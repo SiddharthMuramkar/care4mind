@@ -3,7 +3,7 @@
 Type: research
 Mode: AFK
 Track: site
-Status: open
+Status: resolved
 Blocked by: none
 Map: [Care4Mind.org rebuild](../map.md)
 
@@ -35,3 +35,16 @@ Record these facts:
 - how `/`, `/home/` and `/home-2/` differ, and how the two Text Books pages differ
 
 Nobody decides anything here, and the full scrape comes after the map. Raw responses include author usernames, so keep them out of the repo.
+
+## Answer
+
+Researched 2026-10-26. Full findings: [`current-site-sample.md`](https://github.com/SiddharthMuramkar/care4mind/blob/research/current-site-sample/.scratch/rebuild/research/current-site-sample.md) on branch `research/current-site-sample` (pushed, never merged; commit `72e9d7c`).
+
+- Content is Elementor page-builder markup with pasted styling and copy-paste formatting (55–97% markup on Elementor pages). References, shlokas and Sanskrit terms are formatted text, never fields.
+- Sanskrit appears as Devanagari, IAST, informal ASCII and Hindi-style spellings, often mixed for one term on one page. Only 4 of 39 titles carry an English gloss.
+- Shlokas rarely name their work and never a translator. References are an APA-style list (5 of 11 have DOIs) or bare book lines with no publisher; 10 links go to `#`.
+- Content pages have no internal links. The 6-item menu shows only at 921 px or less, so desktop visitors get no menu. No public comments.
+- 71 media files (37 MB, 15 PNGs over 1 MB); 1 has alt text. Brand: green-to-gold gradient, apricot headings, 11 typeface families including shareware Samarkan.
+- `/`, `/home/` and `/home-2/` are three versions of one homepage; only `/` is live. The two Text Books pages are different lists (24 items vs 11 books).
+
+**Gaps** (all listed in the findings): Only 6 items, plus `/home/` and `/home-2/`, were read in full; nothing was rendered in a browser; which media files are used where needs the full scrape.

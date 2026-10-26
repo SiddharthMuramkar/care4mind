@@ -3,7 +3,7 @@
 Type: research
 Mode: AFK
 Track: site
-Status: open
+Status: resolved
 Blocked by: none
 Map: [Care4Mind.org rebuild](../map.md)
 
@@ -24,3 +24,15 @@ Which URLs has the current site served beyond the 43 in its sitemap, and how are
   - the apex, www, questionnaire, MX, SPF, DMARC and CAA records, with their TTLs
 
 Nobody decides here. The facts feed [URLs and redirects](24-urls-and-redirects.md) and the launch cutover. Keep author usernames out of the committed findings.
+
+## Answer
+
+Researched 2026-10-26. Full findings: [`current-site-urls.md`](https://github.com/SiddharthMuramkar/care4mind/blob/research/current-site-urls/.scratch/rebuild/research/current-site-urls.md) on branch `research/current-site-urls` (pushed, never merged; commit `1fd8ef3`).
+
+- The live sitemap lists exactly 43 URLs. Archives hold only 79 captures of 14 addresses, all still in the sitemap, so there are no old slugs to redirect. `/concepts/` moved from page 294 to 725.
+- WordPress also serves feeds, `?p=`/`?page_id=` IDs, search, likely attachment pages and resized images, so redirects can be set per URL class.
+- care4mind.org: two Namecheap EasyWP IPs, TTL 60 s; `www` is an alias that WordPress 301s to the apex. `questionnaire`: one DigitalOcean IP, TTL 1799 s, app on port 8020.
+- Domain: Namecheap, expires 2027-09-13, transfer-locked, on PremiumDNS, no DNSSEC.
+- Mail uses Namecheap forwarding (MX TTL 1800). SPF names only EasyWP. No DMARC or CAA record.
+
+**Gaps** (all listed in the findings): 8 Common Crawl indexes timed out; http-to-https wasn't tested live; real visitor URLs (access logs, Search Console) only the client has.

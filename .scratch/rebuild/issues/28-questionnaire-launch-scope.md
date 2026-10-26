@@ -26,7 +26,7 @@ The candidates are the KarmaYoga Scale, the Dosha Survey, the 16 pages that desc
 
 **For the fallback, settle:**
 
-- which written record counts as the documented current scoring, such as the KarmaYoga answer key decoded from the page
+- which written record counts as the documented current scoring. For the KarmaYoga Scale, the answer key decoded from the page isn't what gets scored: the per-option points are, and only the current site's database holds them ([How the KarmaYoga Scale and Dosha Survey work now](09-current-questionnaire-behaviour.md))
 - the standard limitations wording: carried over unchanged, not reviewed for validity, no claim of validity, not a diagnosis
 
 **At launch**

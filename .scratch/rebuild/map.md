@@ -56,6 +56,17 @@ Every decision the build needs is made and recorded, so the build spec can be wr
 
 <!-- one line per closed ticket: [title](issues/NN-slug.md): gist -->
 
+- [Sample the current site: content shape, navigation and brand](issues/02-current-site-sample.md): Content is page-builder markup; Sanskrit is mixed across scripts and spellings; shlokas and references are unstructured text; no desktop menu; 1 of 71 media files has alt text.
+- [Every URL and hostname the current site serves](issues/03-current-site-urls.md): 43 sitemap URLs and no old slugs in archives, so redirects can be set per URL class; domain at Namecheap until 2027-09-13; mail is forwarding only, no DMARC.
+- [App framework and content back end on Vercel and Neon](issues/04-framework-and-content-back-end.md): Suggests Next.js 16 + Payload CMS (content in Neon, media in Vercel Blob), Sanity as runner-up; verified, and Payload's accent-ignoring search helper is 4.0-only.
+- [Search and Sanskrit spellings on Neon Postgres](issues/05-search-and-sanskrit-spellings.md): Store every spelling variant and index them with unaccent and pg_trgm on Neon, no synonym files needed; only hosted engines add typo tolerance; Pagefind strips Devanagari vowel signs; verified.
+- [Front-end interaction stack and quality checks](issues/06-front-end-interaction-stack.md): Candidate stack for the Design direction: Next.js 16 and React 19.3, Tailwind 4 tokens plus CSS Modules, Base UI, motion layered CSS → ViewTransition → Motion, GSAP held back; CI with Playwright, axe and Lighthouse; verified.
+- [Typefaces for IAST and Devanagari](issues/07-typefaces-iast-devanagari.md): Many popular fonts can't spell IAST; full ISO 15919 needs self-hosted fonts; four pairings shortlisted, with Playfair + Tiro Devanagari Sanskrit the most complete.
+- [Running on Vercel and Neon: backups, environments, handover and costs](issues/08-running-on-vercel-and-neon.md): About $22–27 a month; buy Neon directly, not through Vercel's Marketplace, so it can be handed over; preview deploys get database copies; media needs its own backup; verified.
+- [How the KarmaYoga Scale and Dosha Survey work now](issues/09-current-questionnaire-behaviour.md): KarmaYoga scores by per-option points held only in the site database, with three result bands in its settings; the Dosha Survey can only show one fixed message to everyone.
+- [Questionnaires in web archives](issues/10-questionnaires-in-web-archives.md): Archives hold the same KarmaYoga items and bands but no points; no Dosha Survey scoring anywhere; the old questionnaire app's questions were never archived.
+- [Published scales behind the Questionnaires](issues/11-published-scales.md): KarmaYoga items come from Navare & Pandey (2022) and 14 of 16 description pages match Tomar (2024), but neither gives usable cut-offs; no source found for the Dosha Survey.
+
 ## Not yet specified
 
 - **Running the site on Vercel and Neon (FR-08).**
