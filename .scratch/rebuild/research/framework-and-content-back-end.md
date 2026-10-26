@@ -13,6 +13,7 @@ Every source below was read on 2026-10-26. Version numbers, release dates and do
 - **Next.js is the framework agents are best equipped for.** Version 16.2 and later ship version-matched docs inside the project for agents to read, and 16.3 adds an `AGENTS.md` that points agents at them. Payload only runs inside Next.js (or TanStack Start from 4.0). Astro is the strongest alternative framework if Payload is not chosen.
 - **Published edits can reach visitors in seconds** with Payload, Sanity or a custom admin: Vercel says it updates cached pages in every region within 300 ms of a revalidation. Git-based options wait for a new deployment, which takes minutes.
 - **context7 docs are strong for every serious candidate, but agents must pin versions.** context7 is the service that feeds current library docs to coding agents. Its default Payload docs come from the 4.0 beta branch, not the 3.x stable release, and some examples it returns only work in 4.0.
+- **Verification (2026-10-26) did not change the recommendation.** Fixes: Payload versions are opt-in, not on by default; the accent-ignoring `postgresUnaccent()` setting is 4.0-only; join-field drag ordering needs `orderable: true`; the Visual Editor is not yet available; the one-argument `revalidateTag` is deprecated rather than removed; and the Vercel 4.5 MB limit is now confirmed. The `postgresUnaccent()` finding adds weight to the question of which Payload major to start on, for the [search ticket](../issues/05-search-and-sanskrit-spellings.md). See [Verification](#verification).
 
 ## Findings
 
@@ -100,7 +101,7 @@ Sources: npm registry entries for [payload](https://registry.npmjs.org/payload),
 
 - **Payload** has the most built in:
   - **Drafts:** turning on `versions.drafts` gives "Save draft" and "Publish" buttons, optional autosave, and scheduled publish and unpublish ([Payload drafts docs](https://payloadcms.com/docs/versions/drafts)).
-  - **History:** versions are on by default, keeping 100 per document. The admin lets editors "view diffs ... and restore documents back to prior versions" ([Payload versions docs](https://payloadcms.com/docs/versions/overview)).
+  - **History:** versions are opt-in for each collection, and keep 100 per document by default once turned on (corrected on verification: the 3.x versions docs call versions "totally opt-in", turned on with `versions: true` or a `versions` object; drafts "rely on Versions being enabled", so every collection that needs history or drafts must set this). The admin lets editors "view diffs ... and restore documents back to prior versions" ([Payload versions docs](https://payloadcms.com/docs/versions/overview)).
   - **Preview:** a Preview button opens the page in Next.js draft mode, which shows unpublished content ([Payload preview docs](https://payloadcms.com/docs/admin/preview)). Live Preview shows the page beside the form in an iframe and updates as the editor types ([Payload Live Preview docs](https://payloadcms.com/docs/live-preview/overview)).
   - **Review step:** access rules can let editors save drafts while only some roles publish. "When this constraint prevents publishing, the Admin UI automatically hides the Publish and Unpublish buttons" ([Payload drafts docs](https://payloadcms.com/docs/versions/drafts)). Formal approval flows with notifications are a paid Enterprise feature, "Publishing Workflows" ([Payload Enterprise](https://payloadcms.com/enterprise)).
 - **Sanity:**
@@ -147,7 +148,7 @@ Every CMS candidate has a field that links to another item by picking it from a 
 #### Unicode IAST and Devanagari
 
 - **Storage is not a differentiator.** Neon "supports UTF8 encoding" ([Neon Postgres compatibility](https://neon.com/docs/reference/compatibility)), and the hosted and Git-based options store JSON or text files, which are Unicode too.
-- **Search needs care in Payload.** Payload's text search treats accented and unaccented letters as different (vikṣepa doesn't match viksepa). It ships an opt-in `postgresUnaccent()` setting that ignores accents ([Payload Postgres docs](https://payloadcms.com/docs/database/postgres)). This belongs to [Search and Sanskrit spellings](../issues/05-search-and-sanskrit-spellings.md).
+- **Search needs care in Payload.** Payload's text search treats accented and unaccented letters as different (vikṣepa doesn't match viksepa). An opt-in `postgresUnaccent()` setting that ignores accents exists only in the 4.0 beta (corrected on verification: it is documented on Payload's `main` (4.0 beta) branch, not in the 3.x Postgres docs. `@payloadcms/db-postgres` 3.92.0 doesn't export it, and 4.0.0-beta.4 does. On 3.x, accent-insensitive matching needs custom work, such as a stored accent-free copy of each field or a custom query through Drizzle) ([Payload Postgres docs, main branch](https://github.com/payloadcms/payload/blob/main/docs/database/postgres.mdx)). This belongs to [Search and Sanskrit spellings](../issues/05-search-and-sanskrit-spellings.md).
 - **Typing IAST** depends on the editor's keyboard or input method. A typing helper inside the admin would be custom work in any CMS (not researched further).
 
 #### Images with required alt text
@@ -165,7 +166,7 @@ A many-to-many link joins items in both directions, such as a Concept linked to 
   - Create a junction collection: a content type whose items are the links, each holding the two related items.
   - Add `join` fields on both sides so editors see and add links from either item.
   - "You could add additional 'context' fields to this shared junction collection ... which would allow you to store additional information directly on relationships" ([Payload join field docs](https://payloadcms.com/docs/fields/join)).
-  - A join field shows the related items without storing them twice, and links can be reordered by dragging ([same page](https://payloadcms.com/docs/fields/join)).
+  - A join field shows the related items without storing them twice. Links can be reordered by dragging once the join field sets `orderable: true` (corrected on verification: drag-and-drop ordering is off unless `orderable` is set) ([same page](https://payloadcms.com/docs/fields/join)).
 - **Sanity:** an array of objects, each holding a `reference` and a note, gives the note. Showing the reverse side inside the Studio would need extra configuration (inference; not tested).
 - **Keystatic:** an array of objects holding a relationship and a note works the same way, with the same one-sided limit.
 - **Custom admin:** a junction table with a note column is plain SQL. Agents build the editing screens.
@@ -195,7 +196,7 @@ Pages can be built ahead of time (**static**), rebuilt on a timer (**incremental
 - **Vercel's side is fast.** "When you revalidate content, all caches across all regions update within 300ms" ([Vercel ISR docs](https://vercel.com/docs/incremental-static-regeneration)).
 - **The Next.js functions to call:**
   - `revalidatePath` regenerates a page.
-  - `revalidateTag` refreshes everything tagged with a name. From Next.js 16 it needs a second argument: `'max'` to keep showing the old copy while refreshing, or `{ expire: 0 }` to expire immediately ([Next.js revalidateTag docs](https://github.com/vercel/next.js/blob/canary/docs/01-app/03-api-reference/04-functions/revalidateTag.mdx)).
+  - `revalidateTag` refreshes everything tagged with a name. From Next.js 16 it takes a second argument: `'max'` to keep showing the old copy while refreshing, or `{ expire: 0 }` to expire immediately ([Next.js revalidateTag docs](https://github.com/vercel/next.js/blob/canary/docs/01-app/03-api-reference/04-functions/revalidateTag.mdx)). (Corrected on verification: the one-argument form is deprecated, not removed. It fails TypeScript type-checking, still runs if that error is suppressed, and behaves like `{ expire: 0 }` ([nextjs.org revalidateTag](https://nextjs.org/docs/app/api-reference/functions/revalidateTag)).)
   - `updateTag` only works from a Server Action ([Next.js caching migration guide](https://github.com/vercel/next.js/blob/canary/docs/01-app/02-guides/migrating-to-cache-components.mdx)).
 - **Payload: seconds.** It runs in the same app, so a publish can call `revalidatePath` directly in an `afterChange` hook, as Payload's website template does ([Payload hooks reference](https://github.com/payloadcms/payload/blob/main/packages/payload/skills/payload/reference/HOOKS.md), [website template README](https://github.com/payloadcms/payload/blob/main/templates/website/README.md)). The template notes one catch: a changed image needs its page republished to refresh the image cache.
 - **Sanity: seconds.** "Content editors see changes reflected on the live site within seconds of publishing" with the Live Content API ([Sanity Next.js docs](https://www.sanity.io/docs/nextjs/introduction)). It can also use webhooks, automatic calls to the site when content changes.
@@ -207,7 +208,7 @@ Pages can be built ahead of time (**static**), rebuilt on a timer (**incremental
 
 | | Export and backup | Licence | Cost on top of Vercel Pro and Neon |
 | --- | --- | --- | --- |
-| Payload | Content is ordinary Postgres tables in Neon, so Neon snapshots and point-in-time restore apply ([Neon plans](https://neon.com/docs/introduction/plans)). The import-export plugin adds CSV or JSON export from the admin ([Payload import-export docs](https://payloadcms.com/docs/plugins/import-export)). | MIT ([licence](https://github.com/payloadcms/payload/blob/main/LICENSE.md)) | $0. Enterprise features (SSO, Publishing Workflows, Visual Editor) are quoted on request ([Payload Enterprise](https://payloadcms.com/enterprise)). |
+| Payload | Content is ordinary Postgres tables in Neon, so Neon snapshots and point-in-time restore apply ([Neon plans](https://neon.com/docs/introduction/plans)). The import-export plugin adds CSV or JSON export from the admin ([Payload import-export docs](https://payloadcms.com/docs/plugins/import-export)). | MIT ([licence](https://github.com/payloadcms/payload/blob/main/LICENSE.md)) | $0. Enterprise features (SSO, Publishing Workflows, Visual Editor) are sold through a sales demo, with no published price ([Payload Enterprise](https://payloadcms.com/enterprise)). (Corrected on verification: the Enterprise page marks the Visual Editor "Coming Soon", so it can't be bought yet. It publishes no prices and offers only "Schedule a Demo".) |
 | Sanity | `sanity datasets export` writes documents and assets to an archive, and exports count against the API quota ([Sanity export docs](https://www.sanity.io/docs/content-lake/exporting-data), [datasets](https://www.sanity.io/docs/content-lake/datasets)). Managed daily backups are Enterprise only ([Sanity backups CLI](https://www.sanity.io/docs/cli-reference/cli-backups)). | Studio MIT; Content Lake proprietary | Free $0 (Admin and Viewer roles only, 3-day history, public datasets only), or Growth $15 per seat a month. Viewers are free ([Sanity pricing](https://www.sanity.io/pricing)). |
 | Contentful | Through its APIs and CLI (not researched further) | Proprietary service | Free is not for commercial use; Lite is $300 a month ([Contentful pricing](https://www.contentful.com/pricing/)). |
 | Keystatic | Content is files in Git, so every clone is a full copy. | MIT | $0 with GitHub mode. Keystatic Cloud is free up to 3 users per team; Pro is $10 a month plus $5 per user beyond 3 ([Keystatic Cloud docs](https://github.com/Thinkmill/keystatic/blob/main/docs/src/content/pages/cloud.mdoc)). |
@@ -278,13 +279,16 @@ context7 scores each library it indexes. "Snippets" is the number of code exampl
 | Better Auth | /better-auth/better-auth | 5,650 | 72.77 | v1.6.23 |
 | Neon | /neondatabase/website | 39,583 | 69.64 | n/a |
 
+(Corrected on verification: benchmark scores aren't stable. A second lookup on 2026-10-26 gave Payload 73.06 and Next.js 76.95, so treat them as rough. Snippet counts and newest pinned versions (Payload v3.85.0, Next.js v16.2.9) matched.)
+
 Things seen while querying:
 
 - **context7's default Payload docs are the 4.0 beta.** They come from Payload's `main` branch, which is now 4.0.0-beta.4, while the `3.x` branch is 3.92.0 ([main package.json](https://raw.githubusercontent.com/payloadcms/payload/main/packages/payload/package.json), [3.x package.json](https://raw.githubusercontent.com/payloadcms/payload/3.x/packages/payload/package.json)).
   - One answer about image uploads used `@payloadcms/transformer-sharp`, which exists only as a 4.0 beta ([npm](https://registry.npmjs.org/@payloadcms/transformer-sharp)).
   - Agents building on 3.x must ask context7 for a pinned 3.x version, or read the docs bundled in the installed package.
 - **Next.js answers come from the `canary` (pre-release) docs.** That is a little ahead of 16.4.3. The version-matched docs inside the project ([Next.js AI agents guide](https://nextjs.org/docs/app/guides/ai-agents)) are the safer source.
-- **Docs drift.** A Sanity webhook example returned by context7 calls `revalidateTag(body._type)` with one argument ([Sanity webhook docs](https://www.sanity.io/docs/nextjs/validating-sanity-webhooks-nextjs)), but Next.js 16 requires a second ([Next.js revalidateTag docs](https://github.com/vercel/next.js/blob/canary/docs/01-app/03-api-reference/04-functions/revalidateTag.mdx)).
+- **Docs drift.** A Sanity webhook example returned by context7 calls `revalidateTag(body._type)` with one argument ([Sanity webhook docs](https://www.sanity.io/docs/nextjs/validating-sanity-webhooks-nextjs)), but Next.js 16 deprecates that form and expects a second argument (corrected on verification: deprecated and a TypeScript error, not a runtime failure) ([Next.js revalidateTag docs](https://github.com/vercel/next.js/blob/canary/docs/01-app/03-api-reference/04-functions/revalidateTag.mdx)).
+- **Payload docs drift the other way too.** The 4.0-only `postgresUnaccent()` setting appears in the default (main-branch) docs, so an agent on 3.x would be told to import something its installed package doesn't export (found on verification).
 - **Agent tooling beyond context7:**
   - Payload ships agent skills inside its package (`packages/payload/skills/`), a separate skills repo and an MCP plugin ([Payload packages](https://github.com/payloadcms/payload/tree/main/packages), [Payload 4.0 beta post](https://payloadcms.com/posts/releases/payload-4-beta-redesigned-admin-tanstack-mcp)).
   - Sanity has a hosted MCP server and an agent toolkit ([Sanity MCP server](https://www.sanity.io/docs/ai/mcp-server)).
@@ -298,7 +302,7 @@ Things seen while querying:
 Why:
 
 1. **It fits ADR-0002.** It is the only packaged editor that keeps content in Neon and runs entirely on Vercel, with no third content service. Neon's snapshots and restore then cover the content.
-2. **It covers the editing list out of the box.** Drafts, autosave, scheduled publish, preview and side-by-side live preview, 100-version history with diffs and restore, and a draft-then-publish review step through roles. It also has pick-from-a-list links, repeatable text, required alt text, and a documented pattern for links that carry a note.
+2. **It covers the editing list out of the box.** Drafts, autosave, scheduled publish, preview and side-by-side live preview, 100-version history with diffs and restore (turned on for each collection; corrected on verification: versions are opt-in), and a draft-then-publish review step through roles. It also has pick-from-a-list links, repeatable text, required alt text, and a documented pattern for links that carry a note.
 3. **Published edits reach visitors in seconds.** The admin and site share one app, so a publish can trigger revalidation directly, with no webhooks.
 4. **It is the stack agents are best equipped for.** Payload is TypeScript configuration in code, with its own agent skills and MCP plugin. Next.js ships version-matched docs for agents. Both have deep context7 coverage.
 5. **It costs nothing extra.** MIT licence, no licence fee, no per-seat cost for the client.
@@ -310,7 +314,8 @@ What to plan for:
 - **Pin versions for agents.** Pin context7 queries to the Payload major in use, and have agents read the installed package's docs.
 - **Postgres adapter.** Use `@payloadcms/db-postgres`, not the Vercel Postgres adapter.
 - **Uploads.** Turn on `clientUploads`, because of Vercel's 4.5 MB upload limit.
-- **Search.** Treat accents in Payload's built-in text matching as a [search ticket](../issues/05-search-and-sanskrit-spellings.md) concern.
+- **Search.** Treat accents in Payload's built-in text matching as a [search ticket](../issues/05-search-and-sanskrit-spellings.md) concern. Payload's built-in accent-insensitive setting, `postgresUnaccent()`, exists only in 4.0, so a 3.x start needs a custom approach (corrected on verification).
+- **Versions.** Turn on `versions` (with `drafts`) for every content collection, because Payload leaves them off by default (found on verification).
 - **Editing trial.** Try Neon Object Storage in the [Editing trial](../issues/22-editing-trial.md) only if branch-aware media matters; otherwise stay on Vercel Blob.
 
 **Runner-up: Next.js 16 + Sanity on the Growth plan.**
@@ -341,7 +346,7 @@ The developer verifies these in the [Architecture review](../issues/23-architect
 - **Payload with Neon Object Storage** (through `@payloadcms/storage-s3` with a custom endpoint) isn't documented by either project. Whether it works is unknown.
 - **Payload 4.0's stable release date** isn't announced.
 - **`payload-totp` and Payload 4.0.** The plugin declares `payload ^3.88.0`; whether it works with 4.0 is unknown. Its quality and maintenance weren't reviewed beyond npm metadata.
-- **The Vercel 4.5 MB upload limit** is quoted from Payload's docs, not confirmed on a Vercel limits page.
+- **The Vercel 4.5 MB upload limit** is quoted from Payload's docs, not confirmed on a Vercel limits page. (Corrected on verification: confirmed. Vercel's Functions limits page says "The maximum payload size for the request body or the response body of a Vercel Function is 4.5 MB" ([Vercel Functions limits](https://vercel.com/docs/functions/limitations)).)
 - **Sanity:** whether the Free plan's terms allow commercial use, and which region holds the Content Lake data, weren't checked. Showing reverse links inside the Studio wasn't researched.
 - **Contentful:** version-history limits and export tooling weren't researched, because its Free plan bars commercial use.
 - **Keystatic:** whether Keystatic Cloud logins support two-factor, and whether Keystatic has any role model beyond GitHub or Cloud team access, weren't found in its docs.
@@ -350,6 +355,34 @@ The developer verifies these in the [Architecture review](../issues/23-architect
 - **Download counts** reflect popularity, not quality.
 - **The Payload admin's own accessibility** was not assessed. The 4.0 beta says WCAG 2.2 AA is "a work-in-progress".
 - **Costs at this site's size** (Neon compute, Blob, function usage) belong to [Running on Vercel and Neon](../issues/08-running-on-vercel-and-neon.md).
+
+## Verification
+
+A second agent re-checked the claims the recommendation rests on, live against primary sources on 2026-10-26. It used read-only calls only: the npm registry and package tarballs, context7, Vercel's documentation search, Neon's docs tools, and web fetches. Nothing was created or changed on Vercel, Neon or any other service.
+
+| # | Claim checked | Source re-checked | Outcome |
+| --- | --- | --- | --- |
+| 1 | Versions and dates: next 16.4.3 (2026-10-23), 16.0.0 on 2025-10-22, 88 stable releases; payload 3.92.0 and 4.0.0-beta.4 (2026-10-22), beta.0 on 2026-10-09, 47 stable releases; sanity 6.20.0, with 5.0.0 on 2025-12-16 and 6.0.0 on 2026-06-11; next-sanity 13.4.0 needs Next 16 and Sanity 5 or 6 | npm registry | Confirmed. Payload 3.92.0's exact Node range is `^22.23.4 \|\| >=24.22.1`. |
+| 2 | `@payloadcms/next` 3.92.0 accepts Next `>=16.3.3 <17`; the 4.0 beta needs Next `>=16.4.0` and Node `>=24.22.1` | npm registry (peerDependencies, engines) | Confirmed |
+| 3 | Payload is MIT; `@payloadcms/db-postgres` uses Drizzle and `pg`; `db-vercel-postgres` depends on the deprecated `@vercel/postgres`; Neon advises `pg` with `@vercel/functions` on Fluid | npm registry, package tarball, LICENSE.md, Neon "Choosing a connection method" | Confirmed |
+| 4 | Payload versions are on by default and keep 100 per document | Payload 3.x versions docs (website, raw `3.x` branch, context7 `/payloadcms/payload/v3.85.0`) | **Corrected.** Versions are opt-in; 100 per document is the default once they are on. |
+| 5 | Drafts, autosave, scheduled publish, and the hidden Publish button for a review step | Payload drafts docs | Confirmed. Drafts require versions, and scheduled publish requires a way to run jobs. |
+| 6 | No built-in 2FA in Payload; `payload-totp` 3.0.6 is MIT and needs `payload ^3.88.0`; Enterprise offers SSO and Publishing Workflows | Payload authentication docs, npm registry, Payload Enterprise page | Confirmed. **Corrected:** the Visual Editor is "Coming Soon", and the page publishes no prices. |
+| 7 | Junction collection with "context" fields for a note on each link | Payload join field docs (3.x) | Confirmed. **Corrected:** drag ordering needs `orderable: true`. |
+| 8 | `postgresUnaccent()` ignores accents in Payload search | Payload Postgres docs on the `3.x` and `main` branches; `@payloadcms/db-postgres` 3.92.0 and 4.0.0-beta.4 tarballs | **Corrected.** It exists only in 4.0 beta. |
+| 9 | Security release 3.90.0 on 2026-09-18 with breaking changes; 4.0 beta announcement (TanStack Start, WCAG 2.2 AA "work-in-progress", no stable date); codemods and the agent-assisted upgrade command | Payload security post, 4.0 beta post (dated 2026-10-19), v4.0.0-beta.0 release notes | Confirmed. The codemods are in the release notes, not the blog post. |
+| 10 | Sanity: $15 per seat a month on Growth; Free has only Administrator and Viewer roles; history kept 3, 90 or 365 days; Contributor role writes drafts but can't publish; two-factor only through Google or GitHub | Sanity pricing, roles docs, security page | Confirmed. Email and password login also exists, without Sanity-side 2FA. |
+| 11 | Contentful's Free plan bars commercial use; Lite costs $300 a month and adds comments, tasks and scheduled publishing | Contentful usage-limits page, pricing page | Confirmed |
+| 12 | Vercel updates caches in every region within 300 ms; ISR works with Next.js, SvelteKit, Nuxt and Astro; 4.5 MB function body limit; Blob costs $0.023 per GB-month and $0.05 per GB | Vercel ISR docs, Functions limits, Blob pricing | Confirmed. The 4.5 MB gap is now closed. |
+| 13 | Neon Object Storage became generally available on 2026-09-18, in 4 AWS regions, at $0.023 per GB-month, sharing the 500 GB transfer allowance; Managed Better Auth's MFA is "Coming soon" | Neon changelog 2026-09-18, Object Storage overview, plans page, Auth roadmap (via Neon docs tools) | Confirmed |
+| 14 | Next.js 16.2+ bundles docs for its version; 16.3+ writes the managed `AGENTS.md`; MCP endpoint; 100% eval pass rate | Next.js AI agents guide (updated 2026-10-15) | Confirmed. The 100% figure comes from Vercel's AGENTS.md-versus-Skills research. |
+| 15 | context7's default Payload docs come from `main` (4.0 beta) and return `@payloadcms/transformer-sharp`, which exists only as 4.0 beta | context7 query, raw `main` and `3.x` package.json, npm registry | Confirmed. **Corrected:** benchmark scores shifted between lookups. |
+| 16 | The one-argument `revalidateTag` fails in Next.js 16 | nextjs.org revalidateTag reference | **Corrected.** It is deprecated and a TypeScript error, but still runs. |
+| 17 | Tina self-hosting supports MongoDB or Upstash Redis only; Editorial Workflow starts on Team Plus at $41 | Tina data layer docs, Tina pricing | Confirmed |
+
+Also noticed: Payload's reference pattern marks `alt` as `required: true`, but the 3.x website template leaves `required` commented out on its Media collection. A build that starts from that template must turn it on.
+
+**Effect on the recommendation:** none. Next.js with Payload, content in Neon and media in Vercel Blob still stands, with Sanity Growth as the runner-up. The `postgresUnaccent()` finding is the most consequential: on Payload 3.x, Sanskrit accent-insensitive search needs custom work, which bears on the [search ticket](../issues/05-search-and-sanskrit-spellings.md) and on which Payload major to start on.
 
 ## Sources
 
@@ -363,6 +396,7 @@ All read 2026-10-26.
 - [Next.js migrating to Cache Components](https://github.com/vercel/next.js/blob/canary/docs/01-app/02-guides/migrating-to-cache-components.mdx)
 - [Vercel: Incremental Static Regeneration](https://vercel.com/docs/incremental-static-regeneration)
 - [Vercel Blob pricing](https://vercel.com/docs/vercel-blob/usage-and-pricing)
+- [Vercel Functions limits](https://vercel.com/docs/functions/limitations) and [nextjs.org revalidateTag reference](https://nextjs.org/docs/app/api-reference/functions/revalidateTag) (added on verification)
 - [Astro joins Cloudflare](https://astro.build/blog/joining-cloudflare)
 - [NuxtLabs joins Vercel](https://vercel.com/blog/nuxtlabs-joins-vercel)
 
@@ -372,6 +406,7 @@ All read 2026-10-26.
 - Payload source: [jobs queue docs](https://github.com/payloadcms/payload/blob/main/docs/jobs-queue/overview.mdx), [v4 migration guide](https://github.com/payloadcms/payload/blob/main/docs/migration-guide/v4.mdx), [collections skill reference](https://github.com/payloadcms/payload/blob/main/packages/payload/skills/payload/reference/COLLECTIONS.md), [hooks skill reference](https://github.com/payloadcms/payload/blob/main/packages/payload/skills/payload/reference/HOOKS.md), [website template README](https://github.com/payloadcms/payload/blob/main/templates/website/README.md), [packages directory](https://github.com/payloadcms/payload/tree/main/packages), [LICENSE](https://github.com/payloadcms/payload/blob/main/LICENSE.md), [main package.json](https://raw.githubusercontent.com/payloadcms/payload/main/packages/payload/package.json), [3.x package.json](https://raw.githubusercontent.com/payloadcms/payload/3.x/packages/payload/package.json)
 - Payload releases and posts: [v4.0.0-beta.0](https://github.com/payloadcms/payload/releases/tag/v4.0.0-beta.0), [v4.0.0-beta.4](https://github.com/payloadcms/payload/releases/tag/v4.0.0-beta.4), [Payload 4.0 beta announcement](https://payloadcms.com/posts/releases/payload-4-beta-redesigned-admin-tanstack-mcp), [Security update for 3.x and 4.0](https://payloadcms.com/posts/blog/payload-security-update-available-for-3x-and-40), [Payload is joining Figma](https://payloadcms.com/posts/blog/payload-is-joining-figma), [Payload Cloud FAQ](https://payloadcms.com/payload-has-joined-figma), [Payload Enterprise](https://payloadcms.com/enterprise)
 - [Figma: Welcoming Payload](https://www.figma.com/blog/payload-joins-figma)
+- Added on verification: [Postgres docs, `3.x` branch](https://github.com/payloadcms/payload/blob/3.x/docs/database/postgres.mdx), [Postgres docs, `main` branch](https://github.com/payloadcms/payload/blob/main/docs/database/postgres.mdx), [versions docs, `3.x` branch](https://github.com/payloadcms/payload/blob/3.x/docs/versions/overview.mdx), [website template Media collection (3.x)](https://github.com/payloadcms/payload/blob/3.x/templates/website/src/collections/Media.ts), and the npm tarballs of `@payloadcms/db-postgres` [3.92.0](https://registry.npmjs.org/@payloadcms/db-postgres/-/db-postgres-3.92.0.tgz) and [4.0.0-beta.4](https://registry.npmjs.org/@payloadcms/db-postgres/-/db-postgres-4.0.0-beta.4.tgz)
 
 **Sanity**
 - npm registry entries: [sanity](https://registry.npmjs.org/sanity), [next-sanity](https://registry.npmjs.org/next-sanity)
