@@ -54,7 +54,7 @@ Give each item a proposed default and name the role that answers it.
 - Who holds the registrar, DNS, Namecheap and DigitalOcean logins? Does the domain carry email?
 - Is the questionnaire app retired? Who built it, and may we contact them?
 - Will anyone edit the current site before launch?
-- Can the client take a full backup of the current site before the old hosting ends: a WordPress export, the uploads, and the Quiz Maker and WPForms entries?
+- Can the client take a full backup of the current site before the old hosting ends: a WordPress export, the uploads, and the Quiz Maker and WPForms entries? It must include the KarmaYoga quiz's own settings, which hold the points each answer scores; a WordPress export leaves them out ([How the KarmaYoga Scale and Dosha Survey work now](09-current-questionnaire-behaviour.md)).
 - Is there any Search Console access, analytics history or server log?
 
 **D. Questionnaires (OQ3, OQ4, OQ6, OQ8)**
