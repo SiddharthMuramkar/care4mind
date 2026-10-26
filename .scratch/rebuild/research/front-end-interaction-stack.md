@@ -23,7 +23,7 @@ A few terms come up throughout:
   1. CSS transitions.
   2. CSS scroll-driven animations. They run off the main thread, but Firefox doesn't support them yet, so they're not "Baseline" (supported by all major browsers).
   3. React `<ViewTransition>` for page changes.
-  4. Motion for springs, gestures and layout changes. It's MIT licensed and 5 kB to start with if it's lazy-loaded. Its default is *not* to honour reduced motion.
+  4. Motion for springs, gestures and layout changes. It's MIT licensed and just over 5 kB to start with if it's lazy-loaded (corrected on verification: that is the vendor's figure for Rollup builds, and other bundlers come out slightly larger). Its default is *not* to honour reduced motion.
 
   GSAP is now free for any website, but under Webflow's own licence rather than an open-source one, and ScrollTrigger runs on the main thread. Lenis moves wheel scrolling onto the main thread. It honours reduced motion by default.
 - **Accessible motion:** WCAG 2.2 AA doesn't on its own require honouring the "reduce motion" setting (that's 2.3.3, Level AAA), but the brief's NFR-01 includes it. Level A 2.2.2 also applies to motion that starts when something scrolls into view and lasts over 5 seconds. Each tool opts into reduced motion differently, so it has to be wired in per tool. WCAG's Reflow criterion (1.4.10, AA) tests at 320 CSS px, which is narrower than FR-06's 360 px.
@@ -33,7 +33,7 @@ A few terms come up throughout:
   - Give motion a job: show what changed after a click.
   - Keep durations at 100–400 ms.
 
-  The two tells all four warn against are "fade-and-slide-up on every section" and "hover effects on every card", which the Anthropic skill calls the AI default. NN/g found that scroll-triggered text animation slowed readers down, and advises caution on medical and task-focused sites. That matters for the Questionnaire pages.
+  The Anthropic skill names two tells as the AI default: "fade-and-slide-up on every section" and "hover effects on every card" (corrected on verification: the draft said all four sources warn against both. Only the Anthropic skill names them. NN/g's scroll-text study backs the first, and Vercel says to animate only when it "clarifies cause & effect or … adds deliberate delight". None of Vercel, NN/g or Apple names hover effects on every card, and the type-and-palette advice comes from the Anthropic skill alone). NN/g found that scroll-triggered text animation slowed readers down, and advises caution on medical and task-focused sites. That matters for the Questionnaire pages.
 - **Automated checks on Vercel:**
   - **Playwright** (scripted browsers) can check every width from 320 to 1440 px, with and without reduced motion, against each preview deployment.
   - **axe-core** catches about 57% of WCAG issues. Its WCAG 2.2 target-size rule only runs if the `wcag22aa` tag is requested.
@@ -53,6 +53,7 @@ A few terms come up throughout:
   - Base UI, with React Aria as the runner-up
   - CSS, then `<ViewTransition>`, then Motion, with GSAP held back for one signature scroll sequence and no Lenis by default
   - Playwright, axe, Lighthouse CI and Deployment Checks in CI
+- **Verification (2026-10-26):** 17 groups of load-bearing claims were rechecked against their primary sources. Six needed fixing: two dates, one version note, two citations made more precise, and one overstated agreement between the design sources. None of the fixes changes the suggested combination. See [Verification](#verification).
 
 ## Findings
 
@@ -76,11 +77,11 @@ From the npm registry (`registry.npmjs.org/<package>`), 2026-10-26:
 | @gsap/react | 2.1.2 | 2025-01-15 | same GSAP licence |
 | lenis | 1.3.27 (2.0.0-dev.5 on the `dev` tag) | 2026-10-15 | MIT |
 | @playwright/test | 1.64.1 | 2026-10-14 | Apache-2.0 |
-| axe-core, @axe-core/playwright | 4.14.0 | 2026-10-15 | MPL-2.0 |
+| axe-core, @axe-core/playwright | 4.14.0 | axe-core 2026-10-05; @axe-core/playwright 2026-10-15 (corrected on verification: the draft gave 2026-10-15 for both) | MPL-2.0 |
 | @lhci/cli (Lighthouse CI) | 0.15.1 | 2025-06-25 | Apache-2.0 |
 | lighthouse | 13.5.0 | 2026-09-18 | Apache-2.0 |
 | @vercel/speed-insights | 2.0.0 | 2026-03-10 | Apache-2.0 |
-| web-vitals | 6.2.3 | not checked | Apache-2.0 |
+| web-vitals | 6.2.3 | 2026-10-05 (corrected on verification: the draft said "not checked") | Apache-2.0 |
 | astro | 7.4.2 (7.0 on 2026-06-22) | 2026-10-21 | MIT |
 | @sveltejs/kit | 3.1.0 (3.0 on 2026-10-01) | 2026-10-14 | MIT |
 
@@ -193,7 +194,7 @@ shadcn's default look is itself widely reused. Using its components as-is works 
   - `m` + `LazyMotion` is "just over 5 kB" for the first render, then +24 kB (`domAnimation`) or +38 kB (`domMax`)
   - `useAnimate` mini is 3.3 kB
 
-  Source: [Reduce bundle size](https://motion.dev/docs/react-reduce-bundle-size). Features can load asynchronously after the page becomes interactive ([LazyMotion](https://motion.dev/docs/react-lazy-motion)).
+  Source: [Reduce bundle size](https://motion.dev/docs/react-reduce-bundle-size). (corrected on verification: the same page says these figures come from Rollup-built bundles and that Webpack "is less effective at tree-shaking", so its bundles should be slightly larger. Next.js doesn't build with Rollup, so treat 5 kB as a lower bound and measure it in the prototypes.) Features can load asynchronously after the page becomes interactive ([LazyMotion](https://motion.dev/docs/react-lazy-motion)).
 - **Next.js:** animated components must be client components, or use `import * as motion from "motion/react-client"` ([installation](https://motion.dev/docs/react-installation)).
 - **Reduced motion:** `MotionConfig`'s `reducedMotion` defaults to `"never"`. Setting `"user"` turns off transform and layout animations when the visitor asks for reduced motion, while keeping `opacity` and `backgroundColor` ([MotionConfig](https://motion.dev/docs/react-motion-config); [accessibility](https://motion.dev/docs/react-accessibility)).
 - **Agents:** the "Motion AI Kit" is an official skill and MCP server. Docs search is free; Performance Doctor, the transition editor and premium examples need Motion+ ([AI Kit](https://motion.dev/docs/ai-kit)).
@@ -238,7 +239,7 @@ shadcn's default look is itself widely reused. Using its components as-is works 
   - `view-transition-class`: Baseline since October 2025.
   - Transition "types": Baseline since 13 January 2026.
   - Transitions between separate page loads ("cross-document"): Chrome 126 and Safari 18.2 but not Firefox, so not Baseline.
-- **React 19.3** (9 September 2026) made `<ViewTransition>` and `addTransitionType` stable ([React 19.3 post](https://react.dev/blog/2026/09/09/react-19-3)). Animations start from Transitions, Suspense reveals or `useDeferredValue`, not from plain `setState` ([Next.js guide](https://nextjs.org/docs/app/guides/view-transitions)).
+- **React 19.3** (9 September 2026) made `<ViewTransition>` and `addTransitionType` stable ([React 19.3 post](https://react.dev/blog/2026/09/09/react-19-3)). (corrected on verification: the post explicitly calls only `<ViewTransition>` and Fragment Refs stable. `addTransitionType`'s stable status rests instead on `react` 19.3.1 exporting it without an `unstable_` prefix, checked in the npm tarball's `cjs/react.production.js`, and on the Next.js guide: "React 19.3 includes the `<ViewTransition>` component and `addTransitionType` API".) Animations start from Transitions, Suspense reveals or `useDeferredValue`, not from plain `setState` ([Next.js guide](https://nextjs.org/docs/app/guides/view-transitions)).
 - **Next.js:** "View transitions work in the App Router with no configuration". Without browser support, "the transitions do not animate", and the page works normally ([guide](https://nextjs.org/docs/app/guides/view-transitions)).
   - **Click loss:** during a transition "the `::view-transition` overlay captures pointer events, so clicks during the animation are lost". The fix is `::view-transition { pointer-events: none }`, but named elements still skip clicks for the length of the transition, so the guide says to "keep transitions short".
   - **Morph needs a ready page:** a shared-element morph plays only if the destination page is already prefetched. Otherwise the new content uses its enter animation.
@@ -385,7 +386,7 @@ What they agree on:
 
 **FR-06 (360–1440 px), with Playwright 1.64.1.** Playwright drives the Chromium, Firefox and WebKit browser engines from scripts ([playwright.dev](https://playwright.dev/docs/intro)). WebKit in Playwright isn't the same as Safari on a real iPhone.
 
-- **Width and reduced motion:** a test project can set the viewport per run, and `reducedMotion: 'reduce'` (added in v1.50) emulates the reduce-motion setting ([TestOptions](https://playwright.dev/docs/api/class-testoptions)).
+- **Width and reduced motion:** a test project can set the viewport per run, and `reducedMotion: 'reduce'` emulates the reduce-motion setting ([TestOptions](https://playwright.dev/docs/api/class-testoptions)). (corrected on verification: the draft said the option was added in v1.50. Playwright's own docs disagree. The TestOptions page says v1.50, but the [release notes](https://playwright.dev/docs/release-notes) list the standalone `testOptions.reducedMotion` as new in v1.63, and `contrast` only arrived in v1.51. Either way it works in 1.64.1, and `contextOptions: { reducedMotion }` has worked since v1.12.)
 - **Visual comparison:** `toHaveScreenshot` compares against stored screenshots and by default "stops CSS animations, CSS transitions and Web Animations", fast-forwarding finite ones ([LocatorAssertions](https://playwright.dev/docs/api/class-locatorassertions)).
 - **What a test can assert at each width** (test design, not a cited finding): no horizontal page scroll; navigation, search and a Questionnaire step all work; a screenshot matches.
 - **Add 320 px** for WCAG Reflow.
@@ -514,6 +515,32 @@ What would change this:
 - **Scroll-driven animations in Firefox.** web-features lists no Firefox release, and Chrome's page mentions "Firefox Technology Preview: supported". When it ships in Firefox stable wasn't checked.
 - **Astro and SvelteKit** were covered only where they differ. Bits UI, a Svelte primitive library, wasn't researched.
 - **context7 coverage.** Snippet counts and benchmark scores are context7's own measures. Some versioned indexes lag npm (Next.js 16.2.9, Playwright 1.63.0, vanilla-extract 1.16.1). Tailwind's own agent resources weren't searched for.
+
+## Verification
+
+An independent check on 2026-10-26 looked again at the claims the suggested combination rests on, each against its primary source. Downloaded files (npm tarballs, the web-features data, the archived licence page) were read as data only.
+
+| # | Claim | Checked against | Outcome |
+| --- | --- | --- | --- |
+| 1 | Versions, dates and licences in the versions table | npm registry metadata for all 21 packages (`dist-tags`, `time`, `license`) | Confirmed: every "Latest" version and licence. **Corrected:** axe-core 4.14.0 was published 2026-10-05, and only `@axe-core/playwright` on 2026-10-15. **Filled in:** web-vitals 6.2.3, published 2026-10-05. Also confirmed: Next 16.0.0 on 2025-10-22, React 19.3.0 on 2026-09-09, Base UI 1.0.0 on 2025-12-11, Motion 13.0.0 on 2026-08-05 and 14.0.0 on 2026-10-02, and `@lhci/cli` 0.15.1 pinning `lighthouse` 12.6.1. |
+| 2 | React 19.3 made `<ViewTransition>` stable on 9 September 2026 | react.dev blog post; `react` 19.3.1 tarball | Confirmed for `<ViewTransition>`. **Corrected citation:** the post doesn't call `addTransitionType` stable. Its stable status is shown by the 19.3.1 package exporting it without an `unstable_` prefix, and by the Next.js guide. |
+| 3 | Next.js runs view transitions with no configuration; clicks are lost under the overlay; reduced motion is not automatic; 150/210/400 ms timings | Next.js view transitions guide (last updated 2026-10-15) | Confirmed, word for word. |
+| 4 | CSS scroll-driven animations aren't Baseline and have no Firefox release; view transitions, `view-transition-class`, transition types, cross-document transitions and `@starting-style` Baseline status | web-features 3.44.0 `data.json` (npm tarball) | Confirmed: Chrome/Edge 115 and Safari 26, no Firefox. The other statuses and dates match. (webstatus.dev renders its data with JavaScript, so it couldn't be read as text.) |
+| 5 | Motion is MIT; `m` + `LazyMotion` is "just over 5 kB"; the full component is 43 kB; `reducedMotion` defaults to `"never"`; "user" keeps opacity and colour | context7 `/websites/motion_dev`; motion.dev bundle-size and MotionConfig pages; npm | Confirmed. **Added caveat:** the sizes are from Rollup builds, and Webpack builds come out slightly larger. |
+| 6 | Motion changelog: 24 releases from 5 August to 20 October, `AnimateView` in 13.4.0, `offset` scroll animations on the main thread since 13.5.0, hardware-accelerated transforms in 14.2.0 | Raw `CHANGELOG.md` | Confirmed: 24 changelog headings from 13.0.0 to 14.6.0. npm has 23 of them as stable releases, because 13.4.7 isn't on npm. |
+| 7 | GSAP licence: free for any website, not open source, Webflow can change or terminate it, AI-generated code allowed | Live gsap.com/standard-license (still the forum-outage notice on 2026-10-26); the Internet Archive capture of 2026-10-17 (downloaded and read); gsap 3.15.0 tarball header | Confirmed: every quoted clause, the effective date (30 April 2025), the last-modified date (30 May 2025), and the header "Copyright 2026, GreenSock. All rights reserved". The gzip sizes come out at 28,268 and 17,998 bytes, matching the draft. |
+| 8 | Lenis honours reduced motion by default but still runs on the main thread; Safari is capped at 60 fps | Lenis 1.3.27 README from the npm tarball | Confirmed, word for word. |
+| 9 | Base UI went stable with 35 components on 11 December 2025; shadcn/ui made it the default in July 2026; Radix's releases page stops at 20 July 2026 | base-ui.com releases; shadcn changelog entry; radix-ui.com releases; npm | Confirmed. shadcn says "New projects now use Base UI by default", "Base UI is stable", and "Radix is not being deprecated". |
+| 10 | React Aria has an official agent skill, an MCP server, `.md` pages and `llms.txt`; v1.22.0 came out on 9 October 2026 | react-aria.adobe.com/ai; GitHub releases API | Confirmed. GitHub dates the release 2026-10-09, while npm has 1.22.0 on 2026-10-08 (UTC). |
+| 11 | Next.js recommends Tailwind for most styling and CSS Modules where Tailwind isn't enough; vanilla-extract's Turbopack support is experimental and off by default | nextjs.org CSS docs (last updated 2026-08-25); vanilla-extract Next.js integration page | Confirmed, word for word. |
+| 12 | Tailwind joined Shopify on 9 September 2026, everything stays MIT-licensed, and new sign-ups for paid products are closed | tailwindcss.com announcement | Confirmed. |
+| 13 | axe finds "on average 57%" of issues; `target-size` is the only WCAG 2.2 A/AA rule, is off by default, and runs when `wcag22aa` is requested; Playwright's example skips that tag | axe-core 4.14.0 tarball (`README.md`; `axe.js` rule metadata, `matchTags` and `ruleShouldRun`); playwright.dev accessibility page | Confirmed. `target-size` is the only rule tagged `wcag22a` or `wcag22aa` and has `enabled: false`, and a matching requested tag overrides that. It still hasn't been *run*, so the item in Gaps stands. |
+| 14 | Lighthouse can't measure INP and TBT is the proxy; Lighthouse's mobile throttling defaults; Playwright's `reducedMotion` option | web.dev/vitals; Lighthouse `throttling.md`; context7 `/websites/playwright_dev`; Playwright TestOptions page and release notes | Lighthouse claims confirmed. **Corrected:** Playwright's docs conflict on when `testOptions.reducedMotion` arrived (v1.50 on one page, v1.63 in the release notes). It works in 1.64.1 either way. |
+| 15 | Speed Insights: the free tier shows only RES, from 10,000 events per rolling 30 days, with a pause of at least 14 days; Plus costs $10 per project per month on Pro plus $0.65 per 10,000 events, with none included. Deployment Checks hold production releases; the bypass headers and `deployment_status` workflow; the Toolbar audit covers WCAG 2.0 A/AA | Vercel docs: Speed Insights limits and pricing (last updated 2026-09-23), Deployment Checks (2026-08-11), automated agent access and Protection Bypass (via `search_vercel_documentation`), Accessibility Audit Tool (2025-09-24) | Confirmed. |
+| 16 | WCAG: 2.3.3 is AAA and excludes colour, blur and opacity; Reflow is AA at 320 CSS px (1280 px at 400%) | W3C Understanding 2.3.3 and 1.4.10 | Confirmed. |
+| 17 | The "crafted look" sources agree | Anthropic `frontend-design` SKILL.md (raw); Vercel Web Interface Guidelines; NN/g scroll-text and duration articles | Quotes confirmed. **Corrected:** the Summary said all four sources warn against both tells. Only the Anthropic skill names them, as described in the Summary. |
+
+**Effect on the recommendation:** none. Every reason given for the suggested combination held up: Base UI's stability and shadcn default, Motion's licence and reduced-motion default, GSAP's non-open-source licence, Lenis running on the main thread, scroll-driven animations missing from Firefox, `<ViewTransition>` being stable with no configuration, vanilla-extract's experimental Turbopack support, axe's `wcag22aa` tag, Lighthouse's lack of INP, and Speed Insights pricing.
 
 ## Sources
 
