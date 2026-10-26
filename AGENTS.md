@@ -1,3 +1,5 @@
+CLAUDE.md is a symlink to this file. Edit AGENTS.md only.
+
 ## Agent skills
 
 ### Issue tracker
