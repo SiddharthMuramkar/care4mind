@@ -18,7 +18,8 @@
     "test": "node scripts/content/registry.mjs && vitest run",
     "test:watch": "vitest",
     "test:e2e": "node scripts/content/registry.mjs && playwright test",
-    "lhci": "lhci autorun"
+    "lhci": "lhci autorun",
+    "content:new": "node scripts/content/new.mjs"
   },
   "dependencies": {
     "@base-ui/react": "1.9.0",
