@@ -1,6 +1,6 @@
 import { beforeAll, describe, expect, it } from 'vitest'
 
-import { concepts, questionnaires } from '@/content'
+import { concepts, questionnaires, type BlockView } from '@/content'
 import type { ConceptRecord, QuestionnaireRecord } from '@/content/schema'
 import { localSource } from '@/content/source'
 
@@ -12,7 +12,8 @@ import { localSource } from '@/content/source'
  * Each mind Concept, by its slug (D02): its headword as a heading shows it, its page, the verses
  * at the top of the page with the census's translation ids (null where the page labels none),
  * the anchors of its sub-terms in the page's order, its reference list in the page's order
- * (census), and what its Questionnaire takes from the page and from research ticket 11.
+ * (census), how many tables its page holds, and what its Questionnaire takes from the page and
+ * from research ticket 11.
  */
 const MIND = [
   {
@@ -46,6 +47,7 @@ const MIND = [
       'tomar-2024',
       'swamij-1-30',
     ],
+    tables: 1,
     questionnaire: { title: 'Vikshepa (Distraction)', candidateSource: 'tomar-2024' },
   },
   {
@@ -67,6 +69,7 @@ const MIND = [
       'yogapedia-2023-angamejayatva',
       'yogapedia-2023-shvasa-prashvasa',
     ],
+    tables: 3,
     questionnaire: { title: 'Upa-Vikshepa Profiling', candidateSource: 'tomar-2024' },
   },
   {
@@ -108,7 +111,32 @@ const MIND = [
       'yogapedia',
       'yogitim-2024',
     ],
+    tables: 2,
     questionnaire: { title: 'Panch Klesha – Vikaar Profiling', candidateSource: 'tomar-2024' },
+  },
+  {
+    slug: 'chittabhumi',
+    name: 'Citta-bhūmi',
+    page: 'https://care4mind.org/knowyourmind/',
+    // Both English lines are labelled "Meaning": neither quote names a translation.
+    verses: [
+      ['yoga-sutra/1.2', null],
+      ['yoga-sutra/1.30', null],
+    ],
+    // The five states of mind.
+    terms: ['mudha', 'ksipta', 'viksipta', 'ekagra', 'niruddha'],
+    // The page lists Krishnappa et al. (2020) twice, as 2020a and 2020b: one Reference, once.
+    references: [
+      'prabhu-bhat-2013',
+      'das-rai-2024',
+      'krishnappa-2020',
+      'jayasheela-salagame-2018',
+      'sridhar-nagendra-2021',
+      'tomar-2024',
+      'shlokam-2020-yogasutra-1-2',
+    ],
+    tables: 2,
+    questionnaire: { title: 'Know Your State of Mind Profile', candidateSource: 'tomar-2024' },
   },
 ]
 
@@ -159,6 +187,25 @@ describe('the mind Concepts', () => {
       expect(concept?.toc.flatMap((entry) => entry.terms.map(({ id }) => id))).toEqual(terms)
     },
   )
+
+  it.each(MIND)('keeps the page’s Meaning on each of $slug’s verses', async ({ slug }) => {
+    const concept = await concepts.get(slug)
+    expect(concept?.verses.length).toBeGreaterThan(0)
+    expect(concept?.verses.filter(({ meaning }) => !meaning)).toEqual([])
+  })
+
+  it.each(MIND)('keeps $slug’s tables, each with its caption', async ({ slug, tables }) => {
+    const tablesIn = (blocks: readonly BlockView[]): BlockView[] =>
+      blocks.flatMap((block) =>
+        block.kind === 'table' ? [block] : block.kind === 'term' ? tablesIn(block.blocks) : [],
+      )
+    const concept = await concepts.get(slug)
+    const found = (concept?.sections ?? []).flatMap((section) => tablesIn(section.blocks))
+    expect(found).toHaveLength(tables)
+    expect(found.filter((table) => table.kind === 'table' && table.caption.trim() === '')).toEqual(
+      [],
+    )
+  })
 
   it.each(MIND)(
     'quotes each of $slug’s verses with the census’s translation',
