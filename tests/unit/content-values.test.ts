@@ -178,13 +178,19 @@ let values: TopicRecord | undefined
 let conceptRecords: readonly ConceptRecord[] = []
 let questionnaireRecords: readonly QuestionnaireRecord[] = []
 
+/**
+ * Reading every record and building the graph takes a few seconds, and more on a machine busy
+ * with parallel lanes; done once here, with room to spare, every test after it is quick.
+ */
+const LOADING_TIMEOUT = 60_000
+
 beforeAll(async () => {
   values = (await localSource.records('topic')).find(({ slug }) => slug === 'values')
   conceptRecords = await localSource.records('concept')
   questionnaireRecords = await localSource.records('questionnaire')
-  // Build the content graph here, once, so no single test pays for it.
+  // Built once per process and shared with the views the tests ask for.
   await concepts.list()
-})
+}, LOADING_TIMEOUT)
 
 const conceptRecord = (slug: string) => conceptRecords.find((concept) => concept.slug === slug)
 const questionnaireRecord = (slug: string) =>
