@@ -3,6 +3,7 @@ import { beforeAll, describe, expect, it } from 'vitest'
 import type { Features } from '@/config/features'
 import {
   CONTENT_KINDS,
+  idOf,
   type ContentRecord,
   type FlagRole,
   type Provenance,
@@ -86,27 +87,25 @@ function ofKind<K extends ContentRecord['kind']>(kind: K): RecordOf<K>[] {
   return records.filter((candidate): candidate is RecordOf<K> => candidate.kind === kind)
 }
 
-/** A record by `kind/id`, as the tools name it. */
-function record(name: string): ContentRecord {
-  const found = records.find((candidate) => {
-    const id =
-      candidate.kind === 'passage' || candidate.kind === 'reference'
-        ? candidate.id
-        : candidate.kind === 'home'
-          ? 'home'
-          : candidate.slug
-    return `${candidate.kind}/${id}` === name
-  })
-  if (!found) throw new Error(`No record ${name}`)
-  return found
+/** A record's name as the tools print it: `kind/id`. */
+const nameOf = (candidate: ContentRecord) => `${candidate.kind}/${idOf(candidate)}`
+
+/** Every provenance a record keeps: its own, or a topic introduction's. */
+function provenancesOf(candidate: ContentRecord): Provenance[] {
+  if (candidate.kind !== 'topic') return [candidate.provenance]
+  return candidate.intro ? [candidate.intro.provenance] : []
 }
 
-/** A record's provenance: its own, or a topic introduction's. */
+/** The provenance of a record named `kind/id`. */
 function provenanceOf(name: string): Provenance {
-  const found = record(name)
-  if (found.kind !== 'topic') return found.provenance
-  if (!found.intro) throw new Error(`${name} has no introduction`)
-  return found.intro.provenance
+  const [provenance] = provenancesOf(
+    records.find((candidate) => nameOf(candidate) === name) ?? fail(`No record ${name}`),
+  )
+  return provenance ?? fail(`${name} keeps no provenance`)
+}
+
+function fail(message: string): never {
+  throw new Error(message)
 }
 
 describe('the route registry, on the real content', () => {
@@ -532,6 +531,28 @@ describe('the flags pack', () => {
         ),
     )
     expect(unasked.map(({ slug }) => slug)).toEqual([])
+  })
+})
+
+describe('the records verify can’t check', () => {
+  it('are those with no saved page, each flagged with where it came from', () => {
+    const elsewhere = records.filter((candidate) =>
+      provenancesOf(candidate).some(({ sources }) =>
+        sources.every(({ url }) => !url.startsWith('https://care4mind.org/')),
+      ),
+    )
+    expect(elsewhere.map(nameOf)).toEqual(['reference/navare-pandey-2022'])
+    const unflagged = elsewhere.filter((candidate) =>
+      provenancesOf(candidate).some(
+        ({ flags }) =>
+          !flags.some(
+            (flag) =>
+              flag.for === 'research-editor' &&
+              /not from a page of the current site/.test(flag.note),
+          ),
+      ),
+    )
+    expect(unflagged.map(nameOf)).toEqual([])
   })
 })
 
