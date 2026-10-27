@@ -11,8 +11,8 @@ import { localSource } from '@/content/source'
 /**
  * Each mind Concept, by its slug (D02): its headword as a heading shows it, its page, the verses
  * at the top of the page with the census's translation ids (null where the page labels none),
- * its reference list in the page's order (census), and what its Questionnaire takes from the page
- * and from research ticket 11.
+ * the anchors of its sub-terms in the page's order, its reference list in the page's order
+ * (census), and what its Questionnaire takes from the page and from research ticket 11.
  */
 const MIND = [
   {
@@ -22,6 +22,17 @@ const MIND = [
     verses: [
       ['yoga-sutra/1.30', 'vikshepa'],
       ['vedanta-sara/5.211', 'vikshepa'],
+    ],
+    terms: [
+      'vyadhi',
+      'styana',
+      'alasya',
+      'samsaya',
+      'pramada',
+      'avirati',
+      'bhrantidarsana',
+      'alabdhabhumikatva',
+      'anavasthitatva',
     ],
     references: [
       'apa-distraction',
@@ -42,6 +53,7 @@ const MIND = [
     name: 'Upa-vikṣepa',
     page: 'https://care4mind.org/upavikshepaprofiling/',
     verses: [['yoga-sutra/1.31', 'upavikshepaprofiling']],
+    terms: ['duhkha', 'daurmanasya', 'angamejayatva', 'svasa', 'prasvasa'],
     references: [
       'aich-2013',
       'anderson-2016',
@@ -56,6 +68,47 @@ const MIND = [
       'yogapedia-2023-shvasa-prashvasa',
     ],
     questionnaire: { title: 'Upa-Vikshepa Profiling', candidateSource: 'tomar-2024' },
+  },
+  {
+    slug: 'panch-klesha',
+    name: 'Pañca kleśa',
+    page: 'https://care4mind.org/panchkleshavikaarprofiling/',
+    verses: [
+      ['yoga-sutra/2.3', 'panchkleshavikaarprofiling'],
+      ['yoga-sutra/2.5', 'panchkleshavikaarprofiling'],
+      ['yoga-sutra/2.7', 'panchkleshavikaarprofiling'],
+      ['yoga-sutra/2.9', 'panchkleshavikaarprofiling'],
+    ],
+    // The five kleśas, then the six enemies of the peaceful mind (the vikāras).
+    terms: [
+      'avidya',
+      'asmita',
+      'raga',
+      'dvesa',
+      'abhinivesa',
+      'kama',
+      'krodha',
+      'lobha',
+      'moha',
+      'mada',
+      'matsarya',
+    ],
+    references: [
+      'hridaya-yoga-2024',
+      'ias-express-2023',
+      'jakubczak-2004',
+      'jayswal-2020',
+      'kshirsagar-2025',
+      'praxis-2022',
+      'roche-2018',
+      'sharma-2021',
+      'shlokam-2020-yogasutra-1-31',
+      'singh-2020',
+      'tomar-2024',
+      'yogapedia',
+      'yogitim-2024',
+    ],
+    questionnaire: { title: 'Panch Klesha – Vikaar Profiling', candidateSource: 'tomar-2024' },
   },
 ]
 
@@ -96,6 +149,14 @@ describe('the mind Concepts', () => {
         mind.verses.map(([passage]) => passage),
       )
       expect(concept?.references.map(({ id }) => id)).toEqual(mind.references)
+    },
+  )
+
+  it.each(MIND)(
+    'anchors each of $slug’s sub-terms, in the page’s order',
+    async ({ slug, terms }) => {
+      const concept = await concepts.get(slug)
+      expect(concept?.toc.flatMap((entry) => entry.terms.map(({ id }) => id))).toEqual(terms)
     },
   )
 
