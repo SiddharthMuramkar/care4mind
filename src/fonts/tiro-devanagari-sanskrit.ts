@@ -1,7 +1,9 @@
 import localFont from 'next/font/local'
 
 // Built by scripts/fonts/subset.py: Devanagari only. It is declared with a unicode-range and
-// never preloaded, so pages without Devanagari never download it.
+// never preloaded, so pages without Devanagari never download it. It is optional (ticket 05):
+// used only if it is there within about a tenth of a second, as it is once cached, so it never
+// swaps in late and moves the text.
 
 export const tiroDevanagariSanskrit = localFont({
   src: [
@@ -12,7 +14,7 @@ export const tiroDevanagariSanskrit = localFont({
     },
   ],
   variable: '--font-tiro',
-  display: 'swap',
+  display: 'optional',
   preload: false,
   adjustFontFallback: false,
   declarations: [
