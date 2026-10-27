@@ -28,5 +28,7 @@ export default defineConfig([
     'playwright-report/**',
     'test-results/**',
     '.lighthouseci/**',
+    // Written by scripts/content/registry.mjs, never committed.
+    'src/content/generated/**',
   ]),
 ])
