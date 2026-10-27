@@ -1,4 +1,4 @@
-import type { Locator, Page } from '@playwright/test'
+import { expect, type Locator, type Page } from '@playwright/test'
 
 /** Scroll down by `distance` at once, then say how far up the screen each element went. */
 export async function travel(page: Page, distance: number, ...elements: Locator[]) {
@@ -20,4 +20,31 @@ export function placeOnScreen(element: Locator, fraction: number) {
     const top = node.getBoundingClientRect().top + window.scrollY
     window.scrollTo({ top: top - window.innerHeight * fraction, behavior: 'instant' })
   }, fraction)
+}
+
+/**
+ * Do something (and wait for where it should lead), then list every scroll
+ * position the page passed through, frame by frame, until it came to rest.
+ * A jump passes through two; a glide, many.
+ */
+export async function scrollPath(page: Page, act: () => Promise<unknown>) {
+  await page.evaluate(() => {
+    const path = [window.scrollY]
+    Object.defineProperty(window, '__scrollPath', { value: path, configurable: true })
+    const watch = () => {
+      if (path.at(-1) !== window.scrollY) path.push(window.scrollY)
+      requestAnimationFrame(watch)
+    }
+    requestAnimationFrame(watch)
+  })
+  await act()
+  const at = () => page.evaluate(() => window.scrollY)
+  await expect
+    .poll(async () => {
+      const before = await at()
+      await page.waitForTimeout(150)
+      return (await at()) === before
+    })
+    .toBe(true)
+  return page.evaluate(() => (window as unknown as { __scrollPath: number[] }).__scrollPath)
 }

@@ -56,6 +56,13 @@
     scroll-padding-top: 5rem;
   }
 
+  /* In-page links glide to their section. The layout's data-scroll-behavior makes page changes jump. */
+  @media (prefers-reduced-motion: no-preference) {
+    html {
+      scroll-behavior: smooth;
+    }
+  }
+
   body {
     background: var(--color-ground);
     color: var(--color-ink);

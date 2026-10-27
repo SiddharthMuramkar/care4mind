@@ -8,7 +8,7 @@ import {
   recordAnimationStarts,
   undrawn,
 } from './drawings'
-import { placeOnScreen, travel } from './scrolling'
+import { placeOnScreen, scrollPath, travel } from './scrolling'
 
 const section = (page: Page, name: string) => page.getByRole('region', { name, exact: true })
 
@@ -162,6 +162,59 @@ test('each Contents numeral keeps its Devanagari digit, ringed by a kolam knot t
     expect(ring.y).toBeLessThan(digit.y + digit.height / 2)
     expect(ring.y + ring.height).toBeGreaterThan(digit.y + digit.height / 2)
   }
+})
+
+for (const { from, name, to } of [
+  { from: 'main', name: 'Explore Concepts', to: 'Concepts' },
+  { from: 'main', name: 'Questionnaires', to: 'Questionnaires' },
+  { from: 'navigation', name: 'Concepts', to: 'Concepts' },
+] as const) {
+  test(`"${name}" in the ${from === 'main' ? 'opening folio' : 'header'} glides down to the ${to} section, its heading in full view`, async ({
+    page,
+  }) => {
+    await page.goto('/')
+    const around =
+      from === 'main' ? page.getByRole('main') : page.getByRole('navigation', { name: 'Main' })
+    const link = around.getByRole('link', { name, exact: true })
+    const heading = page.getByRole('heading', { name: to, level: 2 })
+    await link.scrollIntoViewIfNeeded()
+    const path = await scrollPath(page, async () => {
+      await link.click()
+      await expect(heading).toBeInViewport()
+    })
+    expect(path.length, 'a glide passes through many positions').toBeGreaterThan(4)
+    await expect(heading).toBeInViewport({ ratio: 1 })
+    // Not under the header, wherever the header is.
+    const [title, header] = await Promise.all([
+      heading.boundingBox(),
+      page.getByRole('banner').boundingBox(),
+    ])
+    expect(title?.y).toBeGreaterThanOrEqual(Math.max(0, (header?.y ?? 0) + (header?.height ?? 0)))
+  })
+}
+
+test('links to another page open it at once, without gliding from where you were', async ({
+  page,
+}) => {
+  await page.goto('/')
+  const card = page.getByRole('link', { name: 'Read about Vikṣepa' })
+  await placeOnScreen(card, 0.5)
+  const toConcept = await scrollPath(page, async () => {
+    await card.click()
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText('Vikṣepa')
+  })
+  expect(toConcept.at(-1)).toBe(0)
+  expect(toConcept.length, 'a jump, not a glide').toBeLessThanOrEqual(3)
+
+  await page.evaluate(() => window.scrollTo({ top: 600, behavior: 'instant' }))
+  const backHome = await scrollPath(page, async () => {
+    await page
+      .getByRole('navigation', { name: 'Main' })
+      .getByRole('link', { name: 'Concepts', exact: true })
+      .click()
+    await expect(page.getByRole('heading', { name: 'Concepts', level: 2 })).toBeInViewport()
+  })
+  expect(backHome.length, 'a jump, not a glide').toBeLessThanOrEqual(3)
 })
 
 test('nothing shifts while the kolams draw in, from load to the foot of the page', async ({

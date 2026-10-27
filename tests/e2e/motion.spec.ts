@@ -2,7 +2,7 @@ import { expect, type Page, test } from '@playwright/test'
 
 import { frameKolam, openingFolio, unfinishedDrawings } from './drawings'
 import { PAGES } from './routes'
-import { travel } from './scrolling'
+import { scrollPath, travel } from './scrolling'
 
 /** Animations still moving: anything running longer than the 1 ms the reduced-motion rule allows. */
 async function movingAnimations(page: Page) {
@@ -45,6 +45,28 @@ for (const { path, name } of PAGES) {
     await page.mouse.wheel(0, 4000)
     await page.waitForTimeout(100)
     expect(await unfinishedDrawings(page)).toEqual([])
+  })
+}
+
+for (const { from, name } of [
+  { from: 'main', name: 'Explore Concepts' },
+  { from: 'navigation', name: 'Concepts' },
+] as const) {
+  test(`"${name}" in the ${from === 'main' ? 'opening folio' : 'header'} jumps straight to the Concepts, with reduced motion`, async ({
+    page,
+  }) => {
+    await page.goto('/')
+    const around =
+      from === 'main' ? page.getByRole('main') : page.getByRole('navigation', { name: 'Main' })
+    const link = around.getByRole('link', { name, exact: true })
+    const heading = page.getByRole('heading', { name: 'Concepts', level: 2 })
+    await link.scrollIntoViewIfNeeded()
+    const path = await scrollPath(page, async () => {
+      await link.click()
+      await expect(heading).toBeInViewport()
+    })
+    expect(path, 'one jump, from where it was to the section').toHaveLength(2)
+    await expect(heading).toBeInViewport({ ratio: 1 })
   })
 }
 

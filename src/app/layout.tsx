@@ -29,6 +29,8 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html
       lang="en"
+      // Smooth scrolling is for in-page links: with this, Next.js jumps on page changes.
+      data-scroll-behavior="smooth"
       className={cx(
         playfairText.variable,
         playfairDisplay.variable,
