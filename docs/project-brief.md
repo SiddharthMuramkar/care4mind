@@ -6,6 +6,8 @@
 
 Rebuild Care4Mind.org from scratch, with a new design, as a portal for Indian psychology. Concepts, traditional texts, References and Questionnaires link to one another instead of sitting on standalone pages. The content worth keeping comes over from the current site. The design, front-end code and structure are all new.
 
+The design should look made by a dedicated team of human designers: custom, rich in colour, and fun to explore, with motion and feedback on scroll and click. It must still meet NFR-01 and NFR-02.
+
 ## Audiences
 
 - **General public:** explore Concepts and their practical applications in plain language.
@@ -15,19 +17,19 @@ Rebuild Care4Mind.org from scratch, with a new design, as a portal for Indian ps
 
 ## Constraints
 
-- **One developer** designs, builds, tests and deploys everything. They know Docker and SQL, but little JavaScript, no TypeScript and no WordPress.
+- **One developer, building with coding agents.** Coding agents design, write and test all the code, working from current library docs (through context7). The developer directs them and reviews the architecture, specs and results, but writes no code by hand. So the stack is chosen for what agents build well, not for the languages the developer knows (Docker and SQL).
 - **No access** to the current site's code, database or admin login, or to the code of its separate questionnaire app. The content worth keeping is carried over by scraping the public site. Where Questionnaire questions and scoring rules come from is open (question 4).
 - **The live site is the record of what exists.** The client brief is what the client first asked for; the rebuild's scope is this brief's Requirements and Out of scope. The live site is in worse shape than the client brief assumes: most questionnaires don't work, and several pages are empty or placeholders.
 - **The current site stays live and untouched until launch.** Its upkeep stays with the client.
 - **Subject-matter calls aren't the developer's.** Questionnaire scoring and interpretation belong to the Psychology expert; source accuracy belongs to the Research editor.
-- **No estimates, schedule or fixed launch date yet.** Estimate once the planning map (`.scratch/<effort>/map.md`) is done.
+- **No estimates, schedule or fixed launch date yet.** Estimate once the planning map ([.scratch/rebuild/map.md](../.scratch/rebuild/map.md)) is done.
 
 ## Roles
 
 | Role | Who | Owns |
 | --- | --- | --- |
 | Project owner | _TBD (client)_ | priorities, approvals, launch sign-off |
-| Developer | Siddharth Muramkar | design, build, testing, deployment, documentation |
+| Developer | Siddharth Muramkar | design, build, testing, deployment and documentation, all done by coding agents the developer directs and reviews |
 | Psychology expert | _TBD (client)_ | Questionnaire scoring, interpretation and limitations |
 | Research editor | _TBD (client)_ | source checking, References, taxonomy review |
 
@@ -36,8 +38,7 @@ If no Psychology expert is named by the time an in-scope Questionnaire is built,
 ## What carries over
 
 - **Kept:** the content worth keeping (which pages to keep, merge or drop is open question 5), the questions and scoring of each in-scope Questionnaire (which are in scope is open question 3), the domain care4mind.org, and every URL the current site serves (redirected where it changes; see FR-07).
-- **Replaced:** the design, all front-end code, Elementor and Astra.
-- **Open:** whether WordPress stays on as a content back end or goes entirely (open question 1).
+- **Replaced:** the design, all front-end code, Elementor, Astra and WordPress itself ([ADR-0002](adr/0002-vercel-and-neon.md)).
 
 ## Requirements
 
@@ -94,10 +95,12 @@ New ideas go on a later-phases list, not into this project.
 
 ## Open questions
 
-This brief decides none of these. "(Client)" means the Project owner answers it.
+This brief decides none of these. "(Client)" means the Project owner answers it. They are worked in the planning map ([.scratch/rebuild/map.md](../.scratch/rebuild/map.md)). Once one is decided, it gets a one-line pointer here to where its answer lives.
 
-1. **Platform and hosting.** What the site is built with and where it runs, including whether WordPress stays on as a content back end or goes entirely. Leaning: Vercel for hosting and Neon Postgres for data, but nothing is fixed. It has to suit the developer's skills (see Constraints) and whoever runs the site later, so it waits on question 2. Vercel can also run a Docker image as a function (Container Runtime, in beta on all plans as of October 2026; [docs](https://vercel.com/docs/functions/runtimes/container)).
-2. **Who runs the site after launch? (Client)** Who edits content, who keeps the site patched, and who pays for the hosting. The answer shapes what Content editors need to meet FR-02, and whether WordPress stays on as a content back end.
+1. **Platform and hosting.** What the site is built with and where it runs.
+   - Hosting and data: decided in [ADR-0002](adr/0002-vercel-and-neon.md).
+   - Framework, content back end and search: decided in the map's [Architecture review](../.scratch/rebuild/issues/23-architecture-review.md).
+2. **Who runs the site after launch? (Client)** Who edits content, who keeps the site patched, and who pays for the hosting. The answer shapes what Content editors need to meet FR-02.
 3. **Which Questionnaires are in scope?** Only two have questions on the site today: KarmaYoga Scale (45 questions) and Dosha Survey (12). Sixteen more pages describe a questionnaire and its High/Moderate/Low results but contain no questions: Triguna, the eight "Profiling" pages and seven others (listed in current-site.md). The homepage also links to a separate questionnaire app, which refused connections on 2026-10-26; whether these questionnaires lived there is unknown.
 4. **Where do each Questionnaire's questions and scoring rules come from?** For now: scrape what's public, then revisit. The public pages show only part of the scoring: the KarmaYoga Scale page flags one answer per question as correct and shows a percentage result, the sixteen pages above give no cut-offs, and nothing public shows how the Dosha Survey scores. Other possible sources are the client, whoever built the questionnaire app, and web archives. Without an in-scope Questionnaire's questions and scoring rules, it can't be rebuilt faithfully.
 5. **Which pages to keep, merge or drop, and which topics matter most?** This includes the duplicate and empty pages listed in current-site.md.
