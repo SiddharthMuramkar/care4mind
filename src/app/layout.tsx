@@ -2,12 +2,12 @@ import type { Metadata, Viewport } from 'next'
 import type { ReactNode } from 'react'
 
 import { InkSpread } from '@/components/InkSpread'
+import { LateFonts } from '@/components/LateFonts'
 import { SiteFooter } from '@/components/SiteFooter'
 import { SiteHeader } from '@/components/SiteHeader'
 import { site } from '@/config/site'
-import { playfairDisplay, playfairText } from '@/fonts/playfair'
+import { playfairDisplay, playfairText, playfairTextStyles } from '@/fonts/playfair'
 import { tiroDevanagariSanskrit } from '@/fonts/tiro-devanagari-sanskrit'
-import { cx } from '@/lib/cx'
 
 import '@/styles/globals.css'
 
@@ -31,11 +31,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       lang="en"
       // Smooth scrolling is for in-page links: with this, Next.js jumps on page changes.
       data-scroll-behavior="smooth"
-      className={cx(
-        playfairText.variable,
-        playfairDisplay.variable,
-        tiroDevanagariSanskrit.variable,
-      )}
+      className={playfairText.variable}
     >
       <body>
         <a href="#main" className="skip-link">
@@ -45,6 +41,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         {children}
         <SiteFooter />
         <InkSpread />
+        <LateFonts faces={[...playfairTextStyles, playfairDisplay, tiroDevanagariSanskrit]} />
       </body>
     </html>
   )

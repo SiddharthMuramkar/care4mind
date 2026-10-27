@@ -34,6 +34,9 @@
   /* The ink a pressed control spreads under its label: vermilion at 70%, translucent over the control. */
   --color-ink-spread: #c8342ab3;
 
+  /* Added once the page is painted (LateFonts). Until then headings are set in Text Regular, and Devanagari in a system font. */
+  --font-playfair-display: playfairDisplay;
+  --font-tiro: tiroDevanagariSanskrit;
   --font-text: var(--font-playfair-text), var(--font-tiro), 'Times New Roman', serif;
   --font-display: var(--font-playfair-display), var(--font-playfair-text), var(--font-tiro), serif;
   --font-deva:
