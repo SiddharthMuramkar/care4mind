@@ -1,6 +1,6 @@
 import { beforeAll, describe, expect, it } from 'vitest'
 
-import { concepts, questionnaires, type BlockView } from '@/content'
+import { concepts, questionnaires, topics, type BlockView } from '@/content'
 import type { ConceptRecord, QuestionnaireRecord } from '@/content/schema'
 import { localSource } from '@/content/source'
 
@@ -138,6 +138,36 @@ const MIND = [
     tables: 2,
     questionnaire: { title: 'Know Your State of Mind Profile', candidateSource: 'tomar-2024' },
   },
+  {
+    slug: 'sthitaprajna',
+    name: 'Sthitaprajña',
+    page: 'https://care4mind.org/sthitaprajna/',
+    verses: [
+      ['bhagavad-gita/2.54', 'sthitaprajna'],
+      ['bhagavad-gita/2.55', 'sthitaprajna'],
+      ['bhagavad-gita/2.56', 'sthitaprajna'],
+      ['bhagavad-gita/2.57', 'sthitaprajna'],
+      ['bhagavad-gita/2.58', 'sthitaprajna'],
+      ['bhagavad-gita/2.68', 'sthitaprajna'],
+    ],
+    terms: [],
+    references: [
+      'adkoli-2022',
+      'apa-emotional-intelligence',
+      'kaundinya-2024',
+      'kp-2025',
+      'samant',
+      'sharma-1997',
+      'shlokam-2025',
+      'sivakumar-rajini-2022',
+      'surti-ganga-2021',
+      'tomar-2024',
+      'wisdomlib-2022',
+    ],
+    tables: 1,
+    // Research ticket 11 found no published source for its questionnaire.
+    questionnaire: { title: 'Sthitaprajna', candidateSource: undefined },
+  },
 ]
 
 /** The Concepts this ticket carries over; vikṣepa is ticket 01's. */
@@ -154,6 +184,26 @@ beforeAll(async () => {
 const conceptRecord = (slug: string) => conceptRecords.find((concept) => concept.slug === slug)
 const questionnaireRecord = (slug: string) =>
   questionnaireRecords.find((questionnaire) => questionnaire.slug === slug)
+
+describe('the mind topic', () => {
+  it('holds the five mind Concepts as its own, vikṣepa’s among them', async () => {
+    const mind = await topics.get('mind')
+    expect(mind?.concepts.map(({ slug }) => slug).sort()).toEqual([
+      'chittabhumi',
+      'panch-klesha',
+      'sthitaprajna',
+      'upa-vikshepa',
+      'vikshepa',
+    ])
+  })
+
+  it('puts Sthitaprajña in the self topic too', async () => {
+    const sthitaprajna = await concepts.get('sthitaprajna')
+    expect(sthitaprajna?.secondaryTopics.map(({ slug }) => slug)).toEqual(['self'])
+    const self = await topics.get('self')
+    expect(self?.secondaryConcepts.map(({ slug }) => slug)).toContain('sthitaprajna')
+  })
+})
 
 describe('the mind Concepts', () => {
   it.each(CARRIED_OVER)(
@@ -248,4 +298,13 @@ describe('each mind Concept’s coming-later Questionnaire', () => {
       expect(await questionnaires.form(slug)).toBeNull()
     },
   )
+
+  it('flags Sthitaprajña’s Questionnaire for the Psychology expert: no published source found', async () => {
+    const questionnaire = await questionnaires.get('sthitaprajna')
+    expect(
+      questionnaire?.provenance.flags.filter(
+        (flag) => flag.for === 'psychology-expert' && /no published source/i.test(flag.note),
+      ),
+    ).toHaveLength(1)
+  })
 })
