@@ -193,12 +193,22 @@ export function recordPageTurns(page: Page, { hold = false } = {}) {
   }, hold)
 }
 
-/** The view transitions that changed page, once each has been sampled. */
-export async function pageTurns(page: Page): Promise<PageTurn[]> {
+/** Every view transition the page has started, once each has been sampled. */
+async function viewTransitions(page: Page): Promise<PageTurn[]> {
   const read = () =>
     page.evaluate(() => (window as unknown as { __pageTurns: PageTurn[] }).__pageTurns)
   await expect.poll(async () => (await read()).every((turn) => turn.sampled)).toBe(true)
-  return (await read()).filter((turn) => turn.from !== turn.to)
+  return read()
+}
+
+/** The view transitions that changed page, once each has been sampled. */
+export async function pageTurns(page: Page): Promise<PageTurn[]> {
+  return (await viewTransitions(page)).filter((turn) => turn.from !== turn.to)
+}
+
+/** The view transitions that changed something on the page without leaving it. */
+export async function inPageTransitions(page: Page): Promise<PageTurn[]> {
+  return (await viewTransitions(page)).filter((turn) => turn.from === turn.to)
 }
 
 /** Let a held page turn finish, and wait until it has. */

@@ -9,9 +9,9 @@ test.describe('Concept page', () => {
 
   test('names the term in IAST and Devanagari, each with its language tag', async ({ page }) => {
     const heading = page.getByRole('heading', { level: 1 })
-    await expect(heading).toHaveText('Vikṣepa')
+    await expect(heading).toHaveAccessibleName('Vikṣepa विक्षेप')
     await expect(heading.locator('[lang="sa-Latn"]')).toHaveText('Vikṣepa')
-    await expect(page.locator('main [lang="sa-Deva"]').first()).toHaveText('विक्षेप')
+    await expect(heading.locator('[lang="sa-Deva"]')).toHaveText('विक्षेप')
     expect(await page.locator('main [lang="sa-Deva"]').count()).toBeGreaterThan(5)
   })
 
@@ -60,6 +60,6 @@ test('the homepage card opens the Concept page', async ({ page }) => {
   await page.goto('/')
   await page.getByRole('link', { name: 'Read about Vikṣepa' }).click()
   await expect(page).toHaveURL('/concepts/vikshepa')
-  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Vikṣepa')
+  await expect(page.getByRole('heading', { level: 1 })).toContainText('Vikṣepa')
   expect(errors).toEqual([])
 })

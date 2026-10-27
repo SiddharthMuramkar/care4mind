@@ -47,12 +47,6 @@
   line-height: 1;
 }
 
-.titleDeva {
-  margin: 0;
-  font-size: clamp(2rem, 7vw, 3rem);
-  line-height: 1.4;
-}
-
 .gloss {
   margin: 0;
   font-variant-caps: all-small-caps;

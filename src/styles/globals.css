@@ -125,9 +125,37 @@
   pointer-events: none;
 }
 
+/* A Concept card's title flies above both turning pages, or the arriving page would cover it. */
 ::view-transition-group(.morph) {
+  z-index: 1;
   animation-duration: var(--duration-slow);
   animation-timing-function: var(--ease-out);
+}
+
+/*
+ * The "Devanagari first" switch: a term's two spellings trade places and sizes
+ * (TermSpellings). They pass side by side, the one coming to lead on the left.
+ */
+::view-transition-group(.script-swap) {
+  animation-duration: var(--duration-move);
+  animation-timing-function: var(--ease-in-out);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  ::view-transition-image-pair(.script-lead),
+  ::view-transition-image-pair(.script-follow) {
+    animation: pass-by var(--duration-move) var(--ease-in-out);
+  }
+
+  ::view-transition-image-pair(.script-follow) {
+    --pass: 1;
+  }
+}
+
+@keyframes pass-by {
+  50% {
+    transform: translateX(calc(var(--pass, -1) * 55%));
+  }
 }
 
 /* The header and footer keep their own names, so they stay put, above the turning page. */

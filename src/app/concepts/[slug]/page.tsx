@@ -1,7 +1,6 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { ViewTransition } from 'react'
 
 import { Breadcrumbs } from '@/components/Breadcrumbs'
 import { Folio } from '@/components/Folio'
@@ -10,6 +9,7 @@ import { PageTurn, turnForward } from '@/components/PageTurn'
 import { ReadingThread } from '@/components/ReadingThread'
 import { ReferenceList } from '@/components/ReferenceList'
 import { SanskritTerm } from '@/components/SanskritTerm'
+import { ScriptChoice, ScriptSwitch, TermSpellings } from '@/components/ScriptChoice'
 import { Shloka } from '@/components/Shloka'
 import { SpellingsPopover } from '@/components/SpellingsPopover'
 import { asciiSpellings, getConcept, getQuestionnaire, listConcepts } from '@/content'
@@ -56,22 +56,28 @@ export default async function ConceptPage({ params }: PageProps<'/concepts/[slug
           ]}
         />
         <Folio as="article" className={reading.article} aria-labelledby="concept-title">
-          <header className={reading.titlePage}>
-            <p className={reading.kicker}>Concept</p>
-            <ViewTransition name={`concept-title-${concept.slug}`} share="morph" default="none">
+          <ScriptChoice>
+            <header className={reading.titlePage}>
+              <p className={reading.kicker}>Concept</p>
               <h1 id="concept-title" className={reading.title}>
-                <span lang="sa-Latn">{name}</span>
+                {/* A Concept card's title flies into the IAST spelling (ConceptCard). */}
+                <TermSpellings
+                  term={concept.term}
+                  capitalised
+                  name={`concept-title-${concept.slug}`}
+                />
               </h1>
-            </ViewTransition>
-            {concept.term.devanagari ? (
-              <p lang="sa-Deva" className={reading.titleDeva}>
-                {concept.term.devanagari}
-              </p>
-            ) : null}
-            <p className={reading.gloss}>{concept.gloss}</p>
-            <SpellingsPopover iast={concept.term.iast} spellings={asciiSpellings(concept.term)} />
-            <p className={reading.summary}>{concept.summary}</p>
-          </header>
+              <p className={reading.gloss}>{concept.gloss}</p>
+              <div className={styles.spellingTools}>
+                <SpellingsPopover
+                  iast={concept.term.iast}
+                  spellings={asciiSpellings(concept.term)}
+                />
+                {concept.term.devanagari ? <ScriptSwitch /> : null}
+              </div>
+              <p className={reading.summary}>{concept.summary}</p>
+            </header>
+          </ScriptChoice>
 
           {concept.shlokas.map((shloka) => (
             <Shloka key={shloka.source} shloka={shloka} className={styles.shloka} />

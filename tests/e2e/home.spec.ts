@@ -201,7 +201,7 @@ test('links to another page open it at once, without gliding from where you were
   await placeOnScreen(card, 0.5)
   const toConcept = await scrollPath(page, async () => {
     await card.click()
-    await expect(page.getByRole('heading', { level: 1 })).toHaveText('Vikṣepa')
+    await expect(page.getByRole('heading', { level: 1 })).toContainText('Vikṣepa')
   })
   expect(toConcept.at(-1)).toBe(0)
   expect(toConcept.length, 'a jump, not a glide').toBeLessThanOrEqual(3)
