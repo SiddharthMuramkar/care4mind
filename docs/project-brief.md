@@ -99,7 +99,8 @@ This brief decides none of these. "(Client)" means the Project owner answers it.
 
 1. **Platform and hosting.** What the site is built with and where it runs.
    - Hosting and data: decided in [ADR-0002](adr/0002-vercel-and-neon.md).
-   - Framework, content back end and search: decided in the map's [Architecture review](../.scratch/rebuild/issues/23-architecture-review.md).
+   - Framework: decided in [ADR-0003](adr/0003-nextjs-for-the-front-end.md) (Next.js).
+   - Content back end and search: decided in the map's [Architecture review](../.scratch/rebuild/issues/23-architecture-review.md).
 2. **Who runs the site after launch? (Client)** Who edits content, who keeps the site patched, and who pays for the hosting. The answer shapes what Content editors need to meet FR-02.
 3. **Which Questionnaires are in scope?** Only two have questions on the site today: KarmaYoga Scale (45 questions) and Dosha Survey (12). Sixteen more pages describe a questionnaire and its High/Moderate/Low results but contain no questions: Triguna, the eight "Profiling" pages and seven others (listed in current-site.md). The homepage also links to a separate questionnaire app, which refused connections on 2026-10-26; whether these questionnaires lived there is unknown.
 4. **Where do each Questionnaire's questions and scoring rules come from?** For now: scrape what's public, then revisit. The public pages show only part of the scoring: the KarmaYoga Scale page flags one answer per question as correct and shows a percentage result, the sixteen pages above give no cut-offs, and nothing public shows how the Dosha Survey scores. Other possible sources are the client, whoever built the questionnaire app, and web archives. Without an in-scope Questionnaire's questions and scoring rules, it can't be rebuilt faithfully.

@@ -35,7 +35,16 @@ Every decision the build needs is made and recorded, so the build spec can be wr
   A new client question found in between waits under "Follow-ups from the client's replies" below.
 - **Questionnaire-track tickets never block site tickets.** A Questionnaire whose questions or scoring rules can't be found is decided as "deferred until the rules arrive, follows after launch". It is never left open.
 - **The content model is platform-neutral.** [Content types, topics and shared fields](issues/13-content-types-and-topics.md) through [References, people and journals](issues/17-references-people-journals.md) decide types, fields and links, not database tables. They feed the Architecture review.
-- **Planning only.** Hands-on work happens only to unblock a decision. For the current site:
+- **Execution starts early, for the front-end foundation only** (developer, 2026-10-27). [Design direction](issues/21-design-direction.md) starts the real codebase, and its code is merged and built on. The framework is Next.js ([ADR-0003](../../docs/adr/0003-nextjs-for-the-front-end.md)). This covers:
+  - the Next.js app, design tokens and fonts
+  - the homepage, one Concept page, one Questionnaire intro page and the 404 page
+  - one content module that reads local typed files, so a content back end can replace it later
+  - CI for the front-end checks (lint, unit tests, Playwright with axe, Lighthouse CI)
+  - a Vercel project for preview deploys, with every page set to noindex
+  - short repo docs on how to run, test and deploy
+
+  Everything else still waits for the map: the database, content back end, search, the Questionnaire engine, editor login, the production domain and DNS. Only the style tiles are throwaway, and they are deleted before merge.
+- **Planning only**, apart from the front-end foundation above. Hands-on work happens only to unblock a decision. For the current site:
   - Read-only, few requests, spaced out (uncached pages have taken 40 s), and the REST API is preferred over cached HTML.
   - Never log in, probe the MCP endpoints, submit a form or finish the KarmaYoga Scale without the client's OK.
   - Raw captures (they contain author usernames) stay out of the repo.
@@ -135,13 +144,13 @@ Every decision the build needs is made and recorded, so the build spec can be wr
 
 ## Out of scope
 
-- Building anything: the schema, admin, templates, search index, Questionnaire engine or CI. Implementation comes after the map.
+- Building anything: the schema, admin, templates, search index, Questionnaire engine or CI. Implementation comes after the map, except the front-end foundation (see Notes).
 - The full scrape and content migration, including entering spellings, metadata and alt text. Settled to come after the map.
 - Writing the build spec, the estimate, the schedule, pricing or the contract. These follow the map.
 - Detailed design of every page template. That is build work; the map sets the design direction and the template inventory.
 - Comparing or moving to hosts other than Vercel and Neon. Fixed by ADR-0002; a later move would be a fresh effort.
-- Opening production accounts, provisioning, changing DNS, running the restore drill and the launch switch. That is build and launch work.
-- Writing the repo docs, the restore write-up and the Content editor guide. These are FR-08 and FR-09 deliverables made during the build.
+- Opening production accounts, provisioning, changing DNS, running the restore drill and the launch switch. That is build and launch work. The one exception is the Vercel project for preview deploys (see Notes).
+- Writing the repo docs, the restore write-up and the Content editor guide. These are FR-08 and FR-09 deliverables made during the build. Short docs on running, testing and deploying the front end start now (see Notes).
 - Fixing, securing, probing or changing the current site. It stays the client's until launch; its problems are only reported, in the question list.
 - Backing up the current site, exporting past Questionnaire responses, and cancelling the old hosting. Only the client can do these.
 - Reviving or rehosting the questionnaire app on port 8020. There is no code for it, and it was already down.
