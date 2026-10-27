@@ -6,7 +6,7 @@ Every Reference the kept pages cite or list, page by page, mapped to its record 
 
 - **Batch tickets (08–11):** find your page below. Its reference list is in the page’s order: your Concept’s `references` are these ids, in this order. Reuse them; never add a second record for a work that is here. If your page needs a Reference that isn’t, add the file and say so in your Comments, for ticket 12 to fold in.
 - **Ticket 07:** the Library pages’ books are References too (D09). Each listed book is mapped to its id under the page’s own headings; course entries are not References and aren’t here.
-- **Ticket 12:** reconciles this census with what the batches add. The flags on each record are in its provenance; `node scripts/content/report.mjs` gathers them.
+- **Ticket 12:** reconciled this census with what the batches added; see [Reconciled](#reconciled). The flags on each record are in its provenance; `node scripts/content/report.mjs` gathers them.
 
 ## Counts
 
@@ -14,6 +14,14 @@ Every Reference the kept pages cite or list, page by page, mapped to its record 
 - **Tomar (2024)**, `tomar-2024`, is on all 16 description pages, written 5 ways. Srinivasan (2016) and Thapliyal et al. (2023) are on the four values pages, one record each.
 - **Shlokam.org** entries are one record per page they cite: the home page (`shlokam-2025`), the Yogasutra and Sādhana Pañcakam indexes, and each verse page (`shlokam-2020-yogasutra-2-30`, `shlokam-2024-gita-2-54` and so on).
 - **Atman, Jiva and Jagat** have no reference lists. Course entries (IGNOU, NIOS, the institutes) are courses, for ticket 07.
+
+## Reconciled
+
+Ticket 12 (2026-10-28) checked this census against the records once every batch had landed:
+
+- **Ids.** Each of its 188 ids is a Reference record, and every Reference record is here. No batch ticket (07–11) added one, so there was nothing to fold in. The table of every Reference matches the records: each id's type, its forms as cited and the pages naming it.
+- **Lists.** Each description page's list here is its Concept's `references`, in the same order. Know Your Mind's list names `krishnappa-2020` twice (2020a and 2020b); its Concept lists it once, as ticket 08 listed. The values topic's introduction has its own list, `srinivasan-2016`, `thapliyal-2023` and `tomar-2024`, which the four values pages also list. Each Library page's books are on the reading lists, under the ids here.
+- **No work under two ids.** No two records share a DOI or a URL, and none shares a title with another except `kellogg-2007` and `solso-2006`, two different authors' books called *Cognitive Psychology*. The near matches are distinct works the pages cite apart: `swamij-1-30` (a web page on Yoga Sūtra 1.30–1.32) and `yoga-sutras-patanjali` (a book on Google Books); the Shlokam verse pages, one record each; the three APA Dictionary entries; Mascaro's *The Bhagavad Gita* and *The Upanisads*; the wisdomlib.org and Yogapedia pages, one record each. Nothing was merged.
 
 ## How the records were made
 

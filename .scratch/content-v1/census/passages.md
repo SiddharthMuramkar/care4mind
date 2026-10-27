@@ -4,11 +4,13 @@ Ticket 04 of [content v1](../spec.md). Every verse the 16 description pages quot
 
 6 works, 43 passages, 38 translations. The 16 pages quote verses 56 times; Atman, Jiva and Jagat quote none.
 
+**Reconciled by ticket 12 (2026-10-28)** with the Concepts the batch tickets wrote. Every passage and work here exists and every one is in this census; no batch ticket added a passage. Each page's verses match its Concept's quotes in order, passage, translation id and Meaning. Two pages' Concepts place verses other than the table's *On the page* suggests, as their batch ticket chose: Karta's and Triguna's, noted under each page below. One gap a batch ticket noted is closed: Yoga Sūtra 1.33's translation now lists the inline DharmaWiki link on “Chitta” it dropped (ticket 09).
+
 ## How to use it
 
 - A Concept quotes a verse as `{ passage, translation, meaning }`. Take `passage` and `translation` from your page's table. "none" means the page gives no translation: the quote names none, and never borrows another page's.
 - **Meaning** says whether the page prints a line labelled "Meaning" under the verse. That line is the page's own reading: keep it on your Concept's quote as `meaning`, as the page writes it. It is never a translation.
-- **On the page** says where the verse sits. *Top* is above the page's "Introduction" accordion: those verses are the Concept's `verses`, in this order. *In section* is a verse inside a section: a `verse` block there. Headings are quoted as the page prints them.
+- **On the page** says where the verse sits. *Top* is above the page's "Introduction" accordion: those verses are the Concept's `verses`, in this order. *In section* is a verse inside a section: a `verse` block there. Headings are quoted as the page prints them. Karta's Concept is the one exception: its three verses sit in term blocks (see its page).
 - The pages print each verse's number after it ("॥ २.३०॥", ".. 2.30..", "2-54"), and many print it again before the translation ("30. Non-killing…"). The passages leave both out, since the locator holds the number; leave them out of the Concept too.
 - A verse this census lacks: add its passage file, and say so in your ticket's Comments. A translation, "Meaning" or position this census gets wrong: note it in your Comments for ticket 12. Never edit a passage or work file: ticket 04 owns them.
 
@@ -121,6 +123,7 @@ Ticket 04 of [content v1](../spec.md). Every verse the 16 description pages quot
 
 - No transliteration on the page; none is stored, and it is flagged.
 - The Meaning ends with a citation, "(Tomar, 2024)": it belongs to the Meaning, so it stays on the quote.
+- The translation's inline DharmaWiki link on “Chitta” is dropped, its word kept, and listed on the passage (ticket 12, from ticket 09's note).
 
 ### /knowyourvaluesahimsanon-violenceprofiling/ (Know Your Values: Ahimsa (Non-Violence) Profiling)
 
@@ -192,6 +195,7 @@ Ticket 04 of [content v1](../spec.md). Every verse the 16 description pages quot
 
 - The English line under each verse has no label. It is stored as the translation, flagged for the Research editor, so these quotes name `karta-2` and have no Meaning.
 - The verse numbers (18-23 to 18-25) are printed only after each verse.
+- In the Concept (`karta`, ticket 11), the three verses aren't its `verses`: they sit in its section “Bhagavad Gita – Types of Karta”, each inside the term block of the type of doer the page sets it under (sāttvika, rājasa and tāmasa kartā), as ticket 11 asked. Their order, translations and Meanings are as above.
 
 ### /triguna/ (Triguna)
 
@@ -212,6 +216,7 @@ Ticket 04 of [content v1](../spec.md). Every verse the 16 description pages quot
 - 14.6 to 14.13: the English lines have no label; stored as translations, flagged. The quotation marks around 14.9 to 14.13's are left out. Their headings name no work; stored under the Bhagavad Gītā, whose chapter 14 the page names, flagged.
 - 14.9 sits after the High, Moderate and Low Characteristics table, which is held back with the Questionnaire. The verse and its translation interpret no score, so they are kept.
 - Suśruta Saṃhitā 4.35: no translation and no Meaning, flagged. The page numbers it "(Sush Samh 4.35)" and lists "Sushruta Samhita (Sharirasthanam Adhyayam 4 Sutram 35)" in its Online Resources; the locator is 4.35, and a flag asks how to name its section.
+- In the Concept (`triguna`, ticket 11), 14.5 to 14.9 all sit in its section “Bhagavad Gita – Gunatraya Vibhaga (Chapter 14)”, in this order. The headings “Sattva”, “Rajas” and “Tamas” head one verse each and nothing else, so they are dropped (listed), and “Triguna Profile Questionnaire” belongs to the Questionnaire, so 14.9 follows 14.8. The table's rows 6 to 9 sit in the sections it names.
 
 ### /atman/, /jiva/, /jagat/ (posts)
 
@@ -237,7 +242,7 @@ Attributed to "Patanjali" · Sanskrit · locator label "Sutra" · ASCII "Yoga Su
 | `yoga-sutra/1.22` | /momentumofspiritualpractice/ | `momentumofspiritualpractice` | Work not named; flagged. |
 | `yoga-sutra/1.30` | /vikshepa/, /knowyourmind/ | `vikshepa` | Relabelled on /vikshepa/, flagged; /knowyourmind/'s form listed. |
 | `yoga-sutra/1.31` | /upavikshepaprofiling/ | `upavikshepaprofiling` | Work not named; flagged. |
-| `yoga-sutra/1.33` | /brahmavihara/ | `brahmavihara` | No transliteration; flagged. |
+| `yoga-sutra/1.33` | /brahmavihara/ | `brahmavihara` | No transliteration; flagged. Its translation's DharmaWiki link on “Chitta” dropped (listed). |
 | `yoga-sutra/2.3` | /panchkleshavikaarprofiling/ | `panchkleshavikaarprofiling` | Work not named; flagged. |
 | `yoga-sutra/2.5` | /panchkleshavikaarprofiling/ | `panchkleshavikaarprofiling` | Work not named; flagged. |
 | `yoga-sutra/2.7` | /panchkleshavikaarprofiling/ | `panchkleshavikaarprofiling` | Work not named; flagged. |
