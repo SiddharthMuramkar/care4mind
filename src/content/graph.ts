@@ -4,7 +4,8 @@
  * It is built once per source (a memoised promise) and refuses a broken link: a dangling id
  * throws, naming the record, the field and the missing id, so a broken link can't build. It also
  * holds what is computed rather than stored: the reverse links ("cited by", "quoted in", the
- * Concepts per topic and per work) and each record's in-text citations.
+ * Concepts per topic and per work), each record's in-text citations, and the facts that relate
+ * one Concept to another (D06).
  */
 import { stripDiacritics } from '@/lib/sanskrit'
 
@@ -23,6 +24,8 @@ import {
   type Target,
 } from './schema'
 import { localSource, type ContentSource } from './source'
+import type { RelationKind } from './types'
+import { displayName, passageLabel, referenceLabel } from './views/names'
 
 /** A record named by its kind and id (ids are unique within a kind, not across kinds). */
 export interface RecordKey {
@@ -44,6 +47,17 @@ export interface Citation {
   reference?: string
 }
 
+/** One fact that relates a Concept to another. */
+export interface Relation {
+  /** The other Concept. */
+  concept: Slug
+  kind: RelationKind
+  /** The shared passage, work, Reference or topic, by its id. */
+  via: string
+  /** The fact, as a reader sees it: "Both quote Yoga Sūtra 2.30". */
+  reason: string
+}
+
 export interface ContentGraph {
   /** Every record of a kind, in the source's order. */
   records<K extends ContentKind>(kind: K): readonly RecordOf<K>[]
@@ -58,6 +72,12 @@ export interface ContentGraph {
   conceptsQuotingWork(work: Slug): readonly Slug[]
   /** The in-text citations in a Concept, or in a topic's introduction, in reading order. */
   citations(kind: 'concept' | 'topic', id: string): readonly Citation[]
+  /**
+   * Every fact relating a Concept to another (D06), by the other Concept in source order, then
+   * by kind, then in the Concept's own order: shared passages, then works it quotes from with no
+   * passage in common, then rarely cited References, then topics.
+   */
+  related(concept: Slug): readonly Relation[]
 }
 
 /** Thrown when a record names an id that doesn't exist, as the kind its field links to. */
@@ -316,6 +336,90 @@ function citationsIn(texts: readonly Inline[], references: readonly ReferenceRec
   return [...found.values()]
 }
 
+/**
+ * A Reference relates the Concepts citing it only while it is rarely cited: by at most this many
+ * Concepts (D06). A source most pages cite would relate everything to everything.
+ */
+const RARELY_CITED = 3
+
+/** Tomar (2024) never relates Concepts (D06): it is the handbook nearly every page cites. */
+const NEVER_RELATES: ReadonlySet<string> = new Set(['tomar-2024'])
+
+/** What a Concept may share with another, each in the Concept's own order. */
+interface Shared {
+  slug: Slug
+  passages: readonly string[]
+  works: readonly Slug[]
+  references: readonly string[]
+  topics: readonly Slug[]
+}
+
+/** The items of one list that another holds too, in the first list's order. */
+const inBoth = <T>(mine: readonly T[], theirs: readonly T[]) =>
+  mine.filter((item) => theirs.includes(item))
+
+/** Every fact relating each Concept to each other one (D06), by Concept slug. */
+function relationsOf(
+  concepts: readonly RecordOf<'concept'>[],
+  index: Index,
+  citedBy: ReadonlyMap<string, readonly RecordKey[]>,
+): Map<Slug, Relation[]> {
+  const rare = (reference: string) =>
+    !NEVER_RELATES.has(reference) &&
+    (citedBy.get(reference) ?? []).filter((key) => key.kind === 'concept').length <= RARELY_CITED
+  const workOf = (passage: string) => lookup(index, 'passage', passage)?.work
+  const shared = concepts.map((concept): Shared => {
+    const passages = [...new Set(quotesOf(concept).map((quote) => quote.passage))]
+    return {
+      slug: concept.slug,
+      passages,
+      works: [...new Set(passages.flatMap((passage) => workOf(passage) ?? []))],
+      references: [...new Set(concept.references)].filter(rare),
+      topics: [concept.topics.primary, ...(concept.topics.also ?? [])],
+    }
+  })
+
+  const reasons = {
+    passage: (id: string) => {
+      const passage = lookup(index, 'passage', id)
+      const work = passage && lookup(index, 'work', passage.work)
+      return `Both quote ${passage && work ? passageLabel(passage, work) : id}`
+    },
+    work: (slug: string) => {
+      const work = lookup(index, 'work', slug)
+      return `Both quote the ${work ? displayName({ term: work.title }) : slug}`
+    },
+    reference: (id: string) => {
+      const reference = lookup(index, 'reference', id)
+      return `Both cite ${reference ? referenceLabel(reference) : id}`
+    },
+    topic: (slug: string) =>
+      `Both are in the topic “${lookup(index, 'topic', slug)?.name.english ?? slug}”`,
+  } satisfies Record<RelationKind, (via: string) => string>
+
+  const related = new Map<Slug, Relation[]>()
+  for (const mine of shared) {
+    const relations: Relation[] = []
+    for (const theirs of shared) {
+      if (theirs === mine) continue
+      const passages = inBoth(mine.passages, theirs.passages)
+      // A shared passage already says both quote its work: the work counts only without one.
+      const quotedTogether = new Set(passages.map(workOf))
+      const facts: [RelationKind, readonly string[]][] = [
+        ['passage', passages],
+        ['work', inBoth(mine.works, theirs.works).filter((work) => !quotedTogether.has(work))],
+        ['reference', inBoth(mine.references, theirs.references)],
+        ['topic', inBoth(mine.topics, theirs.topics)],
+      ]
+      for (const [kind, vias] of facts)
+        for (const via of vias)
+          relations.push({ concept: theirs.slug, kind, via, reason: reasons[kind](via) })
+    }
+    related.set(mine.slug, relations)
+  }
+  return related
+}
+
 /** Builds the graph from a source, refusing duplicate and dangling ids. */
 export async function buildGraph(source: ContentSource): Promise<ContentGraph> {
   const byKind = new Map<ContentKind, readonly ContentRecord[]>(
@@ -403,6 +507,8 @@ export async function buildGraph(source: ContentSource): Promise<ContentGraph> {
     citations.set(`topic/${topic.slug}`, citationsIn(textsIn(topic.intro.sections), own))
   }
 
+  const related = relationsOf(recordsOf('concept'), index, citedBy)
+
   return {
     records: recordsOf,
     record: (kind, id) => lookup(index, kind, id),
@@ -411,6 +517,7 @@ export async function buildGraph(source: ContentSource): Promise<ContentGraph> {
     conceptsInTopic: (topic) => inTopic.get(topic) ?? { primary: [], also: [] },
     conceptsQuotingWork: (work) => quotingWork.get(work) ?? [],
     citations: (kind, id) => citations.get(`${kind}/${id}`) ?? [],
+    related: (concept) => related.get(concept) ?? [],
   }
 }
 
