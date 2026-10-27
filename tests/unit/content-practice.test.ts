@@ -1,6 +1,6 @@
 import { beforeAll, describe, expect, it } from 'vitest'
 
-import { concepts, questionnaires } from '@/content'
+import { concepts, questionnaires, works } from '@/content'
 import { contentGraph } from '@/content/graph'
 import type {
   Block,
@@ -87,7 +87,37 @@ const MOMENTUM: Page = {
   unresolved: [],
 }
 
-const PAGES: Page[] = [FIVE_STEPS, MOMENTUM]
+const SPIRITUAL: Page = {
+  slug: 'spiritual-practitioner',
+  url: 'https://care4mind.org/spiritualpractitionerprofiling/',
+  title: 'Spiritual Practitioner Profiling',
+  questionnaire: 'Spiritual Practitioner Profile',
+  candidateSource: 'tomar-2024',
+  verses: [
+    ['sadhana-panchakam/1', 'spiritualpractitionerprofiling'],
+    ['sadhana-panchakam/2', 'spiritualpractitionerprofiling'],
+    ['sadhana-panchakam/3', 'spiritualpractitionerprofiling'],
+    ['sadhana-panchakam/4', 'spiritualpractitionerprofiling'],
+    ['sadhana-panchakam/5', 'spiritualpractitionerprofiling'],
+  ],
+  references: [
+    'choi-2020',
+    'ford-2023',
+    'ivtzan-jegatheeswaran-2015',
+    'kaufman-2022',
+    'malviya-greenham-2025',
+    'padigapati-chandraiah-2020',
+    'park-2011',
+    'sekagya-2024',
+    'shlokam-2020-sadhana-panchakam',
+    'tamil-siddhas',
+    'tomar-2024',
+    'warber-2015',
+  ],
+  unresolved: ['Inbadas, 2017'],
+}
+
+const PAGES: Page[] = [FIVE_STEPS, MOMENTUM, SPIRITUAL]
 
 let conceptRecords: readonly ConceptRecord[] = []
 let questionnaireRecords: readonly QuestionnaireRecord[] = []
@@ -180,11 +210,17 @@ describe('the practice Concepts', () => {
     expect(offenders).toEqual([])
   })
 
-  it('name Five Steps of Perfection by its English title, flagged as having no Sanskrit headword', () => {
-    const concept = conceptOf(FIVE_STEPS.slug)
-    expect(concept?.name).toEqual({ english: 'Five Steps of Perfection' })
-    expect(notesFor(concept, 'research-editor').join(' ')).toMatch(/no Sanskrit headword/)
-  })
+  it.each([
+    { slug: FIVE_STEPS.slug, english: 'Five Steps of Perfection' },
+    { slug: SPIRITUAL.slug, english: 'Spiritual Practitioner' },
+  ])(
+    'name $slug by its English title, flagged as having no Sanskrit headword',
+    ({ slug, english }) => {
+      const concept = conceptOf(slug)
+      expect(concept?.name).toEqual({ english })
+      expect(notesFor(concept, 'research-editor').join(' ')).toMatch(/no Sanskrit headword/)
+    },
+  )
 
   it('keep the five steps as term blocks, named from the page’s Yoga Sūtra 1.20', () => {
     const concept = conceptOf(FIVE_STEPS.slug)
@@ -244,6 +280,22 @@ describe('the practice Concepts', () => {
       expect(tables[0]?.rows).toHaveLength(rows)
     },
   )
+
+  it('mark Spiritual Practitioner’s applications and comparison sections', () => {
+    const roles = (conceptOf(SPIRITUAL.slug)?.sections ?? []).flatMap(({ id, role }) =>
+      role ? [[id, role]] : [],
+    )
+    expect(roles).toEqual([
+      ['applications', 'applications'],
+      ['indian-vs-western-views', 'comparison'],
+    ])
+  })
+
+  it('quote the Sādhana Pañcakam verses under the work the page attributes to Adi Sankaracharya', async () => {
+    const view = await concepts.get(SPIRITUAL.slug)
+    expect(view?.linked.works.map(({ slug }) => slug)).toEqual(['sadhana-panchakam'])
+    expect((await works.get('sadhana-panchakam'))?.attribution).toBe('Adi Sankaracharya')
+  })
 
   it('drop the stray file name the page left in a table cell, and list it', () => {
     const concept = conceptOf(MOMENTUM.slug)
