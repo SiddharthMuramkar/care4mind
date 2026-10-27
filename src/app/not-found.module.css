@@ -14,9 +14,11 @@
   max-width: 16ch;
 }
 
-.fleuron {
-  width: min(10rem, 50%);
-  color: var(--color-highlight);
+/* A small kolam that draws itself as the page opens: a wrong turn is still part of the site. */
+.kolam {
+  width: min(8rem, 50%);
+  height: auto;
+  margin-block: 0.5rem;
 }
 
 .text {

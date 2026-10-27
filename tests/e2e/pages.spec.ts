@@ -1,6 +1,7 @@
 import { expect, test } from '@playwright/test'
 
 import { expectNoAxeViolations } from './axe'
+import { animationsStartedOn, isDrawing, recordAnimationStarts } from './drawings'
 import { MISSING, PAGES } from './routes'
 
 const noSidewaysScroll = () =>
@@ -44,6 +45,22 @@ test.describe('404 page', () => {
     await expect(page.getByRole('link', { name: 'Go to the homepage' })).toBeVisible()
     expect(await page.evaluate(noSidewaysScroll)).toBeLessThanOrEqual(0)
     await expectNoAxeViolations(page)
+  })
+
+  test('draws a small kolam on load, once, which ends complete and is silent', async ({ page }) => {
+    await recordAnimationStarts(page)
+    await page.goto(MISSING)
+    const kolam = page.getByRole('main').locator('svg')
+    await expect(kolam).toHaveAttribute('aria-hidden', 'true')
+    const line = kolam.locator('path')
+    await expect(line, 'one unbroken line').toHaveCount(1)
+    await expect.poll(() => isDrawing(line)).toBe(false)
+    await expect(line).toHaveCSS('stroke-dashoffset', '0px')
+    expect(await animationsStartedOn(line)).toEqual([
+      { byScroll: false, duration: expect.closeTo(1600, -3) },
+    ])
+    const box = await kolam.boundingBox()
+    expect(box?.width, 'a small one').toBeLessThanOrEqual(200)
   })
 })
 

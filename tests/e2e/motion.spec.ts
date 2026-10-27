@@ -4,7 +4,7 @@ import { frameKolam, openingFolio, unfinishedDrawings } from './drawings'
 import { inPageTransitions, pageTurns, prefetched, recordPageTurns } from './page-turns'
 import { inkSpreadsOn, recordInkSpreads } from './presses'
 import { READING_PAGES, readingThread, readTo } from './reading'
-import { PAGES } from './routes'
+import { MISSING, PAGES } from './routes'
 import { scrollPath, travel } from './scrolling'
 import { knobPath, recordScriptedAnimations } from './switches'
 
@@ -51,6 +51,12 @@ for (const { path, name } of PAGES) {
     expect(await unfinishedDrawings(page)).toEqual([])
   })
 }
+
+test('the 404 page shows its kolam finished, with reduced motion', async ({ page }) => {
+  await page.goto(MISSING)
+  expect(await unfinishedDrawings(page)).toEqual([])
+  expect(await movingAnimations(page)).toEqual([])
+})
 
 for (const { from, name } of [
   { from: 'main', name: 'Explore Concepts' },
