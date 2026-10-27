@@ -343,6 +343,7 @@ export default defineConcept({
     'tomar-2024',
     'swamij-1-30',
   ],
+  questionnaire: 'vikshepa',
   reviewStatus: 'drafted-not-reviewed',
   provenance: {
     sources: [{ url: 'https://care4mind.org/vikshepa/', retrieved: '2026-10-27' }],
