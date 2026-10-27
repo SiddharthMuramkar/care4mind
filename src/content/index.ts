@@ -1,41 +1,35 @@
 /**
- * The content module: the only way pages read content.
+ * The content module's public interface: the only way pages read content (`@/content`).
  *
- * Today it reads typed files in this folder. When the Architecture review picks
- * a content back end, these functions are reimplemented against it and no page
- * changes. That is why they are async already.
+ * Under it, one content source supplies records (today the generated registry of the files in
+ * `data/`; later a CMS) and the graph resolves every link between them once. Ticket 13 adds the
+ * collections, views and site derivations here. Until the front-end-site spec moves the pages,
+ * the foundation's functions and types come from the legacy adapter, unchanged.
  */
 import { stripDiacritics } from '@/lib/sanskrit'
 
-import { vikshepa } from './concepts/vikshepa'
-import { homepage } from './home'
-import { karmayogaScale } from './questionnaires/karmayoga-scale'
-import type { Concept, Homepage, Questionnaire, SanskritTerm } from './types'
+import type { SanskritTerm } from './legacy'
 
-export type * from './types'
-
-const concepts: readonly Concept[] = [vikshepa]
-const questionnaires: readonly Questionnaire[] = [karmayogaScale]
-
-export async function getConcept(slug: string): Promise<Concept | null> {
-  return concepts.find((concept) => concept.slug === slug) ?? null
-}
-
-export async function listConcepts(): Promise<readonly Concept[]> {
-  return concepts
-}
-
-export async function getQuestionnaire(slug: string): Promise<Questionnaire | null> {
-  return questionnaires.find((questionnaire) => questionnaire.slug === slug) ?? null
-}
-
-export async function listQuestionnaires(): Promise<readonly Questionnaire[]> {
-  return questionnaires
-}
-
-export async function getHomepage(): Promise<Homepage> {
-  return homepage
-}
+export type {
+  Block,
+  Comparison,
+  Concept,
+  Homepage,
+  Provenance,
+  Questionnaire,
+  Reference,
+  ReviewStatus,
+  SanskritTerm,
+  Section,
+  Shloka,
+} from './legacy'
+export {
+  getConcept,
+  getHomepage,
+  getQuestionnaire,
+  listConcepts,
+  listQuestionnaires,
+} from './legacy'
 
 /**
  * Every plain-keyboard spelling of a term: its IAST with diacritics removed
