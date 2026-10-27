@@ -6,6 +6,7 @@ export default defineGlossaryEntry({
   name: { ascii: 'Chitta Bhumis', devanagari: 'चित्तभूमयः' },
   definition: 'The different states of mind in Yogic psychology.',
   url: 'https://dharmawiki.org/index.php/Chitta_Bhumis_(%E0%A4%9A%E0%A4%BF%E0%A4%A4%E0%A5%8D%E0%A4%A4%E0%A4%AD%E0%A5%82%E0%A4%AE%E0%A4%AF%E0%A4%83)',
+  concept: 'chittabhumi',
   provenance: {
     sources: [{ url: 'https://care4mind.org/concepts/', retrieved: '2026-10-27' }],
     edits: [
