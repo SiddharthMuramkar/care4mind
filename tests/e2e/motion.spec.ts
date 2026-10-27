@@ -1,7 +1,8 @@
 import { expect, type Page, test } from '@playwright/test'
 
-import { unfinishedDrawings } from './drawings'
+import { frameKolam, openingFolio, unfinishedDrawings } from './drawings'
 import { PAGES } from './routes'
+import { travel } from './scrolling'
 
 /** Animations still moving: anything running longer than the 1 ms the reduced-motion rule allows. */
 async function movingAnimations(page: Page) {
@@ -46,6 +47,13 @@ for (const { path, name } of PAGES) {
     expect(await unfinishedDrawings(page)).toEqual([])
   })
 }
+
+test('the opening kolam scrolls with the page, with reduced motion', async ({ page }) => {
+  await page.goto('/')
+  const [kolam, folio] = await travel(page, 240, await frameKolam(page), openingFolio(page))
+  expect(folio).toBe(240)
+  expect(kolam).toBe(folio)
+})
 
 // The reduce rule shortens any animation to 1 ms, so listen for animations starting at all.
 test('pointing at or focusing the logo starts no drawing, with reduced motion', async ({

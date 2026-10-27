@@ -1,15 +1,10 @@
-import { expect, type Locator, type Page, test } from '@playwright/test'
+import { expect, type Page, test } from '@playwright/test'
 
+import { isDrawing } from './drawings'
 import { MISSING, PAGES } from './routes'
 
 const homeLink = (page: Page) =>
   page.getByRole('banner').getByRole('link', { name: 'Care4Mind home', exact: true })
-
-/** Whether an animation is drawing this line right now. */
-const isDrawing = (line: Locator) =>
-  line.evaluate((element) =>
-    element.getAnimations().some((animation) => animation.playState === 'running'),
-  )
 
 for (const { path, name } of [...PAGES, { path: MISSING, name: '404 page' }]) {
   test(`${name} shows the kolam logo, still named "Care4Mind home"`, async ({ page }) => {

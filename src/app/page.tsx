@@ -3,7 +3,7 @@ import Link from 'next/link'
 import { ConceptCard } from '@/components/ConceptCard'
 import { Fleuron } from '@/components/Fleuron'
 import { Folio } from '@/components/Folio'
-import { OrnamentRule } from '@/components/OrnamentRule'
+import { Kolam } from '@/components/Kolam'
 import { QuestionnaireCard } from '@/components/QuestionnaireCard'
 import { getHomepage, listConcepts, listQuestionnaires } from '@/content'
 import { capitalise, toDevanagariDigits } from '@/lib/text'
@@ -20,28 +20,33 @@ export default async function HomePage() {
   return (
     <main id="main" className={styles.main}>
       <section className={styles.hero} aria-labelledby="home-title">
-        <Folio className={styles.heroFolio}>
-          <p className={styles.kicker}>A portal for Indian psychology</p>
-          <h1 id="home-title" className={styles.heroTitle}>
-            <span lang="sa-Deva" className={styles.heroDeva}>
-              {home.shloka.devanagari}
-            </span>
-            <span lang="sa-Latn" className={styles.heroIast}>
-              {home.shloka.iast}
-            </span>
-          </h1>
-          <p className={styles.translation}>{home.shloka.translation}</p>
-          <Fleuron draw className={styles.heroFleuron} />
-          <p className={styles.intro}>{home.intro}</p>
-          <p className={styles.ctas}>
-            <a href="#concepts" className={styles.ctaPrimary}>
-              Explore Concepts
-            </a>
-            <a href="#questionnaires" className={styles.ctaSecondary}>
-              Questionnaires
-            </a>
-          </p>
-        </Folio>
+        <div className={styles.stage}>
+          <div className={styles.frame}>
+            <Kolam columns={9} rows={7} behaviour="draw-on-load" className={styles.frameKolam} />
+          </div>
+          <Folio className={styles.heroFolio}>
+            <p className={styles.kicker}>A portal for Indian psychology</p>
+            <h1 id="home-title" className={styles.heroTitle}>
+              <span lang="sa-Deva" className={styles.heroDeva}>
+                {home.shloka.devanagari}
+              </span>
+              <span lang="sa-Latn" className={styles.heroIast}>
+                {home.shloka.iast}
+              </span>
+            </h1>
+            <p className={styles.translation}>{home.shloka.translation}</p>
+            <Fleuron className={styles.heroFleuron} />
+            <p className={styles.intro}>{home.intro}</p>
+            <p className={styles.ctas}>
+              <a href="#concepts" className={styles.ctaPrimary}>
+                Explore Concepts
+              </a>
+              <a href="#questionnaires" className={styles.ctaSecondary}>
+                Questionnaires
+              </a>
+            </p>
+          </Folio>
+        </div>
       </section>
 
       <section id="contents" className={styles.section} aria-labelledby="contents-title">
@@ -52,6 +57,7 @@ export default async function HomePage() {
           {home.areas.map((area, index) => (
             <li key={area.title} className={styles.entry}>
               <span lang="sa-Deva" className={styles.entryNumber} aria-hidden>
+                <Kolam columns={1} rows={1} behaviour="draw-on-scroll" className={styles.knot} />
                 {toDevanagariDigits(String(index + 1))}
               </span>
               <span className={styles.entryTitle}>
@@ -65,7 +71,7 @@ export default async function HomePage() {
         </ol>
       </section>
 
-      <OrnamentRule className={styles.rule} />
+      <Kolam columns={9} rows={2} behaviour="draw-on-scroll" className={styles.band} />
 
       <section id="concepts" className={styles.section} aria-labelledby="concepts-title">
         <h2 id="concepts-title" className={styles.sectionTitle}>
@@ -90,7 +96,7 @@ export default async function HomePage() {
         </ul>
       </section>
 
-      <OrnamentRule className={styles.rule} />
+      <Kolam columns={9} rows={2} behaviour="draw-on-scroll" className={styles.band} />
 
       <section
         id="questionnaires"

@@ -2,29 +2,3 @@
   display: block;
   overflow: visible;
 }
-
-/* The homepage's one signature moment: the ornament is drawn in, stroke by stroke, once. */
-@keyframes draw {
-  from {
-    stroke-dashoffset: 1;
-  }
-  to {
-    stroke-dashoffset: 0;
-  }
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .draw path {
-    stroke-dasharray: 1;
-    animation: draw 900ms var(--ease-in-out) both;
-  }
-
-  .draw path:nth-child(2),
-  .draw path:nth-child(3) {
-    animation-delay: 250ms;
-  }
-
-  .draw path:nth-child(4) {
-    animation-delay: 500ms;
-  }
-}

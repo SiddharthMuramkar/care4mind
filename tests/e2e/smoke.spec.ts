@@ -1,7 +1,8 @@
 import { expect, test } from '@playwright/test'
 
-import { unfinishedDrawings } from './drawings'
+import { frameKolam, openingFolio, unfinishedDrawings } from './drawings'
 import { PAGES } from './routes'
+import { travel } from './scrolling'
 
 // Firefox and WebKit: each page renders, without errors or sideways scroll.
 for (const { path, name } of PAGES) {
@@ -26,3 +27,14 @@ for (const { path, name } of PAGES) {
     await expect.poll(() => unfinishedDrawings(page)).toEqual([])
   })
 }
+
+test('the opening kolam scrolls with the page where scroll timelines are missing', async ({
+  page,
+}) => {
+  await page.goto('/')
+  const scrollTimelines = await page.evaluate(() => CSS.supports('animation-timeline: scroll()'))
+  test.skip(scrollTimelines, 'this browser drifts the kolam on a scroll timeline')
+  const [kolam, folio] = await travel(page, 240, await frameKolam(page), openingFolio(page))
+  expect(folio).toBe(240)
+  expect(kolam).toBe(folio)
+})

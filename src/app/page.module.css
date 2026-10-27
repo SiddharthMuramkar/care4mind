@@ -3,9 +3,11 @@
   gap: clamp(3rem, 8vw, 5rem);
 }
 
-/* Hero: a folio page floating on indigo ink. */
+/* Hero: a folio page floating on indigo ink, set down on a kolam drawn round it. */
 .hero {
-  padding: clamp(1.5rem, 5vw, 3rem) clamp(1rem, 4vw, 3rem) 0;
+  padding: clamp(0.75rem, 2.5vw, 1.5rem) clamp(1rem, 4vw, 3rem) 0;
+  /* On a phone the kolam reaches past the screen's edges. */
+  overflow-x: clip;
   background: repeating-linear-gradient(
     0deg,
     transparent 0 31px,
@@ -13,10 +15,74 @@
   );
 }
 
-.heroFolio {
+.stage {
+  position: relative;
+  display: flow-root;
   max-width: 52rem;
   margin-inline: auto;
+}
+
+/*
+ * The kolam (9 dots across) is a fifth wider than the folio, so the folio
+ * covers all but its outer dots and loops, which show round its top and sides.
+ * Below the folio's foot it is cut off.
+ */
+.frame {
+  position: absolute;
+  inset: 0 -10%;
+  overflow: clip;
+  pointer-events: none;
+}
+
+/* The kolam scales with the folio, so its line is set thinner on wider screens: about 2–4.5 px. */
+.frameKolam {
+  width: 100%;
+  height: auto;
+  --kolam-line-width: 2.5px;
+}
+
+.heroFolio {
+  /* Room above the folio for the kolam's top row: a tenth of the folio's width. */
+  margin-top: 10%;
   text-align: center;
+}
+
+/*
+ * Parallax, on the root scroll timeline rather than a scroll listener: for the
+ * first screenful of scrolling the kolam moves at four fifths of the page's
+ * speed, so it seems to lie deeper. The still kolam is the default.
+ */
+@keyframes drift {
+  to {
+    transform: translateY(20vh);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: scroll()) {
+    .frameKolam {
+      animation: drift linear both;
+      animation-timeline: scroll(root);
+      animation-range: 0 100vh;
+    }
+  }
+}
+
+/* From tablet width there is room for the kolam's outer loops beside the folio. */
+@media (min-width: 40rem) {
+  .hero {
+    padding-inline: max(3rem, 7.5vw);
+  }
+
+  .frameKolam {
+    --kolam-line-width: 2px;
+  }
+}
+
+@media (min-width: 64rem) {
+  .frameKolam {
+    --kolam-line-width: 1.75px;
+  }
 }
 
 .kicker {
@@ -141,8 +207,10 @@
   font-size: 1.125rem;
 }
 
-.rule {
-  width: min(28rem, calc(100% - 2rem));
+/* A kolam band between sections, drawn in as it scrolls into view. */
+.band {
+  width: min(27rem, calc(100% - 2rem));
+  height: auto;
   margin-inline: auto;
 }
 
@@ -157,7 +225,7 @@
 
 .entry {
   display: grid;
-  grid-template-columns: 2.25rem auto 1fr auto;
+  grid-template-columns: 2.75rem auto 1fr auto;
   grid-template-areas:
     'number title leader status'
     '. text text text';
@@ -168,8 +236,22 @@
 
 .entryNumber {
   grid-area: number;
+  position: relative;
+  text-align: center;
   color: var(--color-link);
   font-size: 1.375rem;
+}
+
+/* A kolam knot looped round each numeral, which stands where the knot's dot would be. */
+.knot {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 2.5rem;
+  height: auto;
+  translate: -50% -50%;
+  --kolam-line-width: 2.25px;
+  --color-kolam-dot: transparent;
 }
 
 .entryTitle {
@@ -232,7 +314,7 @@
 
 @media (max-width: 36rem) {
   .entry {
-    grid-template-columns: 2rem 1fr;
+    grid-template-columns: 2.75rem 1fr;
     grid-template-areas:
       'number title'
       '. status'
