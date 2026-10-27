@@ -1,5 +1,7 @@
 CLAUDE.md is a symlink to this file. Edit AGENTS.md only.
 
+Before creating or editing anything in `src/content/data/`, read `docs/agents/content-migration.md`, the content migration standard.
+
 ## Agent skills
 
 ### Issue tracker
