@@ -1,6 +1,6 @@
 import { beforeAll, describe, expect, it } from 'vitest'
 
-import { concepts, questionnaires, works } from '@/content'
+import { concepts, questionnaires, topics, works } from '@/content'
 import { contentGraph } from '@/content/graph'
 import type {
   Block,
@@ -117,7 +117,28 @@ const SPIRITUAL: Page = {
   unresolved: ['Inbadas, 2017'],
 }
 
-const PAGES: Page[] = [FIVE_STEPS, MOMENTUM, SPIRITUAL]
+const BRAHMA_VIHARA: Page = {
+  slug: 'brahma-vihara',
+  url: 'https://care4mind.org/brahmavihara/',
+  title: 'Brahma Vihara',
+  questionnaire: 'Brahma Vihara Profile',
+  candidateSource: 'tomar-2024',
+  verses: [['yoga-sutra/1.33', 'brahmavihara']],
+  references: [
+    'bhattacharjee-2016',
+    'chatterjee-2018',
+    'ford-2021',
+    'gilbert-2015',
+    'shlokam-2025',
+    'mandal-2024',
+    'sarkar-2019',
+    'tomar-2024',
+    'zeng-2015',
+  ],
+  unresolved: ['Gilbert & Choden, 2013', 'Mishra & Kumar, 2020', 'Bhattacharjee, 2024'],
+}
+
+const PAGES: Page[] = [FIVE_STEPS, MOMENTUM, SPIRITUAL, BRAHMA_VIHARA]
 
 let conceptRecords: readonly ConceptRecord[] = []
 let questionnaireRecords: readonly QuestionnaireRecord[] = []
@@ -208,6 +229,75 @@ describe('the practice Concepts', () => {
       /\bscor(?:e|es|ed|ing)\b|\b(?:high|moderate|low) indicators?\b/i.test(text),
     )
     expect(offenders).toEqual([])
+  })
+
+  it.each(PAGES)(
+    'drop every link from $slug’s text; its page links no DharmaWiki article of its own',
+    ({ slug }) => {
+      const concept = conceptOf(slug)
+      expect(concept).toBeDefined()
+      expect(contentStrings(concept).filter((text) => /https?:|dharmawiki/i.test(text))).toEqual([])
+      expect(concept?.external).toBeUndefined()
+    },
+  )
+
+  it('complete the practice topic with these four Concepts', async () => {
+    const practice = await topics.get('practice')
+    expect(practice?.concepts.map(({ slug }) => slug).sort()).toEqual(
+      PAGES.map(({ slug }) => slug).sort(),
+    )
+  })
+
+  it('name Brahma Vihara by its headword brahmavihāra, with the page’s spellings, flagged', () => {
+    const concept = conceptOf(BRAHMA_VIHARA.slug)
+    expect(concept?.name).toEqual({
+      term: { iast: 'brahmavihāra', ascii: ['Brahma Vihara', 'Brahmavihara'] },
+    })
+    const notes = notesFor(concept, 'research-editor').join(' ')
+    expect(notes).toContain('“brahmavihāra”')
+    expect(notes).toMatch(/no English gloss/)
+  })
+
+  it('keep Brahma Vihara’s four components as term blocks, named from its Yoga Sūtra 1.33', () => {
+    const concept = conceptOf(BRAHMA_VIHARA.slug)
+    const components = termsIn(concept?.sections)
+    expect(
+      components.map(({ id, term, gloss }) => [id, term.iast, term.devanagari, gloss]),
+    ).toEqual([
+      ['maitri', 'maitrī', 'मैत्री', 'Loving-kindness or Benevolence'],
+      ['karuna', 'karuṇā', 'करुणा', 'Compassion'],
+      ['mudita', 'muditā', 'मुदिता', 'Altruistic Joy'],
+      ['upeksa', 'upekṣā', 'उपेक्षा', 'Equanimity or Inner Balance'],
+    ])
+    expect(components.map(({ term }) => term.ascii[0])).toEqual([
+      'Maitra',
+      'Karuna',
+      'Mudita',
+      'Upeksha',
+    ])
+    // Split out of a compound, not printed on its own: listed and flagged.
+    const flagged = notesFor(concept, 'research-editor').join(' ')
+    for (const { term } of components) expect(flagged, term.iast).toContain(term.iast)
+  })
+
+  it('keep Brahma Vihara’s summative table, with a row for each component', () => {
+    const tables = tablesIn(conceptOf(BRAHMA_VIHARA.slug)?.sections)
+    expect(tables.map(({ id, caption, columns }) => ({ id, caption, columns }))).toEqual([
+      {
+        id: 'summative-table',
+        caption: 'Summative Table: Core Functions & Interpretations of Brahma Vihara Components',
+        columns: ['Component', 'Synonymous Term', 'Core Function', 'Interpretation'],
+      },
+    ])
+    expect(
+      tables[0]?.rows.map(({ head }) => (typeof head === 'object' ? head.term.iast : head)),
+    ).toEqual(['maitrī', 'karuṇā', 'muditā', 'upekṣā'])
+  })
+
+  it('list the inline DharmaWiki links dropped from Brahma Vihara’s text', () => {
+    const edits = conceptOf(BRAHMA_VIHARA.slug)?.provenance.edits.join(' ')
+    for (const word of ['Brahman', 'Vedanta', 'kilesas', 'maya'])
+      expect(edits, word).toContain(`“${word}”`)
   })
 
   it.each([
@@ -358,5 +448,10 @@ describe('their Questionnaires', () => {
     const notes = notesFor(questionnaireOf(FIVE_STEPS.slug), 'psychology-expert').join(' ')
     expect(notes).toMatch(/no published source/i)
     expect(notes).toMatch(/planning ticket 11/)
+  })
+
+  it('hold back Brahma Vihara’s line about section-wise scores too', () => {
+    const heldBack = questionnaireOf(BRAHMA_VIHARA.slug)?.heldBack ?? []
+    expect(heldBack.some(({ what }) => /section-wise scores/i.test(what))).toBe(true)
   })
 })
