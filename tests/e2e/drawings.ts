@@ -48,6 +48,8 @@ interface Start {
   /** How long it runs, in ms. Scroll-driven animations have no duration in time. */
   duration: number | null
   byScroll: boolean
+  /** The property a transition changes; empty for an animation. */
+  property: string
 }
 
 /** Note every CSS animation and transition that starts on the page, from before its first paint. */
@@ -69,6 +71,7 @@ export function recordAnimationStarts(page: Page) {
         target,
         duration: typeof duration === 'number' ? duration : null,
         byScroll: Boolean(animation && !(animation.timeline instanceof DocumentTimeline)),
+        property: 'propertyName' in event ? event.propertyName : '',
       })
     }
     document.addEventListener('animationstart', record, true)
@@ -82,11 +85,27 @@ export function recordAnimationStarts(page: Page) {
  * Call recordAnimationStarts before loading the page.
  */
 export function animationsStartedOn(locator: Locator, { orAncestors = false } = {}) {
+  return startsOn(locator, orAncestors).then((starts) =>
+    starts.map(({ duration, byScroll }) => ({ duration, byScroll })),
+  )
+}
+
+/**
+ * The properties that have transitioned on this element or its pseudo-elements
+ * since the page began, each once. Call recordAnimationStarts before loading the page.
+ */
+export function transitionedOn(locator: Locator) {
+  return startsOn(locator, false).then((starts) => [
+    ...new Set(starts.map(({ property }) => property).filter(Boolean)),
+  ])
+}
+
+function startsOn(locator: Locator, orAncestors: boolean) {
   return locator.evaluate(
     (element, orAncestors) =>
       (window as unknown as { __animationStarts: Start[] }).__animationStarts
         .filter(({ target }) => target === element || (orAncestors && target.contains(element)))
-        .map(({ duration, byScroll }) => ({ duration, byScroll })),
+        .map(({ duration, byScroll, property }) => ({ duration, byScroll, property })),
     orAncestors,
   )
 }

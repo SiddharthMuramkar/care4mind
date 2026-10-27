@@ -27,6 +27,7 @@
 }
 
 .link {
+  position: relative;
   display: inline-flex;
   align-items: center;
   min-height: 48px;
@@ -35,13 +36,25 @@
   letter-spacing: 0.12em;
   font-size: 1.1875rem;
   text-decoration: none;
-  background: linear-gradient(currentColor, currentColor) 0 calc(100% - 12px) / 0 1px no-repeat;
-  transition:
-    color var(--duration-quick) var(--ease-out),
-    background-size var(--duration-quick) var(--ease-out);
 }
 
-.link:hover {
+/* On hover and focus a line draws in under the label (short of its last letter-space), by transform. */
+.link::after {
+  content: '';
+  position: absolute;
+  inset-inline: 0 0.12em;
+  top: calc(50% + 0.6em);
+  height: 1px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform var(--duration-quick) var(--ease-out);
+}
+
+.link:is(:hover, :focus-visible) {
   color: var(--color-ink);
-  background-size: 100% 1px;
+}
+
+.link:is(:hover, :focus-visible)::after {
+  transform: none;
 }

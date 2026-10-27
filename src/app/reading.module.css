@@ -24,16 +24,6 @@
   margin: 0;
 }
 
-.article a {
-  color: var(--color-surface-link);
-  text-decoration-thickness: 0.06em;
-  transition: text-decoration-thickness var(--duration-quick) var(--ease-out);
-}
-
-.article a:hover {
-  text-decoration-thickness: 0.14em;
-}
-
 .titlePage {
   display: grid;
   justify-items: center;

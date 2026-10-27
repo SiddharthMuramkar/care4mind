@@ -6,7 +6,7 @@
   font-style: italic;
 }
 
-.link {
-  color: var(--color-link);
+/* A link in running text, so it takes the site's text-link style (globals.css). */
+.citation a {
   white-space: nowrap;
 }

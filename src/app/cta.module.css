@@ -4,6 +4,7 @@
  */
 .primary,
 .secondary {
+  position: relative;
   display: inline-flex;
   align-items: center;
   min-height: 48px;
@@ -15,6 +16,24 @@
   transition:
     transform var(--duration-instant) var(--ease-press),
     box-shadow var(--duration-instant) var(--ease-press);
+}
+
+/* On hover and focus a line draws in under the label (short of its last letter-space), by transform. */
+.primary::after,
+.secondary::after {
+  content: '';
+  position: absolute;
+  inset-inline: 1.5rem calc(1.5rem + 0.12em);
+  top: calc(50% + 0.6em);
+  height: 1px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform var(--duration-quick) var(--ease-out);
+}
+
+:is(.primary, .secondary):is(:hover, :focus-visible)::after {
+  transform: none;
 }
 
 .primary {

@@ -89,6 +89,25 @@
     text-decoration-thickness: 0.06em;
   }
 
+  /*
+   * Links in running text stay underlined (WCAG 1.4.1), and on hover or focus
+   * an accent underline draws in over that line. Only the one link under the
+   * pointer or focus repaints, so this may animate the background size. A
+   * link that a component styles carries a class, and draws its own line or none.
+   */
+  a:not([class]) {
+    text-decoration-line: underline;
+    background: linear-gradient(var(--color-highlight), var(--color-highlight)) 0
+      calc(50% + 0.62em) / 0 0.12em no-repeat;
+    transition: background-size var(--duration-quick) var(--ease-out);
+    /* Laid out as a block (a grid or flex item), it still keeps to its text, and so does the accent. */
+    width: fit-content;
+  }
+
+  a:not([class]):is(:hover, :focus-visible) {
+    background-size: 100% 0.12em;
+  }
+
   :focus-visible {
     outline: 3px solid var(--color-focus);
     outline-offset: 3px;

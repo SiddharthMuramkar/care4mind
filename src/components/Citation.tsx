@@ -22,11 +22,7 @@ export function Citation({ reference }: { reference: Reference }) {
       {reference.year ? <>({reference.year}). </> : null}
       <cite className={styles.title}>{reference.title}</cite>.{' '}
       {reference.publication ? <>{reference.publication}. </> : null}
-      {link ? (
-        <a href={link.href} className={styles.link}>
-          {link.label}
-        </a>
-      ) : null}
+      {link ? <a href={link.href}>{link.label}</a> : null}
     </span>
   )
 }
