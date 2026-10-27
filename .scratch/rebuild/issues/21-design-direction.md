@@ -3,7 +3,7 @@
 Type: prototype
 Mode: HITL
 Track: site
-Status: open
+Status: claimed
 Blocked by: 02, 06, 07
 Waits on: [Sample the current site: content shape, navigation and brand](02-current-site-sample.md), [Front-end interaction stack and quality checks](06-front-end-interaction-stack.md), [Typefaces for IAST and Devanagari](07-typefaces-iast-devanagari.md)
 Map: [Care4Mind.org rebuild](../map.md)
