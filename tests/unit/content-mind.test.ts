@@ -185,6 +185,14 @@ const conceptRecord = (slug: string) => conceptRecords.find((concept) => concept
 const questionnaireRecord = (slug: string) =>
   questionnaireRecords.find((questionnaire) => questionnaire.slug === slug)
 
+type TableView = Extract<BlockView, { kind: 'table' }>
+
+/** Every table in a list of blocks, those inside term blocks included, in reading order. */
+const tablesIn = (blocks: readonly BlockView[]): TableView[] =>
+  blocks.flatMap((block) =>
+    block.kind === 'table' ? [block] : block.kind === 'term' ? tablesIn(block.blocks) : [],
+  )
+
 describe('the mind topic', () => {
   it('holds the five mind Concepts as its own, vikṣepa’s among them', async () => {
     const mind = await topics.get('mind')
@@ -245,16 +253,10 @@ describe('the mind Concepts', () => {
   })
 
   it.each(MIND)('keeps $slug’s tables, each with its caption', async ({ slug, tables }) => {
-    const tablesIn = (blocks: readonly BlockView[]): BlockView[] =>
-      blocks.flatMap((block) =>
-        block.kind === 'table' ? [block] : block.kind === 'term' ? tablesIn(block.blocks) : [],
-      )
     const concept = await concepts.get(slug)
     const found = (concept?.sections ?? []).flatMap((section) => tablesIn(section.blocks))
     expect(found).toHaveLength(tables)
-    expect(found.filter((table) => table.kind === 'table' && table.caption.trim() === '')).toEqual(
-      [],
-    )
+    expect(found.filter(({ caption }) => caption.trim() === '')).toEqual([])
   })
 
   it.each(MIND)(
