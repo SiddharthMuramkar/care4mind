@@ -8,8 +8,9 @@ const loadFeatures = () => import('./motion-features').then((module) => module.d
 
 /**
  * Motion is the last layer of the site's motion stack, after CSS and
- * <ViewTransition>. Its default ignores the reduce-motion setting, so it is
- * switched to "user" here, once, for the whole site.
+ * <ViewTransition>. Wrap only the part that animates with it, so pages
+ * without it load no Motion at all. Its default ignores the reduce-motion
+ * setting, so it is switched to "user" here.
  */
 export function MotionProvider({ children }: { children: ReactNode }) {
   return (

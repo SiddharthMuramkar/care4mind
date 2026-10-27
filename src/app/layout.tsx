@@ -2,7 +2,6 @@ import type { Metadata, Viewport } from 'next'
 import type { ReactNode } from 'react'
 
 import { InkSpread } from '@/components/InkSpread'
-import { MotionProvider } from '@/components/MotionProvider'
 import { SiteFooter } from '@/components/SiteFooter'
 import { SiteHeader } from '@/components/SiteHeader'
 import { site } from '@/config/site'
@@ -42,11 +41,9 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <a href="#main" className="skip-link">
           Skip to content
         </a>
-        <MotionProvider>
-          <SiteHeader />
-          {children}
-          <SiteFooter />
-        </MotionProvider>
+        <SiteHeader />
+        {children}
+        <SiteFooter />
         <InkSpread />
       </body>
     </html>
