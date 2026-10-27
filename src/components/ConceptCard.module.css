@@ -1,0 +1,67 @@
+.card {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-areas:
+    'title deva'
+    'gloss gloss'
+    'summary summary'
+    'action action';
+  align-items: baseline;
+  gap: 0.5rem 1rem;
+  padding: var(--card-padding, 1.5rem);
+  background: var(--color-surface);
+  color: var(--color-surface-ink);
+  border-radius: var(--card-radius, 0);
+  --color-focus: var(--color-surface-focus);
+}
+
+.title {
+  grid-area: title;
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--card-title-size, 2.25rem);
+  line-height: 1.05;
+  font-weight: var(--card-title-weight, 600);
+}
+
+.deva {
+  grid-area: deva;
+  margin: 0;
+  font-size: var(--card-deva-size, 1.5rem);
+}
+
+.gloss {
+  grid-area: gloss;
+  margin: 0;
+  font-style: italic;
+  color: var(--color-surface-muted);
+}
+
+.summary {
+  grid-area: summary;
+  margin: 0;
+  max-width: 48ch;
+}
+
+.action {
+  grid-area: action;
+  margin-top: 0.5rem;
+}
+
+/* The action covers the whole card, so the card is one large target (WCAG 2.5.8). */
+.action :is(a, button)::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+}
+
+.action :is(a, button):focus-visible {
+  outline: none;
+}
+
+.action :is(a, button):focus-visible::after {
+  outline: 3px solid var(--color-surface-focus);
+  outline-offset: 3px;
+}

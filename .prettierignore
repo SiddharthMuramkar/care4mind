@@ -1,0 +1,10 @@
+.scratch/
+docs/
+pnpm-lock.yaml
+pnpm-workspace.yaml
+src/fonts/
+.next/
+playwright-report/
+test-results/
+.lighthouseci/
+*.md

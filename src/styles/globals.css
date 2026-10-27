@@ -1,0 +1,132 @@
+@import 'tailwindcss';
+
+/*
+ * Design tokens. Every colour, type step, duration and easing is declared once
+ * here; components use the generated utilities (bg-ground, text-ink, …) or the
+ * variables directly. Colour tokens are semantic, so each text/background pair
+ * in tests/unit/contrast.test.ts is checked for WCAG AA contrast.
+ */
+@theme {
+  --color-ground: #f6f4ee;
+  --color-ink: #1d1f24;
+  --color-ink-muted: #4a4f59;
+  --color-surface: #ffffff;
+  --color-surface-ink: #1d1f24;
+  --color-surface-muted: #4a4f59;
+  --color-accent: #1f5a8c;
+  --color-accent-ink: #ffffff;
+  --color-highlight: #f2c14e;
+  --color-highlight-ink: #1d1f24;
+  --color-link: #1f5a8c;
+  --color-line: #c9cbd1;
+  --color-focus: #1f5a8c;
+  --color-surface-focus: #1f5a8c;
+
+  --font-display: ui-serif, Georgia, 'Times New Roman', serif;
+  --font-text: ui-serif, Georgia, 'Times New Roman', serif;
+  --font-deva: 'Noto Serif Devanagari', 'Kohinoor Devanagari', 'Nirmala UI', serif;
+
+  --duration-instant: 100ms;
+  --duration-quick: 160ms;
+  --duration-move: 320ms;
+  --duration-slow: 400ms;
+
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --ease-press: cubic-bezier(0.3, 0, 0.2, 1);
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+    text-rendering: optimizeLegibility;
+    scroll-padding-top: 5rem;
+  }
+
+  body {
+    background: var(--color-ground);
+    color: var(--color-ink);
+    font-family: var(--font-text);
+    font-optical-sizing: auto;
+    font-kerning: normal;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Language of Parts (WCAG 3.1.2): Devanagari always gets its own face and a line height that won't jump when the web font swaps in. */
+  :lang(sa-Deva),
+  :lang(hi-Deva) {
+    font-family: var(--font-deva);
+    line-height: 1.75;
+    font-synthesis: none;
+  }
+
+  a {
+    color: var(--color-link);
+    text-underline-offset: 0.18em;
+    text-decoration-thickness: 0.06em;
+  }
+
+  :focus-visible {
+    outline: 3px solid var(--color-focus);
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
+
+  ::selection {
+    background: var(--color-highlight);
+    color: var(--color-highlight-ink);
+  }
+}
+
+/* Clicks keep working while a view transition plays (Next.js view transitions guide). */
+::view-transition {
+  pointer-events: none;
+}
+
+::view-transition-group(.morph) {
+  animation-duration: var(--duration-slow);
+  animation-timing-function: var(--ease-out);
+}
+
+/*
+ * Reduced motion (NFR-01). Every animation and transition finishes at once,
+ * view transitions swap instantly, and scroll-driven effects are only ever
+ * declared inside `prefers-reduced-motion: no-preference`.
+ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 1ms !important;
+    animation-delay: 0s !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 1ms !important;
+    transition-delay: 0s !important;
+    scroll-behavior: auto !important;
+  }
+
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
+}
+
+@layer components {
+  .skip-link {
+    position: absolute;
+    inset-inline-start: 1rem;
+    inset-block-start: 1rem;
+    z-index: 100;
+    padding: 0.75rem 1rem;
+    background: var(--color-accent);
+    color: var(--color-accent-ink);
+    font-weight: 600;
+    transform: translateY(calc(-100% - 2rem));
+    transition: transform var(--duration-quick) var(--ease-out);
+  }
+
+  .skip-link:focus-visible {
+    transform: none;
+  }
+}
