@@ -14,7 +14,7 @@ Work through them in order.
    Done when you know the id of every Reference, verse and translation your pages use, or have noted each one the census lacks.
 3. **Extract each page.** `node scripts/content/extract.mjs <slug>`, with `$CARE4MIND_CAPTURES` set, prints its outline (see [Reading an outline](#reading-an-outline)).
 
-   Done when every block of every outline has a home: a record field, a Questionnaire's `heldBack`, or a provenance edit saying it was dropped.
+   Done when every block of every outline has a home: a record field, a Questionnaire's `heldBack`, or a provenance edit saying it was dropped. Check the headings one by one: an edit that drops one quotes it as the page writes it.
 4. **Write the records.** `pnpm content:new <kind> <id>` writes each new record file with every field of its kind laid out, then the registry. Fill it from the outline by the rules below.
 
    Done when each field holds the page's own text, or an edit lists the change.
@@ -57,13 +57,14 @@ extract prints one block per line, its type first:
 - Text is NFC, with anusvara written ṃ (U+1E43), never ṁ. `normaliseSanskrit()` in `src/lib/sanskrit.ts` does both; list the anusvara change once per record.
 - Changes verify ignores need no edit: letter case, curly or straight quotes, the kind of dash, and spacing. List a deliberate one anyway when it changes how a title or name reads (a title put in sentence case).
 - Typos are fixed and listed as replacements: `“Negliegence” → “Negligence”`. Questionnaire items are the exception: kept verbatim, flagged.
+- A character the site's fonts don't cover, such as an emoji, is left out. The font rule reads provenance too, so the edit names it by its code point (U+1F464) and quotes the resulting text in full.
 - A problem you notice but may not fix (a "five consequences" followed by three, text that stops mid-citation) stays as the page has it, flagged for the Research editor.
 
 ## Edits
 
 - `provenance.edits` lists every change, one per edit, in plain words.
 - A replacement quotes the old and the new text in curly quotes joined by an arrow: `“Indian vs Western concept” → “Indian and Western concepts”`. A deletion has empty new text: `“[2]” → “”`. Text a change adds is quoted in full. One edit may list several replacements of one kind: `Typos fixed: “a” → “b”, “c” → “d”.`
-- Quote the old text as the page writes it (copy it from the outline), so the replacement finds it. Curly quotes inside a quote must balance.
+- Quote the old text as the page writes it (copy it from the outline), so the replacement finds it. Curly quotes inside a quote must balance: write a lone one straight, which verify reads as the same mark (`“‘Asteya" in the” → “‘Asteya’ in the”`).
 - verify applies every replacement to the page wherever its old text occurs, then searches the page with all of them applied, with each one alone, and as it is. It accepts any text quoted in full in an edit. It reads only this convention: `"old" -> "new"` is not applied.
 
 ## Headwords, terms and glosses
@@ -86,14 +87,19 @@ extract prints one block per line, its type first:
 
 - `#` links are dropped and flagged for the Research editor.
 - Other links inside running text, DharmaWiki's included, are dropped and listed. A link that belongs to a Reference ("Read more") moves to that Reference's `url` or `doi`.
-- A Concept's own DharmaWiki article is kept, in `external`. DharmaWiki citation markers ("[1]") are dropped and listed, and text adapted from DharmaWiki is flagged for attribution.
+- A Concept's own DharmaWiki article is kept, in `external`, labelled “DharmaWiki”, with an edit that quotes the label and says where the address came from (the page's link, or its glossary card's). DharmaWiki citation markers ("[1]") are dropped and listed, and text adapted from DharmaWiki is flagged for attribution.
+- An address under a WordPress path (`wp-content`, `wp-json`, `wp-admin`), on any site, is left out of the record, listed, and flagged for the Research editor to give a stable link (Sarkar 2019's PDF): the integrity test refuses those paths everywhere.
 - A link with no real destination (a homepage area pointing at the dead questionnaire app) gets no target, flagged for the Project owner.
 
 ## Structure
 
 - A sub-heading that names a Sanskrit term becomes a term block (`kind: 'term'`) anchored by the term's IAST without diacritics (`samsaya`). Any other sub-heading starts a new section, its id the heading's words, lowercase and hyphenated.
+- Text before a page's first heading is a section headed by the page's title, listed (Jagat).
+- A heading over a verse ("Shloka from Chapter 1, Sutra 31") is dropped and listed, quoted as the page writes it: the verse shows its work and number.
+- Text after a section's last term sub-heading that speaks of all its terms stays in the section, after the term blocks, listed.
 - Applications and "Indian vs Western" sections take the roles `applications` and `comparison` (D05).
 - Tables are table blocks. The caption is the page's own, else the heading above the table, listed.
+- A reference list that names one work twice gives the Concept that id once, in its first place, listed (Know Your Mind's Krishnappa et al., 2020a and 2020b).
 - Shared text is stored once: the yama–niyama section is the values topic's introduction, shown with a `topic-intro` block where a page had it.
 - No images are carried over (D18); dropping them is listed.
 - Interface text isn't content: "Click to learn more", "Read more", "Course Details", "No information available", accordion titles such as "Introduction" and "References". Dropping it is listed once per record.
@@ -105,7 +111,7 @@ Until the Psychology expert approves documented scoring rules (FR-05), no record
 - Score and interpretation sections are held back: score indicators, High, Moderate and Low indicators or characteristics, score-wise category descriptions, scoring continua, cut-offs, answer keys, bands, result messages, average-score lines.
 - Each goes in the Questionnaire's `heldBack` as `{ what, where }`, described and never quoted: "three result bands with their messages, in the quiz's settings".
 - A Questionnaire's `scoring` is `{ status: 'pending', reason }` until planning tickets 26 and 28 supply rules.
-- Text that only says what a questionnaire measures, interpreting no score, may become its `purpose`, flagged for the Psychology expert.
+- Text that only says what a questionnaire measures, interpreting no score, may become its `purpose`, flagged for the Psychology expert. With no such text, the record has no `purpose`, and a Psychology-expert flag (planning ticket 26) asks for one in the words every such record uses: “The page says nothing about what its questionnaire measures outside its held-back score section, so no purpose is stored, and none was written. Write one, or approve leaving it out.”
 - The held-back guard in the integrity test refuses, in any content field: "Score indicator", "Score-Based Indicators", "Score Wise Category", "Scoring Continuum", "High/Moderate/Low indicators", "High/Moderate/Low Score", "High/Moderate/Low Characteristics", "Score indicators for", "scored on a scale", any sentence saying what a high, moderate or low score means, and any key named for an answer, a correct option, points, weights, bands, cut-offs or results.
 
 ## Questionnaires
@@ -142,7 +148,7 @@ A flag is `{ for, note, ticket? }` in `provenance.flags`: a question for a perso
 - `psychology-expert`: anything about a Questionnaire's items, purpose, limitations or scoring.
 - `project-owner`: keep, merge or drop, rights, structure, and links with no real destination.
 - Where your ticket names the role for a flag, follow your ticket.
-- Write each note to stand alone in the flags pack: what the page has, what the record holds, and that nothing was changed or looked up. Identical notes collapse into one line there.
+- Write each note to stand alone in the flags pack: what the page has, what the record holds, and that nothing was changed or looked up. Identical notes collapse into one line there, so a question another record already asks (a verse's unnamed work, on its passage and on its Concept) is copied from that record word for word.
 
 ## What the tests enforce
 
@@ -152,6 +158,7 @@ A flag is `{ for, note, ticket? }` in `provenance.flags`: a question for a perso
 - Every in-text citation, such as "(Tomar, 2024)", resolves to one of the record's References, or a Research-editor flag quotes it.
 - Every Reference has a title and a DOI or URL, or `noStableLink` saying why not ("none given on the current site; not looked up"); a paper or book also has authors, a container or publisher, and a year, or a Research-editor flag naming each one missing (FR-03).
 - No string holds `wp-json`, `wp-admin`, `wp-content` or `/author/`, and care4mind.org appears only in provenance.
+- Content v1 is complete (`tests/unit/content-completeness.test.ts`, on since ticket 12): every topic has a Concept, every Reference is cited by a record, every passage is quoted and every work has one, and the record counts hold. A record added later arrives linked: a Reference with the record citing it, a passage with its quote.
 
 ## What verify checks
 
