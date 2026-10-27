@@ -3,7 +3,7 @@
 Type: task
 Mode: HITL
 Track: site and Questionnaires
-Status: open
+Status: claimed
 Blocked by: none
 Map: [Care4Mind.org rebuild](../map.md)
 
@@ -90,3 +90,13 @@ Give each item a proposed default and name the role that answers it.
 The developer sends the list and records the replies word for word under `## Answer`. Then add a one-line pointer under each open question in the brief that a reply answers.
 
 The ticket resolves when the replies arrive or the reply-by date passes. Its answer lists any unanswered items, so each waiting ticket can decide whether to go ahead on a written-down assumption.
+
+## Comments
+
+**2026-10-27: approval rules settled with the developer**
+
+- **Written OK** from the Project owner (an email reply counts) is needed for: launch sign-off, the scope and † targets, and which Questionnaires launch together with the privacy default. Design direction and keep, merge or drop calls on real content go in the sign-off pack for comment but need no written OK.
+- **Change requests** go on the later-phases list (`docs/later-phases.md`). The Project owner can swap one into scope only through the sign-off pack, seeing what it pushes out.
+- **Unfilled roles:** all three proposed fallbacks stand. The client contact acts as Project owner until one is named. With no Research editor, the developer's choices of citation style, topics and relation types are marked "not yet reviewed" and listed in the sign-off pack. With no Psychology expert, the brief's Roles fallback applies.
+- **Format:** the list goes out as a PDF attached to an email. The client replies by email, quoting the question numbers.
+- Draft: [client-question-list.md](../assets/client-question-list.md).
