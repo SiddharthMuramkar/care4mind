@@ -16,6 +16,7 @@ import ts from 'typescript'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
 import {
+  CONTENT_KINDS,
   KIND_FOLDERS,
   type Block as RecordBlock,
   type ConceptRecord,
@@ -25,7 +26,6 @@ import {
   type QuestionnaireRecord,
   type ReferenceRecord,
   type TopicRecord,
-  CONTENT_KINDS,
 } from '@/content/schema'
 
 // The migration tools (content-v1 ticket 02): extract, verify, new and report, in
@@ -171,7 +171,7 @@ It is “made up” &#8211; on purpose.</p>
 <div class="elementor-accordion-item"><div class="elementor-tab-title" data-tab="2">
 <a class="elementor-accordion-title" tabindex="0">References</a></div>
 <div class="elementor-tab-content" data-tab="2"><ul>
-<li>Author, A. (2020). <i>A made-up book</i>. Example Press. <a href="https://example.org/book">Read more.</a></li>
+<li>Author, A. (2020). <i>A made-up book</i>. Example Press. <a href="https://example.org/book">See the book.</a></li>
 </ul></div></div></div>
 <div class="elementor-widget-container">[example_code name="Test"]</div>
 </div></div></section></div>`,
@@ -225,8 +225,8 @@ const item = (id: number, counter: string, text: string, options: readonly strin
     )
     .join('') +
   `</div></div>`
-const OFTEN = ['Often', 'Never']
-const AGREE = ['Disagree', 'Agree']
+const YES_NO = ['Yes', 'No']
+const TRUE_FALSE = ['False', 'True']
 const EXAMPLE_QUIZ_PAGE = {
   kind: 'post',
   slug: 'karmayoga-scale',
@@ -239,12 +239,12 @@ const EXAMPLE_QUIZ_PAGE = {
     `<input type="button" class="start_button" value="Start"></div></div>` +
     step(30, 'Part A - 1', 'Say how often each happens.') +
     step(31, 'Part B - 2', 'Say how far you agree.') +
-    item(11, '1 / 4', 'I notice examples.', OFTEN) +
-    item(12, '2 / 4', 'I write examples.', OFTEN) +
-    item(21, '3 / 4', 'Examples help me.', AGREE) +
-    item(22, '4 / 4', 'Examples bore me.', [...AGREE].reverse()) +
+    item(11, '1 / 4', 'I notice examples.', YES_NO) +
+    item(12, '2 / 4', 'I write examples.', YES_NO) +
+    item(21, '3 / 4', 'Examples help me.', TRUE_FALSE) +
+    item(22, '4 / 4', 'Examples bore me.', [...TRUE_FALSE].reverse()) +
     `<div class="step ays_thank_you_fs"><div class="ays_quiz_results_page">` +
-    `<p class="ays_average">The average score is 50%</p><button type="button"><span>Restart quiz</span></button>` +
+    `<p class="ays_average">Thank you for taking part.</p><button type="button"><span>Start again</span></button>` +
     `</div></div></form></div>`,
 }
 const QUIZ_FILES = {
@@ -255,10 +255,10 @@ const QUIZ_FILES = {
       { id: '31', text: 'Part B - 2 Say how far you agree.' },
     ],
     questions: [
-      { id: '11', text: 'I notice examples.', options: OFTEN },
-      { id: '12', text: 'I write examples.', options: OFTEN },
-      { id: '21', text: 'Examples help me.', options: AGREE },
-      { id: '22', text: 'Examples bore me.', options: [...AGREE].reverse() },
+      { id: '11', text: 'I notice examples.', options: YES_NO },
+      { id: '12', text: 'I write examples.', options: YES_NO },
+      { id: '21', text: 'Examples help me.', options: TRUE_FALSE },
+      { id: '22', text: 'Examples bore me.', options: [...TRUE_FALSE].reverse() },
     ].map((q, i) => ({
       ...q,
       type: 'radio',
@@ -361,8 +361,8 @@ describe('extract', () => {
       { type: 'tab', text: 'References' },
       {
         type: 'reference',
-        lines: ['Author, A. (2020). A made-up book. Example Press. Read more.'],
-        links: [{ text: 'Read more.', href: 'https://example.org/book' }],
+        lines: ['Author, A. (2020). A made-up book. Example Press. See the book.'],
+        links: [{ text: 'See the book.', href: 'https://example.org/book' }],
       },
       { type: 'shortcode', text: '[example_code name="Test"]' },
     ])
@@ -391,7 +391,7 @@ describe('extract', () => {
     expect(site.page('karmayoga-scale')?.outline()).toEqual([
       {
         type: 'quiz',
-        optionSets: [OFTEN, AGREE, [...AGREE].reverse()],
+        optionSets: [YES_NO, TRUE_FALSE, [...TRUE_FALSE].reverse()],
         parts: [
           {
             step: '30',
@@ -413,7 +413,11 @@ describe('extract', () => {
           },
         ],
         pageOrder: ['11', '12', '21', '22'],
-        otherText: ['Example Scale', 'Answer from your own experience', 'The average score is 50%'],
+        otherText: [
+          'Example Scale',
+          'Answer from your own experience',
+          'Thank you for taking part.',
+        ],
       },
     ])
   })
@@ -435,7 +439,9 @@ describe('extract', () => {
     )
     expect(lines).toContain('        link “the other page” → #  [#]')
     expect(lines).toContain('  td    Udaharana ⏎ (Example) | Shows a rule')
-    expect(lines).toContain('ref     Author, A. (2020). A made-up book. Example Press. Read more.')
+    expect(lines).toContain(
+      'ref     Author, A. (2020). A made-up book. Example Press. See the book.',
+    )
     expect(result.stdout).not.toContain('never shown')
   })
 
@@ -962,8 +968,10 @@ describe('the network rule', () => {
       )
     }
   })
+})
 
-  it('reads kinds of record the way the schema lists them', () => {
+describe('the kinds of record', () => {
+  it('are the schema’s, with the same folders', () => {
     expect(verify.KIND_FOLDERS).toEqual(KIND_FOLDERS)
   })
 })

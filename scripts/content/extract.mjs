@@ -170,7 +170,7 @@ const IMPLIED_CLOSES = {
   option: { close: ['option'], stop: ['select', 'datalist'] },
 }
 
-export function parseHtml(html) {
+function parseHtml(html) {
   const root = { name: '#root', attrs: {}, children: [] }
   const stack = [root]
   const lower = html.toLowerCase()
@@ -308,7 +308,7 @@ const NAMED_ENTITIES = {
   iquest: '¿',
 }
 
-export function decodeEntities(text) {
+function decodeEntities(text) {
   return text.replace(
     /&(?:#(\d+)|#[xX]([0-9a-fA-F]+)|([a-zA-Z][a-zA-Z0-9]*));/g,
     (whole, decimal, hex, name) => {
@@ -930,7 +930,7 @@ const COLUMN = 8
 const tag = (name) => (name.length >= COLUMN ? `${name} ` : name.padEnd(COLUMN))
 
 /** The outline of a saved page, as extract prints it. */
-export function formatOutline(page) {
+function formatOutline(page) {
   const out = [page.title, `${page.kind} ${page.path} · ${page.url}`, '']
   printBlocks(page.outline(), '', out)
   while (out.at(-1) === '') out.pop()

@@ -14,7 +14,7 @@ import { dirname, join } from 'node:path'
 import { openCaptures, runTool, ToolError } from './extract.mjs'
 import { idOf, loadRecords, rootFrom, sortRecords } from './verify.mjs'
 
-export const PACK = '.scratch/content-v1/flags.md'
+const PACK = '.scratch/content-v1/flags.md'
 
 const ROLES = [
   ['research-editor', 'Research editor'],
@@ -126,15 +126,22 @@ export function buildReport(records, captures) {
   return `${out.join('\n')}\n`
 }
 
+const USAGE = `Usage: node scripts/content/report.mjs [--write]
+
+Prints the flags pack: every flag in the records, by role, then the drafted fields, each
+Questionnaire's held-back items and a map of the saved pages in $CARE4MIND_CAPTURES.
+--write saves it as ${PACK} instead.`
+
 async function main(args) {
+  if (args.includes('--help') || args.includes('-h')) {
+    process.stdout.write(`${USAGE}\n`)
+    return 0
+  }
   const captures = openCaptures()
   const { root, rest } = rootFrom(args)
   const write = rest.includes('--write')
   const unknown = rest.filter((arg) => arg !== '--write')
-  if (unknown.length > 0)
-    throw new ToolError(
-      `Unknown argument: ${unknown[0]}\nUsage: node scripts/content/report.mjs [--write]`,
-    )
+  if (unknown.length > 0) throw new ToolError(`Unknown argument: ${unknown[0]}\n${USAGE}`)
   const text = buildReport(await loadRecords(root), captures)
   if (!write) {
     process.stdout.write(text)

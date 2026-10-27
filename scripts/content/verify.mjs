@@ -103,7 +103,7 @@ function typeScriptHooks(root, ts) {
 }
 
 /** The records the arguments name: kinds (`concept`) and records (`passage/yoga-sutra/1.30`). */
-export function selectRecords(records, selectors) {
+function selectRecords(records, selectors) {
   if (selectors.length === 0) return records
   const chosen = new Set()
   for (const selector of selectors) {
@@ -470,7 +470,7 @@ function difference(text, closest) {
   return `${show(a)}  where the page has  ${show(b)}`
 }
 
-export function formatResults(results) {
+function formatResults(results) {
   const out = []
   const tag = (name) => name.padEnd(11)
   const of = (status) => results.filter((result) => result.status === status)
@@ -512,7 +512,17 @@ export function formatResults(results) {
   return `${out.join('\n')}\n`
 }
 
+const USAGE = `Usage: node scripts/content/verify.mjs [kind | kind/id ...]
+
+Checks every string in the records named (all of them when none is) against the saved copies
+of their source pages, read from $CARE4MIND_CAPTURES. Exit code 0 when every string is found,
+1 when one is on none of its pages, 2 when it can't run. Kinds: ${Object.keys(KIND_FOLDERS).join(', ')}.`
+
 async function main(args) {
+  if (args.includes('--help') || args.includes('-h')) {
+    process.stdout.write(`${USAGE}\n`)
+    return 0
+  }
   const captures = openCaptures()
   const { root, rest } = rootFrom(args)
   const records = sortRecords(selectRecords(await loadRecords(root), rest))

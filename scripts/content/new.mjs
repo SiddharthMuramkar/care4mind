@@ -40,7 +40,7 @@ const PROVENANCE = `  provenance: {
     // saved copies were made.
     sources: [{ url: '', retrieved: '2026-10-27' }],
     edits: [], // one change each; a replacement is written “old” → “new”, a deletion “old” → “”
-    flags: [], // { for: 'research-editor' | 'psychology-expert' | 'project-owner', note: '', ticket? }
+    flags: [], // { for: 'research-editor' | 'psychology-expert' | 'project-owner', note, ticket? }
     // drafted: [], // fields written for the new site: never in a migration ticket
   },`
 
@@ -145,7 +145,7 @@ ${PROVENANCE}
   kind: 'resource-list',
   slug: '${id}',
   title: '',
-  groups: [], // { id, heading, items }: a { type: 'reference', reference } or a { type: 'course', provider, name }
+  groups: [], // { id, heading, items }: each item a Reference or a course (see the schema)
 ${PROVENANCE}
 })`,
   page: (id) => `definePage({
@@ -167,7 +167,7 @@ ${PROVENANCE}
 }
 
 /** The record file for a new record of this kind and id. */
-export function template(kind, id) {
+function template(kind, id) {
   const body = TEMPLATES[kind](id)
   const helper = body.slice(0, body.indexOf('('))
   return `import { ${helper} } from '@/content/schema'
@@ -180,6 +180,10 @@ export default ${body}
 }
 
 async function main(args) {
+  if (args.includes('--help') || args.includes('-h')) {
+    process.stdout.write(`${USAGE}\n`)
+    return 0
+  }
   const { root, rest } = rootFrom(args)
   const [kind, id, ...extra] = rest
   if (!kind || !id || extra.length > 0) throw new ToolError(USAGE)
