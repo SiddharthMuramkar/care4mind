@@ -18,7 +18,7 @@ function luminance(hex: string): number {
 
 /**
  * The colour-token pairs every palette must pass. Text pairs need 4.5:1
- * (WCAG 1.4.3); focus rings and control edges need 3:1 (WCAG 1.4.11).
+ * (WCAG 1.4.3); focus rings, control edges and kolam drawings need 3:1 (WCAG 1.4.11).
  */
 export const CONTRAST_PAIRS = [
   { foreground: 'ink', background: 'ground', minimum: 4.5 },
@@ -32,6 +32,10 @@ export const CONTRAST_PAIRS = [
   { foreground: 'focus', background: 'ground', minimum: 3 },
   { foreground: 'surface-focus', background: 'surface', minimum: 3 },
   { foreground: 'accent', background: 'ground', minimum: 3 },
+  { foreground: 'kolam-line', background: 'ground', minimum: 3 },
+  { foreground: 'kolam-dot', background: 'ground', minimum: 3 },
+  { foreground: 'surface-kolam-line', background: 'surface', minimum: 3 },
+  { foreground: 'surface-kolam-dot', background: 'surface', minimum: 3 },
 ] as const
 
 export type ColourToken = (typeof CONTRAST_PAIRS)[number]['foreground' | 'background']

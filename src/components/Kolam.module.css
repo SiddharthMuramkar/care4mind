@@ -1,0 +1,56 @@
+/*
+ * The finished drawing is the default, so reduced motion, browsers without
+ * scroll timelines and visits without JavaScript all see the whole kolam.
+ */
+.kolam {
+  display: block;
+  overflow: visible;
+}
+
+.line {
+  fill: none;
+  stroke: var(--color-kolam-line);
+  stroke-width: var(--kolam-line-width, 3px);
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.dot {
+  fill: var(--color-kolam-dot);
+}
+
+/* The line is one dash as long as itself (pathLength 1), so drawing it is one dash offset. */
+@keyframes draw {
+  from {
+    stroke-dashoffset: 1;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .drawOnLoad .line {
+    stroke-dasharray: 1;
+    animation: draw var(--duration-draw) var(--ease-in-out) both;
+  }
+
+  a:is(:hover, :focus-visible) .redrawOnHover .line {
+    stroke-dasharray: 1;
+    animation: draw var(--duration-redraw) var(--ease-in-out);
+  }
+
+  /* The svg is the timeline's subject: it has a box to track, where its path does not. */
+  @supports (animation-timeline: view()) {
+    .drawOnScroll {
+      view-timeline-name: --kolam;
+    }
+
+    .drawOnScroll .line {
+      stroke-dasharray: 1;
+      animation: draw linear both;
+      animation-timeline: --kolam;
+      animation-range: entry 10% cover 60%;
+    }
+  }
+}
