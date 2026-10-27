@@ -1,14 +1,14 @@
 import { site } from '@/config/site'
 
 import { Fleuron } from './Fleuron'
+import { Logo } from './Logo'
 import styles from './SiteFooter.module.css'
-import { Wordmark } from './Wordmark'
 
 export function SiteFooter() {
   return (
     <footer className={styles.footer}>
       <Fleuron className={styles.fleuron} />
-      <Wordmark />
+      <Logo />
       <p className={styles.tagline}>{site.tagline}</p>
       <p className={styles.credit}>Powered by IIT Bombay-SJMSOM &amp; HUA</p>
       <p className={styles.preview}>

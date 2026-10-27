@@ -1,5 +1,6 @@
 import { expect, test } from '@playwright/test'
 
+import { unfinishedDrawings } from './drawings'
 import { PAGES } from './routes'
 
 // Firefox and WebKit: each page renders, without errors or sideways scroll.
@@ -15,5 +16,13 @@ for (const { path, name } of PAGES) {
     )
     expect(overflow).toBeLessThanOrEqual(0)
     expect(errors).toEqual([])
+  })
+
+  // Drawings these browsers can't drive by scroll are simply shown finished.
+  test(`${name} shows the kolam logo and finished drawings`, async ({ page }) => {
+    await page.goto(path)
+    const logo = page.getByRole('banner').getByRole('link', { name: 'Care4Mind home', exact: true })
+    await expect(logo.locator('svg')).toBeVisible()
+    await expect.poll(() => unfinishedDrawings(page)).toEqual([])
   })
 }
