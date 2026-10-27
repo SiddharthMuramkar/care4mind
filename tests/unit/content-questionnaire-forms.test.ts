@@ -141,11 +141,60 @@ describe('the KarmaYoga Scale’s rights, scoring and held-back sections', () =>
   })
 })
 
-describe('no trace of a result', () => {
-  it('leaves every percentage figure out of the KarmaYoga Scale, its notes and held-back list included', async () => {
-    const figures = stringsIn(await stored('karmayoga-scale')).filter((text) =>
-      /\d\s*%|%\s*\d/.test(text),
+describe('the Dosha Survey', () => {
+  it('is listed as coming later, and its questions are never offered, even while the preview flag is on', async () => {
+    const content = createContent(localSource, ON)
+    const card = (await content.questionnaires.list()).find(({ slug }) => slug === 'dosha-survey')
+    expect(card).toMatchObject({ status: 'coming-later', href: '/questionnaires/#dosha-survey' })
+    expect(await offered('dosha-survey', ON)).toBeNull()
+    expect(await offered('dosha-survey', OFF)).toBeNull()
+    const page = JSON.stringify(await content.questionnaires.get('dosha-survey'))
+    const questions = (await stored('dosha-survey')).form?.parts.flatMap(({ items }) => items)
+    expect(questions?.filter(({ text }) => page.includes(text))).toEqual([])
+  })
+
+  it('stores its 12 questions in one part, each with its own three options', async () => {
+    const { form } = await stored('dosha-survey')
+    expect(form?.parts).toHaveLength(1)
+    const items = form?.parts[0]?.items ?? []
+    expect(items).toHaveLength(12)
+    expect(items.map(({ responseSet }) => form?.responseSets[responseSet]?.length)).toEqual(
+      Array.from({ length: 12 }, () => 3),
     )
-    expect(figures).toEqual([])
+    expect(new Set(items.map(({ responseSet }) => responseSet)).size).toBe(12)
+  })
+
+  it('keeps each question with its topic label and odd spacing, leaving out the form’s numbers and required marks', async () => {
+    const items = (await stored('dosha-survey')).form?.parts[0]?.items ?? []
+    expect(items[0]?.text).toBe('(Memory) Which of the following best describes your memory?')
+    expect(items[8]?.text).toMatch(/^\( First Reaction to Something New\) /)
+    expect(items.filter(({ text }) => !text.startsWith('('))).toEqual([])
+    expect(items.filter(({ text }) => /\bQuestion \d|\*/.test(text))).toEqual([])
+  })
+
+  it('stores nothing of the hidden anti-spam field the form plugin adds after question 9', async () => {
+    const { form } = await stored('dosha-survey')
+    expect(stringsIn(form).filter((text) => /learn to you/i.test(text))).toEqual([])
+  })
+
+  it('needs permission from a rights holder nobody has found', async () => {
+    const { rights } = await stored('dosha-survey')
+    expect(rights?.status).toBe('permission-needed')
+    expect(rights?.holder).toMatch(/unknown/i)
+  })
+
+  it('leaves scoring pending: no rule exists on the current site or in any archive', async () => {
+    const { scoring } = await stored('dosha-survey')
+    expect(scoring.status).toBe('pending')
+    expect(scoring.reason).toMatch(/planning tickets 09 and 10\b/i)
+  })
+})
+
+describe('no trace of a result', () => {
+  it('leaves every percentage figure out of both records, their notes and held-back lists included', async () => {
+    for (const slug of ['karmayoga-scale', 'dosha-survey']) {
+      const figures = stringsIn(await stored(slug)).filter((text) => /\d\s*%|%\s*\d/.test(text))
+      expect(figures).toEqual([])
+    }
   })
 })
