@@ -50,6 +50,16 @@ LATIN = [
     (0xFFFD, 0xFFFD),
 ]
 
+# The OpenType features browsers apply to Latin text by default: kerning, ligatures and
+# contextual forms, and mark placement for IAST and the ISO 15919 marks. The site's CSS turns on
+# no others, so glyphs only other features reach (figure styles, swashes, stylistic sets) are
+# dropped, about a quarter of each Playfair cut (ticket 05).
+LATIN_FEATURES = ["calt", "ccmp", "clig", "curs", "dist", "kern", "liga", "locl", "mark", "mkmk", "rclt", "rlig", "rvrn"]
+# all-small-caps, for labels and kickers, which are set in running text only.
+SMALL_CAPS = ["smcp", "c2sc"]
+# Every feature: Devanagari conjuncts and mark placement depend on them.
+ALL_FEATURES = ["*"]
+
 DEVANAGARI = [
     (0x0900, 0x097F),  # Devanagari, including the dandas । ॥
     (0x1CD0, 0x1CFF),  # Vedic extensions
@@ -68,6 +78,8 @@ class Source:
     # Axis settings for fontTools' instancer: a number pins the axis, a tuple limits its range.
     # Pinning every axis gives a small static font; variable files are four times the size.
     axes: dict[str, float | tuple[float, float]] = field(default_factory=dict)
+    # OpenType features to keep, with the glyphs they reach.
+    features: list[str] = field(default_factory=lambda: ALL_FEATURES)
 
 
 @dataclass
@@ -79,18 +91,19 @@ class Family:
 
 PLAYFAIR = "Playfair[opsz,wdth,wght].ttf"
 PLAYFAIR_ITALIC = "Playfair-Italic[opsz,wdth,wght].ttf"
+TEXT = LATIN_FEATURES + SMALL_CAPS
 
 FAMILIES = [
-    # Playfair as four static cuts: its variable file is 210 kB, each cut about 65 kB.
+    # Playfair as four static cuts: its variable file is 210 kB, each cut 35-55 kB.
     # Text cuts use a small optical size (sturdy, low contrast); the display cut a large one.
     Family(
         "playfair",
         "latin",
         [
-            Source("playfair", PLAYFAIR, "PlayfairText-Regular", {"wdth": 100, "opsz": 14, "wght": 400}),
-            Source("playfair", PLAYFAIR_ITALIC, "PlayfairText-Italic", {"wdth": 100, "opsz": 14, "wght": 400}),
-            Source("playfair", PLAYFAIR, "PlayfairText-SemiBold", {"wdth": 100, "opsz": 14, "wght": 600}),
-            Source("playfair", PLAYFAIR, "PlayfairDisplay-Medium", {"wdth": 100, "opsz": 64, "wght": 500}),
+            Source("playfair", PLAYFAIR, "PlayfairText-Regular", {"wdth": 100, "opsz": 14, "wght": 400}, TEXT),
+            Source("playfair", PLAYFAIR_ITALIC, "PlayfairText-Italic", {"wdth": 100, "opsz": 14, "wght": 400}, TEXT),
+            Source("playfair", PLAYFAIR, "PlayfairText-SemiBold", {"wdth": 100, "opsz": 14, "wght": 600}, TEXT),
+            Source("playfair", PLAYFAIR, "PlayfairDisplay-Medium", {"wdth": 100, "opsz": 64, "wght": 500}, LATIN_FEATURES),
         ],
     ),
     Family(
@@ -136,7 +149,7 @@ def build(source_path: Path, source: Source, script: str, out_path: Path) -> Non
         font = TTFont(buffer, lazy=False)
     options = subset.Options()
     options.flavor = "woff2"
-    options.layout_features = ["*"]  # keep every OpenType feature: conjuncts and mark placement depend on them
+    options.layout_features = source.features
     options.name_IDs = ["*"]
     options.name_languages = ["*"]
     options.hinting = False
