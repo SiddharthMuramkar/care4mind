@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { Fleuron } from '@/components/Fleuron'
 import { Folio } from '@/components/Folio'
 
+import cta from './cta.module.css'
 import reading from './reading.module.css'
 import styles from './not-found.module.css'
 
@@ -22,11 +23,13 @@ export default function NotFound() {
         </p>
         <ul className={styles.links}>
           <li>
-            <Link href="/">Go to the homepage</Link>
+            <Link href="/" className={cta.primary} data-ink>
+              Go to the homepage
+            </Link>
           </li>
           <li>
             <Link href="/concepts/vikshepa">
-              Read about <span lang="sa-Latn">Vikṣepa</span>
+              Read about&nbsp;<span lang="sa-Latn">Vikṣepa</span>
             </Link>
           </li>
         </ul>

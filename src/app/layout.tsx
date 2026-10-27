@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next'
 import type { ReactNode } from 'react'
 
+import { InkSpread } from '@/components/InkSpread'
 import { MotionProvider } from '@/components/MotionProvider'
 import { SiteFooter } from '@/components/SiteFooter'
 import { SiteHeader } from '@/components/SiteHeader'
@@ -46,6 +47,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           {children}
           <SiteFooter />
         </MotionProvider>
+        <InkSpread />
       </body>
     </html>
   )

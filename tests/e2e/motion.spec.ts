@@ -1,6 +1,7 @@
 import { expect, type Page, test } from '@playwright/test'
 
 import { frameKolam, openingFolio, unfinishedDrawings } from './drawings'
+import { inkSpreadsOn, recordInkSpreads } from './presses'
 import { PAGES } from './routes'
 import { scrollPath, travel } from './scrolling'
 
@@ -69,6 +70,19 @@ for (const { from, name } of [
     await expect(heading).toBeInViewport({ ratio: 1 })
   })
 }
+
+test('pressing a call to action spreads no ink and moves nothing, with reduced motion', async ({
+  page,
+}) => {
+  await recordInkSpreads(page)
+  await page.goto('/')
+  const cta = page.getByRole('main').getByRole('link', { name: 'Explore Concepts', exact: true })
+  await cta.click()
+  await expect(page.getByRole('heading', { name: 'Concepts', level: 2 })).toBeInViewport()
+  await page.waitForTimeout(50)
+  expect(await inkSpreadsOn(cta)).toEqual([])
+  expect(await movingAnimations(page)).toEqual([])
+})
 
 test('the opening kolam scrolls with the page, with reduced motion', async ({ page }) => {
   await page.goto('/')

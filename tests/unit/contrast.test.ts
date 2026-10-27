@@ -2,13 +2,26 @@ import { globSync, readFileSync } from 'node:fs'
 
 import { describe, expect, it } from 'vitest'
 
-import { CONTRAST_PAIRS, contrastRatio } from '@/lib/contrast'
+import { composite, CONTRAST_PAIRS, contrastRatio } from '@/lib/contrast'
 
 describe('contrastRatio', () => {
   it('matches the WCAG reference values', () => {
     expect(contrastRatio('#000000', '#ffffff')).toBeCloseTo(21, 5)
     expect(contrastRatio('#ffffff', '#ffffff')).toBeCloseTo(1, 5)
     expect(contrastRatio('#767676', '#ffffff')).toBeCloseTo(4.54, 2)
+  })
+})
+
+describe('composite', () => {
+  it('lays a translucent colour over an opaque one', () => {
+    expect(composite('#ff000080', '#0000ff')).toBe('#80007f')
+    expect(composite('#123456ff', '#ffffff')).toBe('#123456')
+    expect(composite('#12345600', '#abcdef')).toBe('#abcdef')
+  })
+
+  it('rejects anything but a #rrggbbaa colour over a #rrggbb one', () => {
+    expect(() => composite('#ff0000', '#0000ff')).toThrow()
+    expect(() => composite('#ff000080', '#0000ff80')).toThrow()
   })
 })
 
@@ -19,7 +32,7 @@ function palettes(): { name: string; colours: Record<string, string> }[] {
     const css = readFileSync(file, 'utf8').replace(/\/\*[\s\S]*?\*\//g, '')
     for (const [, selector, body] of css.matchAll(/([^{}]+)\{([^{}]*--color-ground:[^{}]*)\}/g)) {
       const colours = Object.fromEntries(
-        [...(body ?? '').matchAll(/--color-([a-z-]+):\s*(#[0-9a-f]{6})\s*;/gi)].map(
+        [...(body ?? '').matchAll(/--color-([a-z-]+):\s*(#[0-9a-f]{6}(?:[0-9a-f]{2})?)\s*;/gi)].map(
           ([, name, value]) => [name, value],
         ),
       )
@@ -38,13 +51,16 @@ describe('palettes meet WCAG 2.2 AA contrast', () => {
 
   for (const palette of all) {
     for (const pair of CONTRAST_PAIRS) {
-      it(`${palette.name}: ${pair.foreground} on ${pair.background} ≥ ${pair.minimum}:1`, () => {
+      const on = 'over' in pair ? `${pair.background} over ${pair.over}` : pair.background
+      it(`${palette.name}: ${pair.foreground} on ${on} ≥ ${pair.minimum}:1`, () => {
         const foreground = palette.colours[pair.foreground]
         const background = palette.colours[pair.background]
-        if (!foreground || !background) {
-          throw new Error(`--color-${pair.foreground} or --color-${pair.background} missing`)
+        const under = 'over' in pair ? palette.colours[pair.over] : undefined
+        if (!foreground || !background || ('over' in pair && !under)) {
+          throw new Error(`a colour of ${pair.foreground} on ${on} is missing`)
         }
-        expect(contrastRatio(foreground, background)).toBeGreaterThanOrEqual(pair.minimum)
+        const seen = under ? composite(background, under) : background
+        expect(contrastRatio(foreground, seen)).toBeGreaterThanOrEqual(pair.minimum)
       })
     }
   }

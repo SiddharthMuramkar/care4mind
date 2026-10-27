@@ -8,6 +8,7 @@ import { QuestionnaireCard } from '@/components/QuestionnaireCard'
 import { getHomepage, listConcepts, listQuestionnaires } from '@/content'
 import { capitalise, toDevanagariDigits } from '@/lib/text'
 
+import cta from './cta.module.css'
 import styles from './page.module.css'
 
 export default async function HomePage() {
@@ -38,10 +39,10 @@ export default async function HomePage() {
             <Fleuron className={styles.heroFleuron} />
             <p className={styles.intro}>{home.intro}</p>
             <p className={styles.ctas}>
-              <a href="#concepts" className={styles.ctaPrimary}>
+              <a href="#concepts" className={cta.primary} data-ink>
                 Explore Concepts
               </a>
-              <a href="#questionnaires" className={styles.ctaSecondary}>
+              <a href="#questionnaires" className={cta.secondary} data-ink>
                 Questionnaires
               </a>
             </p>

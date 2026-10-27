@@ -6,6 +6,20 @@ export function contrastRatio(foreground: string, background: string): number {
   return (lighter + 0.05) / (darker + 0.05)
 }
 
+/** A translucent #rrggbbaa colour laid over an opaque #rrggbb one, blended as the browser blends them. */
+export function composite(over: string, under: string): string {
+  const top = /^#([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i.exec(over)
+  const bottom = /^#([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i.exec(under)
+  if (!top || !bottom) throw new Error(`expected #rrggbbaa over #rrggbb, got ${over} over ${under}`)
+  const alpha = parseInt(top[4] ?? '', 16) / 255
+  const channels = [1, 2, 3].map((index) => {
+    const blended =
+      parseInt(top[index] ?? '', 16) * alpha + parseInt(bottom[index] ?? '', 16) * (1 - alpha)
+    return Math.round(blended).toString(16).padStart(2, '0')
+  })
+  return `#${channels.join('')}`
+}
+
 function luminance(hex: string): number {
   const match = /^#([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i.exec(hex)
   if (!match) throw new Error(`expected a #rrggbb colour, got ${hex}`)
@@ -36,6 +50,9 @@ export const CONTRAST_PAIRS = [
   { foreground: 'kolam-dot', background: 'ground', minimum: 3 },
   { foreground: 'surface-kolam-line', background: 'surface', minimum: 3 },
   { foreground: 'surface-kolam-dot', background: 'surface', minimum: 3 },
+  // A pressed control's label over its ink at the ink's strongest; the ink is translucent, so it is laid over the control.
+  { foreground: 'ink', background: 'ink-spread', over: 'ground', minimum: 4.5 },
+  { foreground: 'surface-ink', background: 'ink-spread', over: 'surface', minimum: 4.5 },
 ] as const
 
 export type ColourToken = (typeof CONTRAST_PAIRS)[number]['foreground' | 'background']

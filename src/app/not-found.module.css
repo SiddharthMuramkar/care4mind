@@ -30,12 +30,14 @@
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
+  align-items: center;
   gap: 0.75rem 1.5rem;
   margin: 1rem 0 0;
   padding: 0;
 }
 
-.links a {
+/* The links beside the call to action, which brings its own style. */
+.links a:not([class]) {
   display: inline-flex;
   align-items: center;
   min-height: 48px;

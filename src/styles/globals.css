@@ -31,6 +31,8 @@
   --color-kolam-dot: #f0b429;
   --color-surface-kolam-line: #151a3d;
   --color-surface-kolam-dot: #c8342a;
+  /* The ink a pressed control spreads under its label: vermilion at 70%, translucent over the control. */
+  --color-ink-spread: #c8342ab3;
 
   --font-text: var(--font-playfair-text), var(--font-tiro), 'Times New Roman', serif;
   --font-display: var(--font-playfair-display), var(--font-playfair-text), var(--font-tiro), serif;
@@ -149,5 +151,65 @@
 
   .skip-link:focus-visible {
     transform: none;
+  }
+
+  /*
+   * Ink-spread (InkSpread): a press on a control marked data-ink spreads
+   * vermilion ink under its label, from the point pressed. The contrast test
+   * checks the label over the ink, on both the indigo and the paper controls.
+   */
+  [data-ink] {
+    position: relative;
+    isolation: isolate;
+  }
+
+  [data-ink]::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: inherit;
+    background: var(--color-ink-spread);
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    [data-ink-press='a']::before {
+      animation: ink-a var(--duration-slow) var(--ease-out);
+    }
+
+    [data-ink-press='b']::before {
+      animation: ink-b var(--duration-slow) var(--ease-out);
+    }
+  }
+}
+
+/* Two identical spreads, so that every press can restart it. */
+@keyframes ink-a {
+  from {
+    clip-path: circle(0 at var(--ink-x, 50%) var(--ink-y, 50%));
+    opacity: 1;
+  }
+  50% {
+    opacity: 1;
+  }
+  to {
+    clip-path: circle(150% at var(--ink-x, 50%) var(--ink-y, 50%));
+    opacity: 0;
+  }
+}
+
+@keyframes ink-b {
+  from {
+    clip-path: circle(0 at var(--ink-x, 50%) var(--ink-y, 50%));
+    opacity: 1;
+  }
+  50% {
+    opacity: 1;
+  }
+  to {
+    clip-path: circle(150% at var(--ink-x, 50%) var(--ink-y, 50%));
+    opacity: 0;
   }
 }
