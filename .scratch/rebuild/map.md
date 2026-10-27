@@ -46,7 +46,6 @@ Every decision the build needs is made and recorded, so the build spec can be wr
   - If a ticket outgrows one session, stop, split it, and add the new tickets here.
 - **New ideas** go on the later-phases list, `docs/later-phases.md` (created when the first idea lands).
 - **Terms to sharpen** as tickets reach them (gaps in GLOSSARY.md):
-  - People and roles: Project owner, client.
   - Content: topic; traditional text, passage and shloka; Model or technique; application; modern construct and construct link; contributor vs author vs translator; review status; IAST form, Devanagari form and ASCII spelling; keyword; evidence type.
   - Sites: current site vs questionnaire app; content back end.
   - Questionnaires: documented scoring rules; result and band; in-scope vs deferred Questionnaire; Questionnaire description page.

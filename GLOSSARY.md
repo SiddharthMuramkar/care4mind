@@ -20,6 +20,18 @@ _Avoid_: assessment, quiz, test
 
 ### People
 
+**Client**:
+Care4Mind, the organisation the site is built for and handed over to.
+_Avoid_: customer, owner
+
+**Project owner**:
+The person at the client who approves scope, priorities and launch.
+_Avoid_: client (for a person), stakeholder
+
+**Client contact**:
+The person at the client the developer writes to. They act as Project owner until one is named.
+_Avoid_: client (for a person)
+
 **Content editor**:
 Someone who adds and updates the site's content after launch.
 _Avoid_: editor (on its own), administrator
