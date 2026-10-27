@@ -1,0 +1,44 @@
+import { definePassage } from '@/content/schema'
+
+export default definePassage({
+  kind: 'passage',
+  id: 'bhagavad-gita/14.13',
+  work: 'bhagavad-gita',
+  locator: '14.13',
+  order: [14, 13],
+  devanagari: ['अप्रकाशोऽप्रवृत्तिश्च प्रमादो मोह एव च ।', 'तमस्येतानि जायन्ते विवृद्धे कुरुनन्दन'],
+  transliteration: {
+    lines: [
+      'Aprakāśo’pravṛttiśca pramādo moha eva ca |',
+      'Tamasyetāni jāyante vivṛddhe kurunandana',
+    ],
+    scheme: 'iast',
+  },
+  translations: [
+    {
+      id: 'triguna',
+      text: 'Darkness, inertness, heedlessness, and delusion arise when Tamas is predominant, O descendant of Kuru.',
+    },
+  ],
+  provenance: {
+    sources: [{ url: 'https://care4mind.org/triguna/', retrieved: '2026-10-27' }],
+    edits: [
+      'Work assigned: the Triguna page heads this verse “Guna Predominance” and names no work there; it is stored as Bhagavad Gītā 14.13, which its text and number are, in the chapter the page heads “Bhagavad Gita – Gunatraya Vibhaga (Chapter 14)”.',
+      'The page gives the English line under the verse no label; it is stored as the translation.',
+      'The quotation marks around the translation are left out.',
+      'The verse number after the last line is left out, since the locator holds it: “ ॥ १४-१३॥” → “” and “ || 14-13 ||” → “”.',
+    ],
+    flags: [
+      {
+        for: 'research-editor',
+        note: 'The Triguna page heads this verse without naming a work; its number belongs to chapter 14, which the page names as the Bhagavad Gita’s, and it is stored under the Bhagavad Gītā. Confirm the attribution.',
+        ticket: 16,
+      },
+      {
+        for: 'research-editor',
+        note: 'The page prints the English line under this verse with no “Translation” or “Meaning” label; it is stored as the verse’s translation. Confirm it is a translation rather than the page’s own reading.',
+        ticket: 16,
+      },
+    ],
+  },
+})
