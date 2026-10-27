@@ -9,23 +9,28 @@ export default defineHome({
   },
   intro:
     'The Bharatiya way of philosophic analysis starts with the reflection on the inner Self of man with the ultimate goal, of all mental training, being attainment of Moksha.',
-  // Each area's target is set by ticket 07, where the new site has a real destination for it.
+  // Each area leads where its current-site link went (ticket 07); Applications led to the dead
+  // questionnaire app, so it has no target until the Project owner gives it one.
   areas: [
     {
       title: 'Concepts',
       text: 'Explore the rich spiritual traditions of India to understand the unique concepts of ancient Indian psychology.',
+      target: { index: 'concepts' },
     },
     {
       title: 'Techniques',
       text: 'Emerging cross-cultural techniques in recent times armed the toolbox of caregivers in many ways.',
+      target: { kind: 'page', id: 'methods' },
     },
     {
       title: 'Resources',
       text: 'Our self is our most important resource. An array of inward journey resources help us find ways to mentor the mind.',
+      target: { index: 'library' },
     },
     {
       title: 'Tradition and Texts',
       text: 'Ancient Indian philosophical texts that deal with specific perspectives of each unique concept.',
+      target: { kind: 'resource-list', id: 'textbooks' },
     },
     {
       title: 'Applications',
@@ -34,6 +39,7 @@ export default defineHome({
     {
       title: 'Research',
       text: 'Opportunities in Indian psychology research to create and host models related to Indian theories.',
+      target: { kind: 'resource-list', id: 'courses' },
     },
   ],
   closing: 'Open the doors to your inner potential.',
@@ -52,7 +58,25 @@ export default defineHome({
       'Closing line: “potential !!!” → “potential.”.',
       'Interface text dropped: each area’s link label (“Concepts...”, “Methods...”, “Resources...”, “Persepctives...”, “Applications...”, “Opportunities...”) and the “-” under each area’s text.',
       'Left out: the “Psychology” heading above the areas, the “Karma Yoga: An Indian Perspective of Work” heading, and the closing “Ancient Indian Wisdom” link to DharmaWiki’s main page.',
+      // Listed when ticket 07 set the area targets.
+      'Area links set for the new site (D11): Concepts leads to the Concepts index (it linked /concepts/), Techniques to Methods (it linked /methods/), Resources to the Library home (it linked /resources/, an empty page), Tradition and Texts to Text Books (it linked /text-books-2-2/, merged into Text Books) and Research to Courses (it linked /institutes/, now Courses). Applications linked to the current site’s questionnaire app, which no longer works, and has no link.',
     ],
-    flags: [],
+    flags: [
+      {
+        for: 'project-owner',
+        note: 'The homepage’s Applications area linked to the current site’s questionnaire app, which no longer works, so it has no link on the new site. Choose a destination for it, or drop the area.',
+        ticket: 19,
+      },
+      {
+        for: 'project-owner',
+        note: 'The homepage’s Tradition and Texts area linked to /text-books-2-2/, a reading list, so it now leads to Text Books, where that page went. Its text is about ancient Indian philosophical texts, which the new Texts index (/texts/) may suit better. Confirm, or choose another destination.',
+        ticket: 20,
+      },
+      {
+        for: 'project-owner',
+        note: 'The homepage’s Research area linked to /institutes/, so it now leads to Courses, where that page went. Its text is about opportunities in Indian psychology research, which no page of the new site covers as such. Confirm, or choose another destination.',
+        ticket: 20,
+      },
+    ],
   },
 })
