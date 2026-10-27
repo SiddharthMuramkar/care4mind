@@ -269,7 +269,7 @@ export default defineConcept({
       },
       {
         for: 'research-editor',
-        note: 'The page gives no English gloss for upa-vikṣepa: its text speaks of “secondary distractions”, “byproducts” and “sub-distractions”, but gives none of them as the term’s meaning. The Concept has no English name, and its five sub-terms, whose sub-headings give no gloss, have none either. Supply glosses or confirm none; nothing was written for them.',
+        note: 'The page gives no English gloss for upa-vikṣepa: its text speaks of “secondary distractions”, “byproducts” and “sub-distractions”, but gives none of them as the term’s meaning, so the Concept has no English name. Its five sub-headings give no gloss either, so the term blocks have none; the text and the comparison table pair some of the terms with English (“duḥkha (suffering)”, “tremors of the limbs (angamejayatva)”, “Daurmanasya (Dejection/Frustration)”), which stay where the page has them. Supply glosses or confirm none; nothing was written for them.',
         ticket: 15,
       },
       {

@@ -387,7 +387,7 @@ export default defineConcept({
     flags: [
       {
         for: 'research-editor',
-        note: 'The page prints no IAST and no Devanagari for its headword: it writes “Panch Klesha” (its title and headings), “Pancha Klesha” (three verse headings) and “panchklesha”. The record’s IAST, “pañca kleśa”, is transliterated from those, and the slug follows the page’s “Panch Klesha”; no Devanagari is stored. Confirm the form; nothing was looked up.',
+        note: 'The page prints no IAST and no Devanagari for its headword: it writes “Panch Klesha” (its title and headings), “Pancha Klesha” (three verse headings) and “panchklesha”. The record’s IAST, “pañca kleśa”, is transliterated from those, and the slug follows the page’s “Panch Klesha”. No Devanagari is stored for it, nor for the six enemies of the peaceful mind, which the page prints only in Latin letters. Confirm the form; nothing was looked up.',
         ticket: 15,
       },
       {

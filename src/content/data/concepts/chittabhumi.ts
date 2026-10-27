@@ -252,7 +252,7 @@ export default defineConcept({
   provenance: {
     sources: [{ url: 'https://care4mind.org/knowyourmind/', retrieved: '2026-10-27' }],
     edits: [
-      'IAST transliterated for the headword: “citta-bhūmi”, from the page’s plural “chittabhumis”, in the singular. The page prints no Devanagari for it, so none is stored.',
+      'IAST transliterated for the headword: “citta-bhūmi”, from the page’s plural “chittabhumis”, in the singular. The page prints no Devanagari for it or for the five states, so none is stored; the states’ IAST is the page’s own (“Mūḍha, Kṣipta, Vikṣipta, Ekāgra, and Niruddha”).',
       'Typo fixed: “Krishnappa el al.” → “Krishnappa et al.”.',
       'Verse headings dropped: “Yoga Sutra 1.2 Excerpt for States of Mind” and “Yoga Sutra 1.30 Excerpt”. Each verse shows its work and number. The page prints Yoga Sūtra 1.30 in a form of its own (one line, broken into words, with the anusvara written with a dot above, U+1E41); the verse shows the form stored on its passage, which lists this page’s.',
       'The sub-heading “States of Mind according to Patanjali Yoga Sutras” starts a section of its own, holding the five states as term blocks; the Roman numerals before their sub-headings (“I.” to “V.”) are left out.',
@@ -267,7 +267,7 @@ export default defineConcept({
     flags: [
       {
         for: 'research-editor',
-        note: 'The page prints no IAST and no Devanagari for its headword: it writes only the plural, “chittabhumis” and “Chittabhumis”. The record’s IAST, “citta-bhūmi”, is transliterated from it in the singular, as is the slug, chittabhumi; its English name, “state of mind”, is the page’s gloss (“five progressive states of mind, known as chittabhumis”) in the singular. No Devanagari is stored. Confirm the forms; nothing was looked up.',
+        note: 'The page prints no IAST and no Devanagari for its headword: it writes only the plural, “chittabhumis” and “Chittabhumis”. The record’s IAST, “citta-bhūmi”, is transliterated from it in the singular, as is the slug, chittabhumi; its English name, “state of mind”, is the page’s gloss (“five progressive states of mind, known as chittabhumis”) in the singular. No Devanagari is stored for it, nor for the five states, which the page prints only in Latin letters. Confirm the forms; nothing was looked up.',
         ticket: 15,
       },
       {
