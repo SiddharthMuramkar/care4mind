@@ -75,3 +75,5 @@ Both pages are labelled Proposal, and both disappear when their flags are off.
   The merger runs `E2E_SCOPE=full` after merging.
 
 ## Comments
+
+**From content-v1, 2026-10-28:** the map has 19 nodes and 85 edges, none through Tomar (2024). Shared works make 62 of the 85, because the Yoga Sūtra and the Bhagavad Gītā join most Concepts. Lead with shared passages and rarely cited References, and show shared-work edges only on demand, or the map turns into a hairball.

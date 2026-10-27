@@ -79,3 +79,5 @@ Spec: [Front-end site: every public page](../spec.md) · Design: [design.md](../
   The merger runs `E2E_SCOPE=full` after merging.
 
 ## Comments
+
+**From content-v1, 2026-10-28:** Yama and Niyama are term blocks in the values topic's introduction, which `az-index.ts` doesn't read (it takes a Concept's own terms), and no glossary entry covers them. Include topic-introduction terms in the A–Z, linking to their anchor on the topic page. Counts on the merged content: 139 A–Z entries before this change.

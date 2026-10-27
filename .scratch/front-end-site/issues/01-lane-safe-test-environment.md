@@ -26,6 +26,7 @@ Nothing a visitor sees changes.
 - `.github/workflows/ci.yml`
 - `README.md`: the Checks section
 - `docs/agents/frontend-conventions.md` (new), and a one-line pointer to it in `AGENTS.md`
+- `vitest.config.ts`: the global `testTimeout` only
 
 ## Acceptance criteria
 
@@ -67,6 +68,7 @@ Nothing a visitor sees changes.
   - **shared pieces:** the slots ticket 04 adds, the feature flags, and the view-transition names (`concept-title-<slug>`, `topic-title-<slug>`, `work-title-<slug>`, `questionnaire-title-<slug>`);
   - **lane commands:** ports, the lock, `E2E_SCOPE` and the done-check.
 - [ ] **Pointer:** `AGENTS.md` gets a one-line pointer to the conventions doc.
+- [ ] **Unit tests under load:** `vitest.config.ts` sets a global `testTimeout` of 30 s, so the whole-content tests don't pass Vitest's 5-second default while three lanes build at once.
 - [ ] **No test weakened:** every existing test still runs and still asserts what it did.
 - [ ] **Done-check:** the current full command list from the foundation tickets passes:
   - `node scripts/content/registry.mjs --check` (or whichever script name content-v1 gave the registry check), `pnpm lint`, `pnpm format:check`, `pnpm typecheck`, `pnpm test` and `pnpm build`;
@@ -76,3 +78,5 @@ Nothing a visitor sees changes.
   Then the new commands give the same results: `pnpm check`, `E2E_PORT=3110 scripts/lane/heavy.sh pnpm check:e2e` and `LHCI_PORT=3210 CHROME_PATH=/usr/bin/google-chrome scripts/lane/heavy.sh pnpm lhci`.
 
 ## Comments
+
+**From content-v1, 2026-10-28:** with three lanes running, whole-content unit tests (the views' JSON round trip, the routes of the real content, the first questionnaire-form test) passed Vitest's 5-second limit at a load average of 17–28. Each passed alone. The global `testTimeout` above is the fix content ticket 12 suggested.

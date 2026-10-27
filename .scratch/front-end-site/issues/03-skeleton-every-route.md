@@ -98,3 +98,8 @@ Spec: [Front-end site: every public page](../spec.md) · Design: [design.md](../
   The merger runs `E2E_SCOPE=full` after merging.
 
 ## Comments
+
+**From content-v1, 2026-10-28:**
+- `site.trail()` gives every crumb an `href`, the last one included; the Breadcrumbs component marks the last as the current page (`aria-current="page"`).
+- `hrefFor()` returns `string` until this ticket narrows it to Next's `Route`.
+- A slug equal to a fixed page (a Concept called `map`, a reading list called `references`) would give two routes one path; the real-content route test already fails on it.

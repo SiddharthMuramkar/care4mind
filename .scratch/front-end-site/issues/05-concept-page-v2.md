@@ -25,6 +25,7 @@ Everything the foundation built stays. The site-wide link previews switch on her
 - `src/components/preview/**` (the LinkPreview stubs from ticket 04)
 - `src/components/SpellingsPopover.*` and `src/components/ReferenceList.*`
 - `tests/e2e/concept.spec.ts`, and any new `tests/e2e/concept-page-*.spec.ts` (not `concept-map.spec.ts`, which ticket 12 owns)
+- `src/content/graph.ts`: the in-text citation reader only, keeping `@/content`'s interface and the content tests unchanged
 
 ## Acceptance criteria
 
@@ -94,3 +95,8 @@ Everything the foundation built stays. The site-wide link previews switch on her
   The merger runs `E2E_SCOPE=full` after merging.
 
 ## Comments
+
+**From content-v1, 2026-10-28:**
+- **Values Concepts (ahimsa, satya, asteya, brahmacharya):** each one's first section and the values topic's introduction share an id and a heading, and the view gives both: the section, then the introduction's section inside its topic-intro block. Draw the introduction's section in that section's place, so the heading shows once and the anchor stays unique.
+- **Ahimsa's EPRA citation:** `graph.ts` reads only innermost parentheses, so “(“EPRA International Journal of Multidisciplinary Research (IJMR),” 2019b)” isn't read as a citation and doesn't link to `epra-2019`. Fix the reader (owned above) with a unit test for nested parentheses.
+- The KarmaYoga form has no form-level description field; its quiz description line stays out and is flagged for the Psychology expert.

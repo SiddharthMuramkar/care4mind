@@ -88,3 +88,5 @@ Spec: [Front-end site: every public page](../spec.md) · Design: [design.md](../
   The merger runs `E2E_SCOPE=full` after merging.
 
 ## Comments
+
+**From content-v1, 2026-10-28:** `search-documents.ts` takes a Concept's own terms only, so Yama and Niyama (term blocks in the values topic's introduction) can't be found. Include topic-introduction terms, pointing at their anchor on the topic page. The merged content gives 448 search documents, against design A4's estimate of about 330: check the index size budget against the real number.
