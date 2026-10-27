@@ -7,24 +7,30 @@
  * in tests/unit/contrast.test.ts is checked for WCAG AA contrast.
  */
 @theme {
-  --color-ground: #f6f4ee;
-  --color-ink: #1d1f24;
-  --color-ink-muted: #4a4f59;
-  --color-surface: #ffffff;
-  --color-surface-ink: #1d1f24;
-  --color-surface-muted: #4a4f59;
-  --color-accent: #1f5a8c;
-  --color-accent-ink: #ffffff;
-  --color-highlight: #f2c14e;
-  --color-highlight-ink: #1d1f24;
-  --color-link: #1f5a8c;
-  --color-line: #c9cbd1;
-  --color-focus: #1f5a8c;
-  --color-surface-focus: #1f5a8c;
+  /* Press: a scholar's edition. Indigo ink grounds, paper folios, turmeric and vermilion. */
+  --color-ground: #151a3d;
+  --color-ink: #f3ecdc;
+  --color-ink-muted: #c9c2d8;
+  --color-link: #f6c453;
+  --color-surface: #eadbb6;
+  --color-surface-ink: #1d1a2e;
+  --color-surface-muted: #5a4a2e;
+  --color-surface-link: #9c2a1f;
+  --color-surface-focus: #151a3d;
+  --color-accent: #f0b429;
+  --color-accent-ink: #151a3d;
+  --color-highlight: #c8342a;
+  --color-highlight-ink: #ffffff;
+  --color-focus: #f6c453;
+  --color-line: #3b4178;
+  /* Decorative only, never behind or as text: */
+  --color-ink-wash: #232a5c;
+  --color-surface-rule: #8c7a55;
 
-  --font-display: ui-serif, Georgia, 'Times New Roman', serif;
-  --font-text: ui-serif, Georgia, 'Times New Roman', serif;
-  --font-deva: 'Noto Serif Devanagari', 'Kohinoor Devanagari', 'Nirmala UI', serif;
+  --font-text: var(--font-playfair-text), var(--font-tiro), 'Times New Roman', serif;
+  --font-display: var(--font-playfair-display), var(--font-playfair-text), var(--font-tiro), serif;
+  --font-deva:
+    var(--font-tiro), 'Noto Serif Devanagari', 'Kohinoor Devanagari', 'Nirmala UI', serif;
 
   --duration-instant: 100ms;
   --duration-quick: 160ms;
@@ -56,6 +62,7 @@
   :lang(sa-Deva),
   :lang(hi-Deva) {
     font-family: var(--font-deva);
+    font-weight: 400;
     line-height: 1.75;
     font-synthesis: none;
   }

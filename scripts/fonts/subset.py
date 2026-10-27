@@ -63,65 +63,40 @@ DEVANAGARI = [
 class Source:
     dir: str
     file: str
-    style: str  # "normal" or "italic"
-    # Axis limits for fontTools' instancer: a number pins the axis, a tuple limits its range.
+    # Output file name (without .woff2) under the family folder.
+    out: str
+    # Axis settings for fontTools' instancer: a number pins the axis, a tuple limits its range.
+    # Pinning every axis gives a small static font; variable files are four times the size.
     axes: dict[str, float | tuple[float, float]] = field(default_factory=dict)
 
 
 @dataclass
 class Family:
     slug: str  # output folder under src/fonts/
-    name: str  # output file stem
     script: str  # "latin" or "devanagari"
     sources: list[Source]
 
 
+PLAYFAIR = "Playfair[opsz,wdth,wght].ttf"
+PLAYFAIR_ITALIC = "Playfair-Italic[opsz,wdth,wght].ttf"
+
 FAMILIES = [
+    # Playfair as four static cuts: its variable file is 210 kB, each cut about 65 kB.
+    # Text cuts use a small optical size (sturdy, low contrast); the display cut a large one.
     Family(
         "playfair",
-        "Playfair",
         "latin",
         [
-            Source("playfair", "Playfair[opsz,wdth,wght].ttf", "normal", {"wdth": 100}),
-            Source("playfair", "Playfair-Italic[opsz,wdth,wght].ttf", "italic", {"wdth": 100}),
+            Source("playfair", PLAYFAIR, "PlayfairText-Regular", {"wdth": 100, "opsz": 14, "wght": 400}),
+            Source("playfair", PLAYFAIR_ITALIC, "PlayfairText-Italic", {"wdth": 100, "opsz": 14, "wght": 400}),
+            Source("playfair", PLAYFAIR, "PlayfairText-SemiBold", {"wdth": 100, "opsz": 14, "wght": 600}),
+            Source("playfair", PLAYFAIR, "PlayfairDisplay-Medium", {"wdth": 100, "opsz": 64, "wght": 500}),
         ],
     ),
     Family(
         "tiro-devanagari-sanskrit",
-        "TiroDevanagariSanskrit",
         "devanagari",
-        [
-            Source("tirodevanagarisanskrit", "TiroDevanagariSanskrit-Regular.ttf", "normal"),
-            Source("tirodevanagarisanskrit", "TiroDevanagariSanskrit-Italic.ttf", "italic"),
-        ],
-    ),
-    Family(
-        "anek-latin",
-        "AnekLatin",
-        "latin",
-        [Source("aneklatin", "AnekLatin[wdth,wght].ttf", "normal")],
-    ),
-    Family(
-        "anek-devanagari",
-        "AnekDevanagari",
-        "devanagari",
-        # The full width axis makes this file about 726 kB; pinning it keeps it near 255 kB.
-        [Source("anekdevanagari", "AnekDevanagari[wdth,wght].ttf", "normal", {"wdth": 100})],
-    ),
-    Family(
-        "literata",
-        "Literata",
-        "latin",
-        [
-            Source("literata", "Literata[opsz,wght].ttf", "normal"),
-            Source("literata", "Literata-Italic[opsz,wght].ttf", "italic"),
-        ],
-    ),
-    Family(
-        "eczar",
-        "Eczar",
-        "devanagari",
-        [Source("eczar", "Eczar[wght].ttf", "normal")],
+        [Source("tirodevanagarisanskrit", "TiroDevanagariSanskrit-Regular.ttf", "TiroDevanagariSanskrit-Regular")],
     ),
 ]
 
@@ -183,14 +158,14 @@ def main() -> None:
     parser.add_argument("--only", nargs="*", help="build only these family slugs")
     args = parser.parse_args()
 
-    lock: dict[str, str] = json.loads(LOCK_FILE.read_text()) if LOCK_FILE.exists() else {}
+    # With --update-lock, start empty so the lock lists only the files this build uses.
+    lock: dict[str, str] = {} if args.update_lock or not LOCK_FILE.exists() else json.loads(LOCK_FILE.read_text())
     for family in FAMILIES:
         if args.only and family.slug not in args.only:
             continue
         for source in family.sources:
             path = fetch(source.dir, source.file, args.cache, lock, args.update_lock)
-            suffix = "-Italic" if source.style == "italic" else ""
-            build(path, source, family.script, OUT_DIR / family.slug / f"{family.name}{suffix}.woff2")
+            build(path, source, family.script, OUT_DIR / family.slug / f"{source.out}.woff2")
         licence = fetch(family.sources[0].dir, "OFL.txt", args.cache, lock, args.update_lock)
         shutil.copyfile(licence, OUT_DIR / family.slug / "OFL.txt")
     if args.update_lock:

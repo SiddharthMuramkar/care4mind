@@ -26,6 +26,7 @@ export const CONTRAST_PAIRS = [
   { foreground: 'link', background: 'ground', minimum: 4.5 },
   { foreground: 'surface-ink', background: 'surface', minimum: 4.5 },
   { foreground: 'surface-muted', background: 'surface', minimum: 4.5 },
+  { foreground: 'surface-link', background: 'surface', minimum: 4.5 },
   { foreground: 'accent-ink', background: 'accent', minimum: 4.5 },
   { foreground: 'highlight-ink', background: 'highlight', minimum: 4.5 },
   { foreground: 'focus', background: 'ground', minimum: 3 },

@@ -1,12 +1,15 @@
 import localFont from 'next/font/local'
 
-// Built by scripts/fonts/subset.py. next/font reads these options at build time, so every value is
-// written out literally. One family per module: a page preloads only the fonts its imports reach.
+// Built by scripts/fonts/subset.py: Devanagari only. It is declared with a unicode-range and
+// never preloaded, so pages without Devanagari never download it.
 
 export const tiroDevanagariSanskrit = localFont({
   src: [
-    { path: './tiro-devanagari-sanskrit/TiroDevanagariSanskrit.woff2', style: 'normal', weight: '400' },
-    { path: './tiro-devanagari-sanskrit/TiroDevanagariSanskrit-Italic.woff2', style: 'italic', weight: '400' },
+    {
+      path: './tiro-devanagari-sanskrit/TiroDevanagariSanskrit-Regular.woff2',
+      style: 'normal',
+      weight: '400',
+    },
   ],
   variable: '--font-tiro',
   display: 'swap',
