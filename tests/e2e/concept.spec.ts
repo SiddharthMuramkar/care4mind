@@ -1,6 +1,7 @@
-import { expect, test } from '@playwright/test'
+import { expect, type Locator, test } from '@playwright/test'
 
 import { expectNoAxeViolations } from './axe'
+import { recordAnimationStarts, transitionedOn } from './drawings'
 
 test.describe('Concept page', () => {
   test.beforeEach(async ({ page }) => {
@@ -62,4 +63,42 @@ test('the homepage card opens the Concept page', async ({ page }) => {
   await expect(page).toHaveURL('/concepts/vikshepa')
   await expect(page.getByRole('heading', { level: 1 })).toContainText('Vikṣepa')
   expect(errors).toEqual([])
+})
+
+/** How far a drawing is turned, in degrees, as it is drawn on screen. */
+const turned = (drawing: Locator) =>
+  drawing.evaluate((element) => {
+    const { transform } = getComputedStyle(element)
+    const matrix = new DOMMatrixReadOnly(transform === 'none' ? undefined : transform)
+    return Math.round((Math.atan2(matrix.b, matrix.a) * 180) / Math.PI)
+  })
+
+test('the References control wears a kolam knot that turns as the list opens, and back', async ({
+  page,
+}) => {
+  await recordAnimationStarts(page)
+  await page.goto('/concepts/vikshepa')
+  const trigger = page.getByRole('button', { name: /References/ })
+  const knot = trigger.locator('svg')
+  // A 1×1 kolam: one unbroken line looped round one dot, silent to assistive technology.
+  await expect(knot).toHaveAttribute('aria-hidden', 'true')
+  await expect(knot.locator('path')).toHaveCount(1)
+  await expect(knot.locator('circle')).toHaveCount(1)
+  expect(await turned(knot)).toBe(0)
+  const dot = knot.locator('circle')
+  const closedDot = (await dot.boundingBox())?.width ?? NaN
+
+  await trigger.click()
+  await expect(trigger).toHaveAttribute('aria-expanded', 'true')
+  await expect.poll(() => turned(knot)).toBe(45)
+  expect(await transitionedOn(knot), 'it turns by transform').toEqual(['transform'])
+  // A near-round knot looks much the same turned, so its dot swells too: the open state shows at a
+  // glance. Turning alone widens the dot's box by √2; swelling widens it well past that.
+  await expect.poll(async () => (await dot.boundingBox())?.width).toBeGreaterThan(closedDot * 2)
+  expect(await transitionedOn(dot), 'it swells by transform').toEqual(['transform'])
+
+  await trigger.click()
+  await expect(trigger).toHaveAttribute('aria-expanded', 'false')
+  await expect.poll(() => turned(knot)).toBe(0)
+  await expect.poll(async () => (await dot.boundingBox())?.width).toBeCloseTo(closedDot, 0)
 })

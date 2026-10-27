@@ -5,6 +5,7 @@ import { Accordion } from '@base-ui/react/accordion'
 import type { Reference } from '@/content'
 
 import { Citation } from './Citation'
+import { Kolam } from './Kolam'
 import styles from './ReferenceList.module.css'
 
 /**
@@ -20,7 +21,7 @@ export function ReferenceList({ references }: { references: readonly Reference[]
           <Accordion.Trigger className={styles.trigger}>
             <span>References</span>
             <span className={styles.count}>({references.length})</span>
-            <span className={styles.icon} aria-hidden />
+            <Kolam columns={1} rows={1} className={styles.knot} />
           </Accordion.Trigger>
         </Accordion.Header>
         <Accordion.Panel className={styles.panel}>

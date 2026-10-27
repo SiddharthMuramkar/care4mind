@@ -31,31 +31,36 @@
   color: var(--color-surface-muted);
 }
 
-/* A plus that turns into a minus: two rules, the vertical one folding flat. */
-.icon {
-  position: relative;
+/*
+ * A kolam knot, one line looped round one dot. As the list opens it turns an
+ * eighth of a turn, from a diamond to a square, and its dot swells: the knot is
+ * nearly round, so the dot is what shows the list is open at a glance.
+ */
+.knot {
+  flex: none;
   margin-inline-start: auto;
   align-self: center;
-  width: 18px;
-  height: 18px;
+  width: 0.9em;
+  height: auto;
+  --kolam-line-width: 4px;
 }
 
-.icon::before,
-.icon::after {
-  content: '';
-  position: absolute;
-  inset: 8px 0 auto;
-  height: 2px;
-  background: var(--color-highlight);
-  transition: transform var(--duration-quick) var(--ease-out);
+.knot,
+.knot circle {
+  transition: transform var(--duration-move) var(--ease-out);
 }
 
-.icon::after {
-  transform: rotate(90deg);
+.knot circle {
+  transform-box: fill-box;
+  transform-origin: center;
 }
 
-.trigger[data-panel-open] .icon::after {
-  transform: rotate(0deg);
+.trigger[data-panel-open] .knot {
+  transform: rotate(45deg);
+}
+
+.trigger[data-panel-open] .knot circle {
+  transform: scale(1.8);
 }
 
 /* Fade only: animating height would make the page re-layout on every frame. */
