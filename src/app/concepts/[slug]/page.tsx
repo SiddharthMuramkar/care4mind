@@ -7,6 +7,7 @@ import { Breadcrumbs } from '@/components/Breadcrumbs'
 import { Folio } from '@/components/Folio'
 import { OrnamentRule } from '@/components/OrnamentRule'
 import { PageTurn, turnForward } from '@/components/PageTurn'
+import { ReadingThread } from '@/components/ReadingThread'
 import { ReferenceList } from '@/components/ReferenceList'
 import { SanskritTerm } from '@/components/SanskritTerm'
 import { Shloka } from '@/components/Shloka'
@@ -46,6 +47,7 @@ export default async function ConceptPage({ params }: PageProps<'/concepts/[slug
   return (
     <PageTurn>
       <main id="main" className={reading.page}>
+        <ReadingThread />
         <Breadcrumbs
           trail={[
             { label: 'Home', href: '/' },

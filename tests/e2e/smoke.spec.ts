@@ -1,6 +1,7 @@
 import { expect, test } from '@playwright/test'
 
 import { frameKolam, openingFolio, unfinishedDrawings } from './drawings'
+import { READING_PAGES, readingThread, readTo } from './reading'
 import { PAGES } from './routes'
 import { travel } from './scrolling'
 
@@ -38,3 +39,13 @@ test('the opening kolam scrolls with the page where scroll timelines are missing
   expect(folio).toBe(240)
   expect(kolam).toBe(folio)
 })
+
+for (const { path, name } of READING_PAGES) {
+  test(`${name} has no reading thread where scroll timelines are missing`, async ({ page }) => {
+    await page.goto(path)
+    const scrollTimelines = await page.evaluate(() => CSS.supports('animation-timeline: scroll()'))
+    test.skip(scrollTimelines, 'this browser fills the thread on a scroll timeline')
+    await readTo(page, 0.5)
+    expect(await readingThread(page)).toBeNull()
+  })
+}

@@ -3,6 +3,7 @@ import { expect, type Page, test } from '@playwright/test'
 import { frameKolam, openingFolio, unfinishedDrawings } from './drawings'
 import { pageTurns, prefetched, recordPageTurns } from './page-turns'
 import { inkSpreadsOn, recordInkSpreads } from './presses'
+import { READING_PAGES, readingThread, readTo } from './reading'
 import { PAGES } from './routes'
 import { scrollPath, travel } from './scrolling'
 
@@ -135,3 +136,11 @@ test('pointing at or focusing the logo starts no drawing, with reduced motion', 
   expect(await movingAnimations(page)).toEqual([])
   expect(await unfinishedDrawings(page)).toEqual([])
 })
+
+for (const { path, name } of READING_PAGES) {
+  test(`${name} has no reading thread, with reduced motion`, async ({ page }) => {
+    await page.goto(path)
+    await readTo(page, 0.5)
+    expect(await readingThread(page)).toBeNull()
+  })
+}

@@ -6,6 +6,7 @@ import { Breadcrumbs } from '@/components/Breadcrumbs'
 import { Citation } from '@/components/Citation'
 import { Folio } from '@/components/Folio'
 import { PageTurn, turnForward } from '@/components/PageTurn'
+import { ReadingThread } from '@/components/ReadingThread'
 import { getConcept, getQuestionnaire, listQuestionnaires } from '@/content'
 import { capitalise } from '@/lib/text'
 
@@ -42,6 +43,7 @@ export default async function QuestionnairePage({ params }: PageProps<'/question
   return (
     <PageTurn>
       <main id="main" className={reading.page}>
+        <ReadingThread />
         <Breadcrumbs
           trail={[
             { label: 'Home', href: '/' },
