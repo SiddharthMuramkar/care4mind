@@ -363,6 +363,8 @@ export default defineConcept({
       'Table row gloss: “Craving/Sensuality” → “Craving, sensuality”.',
       'Obstacle names split out of the compound in the page’s Yoga Sūtra 1.30 shloka, in their dictionary forms: “आलस्य”, “अविरति”, “अलब्धभूमिकत्व”, “अनवस्थितत्व”, “bhrāntidarśana” and “alabdhabhūmikatva”.',
       'Interface text dropped: the “Introduction” and “References” labels.',
+      // Listed when verify first checked the record (ticket 02): a fix the foundation made.
+      'Typo fixed: “above- mentioned” → “above-mentioned”.',
     ],
     flags: [
       {
