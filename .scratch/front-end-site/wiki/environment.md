@@ -12,3 +12,4 @@ Each entry is dated, with what was true at that point.
 - **2026-10-27, GitHub:** the GitHub MCP server fails to connect, so use the `gh` CLI. Pushing workflow files needed `gh auth refresh -s workflow`.
 - **2026-10-27, captures:** the saved site copies are in `/home/fedora/care4mind-captures` (`CARE4MIND_CAPTURES`), moved from the session scratchpad so a reboot can't lose them. They were stripped of the answer key, bands, passwords and user fields, and are never committed.
 - **2026-10-27, machine:** 8 CPUs and 15 GB of RAM. At most 3 heavy lanes, with Playwright and Lighthouse serialised under `flock /tmp/care4mind-heavy.lock`.
+- **2026-10-28, Vitest under load:** with three content lanes at once the load average reached 17–28 on 8 CPUs, and whole-content unit tests passed Vitest's 5-second default (each passed alone). Lanes loaded the content once in a `beforeAll` with 60 s; site ticket 01 sets a global `testTimeout`.
