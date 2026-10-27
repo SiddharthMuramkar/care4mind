@@ -111,6 +111,59 @@
   animation-timing-function: var(--ease-out);
 }
 
+/* The header and footer keep their own names, so they stay put, above the turning page. */
+::view-transition-group(site-header),
+::view-transition-group(site-footer) {
+  z-index: 1;
+  animation: none;
+}
+
+::view-transition-old(site-header),
+::view-transition-old(site-footer) {
+  display: none;
+}
+
+::view-transition-new(site-header),
+::view-transition-new(site-footer) {
+  animation: none;
+}
+
+/*
+ * Page-turn (PageTurn): going deeper slides the page away to the left as the
+ * next one comes in from the right, like turning a page forward. Going back
+ * turns it the other way.
+ */
+@media (prefers-reduced-motion: no-preference) {
+  ::view-transition-old(.turn-forward),
+  ::view-transition-old(.turn-back) {
+    animation: page-leave var(--duration-move) var(--ease-in-out) both;
+  }
+
+  ::view-transition-new(.turn-forward),
+  ::view-transition-new(.turn-back) {
+    animation: page-arrive var(--duration-move) var(--ease-out) both;
+  }
+
+  ::view-transition-old(.turn-back),
+  ::view-transition-new(.turn-back) {
+    --turn: -1;
+  }
+}
+
+@keyframes page-leave {
+  to {
+    opacity: 0;
+    transform: translateX(calc(var(--turn, 1) * -3rem));
+  }
+}
+
+@keyframes page-arrive {
+  from {
+    opacity: 0;
+    transform: translateX(calc(var(--turn, 1) * 3rem));
+  }
+}
+
 /*
  * Reduced motion (NFR-01). Every animation and transition finishes at once,
  * view transitions swap instantly, and scroll-driven effects are only ever

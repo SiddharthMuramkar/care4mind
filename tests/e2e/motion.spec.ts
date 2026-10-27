@@ -1,6 +1,7 @@
 import { expect, type Page, test } from '@playwright/test'
 
 import { frameKolam, openingFolio, unfinishedDrawings } from './drawings'
+import { pageTurns, prefetched, recordPageTurns } from './page-turns'
 import { inkSpreadsOn, recordInkSpreads } from './presses'
 import { PAGES } from './routes'
 import { scrollPath, travel } from './scrolling'
@@ -83,6 +84,27 @@ test('pressing a call to action spreads no ink and moves nothing, with reduced m
   expect(await inkSpreadsOn(cta)).toEqual([])
   expect(await movingAnimations(page)).toEqual([])
 })
+
+for (const { from, link, to } of [
+  { from: '/', link: 'Read about Vikṣepa', to: '/concepts/vikshepa' },
+  { from: '/concepts/vikshepa', link: 'Home', to: '/' },
+]) {
+  test(`following "${link}" changes the page at once, with reduced motion`, async ({ page }) => {
+    await recordPageTurns(page)
+    await page.goto(from)
+    const target = page.getByRole('link', { name: link, exact: true })
+    await prefetched(target)
+    await target.click()
+    await expect(page).toHaveURL(to)
+    await expect(page.getByRole('heading', { level: 1 })).toBeVisible()
+    for (const change of await pageTurns(page)) {
+      expect(change.leaving).toBeNull()
+      expect(change.arriving).toBeNull()
+      expect(change.flights).toEqual([])
+    }
+    expect(await movingAnimations(page)).toEqual([])
+  })
+}
 
 test('the opening kolam scrolls with the page, with reduced motion', async ({ page }) => {
   await page.goto('/')

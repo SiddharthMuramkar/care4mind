@@ -7,7 +7,8 @@ import styles from './SiteHeader.module.css'
 // and its mobile pattern; until then two links fit at every width.
 export function SiteHeader() {
   return (
-    <header className={styles.header}>
+    // Its own transition name keeps it still while the page turns (globals.css).
+    <header className={styles.header} style={{ viewTransitionName: 'site-header' }}>
       <Link href="/" className={styles.home} aria-label="Care4Mind home">
         <Logo redraw />
       </Link>
