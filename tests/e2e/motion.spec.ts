@@ -26,7 +26,8 @@ for (const { path, name } of PAGES) {
     await page.waitForTimeout(100)
     expect(await movingAnimations(page)).toEqual([])
 
-    const button = page.getByRole('button').first()
+    // Disabled buttons (the Questionnaire's "Start") can't be clicked, so pick the first one that can.
+    const button = page.locator('main button:enabled').first()
     if (await button.count()) {
       await button.scrollIntoViewIfNeeded()
       await button.click()

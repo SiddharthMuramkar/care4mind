@@ -2,7 +2,7 @@
 // Lighthouse cannot measure INP, so Total Blocking Time stands in for it.
 const PORT = 3200
 // Lighthouse won't audit a page that answers 404, so the 404 page is covered by Playwright instead.
-const paths = ['/', '/directions/press', '/directions/chroma', '/directions/kolam']
+const paths = ['/', '/concepts/vikshepa', '/questionnaires/karmayoga-scale']
 
 module.exports = {
   ci: {

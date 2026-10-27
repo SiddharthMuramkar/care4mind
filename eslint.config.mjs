@@ -9,7 +9,14 @@ export default defineConfig([
   ...nextVitals,
   ...nextTypescript,
   // The jsx-a11y plugin is already registered by eslint-config-next; add its full recommended rule set.
-  { files: ['**/*.{jsx,tsx}'], rules: jsxA11y.flatConfigs.recommended.rules },
+  {
+    files: ['**/*.{jsx,tsx}'],
+    rules: {
+      ...jsxA11y.flatConfigs.recommended.rules,
+      // A scrollable region (a wide table on a phone) must take keyboard focus so it can be scrolled.
+      'jsx-a11y/no-noninteractive-tabindex': ['error', { tags: [], roles: ['tabpanel', 'region'] }],
+    },
+  },
   ...tseslint.configs.strict.map((config) => ({ ...config, files: ['**/*.{ts,tsx}'] })),
   prettier,
   globalIgnores([
