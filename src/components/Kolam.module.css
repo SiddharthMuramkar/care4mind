@@ -19,24 +19,28 @@
   fill: var(--color-kolam-dot);
 }
 
-/* The line is one dash as long as itself (pathLength 1), so drawing it is one dash offset. */
+/*
+ * The line is one dash as long as itself (pathLength 1), so drawing it is one
+ * dash offset. The dash is there only while it draws: on a long curved line a
+ * browser's dash can stop just short of the end, leaving a gap where it closes.
+ */
 @keyframes draw {
   from {
+    stroke-dasharray: 1;
     stroke-dashoffset: 1;
   }
   to {
+    stroke-dasharray: 1;
     stroke-dashoffset: 0;
   }
 }
 
 @media (prefers-reduced-motion: no-preference) {
   .drawOnLoad .line {
-    stroke-dasharray: 1;
-    animation: draw var(--duration-draw) var(--ease-in-out) both;
+    animation: draw var(--duration-draw) var(--ease-in-out) backwards;
   }
 
   a:is(:hover, :focus-visible) .redrawOnHover .line {
-    stroke-dasharray: 1;
     animation: draw var(--duration-redraw) var(--ease-in-out);
   }
 
@@ -47,8 +51,7 @@
     }
 
     .drawOnScroll .line {
-      stroke-dasharray: 1;
-      animation: draw linear both;
+      animation: draw linear backwards;
       animation-timeline: --kolam;
       animation-range: entry 10% cover 60%;
     }
