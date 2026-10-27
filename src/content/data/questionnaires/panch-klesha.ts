@@ -32,6 +32,12 @@ export default defineQuestionnaire({
       'The title is the page’s own, “Panch Klesha – Vikaar Profiling”: the page gives its questionnaire no other name.',
       'Candidate source: Tomar (2024), whose contents research ticket 11 (Published scales) found this questionnaire in by name. The page names no source for the questionnaire itself.',
     ],
-    flags: [],
+    flags: [
+      {
+        for: 'psychology-expert',
+        note: 'The page says nothing about what its questionnaire measures outside its held-back score section, so no purpose is stored, and none was written. Write one, or approve leaving it out.',
+        ticket: 26,
+      },
+    ],
   },
 })

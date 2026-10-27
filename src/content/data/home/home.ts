@@ -60,6 +60,8 @@ export default defineHome({
       'Left out: the “Psychology” heading above the areas, the “Karma Yoga: An Indian Perspective of Work” heading, and the closing “Ancient Indian Wisdom” link to DharmaWiki’s main page.',
       // Listed when ticket 07 set the area targets.
       'Area links set for the new site (D11): Concepts leads to the Concepts index (it linked /concepts/), Techniques to Methods (it linked /methods/), Resources to the Library home (it linked /resources/, an empty page), Tradition and Texts to Text Books (it linked /text-books-2-2/, merged into Text Books) and Research to Courses (it linked /institutes/, now Courses). Applications linked to the current site’s questionnaire app, which no longer works, and has no link.',
+      // Listed by the fidelity sweep (ticket 12): the headings of the cards left out above.
+      'Headings left out with their cards, as the page writes them: “Questionnaires & Surveys” over all of them; “Questionaire”, “Questionaire -02” (twice) and “Questionaire - 03”, whose “Click to begin....” links go to the questionnaire app; and “Dosha”, “Survey -02”, “survey -03” and “Survey -04”, whose “Survey...” links go to the Dosha Survey page. The Dosha card’s description is quoted in a flag on the Dosha Survey.',
     ],
     flags: [
       {

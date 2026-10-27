@@ -36,6 +36,12 @@ export default defineQuestionnaire({
       'Candidate source: Tomar (2024), whose contents research ticket 11 (Published scales) found this questionnaire in by name, as “Asteya (Non-Stealing) Profiling”. The page names no source for the questionnaire itself.',
       'No purpose: outside its held-back score section, the page says nothing about what its questionnaire measures.',
     ],
-    flags: [],
+    flags: [
+      {
+        for: 'psychology-expert',
+        note: 'The page says nothing about what its questionnaire measures outside its held-back score section, so no purpose is stored, and none was written. Write one, or approve leaving it out.',
+        ticket: 26,
+      },
+    ],
   },
 })

@@ -30,6 +30,12 @@ export default defineQuestionnaire({
       'The title is the name the page gives its questionnaire in its first heading, “Know Your State of Mind Profile”; the page’s own title is “Know Your Mind”.',
       'Candidate source: Tomar (2024), whose contents research ticket 11 (Published scales) found this questionnaire in by name. The page names no source for the questionnaire itself.',
     ],
-    flags: [],
+    flags: [
+      {
+        for: 'psychology-expert',
+        note: 'The page says nothing about what its questionnaire measures outside its held-back score section, so no purpose is stored, and none was written. Write one, or approve leaving it out.',
+        ticket: 26,
+      },
+    ],
   },
 })

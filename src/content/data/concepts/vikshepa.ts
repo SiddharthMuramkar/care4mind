@@ -366,6 +366,8 @@ export default defineConcept({
       'Interface text dropped: the “Introduction” and “References” labels.',
       // Listed when verify first checked the record (ticket 02): a fix the foundation made.
       'Typo fixed: “above- mentioned” → “above-mentioned”.',
+      // Listed by the fidelity sweep (ticket 12): headings the page has that no field holds.
+      'Verse headings dropped: “Shloka from Bhagavad Gita (Chapter 1, Sutra 30)” and “Shloka from Vedanta Sara (5.211)”. Each verse shows its work and number.',
     ],
     flags: [
       {

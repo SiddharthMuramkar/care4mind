@@ -2,15 +2,15 @@ import { defineQuestionnaire } from '@/content/schema'
 
 // The current site's Dosha Survey, a form of 12 questions. It is kept as a coming-later
 // Questionnaire (D16): its questions are stored word for word but never offered as a form, and
-// its author, rights and scoring are unknown. Its link to triguṇa, which places its card in the
-// temperament topic, is set by content-v1 ticket 12 once that Concept exists.
+// its author, rights and scoring are unknown. Its link to triguṇa, set by content-v1 ticket 12
+// once that Concept existed, places its card in the temperament topic (design notes B3).
 export default defineQuestionnaire({
   kind: 'questionnaire',
   slug: 'dosha-survey',
   title: 'Dosha Survey',
   sourceTitle: 'Dosha Survey',
   status: 'coming-later',
-  concepts: [],
+  concepts: ['triguna'],
   form: {
     responseSets: {
       q1: [
@@ -142,9 +142,19 @@ export default defineQuestionnaire({
         ticket: 26,
       },
       {
+        for: 'psychology-expert',
+        note: 'The survey’s page says nothing about what it measures, so no purpose is stored, and none was written. The current homepage’s “Dosha” card, left out with the homepage’s other questionnaire cards, describes it: “The Dosha Survey helps identify your unique mind-body type based on the three Ayurvedic principles — Vāta (air & space), Pitta (fire & water), and Kapha (earth & water)..”. Decide whether that sentence becomes its purpose, or approve leaving it out.',
+        ticket: 26,
+      },
+      {
         for: 'project-owner',
         note: 'No published source was found for the Dosha Survey (research ticket 11), so its author and rights holder are unknown. Its questions are stored but not offered as a form; permission is needed before they are published.',
         ticket: 1,
+      },
+      {
+        for: 'project-owner',
+        note: 'The current Dosha Survey page links no Concept. The record names triguṇa as its Concept, which places the survey’s card in the temperament topic, as the design notes do (B3): a structure call, not something the page says. Confirm the placement, or choose another topic or none.',
+        ticket: 13,
       },
     ],
   },

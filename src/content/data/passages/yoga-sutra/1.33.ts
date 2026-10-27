@@ -17,6 +17,7 @@ export default definePassage({
     sources: [{ url: 'https://care4mind.org/brahmavihara/', retrieved: '2026-10-27' }],
     edits: [
       'The verse number after the last line is left out, since the locator holds it: “ II 1.33 II” → “”.',
+      'Inline DharmaWiki link dropped, its word kept: “Chitta”, in the translation.',
     ],
     flags: [
       {
