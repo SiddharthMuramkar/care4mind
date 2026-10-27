@@ -274,7 +274,7 @@ interface DesignFact {
   says: RegExp
 }
 
-/** The 27 verses whose page names no work (census of passages), each stored under the work its text is. */
+/** The 27 verses whose page names no work (the passages census), stored under their text's work. */
 const UNNAMED_WORKS = [
   ...[
     '1.20',
