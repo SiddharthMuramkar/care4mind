@@ -143,10 +143,18 @@ const PAGES: Page[] = [FIVE_STEPS, MOMENTUM, SPIRITUAL, BRAHMA_VIHARA]
 let conceptRecords: readonly ConceptRecord[] = []
 let questionnaireRecords: readonly QuestionnaireRecord[] = []
 
+/**
+ * Reading every record and building the graph takes a few seconds, and more on a machine busy
+ * with parallel lanes; done once here, with room to spare, every test after it is quick.
+ */
+const LOADING_TIMEOUT = 60_000
+
 beforeAll(async () => {
   conceptRecords = await localSource.records('concept')
   questionnaireRecords = await localSource.records('questionnaire')
-})
+  // Built once per process and shared with the views the tests ask for.
+  await contentGraph()
+}, LOADING_TIMEOUT)
 
 const conceptOf = (slug: string) => conceptRecords.find((concept) => concept.slug === slug)
 const questionnaireOf = (slug: string) =>
