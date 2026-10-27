@@ -1,9 +1,8 @@
 import { ViewTransition, type ReactNode } from 'react'
 
 import type { Concept } from '@/content'
-import { capitalise } from '@/lib/text'
-
 import { cx } from '@/lib/cx'
+import { capitalise } from '@/lib/text'
 
 import styles from './ConceptCard.module.css'
 
@@ -20,20 +19,18 @@ interface Props {
  */
 export function ConceptCard({ concept, action, className }: Props) {
   return (
-    <article className={cx(styles.card, className)} data-part="card">
+    <article className={cx(styles.card, className)}>
       <ViewTransition name={`concept-title-${concept.slug}`} share="morph" default="none">
-        <h3 className={styles.title} data-part="card-title">
+        <h3 className={styles.title}>
           <span lang="sa-Latn">{capitalise(concept.term.iast)}</span>
         </h3>
       </ViewTransition>
       {concept.term.devanagari ? (
-        <p lang="sa-Deva" className={styles.deva} data-part="card-deva">
+        <p lang="sa-Deva" className={styles.deva}>
           {concept.term.devanagari}
         </p>
       ) : null}
-      <p className={styles.gloss} data-part="card-gloss">
-        {concept.gloss}
-      </p>
+      <p className={styles.gloss}>{concept.gloss}</p>
       <p className={styles.summary}>{concept.summary}</p>
       <div className={styles.action}>{action}</div>
     </article>

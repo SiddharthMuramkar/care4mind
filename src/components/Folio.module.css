@@ -1,0 +1,51 @@
+.folio {
+  position: relative;
+  padding: clamp(2rem, 6vw, 4.5rem) clamp(1.25rem, 6vw, 4.5rem);
+  background: var(--color-surface);
+  color: var(--color-surface-ink);
+  box-shadow:
+    inset 0 0 0 10px var(--color-surface),
+    inset 0 0 0 11px rgb(29 26 46 / 0.6),
+    inset 0 0 0 15px var(--color-surface),
+    inset 0 0 0 16px rgb(29 26 46 / 0.35),
+    0 30px 60px -20px rgb(0 0 0 / 0.55);
+  --color-focus: var(--color-surface-focus);
+  --color-link: var(--color-surface-link);
+  --rule-colour: var(--color-highlight);
+}
+
+.corner {
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  border: 1px solid rgb(29 26 46 / 0.6);
+  background: var(--color-surface);
+  transform: rotate(45deg);
+}
+
+.corner::after {
+  content: '';
+  position: absolute;
+  inset: 4px;
+  background: var(--color-highlight);
+}
+
+.corner[data-corner='tl'] {
+  top: 2px;
+  left: 2px;
+}
+
+.corner[data-corner='tr'] {
+  top: 2px;
+  right: 2px;
+}
+
+.corner[data-corner='bl'] {
+  bottom: 2px;
+  left: 2px;
+}
+
+.corner[data-corner='br'] {
+  bottom: 2px;
+  right: 2px;
+}

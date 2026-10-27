@@ -392,6 +392,7 @@ export const vikshepa: Concept = {
       'Typos fixed: “Negliegence” → “Negligence”, “Yogi Sutra” → “Yoga Sutra”, “above- stated” → “above-stated”, “consequences that typically” → “consequences typically”.',
       'Left out: the page’s High, Moderate and Low score indicators, which belong to its Questionnaire, and its inline links to dharmawiki.org.',
       'Reference list: one duplicated author run removed from Gurubhaktananda (2018); the Tomar (2024) Google Books link shortened to the book id; the APA link moved to https.',
+      'The link to the KarmaYoga Scale is added for this preview (several of its items are about distraction at work); the current page has none, and the content-links ticket decides real links.',
       'Not changed, for the Research editor: the first paragraph says “five consequences” and lists three; the Vedānta Sāra shloka has “वास्तु” where vastu may be meant; Sharma & Pareek has no year or journal.',
     ],
   },

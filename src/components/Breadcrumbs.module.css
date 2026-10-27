@@ -1,0 +1,35 @@
+.breadcrumbs ol {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  margin: 0;
+  padding: 0;
+  font-variant-caps: all-small-caps;
+  letter-spacing: 0.1em;
+  font-size: 1.0625rem;
+  color: var(--color-ink-muted);
+}
+
+.breadcrumbs li {
+  display: inline-flex;
+  align-items: center;
+}
+
+.breadcrumbs li + li::before {
+  content: '·' / '';
+  margin-inline: 0.6em;
+  color: var(--color-highlight);
+  font-weight: 600;
+}
+
+.breadcrumbs a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  color: var(--color-link);
+}
+
+.breadcrumbs [aria-current='page'] {
+  color: var(--color-ink);
+}

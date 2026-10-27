@@ -1,0 +1,12 @@
+.citation {
+  overflow-wrap: anywhere;
+}
+
+.title {
+  font-style: italic;
+}
+
+.link {
+  color: var(--color-link);
+  white-space: nowrap;
+}

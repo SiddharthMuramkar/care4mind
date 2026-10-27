@@ -1,0 +1,44 @@
+.rule {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 0.75rem;
+  color: var(--rule-colour, var(--color-highlight));
+}
+
+.line {
+  height: 1px;
+  background: currentColor;
+}
+
+.line:first-child {
+  transform-origin: right;
+}
+
+.line:last-child {
+  transform-origin: left;
+}
+
+.fleuron {
+  width: 6rem;
+}
+
+@keyframes ink-in {
+  from {
+    transform: scaleX(0.05);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+/* Scroll-driven, so it runs off the main thread; Firefox (no support yet) shows the finished rule. */
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    .line {
+      animation: ink-in linear both;
+      animation-timeline: view();
+      animation-range: entry 0% cover 40%;
+    }
+  }
+}

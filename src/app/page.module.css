@@ -1,0 +1,245 @@
+.main {
+  display: grid;
+  gap: clamp(3rem, 8vw, 5rem);
+}
+
+/* Hero: a folio page floating on indigo ink. */
+.hero {
+  padding: clamp(1.5rem, 5vw, 3rem) clamp(1rem, 4vw, 3rem) 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent 0 31px,
+    rgb(255 255 255 / 0.03) 31px 32px
+  );
+}
+
+.heroFolio {
+  max-width: 52rem;
+  margin-inline: auto;
+  text-align: center;
+}
+
+.kicker {
+  margin: 0 0 1.5rem;
+  font-variant-caps: all-small-caps;
+  letter-spacing: 0.16em;
+  font-size: 1.125rem;
+  color: var(--color-surface-muted);
+}
+
+.heroTitle {
+  margin: 0;
+  display: grid;
+  gap: 0.75rem;
+  font-weight: 400;
+}
+
+.heroDeva {
+  font-size: clamp(2.75rem, 11vw, 6.25rem);
+  line-height: 1.35;
+}
+
+.heroIast {
+  font-family: var(--font-text);
+  font-style: italic;
+  font-size: clamp(1.375rem, 3.6vw, 2.25rem);
+  line-height: 1.2;
+}
+
+.translation {
+  margin: 1rem auto 0;
+  max-width: 30ch;
+  font-size: clamp(1.125rem, 2.4vw, 1.375rem);
+  font-variant-caps: all-small-caps;
+  letter-spacing: 0.08em;
+}
+
+.heroFleuron {
+  width: min(12rem, 60%);
+  margin: 2rem auto;
+  color: var(--color-highlight);
+}
+
+.intro {
+  margin: 0 auto;
+  max-width: 44ch;
+  font-size: 1.125rem;
+  line-height: 1.65;
+}
+
+.ctas {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.75rem 1.25rem;
+  margin: 2.25rem 0 0;
+}
+
+.ctaPrimary,
+.ctaSecondary {
+  display: inline-flex;
+  align-items: center;
+  min-height: 48px;
+  padding: 0 1.5rem;
+  font-variant-caps: all-small-caps;
+  letter-spacing: 0.12em;
+  font-size: 1.1875rem;
+  text-decoration: none;
+  transition:
+    transform var(--duration-instant) var(--ease-press),
+    box-shadow var(--duration-instant) var(--ease-press);
+}
+
+.ctaPrimary {
+  background: var(--color-ground);
+  color: var(--color-ink);
+  box-shadow: 0 3px 0 #05061a;
+}
+
+.ctaPrimary:active {
+  transform: translateY(2px);
+  box-shadow:
+    0 1px 0 #05061a,
+    inset 0 2px 5px rgb(0 0 0 / 0.5);
+}
+
+.ctaSecondary {
+  color: var(--color-surface-ink);
+  box-shadow: inset 0 0 0 1px currentColor;
+}
+
+.ctaSecondary:active {
+  transform: translateY(1px);
+  box-shadow:
+    inset 0 0 0 1px currentColor,
+    inset 0 2px 4px rgb(0 0 0 / 0.2);
+}
+
+/* Sections on the indigo ground */
+.section {
+  display: grid;
+  gap: 1.25rem;
+  width: 100%;
+  max-width: 60rem;
+  margin-inline: auto;
+  padding-inline: clamp(1rem, 4vw, 3rem);
+  scroll-margin-top: 1.5rem;
+}
+
+.sectionTitle {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: clamp(2.25rem, 6vw, 3.25rem);
+  line-height: 1.1;
+}
+
+.sectionIntro {
+  margin: 0;
+  max-width: 52ch;
+  color: var(--color-ink-muted);
+  font-size: 1.125rem;
+}
+
+.rule {
+  width: min(28rem, calc(100% - 2rem));
+  margin-inline: auto;
+}
+
+/* Contents: a book's table of contents, with Devanagari numerals and dotted leaders. */
+.contents {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 1.25rem;
+}
+
+.entry {
+  display: grid;
+  grid-template-columns: 2.25rem auto 1fr auto;
+  grid-template-areas:
+    'number title leader status'
+    '. text text text';
+  align-items: baseline;
+  column-gap: 0.75rem;
+  row-gap: 0.25rem;
+}
+
+.entryNumber {
+  grid-area: number;
+  color: var(--color-link);
+  font-size: 1.375rem;
+}
+
+.entryTitle {
+  grid-area: title;
+  font-family: var(--font-display);
+  font-size: clamp(1.5rem, 3.5vw, 1.875rem);
+  line-height: 1.2;
+}
+
+.entryTitle a {
+  color: var(--color-link);
+}
+
+.entryLeader {
+  grid-area: leader;
+  align-self: end;
+  margin-bottom: 0.4rem;
+  border-bottom: 2px dotted var(--color-line);
+}
+
+.entryStatus {
+  grid-area: status;
+  color: var(--color-ink-muted);
+  font-variant-caps: all-small-caps;
+  letter-spacing: 0.1em;
+  font-size: 1.0625rem;
+}
+
+.entryText {
+  grid-area: text;
+  max-width: 56ch;
+  color: var(--color-ink-muted);
+}
+
+.cards {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 1.5rem;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 26rem), 1fr));
+}
+
+.note {
+  margin: 0;
+  max-width: 56ch;
+  color: var(--color-ink-muted);
+  font-style: italic;
+}
+
+.closing {
+  margin: 0 auto;
+  padding-inline: 1rem;
+  max-width: 24ch;
+  text-align: center;
+  font-family: var(--font-display);
+  font-size: clamp(1.75rem, 5vw, 2.75rem);
+  line-height: 1.2;
+}
+
+@media (max-width: 36rem) {
+  .entry {
+    grid-template-columns: 2rem 1fr;
+    grid-template-areas:
+      'number title'
+      '. status'
+      '. text';
+  }
+
+  .entryLeader {
+    display: none;
+  }
+}

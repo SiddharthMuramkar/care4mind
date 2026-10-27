@@ -1,0 +1,78 @@
+.root {
+  border-block: 1px solid var(--color-surface-rule);
+}
+
+.header {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: clamp(1.5rem, 3.5vw, 2rem);
+}
+
+.trigger {
+  appearance: none;
+  display: flex;
+  width: 100%;
+  align-items: baseline;
+  gap: 0.5rem;
+  min-height: 56px;
+  padding: 0.75rem 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+}
+
+.count {
+  font-family: var(--font-text);
+  font-size: 1.125rem;
+  color: var(--color-surface-muted);
+}
+
+/* A plus that turns into a minus: two rules, the vertical one folding flat. */
+.icon {
+  position: relative;
+  margin-inline-start: auto;
+  align-self: center;
+  width: 18px;
+  height: 18px;
+}
+
+.icon::before,
+.icon::after {
+  content: '';
+  position: absolute;
+  inset: 8px 0 auto;
+  height: 2px;
+  background: var(--color-highlight);
+  transition: transform var(--duration-quick) var(--ease-out);
+}
+
+.icon::after {
+  transform: rotate(90deg);
+}
+
+.trigger[data-panel-open] .icon::after {
+  transform: rotate(0deg);
+}
+
+/* Fade only: animating height would make the page re-layout on every frame. */
+.panel {
+  transition: opacity var(--duration-quick) var(--ease-out);
+}
+
+.panel[data-starting-style],
+.panel[data-ending-style] {
+  opacity: 0;
+}
+
+.list {
+  margin: 0;
+  padding: 0 0 1.5rem 1.5rem;
+  display: grid;
+  gap: 0.75rem;
+  font-size: 1rem;
+  line-height: 1.6;
+}

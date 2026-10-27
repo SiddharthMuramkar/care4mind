@@ -17,7 +17,10 @@ export function Shloka({ shloka, className }: { shloka: ShlokaContent; className
             <span key={index} className={styles.line}>
               {line}
               {index === lastLine ? (
-                <span className={styles.number}> ॥ {toDevanagariDigits(shloka.verse)} ॥</span>
+                <>
+                  {' '}
+                  <span className={styles.number}>॥ {toDevanagariDigits(shloka.verse)} ॥</span>
+                </>
               ) : null}
             </span>
           ))}
@@ -27,7 +30,10 @@ export function Shloka({ shloka, className }: { shloka: ShlokaContent; className
             <span key={index} className={styles.line}>
               {line}
               {index === lastTransliteration ? (
-                <span className={styles.number}> ‖ {shloka.verse} ‖</span>
+                <>
+                  {' '}
+                  <span className={styles.number}>‖ {shloka.verse} ‖</span>
+                </>
               ) : null}
             </span>
           ))}

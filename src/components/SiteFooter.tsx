@@ -1,0 +1,20 @@
+import { site } from '@/config/site'
+
+import { Fleuron } from './Fleuron'
+import styles from './SiteFooter.module.css'
+import { Wordmark } from './Wordmark'
+
+export function SiteFooter() {
+  return (
+    <footer className={styles.footer}>
+      <Fleuron className={styles.fleuron} />
+      <Wordmark />
+      <p className={styles.tagline}>{site.tagline}</p>
+      <p className={styles.credit}>Powered by IIT Bombay-SJMSOM &amp; HUA</p>
+      <p className={styles.preview}>
+        A preview of the new site, not yet public. Content carried over from the current site has
+        not been reviewed yet.
+      </p>
+    </footer>
+  )
+}
