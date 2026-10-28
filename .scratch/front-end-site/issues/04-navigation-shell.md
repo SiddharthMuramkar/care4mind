@@ -1,6 +1,6 @@
 # 04: Navigation shell
 
-Status: ready-for-agent
+Status: resolved
 Blocked by: 16
 Spec: [Front-end site: every public page](../spec.md) · Design: [design.md](../design.md) §C1, §C2 · Decisions: D01, D20, D21
 
@@ -36,47 +36,47 @@ Spec: [Front-end site: every public page](../spec.md) · Design: [design.md](../
 
 ## Acceptance criteria
 
-- [ ] **Main navigation (D01):**
+- [x] **Main navigation (D01):**
   - Every page's header shows the logo and then, in order, Concepts · Texts · Questionnaires · Library · Search.
   - They are server-rendered links to `/concepts/`, `/texts/`, `/questionnaires/`, `/library/` and `/search/`, made with `hrefFor()`, and they work with JavaScript off.
   - The section you are in is marked visibly and with `aria-current`: `"page"` on the section's own page and `"true"` below it.
-- [ ] **Panels on wide screens** (a Base UI NavigationMenu, with links rendered through Next's `Link`):
+- [x] **Panels on wide screens** (a Base UI NavigationMenu, with links rendered through Next's `Link`):
   - The Concepts panel lists the five topics with their Concept counts, the A–Z and, while `conceptMap` is on, the Concept map.
   - The Library panel lists its five pages.
   - Each panel opens from the keyboard and closes with Escape, with focus back on the control that opened it.
   - Hover opens it after a short delay, and the panel stays open while the pointer moves into it (WCAG 1.4.13).
   - A panel never traps focus.
-- [ ] **Menu on narrow screens:**
+- [x] **Menu on narrow screens:**
   - Below the width at which the five sections fit on one line, a "Menu" button opens a Base UI Drawer.
   - Its code loads on the first press or when the browser is idle.
   - While open, focus moves into the sheet and stays there.
   - Escape, a Close button or a swipe dismisses it, and following a link closes it and navigates.
   - Focus returns to Menu when it closes.
   - Without JavaScript, Menu is a link to the full navigation in the footer.
-- [ ] **Fits at every width:**
+- [x] **Fits at every width:**
   - The header neither wraps nor scrolls sideways at 320, 360, 768 or 1440 px.
   - Every header control is at least 44 × 44 CSS px, and the logo keeps its 48 px target.
-- [ ] **Footer:**
+- [x] **Footer:**
   - The full navigation: every section and every Library page.
   - The wordmark, tagline, credit and preview notice.
   - A link to `/proposals/` while either proposal flag is on.
-- [ ] **Feature flags (D16, D20):**
+- [x] **Feature flags (D16, D20):**
   - `features` has `questionnairePreview`, `conceptMap` and `devanagariFirst`.
   - Each is on in local runs and Vercel previews, off when `VERCEL_ENV` is `production`, and can be forced either way by its own environment variable.
   - Unit tests cover the three environments and both overrides for each flag.
   - If content-v1 already reads the preview flag somewhere else, that place reads `features` instead.
-- [ ] **Toasts:**
+- [x] **Toasts:**
   - One Base UI Toast provider sits in the layout, with a `toast()` helper for later tickets.
   - Toasts are announced politely and never take focus.
   - Each stays at least 5 s, pauses while hovered or focused, and can be dismissed.
-- [ ] **Slots,** with their props final and documented in a short comment, so later tickets change only their insides:
+- [x] **Slots,** with their props final and documented in a short comment, so later tickets change only their insides:
   - **SearchTrigger** sits in the header and the Drawer. Its stub is a link to `/search/` labelled "Search", and it accepts an optional initial query.
   - **ScriptPreference** sits in the header and the Drawer. Its stub renders nothing.
   - **HeadScript** sits in the document head. Its stub renders nothing.
   - **ScriptPair** renders a term's two spellings, IAST then Devanagari, each with its `lang` tag (`sa-Latn`, `sa-Deva`).
   - **ProposalNote** works from day one: a labelled note reading "Proposal" that links to `/proposals/`.
   - **LinkPreview** takes a link plus a typed preview payload (kind, name, Devanagari, gloss and a short text). Its stub renders the plain link, and its root, mounted once in the layout, renders nothing.
-- [ ] **Tokens, once.** `globals.css` gains every token later tickets need, so none of them edits it:
+- [x] **Tokens, once.** `globals.css` gains every token later tickets need, so none of them edits it:
   - topic hues;
   - Questionnaire status colours (always paired with text);
   - the Proposal label;
@@ -87,23 +87,23 @@ Spec: [Front-end site: every public page](../spec.md) · Design: [design.md](../
   - durations for morphs and list reordering.
 
   Every new text pair is added to the contrast test at 4.5:1, and every graphic or focus pair at 3:1.
-- [ ] **Press only (D21):** after merging the integration branch with ticket 16, this lane's Kolam uses go:
+- [x] **Press only (D21):** after merging the integration branch with ticket 16, this lane's Kolam uses go:
   - the `kolam()` call in NavPanels, `<Kolam>` in MenuDrawer and ToastViewport, and `<Logo redraw>`;
   - the kolam colour tokens its CSS reads.
 
   The drawings are replaced with Press ornaments (the Fleuron or OrnamentRule) and the colours with Press tokens, and `git grep -il kolam -- src tests docs` prints nothing on this lane. This ticket no longer owns the logo: ticket 16 does.
-- [ ] **Reduced motion:** panels and the Drawer open and close without sliding or fading, and still work.
-- [ ] **Speed:**
+- [x] **Reduced motion:** panels and the Drawer open and close without sliding or fading, and still work.
+- [x] **Speed:**
   - The header adds no layout shift.
   - The Drawer's code isn't in any page's first-load JavaScript.
   - Opening the Drawer is measured once at 4× CPU slowdown and recorded in Comments; ticket 15 adds the standing check.
-- [ ] **Tests:** `nav.spec.ts` covers:
+- [x] **Tests:** `nav.spec.ts` covers:
   - every header link with JavaScript disabled;
   - opening and closing each panel by keyboard, with focus returning;
   - the Drawer at 360 px: it opens, Tab stays inside, Escape closes it, focus returns, and a link closes it and navigates;
   - axe with each panel open and with the Drawer open;
   - no overflow at 320 px.
-- [ ] **Done-check:**
+- [x] **Done-check:**
   - `pnpm check` passes;
   - the lane's end-to-end run passes: `E2E_SCOPE=sample E2E_PORT=<lane port> scripts/lane/heavy.sh pnpm check:e2e`, covering Chromium at 360, 768 and 1440 px, reflow at 320 px, reduced motion and Firefox, with WebKit in CI.
 
@@ -180,3 +180,28 @@ Spec: [Front-end site: every public page](../spec.md) · Design: [design.md](../
 - Heavy interactive parts follow the shell's pattern: a server-rendered link or control that works first, then the island's code from `whenIdle()` or on the first pointer or focus, with an early press replayed when the code arrives.
 
 **Left over:** nothing in this ticket. The toast e2e check waits for its first caller (see Toasts).
+
+### Check (lane/site-04, 2026-10-28)
+
+I checked every criterion against the code and the tests, not against the build notes. The lane already had the latest integration branch.
+
+- **Fixed:** the Library's pages were listed by size (Text Books, Inspirational Books, Courses) in the panel, the Drawer and the footer. The Library page itself lists Courses, Inspirational Books, Text Books. `siteNav()` now follows `library.list()`'s order after References, as the Library page does, so the two agree even if ticket 08 reorders the page. `nav.spec.ts`'s `LIBRARY` list follows the new order.
+- **Toasts, checked by hand** (nothing calls `toast()` yet): a scratch page on `next dev`, deleted afterwards, called `toast({ title: 'Copied', description })`.
+  - The toast lands in one `role="region"` with `aria-live="polite"`, and focus stays on the button that asked for it.
+  - It is still there after 5.2 s. Hovered, it is still there at 8.2 s, and it goes once the pointer leaves.
+  - F6 takes focus into the region, which keeps it open past 7.5 s. Dismiss removes it.
+- **Note for the first Copy button's e2e check (05 or 07):** Base UI keeps a toast's close button `aria-hidden` until the region is hovered or focused, so the announcement stays short. A test finds Dismiss by role only after F6 or a hover.
+- **Looked at** (above the fold, Chromium): the Concepts panel on `/concepts/vikshepa/` and the Library panel on `/library/` at 1440 px, the Drawer at 360 px, the header on `/texts/` at 768 px and on `/questionnaires/` at 320 px, and the footer at 1440 and 360 px. Everything is set as Press, aligned and readable. The Proposal label's pale blue is the editor's blue pencil (`ProposalNote.module.css`, ticket 12's), so it stays.
+- **Done-check:** `pnpm check` (660 unit tests, build) and `E2E_SCOPE=sample E2E_PORT=3110 scripts/lane/heavy.sh pnpm check:e2e` (527 passed, 112 skipped by width) both pass on the final commit.
+- **Lighthouse** (`pnpm lhci`, HTTP/2, LHCI_PORT=3210), median of 3 runs, after the fix:
+
+  | Page | LCP | TBT | CLS | Performance | Accessibility |
+  | --- | --- | --- | --- | --- | --- |
+  | `/` | 1.89 s | 29 ms | 0 | 1.0 | 1.0 |
+  | `/concepts/vikshepa/` | 1.95 s | 30 ms | 0.001 | 0.99 | 1.0 |
+  | `/questionnaires/karmayoga-scale/` | 1.88 s | 14 ms | 0.001 | 1.0 | 1.0 |
+
+  These match ticket 16's figures (1.87, 1.95 and 1.88 s), so the shell adds no cost to the LCP.
+- **Notes for the conventions doc (ticket 15):**
+  - `next dev` (16.4) appends a "nextjs-agent-rules" block to `AGENTS.md`. Restore it with `git checkout AGENTS.md`; never commit it.
+  - `next dev` leaves route types in `.next/dev/types`, which `pnpm typecheck` reads. After deleting a scratch page, remove `.next/dev` or the typecheck fails on the missing page.
