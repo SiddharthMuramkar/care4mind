@@ -1,0 +1,252 @@
+/*
+ * The A–Z's controls (AzIndex): filter chips, and a thumb index of letters that stays in view.
+ * The entries' own styles are in az.module.css.
+ */
+.index {
+  display: grid;
+  gap: 1.25rem;
+}
+
+/* Grid children may shrink below their content: the rail scrolls inside its own band. */
+.index > * {
+  min-width: 0;
+}
+
+/* Without JavaScript there is nothing to press: the chips go and the whole list shows. */
+.filters {
+  display: grid;
+  gap: 0.75rem;
+}
+
+@media (scripting: none) {
+  .filters {
+    display: none;
+  }
+}
+
+.chips {
+  display: grid;
+  gap: 0.6rem;
+}
+
+.chipGroup {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem 0.5rem;
+}
+
+.groupLabel {
+  font-variant-caps: all-small-caps;
+  letter-spacing: 0.12em;
+  color: var(--color-surface-muted);
+}
+
+/* Wide: each group's label in a margin of its own, its chips wrapping beside it. */
+@media (min-width: 40rem) {
+  .chipGroup {
+    position: relative;
+    padding-inline-start: 5rem;
+  }
+
+  .groupLabel {
+    position: absolute;
+    inset-inline-start: 0;
+    top: 0.45rem;
+  }
+}
+
+/* A phone: each group is one row of chips that scrolls sideways under its label. */
+@media (max-width: 39.99rem) {
+  .chipGroup {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    margin: -6px;
+    padding: 6px;
+    scrollbar-width: none;
+    mask-image: linear-gradient(to right, #000 88%, transparent);
+  }
+
+  .chip {
+    flex: none;
+    white-space: nowrap;
+  }
+}
+
+/* A chip is a slip of type: outlined while off, inked solid while pressed, pressed into the paper. */
+.chip {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.25rem;
+  padding: 0.2rem 0.85rem;
+  border: 1px solid color-mix(in srgb, var(--color-surface-ink) 45%, transparent);
+  border-radius: 2px;
+  background: transparent;
+  color: var(--color-surface-ink);
+  font: inherit;
+  font-size: 1rem;
+  line-height: 1.3;
+  text-align: start;
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.chip :lang(sa-Latn),
+.chip :lang(pi-Latn) {
+  font-style: italic;
+}
+
+.chip:hover {
+  border-color: var(--color-surface-ink);
+}
+
+.chip[aria-pressed='true'] {
+  background: var(--color-ground);
+  border-color: var(--color-ground);
+  color: var(--color-ink);
+}
+
+/* The pressed chip's vermilion mark, a lozenge before its name (::before is the ink's). */
+.chip[aria-pressed='true']::after {
+  content: '';
+  order: -1;
+  flex: none;
+  width: 0.4em;
+  height: 0.4em;
+  margin-inline-end: 0.5em;
+  background: var(--color-highlight);
+  transform: rotate(45deg);
+}
+
+.chip:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+.tally {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.5rem 1.25rem;
+}
+
+.count {
+  margin: 0;
+  font-variant-caps: all-small-caps;
+  letter-spacing: 0.1em;
+  font-size: 1.125rem;
+  color: var(--color-surface-muted);
+}
+
+.clear {
+  position: relative;
+  min-height: 2.25rem;
+  padding: 0 0.25rem;
+  border: 0;
+  background: none;
+  color: var(--color-link);
+  font: inherit;
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+  cursor: pointer;
+  overflow: hidden;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .chip,
+  .clear {
+    transition: transform var(--duration-instant) var(--ease-press);
+  }
+
+  .chip:active,
+  .clear:active {
+    transform: translateY(1px);
+  }
+}
+
+/* The thumb index: a band of letters that stays under the header while the list passes. */
+.railBand {
+  position: sticky;
+  top: var(--sticky-top);
+  z-index: 1;
+  margin-inline: -0.5rem;
+  padding: 0.35rem 0.5rem;
+  background: var(--color-surface);
+  border-block: 3px double var(--color-surface-rule);
+}
+
+.rail {
+  display: flex;
+  justify-content: space-between;
+  overflow-x: auto;
+  scrollbar-width: none;
+  /* The letter whose section is in view is the rail's current target (CSS only). */
+  scroll-target-group: auto;
+}
+
+.letter {
+  position: relative;
+  flex: none;
+  display: grid;
+  place-items: center;
+  min-width: 1.75rem;
+  min-height: 2.5rem;
+  font-family: var(--font-display);
+  font-size: 1.1875rem;
+  color: var(--color-surface-ink);
+  text-decoration: none;
+}
+
+a.letter:hover {
+  color: var(--color-link);
+}
+
+a.letter:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: -3px;
+}
+
+/* A letter with nothing under it is set in grey, and is no link. */
+.blank {
+  color: color-mix(in srgb, var(--color-surface-muted) 55%, var(--color-surface));
+}
+
+/* The current letter: vermilion, with a lozenge under it. */
+.letter::after {
+  content: '';
+  position: absolute;
+  bottom: 0.2rem;
+  left: 50%;
+  width: 0.35rem;
+  height: 0.35rem;
+  margin-left: -0.175rem;
+  background: var(--color-highlight);
+  transform: rotate(45deg) scale(0);
+}
+
+/* The current letter's rule (:target-current) is in AzIndex's stylesheet: see CURRENT there. */
+
+@media (prefers-reduced-motion: no-preference) {
+  .letter::after {
+    transition: transform var(--duration-quick) var(--ease-out);
+  }
+}
+
+@media (max-width: 40rem) {
+  .rail {
+    justify-content: flex-start;
+    gap: 0.25rem;
+    mask-image: linear-gradient(to right, #000 85%, transparent);
+  }
+
+  .letter {
+    min-width: 2.25rem;
+  }
+}
+
+.none {
+  margin: 0;
+  font-style: italic;
+  color: var(--color-surface-muted);
+}

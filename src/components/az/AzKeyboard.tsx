@@ -6,7 +6,7 @@ import { Toolbar } from '@base-ui/react/toolbar'
 
 import { cx } from '@/lib/cx'
 
-import styles from './az.module.css'
+import styles from './AzIndex.module.css'
 import type { ChipsProps, KeyboardParts, RailProps } from './types'
 
 /** The rail as a Base UI Toolbar: one Tab stop, the arrow keys moving between its letters. */

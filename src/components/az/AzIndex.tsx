@@ -16,7 +16,7 @@ import { flushSync } from 'react-dom'
 import { whenIdle } from '@/components/nav/current'
 import { cx } from '@/lib/cx'
 
-import styles from './az.module.css'
+import styles from './AzIndex.module.css'
 import {
   fromChips,
   GROUPS,
@@ -239,15 +239,20 @@ export function AzIndex({ letters, groups, total, children }: Props) {
   // button between its pointerdown and its click would lose the press.
   const pressing = useRef(false)
   const waiting = useRef<(() => void) | undefined>(undefined)
-  const holdSwap = () => {
-    pressing.current = true
-  }
   const release = () => {
     setTimeout(() => {
       pressing.current = false
       waiting.current?.()
       waiting.current = undefined
     })
+  }
+  const holdSwap = () => {
+    pressing.current = true
+    // A press that ends outside the island (dragged away) lets go soon all the same.
+    setTimeout(release, 1000)
+  }
+  const holdSwapForKey = ({ key }: { key: string }) => {
+    if (key === ' ' || key === 'Enter') holdSwap()
   }
 
   const upgrade = useCallback(() => {
@@ -307,7 +312,7 @@ export function AzIndex({ letters, groups, total, children }: Props) {
       onPointerEnter={parts ? undefined : upgrade}
       onFocus={parts ? undefined : upgrade}
       onPointerDown={parts ? undefined : holdSwap}
-      onKeyDown={parts ? undefined : holdSwap}
+      onKeyDown={parts ? undefined : holdSwapForKey}
       onPointerUp={parts ? undefined : release}
       onPointerCancel={parts ? undefined : release}
       onKeyUp={parts ? undefined : release}
