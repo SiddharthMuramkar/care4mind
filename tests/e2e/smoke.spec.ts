@@ -1,30 +1,27 @@
 import { frameKolam, openingFolio, unfinishedDrawings } from './drawings'
-import { expect, test } from './fixtures'
+import { expect, gotoReady, scrollsSideways, test } from './fixtures'
 import { READING_PAGES, readingThread, readTo } from './reading'
-import { PAGES } from './routes'
+import { at, ROUTES_IN_SCOPE } from './routes'
 import { travel } from './scrolling'
 
-// Firefox and WebKit: each page renders, without errors or sideways scroll.
-for (const { path, name } of PAGES) {
-  test(`${name} renders`, async ({ page }) => {
+// Firefox, and WebKit in CI: every route renders without errors or sideways scroll, with the
+// kolam logo, and shows the drawings these browsers can't drive by scroll simply finished.
+for (const route of ROUTES_IN_SCOPE) {
+  test(`${route.path} renders, its drawings finished`, async ({ page }) => {
+    const where = at(page, route.path)
     const errors: string[] = []
     page.on('pageerror', (error) => errors.push(error.message))
-    const response = await page.goto(path)
-    expect(response?.status()).toBe(200)
-    await expect(page.locator('h1')).toBeVisible()
-    const overflow = await page.evaluate(
-      () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
-    )
-    expect(overflow).toBeLessThanOrEqual(0)
-    expect(errors).toEqual([])
-  })
+    const response = await gotoReady(page, route.path)
 
-  // Drawings these browsers can't drive by scroll are simply shown finished.
-  test(`${name} shows the kolam logo and finished drawings`, async ({ page }) => {
-    await page.goto(path)
+    expect.soft(response?.status(), `${where}: status`).toBe(200)
+    await expect.soft(page.locator('h1'), `${where}: a visible h1`).toBeVisible()
+    expect.soft(await scrollsSideways(page), `${where}: no sideways scroll`).toEqual([])
     const logo = page.getByRole('banner').getByRole('link', { name: 'Care4Mind home', exact: true })
-    await expect(logo.locator('svg')).toBeVisible()
-    await expect.poll(() => unfinishedDrawings(page)).toEqual([])
+    await expect.soft(logo.locator('svg'), `${where}: the kolam logo`).toBeVisible()
+    await expect
+      .poll(() => unfinishedDrawings(page), { message: `${where}: unfinished drawings` })
+      .toEqual([])
+    expect(errors, `${where}: page errors`).toEqual([])
   })
 }
 
