@@ -1,9 +1,10 @@
 'use client'
 
-import * as m from 'motion/react-m'
 import {
   createContext,
+  lazy,
   type ReactNode,
+  Suspense,
   use,
   useDeferredValue,
   useState,
@@ -14,7 +15,6 @@ import type { SanskritTerm } from '@/content'
 import { capitalise } from '@/lib/text'
 
 import { Kolam } from './Kolam'
-import { MotionProvider } from './MotionProvider'
 import styles from './ScriptChoice.module.css'
 
 type Choice = [devanagariFirst: boolean, choose: (devanagariFirst: boolean) => void]
@@ -78,8 +78,9 @@ export function TermSpellings({
   )
 }
 
-// Settles in --duration-move (0.32 s), as the spellings do. Under reduced motion Motion jumps it instead.
-const SPRING = { type: 'spring', visualDuration: 0.32, bounce: 0.4 } as const
+// Motion, the site's one use of it, loads with the knob once the page has started up (ticket 05).
+// Until then the knob is the one the page was sent with, or a still copy of it after a page change.
+const Knob = lazy(() => import('./SwitchKnob').then((module) => ({ default: module.SwitchKnob })))
 
 /**
  * The "Devanagari first" switch: a toggle button that reorders the
@@ -97,14 +98,16 @@ export function ScriptSwitch() {
     >
       <span className={styles.track} aria-hidden>
         <Kolam columns={2} rows={1} className={styles.loops} />
-        <MotionProvider>
-          <m.span
-            className={styles.knob}
-            initial={false}
-            animate={{ x: devanagariFirst ? '100%' : '0%' }}
-            transition={SPRING}
-          />
-        </MotionProvider>
+        <Suspense
+          fallback={
+            <span
+              className={styles.knob}
+              style={{ transform: devanagariFirst ? 'translateX(100%)' : 'none' }}
+            />
+          }
+        >
+          <Knob on={devanagariFirst} />
+        </Suspense>
       </span>
       Devanagari first
     </button>
