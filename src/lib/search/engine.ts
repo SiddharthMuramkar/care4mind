@@ -81,8 +81,15 @@ const FUZZY = (distance: number) => (distance === 1 ? 0.4 : 0.3)
 const editsFor = (word: string) =>
   !isLatin(word) ? 0 : word.length >= 8 ? 2 : word.length >= 5 ? 1 : 0
 
-/** A prefix scores between 0.5 and 0.75: higher the more of the word it already has. */
-const prefixQuality = (typed: string, word: string) => 0.5 + 0.25 * (typed.length / word.length)
+/**
+ * A prefix scores between 0.65 and 0.9, above any match by sound: higher the more of the word it
+ * already has.
+ */
+const prefixQuality = (typed: string, word: string) => 0.65 + 0.25 * (typed.length / word.length)
+
+/** The most of a query read: no name, title or locator is longer. */
+const MAX_WORDS = 8
+const MAX_LENGTH = 200
 
 /** Words too common to find anything by, left out of excerpts. */
 const COMMON = new Set(
@@ -287,7 +294,9 @@ function grouped(hits: SearchHit[]): SearchHit[] {
  * one of a document's fields; a query or a name written as one word or as several finds the same.
  */
 export function query(index: SearchIndex, q: string): SearchHit[] {
-  const typed = words(q)
+  // Every word is weighed against the whole index: a long query (a pasted page) would hold the
+  // server, so only its first words count.
+  const typed = words(q.slice(0, MAX_LENGTH)).slice(0, MAX_WORDS)
   if (typed.length === 0) return []
   const { documents, postings, words: vocabulary, phrases, runs } = prepare(index)
   const count = typed.length

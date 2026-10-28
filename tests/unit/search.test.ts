@@ -116,6 +116,11 @@ describe('the search engine, on the real corpus', () => {
     },
   )
 
+  it('reads only the first eight words of a query, so a pasted page costs no more than a phrase', () => {
+    // The ninth word would find nothing, were it read.
+    expect(ids(query(index, `${'vikshepa '.repeat(8)}qqqqxz`))).toContain('concept:vikshepa')
+  })
+
   it.each(['', '   ', '·', '—'])('returns nothing for the empty query “%s”', (q) => {
     expect(query(index, q)).toEqual([])
   })
@@ -141,6 +146,35 @@ describe('the search engine, on the real corpus', () => {
       field: 'keywords',
       variant: 'YS 1.30',
     })
+  })
+})
+
+describe('the matching order', () => {
+  const named = (id: string, name: string): SearchDocument => ({
+    id: `concept:${id}`,
+    kind: 'concept',
+    title: id,
+    href: `/concepts/${id}/`,
+    names: [name],
+    keywords: [],
+    people: [],
+    excerpt: '',
+  })
+
+  it('ranks an exact match, then a prefix, then a sound, then a typo', () => {
+    const small = buildIndex([
+      named('typo', 'kelpa'),
+      named('sound', 'kalph'),
+      // A long word the query is only the start of still outranks a match by sound.
+      named('prefix', 'kalpanatmakata'),
+      named('exact', 'kalpa'),
+    ])
+    expect(ids(query(small, 'kalpa'))).toEqual([
+      'concept:exact',
+      'concept:prefix',
+      'concept:sound',
+      'concept:typo',
+    ])
   })
 })
 
