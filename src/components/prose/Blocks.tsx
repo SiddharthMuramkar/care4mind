@@ -5,9 +5,9 @@ import { hrefFor, type BlockView, type SectionView, type TopicRef } from '@/cont
 
 import { turnForward } from '../PageTurn'
 import { SanskritTerm } from '../SanskritTerm'
-import { Shloka } from '../Shloka'
 import styles from './Prose.module.css'
 import { Text, type CitationLinks } from './Text'
+import { VerseCard } from './VerseCard'
 
 type Level = 3 | 4 | 5 | 6
 type Table = Extract<BlockView, { kind: 'table' }>
@@ -27,7 +27,10 @@ function SharedFrom({ topic }: { topic: TopicRef }) {
   )
 }
 
-/** A table, scrolling in its own frame on a narrow screen (WCAG 1.4.10 allows it for data tables). */
+/**
+ * A table, scrolling sideways in its own frame on a narrow screen (WCAG 1.4.10 allows it for data
+ * tables): its first column stays in view, and shadows at the edges show there is more.
+ */
 function DataTable({ table, citations }: { table: Table; citations?: CitationLinks }) {
   const caption = `${table.id}-caption`
   return (
@@ -119,9 +122,17 @@ function Block({
       const Heading = `h${level}` as const
       return (
         <div id={block.id} className={styles.term}>
-          <Heading className={styles.termTitle}>
-            <SanskritTerm term={block.term} gloss={block.gloss} capitalised />
-          </Heading>
+          <div className={styles.termHead}>
+            <Heading className={styles.termTitle}>
+              <SanskritTerm term={block.term} gloss={block.gloss} capitalised />
+            </Heading>
+            <a href={`#${block.id}`} className={styles.anchor}>
+              <span aria-hidden>¶</span>
+              <span className="sr-only">
+                Link to <span lang="sa-Latn">{block.name}</span>
+              </span>
+            </a>
+          </div>
           <Blocks blocks={block.blocks} citations={citations} level={below(level)} />
         </div>
       )
@@ -129,7 +140,7 @@ function Block({
     case 'table':
       return <DataTable table={block} citations={citations} />
     case 'verse':
-      return <Shloka verse={block.verse} className={styles.verse} />
+      return <VerseCard verse={block.verse} />
     case 'topic-intro': {
       const Heading = `h${level}` as const
       return (
@@ -179,7 +190,14 @@ function standingIn(section: SectionView) {
   return own && { own, others: only.sections.filter((inner) => inner !== own), topic: only.topic }
 }
 
-/** A record's sections in reading order, each anchored at its id under its own heading. */
+/** How a section's role is named above its heading (D05). */
+const ROLES = { applications: 'Applications', comparison: 'Comparison' } as const
+
+/**
+ * A record's sections in reading order, each anchored at its id under its own heading, an
+ * applications or comparison section labelled as one. Each names a view timeline after its id,
+ * which a table of contents can follow where `:target-current` is missing.
+ */
 export function Sections({
   sections,
   citations,
@@ -190,8 +208,14 @@ export function Sections({
   return sections.map((section) => {
     const shared = standingIn(section)
     return (
-      <section key={section.id} id={section.id} className={styles.section}>
+      <section
+        key={section.id}
+        id={section.id}
+        className={styles.section}
+        style={{ '--timeline': `--section-${section.id}` } as CSSProperties}
+      >
         <h2 className={styles.sectionTitle}>
+          {section.role ? <span className={styles.role}>{ROLES[section.role]}</span> : null}
           <Text text={section.heading} citations={citations} />
         </h2>
         {shared ? (

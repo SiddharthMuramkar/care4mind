@@ -95,3 +95,44 @@
     }
   }
 }
+
+/* An entry a citation has led to: marked in the margin with a vermilion rule, and focused. */
+.list > li {
+  scroll-margin-top: 1.5rem;
+}
+
+.list > li:target {
+  box-shadow: -0.75rem 0 0 -0.5rem var(--color-highlight);
+}
+
+.list > li:focus {
+  outline: 2px solid var(--color-surface-focus);
+  outline-offset: 0.25rem;
+}
+
+.list > li:focus:not(:focus-visible):not(:target) {
+  outline: none;
+}
+
+/* The view timeline a table of contents follows where it lacks :target-current. */
+@supports (timeline-scope: none) and (not (scroll-target-group: auto)) {
+  .root {
+    view-timeline-name: --section-references;
+    view-timeline-inset: 30% 69%;
+  }
+}
+
+/* On paper the References are always open, with the plus that opens them left off. */
+@media print {
+  .root::details-content {
+    content-visibility: visible;
+  }
+
+  .root .list {
+    opacity: 1;
+  }
+
+  .icon {
+    display: none;
+  }
+}
