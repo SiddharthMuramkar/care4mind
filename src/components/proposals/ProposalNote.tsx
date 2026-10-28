@@ -7,22 +7,28 @@ import { cx } from '@/lib/cx'
 import styles from './ProposalNote.module.css'
 
 export interface ProposalNoteProps {
-  /** A short sentence beside the label, such as what the proposal adds. Omit it for the label alone. */
+  /** A short sentence beside the label, such as what the proposal awaits. Omit it for the label alone. */
   children?: ReactNode
   className?: string
+  /** On the proposals page itself, the label names the page rather than linking to it. */
+  here?: boolean
 }
 
 /**
- * Slot, added by front-end-site ticket 04 and owned by ticket 12 after it: the label on every
- * Proposal surface (D20), reading "Proposal" and linking to the proposals page, which exists
- * whenever a Proposal does. Ticket 12 sets its wording and style; its props stay.
+ * The label on every Proposal surface (D20), in the editor's blue pencil: "Proposal", linking to
+ * the proposals page, which exists whenever a Proposal does. Beside a page's heading it carries a
+ * sentence saying the proposal awaits the Project owner's decision.
  */
-export function ProposalNote({ children, className }: ProposalNoteProps) {
+export function ProposalNote({ children, className, here = false }: ProposalNoteProps) {
   return (
     <span className={cx(styles.note, className)}>
-      <Link href={hrefFor({ page: 'proposals' })} className={styles.label}>
-        Proposal
-      </Link>
+      {here ? (
+        <span className={styles.label}>Proposal</span>
+      ) : (
+        <Link href={hrefFor({ page: 'proposals' })} className={styles.label}>
+          Proposal
+        </Link>
+      )}
       {children ? <span className={styles.text}>{children}</span> : null}
     </span>
   )
