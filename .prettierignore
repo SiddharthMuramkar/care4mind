@@ -3,6 +3,7 @@ docs/
 pnpm-lock.yaml
 pnpm-workspace.yaml
 src/fonts/
+src/content/generated/
 .next/
 playwright-report/
 test-results/
