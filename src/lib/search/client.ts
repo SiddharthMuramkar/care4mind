@@ -4,8 +4,8 @@ import type { Search } from './search'
 let loading: Promise<SearchIndex> | undefined
 
 /**
- * The index, fetched once on intent or when the browser is idle, and unpacked for matching as
- * soon as it arrives. A failed load is tried again on the next call.
+ * The index, fetched once on intent (or as the results page's field takes focus), and unpacked
+ * for matching as soon as it arrives. A failed load is tried again on the next call.
  */
 export function loadIndex(): Promise<SearchIndex> {
   loading ??= fetch(INDEX_PATH, { priority: 'low' })

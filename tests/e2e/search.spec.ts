@@ -4,7 +4,7 @@ import type { Locator, Page } from '@playwright/test'
 
 import { expectNoAxeViolations } from './axe'
 import { expect, gotoReady, test } from './fixtures'
-import { expectPageTurned, pageTurns, recordPageTurns } from './page-turns'
+import { expectPageTurned, pageTurns, prefetched, recordPageTurns } from './page-turns'
 
 // Front-end-site ticket 09: search (FR-04, NFR-03): the ⌘K palette, the results page and the index.
 
@@ -111,6 +111,10 @@ test.describe('the palette', () => {
     await expect(await highlighted(page)).toHaveAccessibleName(/^Vikṣepa/)
     await expect(field(page)).toBeFocused()
 
+    // The palette fetches the highlighted result's page ahead; a page still on its way loses its
+    // turn (Next.js 16.4), so wait as a reader's glance would.
+    await prefetched(first)
+    await field(page).focus()
     await page.keyboard.press('Enter')
     await expect(page).toHaveURL(/\/concepts\/vikshepa\/$/)
     await expect(page.getByRole('heading', { level: 1 })).toContainText('Vikṣepa')
@@ -257,30 +261,28 @@ test.describe('the palette', () => {
     await expectNoAxeViolations(page, 'the palette with results')
   })
 
-  test('loads its code and the index only after the page has loaded', async ({ page }) => {
+  test('loads its code and the index on intent, never with the page', async ({ page }) => {
     await gotoReady(page, '/concepts/vikshepa/')
-    const resources = () =>
-      page.evaluate(() => {
-        const loaded = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming
-        return performance.getEntriesByType('resource').map(({ name, startTime }) => ({
-          path: new URL(name).pathname,
-          early: startTime < loaded.loadEventEnd,
-        }))
-      })
+    await page.evaluate(() => new Promise((done) => requestIdleCallback(done, { timeout: 3000 })))
+    const paths = () =>
+      page.evaluate(() =>
+        performance.getEntriesByType('resource').map(({ name }) => new URL(name).pathname),
+      )
     // The palette's code is the script that names its field.
-    const holdsPalette = async (path: string) =>
-      path.endsWith('.js') &&
-      (await (await page.request.get(path)).text()).includes('Search Care4Mind')
+    const paletteLoaded = async () => {
+      const scripts = (await paths()).filter((path) => path.endsWith('.js'))
+      const bodies = await Promise.all(
+        scripts.map(async (path) => (await page.request.get(path)).text()),
+      )
+      return bodies.some((body) => body.includes('Search Care4Mind'))
+    }
+    expect(await paths()).not.toContain('/search-index.json')
+    expect(await paletteLoaded()).toBe(false)
 
-    await expect
-      .poll(async () => (await resources()).some(({ path }) => path === '/search-index.json'))
-      .toBe(true)
-    const all = await resources()
-    expect(all.find(({ path }) => path === '/search-index.json')?.early).toBe(false)
-    const early = all.filter(({ early }) => early).map(({ path }) => path)
-    for (const path of early) expect(await holdsPalette(path), path).toBe(false)
-    const late = all.filter(({ early }) => !early).map(({ path }) => path)
-    expect(await Promise.all(late.map(holdsPalette))).toContain(true)
+    await headerSearch(page).hover()
+    await expect.poll(async () => (await paths()).includes('/search-index.json')).toBe(true)
+    await expect.poll(paletteLoaded).toBe(true)
+    await expect(palette(page)).toHaveCount(0)
   })
 })
 

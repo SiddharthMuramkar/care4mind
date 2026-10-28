@@ -10,6 +10,8 @@ export interface PaletteState {
 }
 
 let state: PaletteState = { open: false, query: '', opener: null }
+/** How many times it has opened: a late close for one opening never closes the next. */
+let openings = 0
 const listeners = new Set<() => void>()
 
 function set(next: PaletteState) {
@@ -30,7 +32,19 @@ export function subscribe(listener: () => void) {
 export function openPalette(query = '', opener?: HTMLElement | null) {
   const from =
     opener ?? (document.activeElement instanceof HTMLElement ? document.activeElement : null)
+  openings += 1
   set({ open: true, query, opener: from })
+}
+
+/**
+ * A result on another page was chosen: the palette closes once that page is shown (the header's
+ * Search closes it as the address changes), or after two seconds if it never is.
+ */
+export function closeOnArrival() {
+  const opening = openings
+  setTimeout(() => {
+    if (opening === openings) closePalette()
+  }, 2000)
 }
 
 /** Changes the query an opening palette will hold, before its field is there to type in. */
@@ -64,7 +78,7 @@ export function loadPalette(): Promise<ComponentType<PaletteProps>> {
 
 /**
  * Fetches what a search needs, the palette's code and the index, so it is ready when someone
- * searches: on intent (⌘K, or a pointer or focus on Search) or when the browser is idle.
+ * searches: on intent (⌘K, or a pointer or focus on Search).
  */
 export function prepareSearch() {
   loadPalette().catch(() => undefined)

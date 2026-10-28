@@ -476,6 +476,13 @@
   }
 }
 
+/* A result on another page was chosen: the card and its backdrop give way as the page turns. */
+.card[data-chosen],
+:global(body):has(.card[data-chosen]) .backdrop {
+  opacity: 0;
+  pointer-events: none;
+}
+
 /* Under no-preference only: the card settles in, its rule inks in from the centre, and the
  * highlighter sweeps across the chosen row. */
 @media (prefers-reduced-motion: no-preference) {
@@ -498,6 +505,10 @@
   .card[data-ending-style] {
     opacity: 0;
     transform: translateY(-0.75rem) scale(0.985);
+  }
+
+  .card[data-chosen] {
+    transform: scale(0.985);
   }
 
   .rule {

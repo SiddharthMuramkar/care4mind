@@ -1,9 +1,8 @@
 'use client'
 
 import type { Route } from 'next'
+import { usePathname } from 'next/navigation'
 import { type ComponentType, startTransition, useEffect, useState } from 'react'
-
-import { whenIdle } from '@/components/nav/current'
 
 import type { PaletteProps } from './Palette'
 import {
@@ -21,20 +20,6 @@ import {
 /** Marks the header's Search, where focus goes back to when what opened the palette is gone. */
 export const HEADER_TRIGGER = 'data-search-trigger'
 
-/** Runs something once the page has loaded and the browser is idle, never before first paint. */
-function afterLoad(work: () => void): () => void {
-  let cancel = () => {}
-  const idle = () => {
-    cancel = whenIdle(work)
-  }
-  if (document.readyState === 'complete') idle()
-  else window.addEventListener('load', idle, { once: true })
-  return () => {
-    window.removeEventListener('load', idle)
-    cancel()
-  }
-}
-
 /**
  * Where focus goes as the palette closes: back to what opened it; to the header's Search if that
  * has gone; and nowhere when nothing had focus (⌘K pressed on the page itself).
@@ -50,19 +35,26 @@ function returnTarget(): HTMLElement | false | null {
 
 /**
  * Listens for ⌘K or Ctrl+K on every page, and shows the palette when anything opens it. Mounted
- * once, by the header's Search. The palette's code and the index load on intent or when the
- * browser is idle after the page has loaded; a press before they arrive opens the palette as
+ * once, by the header's Search. The palette's code and the index load only on intent (⌘K, or
+ * a pointer or focus on Search), never with the page: loaded when idle they cost every visit's
+ * start-up time (Lighthouse's Total Blocking Time). ⌘K before they arrive opens the palette as
  * soon as they do, with whatever was typed meanwhile in its field.
  */
 export function PaletteHost({ searchPath }: { searchPath: Route }) {
   const [open, setOpen] = useState(false)
   const [Palette, setPalette] = useState<ComponentType<PaletteProps>>()
+  const pathname = usePathname()
+
+  // A chosen result's page is shown: the palette, faded as the page turned, closes.
+  useEffect(() => {
+    closePalette()
+  }, [pathname])
 
   useEffect(() => {
     // Opening renders as a transition: the press is answered at once, and the card follows.
     const load = () =>
       loadPalette().then(
-        (component) => setPalette(() => component),
+        (component) => startTransition(() => setPalette(() => component)),
         () => undefined,
       )
     const unsubscribe = subscribe(() => {
@@ -71,7 +63,9 @@ export function PaletteHost({ searchPath }: { searchPath: Route }) {
         prepareSearch()
         void load()
       }
-      startTransition(() => setOpen(next))
+      // Closing is at once, so it never shares a transition (and a page turn) with a navigation.
+      if (next) startTransition(() => setOpen(true))
+      else setOpen(false)
     })
     const onKeyDown = (event: KeyboardEvent) => {
       if (isShortcut(event)) {
@@ -90,14 +84,9 @@ export function PaletteHost({ searchPath }: { searchPath: Route }) {
       event.preventDefault()
     }
     document.addEventListener('keydown', onKeyDown)
-    const cancel = afterLoad(() => {
-      prepareSearch()
-      void load()
-    })
     return () => {
       unsubscribe()
       document.removeEventListener('keydown', onKeyDown)
-      cancel()
     }
   }, [])
 

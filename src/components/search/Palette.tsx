@@ -5,6 +5,7 @@ import { Dialog } from '@base-ui/react/dialog'
 import { ScrollArea } from '@base-ui/react/scroll-area'
 import type { Route } from 'next'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import {
   type RefObject,
   startTransition,
@@ -30,7 +31,7 @@ import {
   type HitGroup,
 } from './kinds'
 import styles from './Palette.module.css'
-import { isFieldReady, paletteState, setFieldReady, subscribe } from './palette'
+import { closeOnArrival, isFieldReady, paletteState, setFieldReady, subscribe } from './palette'
 
 export interface PaletteProps {
   open: boolean
@@ -105,6 +106,7 @@ function Finder({ input, searchPath, close }: FinderProps) {
   const [answer, setAnswer] = useState<Answer>({ query: '', hits: [] })
   const [failed, setFailed] = useState(false)
   const keysId = useId()
+  const router = useRouter()
 
   useEffect(() => () => setFieldReady(false), [])
 
@@ -168,6 +170,12 @@ function Finder({ input, searchPath, close }: FinderProps) {
         if (!next && details.reason === 'escape-key') close()
       }}
       itemToStringValue={(hit: SearchHit) => hit.title}
+      // The chosen result's page is fetched ahead, so Enter turns to it at once. (Next.js 16.4
+      // turns no page when a navigation has to wait for its page: the turn's types are lost.)
+      onItemHighlighted={(hit: SearchHit | undefined) => {
+        // Each result's path, made by hrefFor() in the content module.
+        if (hit) router.prefetch(hit.href as Route)
+      }}
     >
       <div className={styles.field}>
         <SearchGlyph className={styles.glyph} />
@@ -267,7 +275,15 @@ function Result({ hit, close }: { hit: SearchHit; close: () => void }) {
     <Autocomplete.Item
       value={hit}
       className={styles.item}
-      onClick={close}
+      onClick={(event) => {
+        // A place on this page: close now. Another page: the card fades as the page turns, and
+        // closes once the new page is shown. (Closing as the link is followed can cost the turn.)
+        if (new URL(hit.href, location.href).pathname === location.pathname) close()
+        else {
+          event.currentTarget.closest('[role="dialog"]')?.setAttribute('data-chosen', '')
+          closeOnArrival()
+        }
+      }}
       // Each result's path, made by hrefFor() in the content module.
       render={<Link href={hit.href as Route} prefetch={false} transitionTypes={turnForward} />}
     >
