@@ -1,6 +1,7 @@
 import type { Locator, Page } from '@playwright/test'
 
 import { expectNoAxeViolations } from './axe'
+import { unfinishedRules } from './drawings'
 import { expect, gotoReady, test } from './fixtures'
 
 // Front-end-site ticket 10: taking the KarmaYoga Scale (C4, D16). Local runs and CI build with the
@@ -285,6 +286,50 @@ test.describe('the KarmaYoga flow', () => {
     await page.keyboard.press('ArrowDown')
     await next(page).click()
     await expect(row.getByRole('definition').first()).toHaveText('Agree')
+  })
+
+  test('sets each answer like a contents line: a leader runs from its statement’s last word to it', async ({
+    page,
+  }) => {
+    await gotoReady(page, FLOW)
+    await toReview(page, (position) => position % 5)
+    const rows = page.locator('dl > div')
+    await expect(rows).toHaveCount(45)
+    await expect.poll(() => unfinishedRules(page)).toEqual([])
+    const lines = await rows.evaluateAll((all) =>
+      all.map((row) => {
+        const [text, leader] = row.querySelectorAll('dt > span')
+        const answer = row.querySelector('dd')
+        if (!text || !leader || !answer) return null
+        const range = document.createRange()
+        range.selectNodeContents(text)
+        const words = [...range.getClientRects()].at(-1)
+        const dots = leader.getBoundingClientRect()
+        const statement = row.querySelector('dt')?.getBoundingClientRect()
+        if (!words || !statement || dots.width === 0) return null
+        return {
+          text: text.textContent,
+          // From just after the last word, on its line, to the edge of the answer's column.
+          gap: dots.left - words.right,
+          onLastLine: dots.bottom > words.top && dots.bottom <= words.bottom + 6,
+          reaches: dots.right >= statement.right - 1,
+          clear: statement.right <= answer.getBoundingClientRect().left,
+        }
+      }),
+    )
+    const drawn = lines.filter((line) => line !== null)
+    // Narrow screens set the answer under its statement, with no leader.
+    if ((page.viewportSize()?.width ?? 0) < 480) return expect(drawn).toEqual([])
+    expect(drawn).toHaveLength(45)
+    for (const { text, gap, onLastLine, reaches, clear } of drawn) {
+      expect({ text, gap: gap >= 0 && gap <= 16, onLastLine, reaches, clear }).toEqual({
+        text,
+        gap: true,
+        onLastLine: true,
+        reaches: true,
+        clear: true,
+      })
+    }
   })
 
   test('ends on a placeholder: no number and no band, the limitation, the answers and the source', async ({

@@ -379,6 +379,15 @@
   margin-inline-start: auto;
 }
 
+/* On a phone the controls stand one under another, each the width of the page. */
+@media (max-width: 30rem) {
+  .controls > * {
+    flex: 1 1 100%;
+    justify-content: center;
+    text-align: center;
+  }
+}
+
 /* Next refused: the summary at the top of the part. */
 .summary {
   display: grid;
@@ -439,17 +448,23 @@
   break-inside: avoid;
 }
 
+/* The statement runs on into its leader, which is cut at the edge of the answer's column. */
 .rowStatement {
   flex: 1 1 auto;
-  display: flex;
-  align-items: last baseline;
-  gap: 0.6rem;
   min-width: 0;
+  overflow: clip;
 }
 
+/*
+ * A dotted leader from the statement's last word to its answer, as a book's contents runs on to a
+ * page number. As wide as the line, it takes no room on it, so it never wraps to a line alone.
+ */
 .leader {
-  flex: 1 0 1.5rem;
+  display: inline-block;
+  width: 100%;
+  margin-inline: 0.5em calc(-100% - 0.5em);
   border-bottom: 2px dotted var(--color-surface-rule);
+  transform-origin: left;
 }
 
 .answer {
@@ -474,7 +489,7 @@
   padding-inline: 0.35rem;
 }
 
-/* On review, the leaders ink in from their centres as the page arrives. */
+/* On review, each leader inks out from its statement to its answer as the page arrives. */
 @media (prefers-reduced-motion: no-preference) {
   .review .leader {
     animation: leader-ink var(--duration-slow) var(--ease-out) both;
@@ -488,6 +503,10 @@
 }
 
 @media (max-width: 30rem) {
+  .answers {
+    gap: 0.85rem;
+  }
+
   .row {
     flex-wrap: wrap;
     gap: 0 0.75rem;
@@ -518,9 +537,9 @@
   padding: clamp(2rem, 6vw, 3rem) clamp(1.25rem, 5vw, 3rem) clamp(1.5rem, 5vw, 2.5rem);
   text-align: center;
   box-shadow:
-    inset 0 0 0 1px rgb(29 26 46 / 0.55),
+    inset 0 0 0 1px color-mix(in srgb, var(--color-surface-ink) 55%, transparent),
     inset 0 0 0 6px var(--color-surface),
-    inset 0 0 0 7px rgb(29 26 46 / 0.3);
+    inset 0 0 0 7px color-mix(in srgb, var(--color-surface-ink) 30%, transparent);
 }
 
 .plateLabel {
@@ -566,20 +585,73 @@
   white-space: nowrap;
 }
 
-/* Printed, the end screen keeps the placeholder, the limits, the answers and the source. */
+/*
+ * Printed, the end screen keeps the placeholder, the limits, the answers and the source. It is set
+ * in block flow: where a page breaks, a grid's later items can print over its earlier ones. A
+ * part keeps its progress, with each rule and each chosen answer printed as it shows.
+ */
 @media print {
-  .progress,
   .controls,
   .change {
     display: none;
   }
 
-  .flow {
-    display: grid;
+  .flow,
+  .step,
+  .end,
+  .yourAnswers,
+  .answersPart,
+  .answers {
+    display: block;
+  }
+
+  .progress {
+    position: static;
+    margin-bottom: 2rem;
+    box-shadow: none;
+  }
+
+  .end > * + * {
+    margin-top: 2.25rem;
+  }
+
+  .yourAnswers > * + * {
+    margin-top: 1.5rem;
+  }
+
+  .answersPart > * + * {
+    margin-top: 0.85rem;
+  }
+
+  .answers > * + * {
+    margin-top: 0.35rem;
   }
 
   .plate,
-  .answersPart {
+  .row {
     break-inside: avoid;
+  }
+
+  .sectionTitle,
+  .answersTitle {
+    break-after: avoid;
+  }
+
+  .tally,
+  .mark::after {
+    print-color-adjust: exact;
+  }
+
+  .option:has(.radio:checked) {
+    color: inherit;
+    border-width: 2px;
+  }
+
+  .option:has(.radio:checked)::before {
+    display: none;
+  }
+
+  .option:has(.radio:checked) .mark {
+    border-color: currentColor;
   }
 }
