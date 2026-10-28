@@ -72,6 +72,12 @@ for (const { path, name } of PAGES) {
     // Ticket 05: the first paint needs nothing more, so every other font is asked for after it.
     test('asks for no other font until its text is painted', async ({ page }) => {
       await page.goto(path)
+      // The first paint is noted once it reaches the screen, which on a slow machine can be after load.
+      await expect
+        .poll(() =>
+          page.evaluate(() => performance.getEntriesByName('first-contentful-paint').length),
+        )
+        .toBe(1)
       const { painted, early } = await page.evaluate(() => {
         const preloaded = new Set(
           [...document.querySelectorAll<HTMLLinkElement>('link[rel="preload"][as="font"]')].map(

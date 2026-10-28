@@ -16,9 +16,11 @@ export async function travel(page: Page, distance: number, ...elements: Locator[
 
 /** Scroll at once so that the element's top sits this far down the screen (0 is the top, 1 the bottom). */
 export function placeOnScreen(element: Locator, fraction: number) {
-  return element.evaluate((node, fraction) => {
+  return element.evaluate(async (node, fraction) => {
     const top = node.getBoundingClientRect().top + window.scrollY
     window.scrollTo({ top: top - window.innerHeight * fraction, behavior: 'instant' })
+    // Scroll-driven animations catch up on the next frame; until then they read as before.
+    await new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(done)))
   }, fraction)
 }
 
