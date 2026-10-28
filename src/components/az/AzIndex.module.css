@@ -24,6 +24,15 @@
   }
 }
 
+/* On paper the list is the page: the chips and the letters stay off it. */
+@media print {
+  .filters,
+  .railBand,
+  .none {
+    display: none;
+  }
+}
+
 .chips {
   display: grid;
   gap: 0.6rem;

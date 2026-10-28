@@ -216,7 +216,30 @@ test.describe('the filter chips', () => {
       await expect(rail(page).getByRole('link', { name: letter, exact: true })).toHaveCount(0)
   })
 
-  test('the list glides into its new order, naming at most 40 entries', async ({ page }) => {
+  test('the list glides into its new order, naming at most 40 entries and nothing else', async ({
+    page,
+  }) => {
+    // Which parts of the page each view transition captures, as it starts to run (beneath
+    // recordPageTurns, which wraps the same method).
+    await page.addInitScript(() => {
+      const captured: string[][] = []
+      Object.defineProperty(window, '__captured', { value: captured })
+      const start = Document.prototype.startViewTransition
+      Document.prototype.startViewTransition = function (this: Document, init) {
+        const transition = start.call(this, init)
+        transition.ready.then(
+          () =>
+            captured.push(
+              document
+                .getAnimations()
+                .map(({ effect }) => (effect as KeyframeEffect | null)?.pseudoElement ?? '')
+                .flatMap((pseudo) => /^::view-transition-group\((.+)\)$/.exec(pseudo)?.[1] ?? []),
+            ),
+          () => {},
+        )
+        return transition
+      }
+    })
     await recordPageTurns(page)
     await gotoReady(page, PATH)
     await chip(page, mind.name).click()
@@ -226,6 +249,13 @@ test.describe('the filter chips', () => {
     const entriesFlying = (reorder?.flights ?? []).filter(({ name }) => name.startsWith('az-'))
     expect(entriesFlying.length).toBeGreaterThan(0)
     expect(entriesFlying.length).toBeLessThanOrEqual(40)
+    // The chips, the count, the header and the rest of the page change in place, at once.
+    const captured = () =>
+      page.evaluate(() => (window as unknown as { __captured: string[][] }).__captured)
+    await expect.poll(async () => (await captured()).length).toBe(1)
+    const [groups = []] = await captured()
+    expect(groups.length).toBeGreaterThan(0)
+    expect(groups.filter((name) => !name.startsWith('az-'))).toEqual([])
   })
 
   test('under reduced motion the list changes at once', async ({ page }) => {

@@ -41,6 +41,9 @@ const LIST = 'az-list'
  */
 const NAMED = 40
 
+/** Set on the page while its list reorders. */
+const REORDERING = 'data-az-reorder'
+
 // The address is the filter's one source: a chip press pushes a new one, Back restores the last.
 const listeners = new Set<() => void>()
 function subscribe(listener: () => void) {
@@ -60,14 +63,22 @@ function go(selection: Selection) {
   for (const listener of listeners) listener()
 }
 
+/** How many reorders are under way: the page stays out of their pictures until the last ends. */
+let reordering = 0
+
 /**
  * Change the filter, letting the first entries on screen glide to their new places (a view
- * transition), unless motion is reduced or the browser has no view transitions.
+ * transition), unless motion is reduced or the browser has no view transitions. Only the entries
+ * are captured (`ALONE`): the chips, the count, the header and the rest of the page change in
+ * place, which spares a slow phone two pictures of the whole screen.
  */
 function reorder(from: Selection, to: Selection, change: () => void) {
   const list = document.getElementById(LIST)
   const still = !window.matchMedia('(prefers-reduced-motion: no-preference)').matches
   if (!list || still || typeof document.startViewTransition !== 'function') return change()
+  const root = document.documentElement
+  reordering += 1
+  root.setAttribute(REORDERING, '')
   const named: HTMLElement[] = []
   // Each entry is named by its place in the whole list, the same before and after.
   const places = new Map([...list.querySelectorAll('[data-entry]')].map((entry, at) => [entry, at]))
@@ -95,7 +106,11 @@ function reorder(from: Selection, to: Selection, change: () => void) {
     clear()
     name(to)
   })
-  void transition.finished.finally(clear)
+  void transition.finished.finally(() => {
+    clear()
+    reordering -= 1
+    if (reordering === 0) root.removeAttribute(REORDERING)
+  })
 }
 
 /**
@@ -135,6 +150,10 @@ const entries = (count: number) => `${count} ${count === 1 ? 'entry' : 'entries'
 
 // The reordering list's flights, set here as the island is the only thing that starts them.
 const FLIGHTS = `::view-transition-group(.az-entry) { animation-duration: var(--duration-reorder); animation-timing-function: var(--ease-out); }`
+
+// While the list reorders, nothing but its entries is captured: not the page itself, nor what
+// names itself for page turns (the header and footer, by their inline style).
+const ALONE = `:root[${REORDERING}] { view-transition-name: none; } :root[${REORDERING}] [style*='view-transition-name']:not([data-entry]) { view-transition-name: none !important; }`
 
 // The rail's current letter, vermilion with its lozenge shown: the link scroll-target-group makes
 // current as its section scrolls into view. Here rather than in the CSS Module, whose parser
@@ -317,7 +336,7 @@ export function AzIndex({ letters, groups, total, children }: Props) {
       onPointerCancel={parts ? undefined : release}
       onKeyUp={parts ? undefined : release}
     >
-      <style>{`${FLIGHTS}${CURRENT}`}</style>
+      <style>{`${FLIGHTS}${ALONE}${CURRENT}`}</style>
       <div className={styles.filters}>
         <Chips groups={groups} pressed={pressed} onPress={press} />
         <div className={styles.tally}>
