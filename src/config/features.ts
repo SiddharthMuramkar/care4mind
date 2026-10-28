@@ -5,8 +5,7 @@
  * is `production`), so nothing the Project owner hasn't approved goes live. Its own environment
  * variable forces it either way: `1` on, `0` off. Flags are read once, when the site builds, on
  * the server: hand a flag to a client component as a prop rather than importing this there.
- *
- * Front-end-site ticket 04 adds the rest of the site's flags here.
+ * The content module reads them through createContent(), the shell through this module.
  */
 export interface Features {
   /** A Questionnaire with status "preview" can be taken (the KarmaYoga flow). */
