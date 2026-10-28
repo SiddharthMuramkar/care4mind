@@ -1,6 +1,6 @@
 # 17: Review aid: pnpm shots
 
-Status: ready-for-agent
+Status: resolved
 Blocked by: none
 Spec: [Front-end site: every public page](../spec.md) · Design: [design.md](../design.md) §F
 
@@ -22,28 +22,28 @@ This ticket carves the `pnpm shots` criterion out of ticket 15, which now waits 
 
 ## Acceptance criteria
 
-- [ ] **What it shoots:**
+- [x] **What it shoots:**
   - `pnpm shots` writes a JPEG (quality 70) of each sample route in `site.routes()` (the entries marked `sample`, one per kind) at 360×800 and 1440×900.
   - It reads the routes from the route registry, reusing `@/content` and the existing helpers, never a second list of routes.
   - Only the viewport by default; `--full` shoots whole pages.
   - Reduced motion is off by default; `--reduced` turns it on, and `--both` shoots each page both ways.
-- [ ] **Files:**
+- [x] **Files:**
   - Each lands in `.shots/<route-slug>-<width>[-reduced].jpg`: the path's parts joined by hyphens, `home` for `/` (`.shots/home-360.jpg`, `.shots/concepts-vikshepa-1440-reduced.jpg`).
   - `.shots/` is git-ignored.
   - The command prints each file it wrote, one per line, and nothing else on success.
-- [ ] **Options:**
+- [x] **Options:**
   - `--only` takes route paths or kinds, comma-separated (`--only /,concept`); an unknown path or kind stops it, naming what it takes.
   - `--widths` overrides the widths (`--widths 320,768`).
-- [ ] **Its server:**
+- [x] **Its server:**
   - It uses `SHOTS_PORT` (default 3100).
   - If something already listens there, it shoots that server.
   - Otherwise it starts `pnpm start -p $SHOTS_PORT` and stops it afterwards, also when a shot fails.
   - With no build (`.next/` missing), it says so plainly, names `pnpm build`, and exits non-zero.
-- [ ] **Ready before the shot:** each page waits for its fonts (`document.fonts.ready`) and for `html[data-hydrated]`, as `gotoReady()` does, before the screenshot.
-- [ ] **No new dependency:** it uses Playwright, which the repo has.
-- [ ] **Unit test:** the parts with no browser (the argument parsing, the `--only` filter over a registry, the file names) are tested in `tests/unit/shots.test.ts`.
-- [ ] **Conventions doc:** a short "Screenshots" paragraph in `docs/agents/frontend-conventions.md` says what `pnpm shots` writes, its options, `SHOTS_PORT`, and to open only the files it printed.
-- [ ] **Done-check:**
+- [x] **Ready before the shot:** each page waits for its fonts (`document.fonts.ready`) and for `html[data-hydrated]`, as `gotoReady()` does, before the screenshot.
+- [x] **No new dependency:** it uses Playwright, which the repo has.
+- [x] **Unit test:** the parts with no browser (the argument parsing, the `--only` filter over a registry, the file names) are tested in `tests/unit/shots.test.ts`.
+- [x] **Conventions doc:** a short "Screenshots" paragraph in `docs/agents/frontend-conventions.md` says what `pnpm shots` writes, its options, `SHOTS_PORT`, and to open only the files it printed.
+- [x] **Done-check:**
   - `pnpm check` passes;
   - `SHOTS_PORT=<port> pnpm shots --only /` writes `.shots/home-360.jpg` and `.shots/home-1440.jpg` and prints both paths.
 
@@ -65,3 +65,10 @@ This ticket carves the `pnpm shots` criterion out of ticket 15, which now waits 
   - "No build" is `.next/BUILD_ID` missing (a dev run leaves `.next/` without one), checked only when it must start a server, before the registry loads.
 - **Checked by hand:** `SHOTS_PORT=3120 pnpm shots --only /` wrote and printed `.shots/home-360.jpg` and `.shots/home-1440.jpg` and freed the port; with a server already on 3120 it shot that and left it running; a forced write failure stopped its server and exited 1; `--full` wrote a 360×40152 page; with no build it named `pnpm build` and exited 1.
 - **For ticket 15:** `pnpm shots` isn't routed through `scripts/lane/heavy.sh` in the conventions paragraph (it is light: one Chromium, four pages); fold that in if you'd rather it queued.
+
+**2026-10-28, the check:**
+
+- **Checked against the code and by hand on port 3120:** `--only /` wrote and printed `.shots/home-360.jpg` and `.shots/home-1440.jpg` (absolute paths, nothing else on stdout: pnpm's own `$ node scripts/shots.mjs` line goes to stderr) and left the port free; with a server already on the port it shot that and left it running; a failed shot (`.shots` made a file) stopped its server and exited 1; with no `.next/BUILD_ID` it named `pnpm build` and exited 1. The shots of `/` and `/concepts/ahimsa/` show the pages hydrated, in their late fonts, with the Fleuron drawn. `pnpm check` and the sample e2e run pass.
+- **Fixed:** a Ctrl-C while `next start` was still starting could leave that server running: the signal handlers went in only once it answered (in a try it died writing to the closed pipe, which is luck, not design). `startServer()` now only spawns it, the handlers go in at once and `ready()` waits; an interrupted run now exits 130 with the port free.
+- **Polished:** an unknown `--only` item now reads "“x” is no route path or kind here.", not "“x” is neither."
+- **For ticket 15:** nothing beyond the lane's note above; the "Screenshots" section is in the conventions doc. No tests changed.
