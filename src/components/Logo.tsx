@@ -1,21 +1,20 @@
-import { Kolam } from './Kolam'
 import styles from './Logo.module.css'
 
 /**
- * The kolam mark, one line looped round two dots, beside "care4mind" in
- * lowercase italic. With `redraw`, the mark draws itself again whenever the
- * link around it is hovered or focused.
+ * The Press wordmark: Care4Mind in Playfair, with the 4 set in a vermilion
+ * roundel. Type and its roundel only: nothing in it is drawn in or animated.
  */
-export function Logo({ redraw = false }: { redraw?: boolean }) {
+export function Logo() {
   return (
-    <span className={styles.logo}>
-      <Kolam
-        columns={2}
-        rows={1}
-        behaviour={redraw ? 'redraw-on-hover' : 'still'}
-        className={styles.mark}
-      />
-      care4mind
+    <span className={styles.wordmark}>
+      Care
+      <span className={styles.four}>
+        <svg className={styles.roundel} viewBox="0 0 2 2" aria-hidden focusable="false">
+          <circle cx="1" cy="1" r="1" />
+        </svg>
+        4
+      </span>
+      Mind
     </span>
   )
 }

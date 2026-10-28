@@ -10,7 +10,7 @@ export function SiteHeader() {
     // Its own transition name keeps it still while the page turns (globals.css).
     <header className={styles.header} style={{ viewTransitionName: 'site-header' }}>
       <Link href="/" className={styles.home} aria-label="Care4Mind home">
-        <Logo redraw />
+        <Logo />
       </Link>
       <nav aria-label="Main">
         <ul className={styles.links}>
