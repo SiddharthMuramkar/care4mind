@@ -25,12 +25,12 @@ const TOPICS = [
   { name: /^Guṇa and temperament/, path: '/topics/temperament/', count: 2 },
 ] as const
 
-// Each with what it holds, counted as the Library page counts it.
+// In the Library page's order, each with what it holds, counted as the Library page counts it.
 const LIBRARY = [
   { name: /^References/, path: '/library/references/', holds: '188 References' },
-  { name: /^Text Books/, path: '/library/textbooks/', holds: '20 entries' },
-  { name: /^Inspirational Books/, path: '/library/inspirational-books/', holds: '13 entries' },
   { name: /^Courses/, path: '/library/courses/', holds: '8 entries' },
+  { name: /^Inspirational Books/, path: '/library/inspirational-books/', holds: '13 entries' },
+  { name: /^Text Books/, path: '/library/textbooks/', holds: '20 entries' },
   { name: /^Methods/, path: '/library/methods/', holds: '5 sections' },
 ] as const
 

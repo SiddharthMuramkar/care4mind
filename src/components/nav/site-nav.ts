@@ -29,35 +29,25 @@ async function build(): Promise<SiteNav> {
   const has = (kind: string) => routes.some((entry) => entry.kind === kind)
   const link = (label: string, path: string): NavLink => ({ label, href: route(path) })
 
-  const lists = libraryCards
-    .filter((card) => card.kind === 'resource-list')
-    .sort((a, b) => b.itemCount - a.itemCount)
-  const pages = await Promise.all(
-    libraryCards
-      .filter((card) => card.kind === 'page')
-      .map(async (card) => {
-        const view = await library.get(card.slug)
-        const sections = view?.kind === 'page' ? view.sections.length : 0
-        return { card, sections }
-      }),
-  )
   const holds = (count: number, one: string, many: string): Holding => ({ count, one, many })
+  // In the Library page's order: References, then the Library's lists and pages as it lists them.
   const libraryPages: LibraryLink[] = [
     {
       slug: 'references',
       ...link('References', hrefFor({ page: 'references' })),
       holds: holds(allReferences.length, 'Reference', 'References'),
     },
-    ...lists.map((card) => ({
-      slug: card.slug,
-      ...link(card.title, card.href),
-      holds: holds(card.itemCount, 'entry', 'entries'),
-    })),
-    ...pages.map(({ card, sections }) => ({
-      slug: card.slug,
-      ...link(card.title, card.href),
-      ...(sections > 0 ? { holds: holds(sections, 'section', 'sections') } : {}),
-    })),
+    ...(await Promise.all(
+      libraryCards.map(async (card): Promise<LibraryLink> => {
+        const page = { slug: card.slug, ...link(card.title, card.href) }
+        if (card.kind === 'resource-list') {
+          return { ...page, holds: holds(card.itemCount, 'entry', 'entries') }
+        }
+        const view = await library.get(card.slug)
+        const sections = view?.kind === 'page' ? view.sections.length : 0
+        return sections > 0 ? { ...page, holds: holds(sections, 'section', 'sections') } : page
+      }),
+    )),
   ]
 
   const topicLinks = [...topicCards]

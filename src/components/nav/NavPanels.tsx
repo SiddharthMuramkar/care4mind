@@ -238,7 +238,7 @@ function ConceptsPanel({ site, pathname, mapNote }: PanelProps & { mapNote?: Rea
   )
 }
 
-/** The Library's pages as a catalogue: References first, then the reading lists, then its pages, each with what it holds. */
+/** The Library's pages as a catalogue, in the Library page's order, each with what it holds. */
 function LibraryPanel({ site, pathname }: PanelProps) {
   const { pages, index } = site.library
   return (
