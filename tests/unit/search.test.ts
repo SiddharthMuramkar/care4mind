@@ -96,6 +96,14 @@ describe('the search engine, on the real corpus', () => {
     expect(ids(query(index, 'satx'))).not.toContain('concept:satya')
   })
 
+  it('finds only what holds the query, or a spelling of it', () => {
+    const found = ids(query(index, 'vikshepa'))
+    expect(found).toContain('questionnaire:vikshepa')
+    expect(found).not.toContain('concept:satya')
+    expect(found).not.toContain('concept:ahimsa')
+    expect(found.length).toBeLessThan(40)
+  })
+
   it('finds a name as it is being typed', () => {
     expect(query(index, 'viks')[0]?.id).toBe('concept:vikshepa')
     expect(query(index, 'brahma vih')[0]?.id).toBe('concept:brahma-vihara')

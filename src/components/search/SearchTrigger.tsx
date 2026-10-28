@@ -1,9 +1,9 @@
 import type { Route } from 'next'
-import Link from 'next/link'
 import type { ReactNode } from 'react'
 
-import { CurrentLink } from '@/components/nav/CurrentLink'
 import { hrefFor } from '@/content'
+
+import { SearchLink } from './SearchLink'
 
 export interface SearchTriggerProps {
   /**
@@ -20,13 +20,11 @@ export interface SearchTriggerProps {
 }
 
 /**
- * Slot, added by front-end-site ticket 04 and filled by ticket 09: the way into search.
- *
- * This stub is a plain link to the search page. Ticket 09 makes it open the palette (and ⌘K)
- * and show the shortcut, keeping these props, keeping it a working link without JavaScript,
- * and keeping its width the same before and after the page is interactive (reserve the
- * shortcut's space), so the header doesn't shift. Render it from a server component; the
- * header hands the Drawer its copy already rendered.
+ * The way into search (front-end-site ticket 09). Without JavaScript it is a link to the search
+ * page, with `?q=` for an initial query. Once the page is interactive it opens the palette,
+ * filled in with that query; pointing at it or focusing it fetches the palette and the index.
+ * The header's copy also shows the shortcut (⌘K, or Ctrl K) from 72rem, in a box kept from the
+ * start so nothing moves, and carries the ⌘K listener for every page.
  */
 export function SearchTrigger({
   placement = 'page',
@@ -38,17 +36,15 @@ export function SearchTrigger({
   const href = (
     initialQuery === undefined ? search : `${search}?q=${encodeURIComponent(initialQuery)}`
   ) as Route
-  const label = children ?? 'Search'
-  if (placement === 'page') {
-    return (
-      <Link href={href} className={className}>
-        {label}
-      </Link>
-    )
-  }
   return (
-    <CurrentLink href={href} className={className}>
-      {label}
-    </CurrentLink>
+    <SearchLink
+      href={href}
+      searchPath={search}
+      placement={placement}
+      initialQuery={initialQuery}
+      className={className}
+    >
+      {children ?? 'Search'}
+    </SearchLink>
   )
 }

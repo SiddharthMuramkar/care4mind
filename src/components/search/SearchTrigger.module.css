@@ -1,0 +1,32 @@
+/*
+ * The header's Search shows its shortcut from 72rem, where it is a labelled field: set like a
+ * printer's sort at the end of the field. Its box is there before the page is interactive, so
+ * nothing moves when the shortcut fills it. Generated text with an empty alternative, so the
+ * link is still named "Search" (aria-keyshortcuts carries the keys).
+ */
+@media (min-width: 72rem) {
+  .shortcut::before {
+    content: attr(data-shortcut);
+    content: attr(data-shortcut) / '';
+    order: 1;
+    display: inline-block;
+    box-sizing: border-box;
+    width: 4.25em;
+    overflow: hidden;
+    white-space: nowrap;
+    margin-inline-start: 0.35rem;
+    padding: 0.05em 0.4em 0.1em;
+    border: 1px solid color-mix(in srgb, var(--color-ink-muted) 45%, transparent);
+    border-radius: 3px;
+    font-size: 0.875rem;
+    font-variant-caps: normal;
+    letter-spacing: 0.04em;
+    line-height: 1.4;
+    text-align: center;
+    color: var(--color-ink-muted);
+  }
+
+  .shortcut:not([data-shortcut])::before {
+    border-color: transparent;
+  }
+}

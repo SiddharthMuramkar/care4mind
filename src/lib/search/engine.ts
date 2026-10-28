@@ -255,11 +255,14 @@ function lookUp(
     else if (sound === key) offer(text, PHONETIC, false)
     else if (key.length >= 3 && sound.startsWith(key)) offer(text, PHONETIC_PREFIX, false)
     else if (edits > 0) {
+      // A typo in the letters as typed, or in their sound, each within its own allowance.
+      const byLetters = editDistance(typed, text, edits)
+      const bySound = keyEdits > 0 ? editDistance(key, sound, keyEdits) : Infinity
       const distance = Math.min(
-        editDistance(typed, text, edits),
-        keyEdits > 0 ? editDistance(key, sound, keyEdits) : Infinity,
+        byLetters <= edits ? byLetters : Infinity,
+        bySound <= keyEdits ? bySound : Infinity,
       )
-      if (distance <= edits) offer(text, FUZZY(distance), false)
+      if (distance !== Infinity) offer(text, FUZZY(distance), false)
     }
   }
   return found
