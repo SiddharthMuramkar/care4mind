@@ -57,7 +57,9 @@ test('the header stays put while the page turns', async ({ page }) => {
   const card = page.getByRole('link', { name: 'Read about Vikṣepa' })
   await prefetched(card)
   await card.click()
-  await pageTurns(page)
+  // The page turns once the next page is ready: wait until it has started, held half-way.
+  // (pageTurns alone would return at once, before anything has been recorded.)
+  await expect.poll(async () => (await pageTurns(page)).length).toBe(1)
   // Half-way through the turn: the header looks exactly as it does once the page is still.
   const header = page.getByRole('banner')
   const box = (await header.boundingBox()) ?? undefined
