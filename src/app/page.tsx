@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { ConceptCard } from '@/components/ConceptCard'
 import { Fleuron } from '@/components/Fleuron'
 import { Folio } from '@/components/Folio'
-import { Kolam } from '@/components/Kolam'
+import { OrnamentRule } from '@/components/OrnamentRule'
 import { PageTurn, turnForward } from '@/components/PageTurn'
 import { Text } from '@/components/prose'
 import { QuestionnaireCard } from '@/components/QuestionnaireCard'
@@ -49,35 +49,30 @@ export default async function HomePage() {
     <PageTurn>
       <main id="main" className={styles.main}>
         <section className={styles.hero} aria-labelledby="home-title">
-          <div className={styles.stage}>
-            <div className={styles.frame}>
-              <Kolam columns={9} rows={7} behaviour="draw-on-load" className={styles.frameKolam} />
-            </div>
-            <Folio className={styles.heroFolio}>
-              <p className={styles.kicker}>A portal for Indian psychology</p>
-              <h1 id="home-title" className={styles.heroTitle}>
-                <span lang="sa-Deva" className={styles.heroDeva}>
-                  {page.shloka.devanagari}
-                </span>
-                <span lang="sa-Latn" className={styles.heroIast}>
-                  {page.shloka.iast}
-                </span>
-              </h1>
-              <p className={styles.translation}>{page.shloka.translation}</p>
-              <Fleuron className={styles.heroFleuron} />
-              <p className={styles.intro}>
-                <Text text={page.intro} />
-              </p>
-              <p className={styles.ctas}>
-                <a href="#concepts" className={cta.primary} data-ink>
-                  Explore Concepts
-                </a>
-                <a href="#questionnaires" className={cta.secondary} data-ink>
-                  Questionnaires
-                </a>
-              </p>
-            </Folio>
-          </div>
+          <Folio className={styles.heroFolio}>
+            <p className={styles.kicker}>A portal for Indian psychology</p>
+            <h1 id="home-title" className={styles.heroTitle}>
+              <span lang="sa-Deva" className={styles.heroDeva}>
+                {page.shloka.devanagari}
+              </span>
+              <span lang="sa-Latn" className={styles.heroIast}>
+                {page.shloka.iast}
+              </span>
+            </h1>
+            <p className={styles.translation}>{page.shloka.translation}</p>
+            <Fleuron draw className={styles.heroFleuron} />
+            <p className={styles.intro}>
+              <Text text={page.intro} />
+            </p>
+            <p className={styles.ctas}>
+              <a href="#concepts" className={cta.primary} data-ink>
+                Explore Concepts
+              </a>
+              <a href="#questionnaires" className={cta.secondary} data-ink>
+                Questionnaires
+              </a>
+            </p>
+          </Folio>
         </section>
 
         <section id="contents" className={styles.section} aria-labelledby="contents-title">
@@ -88,7 +83,6 @@ export default async function HomePage() {
             {areas.map((area, index) => (
               <li key={area.title} className={styles.entry}>
                 <span lang="sa-Deva" className={styles.entryNumber} aria-hidden>
-                  <Kolam columns={1} rows={1} behaviour="draw-on-scroll" className={styles.knot} />
                   {toDevanagariDigits(String(index + 1))}
                 </span>
                 <span className={styles.entryTitle}>
@@ -111,7 +105,7 @@ export default async function HomePage() {
           </ol>
         </section>
 
-        <Kolam columns={9} rows={2} behaviour="draw-on-scroll" className={styles.band} />
+        <OrnamentRule className={styles.rule} />
 
         <section id="concepts" className={styles.section} aria-labelledby="concepts-title">
           <h2 id="concepts-title" className={styles.sectionTitle}>
@@ -144,7 +138,7 @@ export default async function HomePage() {
           </p>
         </section>
 
-        <Kolam columns={9} rows={2} behaviour="draw-on-scroll" className={styles.band} />
+        <OrnamentRule className={styles.rule} />
 
         <section
           id="questionnaires"

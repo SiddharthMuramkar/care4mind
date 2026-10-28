@@ -34,31 +34,74 @@
   cursor: pointer;
 }
 
-/* The track: the logo's mark, its line drawn heavier so it holds at this size. */
+/*
+ * The track: an Oxford rule, a thick rule over a thin one, as a printer sets
+ * under a heading. Its knob is a vermilion roundel, like the 4 in the wordmark.
+ */
 .track {
+  --roundel: 0.8em;
   position: relative;
   flex: none;
-  width: 2.75em;
+  width: 3em;
+  height: 1em;
 }
 
-.loops {
-  width: 100%;
-  height: auto;
-  --kolam-line-width: 5px;
+.track::before,
+.track::after {
+  content: '';
+  position: absolute;
+  inset-inline: 0;
+  background: var(--color-surface-ink);
 }
 
-/* The knob covers one loop and springs to the other, so it moves by its own width. */
+.track::before {
+  top: calc(50% - 2.5px);
+  height: 2px;
+}
+
+.track::after {
+  top: calc(50% + 1px);
+  height: 1px;
+}
+
+/* Pressed, the thick rule is inked vermilion behind the knob, from the start of the track to its end. */
+.ink {
+  position: absolute;
+  z-index: 1;
+  inset-inline: 0;
+  top: calc(50% - 2.5px);
+  height: 2px;
+  background: var(--color-highlight);
+  transform: scaleX(0);
+  transform-origin: left;
+}
+
+.switch[aria-pressed='true'] .ink {
+  transform: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .ink {
+    transition: transform var(--duration-move) var(--ease-in-out);
+  }
+}
+
+/* The knob's box spans the track less one roundel, so moving by its own width carries the roundel end to end. */
 .knob {
   position: absolute;
-  inset: 0 50% 0 0;
+  z-index: 2;
+  inset: 0 var(--roundel) 0 0;
   display: grid;
-  place-items: center;
+  align-items: center;
+  justify-items: start;
 }
 
+/* Ringed in paper, so the rule seems to pass beneath it. */
 .knob::before {
   content: '';
-  width: 0.55em;
-  height: 0.55em;
+  width: var(--roundel);
+  height: var(--roundel);
   border-radius: 50%;
-  background: var(--color-kolam-dot);
+  background: var(--color-highlight);
+  box-shadow: 0 0 0 2px var(--color-surface);
 }

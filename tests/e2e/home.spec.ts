@@ -2,56 +2,83 @@ import type { Locator, Page } from '@playwright/test'
 
 import {
   animationsStartedOn,
-  frameKolam,
+  delaysStartedOn,
   isDrawing,
   openingFolio,
   recordAnimationStarts,
-  undrawn,
 } from './drawings'
 import { expect, gotoReady, test } from './fixtures'
-import { placeOnScreen, scrollPath, travel } from './scrolling'
+import { placeOnScreen, scrollPath } from './scrolling'
 
 const section = (page: Page, name: string) => page.getByRole('region', { name, exact: true })
 
-/** The one drawing in the gap between two sections. */
-async function drawingBetween(page: Page, above: Locator, below: Locator) {
+/** The lotus Fleuron printed in the opening folio. */
+const heroFleuron = (page: Page) => openingFolio(page).locator('svg')
+
+/** The one ornament in the gap between two sections: its outermost element hidden from assistive technology. */
+async function ornamentBetween(page: Page, above: Locator, below: Locator) {
   const top = await above.boundingBox()
   const bottom = await below.boundingBox()
   if (!top || !bottom) throw new Error('both sections must be on the page')
   const between: Locator[] = []
-  for (const drawing of await page.getByRole('main').locator('svg').all()) {
-    const box = await drawing.boundingBox()
-    if (box && box.y >= top.y + top.height && box.y + box.height <= bottom.y) between.push(drawing)
+  const decoration = page
+    .getByRole('main')
+    .locator('[aria-hidden="true"]:not([aria-hidden="true"] *)')
+  for (const ornament of await decoration.all()) {
+    const box = await ornament.boundingBox()
+    if (box && box.y >= top.y + top.height && box.y + box.height <= bottom.y) between.push(ornament)
   }
-  expect(between, 'one drawing between the sections').toHaveLength(1)
+  expect(between, 'one ornament between the sections').toHaveLength(1)
   return between[0] as Locator
 }
 
-test.describe('the opening kolam', () => {
-  test('frames the opening folio and is hidden from assistive technology', async ({ page }) => {
-    await gotoReady(page, '/')
-    const frame = await frameKolam(page)
-    await expect(frame).toBeVisible()
-    await expect(frame).toHaveAttribute('aria-hidden', 'true')
-    await expect(page.getByRole('main').getByRole('img')).toHaveCount(0)
-  })
+/**
+ * The rules of an OrnamentRule as drawn on screen, left to right: where each
+ * starts and ends across the screen, and how much of its full width is inked.
+ */
+function rulesOf(ornament: Locator) {
+  return ornament.evaluate((element) =>
+    [...element.children]
+      .filter((child): child is HTMLElement => child instanceof HTMLElement)
+      .map((rule) => {
+        const { left, right, width } = rule.getBoundingClientRect()
+        return { left, right, inked: width / rule.offsetWidth }
+      })
+      .sort((a, b) => a.left - b.left),
+  )
+}
 
-  test('draws itself once on load, in about 1.6 s, and ends complete', async ({ page }) => {
+test.describe('the opening folio', () => {
+  test('its lotus Fleuron draws itself once on load, stroke by stroke, and ends complete', async ({
+    page,
+  }) => {
     await recordAnimationStarts(page)
     await gotoReady(page, '/')
-    const line = (await frameKolam(page)).locator('path')
-    await expect.poll(() => isDrawing(line)).toBe(false)
-    await expect(line).toHaveCSS('stroke-dashoffset', '0px')
+    const fleuron = heroFleuron(page)
+    await expect(fleuron).toBeVisible()
+    await expect(fleuron).toHaveAttribute('aria-hidden', 'true')
+    await expect(page.getByRole('main').getByRole('img')).toHaveCount(0)
+    const strokes = await fleuron.locator('path').all()
+    expect(strokes.length, 'drawn in more than one stroke').toBeGreaterThan(1)
+    for (const stroke of strokes) {
+      await expect.poll(() => isDrawing(stroke)).toBe(false)
+      await expect(stroke).toHaveCSS('stroke-dashoffset', '0px')
+    }
 
     // Scrolling away and back draws nothing new.
     await page.evaluate(() => window.scrollTo({ top: 1500, behavior: 'instant' }))
     await page.evaluate(() => window.scrollTo({ top: 0, behavior: 'instant' }))
     await page.waitForTimeout(100)
-    expect(await isDrawing(line)).toBe(false)
-    await expect(line).toHaveCSS('stroke-dashoffset', '0px')
-    expect(await animationsStartedOn(line)).toEqual([
-      { byScroll: false, duration: expect.closeTo(1600, -3) },
-    ])
+    for (const stroke of strokes) {
+      expect(await isDrawing(stroke)).toBe(false)
+      await expect(stroke).toHaveCSS('stroke-dashoffset', '0px')
+      expect(await animationsStartedOn(stroke), 'drawn once, in time').toEqual([
+        { byScroll: false, duration: expect.any(Number) },
+      ])
+    }
+    // Stroke by stroke: the strokes set off one after another, not all at once.
+    const delays = await Promise.all(strokes.map((stroke) => delaysStartedOn(stroke)))
+    expect(new Set(delays.flat()).size).toBeGreaterThan(1)
   })
 
   test('never makes the verse wait: the heading and translation are never hidden or faded in', async ({
@@ -69,17 +96,23 @@ test.describe('the opening kolam', () => {
     }
   })
 
-  test('drifts a little slower than the page as it scrolls', async ({ page }) => {
+  test('sits on the ruled ground with nothing drawn round it, and nothing drifts as the page scrolls', async ({
+    page,
+  }) => {
     await gotoReady(page, '/')
-    const [kolam = NaN, folio = NaN] = await travel(
-      page,
-      240,
-      await frameKolam(page),
-      openingFolio(page),
+    const hero = page.getByRole('region').filter({ has: page.getByRole('heading', { level: 1 }) })
+    await expect(hero.locator('svg'), 'the only drawing is in the folio').toHaveCount(
+      await openingFolio(page).locator('svg').count(),
     )
-    expect(folio).toBe(240)
-    expect(kolam).toBeGreaterThan(folio * 0.5)
-    expect(kolam).toBeLessThan(folio * 0.95)
+    const parts = [openingFolio(page), heroFleuron(page), hero]
+    const tops = () => Promise.all(parts.map(async (part) => (await part.boundingBox())?.y ?? NaN))
+    const before = await tops()
+    await page.evaluate(() => window.scrollBy({ top: 240, behavior: 'instant' }))
+    await page.evaluate(
+      () => new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(done))),
+    )
+    const after = await tops()
+    expect(before.map((top, index) => top - (after[index] ?? NaN))).toEqual([240, 240, 240])
   })
 
   test('is never the largest contentful paint', async ({ page }) => {
@@ -102,7 +135,7 @@ test.describe('the opening kolam', () => {
   })
 })
 
-test('a kolam band between each pair of sections draws itself in as it scrolls into view', async ({
+test('an OrnamentRule between each pair of sections inks in from the centre as it scrolls into view', async ({
   page,
 }) => {
   await gotoReady(page, '/')
@@ -112,23 +145,38 @@ test('a kolam band between each pair of sections draws itself in as it scrolls i
   ]
   for (const [above, below] of neighbours) {
     await page.evaluate(() => window.scrollTo({ top: 0, behavior: 'instant' }))
-    const band = await drawingBetween(page, section(page, above), section(page, below))
-    const line = band.locator('path')
-    // A kolam: one unbroken line.
-    await expect(line).toHaveCount(1)
-    await expect(band).not.toBeInViewport()
-    expect(await undrawn(line)).toBe(1)
+    const ornament = await ornamentBetween(page, section(page, above), section(page, below))
+    await expect(ornament).toHaveAttribute('aria-hidden', 'true')
+    await expect(ornament).not.toBeInViewport()
+    const before = await rulesOf(ornament)
+    expect(before, 'two rules, one each side of the fleuron').toHaveLength(2)
+    for (const rule of before)
+      expect(rule.inked, 'short before it reaches the screen').toBeLessThan(0.1)
 
-    await placeOnScreen(band, 0.85)
-    await expect.poll(() => undrawn(line)).toBeLessThan(1)
-    expect(await undrawn(line)).toBeGreaterThan(0)
+    await placeOnScreen(ornament, 0.85)
+    const partWay = await rulesOf(ornament)
+    for (const rule of partWay) {
+      expect(rule.inked, 'part-way in on the way up').toBeGreaterThan(0.1)
+      expect(rule.inked).toBeLessThan(0.95)
+    }
 
-    await placeOnScreen(band, 0.2)
-    await expect.poll(() => undrawn(line)).toBe(0)
+    await placeOnScreen(ornament, 0.2)
+    await expect
+      .poll(async () => (await rulesOf(ornament)).map(({ inked }) => inked))
+      .toEqual([1, 1])
+    const full = await rulesOf(ornament)
+
+    // From the centre: the rules' inner ends, beside the fleuron, stay put while their outer ends reach out.
+    const [left, right] = [partWay[0], partWay[1]]
+    const [fullLeft, fullRight] = [full[0], full[1]]
+    if (!left || !right || !fullLeft || !fullRight) throw new Error('two rules')
+    expect(Math.abs(right.left - left.right - (fullRight.left - fullLeft.right))).toBeLessThan(1)
+    expect(left.left).toBeGreaterThan(fullLeft.left)
+    expect(right.right).toBeLessThan(fullRight.right)
   }
 })
 
-test('each Contents numeral keeps its Devanagari digit, ringed by a kolam knot that draws in as it scrolls up', async ({
+test('each Contents numeral is its Devanagari digit as plain text, with nothing drawn round it', async ({
   page,
 }) => {
   await gotoReady(page, '/')
@@ -137,31 +185,12 @@ test('each Contents numeral keeps its Devanagari digit, ringed by a kolam knot t
   await expect(entries).toHaveCount(numerals.length)
   for (const [index, entry] of (await entries.all()).entries()) {
     const numeral = entry.getByText(numerals[index] ?? '', { exact: true })
-    const knot = entry.locator('svg')
-    const line = knot.locator('path')
     await expect(numeral).toBeVisible()
-    await expect(line).toHaveCount(1)
-
-    await placeOnScreen(knot, 0.9)
-    await expect.poll(() => undrawn(line)).toBeLessThan(1)
-    expect(await undrawn(line)).toBeGreaterThan(0)
-
-    await placeOnScreen(knot, 0.2)
-    await expect.poll(() => undrawn(line)).toBe(0)
-    const ring = await knot.boundingBox()
-    const digit = await numeral.evaluate((element) => {
-      const range = document.createRange()
-      range.selectNodeContents(
-        [...element.childNodes].find((node) => node.nodeType === Node.TEXT_NODE) ?? element,
-      )
-      const { x, y, width, height } = range.getBoundingClientRect()
-      return { x, y, width, height }
-    })
-    if (!ring) throw new Error('the knot must be on screen')
-    expect(ring.x, 'the knot loops round its numeral').toBeLessThan(digit.x)
-    expect(ring.x + ring.width).toBeGreaterThan(digit.x + digit.width)
-    expect(ring.y).toBeLessThan(digit.y + digit.height / 2)
-    expect(ring.y + ring.height).toBeGreaterThan(digit.y + digit.height / 2)
+    expect(
+      await numeral.evaluate((element) => element.children.length),
+      'the numeral is text alone',
+    ).toBe(0)
+    await expect(entry.locator('svg, img, canvas'), 'nothing drawn in the entry').toHaveCount(0)
   }
 })
 
@@ -218,7 +247,7 @@ test('links to another page open it at once, without gliding from where you were
   expect(backHome.length, 'a jump, not a glide').toBeLessThanOrEqual(3)
 })
 
-test('nothing shifts while the kolams draw in, from load to the foot of the page', async ({
+test('nothing shifts while the ornaments draw and ink in, from load to the foot of the page', async ({
   page,
 }) => {
   await page.addInitScript(() => {
@@ -234,8 +263,9 @@ test('nothing shifts while the kolams draw in, from load to the foot of the page
     }).observe({ type: 'layout-shift', buffered: true })
   })
   await gotoReady(page, '/')
-  const frame = (await frameKolam(page)).locator('path')
-  await expect.poll(() => isDrawing(frame)).toBe(false)
+  for (const stroke of await heroFleuron(page).locator('path').all()) {
+    await expect.poll(() => isDrawing(stroke)).toBe(false)
+  }
   const height = await page.evaluate(() => document.documentElement.scrollHeight)
   for (let top = 0; top <= height; top += 300) {
     await page.evaluate((top) => window.scrollTo({ top, behavior: 'instant' }), top)

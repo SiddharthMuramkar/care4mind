@@ -11,8 +11,6 @@
     0 30px 60px -20px rgb(0 0 0 / 0.55);
   --color-focus: var(--color-surface-focus);
   --color-link: var(--color-surface-link);
-  --color-kolam-line: var(--color-surface-kolam-line);
-  --color-kolam-dot: var(--color-surface-kolam-dot);
   --rule-colour: var(--color-highlight);
 }
 
