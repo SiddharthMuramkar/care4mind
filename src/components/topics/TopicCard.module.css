@@ -1,0 +1,115 @@
+/*
+ * A topic card: a slip of paper on the folio, edged at the top in the topic's hue. It lifts as
+ * the pointer finds it and presses into the page when pressed; only its transform moves.
+ */
+.card {
+  position: relative;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  align-content: start;
+  gap: 0.5rem;
+  padding: 1.25rem 1.25rem 1rem;
+  background: color-mix(in srgb, var(--color-surface) 70%, var(--color-ink));
+  color: var(--color-surface-ink);
+  border-radius: 2px;
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--color-surface-ink) 30%, transparent),
+    inset 0 3px 0 var(--topic, var(--color-highlight));
+  overflow-wrap: anywhere;
+}
+
+.numeral {
+  font-family: var(--font-deva);
+  font-size: 1.5rem;
+  line-height: 1;
+  color: var(--color-highlight);
+}
+
+.title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: 1.5rem;
+  line-height: 1.15;
+}
+
+.link {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* The whole card answers the pointer: the link reaches over it. */
+.link::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+}
+
+.link:focus-visible {
+  outline: none;
+}
+
+.card:has(.link:focus-visible) {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 3px;
+}
+
+.term {
+  margin: 0;
+  font-style: italic;
+  color: var(--color-surface-muted);
+}
+
+.term :lang(sa-Deva) {
+  font-style: normal;
+  font-family: var(--font-deva);
+}
+
+.count {
+  margin: 0;
+  padding-top: 0.5rem;
+  border-top: 1px solid color-mix(in srgb, var(--color-surface-rule) 60%, transparent);
+  font-variant-caps: all-small-caps;
+  letter-spacing: 0.1em;
+  color: var(--color-surface-muted);
+}
+
+/* On a phone the card lies on its side: numeral, then name and count, one under the other. */
+@media (max-width: 39.99rem) {
+  .card {
+    grid-template-columns: 2rem 1fr;
+    grid-template-rows: none;
+    column-gap: 0.75rem;
+    row-gap: 0.25rem;
+    padding: 0.9rem 1rem;
+  }
+
+  .numeral {
+    grid-row: span 3;
+    padding-top: 0.2rem;
+  }
+
+  .title {
+    font-size: 1.3125rem;
+  }
+
+  .count {
+    padding-top: 0;
+    border-top: 0;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .card {
+    transition: transform var(--duration-quick) var(--ease-out);
+  }
+
+  .card:has(.link:hover) {
+    transform: translateY(-3px);
+  }
+
+  .card:has(.link:active) {
+    transform: translateY(1px);
+    transition-duration: var(--duration-instant);
+  }
+}
