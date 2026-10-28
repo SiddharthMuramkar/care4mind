@@ -6,18 +6,17 @@ import type { LateFace } from '@/fonts/late-faces'
  */
 function addAfterFirstPaint(faces: readonly LateFace[]) {
   const add = () => {
+    const joining: FontFace[] = []
     for (const { family, url, descriptors, onDemand } of faces) {
       const face = new FontFace(family, `url(${url}) format('woff2')`, descriptors)
-      if (onDemand) {
-        document.fonts.add(face)
-      } else {
-        // A face that fails to load leaves its text in its stand-in.
-        face
-          .load()
-          .then(() => document.fonts.add(face))
-          .catch(() => {})
-      }
+      if (onDemand) document.fonts.add(face)
+      else joining.push(face)
     }
+    // Faces joining a family on the page reset all its text, so they join together, at one
+    // relayout. One that fails to load leaves its text in its stand-in.
+    Promise.allSettled(joining.map((face) => face.load())).then(() => {
+      for (const face of joining) if (face.status === 'loaded') document.fonts.add(face)
+    })
   }
   if (PerformanceObserver.supportedEntryTypes?.includes('paint')) {
     new PerformanceObserver((list, observer) => {
