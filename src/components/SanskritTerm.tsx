@@ -1,4 +1,4 @@
-import type { SanskritTerm as Term } from '@/content'
+import type { SanskritName } from '@/content'
 import { capitalise } from '@/lib/text'
 
 import { cx } from '@/lib/cx'
@@ -6,7 +6,7 @@ import { cx } from '@/lib/cx'
 import styles from './SanskritTerm.module.css'
 
 interface Props {
-  term: Term
+  term: SanskritName
   gloss?: string
   /** Show the Devanagari form beside the IAST, where the term has one. */
   devanagari?: boolean

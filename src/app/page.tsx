@@ -1,3 +1,4 @@
+import type { Metadata, Route } from 'next'
 import Link from 'next/link'
 
 import { ConceptCard } from '@/components/ConceptCard'
@@ -5,19 +6,44 @@ import { Fleuron } from '@/components/Fleuron'
 import { Folio } from '@/components/Folio'
 import { Kolam } from '@/components/Kolam'
 import { PageTurn, turnForward } from '@/components/PageTurn'
+import { Text } from '@/components/prose'
 import { QuestionnaireCard } from '@/components/QuestionnaireCard'
-import { getHomepage, listConcepts, listQuestionnaires } from '@/content'
-import { capitalise, toDevanagariDigits } from '@/lib/text'
+import { concepts, home, hrefFor, questionnaires, site } from '@/content'
+import { metadataFor } from '@/lib/metadata'
+import { toDevanagariDigits } from '@/lib/text'
 
 import cta from './cta.module.css'
 import styles from './page.module.css'
 
+export function generateMetadata(): Promise<Metadata> {
+  return metadataFor(hrefFor({ page: 'home' }))
+}
+
+/** Where an area's link leads, as the site map names it: "Library › Methods". */
+async function placeOf(href: string): Promise<string> {
+  return (await site.trail(href))
+    .slice(1)
+    .map((crumb) => crumb.label)
+    .join(' › ')
+}
+
 export default async function HomePage() {
-  const [home, concepts, questionnaires] = await Promise.all([
-    getHomepage(),
-    listConcepts(),
-    listQuestionnaires(),
+  const [page, allConcepts, allQuestionnaires] = await Promise.all([
+    home.get(),
+    concepts.list(),
+    questionnaires.list(),
   ])
+  // The homepage features the Questionnaires with pages of their own, and the Concepts they draw
+  // on; the A–Z and the Questionnaires page hold the rest.
+  const featured = allQuestionnaires.filter(({ status }) => status !== 'coming-later')
+  const later = allQuestionnaires.length - featured.length
+  const drawnOn = new Set(
+    featured.flatMap((questionnaire) => questionnaire.concepts.map((c) => c.slug)),
+  )
+  const featuredConcepts = allConcepts.filter(({ slug }) => drawnOn.has(slug))
+  const areas = await Promise.all(
+    page.areas.map(async (area) => ({ ...area, place: area.href && (await placeOf(area.href)) })),
+  )
 
   return (
     <PageTurn>
@@ -31,15 +57,17 @@ export default async function HomePage() {
               <p className={styles.kicker}>A portal for Indian psychology</p>
               <h1 id="home-title" className={styles.heroTitle}>
                 <span lang="sa-Deva" className={styles.heroDeva}>
-                  {home.shloka.devanagari}
+                  {page.shloka.devanagari}
                 </span>
                 <span lang="sa-Latn" className={styles.heroIast}>
-                  {home.shloka.iast}
+                  {page.shloka.iast}
                 </span>
               </h1>
-              <p className={styles.translation}>{home.shloka.translation}</p>
+              <p className={styles.translation}>{page.shloka.translation}</p>
               <Fleuron className={styles.heroFleuron} />
-              <p className={styles.intro}>{home.intro}</p>
+              <p className={styles.intro}>
+                <Text text={page.intro} />
+              </p>
               <p className={styles.ctas}>
                 <a href="#concepts" className={cta.primary} data-ink>
                   Explore Concepts
@@ -57,18 +85,27 @@ export default async function HomePage() {
             Contents
           </h2>
           <ol className={styles.contents}>
-            {home.areas.map((area, index) => (
+            {areas.map((area, index) => (
               <li key={area.title} className={styles.entry}>
                 <span lang="sa-Deva" className={styles.entryNumber} aria-hidden>
                   <Kolam columns={1} rows={1} behaviour="draw-on-scroll" className={styles.knot} />
                   {toDevanagariDigits(String(index + 1))}
                 </span>
                 <span className={styles.entryTitle}>
-                  {area.href ? <a href={area.href}>{area.title}</a> : area.title}
+                  {area.href ? (
+                    // The homepage's areas lead to the pages the content module gives them.
+                    <Link href={area.href as Route} transitionTypes={turnForward}>
+                      {area.title}
+                    </Link>
+                  ) : (
+                    area.title
+                  )}
                 </span>
                 <span className={styles.entryLeader} aria-hidden />
-                <span className={styles.entryStatus}>{area.href ? 'Below' : 'In preparation'}</span>
-                <span className={styles.entryText}>{area.text}</span>
+                <span className={styles.entryStatus}>{area.place || 'In preparation'}</span>
+                <span className={styles.entryText}>
+                  <Text text={area.text} />
+                </span>
               </li>
             ))}
           </ol>
@@ -84,19 +121,27 @@ export default async function HomePage() {
             Each Concept is a single idea from Indian psychology, named by its Sanskrit term.
           </p>
           <ul className={styles.cards}>
-            {concepts.map((concept) => (
+            {featuredConcepts.map((concept) => (
               <li key={concept.slug}>
                 <ConceptCard
                   concept={concept}
                   action={
-                    <Link href={`/concepts/${concept.slug}`} transitionTypes={turnForward}>
-                      Read about&nbsp;<span lang="sa-Latn">{capitalise(concept.term.iast)}</span>
+                    <Link
+                      href={hrefFor({ kind: 'concept', id: concept.slug })}
+                      transitionTypes={turnForward}
+                    >
+                      Read about&nbsp;<span lang={concept.lang}>{concept.name}</span>
                     </Link>
                   }
                 />
               </li>
             ))}
           </ul>
+          <p className={styles.note}>
+            <Link href={hrefFor({ page: 'concepts' })} transitionTypes={turnForward}>
+              All {allConcepts.length} Concepts, from A to Z
+            </Link>
+          </p>
         </section>
 
         <Kolam columns={9} rows={2} behaviour="draw-on-scroll" className={styles.band} />
@@ -114,16 +159,24 @@ export default async function HomePage() {
             purpose and limitations before you start.
           </p>
           <ul className={styles.cards}>
-            {questionnaires.map((questionnaire) => (
+            {featured.map((questionnaire) => (
               <li key={questionnaire.slug}>
                 <QuestionnaireCard questionnaire={questionnaire} />
               </li>
             ))}
           </ul>
-          <p className={styles.note}>{home.questionnairesNote}</p>
+          {later > 0 ? (
+            <p className={styles.note}>
+              <Link href={hrefFor({ page: 'questionnaires' })} transitionTypes={turnForward}>
+                {later} more Questionnaires from the current site, coming later
+              </Link>
+            </p>
+          ) : null}
         </section>
 
-        <p className={styles.closing}>{home.closing}</p>
+        <p className={styles.closing}>
+          <Text text={page.closing} />
+        </p>
       </main>
     </PageTurn>
   )

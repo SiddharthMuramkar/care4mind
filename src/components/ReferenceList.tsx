@@ -1,16 +1,17 @@
-import type { Reference } from '@/content'
+import type { ReferenceView } from '@/content'
 
 import { Citation } from './Citation'
 import { Kolam } from './Kolam'
 import styles from './ReferenceList.module.css'
 
 /**
- * A Concept's References, folded away so they don't interrupt reading. A
- * native disclosure, so it needs no JavaScript: while it is closed the
- * browser's find-in-page still reaches every entry, and a link to one
- * (`#ref-…`) opens it there.
+ * A page's References, folded away so they don't interrupt reading. A native
+ * disclosure, so it needs no JavaScript: while it is closed the browser's
+ * find-in-page still reaches every entry, and a link to one (`#ref-…`) opens
+ * it there. A page with none shows nothing.
  */
-export function ReferenceList({ references }: { references: readonly Reference[] }) {
+export function ReferenceList({ references }: { references: readonly ReferenceView[] }) {
+  if (references.length === 0) return null
   return (
     <details className={styles.root}>
       <summary className={styles.trigger}>
@@ -20,7 +21,7 @@ export function ReferenceList({ references }: { references: readonly Reference[]
       </summary>
       <ol className={styles.list}>
         {references.map((reference) => (
-          <li key={reference.id} id={`ref-${reference.id}`}>
+          <li key={reference.id} id={reference.anchor}>
             <Citation reference={reference} />
           </li>
         ))}

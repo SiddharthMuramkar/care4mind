@@ -1,6 +1,6 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`the foundation’s content, through the legacy functions > gives every term on the foundation’s pages the same ASCII spellings 1`] = `
+exports[`the foundation’s content, through the v1 interface > gives every term on the foundation’s pages the same ASCII spellings 1`] = `
 {
   "alabdhabhūmikatva": [
     "alabdhabhumikatva",
@@ -41,9 +41,8 @@ exports[`the foundation’s content, through the legacy functions > gives every 
 }
 `;
 
-exports[`the foundation’s content, through the legacy functions > returns the KarmaYoga Scale as the foundation did 1`] = `
+exports[`the foundation’s content, through the v1 interface > returns the KarmaYoga Scale as the foundation did 1`] = `
 {
-  "availability": "coming-soon",
   "format": [
     "45 statements in four parts: everyday experience (two parts) and experience related to work (two parts).",
     "21 statements are rated by how often they apply, from Always to Never.",
@@ -72,7 +71,7 @@ exports[`the foundation’s content, through the legacy functions > returns the 
   "relatedConcepts": [
     "vikshepa",
   ],
-  "reviewStatus": "carried-over-not-reviewed",
+  "reviewStatus": "drafted-not-reviewed",
   "slug": "karmayoga-scale",
   "source": {
     "authors": "Navare, A., & Pandey, A.",
@@ -82,28 +81,32 @@ exports[`the foundation’s content, through the legacy functions > returns the 
     "title": "Karma Yoga: Scale development and studies of the impact on positive psychological outcomes at the workplace",
     "year": "2022",
   },
+  "status": "preview",
   "summary": "Statements about your everyday experience and your experience at work, rated by how often they apply and how far you agree.",
   "title": "KarmaYoga Scale",
 }
 `;
 
-exports[`the foundation’s content, through the legacy functions > returns the homepage as the foundation did 1`] = `
+exports[`the foundation’s content, through the v1 interface > returns the homepage as the foundation did 1`] = `
 {
   "areas": [
     {
-      "href": "#concepts",
+      "href": "/concepts/",
       "text": "Explore the rich spiritual traditions of India to understand the unique concepts of ancient Indian psychology.",
       "title": "Concepts",
     },
     {
+      "href": "/library/methods/",
       "text": "Emerging cross-cultural techniques in recent times armed the toolbox of caregivers in many ways.",
       "title": "Techniques",
     },
     {
+      "href": "/library/",
       "text": "Our self is our most important resource. An array of inward journey resources help us find ways to mentor the mind.",
       "title": "Resources",
     },
     {
+      "href": "/library/textbooks/",
       "text": "Ancient Indian philosophical texts that deal with specific perspectives of each unique concept.",
       "title": "Tradition and Texts",
     },
@@ -112,6 +115,7 @@ exports[`the foundation’s content, through the legacy functions > returns the 
       "title": "Applications",
     },
     {
+      "href": "/library/courses/",
       "text": "Opportunities in Indian psychology research to create and host models related to Indian theories.",
       "title": "Research",
     },
@@ -123,7 +127,6 @@ exports[`the foundation’s content, through the legacy functions > returns the 
     "retrieved": "2026-10-27",
     "url": "https://care4mind.org/",
   },
-  "questionnairesNote": "More Questionnaires from the current site follow once their questions and scoring rules are confirmed.",
   "shloka": {
     "devanagari": "यद् भावं तद् भवति",
     "iast": "yad bhāvaṃ tad bhavati",
@@ -132,7 +135,7 @@ exports[`the foundation’s content, through the legacy functions > returns the 
 }
 `;
 
-exports[`the foundation’s content, through the legacy functions > returns the vikṣepa Concept as the foundation did 1`] = `
+exports[`the foundation’s content, through the v1 interface > returns the vikṣepa Concept as the foundation did 1`] = `
 {
   "comparison": {
     "caption": "Comparison between Indian and Western concepts related to vikṣepa and its associated obstacles (Schleim, 2025).",
@@ -369,7 +372,7 @@ exports[`the foundation’s content, through the legacy functions > returns the 
   "relatedQuestionnaires": [
     "karmayoga-scale",
   ],
-  "reviewStatus": "carried-over-not-reviewed",
+  "reviewStatus": "drafted-not-reviewed",
   "sections": [
     {
       "blocks": [

@@ -95,8 +95,8 @@ test('pressing a call to action spreads no ink and moves nothing, with reduced m
 })
 
 for (const { from, link, to } of [
-  { from: '/', link: 'Read about Vikṣepa', to: '/concepts/vikshepa' },
-  { from: '/concepts/vikshepa', link: 'Home', to: '/' },
+  { from: '/', link: 'Read about Vikṣepa', to: '/concepts/vikshepa/' },
+  { from: '/concepts/vikshepa/', link: 'Home', to: '/' },
 ]) {
   test(`following "${link}" changes the page at once, with reduced motion`, async ({ page }) => {
     await recordPageTurns(page)
@@ -150,7 +150,7 @@ test('the "Devanagari first" switch still swaps the scripts, at once, with reduc
 }) => {
   await recordPageTurns(page)
   await recordScriptedAnimations(page)
-  await gotoReady(page, '/concepts/vikshepa')
+  await gotoReady(page, '/concepts/vikshepa/')
   const toggle = page.getByRole('button', { name: 'Devanagari first' })
   const spellings = page.getByRole('heading', { level: 1 }).locator('[lang]')
   await expect(spellings.first()).toHaveAttribute('lang', 'sa-Latn')

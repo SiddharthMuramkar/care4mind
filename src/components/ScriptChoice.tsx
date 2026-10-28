@@ -11,7 +11,7 @@ import {
   ViewTransition,
 } from 'react'
 
-import type { SanskritTerm } from '@/content'
+import type { SanskritName } from '@/content'
 import { capitalise } from '@/lib/text'
 
 import { Kolam } from './Kolam'
@@ -41,7 +41,7 @@ export function TermSpellings({
   capitalised = false,
   name,
 }: {
-  term: SanskritTerm
+  term: SanskritName
   capitalised?: boolean
   /** A view-transition name for the IAST spelling, so a title elsewhere can fly into it. */
   name?: string

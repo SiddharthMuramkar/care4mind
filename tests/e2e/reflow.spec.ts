@@ -13,7 +13,7 @@ for (const { path, name } of PAGES) {
 }
 
 test('the Concept page still reflows at 320 px with the Devanagari leading', async ({ page }) => {
-  await gotoReady(page, '/concepts/vikshepa')
+  await gotoReady(page, '/concepts/vikshepa/')
   const toggle = page.getByRole('button', { name: 'Devanagari first' })
   const box = await toggle.boundingBox()
   expect(box?.x ?? -1, 'the switch fits the screen').toBeGreaterThanOrEqual(0)

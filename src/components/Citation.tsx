@@ -1,11 +1,26 @@
-import type { Reference } from '@/content'
+import type { ReferenceView } from '@/content'
 
 import styles from './Citation.module.css'
 
 // The site's citation style is still to be chosen (FR-03, planning ticket 17). Until then
 // References follow the APA-like pattern the current site uses.
 
-function linkFor(reference: Reference): { href: string; label: string } | null {
+type Cited = Pick<
+  ReferenceView,
+  | 'authors'
+  | 'year'
+  | 'title'
+  | 'edition'
+  | 'container'
+  | 'publisher'
+  | 'volume'
+  | 'issue'
+  | 'pages'
+  | 'doi'
+  | 'url'
+>
+
+function linkFor(reference: Cited): { href: string; label: string } | null {
   if (reference.doi)
     return { href: `https://doi.org/${reference.doi}`, label: `doi:${reference.doi}` }
   if (reference.url)
@@ -13,15 +28,30 @@ function linkFor(reference: Reference): { href: string; label: string } | null {
   return null
 }
 
-/** One Reference, formatted for reading. */
-export function Citation({ reference }: { reference: Reference }) {
+/** Where it was published: its journal or publisher, volume, issue and pages, as one. */
+function publicationOf(reference: Cited): string {
+  const volume =
+    reference.volume === undefined || reference.issue === undefined
+      ? reference.volume
+      : `${reference.volume}(${reference.issue})`
+  return [reference.container ?? reference.publisher, volume, reference.pages]
+    .filter((part) => part !== undefined)
+    .join(', ')
+}
+
+/** One Reference, formatted for reading. Each run of text is one string, which keeps long lists light. */
+export function Citation({ reference }: { reference: Cited }) {
   const link = linkFor(reference)
+  const publication = publicationOf(reference)
+  const before = [reference.authors, reference.year && `(${reference.year}).`]
+    .filter(Boolean)
+    .join(' ')
+  const after = `${reference.edition ? ` (${reference.edition})` : ''}. ${publication ? `${publication}. ` : ''}`
   return (
     <span className={styles.citation}>
-      {reference.authors ? <>{reference.authors} </> : null}
-      {reference.year ? <>({reference.year}). </> : null}
-      <cite className={styles.title}>{reference.title}</cite>.{' '}
-      {reference.publication ? <>{reference.publication}. </> : null}
+      {before ? `${before} ` : null}
+      <cite className={styles.title}>{reference.title}</cite>
+      {after}
       {link ? <a href={link.href}>{link.label}</a> : null}
     </span>
   )

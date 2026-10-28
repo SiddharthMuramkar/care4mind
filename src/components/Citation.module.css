@@ -1,12 +1,8 @@
+/* A long title or DOI moves to a line of its own, and breaks only where no line is wide enough. */
 .citation {
   overflow-wrap: anywhere;
 }
 
 .title {
   font-style: italic;
-}
-
-/* A link in running text, so it takes the site's text-link style (globals.css). */
-.citation a {
-  white-space: nowrap;
 }

@@ -42,7 +42,7 @@ function spellingTops(title: Locator) {
 test.beforeEach(async ({ page }) => {
   await recordPageTurns(page)
   await recordScriptedAnimations(page)
-  await gotoReady(page, '/concepts/vikshepa')
+  await gotoReady(page, '/concepts/vikshepa/')
 })
 
 test('the "Devanagari first" switch puts the Devanagari at the head of the heading, and back', async ({

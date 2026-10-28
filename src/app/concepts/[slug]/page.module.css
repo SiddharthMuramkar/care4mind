@@ -23,68 +23,6 @@
   margin-inline: auto;
 }
 
-.term {
-  display: grid;
-  gap: 0.75rem;
-  padding-inline-start: 1.25rem;
-  border-inline-start: 2px solid var(--color-highlight);
-}
-
-.termTitle {
-  margin: 0;
-  font-family: var(--font-display);
-  font-weight: 500;
-  font-size: 1.5rem;
-  line-height: 1.3;
-}
-
-.comparison {
-  margin: 0;
-}
-
-/* A data table keeps its columns; on narrow screens it scrolls inside its own frame
-   (WCAG 1.4.10 lets two-dimensional tables do this). */
-.tableScroll {
-  overflow-x: auto;
-  border: 1px solid var(--color-surface-rule);
-}
-
-.table {
-  width: 100%;
-  min-width: 44rem;
-  border-collapse: collapse;
-  font-size: 1rem;
-  line-height: 1.5;
-}
-
-.caption {
-  caption-side: top;
-  padding: 1rem;
-  text-align: start;
-  font-style: italic;
-  color: var(--color-surface-muted);
-}
-
-.table th,
-.table td {
-  padding: 0.75rem 1rem;
-  text-align: start;
-  vertical-align: top;
-  border-top: 1px solid var(--color-surface-rule);
-}
-
-.table thead th {
-  font-variant-caps: all-small-caps;
-  letter-spacing: 0.08em;
-  font-size: 1.0625rem;
-  font-weight: 600;
-}
-
-.table tbody th {
-  font-weight: 600;
-  min-width: 10rem;
-}
-
 .related {
   list-style: none;
   margin: 0;
@@ -104,5 +42,9 @@
 }
 
 .relatedNote {
+  color: var(--color-surface-muted);
+}
+
+.external {
   color: var(--color-surface-muted);
 }

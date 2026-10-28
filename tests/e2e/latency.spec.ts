@@ -30,7 +30,7 @@ test(`pressing the "Devanagari first" switch answers within ${BUDGET} ms on a sl
 }) => {
   const toggle = page.getByRole('button', { name: 'Devanagari first' })
   const { quickest, visits } = await visitLatency(BUDGET, async () => {
-    await openOnSlowPhone(page, '/concepts/vikshepa')
+    await openOnSlowPhone(page, '/concepts/vikshepa/')
     const latencies: number[] = []
     for (const pressed of ['true', 'false']) {
       latencies.push(await latencyOf(page, () => toggle.click()))
