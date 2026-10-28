@@ -80,3 +80,31 @@ Animations, all only under `prefers-reduced-motion: no-preference` (none under r
   4. Revisit the lab budget itself. Lighthouse assumes every font that arrived before the first paint held it up, which a swap font doesn't: the text paints in the fallback first. Field LCP after launch would show what visitors get, but it can't gate a pull request.
 - TBT on the Concept page sits around the 200 ms line here: 194–208 ms in one run, 182–293 ms in the next, under heavier load. Its long task is the app starting up: compiling and running React, Next.js and the page's client code (55–65 ms, simulated at four times). Less JavaScript at start-up is the only lever; the other two pages stay at 104–234 ms.
 - `.lighthouseci/` holds the reports locally (git-ignored).
+
+**Second pass, 2026-10-28. Still not resolved: the Concept page's LCP passes in only some runs (see Left over).** Format, lint, typecheck, 69 unit tests, the build and 375 Playwright tests (368 passed, 7 skipped by design) pass. `pnpm lhci` on the final code passed 1 run in 4 and failed the other 3 on the Concept page's LCP alone (2.63–2.77 s); on the step before it passed 3 in 4. This section replaces the first pass's font notes and measurements.
+
+- **Fonts, a step past the spec's two:** only Text Regular is preloaded. Display Medium, the italic, the semibold and Tiro are added by a small inline script (`LateFonts`) once the first text is painted, so Lighthouse no longer counts them towards LCP. Until then headings are set in Text Regular, italic and semibold text in Regular slanted or thickened, and Devanagari in a system font. Swapping them in moves nothing measurable (at most 0.0015 layout shift at 320–1440 px), and the existing "nothing shifts" checks still pass. The italic and semibold join together, at one relayout. Tiro no longer needs `font-display: optional`, and only pages with Devanagari fetch it.
+- **Smaller Playfair cuts:** `scripts/fonts/subset.py` keeps the OpenType features browsers apply by default, plus small caps in the text cuts; figure styles, swashes and stylistic sets go. Regular 66 → 49 kB, Italic 76 → 55, SemiBold 66 → 50, Display Medium 66 → 36. Coverage is unchanged, and sample text with ligatures, kerning, IAST marks and small caps renders pixel for pixel as before.
+- **Motion:** the switch's knob is a lazy component (`SwitchKnob`), so Motion is out of the Concept page's first scripts (219 → 182 kB). Its features still follow in a script of their own: together they ran as one 26 ms task.
+- Decisions the spec left open:
+  - Display Medium leaves the preload too, though the spec's step 1 kept it: with it, the homepage's and Questionnaire's slow runs were over 2.5 s. The fonts spec now checks the single preload, that no other font is asked for before the first paint, and that headings, italic, semibold and Devanagari then get their own faces (two of its checks now wait for faces that arrive later).
+  - Base UI's popover and accordion stay in the first scripts. Loaded after start-up, a press that lands before their script arrives does nothing; a test caught it.
+
+**Measurements**, from 8 `pnpm lhci` runs of the final code (mobile profile, load average 10–23):
+
+| Page | LCP, median (range) | CLS | TBT, median (range) | Performance | Fonts: before first paint / in all | JavaScript (gzip) |
+| --- | --- | --- | --- | --- | --- | --- |
+| `/` | 2.33 s (1.89–2.46) | 0 | 165 ms (79–247) | 0.93–0.98 | 49 / 300 kB | 139 kB in 6 files (465 kB raw) |
+| `/concepts/vikshepa` | 2.67 s (2.00–2.82) | 0.001 | 186 ms (154–316) | 0.89–0.96 | 49 / 300 kB | 182 kB in 8 files (588 kB raw) |
+| `/questionnaires/karmayoga-scale` | 2.29 s (2.00–2.30) | 0.001 | 152 ms (98–165) | 0.96–0.98 | 49 / 191 kB (no Devanagari, so no Tiro) | 139 kB in 6 files (465 kB raw) |
+
+Accessibility is 1.0 on all three. The animations are as listed in the first pass; the knob still springs.
+
+**Left over: the Concept page's LCP is 2.0–2.3 s in some runs and 2.6–2.8 s in the rest.**
+
+- Why: on a local load every script has downloaded before the first paint, and Lighthouse counts one towards LCP when it also began running before that paint reached the screen. The app's start-up script begins within a few milliseconds of that moment, either side. When it is before, its bytes and its 50 ms of start-up count, about 0.5 s more. The Concept page is the heaviest (20 kB of HTML, 182 kB of script), so that tips it over 2.5 s; the homepage and Questionnaire stay under it either way (at most 2.46 s).
+- The machine makes it worse and less steady: eight `ssh-add` processes have each been using a whole core since 25–27 October, so all eight cores are busy and the browser's work runs about twice as slow. TBT on unchanged code ranged 98–369 ms.
+- Options, each a decision beyond this ticket:
+  1. Stop the stuck `ssh-add` processes and run the done-check again.
+  2. Load Base UI's popover and accordion after start-up (Concept scripts 182 → about 142 kB). Lighthouse's own model puts the slow runs at about 2.5 s then, still not a sure pass, and an early press would be lost.
+  3. Revisit the lab budget for long pages.
