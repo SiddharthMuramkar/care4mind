@@ -9,5 +9,7 @@ export default defineConfig({
   test: {
     include: ['tests/unit/**/*.test.ts'],
     environment: 'node',
+    // The whole-content tests pass Vitest's 5 s default while three lanes build at once.
+    testTimeout: 30_000,
   },
 })
