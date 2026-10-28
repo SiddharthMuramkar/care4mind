@@ -51,12 +51,16 @@
   content: '' / ':';
 }
 
+/* A lozenge drawn, not set as a glyph: the text faces have none, and a system font would stand in. */
 .role::before {
-  content: '◆' / '';
+  content: '';
   display: inline-block;
-  margin-inline-end: 0.5em;
-  font-size: 0.7em;
-  vertical-align: 0.15em;
+  width: 0.36em;
+  height: 0.36em;
+  margin-inline: 0.08em 0.6em;
+  vertical-align: 0.18em;
+  background: currentColor;
+  transform: rotate(45deg);
 }
 
 /* A term inside a Concept (each of the nine vikṣepas), ruled off in vermilion and anchored at its id. */
@@ -247,9 +251,12 @@
 }
 
 .verse figcaption a::before {
-  content: '◆';
-  font-size: 0.6em;
-  color: var(--color-highlight);
+  content: '';
+  flex: none;
+  width: 0.36em;
+  height: 0.36em;
+  background: var(--color-highlight);
+  transform: rotate(45deg);
 }
 
 .verse figcaption a:hover {

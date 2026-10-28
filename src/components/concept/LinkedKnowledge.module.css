@@ -117,34 +117,46 @@
   }
 }
 
-/* The References, by name, each leading to its entry in the list below. */
+/*
+ * The References, by name, each leading to its entry in the list below: one to a line on a phone,
+ * run on between dots where there is room.
+ */
 .references {
   list-style: none;
   margin: 0;
   padding: 0;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.35rem 0;
+  display: grid;
+  gap: 0.1rem;
   font-size: 1rem;
   line-height: 1.5;
 }
 
-.references li:not(:last-child)::after {
-  content: '·';
-  margin-inline: 0.6rem;
-  color: var(--color-surface-rule);
-}
-
 .references a {
   display: inline-block;
+  min-width: 0;
   padding-block: 0.25rem;
   overflow-wrap: anywhere;
 }
 
-.cards {
-  display: grid;
-  gap: 1rem;
-  grid-template-columns: repeat(auto-fill, minmax(min(100%, 18rem), 1fr));
+@media (min-width: 40rem) {
+  .references {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem 0;
+  }
+
+  /* Each name keeps its dot beside it, never alone at the head of a line. */
+  .references li {
+    display: flex;
+    align-items: baseline;
+    min-width: 0;
+  }
+
+  .references li:not(:last-child)::after {
+    content: '·' / '';
+    margin-inline: 0.6rem;
+    color: var(--color-surface-rule);
+  }
 }
 
 /*

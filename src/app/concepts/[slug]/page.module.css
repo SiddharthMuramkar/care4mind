@@ -87,7 +87,7 @@
   .article {
     font-size: 11pt;
     line-height: 1.5;
-    color: #000;
+    color: var(--color-surface-ink);
   }
 
   .article > span[aria-hidden],

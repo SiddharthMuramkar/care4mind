@@ -447,11 +447,32 @@ test.describe('Concept page v2: linked knowledge', () => {
       '#indian-and-western-concepts',
     )
     await expect(panel.locator('a[href^="#ref-"]')).toHaveCount(10)
-    await expect(panel.getByRole('link', { name: 'About the KarmaYoga Scale' })).toBeVisible()
+    // The Questionnaire, with its status in words beside it (WCAG 1.4.1).
+    const questionnaire = panel.getByRole('listitem').filter({ hasText: 'KarmaYoga Scale' })
+    await expect(questionnaire.getByRole('link', { name: 'KarmaYoga Scale' })).toHaveAttribute(
+      'href',
+      '/questionnaires/karmayoga-scale/',
+    )
+    await expect(questionnaire).toContainText(/Open|Preview|Coming soon|Coming later/)
     // Its rules are decoration, silent to assistive technology.
     const rules = panel.locator('li [aria-hidden="true"]')
     expect(await rules.count()).toBeGreaterThan(10)
     await expectNoAxeViolations(page)
+  })
+
+  test('the Questionnaire’s title turns the page forward and flies into its heading', async ({
+    page,
+  }) => {
+    await recordPageTurns(page)
+    await gotoReady(page, '/concepts/vikshepa/')
+    const link = linked(page).getByRole('link', { name: 'KarmaYoga Scale' })
+    await link.scrollIntoViewIfNeeded()
+    await prefetched(link)
+    await link.click()
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText('KarmaYoga Scale')
+    const [turn] = await pageTurns(page)
+    expectPageTurned(turn, 'forward')
+    expect(turn?.flights.map(({ name }) => name)).toContain('questionnaire-title-karmayoga-scale')
   })
 
   test('leaves empty groups out', async ({ page }) => {
@@ -477,6 +498,7 @@ test.describe('Concept page v2: linked knowledge', () => {
     await page.emulateMedia({ reducedMotion: 'reduce' })
     await gotoReady(page, '/concepts/vikshepa/')
     const inks = linked(page).locator('li [aria-hidden="true"] > *')
+    expect(await inks.count()).toBeGreaterThan(10)
     const still = await inks.evaluateAll((elements) =>
       elements.every(
         (element) =>
@@ -729,6 +751,7 @@ test.describe('Concept page v2: print', () => {
     const after = await doi.evaluate((link) => getComputedStyle(link, '::after').content)
     expect(after).toContain('https://doi.org/10.3389/fpsyg.2025.1554014')
     const inks = linked(page).locator('li [aria-hidden="true"] > *')
+    expect(await inks.count()).toBeGreaterThan(10)
     expect(
       await inks.evaluateAll((elements) =>
         elements.every((element) => getComputedStyle(element).clipPath === 'none'),

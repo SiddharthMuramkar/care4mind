@@ -1,13 +1,13 @@
 import type { Route } from 'next'
 import Link from 'next/link'
-import type { CSSProperties, ReactNode } from 'react'
+import { ViewTransition, type CSSProperties, type ReactNode } from 'react'
 
-import type { ConceptView, VerseView } from '@/content'
+import { hrefFor, type ConceptView, type VerseView } from '@/content'
+import { statusWords } from '@/lib/questionnaire/gate'
 
 import { turnForward } from '../PageTurn'
 import { LinkPreview } from '../preview/LinkPreview'
 import { Text } from '../prose'
-import { QuestionnaireCard } from '../QuestionnaireCard'
 import { conceptPreview, passagePreview } from './previews'
 import styles from './LinkedKnowledge.module.css'
 
@@ -39,9 +39,10 @@ const ROLES = { applications: 'Applications', comparison: 'Comparison' } as cons
 /**
  * Linked knowledge (FR-01): everything a Concept connects to, each one link away. Related
  * Concepts with the fact that relates them (D06), the passages it quotes, its applications and
- * comparison sections, its References and its Questionnaire. An empty group is left out. The
- * entries are joined to their notes by cross-reference rules (D21), dotted leaders that ink in as
- * they come into view, finished and still in print and where motion is reduced.
+ * comparison sections, its References and its Questionnaire with its status in words (its title
+ * flies into its page's heading as it is followed). An empty group is left out. The entries are
+ * joined to their notes by cross-reference rules (D21), dotted leaders that ink in as they come
+ * into view, finished and still in print and where motion is reduced.
  */
 export function LinkedKnowledge({
   concept,
@@ -160,11 +161,22 @@ export function LinkedKnowledge({
           title={questionnaires.length === 1 ? 'Questionnaire' : 'Questionnaires'}
           count={questionnaires.length}
         >
-          <div className={styles.cards}>
-            {questionnaires.map((questionnaire) => (
-              <QuestionnaireCard key={questionnaire.slug} questionnaire={questionnaire} />
+          <ul className={styles.rows}>
+            {questionnaires.map(({ slug, title, status }) => (
+              <li key={slug} className={styles.row}>
+                <Link
+                  href={hrefFor({ kind: 'questionnaire', id: slug, status })}
+                  transitionTypes={turnForward}
+                >
+                  <ViewTransition name={`questionnaire-title-${slug}`} share="morph" default="none">
+                    <span>{title}</span>
+                  </ViewTransition>
+                </Link>
+                <Leader />
+                <span className={styles.note}>{statusWords(status)}</span>
+              </li>
             ))}
-          </div>
+          </ul>
         </Group>
       ) : null}
     </section>
