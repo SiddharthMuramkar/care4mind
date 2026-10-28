@@ -1,60 +1,187 @@
-/* A solid strip across the page, so a turning page passes beneath it. Its content keeps to 72rem. */
+/*
+ * A solid indigo strip stuck to the top of the screen, so a turning page passes beneath it and
+ * a reader can always move on. Its content keeps to 72rem. The reading thread runs along its
+ * top edge (--layer-thread is above --layer-header).
+ */
 .header {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  align-items: center;
-  gap: 0.5rem 1.5rem;
-  padding: 0.75rem calc(max(0px, (100% - 72rem) / 2) + clamp(1rem, 4vw, 3rem));
+  position: sticky;
+  top: 0;
+  z-index: var(--layer-header);
   background: var(--color-ground);
+}
+
+/*
+ * A popover open in the text (the other spellings of a term) is drawn above everything and
+ * stays by its button. While one is open the header scrolls with the page instead of sticking,
+ * so the popover can never lie over a header control that takes focus (WCAG 2.4.11).
+ */
+:global(:root:has(:popover-open)) .header {
+  position: relative;
+}
+
+/* A hairline under the strip, and once the page moves beneath it, a soft shadow. */
+.header::after {
+  content: '';
+  position: absolute;
+  inset-inline: 0;
+  top: 100%;
+  height: 1px;
+  background: var(--color-line);
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: scroll()) {
+    .header::before {
+      content: '';
+      position: absolute;
+      inset-inline: 0;
+      top: 100%;
+      height: 1.25rem;
+      background: linear-gradient(var(--color-scroll-shadow), transparent);
+      pointer-events: none;
+      animation: lift linear both;
+      animation-timeline: scroll(root);
+      animation-range: 0 4rem;
+    }
+  }
+}
+
+@keyframes lift {
+  from {
+    opacity: 0;
+  }
+}
+
+.strip {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  height: var(--header-height);
+  padding-inline: calc(max(0px, (100% - 72rem) / 2) + clamp(0.75rem, 4vw, 3rem));
 }
 
 .home {
   display: inline-flex;
   align-items: center;
   min-height: 48px;
+  margin-inline-end: auto;
   color: var(--color-ink);
   text-decoration: none;
 }
 
-.links {
-  list-style: none;
+.nav {
   display: flex;
-  flex-wrap: wrap;
-  gap: 0 1.25rem;
-  margin: 0;
-  padding: 0;
+  align-items: center;
+  gap: 1.25rem;
 }
 
-.link {
+/* Search: a loop round a dot on narrow screens, a labelled field from 72rem. */
+.search {
   position: relative;
   display: inline-flex;
   align-items: center;
-  min-height: 48px;
+  justify-content: center;
+  min-width: 44px;
+  min-height: 44px;
+  border-radius: 999px;
   color: var(--color-ink-muted);
-  font-variant-caps: all-small-caps;
-  letter-spacing: 0.12em;
-  font-size: 1.1875rem;
   text-decoration: none;
+  --glyph-dot: var(--color-accent);
 }
 
-/* On hover and focus a line draws in under the label (short of its last letter-space), by transform. */
-.link::after {
-  content: '';
+.searchGlyph {
+  flex: none;
+  width: 22px;
+  height: 22px;
+}
+
+.searchLabel {
   position: absolute;
-  inset-inline: 0 0.12em;
-  top: calc(50% + 0.6em);
+  width: 1px;
   height: 1px;
-  background: currentColor;
-  transform: scaleX(0);
-  transform-origin: left;
-  transition: transform var(--duration-quick) var(--ease-out);
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
 
-.link:is(:hover, :focus-visible) {
+.search:is(:hover, :focus-visible),
+.search[aria-current] {
   color: var(--color-ink);
 }
 
-.link:is(:hover, :focus-visible)::after {
-  transform: none;
+.search[aria-current]::after {
+  content: '';
+  position: absolute;
+  left: calc(50% - 3.5px);
+  bottom: -2px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--color-accent);
+}
+
+.script {
+  display: none;
+}
+
+@media (min-width: 72rem) {
+  .strip {
+    gap: 1.5rem;
+  }
+
+  .search {
+    gap: 0.55rem;
+    min-width: 0;
+    padding: 0 1rem 0 0.75rem;
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-ink-muted) 40%, transparent);
+  }
+
+  .search:is(:hover, :focus-visible) {
+    box-shadow: inset 0 0 0 1px var(--color-ink-muted);
+  }
+
+  .search[aria-current] {
+    box-shadow: inset 0 0 0 1px var(--color-accent);
+  }
+
+  .searchLabel {
+    position: static;
+    width: auto;
+    height: auto;
+    overflow: visible;
+    clip-path: none;
+    font-variant-caps: all-small-caps;
+    letter-spacing: 0.12em;
+    font-size: 1.1875rem;
+  }
+
+  .script {
+    display: contents;
+  }
+}
+
+/* The Drawer's copy of Search: a ruled field across the top of the sheet. */
+.drawerSearch {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  min-height: 48px;
+  padding: 0 1rem;
+  border: 1px solid var(--color-drawer-line);
+  border-radius: 999px;
+  color: var(--color-drawer-ink);
+  font-variant-caps: all-small-caps;
+  letter-spacing: 0.12em;
+  font-size: 1.0625rem;
+  text-decoration: none;
+  --glyph-dot: var(--color-highlight);
+}
+
+.drawerSearch:hover {
+  border-color: var(--color-drawer-ink);
+}
+
+.drawerSearch[aria-current] {
+  border-color: var(--color-highlight);
 }

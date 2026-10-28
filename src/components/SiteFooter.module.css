@@ -1,27 +1,142 @@
+/* The colophon: the wordmark, the whole site in a few columns, and the imprint beneath. */
 .footer {
-  display: grid;
-  justify-items: center;
-  gap: 0.75rem;
   margin-top: clamp(4rem, 10vw, 7rem);
-  padding: 3rem clamp(1rem, 4vw, 3rem) 4rem;
+  padding: 2rem 0 3rem;
   border-top: 1px solid var(--color-line);
-  text-align: center;
 }
 
 .fleuron {
+  display: block;
   width: 8rem;
+  margin: 0 auto 2.5rem;
   color: var(--color-highlight);
+}
+
+.inner {
+  display: grid;
+  gap: 2rem 3rem;
+  padding-inline: calc(max(0px, (100% - 72rem) / 2) + clamp(1rem, 4vw, 3rem));
+}
+
+@media (min-width: 48rem) {
+  .inner {
+    grid-template-columns: minmax(13rem, 1fr) 3fr;
+  }
+}
+
+.colophon {
+  display: grid;
+  align-content: start;
+  justify-items: start;
+  gap: 0.75rem;
 }
 
 .tagline {
   margin: 0;
+  max-width: 24ch;
   font-style: italic;
+}
+
+.groups {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  columns: 2 9.5rem;
+  column-gap: 2rem;
+}
+
+@media (min-width: 48rem) {
+  .groups {
+    columns: 3 11rem;
+  }
+
+  /* Concepts, the longest, fills the first column; the other sections share the rest. */
+  .group:first-child {
+    break-after: column;
+  }
+}
+
+.group {
+  break-inside: avoid;
+  margin-bottom: 1.25rem;
+}
+
+/* A section's name heads its pages, in the header's small capitals. */
+.head {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  color: var(--color-ink);
+  font-variant-caps: all-small-caps;
+  letter-spacing: 0.12em;
+  font-size: 1.1875rem;
+  text-decoration: none;
+}
+
+.head::after {
+  content: '';
+  position: absolute;
+  inset-inline: 0 0.12em;
+  top: calc(50% + 0.6em);
+  height: 1px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform var(--duration-quick) var(--ease-out);
+}
+
+.head:is(:hover, :focus-visible)::after {
+  transform: none;
+}
+
+.pages {
+  list-style: none;
+  display: grid;
+  gap: 0.2rem;
+  margin: 0;
+  padding: 0;
+  line-height: 1.6;
+}
+
+/* Each topic carries its hue, as a dot before its name. */
+.topic {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+}
+
+.topic::before {
+  content: '';
+  flex: none;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--topic, var(--color-kolam-dot));
+  translate: 0 -0.15em;
+}
+
+.proposal {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem 0.6rem;
+}
+
+.imprint {
+  display: grid;
+  justify-items: center;
+  gap: 0.6rem;
+  margin: 2.5rem clamp(1rem, 4vw, 3rem) 0;
+  padding-top: 1.75rem;
+  border-top: 1px solid var(--color-line);
+  text-align: center;
 }
 
 .credit,
 .preview {
   margin: 0;
-  max-width: 48ch;
+  max-width: 52ch;
   color: var(--color-ink-muted);
   font-size: 0.9375rem;
 }

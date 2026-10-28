@@ -16,3 +16,10 @@
   height: auto;
   --kolam-line-width: 5px;
 }
+
+/* On the narrowest phones the wordmark steps down, so the header's strip keeps to one line. */
+@media (max-width: 24rem) {
+  .logo {
+    font-size: 1.3125rem;
+  }
+}

@@ -1,0 +1,393 @@
+/*
+ * The header's panels: index cards hung from the strip, ruled like the folio. They open and
+ * close by opacity and transform alone, and at once under reduced motion.
+ */
+.positioner {
+  z-index: var(--layer-popup);
+}
+
+.popup {
+  --color-focus: var(--color-surface-focus);
+  --color-link: var(--color-surface-link);
+  position: relative;
+  max-width: calc(100vw - 2rem);
+  background: var(--color-panel);
+  color: var(--color-panel-ink);
+  box-shadow:
+    inset 0 0 0 1px color-mix(in srgb, var(--color-panel-line) 70%, transparent),
+    inset 0 0 0 5px var(--color-panel),
+    inset 0 0 0 6px color-mix(in srgb, var(--color-panel-line) 45%, transparent),
+    0 28px 48px -20px color-mix(in srgb, var(--color-ground) 80%, transparent);
+  transform-origin: var(--transform-origin);
+  outline: 0;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .popup {
+    transition:
+      opacity var(--duration-panel) var(--ease-out),
+      transform var(--duration-panel) var(--ease-out);
+  }
+
+  .popup[data-starting-style],
+  .popup[data-ending-style] {
+    opacity: 0;
+    transform: translateY(-0.5rem) scale(0.985);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .popup[data-starting-style],
+  .popup[data-ending-style] {
+    opacity: 0;
+  }
+}
+
+/* A small diamond, the folio's corner, pointing up at the item that opened the panel. */
+.arrow {
+  width: 14px;
+  height: 14px;
+}
+
+.arrow[data-side='bottom'] {
+  top: -7px;
+}
+
+.arrow::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--color-panel);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-panel-line) 70%, transparent);
+  transform: rotate(45deg);
+  clip-path: polygon(0 0, 100% 0, 0 100%);
+}
+
+.arrow::after {
+  content: '';
+  position: absolute;
+  inset: 4px;
+  background: var(--color-highlight);
+  transform: rotate(45deg);
+}
+
+.viewport {
+  position: relative;
+  overflow: hidden;
+}
+
+.content {
+  padding: 1.5rem 1.75rem 1.25rem;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  /* Moving from one panel to the other, the new one slides in from the side it was opened from. */
+  .content {
+    transition:
+      opacity var(--duration-panel) var(--ease-out),
+      transform var(--duration-panel) var(--ease-out);
+  }
+
+  .content[data-starting-style],
+  .content[data-ending-style] {
+    opacity: 0;
+  }
+
+  .content[data-starting-style][data-activation-direction='right'],
+  .content[data-ending-style][data-activation-direction='left'] {
+    transform: translateX(2.5rem);
+  }
+
+  .content[data-starting-style][data-activation-direction='left'],
+  .content[data-ending-style][data-activation-direction='right'] {
+    transform: translateX(-2.5rem);
+  }
+}
+
+.kicker {
+  margin: 0 0 0.75rem;
+  color: var(--color-panel-muted);
+  font-variant-caps: all-small-caps;
+  letter-spacing: 0.14em;
+  font-size: 1rem;
+}
+
+/* Concepts: the topics strung on one kolam line, a dot in each topic's hue. */
+.concepts {
+  width: min(30rem, calc(100vw - 5.5rem));
+}
+
+.topics {
+  position: relative;
+}
+
+.thread {
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-start: 0;
+  width: 48px;
+  height: auto;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.thread path {
+  fill: none;
+  stroke: var(--color-surface-kolam-line);
+  stroke-width: 2px;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+@keyframes draw {
+  from {
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+  }
+  to {
+    stroke-dasharray: 1;
+    stroke-dashoffset: 0;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .thread path {
+    animation: draw 700ms var(--ease-in-out) backwards;
+  }
+}
+
+.topicList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+/* Each row is one dot's height on the line (48 px), so the dots sit in its loops. */
+.topic {
+  position: relative;
+  display: grid;
+  grid-template-columns: 48px 1fr auto;
+  align-items: center;
+  column-gap: 0.75rem;
+  min-height: 48px;
+  padding-inline-end: 0.5rem;
+  color: var(--color-panel-ink);
+  text-decoration: none;
+}
+
+/* A wash of the topic's hue behind the row, faded in by opacity. */
+.topic::before {
+  content: '';
+  position: absolute;
+  inset: 4px 0 4px 40px;
+  background: color-mix(in srgb, var(--topic, var(--color-surface-kolam-dot)) 14%, transparent);
+  opacity: 0;
+  transition: opacity var(--duration-quick) var(--ease-out);
+}
+
+.dot {
+  justify-self: center;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--topic, var(--color-surface-kolam-dot));
+  box-shadow: 0 0 0 3px var(--color-panel);
+  transition: transform var(--duration-quick) var(--ease-out);
+}
+
+.topicName {
+  position: relative;
+  font-size: 1.0625rem;
+  line-height: 1.3;
+}
+
+.term {
+  margin-inline-start: 0.4em;
+  color: var(--color-panel-muted);
+  font-style: italic;
+}
+
+.term::before {
+  content: '·' / '';
+  margin-inline-end: 0.4em;
+  font-style: normal;
+}
+
+.count {
+  position: relative;
+  color: var(--color-panel-muted);
+  font-variant-caps: all-small-caps;
+  letter-spacing: 0.08em;
+  font-variant-numeric: lining-nums tabular-nums;
+  white-space: nowrap;
+}
+
+.topic:is(:hover, :focus-visible)::before {
+  opacity: 1;
+}
+
+.topic:is(:hover, :focus-visible) .dot {
+  transform: scale(1.5);
+}
+
+.topic[aria-current] .topicName {
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.2em;
+}
+
+/* Onward: the A–Z, the map, the Library's home. */
+.more {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem 1.75rem;
+  margin-top: 1rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid color-mix(in srgb, var(--color-panel-line) 60%, transparent);
+}
+
+.onward {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 44px;
+  color: var(--color-surface-link);
+  font-variant-caps: all-small-caps;
+  letter-spacing: 0.1em;
+  font-size: 1.0625rem;
+  text-decoration: none;
+}
+
+.onward::after {
+  content: '';
+  position: absolute;
+  inset-inline: 0 1.5rem;
+  top: calc(50% + 0.65em);
+  height: 1px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform var(--duration-quick) var(--ease-out);
+}
+
+.onward:is(:hover, :focus-visible)::after {
+  transform: none;
+}
+
+.arrowGlyph {
+  width: 16px;
+  height: 12px;
+  transition: transform var(--duration-quick) var(--ease-out);
+}
+
+.onward:is(:hover, :focus-visible) .arrowGlyph {
+  transform: translateX(3px);
+}
+
+.proposal {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+/* The Library: its pages as a pile of books, each spine set in type on its own cloth. */
+.library {
+  width: min(24rem, calc(100vw - 5.5rem));
+}
+
+.pile {
+  list-style: none;
+  display: grid;
+  gap: 5px;
+  margin: 0;
+  padding: 0 0 0.25rem;
+}
+
+.book {
+  --lean: 0rem;
+  --length: 100%;
+  width: var(--length);
+  margin-inline-start: var(--lean);
+}
+
+/* Not a neat stack: each book a little longer or shorter, set a little in or out. */
+.book:nth-child(5n + 1) {
+  --length: 100%;
+}
+
+.book:nth-child(5n + 2) {
+  --length: 92%;
+  --lean: 3%;
+}
+
+.book:nth-child(5n + 3) {
+  --length: 96%;
+  --lean: 1%;
+}
+
+.book:nth-child(5n + 4) {
+  --length: 88%;
+  --lean: 5%;
+}
+
+.book:nth-child(5n + 5) {
+  --length: 94%;
+  --lean: 2%;
+}
+
+.spine {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  min-height: 44px;
+  padding: 0 1rem 0 1.5rem;
+  border-radius: 2px 5px 5px 2px;
+  background: var(--cloth);
+  color: var(--cloth-ink);
+  text-decoration: none;
+  box-shadow:
+    inset 0 -3px 0 color-mix(in srgb, var(--color-ground) 22%, transparent),
+    inset 0 1px 0 color-mix(in srgb, var(--color-drawer) 22%, transparent);
+  transition: transform var(--duration-quick) var(--ease-out);
+}
+
+/* The two bands a binder tools across a spine, near its head. */
+.spine::before {
+  content: '';
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: 0.5rem;
+  width: 4px;
+  border-inline: 1px solid color-mix(in srgb, var(--cloth-ink) 45%, transparent);
+}
+
+.title {
+  font-variant-caps: all-small-caps;
+  letter-spacing: 0.12em;
+  font-size: 1.0625rem;
+}
+
+.volume {
+  font-size: 0.875rem;
+  font-variant-numeric: lining-nums tabular-nums;
+  white-space: nowrap;
+}
+
+/* Pointing at a book draws it a little out of the pile. */
+.spine:is(:hover, :focus-visible) {
+  transform: translateX(0.6rem);
+}
+
+.spine:focus-visible {
+  outline-offset: 2px;
+}
+
+.spine[aria-current] .title {
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.25em;
+}
