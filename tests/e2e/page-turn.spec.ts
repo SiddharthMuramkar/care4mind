@@ -38,11 +38,18 @@ test("a Concept card's title flies into the Concept page's heading as the page t
   const [turn] = await pageTurns(page)
   const to = await heading.boundingBox()
   const flight = turn?.flights.find(({ name }) => name.includes('vikshepa'))
-  const [start = NaN, midway = NaN, end = NaN] = flight?.y ?? []
-  expect(Math.abs(start - (from?.y ?? NaN)), 'it sets off from the card').toBeLessThan(2)
-  expect(Math.abs(end - (to?.y ?? NaN)), 'it lands on the heading').toBeLessThan(2)
-  expect(midway, 'it flies between them').not.toBe(start)
-  expect((midway - start) * (end - midway), 'it flies between them').toBeGreaterThan(0)
+  const [x0 = NaN, xMid = NaN, x1 = NaN] = flight?.x ?? []
+  const [y0 = NaN, yMid = NaN, y1 = NaN] = flight?.y ?? []
+  const off = (x: number, y: number, box: typeof from) =>
+    Math.hypot(x - (box?.x ?? NaN), y - (box?.y ?? NaN))
+  expect(off(x0, y0, from), 'it sets off from the card').toBeLessThan(2)
+  expect(off(x1, y1, to), 'it lands on the heading').toBeLessThan(2)
+  // Half-way it is part of the way along the line from the card to the heading,
+  // whichever way that line runs: where the two sit level, it flies sideways only.
+  const along =
+    ((xMid - x0) * (x1 - x0) + (yMid - y0) * (y1 - y0)) / ((x1 - x0) ** 2 + (y1 - y0) ** 2)
+  expect(along, 'it flies between them').toBeGreaterThan(0)
+  expect(along, 'it flies between them').toBeLessThan(1)
 })
 
 test('the header stays put while the page turns', async ({ page }) => {

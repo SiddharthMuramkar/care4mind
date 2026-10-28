@@ -45,6 +45,7 @@ export interface Movement {
 /** A shared element flying from one place to another: where it is at the start, half-way and the end. */
 export interface Flight {
   name: string
+  x: [number, number, number]
   y: [number, number, number]
 }
 
@@ -175,7 +176,11 @@ export function recordPageTurns(page: Page, { hold = false } = {}) {
             ) as [DOMMatrixReadOnly, DOMMatrixReadOnly, DOMMatrixReadOnly]
             // React also holds the page's root still with an animation; only groups that move fly.
             if (start.m41 === end.m41 && start.m42 === end.m42) continue
-            turn.flights.push({ name, y: [start.m42, midway.m42, end.m42] })
+            turn.flights.push({
+              name,
+              x: [start.m41, midway.m41, end.m41],
+              y: [start.m42, midway.m42, end.m42],
+            })
           }
           turn.sampled = true
           if (hold) {
