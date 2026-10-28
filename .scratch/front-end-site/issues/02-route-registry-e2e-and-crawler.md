@@ -1,7 +1,7 @@
 # 02: Route registry e2e and link crawler
 
 Status: ready-for-agent
-Blocked by: 03
+Blocked by: 03, 16
 Spec: [Front-end site: every public page](../spec.md) · Design: [design.md](../design.md) §E2
 
 **What to build:** every public page is tested the same way, straight from the route registry. A new page is covered the moment it exists, and no page links anywhere that isn't there.
@@ -12,7 +12,7 @@ Spec: [Front-end site: every public page](../spec.md) · Design: [design.md](../
 ## Owns
 
 - `tests/e2e/routes.ts`, rewritten to read `site.routes()`
-- `tests/e2e/pages.spec.ts`, `reflow.spec.ts`, `smoke.spec.ts`, `motion.spec.ts` and `axe.ts`
+- `tests/e2e/pages.spec.ts`, `reflow.spec.ts`, `smoke.spec.ts`, `motion.spec.ts` and `axe.ts`. Ticket 16 (Press only, D21) edits the motion, smoke and pages specs first, so this ticket starts once it has merged.
 - `tests/e2e/skeleton.spec.ts` (from ticket 03), folded into `pages.spec.ts` or deleted
 - `tests/e2e/fixtures.ts` (from ticket 01): additions only, such as registry helpers
 - `tests/e2e/crawler.spec.ts` (new)

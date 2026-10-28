@@ -2,13 +2,13 @@
 
 Status: ready-for-agent
 Blocked by: 03, 04
-Spec: [Front-end site: every public page](../spec.md) · Design: [design.md](../design.md) §C5 · Decisions: D06, D20
+Spec: [Front-end site: every public page](../spec.md) · Design: [design.md](../design.md) §C5 · Decisions: D06, D20, D21
 
 **What to build:** two pages for the Project owner to judge in the sign-off pack.
 
-**The Concept map** at `/concepts/map/` shows the 19 Concepts round a rosette, one sector per topic.
+**The Concept map** at `/concepts/map/` shows the 19 Concepts round a circle, one sector per topic, as a printed plate.
 
-- Curved kolam threads join Concepts that share a verse, a work or a rarely cited Reference.
+- Hairline curves, inked once on load, join Concepts that share a verse, a work or a rarely cited Reference, each kind in its own line style.
 - Pointing at or focusing a Concept lights its neighbours.
 - Filters show one kind of connection at a time.
 - A "Connections" list says everything the picture shows, in words. On a phone it is what you see first.
@@ -16,7 +16,7 @@ Spec: [Front-end site: every public page](../spec.md) · Design: [design.md](../
 **The proposals page** at `/proposals/` lists what the design suggests beyond the brief:
 
 - the two built proposals, the map and site-wide "Devanagari first";
-- two ideas described but not built, audio pronunciation and a "kolam of your reading path".
+- one idea described but not built, audio pronunciation. (The fourth idea of the first plan was dropped with D21, and ticket 16 removes its entry.)
 
 Both pages are labelled Proposal, and both disappear when their flags are off.
 
@@ -36,18 +36,18 @@ Both pages are labelled Proposal, and both disappear when their flags are off.
   - A unit test covers both conditions.
 - [ ] **Labelled:** both pages carry a ProposalNote near their heading, saying in words that this is a proposal awaiting the Project owner's decision.
 - [ ] **Layout at build time:**
-  - The positions come from `site.graph()` and are computed during the build: a rosette with one sector per topic.
+  - The positions come from `site.graph()` and are computed during the build: a circle with one sector per topic.
   - The browser runs no layout code.
   - The map reserves its box, so nothing shifts as it loads.
-- [ ] **Threads:**
-  - The edges are curved kolam threads, one per connection, typed as shared passage, shared work or rarely cited shared Reference. Tomar (2024) is excluded.
-  - The types differ by line style as well as colour, and a legend names them (WCAG 1.4.1).
-  - Threads draw on scroll, following the Kolam conventions, and are still under reduced motion.
-  - The thread layer is hidden from assistive technology.
+- [ ] **The printed plate (D21):**
+  - The edges are hairline curves, one per connection, typed by line style: solid for a shared passage, dashed for a shared work, dotted for a rarely cited shared Reference. Tomar (2024) is excluded.
+  - The types differ by line style, never by colour alone, and a legend names them (WCAG 1.4.1).
+  - The curves ink in once on load, following the Press ornament conventions, and are finished and still under reduced motion and in print.
+  - The line layer is hidden from assistive technology.
 - [ ] **Points:**
-  - Each Concept is an HTML link laid over the SVG thread layer, named with the Concept, and opens its page with a forward page turn.
+  - Each Concept is an HTML link laid over the SVG line layer, named with the Concept, and opens its page with a forward page turn.
   - The tab order follows the topics.
-  - Hovering or focusing a point highlights its neighbours and their threads through `:has()` rules generated at build time, with no JavaScript.
+  - Hovering or focusing a point highlights its neighbours and their curves through `:has()` rules generated at build time, with no JavaScript.
 - [ ] **Filters:**
   - A Base UI ToggleGroup filters by connection type and by topic.
   - The state lives in the address's query string, and the visible connections are announced politely.
@@ -59,15 +59,14 @@ Both pages are labelled Proposal, and both disappear when their flags are off.
   - **Concept map:** built; with a link to it.
   - **Site-wide "Devanagari first":** built; with how to try it.
   - **Audio pronunciation:** described, not built.
-  - **"Kolam of your reading path":** described, not built.
 
-  Each entry says, in plain interface text, what it adds, what it costs in speed and upkeep, and how it is switched off.
+  There is no fourth entry: the "reading path" idea was dropped with D21. Each entry says, in plain interface text, what it adds, what it costs in speed and upkeep, and how it is switched off.
 - [ ] **Breadcrumbs (D15):** Home › Concepts › Concept map, and Home › Proposals.
 - [ ] **Reflow:** both pages fit 320 px with no sideways scroll (WCAG 1.4.10). At narrow widths the map scales down or gives way to the list, and never scrolls sideways.
 - [ ] **Speed:** no client JavaScript beyond the filter chips. Record the page's first-load JavaScript and its SVG size in Comments.
 - [ ] **Tests:**
   - `concept-map.spec.ts` covers: neighbours lighting on focus (computed style), a point opening its Concept, filters by keyboard, the Connections list against `site.graph()`, the 360 px default, and axe.
-  - `proposals.spec.ts` covers: the four entries, links, and axe.
+  - `proposals.spec.ts` covers: the three entries and no others, links, and axe.
 - [ ] **Done-check:**
   - `pnpm check` passes;
   - the lane's end-to-end run passes: `E2E_SCOPE=sample E2E_PORT=<lane port> scripts/lane/heavy.sh pnpm check:e2e`, covering Chromium at 360, 768 and 1440 px, reflow at 320 px, reduced motion and Firefox, with WebKit in CI.

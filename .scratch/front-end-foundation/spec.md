@@ -4,6 +4,8 @@ Status: ready-for-agent
 Source: [Design direction (ticket 21)](../rebuild/issues/21-design-direction.md), [ADR-0003](../../docs/adr/0003-nextjs-for-the-front-end.md)
 Tickets: [issues/](issues/)
 
+**Superseded in its Kolam parts (2026-10-28).** The developer chose Press only ([D21](../front-end-site/decisions.md#d21-press-replacements)): the kolam logo, drawings, generator, colours and timings below are replaced by Press elements, built by [front-end-site ticket 16](../front-end-site/issues/16-press-only-remove-kolam.md). The rest of this spec stands as the record of what the foundation built.
+
 ## Problem Statement
 
 The developer has built the first four pages of the new Care4Mind site in the "Press" direction: indigo grounds, paper folios, turmeric and vermilion, Playfair with Tiro Devanagari Sanskrit. The pages are accessible and fast, but they still read as a well-set book rather than the site the brief asks for: "custom, rich in colour, and fun to explore, with motion and feedback on scroll and click", made by "a dedicated team of human designers", never template-like.

@@ -2,7 +2,7 @@
 
 Status: ready-for-agent
 Blocked by: 03, 04
-Spec: [Front-end site: every public page](../spec.md) · Design: [design.md](../design.md) §C3, §C4 · Decisions: D12, D16 · Planning: builds what [planning ticket 12](../../rebuild/issues/12-questionnaire-flow-prototype.md) asked to prototype
+Spec: [Front-end site: every public page](../spec.md) · Design: [design.md](../design.md) §C3, §C4 · Decisions: D12, D16, D21 · Planning: builds what [planning ticket 12](../../rebuild/issues/12-questionnaire-flow-prototype.md) asked to prototype
 
 **What to build:**
 
@@ -10,7 +10,7 @@ Spec: [Front-end site: every public page](../spec.md) · Design: [design.md](../
 - The KarmaYoga intro sets out purpose and limitations before Start.
 - Where the preview is switched on, Start opens the flow:
   - four parts, one per screen, each with its real instructions;
-  - large answer buttons, and a kolam that fills in as you answer;
+  - large answer buttons, and a tally of short rules that inks in as you answer;
   - a part you haven't finished is refused without losing anything, and the browser's Back button moves between parts;
   - a review step lets you change any answer;
   - the end screen says plainly that the scoring isn't confirmed yet. It shows no number and no band.
@@ -56,7 +56,7 @@ This is the build side of planning ticket 12. The developer reacts to it there.
   - Answers never appear in the address.
   - Reloading with no answers in memory returns to the first part.
 - [ ] **Progress:**
-  - A decorative 9×5 kolam, hidden from assistive technology, lights one dot per answer and draws its line in proportion. It is built from the kolam generator, in this ticket's folder.
+  - A decorative tally of 45 short rules in four groups of 12, 6, 9 and 18, one group per part, hidden from assistive technology (`aria-hidden`), inks in one rule per statement answered (D21). It is built in this ticket's folder, reserves its box so nothing shifts as it fills, and is finished and still under reduced motion and in print: each rule shows its state at once.
   - Beside it, the text "Part 2 of 4 · 14 of 45 answered" sits inside a Base UI Progress element with `aria-valuetext`, not in a live region.
 - [ ] **Refusing incomplete parts (FR-05):**
   - Next on an unfinished part shows an error summary at the top and moves focus to it.

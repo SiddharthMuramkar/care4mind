@@ -1,8 +1,8 @@
 # 04: Navigation shell
 
 Status: ready-for-agent
-Blocked by: 01
-Spec: [Front-end site: every public page](../spec.md) · Design: [design.md](../design.md) §C1, §C2 · Decisions: D01, D20
+Blocked by: 16
+Spec: [Front-end site: every public page](../spec.md) · Design: [design.md](../design.md) §C1, §C2 · Decisions: D01, D20, D21
 
 **What to build:** the frame every page shares, finished once so that no later ticket has to touch the header, the footer, the layout or the tokens.
 
@@ -22,7 +22,7 @@ Spec: [Front-end site: every public page](../spec.md) · Design: [design.md](../
 - `src/app/layout.tsx`
 - `src/styles/globals.css`, the only owner of tokens from now on
 - `src/lib/contrast.ts` and `tests/unit/contrast.test.ts`: the new colour pairs
-- `src/components/SiteHeader.*`, `SiteFooter.*`, `Wordmark.*` and the foundation's logo, plus `MotionProvider.tsx`
+- `src/components/SiteHeader.*` and `SiteFooter.*`, plus `MotionProvider.tsx`. The logo (`Logo.*`, now the Press wordmark) is ticket 16's: use it as ticket 16 left it.
 - `src/components/nav/**` (new): the panels, the Drawer and the Menu button
 - `src/components/toast/**` (new): the Toast provider and a `toast()` helper
 - `src/config/features.ts` (new, or extended if content-v1 already created it for the preview flag)
@@ -31,7 +31,7 @@ Spec: [Front-end site: every public page](../spec.md) · Design: [design.md](../
   - `src/components/script/**` (ScriptPreference, HeadScript and ScriptPair), owned by 13
   - `src/components/proposals/ProposalNote.tsx`, owned by 12
   - `src/components/preview/**` (LinkPreview and its root), owned by 05
-- `tests/e2e/nav.spec.ts` (new), and the foundation's header and logo spec files. If those checks sit inside a shared file such as `pages.spec.ts`, which ticket 02 owns, leave them there and don't edit that file.
+- `tests/e2e/nav.spec.ts` (new), and the foundation's header spec files. `logo.spec.ts` is ticket 16's; once it has merged, edit it only where the new header changes what it checks, such as the tab order. If those checks sit inside a shared file such as `pages.spec.ts`, which ticket 02 owns, leave them there and don't edit that file.
 - `tests/unit/features.test.ts` (new)
 
 ## Acceptance criteria
@@ -87,6 +87,11 @@ Spec: [Front-end site: every public page](../spec.md) · Design: [design.md](../
   - durations for morphs and list reordering.
 
   Every new text pair is added to the contrast test at 4.5:1, and every graphic or focus pair at 3:1.
+- [ ] **Press only (D21):** after merging the integration branch with ticket 16, this lane's Kolam uses go:
+  - the `kolam()` call in NavPanels, `<Kolam>` in MenuDrawer and ToastViewport, and `<Logo redraw>`;
+  - the kolam colour tokens its CSS reads.
+
+  The drawings are replaced with Press ornaments (the Fleuron or OrnamentRule) and the colours with Press tokens, and `git grep -il kolam -- src tests docs` prints nothing on this lane. This ticket no longer owns the logo: ticket 16 does.
 - [ ] **Reduced motion:** panels and the Drawer open and close without sliding or fading, and still work.
 - [ ] **Speed:**
   - The header adds no layout shift.
