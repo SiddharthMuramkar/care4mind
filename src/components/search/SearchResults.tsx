@@ -1,11 +1,19 @@
 import type { Route } from 'next'
 import Link from 'next/link'
-import type { Ref } from 'react'
+import { type Ref, ViewTransition } from 'react'
 
 import { turnForward } from '@/components/PageTurn'
 import type { SearchHit } from '@/lib/search/search'
 
-import { groupByKind, langOf, matchLabel, resultCount, shownVariant, SUGGESTIONS } from './kinds'
+import {
+  groupByKind,
+  langOf,
+  matchLabel,
+  morphName,
+  resultCount,
+  shownVariant,
+  SUGGESTIONS,
+} from './kinds'
 import styles from './SearchResults.module.css'
 
 /** The results listed of one kind before the rest wait behind "more". */
@@ -88,7 +96,7 @@ export function SearchResults({ query, hits, searchPath, headingRef }: Props) {
             <span className={styles.leader} aria-hidden />
             <span className={styles.count}>{found.length}</span>
           </h3>
-          <Entries hits={found.slice(0, SHOWN)} />
+          <Entries hits={found.slice(0, SHOWN)} morph />
           {found.length > SHOWN ? (
             <details className={styles.more}>
               <summary>
@@ -103,22 +111,37 @@ export function SearchResults({ query, hits, searchPath, headingRef }: Props) {
   )
 }
 
-function Entries({ hits }: { hits: readonly SearchHit[] }) {
+/**
+ * Results in a list. With `morph`, a title shares a view-transition name with its page's heading
+ * (a Concept, topic, text or questionnaire), so following it lifts the title into the page; only
+ * the entries shown before "more" are named, which keeps a list to a few dozen names.
+ */
+function Entries({ hits, morph = false }: { hits: readonly SearchHit[]; morph?: boolean }) {
   return (
     <ol className={styles.entries}>
       {hits.map((hit) => {
         const variant = shownVariant(hit)
+        const name = morph ? morphName(hit) : undefined
+        const link = (
+          // Each result's path, made by hrefFor() in the content module.
+          <Link
+            href={hit.href as Route}
+            className={styles.name}
+            transitionTypes={turnForward}
+            {...tag(hit.title)}
+          >
+            {hit.title}
+          </Link>
+        )
         return (
           <li key={hit.id} className={styles.entry}>
-            {/* Each result's path, made by hrefFor() in the content module. */}
-            <Link
-              href={hit.href as Route}
-              className={styles.name}
-              transitionTypes={turnForward}
-              {...tag(hit.title)}
-            >
-              {hit.title}
-            </Link>
+            {name ? (
+              <ViewTransition name={name} share="morph" default="none">
+                {link}
+              </ViewTransition>
+            ) : (
+              link
+            )}
             {hit.parent || variant ? (
               <span className={styles.meta}>
                 {hit.parent ? (

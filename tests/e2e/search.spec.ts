@@ -308,6 +308,18 @@ test.describe('the results page', () => {
     await expect(page.getByRole('main').getByRole('link', { name: 'Tomar' })).toBeVisible()
   })
 
+  test('turns forward to a result, its title flying into the page’s heading', async ({ page }) => {
+    await recordPageTurns(page)
+    await gotoReady(page, '/search/?q=vikshepa')
+    const link = page.getByRole('main').getByRole('link', { name: 'Vikṣepa', exact: true })
+    await prefetched(link)
+    await link.click()
+    await expect(page.getByRole('heading', { level: 1 })).toContainText('Vikṣepa')
+    const [turn] = await pageTurns(page)
+    expectPageTurned(turn, 'forward')
+    expect(turn?.flights.map(({ name }) => name)).toContain('concept-title-vikshepa')
+  })
+
   test('passes axe with results', async ({ page }) => {
     await gotoReady(page, '/search/?q=vikshepa')
     await expectNoAxeViolations(page, '/search/?q=vikshepa')

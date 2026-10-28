@@ -70,5 +70,13 @@ export function matchLabel(hit: SearchHit): string {
   return field === 'excerpt' ? 'mentions' : 'matched'
 }
 
+/** The kinds whose page heading shares a view-transition name with a link to it (`concept-title-<slug>`). */
+const MORPHS: ReadonlySet<SearchKind> = new Set(['concept', 'topic', 'work', 'questionnaire'])
+
+/** The name a hit's title shares with its page's heading, so following it morphs one into the other. */
+export function morphName(hit: SearchHit): string | undefined {
+  return MORPHS.has(hit.kind) ? `${hit.kind}-title-${hit.id.slice(hit.kind.length + 1)}` : undefined
+}
+
 /** "1 result", "12 results". */
 export const resultCount = (count: number) => `${count} ${count === 1 ? 'result' : 'results'}`
