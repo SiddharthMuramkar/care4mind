@@ -1,6 +1,6 @@
 # 05: Performance budgets
 
-Status: ready-for-agent
+Status: resolved
 Blocked by: 02, 03, 04
 Spec: [Front-end foundation: Press × Kolam](../spec.md)
 
@@ -8,7 +8,7 @@ Spec: [Front-end foundation: Press × Kolam](../spec.md)
 
 ## Acceptance criteria
 
-- [ ] **Lighthouse budgets:**
+- [x] **Lighthouse budgets:**
   - Lighthouse CI runs three times on `/`, `/concepts/vikshepa` and `/questionnaires/karmayoga-scale` on the mobile profile;
   - LCP ≤ 2.5 s, CLS ≤ 0.1, Total Blocking Time ≤ 200 ms and accessibility ≥ 0.95 all pass as errors;
   - the performance score stays a warning at 0.9.
@@ -27,7 +27,7 @@ Spec: [Front-end foundation: Press × Kolam](../spec.md)
   - first-load JavaScript per route;
   - which animations each page runs.
 - [x] **No regressions:** every end-to-end suite stays green.
-- [ ] **Done-check:** every check in the spec's Testing Decisions passes, plus `CHROME_PATH=/usr/bin/google-chrome pnpm lhci`.
+- [x] **Done-check:** every check in the spec's Testing Decisions passes, plus `CHROME_PATH=/usr/bin/google-chrome pnpm lhci`.
 
 ## Comments
 
@@ -64,7 +64,7 @@ Animations, all only under `prefers-reduced-motion: no-preference` (none under r
 
 - Every page: the logo redraws on hover and focus (stroke offset, 0.7 s); link underlines draw (transform, or background size in running text); page-turns between pages (transform and opacity, 320 ms), with the card title's morph.
 - Homepage: the opening kolam draws once on load (1.6 s) and drifts on the root scroll timeline (transform); two bands and six Contents knots draw on scroll; ink spreads on both calls to action (clip-path and opacity, 400 ms); cards deboss when pressed; in-page links glide.
-- Concept page: the reading thread (scaleX on the root scroll timeline); the ornament rule draws in on scroll (scaleX); the script switch's spellings trade places (view transition, 320 ms) and its knob springs (Motion); the References knot turns and its dot swells, and the list fades; the "Also spelled" popover fades and scales.
+- Concept page: the reading thread (scaleX on the root scroll timeline); the ornament rule draws in on scroll (scaleX); the script switch's spellings trade places (view transition, 320 ms) and its knob springs (Motion); the References knot turns and its dot swells (transform), and the list fades in as it opens (opacity); the "Also spelled" popover fades and scales in as it opens (opacity and transform). Since the third pass, the list and the popover close at once.
 - Questionnaire page: the reading thread.
 - 404: a small kolam draws once on load; ink spreads on "Go to the homepage".
 - Lighthouse lists only the kolam line draws as non-composited (SVG stroke offsets, which the spec allows).
@@ -110,3 +110,32 @@ Font sizes are as transferred: Text Regular 50 kB, Italic 56, SemiBold 50, Displ
   1. Stop the stuck `ssh-add` processes and run the done-check again.
   2. Load Base UI's popover and accordion after start-up (Concept scripts 182 → about 142 kB). Lighthouse's own model puts the slow runs at about 2.5 s then, still not a sure pass, and an early press would be lost.
   3. Revisit the lab budget for long pages.
+
+**Third pass, 2026-10-28. Resolved: `pnpm lhci` passed three runs in a row on the final code, on an idle machine.** Format, lint, typecheck, 574 unit tests, the build and the Playwright suite (395 passed, 7 skipped by design) pass too.
+
+- **Base UI is out of the Concept page.** Its popover and accordion made up most of the page's own 43 kB of script (gzip). Both parts are native HTML now, in server components, so the page loads what the homepage does plus 2 kB for the script switch: 182 → 140 kB. Both now also work without JavaScript.
+  - **"Also spelled"** is a `popover` its button opens (`popovertarget`). The browser draws it above the page and closes it on Escape, a press elsewhere, its Close or the button again. Focus stays on the button, Tab goes on into the popover, and closing it from inside hands focus back to the button. Its title (a heading that names the dialog), its list with each spelling's language tag, and Close are as before.
+  - It is placed with CSS anchor positioning: under its button, from the button's left edge, but below the "Devanagari first" switch, which narrow screens wrap under the button. Base UI's popup covered the wrapped switch and closed when focus left it. A native popover stays open, so it now opens clear of both, and tabbing on or back never lands under it (WCAG 2.4.11). It sits on the page rather than the screen, so it scrolls with its button. Firefox before 147 and Safari before 26 have no anchor positioning; there the browser centres it on the screen.
+  - It fades and scales in as it opens (opacity and transform, from `@starting-style`), only without reduced motion, and closes at once. Fading it out too would mean transitioning `display` and `overlay` with `transition-behavior: allow-discrete`, and Firefox and Safari have no `overlay`: the popover would drop out of the top layer while still fading. Its arrow is gone: with the switch between them, it would point at the switch.
+  - **The References** are a `details` element: closed by default, with the count. As it opens, the knot turns and its dot swells (transform) and the list fades in (opacity); closing is immediate. The list itself fades, as Firefox doesn't transition `::details-content`. While closed, find-in-page reaches every entry (Chrome, Firefox 148 and later, Safari in part; in Chromium a text-fragment link to an entry's title opens it the same way), and a link to an entry (`#ref-…`) opens the References at it, from the page or from another page, with or without JavaScript, in Chromium and Firefox alike. Base UI's did so only from the page, once its script had run. "References" is now a level-2 heading inside the summary, like the page's other sections (Base UI's accordion made it level 3). Screen readers differ on headings inside a summary: NVDA and VoiceOver have announced them, JAWS hasn't.
+  - `@base-ui/react` is no longer imported anywhere. The dependency stays: ADR-0003 names it for accessible parts, and dropping it is a separate decision.
+- **Why the Concept page's LCP splits, in plain terms:** Lighthouse estimates LCP by replaying, at slow 4G and a CPU four times slower, the files and main-thread work that came before the first paint of a fast local load. Locally every file arrives before that paint, and React's start-up begins within a few milliseconds of it, either side. When it begins first, the estimate also counts the 72 kB react-dom file and the start-up itself: about 0.65 s more.
+- **Tests,** all in `tests/e2e/concept.spec.ts`:
+  - New: the popover opens with Enter or Space and closes with Close or Escape, focus staying on its button and coming back to it; it opens with a click and closes with Close or a click elsewhere; with it open, tabbing on or back never lands on a control it covers, as the page loads and on a screen 600 px tall; a `#ref-` link opens the References at that entry, from the page and from another page; with JavaScript off, the popover opens and closes, a `#ref-` link and the summary open the References, and the related Questionnaire link works; arriving from the homepage, where React draws the page in the browser, both still open; the list fades in by opacity alone.
+  - Changed: the two References tests reached the control by its `button` role and its `aria-expanded` attribute, both of which only Base UI produced. They now reach the summary by its text and read the open state from the `details` element's `open` attribute. Their assertions (closed, then open; the knot turning, swelling and turning back) are unchanged. No other test changed.
+
+**Measurements**, from the 3 final `pnpm lhci` runs, 9 loads per page (mobile profile, load average 1.3–2.2):
+
+| Page | LCP, median (range) | CLS | TBT, median (range) | Performance | First-load JavaScript (gzip) |
+| --- | --- | --- | --- | --- | --- |
+| `/` | 2.31 s (1.69–2.35) | 0 | 140 ms (136–161) | 0.97 (0.96–0.98) | 138.5 kB in 6 files (465 kB raw) |
+| `/concepts/vikshepa` | 2.45 s (1.81–2.46) | 0.001 | 142 ms (137–144) | 0.96 (0.96–0.98) | 140.3 kB in 7 files (468 kB raw) |
+| `/questionnaires/karmayoga-scale` | 2.30 s (2.29–2.33) | 0.001 | 141 ms (131–167) | 0.97 (0.96–0.97) | 138.5 kB in 6 files (465 kB raw) |
+
+The Concept page's LCP was 2.45–2.46 s in 6 loads and 1.81 s in 3; the runs lhci judged by were at 1.81, 1.81 and 2.46 s. Its HTML is 21 kB gzip (20.5 before: the References are now drawn on the server). Accessibility is 1.0 on all three; the fonts are as in the second pass.
+
+**Left over:**
+
+- The Concept page's slower loads now come in at 2.45–2.46 s (2.75–2.79 before): within budget whichever way the race goes, but 40–50 ms under it, short of the 2.4 s hoped for. What remains in them is the second round trip its 21 kB document needs (the homepage's 12 kB fits in the first), the preloaded Text Regular (50 kB), React and Next.js (138 kB), and React's start-up (48 ms here, so 190 ms at a quarter of the speed). By Lighthouse's own model, a document under 14.6 kB or a Text Regular under about 25 kB would each take 150 ms off; smaller cuts don't move it, as the model counts whole round trips. By the same model, inlining the CSS would save 10–110 ms, depending on the load. Each is a decision beyond this ticket: the page's content, ticket 07's coverage of the font, or how Next.js ships CSS.
+- That margin is about 11 ms of start-up on this machine's CPU. A busy machine slows the start-up and could tip the slower loads over 2.5 s, as in the second pass.
+- Without anchor positioning, the centred popover can cover its button until Tab moves into it or Escape closes it.
