@@ -52,8 +52,8 @@
    */
 
   /*
-   * Topic hues (design B3), for drawings only: dots, petals, sectors and swatches. Never text: a
-   * topic is always named in words. Each keeps 3:1 against the indigo ground and the paper alike.
+   * Topic hues (design B3), for drawings only: lozenges, rules, leaders and swatches. Never text:
+   * a topic is always named in words. Each keeps 3:1 against the indigo ground and the paper alike.
    */
   --color-topic-self: #b44d6b;
   --color-topic-mind: #2f7fa3;
@@ -103,17 +103,6 @@
   --color-toast-ink: #f3ecdc;
   --color-toast-muted: #c9c2d8;
   --color-toast-line: #f0b429;
-  /* Book cloth for typographic spines, each with the ink its title is set in. */
-  --color-cloth-indigo: #151a3d;
-  --color-cloth-indigo-ink: #f3ecdc;
-  --color-cloth-madder: #9c2a1f;
-  --color-cloth-madder-ink: #f6eedb;
-  --color-cloth-turmeric: #f0b429;
-  --color-cloth-turmeric-ink: #151a3d;
-  --color-cloth-neem: #2f5d3a;
-  --color-cloth-neem-ink: #f3ecdc;
-  --color-cloth-teak: #5a4a2e;
-  --color-cloth-teak-ink: #f6eedb;
 
   /* Behind a modal Drawer or the palette; and the shadow at a scrolling table's edge. Translucent. */
   --color-backdrop: #0b0d1fb3;
@@ -225,9 +214,9 @@
   }
 
   /*
-   * A part names its topic, book cloth or Questionnaire status with a data attribute and reads
-   * the colour back as --topic, --cloth/--cloth-ink or --status/--status-ink, so a slug from
-   * content picks its token without the component spelling out each one.
+   * A part names its topic or Questionnaire status with a data attribute and reads the colour
+   * back as --topic or --status/--status-ink, so a slug from content picks its token without the
+   * component spelling out each one.
    */
   [data-topic='self'] {
     --topic: var(--color-topic-self);
@@ -247,31 +236,6 @@
 
   [data-topic='temperament'] {
     --topic: var(--color-topic-temperament);
-  }
-
-  [data-cloth='indigo'] {
-    --cloth: var(--color-cloth-indigo);
-    --cloth-ink: var(--color-cloth-indigo-ink);
-  }
-
-  [data-cloth='madder'] {
-    --cloth: var(--color-cloth-madder);
-    --cloth-ink: var(--color-cloth-madder-ink);
-  }
-
-  [data-cloth='turmeric'] {
-    --cloth: var(--color-cloth-turmeric);
-    --cloth-ink: var(--color-cloth-turmeric-ink);
-  }
-
-  [data-cloth='neem'] {
-    --cloth: var(--color-cloth-neem);
-    --cloth-ink: var(--color-cloth-neem-ink);
-  }
-
-  [data-cloth='teak'] {
-    --cloth: var(--color-cloth-teak);
-    --cloth-ink: var(--color-cloth-teak-ink);
   }
 
   [data-status='live'] {

@@ -82,7 +82,7 @@ test.describe('without JavaScript', () => {
     const links = banner(page).getByRole('link')
     if (isWide(page)) {
       await expect(links).toHaveText([
-        'care4mind',
+        'Care4Mind',
         ...SECTIONS.map(({ name }) => new RegExp(`^\\s*${name}\\s*$`)),
       ])
       for (const { name, path } of SECTIONS) {
@@ -90,7 +90,7 @@ test.describe('without JavaScript', () => {
       }
     } else {
       // On a phone the sections wait behind Menu, which is a link to the footer's navigation.
-      await expect(links).toHaveText(['care4mind', /Search/, /Menu/])
+      await expect(links).toHaveText(['Care4Mind', /Search/, /Menu/])
       const menu = banner(page).getByRole('link', { name: 'Menu' })
       await expect(menu).toHaveAttribute('href', '#site-nav')
       expect(await pathOf(banner(page).getByRole('link', { name: 'Search' }))).toBe('/search/')
@@ -141,7 +141,7 @@ test.describe('without JavaScript', () => {
       '/proposals/',
     )
     const footer = page.getByRole('contentinfo')
-    await expect(footer.getByText('care4mind', { exact: true })).toBeVisible()
+    await expect(footer.getByText('Care4Mind', { exact: true })).toBeVisible()
     await expect(footer).toContainText('Indic ways to invoke a perfect balanced mind')
     await expect(footer).toContainText('Powered by IIT Bombay-SJMSOM & HUA')
     await expect(footer).toContainText('A preview of the new site, not yet public.')
@@ -163,7 +163,9 @@ test.describe('the section you are in', () => {
     { path: '/proposals/', current: {} },
   ] as const
 
-  test('is marked in the header, by aria-current and a dot under its name', async ({ page }) => {
+  test('is marked in the header, by aria-current and a lozenge under its name', async ({
+    page,
+  }) => {
     test.skip(!isWide(page), 'the sections show in the header from 72rem')
     for (const { path, current } of CASES) {
       await gotoReady(page, path)
@@ -177,7 +179,7 @@ test.describe('the section you are in', () => {
           )
       await expect.poll(marked, { message: path }).toEqual(current)
       for (const name of Object.keys(current)) {
-        const dot = await header(page)
+        const mark = await header(page)
           .getByRole('link', { name, exact: true })
           .evaluate((link) => {
             const marker = getComputedStyle(link, '::before')
@@ -186,7 +188,7 @@ test.describe('the section you are in', () => {
               (style) => style.content !== 'none' && parseFloat(style.width) > 0,
             )
           })
-        expect(dot, `${name} shows its mark on ${path}`).toBe(true)
+        expect(mark, `${name} shows its mark on ${path}`).toBe(true)
       }
     }
   })

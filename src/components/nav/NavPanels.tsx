@@ -13,7 +13,7 @@ import {
 } from 'react'
 import { createPortal } from 'react-dom'
 
-import { kolam } from '@/lib/kolam'
+import { toDevanagariDigits } from '@/lib/text'
 
 import { currentFor, panelOf } from './current'
 import { ArrowGlyph, ChevronGlyph } from './glyphs'
@@ -183,51 +183,42 @@ function PanelLink({
 }
 
 /**
- * The five topics on one unbroken kolam line, a dot in each topic's hue, with their Concept
- * counts; then the A–Z and, while it is on, the Concept map. The line draws as the panel opens.
+ * The five topics set like a book's contents: a Devanagari numeral, the topic and its term, a
+ * dotted leader and its Concept count where the page number would be. Then the A–Z and, while it
+ * is on, the Concept map. As the panel opens the rows rise in turn and their leaders ink in.
  */
 function ConceptsPanel({ site, pathname, mapNote }: PanelProps & { mapNote?: ReactNode }) {
   const { topics, index, map } = site.concepts
-  const thread = kolam(1, Math.max(1, topics.length))
   return (
     <div className={styles.concepts}>
-      <p className={styles.kicker}>Concepts by topic</p>
-      <div className={styles.topics}>
-        <svg
-          className={styles.thread}
-          viewBox={`0 0 ${thread.width} ${thread.height}`}
-          width={thread.width}
-          height={thread.height}
-          aria-hidden
-          focusable="false"
-        >
-          <path d={thread.d} pathLength={1} />
-        </svg>
-        <ul className={styles.topicList}>
-          {topics.map((topic, index) => (
-            <li
-              key={topic.slug}
-              data-topic={topic.slug}
-              style={{ '--index': index } as CSSProperties}
-            >
-              <PanelLink href={topic.href} pathname={pathname} className={styles.topic}>
-                <span className={styles.dot} aria-hidden />
-                <span className={styles.topicName}>
-                  {topic.label}
-                  {topic.term ? (
-                    <span lang="sa-Latn" className={styles.term}>
-                      {topic.term}
-                    </span>
-                  ) : null}
-                </span>
-                <span className={styles.count}>
-                  {topic.count} {topic.count === 1 ? 'Concept' : 'Concepts'}
-                </span>
-              </PanelLink>
-            </li>
-          ))}
-        </ul>
-      </div>
+      <PanelHead>Concepts by topic</PanelHead>
+      <ol className={styles.contents}>
+        {topics.map((topic, position) => (
+          <li
+            key={topic.slug}
+            data-topic={topic.slug}
+            style={{ '--index': position } as CSSProperties}
+          >
+            <PanelLink href={topic.href} pathname={pathname} className={styles.entry}>
+              <span lang="sa-Deva" className={styles.numeral} aria-hidden>
+                {toDevanagariDigits(String(position + 1))}
+              </span>
+              <span className={styles.name}>
+                {topic.label}
+                {topic.term ? (
+                  <span lang="sa-Latn" className={styles.term}>
+                    {topic.term}
+                  </span>
+                ) : null}
+              </span>
+              <span className={styles.leader} aria-hidden />
+              <span className={styles.count}>
+                {topic.count} {topic.count === 1 ? 'Concept' : 'Concepts'}
+              </span>
+            </PanelLink>
+          </li>
+        ))}
+      </ol>
       <div className={styles.more}>
         <PanelLink href={index.href} pathname={pathname} className={styles.onward}>
           {index.label}
@@ -247,36 +238,28 @@ function ConceptsPanel({ site, pathname, mapNote }: PanelProps & { mapNote?: Rea
   )
 }
 
-// Each page of the Library is a book in a pile, bound in its own cloth.
-const CLOTHS = ['indigo', 'madder', 'turmeric', 'neem', 'teak'] as const
-
-/** The Library's pages as a pile of books, set in type: References first, as the heaviest. */
+/** The Library's pages as a catalogue: References first, then the reading lists, each with its count. */
 function LibraryPanel({ site, pathname }: PanelProps) {
   const { pages, index } = site.library
   return (
     <div className={styles.library}>
-      <p className={styles.kicker}>The Library</p>
-      <ul className={styles.pile}>
-        {pages.map((page, position) => {
-          const cloth = CLOTHS[position % CLOTHS.length]
-          return (
-            <li
-              key={page.slug}
-              className={styles.book}
-              data-cloth={cloth}
-              style={{ '--index': position } as CSSProperties}
-            >
-              <PanelLink href={page.href} pathname={pathname} className={styles.spine}>
-                <span className={styles.title}>{page.label}</span>
-                {page.count === undefined ? null : (
-                  <span className={styles.volume}>
+      <PanelHead>The Library</PanelHead>
+      <ul className={styles.contents}>
+        {pages.map((page, position) => (
+          <li key={page.slug} style={{ '--index': position } as CSSProperties}>
+            <PanelLink href={page.href} pathname={pathname} className={styles.entry}>
+              <span className={styles.name}>{page.label}</span>
+              {page.count === undefined ? null : (
+                <>
+                  <span className={styles.leader} aria-hidden />
+                  <span className={styles.count}>
                     {page.count} {page.count === 1 ? 'entry' : 'entries'}
                   </span>
-                )}
-              </PanelLink>
-            </li>
-          )
-        })}
+                </>
+              )}
+            </PanelLink>
+          </li>
+        ))}
       </ul>
       <div className={styles.more}>
         <PanelLink href={index.href} pathname={pathname} className={styles.onward}>
@@ -284,6 +267,16 @@ function LibraryPanel({ site, pathname }: PanelProps) {
           <ArrowGlyph className={styles.arrowGlyph} />
         </PanelLink>
       </div>
+    </div>
+  )
+}
+
+/** A panel's running head in small capitals, over a printer's double rule that inks in from the centre. */
+function PanelHead({ children }: { children: ReactNode }) {
+  return (
+    <div className={styles.head}>
+      <p className={styles.kicker}>{children}</p>
+      <span className={styles.headRule} aria-hidden />
     </div>
   )
 }

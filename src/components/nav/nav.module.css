@@ -57,8 +57,9 @@
 }
 
 /*
- * The section you are in: its label in full ink over a turmeric kolam dot, so it reads by shape
- * as well as colour. On the section's own page the dot is filled; below it, a ring.
+ * The section you are in: its label in full ink over a turmeric lozenge, the folio's corner
+ * diamond, so it reads by shape as well as colour. On the section's own page the lozenge is
+ * filled; below it, only its outline.
  */
 .link[aria-current] {
   color: var(--color-ink);
@@ -68,11 +69,11 @@
   content: '';
   position: absolute;
   left: calc(50% - 0.06em - 3.5px);
-  bottom: -2px;
+  bottom: -1px;
   width: 7px;
   height: 7px;
-  border-radius: 50%;
   background: var(--color-accent);
+  transform: rotate(45deg);
 }
 
 .link[aria-current='true']::before {
@@ -126,7 +127,7 @@
   display: contents;
 }
 
-/* Windows' contrast themes repaint backgrounds: draw the current section's dot in the text colour. */
+/* Windows' contrast themes repaint backgrounds: draw the current section's lozenge in the text colour. */
 @media (forced-colors: active) {
   .link[aria-current]::before {
     forced-color-adjust: none;

@@ -1,6 +1,6 @@
 /*
- * The navigation's small drawings, in the kolam's hand: round strokes in the text's colour, and a
- * dot that a parent can colour with --glyph-dot. Decorative: the control around each is named.
+ * The navigation's small drawings, cut like a printer's sorts: hairline strokes in the text's
+ * colour. Decorative: the control around each is named.
  */
 
 interface GlyphProps {
@@ -16,7 +16,7 @@ const common = {
   strokeLinejoin: 'round',
 } as const
 
-/** Search: one loop round a dot, with a handle. */
+/** Search: a reading glass. */
 export function SearchGlyph({ className }: GlyphProps) {
   return (
     <svg
@@ -29,12 +29,11 @@ export function SearchGlyph({ className }: GlyphProps) {
     >
       <circle cx="10" cy="10" r="6.5" />
       <path d="m15 15 5.5 5.5" />
-      <circle cx="10" cy="10" r="1.9" fill="var(--glyph-dot, currentColor)" stroke="none" />
     </svg>
   )
 }
 
-/** Menu: three rules, the middle one ending in a dot. */
+/** Menu: three rules, set like lines of type, the middle one shorter. */
 export function MenuGlyph({ className }: GlyphProps) {
   return (
     <svg
@@ -45,8 +44,7 @@ export function MenuGlyph({ className }: GlyphProps) {
       strokeWidth={1.75}
       {...common}
     >
-      <path d="M4 6.5h16M4 12h10M4 17.5h16" />
-      <circle cx="18.25" cy="12" r="1.9" fill="var(--glyph-dot, currentColor)" stroke="none" />
+      <path d="M4 6.5h16M4 12h11M4 17.5h16" />
     </svg>
   )
 }
@@ -67,7 +65,7 @@ export function CloseGlyph({ className }: GlyphProps) {
   )
 }
 
-/** Opens a panel: a small curve pointing down, turned up while the panel is open. */
+/** Opens a panel: a small chevron pointing down, turned up while the panel is open. */
 export function ChevronGlyph({ className }: GlyphProps) {
   return (
     <svg
@@ -95,6 +93,35 @@ export function ArrowGlyph({ className }: GlyphProps) {
       {...common}
     >
       <path d="M1.5 6h12M9.5 2l4 4-4 4" />
+    </svg>
+  )
+}
+
+/**
+ * Done: a tick in a vermilion roundel, like the wordmark's 4. The tick is one stroke
+ * (`pathLength` 1), so a parent can ink it in by its dash offset.
+ */
+export function SealGlyph({ className, tickClassName }: GlyphProps & { tickClassName?: string }) {
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 32 32"
+      width="32"
+      height="32"
+      aria-hidden
+      focusable="false"
+    >
+      <circle cx="16" cy="16" r="15" fill="var(--color-highlight)" />
+      <path
+        className={tickClassName}
+        d="m9.5 16.5 4.5 4.5 8.5-9.5"
+        pathLength={1}
+        fill="none"
+        stroke="var(--color-highlight-ink)"
+        strokeWidth={2.25}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
     </svg>
   )
 }

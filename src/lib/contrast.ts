@@ -85,12 +85,6 @@ export const CONTRAST_PAIRS = [
   { foreground: 'toast-muted', background: 'toast', minimum: 4.5 },
   { foreground: 'focus', background: 'toast', minimum: 3 },
   { foreground: 'toast-line', background: 'ground', minimum: 3 },
-  // Book cloth: a spine's title on its cloth.
-  { foreground: 'cloth-indigo-ink', background: 'cloth-indigo', minimum: 4.5 },
-  { foreground: 'cloth-madder-ink', background: 'cloth-madder', minimum: 4.5 },
-  { foreground: 'cloth-turmeric-ink', background: 'cloth-turmeric', minimum: 4.5 },
-  { foreground: 'cloth-neem-ink', background: 'cloth-neem', minimum: 4.5 },
-  { foreground: 'cloth-teak-ink', background: 'cloth-teak', minimum: 4.5 },
 ] as const
 
 export type ColourToken = (typeof CONTRAST_PAIRS)[number]['foreground' | 'background']

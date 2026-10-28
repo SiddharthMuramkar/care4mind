@@ -99,21 +99,20 @@
   line-height: 1.6;
 }
 
-/* Each topic carries its hue, as a dot before its name. */
+/* Each topic carries its hue, as a small lozenge before its name: the folio's corner diamond. */
 .topic {
   display: flex;
   align-items: baseline;
-  gap: 0.5rem;
+  gap: 0.55rem;
 }
 
 .topic::before {
   content: '';
   flex: none;
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: var(--topic, var(--color-kolam-dot));
-  translate: 0 -0.15em;
+  width: 6px;
+  height: 6px;
+  background: var(--topic);
+  transform: translateY(-0.2em) rotate(45deg);
 }
 
 .proposal {

@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import type { CSSProperties, MouseEvent, ReactNode, RefObject } from 'react'
 
-import { Kolam } from '@/components/Kolam'
+import { Fleuron } from '@/components/Fleuron'
 import { toDevanagariDigits } from '@/lib/text'
 
 import { currentFor, panelOf } from './current'
@@ -25,9 +25,9 @@ export interface MenuDrawerProps {
 }
 
 /**
- * The Drawer (Base UI): a page that slides in from the right with the whole navigation, like a
- * book's contents. It keeps focus inside while open; Escape, Close or a swipe to the right puts
- * it away, and following a link closes it as the next page opens.
+ * The Drawer (Base UI): a leaf of paper that slides in from the right with the whole navigation,
+ * set like a book's contents. It keeps focus inside while open; Escape, Close or a swipe to the
+ * right puts it away, and following a link closes it as the next page opens.
  */
 export function MenuDrawer({
   nav,
@@ -78,12 +78,6 @@ export function MenuDrawer({
                         style={{ '--index': index } as CSSProperties}
                       >
                         <span lang="sa-Deva" className={styles.numeral} aria-hidden>
-                          <Kolam
-                            columns={1}
-                            rows={1}
-                            behaviour="draw-on-load"
-                            className={styles.knot}
-                          />
                           {toDevanagariDigits(String(index + 1))}
                         </span>
                         <Link
@@ -102,6 +96,7 @@ export function MenuDrawer({
                   })}
                 </ol>
               </nav>
+              <Fleuron className={styles.fleuron} />
             </div>
           </Drawer.Popup>
         </Drawer.Viewport>
@@ -115,7 +110,7 @@ interface ListProps {
   pathname: string
 }
 
-/** Under Concepts: the A–Z, each topic with its hue and Concept count, and the map. */
+/** Under Concepts: the A–Z, each topic with its hue, a leader and its Concept count, and the map. */
 function ConceptsList({ nav, pathname, mapNote }: ListProps & { mapNote?: ReactNode }) {
   const { index, topics, map } = nav.concepts
   return (
@@ -136,8 +131,11 @@ function ConceptsList({ nav, pathname, mapNote }: ListProps & { mapNote?: ReactN
             className={styles.page}
             aria-current={currentFor(pathname, topic.href)}
           >
-            <span className={styles.dot} aria-hidden />
-            <span>{topic.label}</span>
+            <span className={styles.name}>
+              <span className={styles.lozenge} aria-hidden />
+              {topic.label}
+            </span>
+            <span className={styles.leader} aria-hidden />
             <span className={styles.count}>
               {topic.count}
               <span className="sr-only"> {topic.count === 1 ? 'Concept' : 'Concepts'}</span>
@@ -161,7 +159,7 @@ function ConceptsList({ nav, pathname, mapNote }: ListProps & { mapNote?: ReactN
   )
 }
 
-/** Under Library: its five pages. */
+/** Under Library: its five pages, each list with a leader to its count. */
 function LibraryList({ nav, pathname }: ListProps) {
   return (
     <ul className={styles.pages}>
@@ -172,12 +170,15 @@ function LibraryList({ nav, pathname }: ListProps) {
             className={styles.page}
             aria-current={currentFor(pathname, page.href)}
           >
-            <span>{page.label}</span>
+            <span className={styles.name}>{page.label}</span>
             {page.count === undefined ? null : (
-              <span className={styles.count}>
-                {page.count}
-                <span className="sr-only"> {page.count === 1 ? 'entry' : 'entries'}</span>
-              </span>
+              <>
+                <span className={styles.leader} aria-hidden />
+                <span className={styles.count}>
+                  {page.count}
+                  <span className="sr-only"> {page.count === 1 ? 'entry' : 'entries'}</span>
+                </span>
+              </>
             )}
           </Link>
         </li>

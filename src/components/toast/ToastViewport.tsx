@@ -3,8 +3,7 @@
 import { Toast } from '@base-ui/react/toast'
 import { useEffect } from 'react'
 
-import { Kolam } from '@/components/Kolam'
-import { CloseGlyph } from '@/components/nav/glyphs'
+import { CloseGlyph, SealGlyph } from '@/components/nav/glyphs'
 
 import { connectToasts } from './toast'
 import styles from './ToastViewport.module.css'
@@ -13,7 +12,7 @@ const manager = Toast.createToastManager()
 
 /**
  * Base UI's Toast, loaded with the first toast(): one polite live region in the corner, each
- * toast a dark slip whose kolam knot closes round its dot as it arrives. A toast stays 6 s,
+ * toast a dark slip sealed in vermilion, its tick inking in as it arrives. A toast stays 6 s,
  * longer while the pointer or focus is on it, and goes with Dismiss, a swipe or F6 then Escape.
  */
 export function ToastViewport() {
@@ -49,7 +48,7 @@ function Toasts() {
   return toasts.map((toast) => (
     <Toast.Root key={toast.id} toast={toast} className={styles.toast}>
       <Toast.Content className={styles.content}>
-        <Kolam columns={1} rows={1} behaviour="draw-on-load" className={styles.knot} />
+        <SealGlyph className={styles.seal} tickClassName={styles.tick} />
         <div className={styles.text}>
           {/* Paragraphs, not headings: a toast is a passing note, not part of the page's outline. */}
           <Toast.Title className={styles.title} render={<p />} />

@@ -106,20 +106,36 @@
   opacity: 1;
 }
 
-/* A kolam knot: one loop closing round its dot, like a seal pressed on the slip. */
-.knot {
+/* A seal pressed on the slip: a vermilion roundel, like the wordmark's 4, its tick inking in. */
+.seal {
   flex: none;
-  width: 2rem;
-  height: auto;
-  --kolam-line-width: 3px;
-  --color-kolam-line: var(--color-toast-line);
-  --color-kolam-dot: var(--color-highlight);
+  width: 1.75rem;
+  height: 1.75rem;
+}
+
+@keyframes ink-tick {
+  from {
+    stroke-dashoffset: 1.05;
+  }
+}
+
+@keyframes press {
+  from {
+    transform: scale(0.6);
+  }
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  .content .knot path {
-    animation-duration: 640ms;
-    animation-delay: 80ms;
+  .seal {
+    animation: press var(--duration-move) var(--ease-sheet) backwards;
+    animation-delay: 60ms;
+  }
+
+  /* Dash and gap longer than the stroke, so its round cap shows nothing before it starts. */
+  .tick {
+    stroke-dasharray: 1 1.1;
+    animation: ink-tick var(--duration-slow) var(--ease-out) backwards;
+    animation-delay: 180ms;
   }
 }
 
