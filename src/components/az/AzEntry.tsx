@@ -5,7 +5,7 @@ import { turnForward } from '@/components/PageTurn'
 import { LinkPreview, type PreviewPayload } from '@/components/preview/LinkPreview'
 import { Text } from '@/components/prose'
 import { ScriptPair } from '@/components/script/ScriptPair'
-import { hrefFor, type AzEntry as Entry } from '@/content'
+import type { AzEntry as Entry } from '@/content'
 
 import styles from './az.module.css'
 
@@ -17,7 +17,11 @@ const siteOf = (href: string) => {
   return SITES[host] ?? host
 }
 
-/** What an entry is, in words: a Concept page, a term explained in one or in a topic, a glossary entry. */
+/**
+ * What an entry is, in words: a Concept page, a term explained in one or in a topic, or a
+ * glossary entry. Plain text: the entry's own link already leads there, and a second link on
+ * every term would weigh on a long page.
+ */
 function Kind({ entry, topicNames }: { entry: Entry; topicNames: ReadonlyMap<string, string> }) {
   if (entry.kind === 'concept') return <>Concept page</>
   if (entry.kind === 'glossary') return <>Glossary</>
@@ -25,28 +29,19 @@ function Kind({ entry, topicNames }: { entry: Entry; topicNames: ReadonlyMap<str
     return (
       <>
         Term in{' '}
-        <Link
-          href={hrefFor({ kind: 'concept', id: entry.concept.slug })}
+        <span
           className={styles.within}
-          transitionTypes={turnForward}
+          {...(entry.concept.lang ? { lang: entry.concept.lang } : {})}
         >
-          <span {...(entry.concept.lang ? { lang: entry.concept.lang } : {})}>
-            {entry.concept.name}
-          </span>
-        </Link>
+          {entry.concept.name}
+        </span>
       </>
     )
   const [topic] = entry.topics
-  return topic ? (
+  const name = topic === undefined ? undefined : topicNames.get(topic)
+  return name ? (
     <>
-      Term in the introduction to{' '}
-      <Link
-        href={hrefFor({ kind: 'topic', id: topic })}
-        className={styles.within}
-        transitionTypes={turnForward}
-      >
-        {topicNames.get(topic) ?? topic}
-      </Link>
+      Term in the introduction to <span className={styles.within}>{name}</span>
     </>
   ) : (
     <>Term</>
@@ -60,13 +55,10 @@ function Kind({ entry, topicNames }: { entry: Entry; topicNames: ReadonlyMap<str
  */
 export function AzEntry({
   entry,
-  index,
   topicNames,
   preview,
 }: {
   entry: Entry
-  /** Its place in the whole list, which names it as the list reorders. */
-  index: number
   topicNames: ReadonlyMap<string, string>
   /** The preview a Concept's link shows (ticket 05's LinkPreview). */
   preview?: PreviewPayload
@@ -109,7 +101,6 @@ export function AzEntry({
       {...(anchor ? { id: anchor } : {})}
       className={styles.entry}
       data-entry
-      data-key={index}
       data-kind={entry.kind}
       {...(entry.topics.length > 0 ? { 'data-topics': entry.topics.join(' ') } : {})}
       {...(entry.works.length > 0 ? { 'data-works': entry.works.join(' ') } : {})}

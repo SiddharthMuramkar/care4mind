@@ -69,13 +69,15 @@ function reorder(from: Selection, to: Selection, change: () => void) {
   const still = !window.matchMedia('(prefers-reduced-motion: no-preference)').matches
   if (!list || still || typeof document.startViewTransition !== 'function') return change()
   const named: HTMLElement[] = []
+  // Each entry is named by its place in the whole list, the same before and after.
+  const places = new Map([...list.querySelectorAll('[data-entry]')].map((entry, at) => [entry, at]))
   const name = (selection: Selection) => {
     for (const entry of list.querySelectorAll<HTMLElement>(shownEntries(selection))) {
       if (named.length === NAMED) return
       const { top, bottom } = entry.getBoundingClientRect()
       if (bottom < 0) continue
       if (top > window.innerHeight) return
-      entry.style.setProperty('view-transition-name', `az-${entry.dataset.key ?? named.length}`)
+      entry.style.setProperty('view-transition-name', `az-${places.get(entry) ?? named.length}`)
       entry.style.setProperty('view-transition-class', 'az-entry')
       named.push(entry)
     }

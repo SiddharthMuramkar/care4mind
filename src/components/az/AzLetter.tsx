@@ -28,7 +28,6 @@ export function AzLetter({
             <AzEntry
               key={index}
               entry={entry}
-              index={index}
               topicNames={topicNames}
               {...(preview ? { preview } : {})}
             />

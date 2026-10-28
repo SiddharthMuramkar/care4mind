@@ -367,7 +367,7 @@ a.letter:focus-visible {
   letter-spacing: 0;
 }
 
-.within :lang(sa-Latn) {
+.within:lang(sa-Latn) {
   font-style: italic;
 }
 
