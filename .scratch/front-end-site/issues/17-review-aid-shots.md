@@ -50,3 +50,18 @@ This ticket carves the `pnpm shots` criterion out of ticket 15, which now waits 
 ## Comments
 
 **2026-10-28, a note for the lane:** the registry is TypeScript behind the `@/content` alias, which plain Node can't import from a `.mjs` file. Playwright's loader resolves it already (`tests/e2e/routes.ts` imports `site` from `@/content`), so reach the registry through that loader or another tool the repo already has, not through a copied list of routes. Say in your summary how you did it.
+
+**2026-10-28, the lane (built):**
+
+- **What it is:** `scripts/shots.mjs` (`pnpm shots`), its pure part (`parseArgs`, `planShots`) tested in `tests/unit/shots.test.ts` (10 tests: the default plan, `--only` paths and kinds, de-duplication, unknown paths/kinds/options, `--widths`, `--reduced`/`--both`, `--full`, and over the real registry one shot per kind and a distinct file for every route). `package.json` gains `shots`; `.gitignore` gains `/.shots/`; the conventions doc gains a "Screenshots" section.
+- **How it reaches the registry:** through Vite, which the repo has for Vitest. `runnerImport()` loads a two-line virtual module (`import { site } from '<repo>/src/content/index.ts'; export default await site.routes()`) with `resolve.tsconfigPaths`, so `@/content` resolves from `tsconfig.json` like everywhere else. The routes have to be read inside that import: the content source loads its records lazily and Vite's runner closes when the import ends. No port, no files written; about 2–4 s.
+- **Decisions the ticket left open:**
+  - It prints absolute paths (an agent's file viewer wants them); pnpm's own `$ node scripts/shots.mjs` line goes to stderr, so stdout is only the files.
+  - Ready before the shot: `html[data-hydrated]` (15 s), then network idle (≤ 5 s, so the faces LateFonts adds after first paint have arrived: `document.fonts.ready` alone misses them, as they join `document.fonts` only once loaded), then `document.fonts.ready`, then the opening animations on the document timeline finish (≤ 5 s). Scroll-driven drawings stay where the scroll has them, as a reader sees them.
+  - Heights for `--widths`: under 768 px 800 tall, under 1024 px 1024, else 900, matching the e2e projects (360×800, 768×1024, 1440×900).
+  - `--only` accepts a path with or without its trailing slash; a kind gives its sample route; a path may be any route, not only a sample. An unknown item names every kind in this build's registry and says a switched-off feature has no routes.
+  - A fresh browser context per shot, four at once, printed in plan order. The default 32 shots take about 9 s, `--only /` about 6 s, including starting and stopping `next start`.
+  - On a failed shot it starts no more, prints the files it did write, names the failure on stderr, stops its server and exits 1; a 404 asks whether the build had this run's `FEATURE_*` variables. Bad options exit 2 with the usage. Ctrl-C stops its server too (it runs in its own process group).
+  - "No build" is `.next/BUILD_ID` missing (a dev run leaves `.next/` without one), checked only when it must start a server, before the registry loads.
+- **Checked by hand:** `SHOTS_PORT=3120 pnpm shots --only /` wrote and printed `.shots/home-360.jpg` and `.shots/home-1440.jpg` and freed the port; with a server already on 3120 it shot that and left it running; a forced write failure stopped its server and exited 1; `--full` wrote a 360×40152 page; with no build it named `pnpm build` and exited 1.
+- **For ticket 15:** `pnpm shots` isn't routed through `scripts/lane/heavy.sh` in the conventions paragraph (it is light: one Chromium, four pages); fold that in if you'd rather it queued.
