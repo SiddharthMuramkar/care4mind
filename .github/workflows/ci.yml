@@ -1,0 +1,54 @@
+# Checks every pull request and every push to main with the commands every lane finishes with:
+# pnpm check, then the browser tests and Lighthouse on the build it made. See README.md, "Checks".
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    name: Checks, browser tests (FR-06, NFR-01) and Lighthouse (NFR-02)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      # The content registry is generated, never committed, so a fresh checkout writes it first.
+      - run: node scripts/content/registry.mjs
+      - id: check
+        run: pnpm check
+      - run: pnpm exec playwright install --with-deps chromium firefox webkit
+      - run: pnpm check:e2e
+        env:
+          E2E_SCOPE: full
+          # Half the runner's cores, Playwright's own default: the lanes' 4 suit an 8-core machine.
+          E2E_WORKERS: 50%
+      # Lighthouse measures the same build, whether or not a browser test failed.
+      - if: ${{ !cancelled() && steps.check.outcome == 'success' }}
+        run: pnpm lhci
+      - if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 14
+      - if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: lighthouse-reports
+          path: .lighthouseci/
+          retention-days: 14

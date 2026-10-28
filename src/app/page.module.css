@@ -1,0 +1,287 @@
+.main {
+  display: grid;
+  gap: clamp(3rem, 8vw, 5rem);
+}
+
+/* Hero: a folio page floating on indigo ink, set down on a kolam drawn round it. */
+.hero {
+  padding: clamp(0.75rem, 2.5vw, 1.5rem) clamp(1rem, 4vw, 3rem) 0;
+  /* On a phone the kolam reaches past the screen's edges. */
+  overflow-x: clip;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent 0 31px,
+    rgb(255 255 255 / 0.03) 31px 32px
+  );
+}
+
+.stage {
+  position: relative;
+  display: flow-root;
+  max-width: 52rem;
+  margin-inline: auto;
+}
+
+/*
+ * The kolam (9 dots across) is a fifth wider than the folio, so the folio
+ * covers all but its outer dots and loops, which show round its top and sides.
+ * Below the folio's foot it is cut off.
+ */
+.frame {
+  position: absolute;
+  inset: 0 -10%;
+  overflow: clip;
+  pointer-events: none;
+}
+
+/* The kolam scales with the folio, so its line is set thinner on wider screens: about 2–4.5 px. */
+.frameKolam {
+  width: 100%;
+  height: auto;
+  --kolam-line-width: 2.5px;
+}
+
+.heroFolio {
+  /* Room above the folio for the kolam's top row: a tenth of the folio's width. */
+  margin-top: 10%;
+  text-align: center;
+}
+
+/*
+ * Parallax, on the root scroll timeline rather than a scroll listener: for the
+ * first screenful of scrolling the kolam moves at four fifths of the page's
+ * speed, so it seems to lie deeper. The still kolam is the default.
+ */
+@keyframes drift {
+  to {
+    transform: translateY(20vh);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: scroll()) {
+    .frameKolam {
+      animation: drift linear both;
+      animation-timeline: scroll(root);
+      animation-range: 0 100vh;
+    }
+  }
+}
+
+/* From tablet width there is room for the kolam's outer loops beside the folio. */
+@media (min-width: 40rem) {
+  .hero {
+    padding-inline: max(3rem, 7.5vw);
+  }
+
+  .frameKolam {
+    --kolam-line-width: 2px;
+  }
+}
+
+@media (min-width: 64rem) {
+  .frameKolam {
+    --kolam-line-width: 1.75px;
+  }
+}
+
+.kicker {
+  margin: 0 0 1.5rem;
+  font-variant-caps: all-small-caps;
+  letter-spacing: 0.16em;
+  font-size: 1.125rem;
+  color: var(--color-surface-muted);
+}
+
+.heroTitle {
+  margin: 0;
+  display: grid;
+  gap: 0.75rem;
+  font-weight: 400;
+}
+
+.heroDeva {
+  font-size: clamp(2.75rem, 11vw, 6.25rem);
+  line-height: 1.35;
+}
+
+.heroIast {
+  font-family: var(--font-text);
+  font-style: italic;
+  font-size: clamp(1.375rem, 3.6vw, 2.25rem);
+  line-height: 1.2;
+}
+
+.translation {
+  margin: 1rem auto 0;
+  max-width: 30ch;
+  font-size: clamp(1.125rem, 2.4vw, 1.375rem);
+  font-variant-caps: all-small-caps;
+  letter-spacing: 0.08em;
+}
+
+.heroFleuron {
+  width: min(12rem, 60%);
+  margin: 2rem auto;
+  color: var(--color-highlight);
+}
+
+.intro {
+  margin: 0 auto;
+  max-width: 44ch;
+  font-size: 1.125rem;
+  line-height: 1.65;
+}
+
+.ctas {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.75rem 1.25rem;
+  margin: 2.25rem 0 0;
+}
+
+/* Sections on the indigo ground */
+.section {
+  display: grid;
+  gap: 1.25rem;
+  width: 100%;
+  max-width: 60rem;
+  margin-inline: auto;
+  padding-inline: clamp(1rem, 4vw, 3rem);
+  scroll-margin-top: 1.5rem;
+}
+
+.sectionTitle {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: clamp(2.25rem, 6vw, 3.25rem);
+  line-height: 1.1;
+}
+
+.sectionIntro {
+  margin: 0;
+  max-width: 52ch;
+  color: var(--color-ink-muted);
+  font-size: 1.125rem;
+}
+
+/* A kolam band between sections, drawn in as it scrolls into view. */
+.band {
+  width: min(27rem, calc(100% - 2rem));
+  height: auto;
+  margin-inline: auto;
+}
+
+/* Contents: a book's table of contents, with Devanagari numerals and dotted leaders. */
+.contents {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 1.25rem;
+}
+
+.entry {
+  display: grid;
+  grid-template-columns: 2.75rem auto 1fr auto;
+  grid-template-areas:
+    'number title leader status'
+    '. text text text';
+  align-items: baseline;
+  column-gap: 0.75rem;
+  row-gap: 0.25rem;
+}
+
+.entryNumber {
+  grid-area: number;
+  position: relative;
+  text-align: center;
+  color: var(--color-link);
+  font-size: 1.375rem;
+}
+
+/* A kolam knot looped round each numeral, which stands where the knot's dot would be. */
+.knot {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 2.5rem;
+  height: auto;
+  translate: -50% -50%;
+  --kolam-line-width: 2.25px;
+  --color-kolam-dot: transparent;
+}
+
+.entryTitle {
+  grid-area: title;
+  font-family: var(--font-display);
+  font-size: clamp(1.5rem, 3.5vw, 1.875rem);
+  line-height: 1.2;
+}
+
+.entryTitle a {
+  color: var(--color-link);
+}
+
+.entryLeader {
+  grid-area: leader;
+  align-self: end;
+  margin-bottom: 0.4rem;
+  border-bottom: 2px dotted var(--color-line);
+}
+
+.entryStatus {
+  grid-area: status;
+  color: var(--color-ink-muted);
+  font-variant-caps: all-small-caps;
+  letter-spacing: 0.1em;
+  font-size: 1.0625rem;
+}
+
+.entryText {
+  grid-area: text;
+  max-width: 56ch;
+  color: var(--color-ink-muted);
+}
+
+.cards {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 1.5rem;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 26rem), 1fr));
+}
+
+.note {
+  margin: 0;
+  max-width: 56ch;
+  color: var(--color-ink-muted);
+  font-style: italic;
+}
+
+.closing {
+  margin: 0 auto;
+  padding-inline: 1rem;
+  max-width: 24ch;
+  text-align: center;
+  font-family: var(--font-display);
+  font-size: clamp(1.75rem, 5vw, 2.75rem);
+  line-height: 1.2;
+}
+
+@media (max-width: 36rem) {
+  .entry {
+    grid-template-columns: 2.75rem 1fr;
+    grid-template-areas:
+      'number title'
+      '. status'
+      '. text';
+  }
+
+  .entryLeader {
+    display: none;
+  }
+}

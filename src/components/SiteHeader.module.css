@@ -1,0 +1,60 @@
+/* A solid strip across the page, so a turning page passes beneath it. Its content keeps to 72rem. */
+.header {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem 1.5rem;
+  padding: 0.75rem calc(max(0px, (100% - 72rem) / 2) + clamp(1rem, 4vw, 3rem));
+  background: var(--color-ground);
+}
+
+.home {
+  display: inline-flex;
+  align-items: center;
+  min-height: 48px;
+  color: var(--color-ink);
+  text-decoration: none;
+}
+
+.links {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 1.25rem;
+  margin: 0;
+  padding: 0;
+}
+
+.link {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  min-height: 48px;
+  color: var(--color-ink-muted);
+  font-variant-caps: all-small-caps;
+  letter-spacing: 0.12em;
+  font-size: 1.1875rem;
+  text-decoration: none;
+}
+
+/* On hover and focus a line draws in under the label (short of its last letter-space), by transform. */
+.link::after {
+  content: '';
+  position: absolute;
+  inset-inline: 0 0.12em;
+  top: calc(50% + 0.6em);
+  height: 1px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform var(--duration-quick) var(--ease-out);
+}
+
+.link:is(:hover, :focus-visible) {
+  color: var(--color-ink);
+}
+
+.link:is(:hover, :focus-visible)::after {
+  transform: none;
+}

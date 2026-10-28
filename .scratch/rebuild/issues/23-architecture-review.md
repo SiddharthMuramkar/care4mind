@@ -10,15 +10,16 @@ Map: [Care4Mind.org rebuild](../map.md)
 
 ## Question
 
-Does the developer accept the architecture the research recommends? Settle the rest of open question 1 in one ADR (ADR-0003):
+Does the developer accept the architecture the research recommends? Settle the rest of open question 1 in one ADR (ADR-0004):
 
-- the framework and the content back end
+- confirm the framework, Next.js, chosen early in [ADR-0003](../../../docs/adr/0003-nextjs-for-the-front-end.md), and choose the content back end
 - static, server-rendered or mixed pages
 - where media lives
 - the search technology that passes the test cases from [What search finds](18-what-search-finds.md), and how its index stays current
 - editor login
 - environments: preview deploys paired with Neon branches, and production
-- how coding agents build and test it: context7 for docs, and CI checks for FR-05, FR-06, FR-07, NFR-01, NFR-02 and NFR-04
+- how coding agents build and test it: context7 for docs, and CI checks for FR-05, FR-06, FR-07, NFR-01, NFR-02 and NFR-04. The front-end checks built in [Design direction](21-design-direction.md) (lint, unit tests, Playwright with axe, Lighthouse CI) already run; confirm and extend them
+- how the content module that [Design direction](21-design-direction.md) put in front of local files gives way to the chosen content back end
 - the expected monthly running cost the client takes over
 
 Confirm the FR-02 list of editable types against the client's answers on who will edit (OQ2). If those answers are late, go ahead on a written-down assumption.

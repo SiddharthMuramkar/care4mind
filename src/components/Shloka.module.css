@@ -1,0 +1,57 @@
+.shloka {
+  margin: 0;
+  display: grid;
+  gap: 1.25rem;
+}
+
+.verse {
+  margin: 0;
+  display: grid;
+  gap: 0.75rem;
+}
+
+.deva {
+  margin: 0;
+  font-size: clamp(1.125rem, 5.5vw, 1.5rem);
+  line-height: 1.7;
+}
+
+.transliteration {
+  margin: 0;
+  font-style: italic;
+  font-size: 1.0625rem;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+
+.line {
+  display: block;
+}
+
+.number {
+  white-space: nowrap;
+  font-style: normal;
+}
+
+.gloss {
+  display: grid;
+  gap: 0.75rem;
+  max-width: 62ch;
+}
+
+.gloss p {
+  margin: 0;
+}
+
+.label {
+  font-variant-caps: all-small-caps;
+  letter-spacing: 0.08em;
+  font-weight: 600;
+  margin-inline-end: 0.35em;
+}
+
+.source {
+  font-variant-caps: all-small-caps;
+  letter-spacing: 0.1em;
+  font-size: 1rem;
+}

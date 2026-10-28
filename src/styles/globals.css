@@ -1,0 +1,318 @@
+@import 'tailwindcss';
+
+/*
+ * Design tokens. Every colour, type step, duration and easing is declared once
+ * here; components use the generated utilities (bg-ground, text-ink, …) or the
+ * variables directly. Colour tokens are semantic, so each text/background pair
+ * in tests/unit/contrast.test.ts is checked for WCAG AA contrast.
+ */
+@theme {
+  /* Press: a scholar's edition. Indigo ink grounds, paper folios, turmeric and vermilion. */
+  --color-ground: #151a3d;
+  --color-ink: #f3ecdc;
+  --color-ink-muted: #c9c2d8;
+  --color-link: #f6c453;
+  --color-surface: #eadbb6;
+  --color-surface-ink: #1d1a2e;
+  --color-surface-muted: #5a4a2e;
+  --color-surface-link: #9c2a1f;
+  --color-surface-focus: #151a3d;
+  --color-accent: #f0b429;
+  --color-accent-ink: #151a3d;
+  --color-highlight: #c8342a;
+  --color-highlight-ink: #ffffff;
+  --color-focus: #f6c453;
+  --color-line: #3b4178;
+  /* Decorative only, never behind or as text: */
+  --color-ink-wash: #232a5c;
+  --color-surface-rule: #8c7a55;
+  /* Kolam drawings: rice-flour cream and turmeric on indigo; indigo and vermilion on paper. */
+  --color-kolam-line: #f3ecdc;
+  --color-kolam-dot: #f0b429;
+  --color-surface-kolam-line: #151a3d;
+  --color-surface-kolam-dot: #c8342a;
+  /* The ink a pressed control spreads under its label: vermilion at 70%, translucent over the control. */
+  --color-ink-spread: #c8342ab3;
+
+  /* Added once the page is painted (LateFonts). Until then headings are set in Text Regular, and Devanagari in a system font. */
+  --font-playfair-display: playfairDisplay;
+  --font-tiro: tiroDevanagariSanskrit;
+  --font-text: var(--font-playfair-text), var(--font-tiro), 'Times New Roman', serif;
+  --font-display: var(--font-playfair-display), var(--font-playfair-text), var(--font-tiro), serif;
+  --font-deva:
+    var(--font-tiro), 'Noto Serif Devanagari', 'Kohinoor Devanagari', 'Nirmala UI', serif;
+
+  --duration-instant: 100ms;
+  --duration-quick: 160ms;
+  --duration-move: 320ms;
+  --duration-slow: 400ms;
+  --duration-redraw: 700ms;
+  --duration-draw: 1600ms;
+
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --ease-press: cubic-bezier(0.3, 0, 0.2, 1);
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+    text-rendering: optimizeLegibility;
+    scroll-padding-top: 5rem;
+  }
+
+  /* In-page links glide to their section. The layout's data-scroll-behavior makes page changes jump. */
+  @media (prefers-reduced-motion: no-preference) {
+    html {
+      scroll-behavior: smooth;
+    }
+  }
+
+  body {
+    background: var(--color-ground);
+    color: var(--color-ink);
+    font-family: var(--font-text);
+    font-optical-sizing: auto;
+    font-kerning: normal;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Language of Parts (WCAG 3.1.2): Devanagari always gets its own face and a line height that won't jump when the web font swaps in. */
+  :lang(sa-Deva),
+  :lang(hi-Deva) {
+    font-family: var(--font-deva);
+    font-weight: 400;
+    line-height: 1.75;
+    font-synthesis: none;
+  }
+
+  a {
+    color: var(--color-link);
+    text-underline-offset: 0.18em;
+    text-decoration-thickness: 0.06em;
+  }
+
+  /*
+   * Links in running text stay underlined (WCAG 1.4.1), and on hover or focus
+   * an accent underline draws in over that line. Only the one link under the
+   * pointer or focus repaints, so this may animate the background size. A
+   * link that a component styles carries a class, and draws its own line or none.
+   */
+  a:not([class]) {
+    text-decoration-line: underline;
+    background: linear-gradient(var(--color-highlight), var(--color-highlight)) 0
+      calc(50% + 0.62em) / 0 0.12em no-repeat;
+    transition: background-size var(--duration-quick) var(--ease-out);
+    /* Laid out as a block (a grid or flex item), it still keeps to its text, and so does the accent. */
+    width: fit-content;
+  }
+
+  a:not([class]):is(:hover, :focus-visible) {
+    background-size: 100% 0.12em;
+  }
+
+  :focus-visible {
+    outline: 3px solid var(--color-focus);
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
+
+  ::selection {
+    background: var(--color-highlight);
+    color: var(--color-highlight-ink);
+  }
+}
+
+/* Clicks keep working while a view transition plays (Next.js view transitions guide). */
+::view-transition {
+  pointer-events: none;
+}
+
+/* A Concept card's title flies above both turning pages, or the arriving page would cover it. */
+::view-transition-group(.morph) {
+  z-index: 1;
+  animation-duration: var(--duration-slow);
+  animation-timing-function: var(--ease-out);
+}
+
+/*
+ * The "Devanagari first" switch: a term's two spellings trade places and sizes
+ * (TermSpellings). They pass side by side, the one coming to lead on the left.
+ */
+::view-transition-group(.script-swap) {
+  animation-duration: var(--duration-move);
+  animation-timing-function: var(--ease-in-out);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  ::view-transition-image-pair(.script-lead),
+  ::view-transition-image-pair(.script-follow) {
+    animation: pass-by var(--duration-move) var(--ease-in-out);
+  }
+
+  ::view-transition-image-pair(.script-follow) {
+    --pass: 1;
+  }
+}
+
+@keyframes pass-by {
+  50% {
+    transform: translateX(calc(var(--pass, -1) * 55%));
+  }
+}
+
+/* The header and footer keep their own names, so they stay put, above the turning page. */
+::view-transition-group(site-header),
+::view-transition-group(site-footer) {
+  z-index: 1;
+  animation: none;
+}
+
+::view-transition-old(site-header),
+::view-transition-old(site-footer) {
+  display: none;
+}
+
+::view-transition-new(site-header),
+::view-transition-new(site-footer) {
+  animation: none;
+}
+
+/*
+ * Page-turn (PageTurn): going deeper slides the page away to the left as the
+ * next one comes in from the right, like turning a page forward. Going back
+ * turns it the other way.
+ */
+@media (prefers-reduced-motion: no-preference) {
+  ::view-transition-old(.turn-forward),
+  ::view-transition-old(.turn-back) {
+    animation: page-leave var(--duration-move) var(--ease-in-out) both;
+  }
+
+  ::view-transition-new(.turn-forward),
+  ::view-transition-new(.turn-back) {
+    animation: page-arrive var(--duration-move) var(--ease-out) both;
+  }
+
+  ::view-transition-old(.turn-back),
+  ::view-transition-new(.turn-back) {
+    --turn: -1;
+  }
+}
+
+@keyframes page-leave {
+  to {
+    opacity: 0;
+    transform: translateX(calc(var(--turn, 1) * -3rem));
+  }
+}
+
+@keyframes page-arrive {
+  from {
+    opacity: 0;
+    transform: translateX(calc(var(--turn, 1) * 3rem));
+  }
+}
+
+/*
+ * Reduced motion (NFR-01). Every animation and transition finishes at once,
+ * view transitions swap instantly, and scroll-driven effects are only ever
+ * declared inside `prefers-reduced-motion: no-preference`.
+ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 1ms !important;
+    animation-delay: 0s !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 1ms !important;
+    transition-delay: 0s !important;
+    scroll-behavior: auto !important;
+  }
+
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
+}
+
+@layer components {
+  .skip-link {
+    position: absolute;
+    inset-inline-start: 1rem;
+    inset-block-start: 1rem;
+    z-index: 100;
+    padding: 0.75rem 1rem;
+    background: var(--color-accent);
+    color: var(--color-accent-ink);
+    font-weight: 600;
+    transform: translateY(calc(-100% - 2rem));
+    transition: transform var(--duration-quick) var(--ease-out);
+  }
+
+  .skip-link:focus-visible {
+    transform: none;
+  }
+
+  /*
+   * Ink-spread (InkSpread): a press on a control marked data-ink spreads
+   * vermilion ink under its label, from the point pressed. The contrast test
+   * checks the label over the ink, on both the indigo and the paper controls.
+   */
+  [data-ink] {
+    position: relative;
+    isolation: isolate;
+  }
+
+  [data-ink]::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: inherit;
+    background: var(--color-ink-spread);
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    [data-ink-press='a']::before {
+      animation: ink-a var(--duration-slow) var(--ease-out);
+    }
+
+    [data-ink-press='b']::before {
+      animation: ink-b var(--duration-slow) var(--ease-out);
+    }
+  }
+}
+
+/* Two identical spreads, so that every press can restart it. */
+@keyframes ink-a {
+  from {
+    clip-path: circle(0 at var(--ink-x, 50%) var(--ink-y, 50%));
+    opacity: 1;
+  }
+  50% {
+    opacity: 1;
+  }
+  to {
+    clip-path: circle(150% at var(--ink-x, 50%) var(--ink-y, 50%));
+    opacity: 0;
+  }
+}
+
+@keyframes ink-b {
+  from {
+    clip-path: circle(0 at var(--ink-x, 50%) var(--ink-y, 50%));
+    opacity: 1;
+  }
+  50% {
+    opacity: 1;
+  }
+  to {
+    clip-path: circle(150% at var(--ink-x, 50%) var(--ink-y, 50%));
+    opacity: 0;
+  }
+}

@@ -1,0 +1,94 @@
+.root {
+  border-block: 1px solid var(--color-surface-rule);
+}
+
+/* The summary is the whole row: heading, count and knot, with no disclosure triangle. */
+.trigger {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  min-height: 56px;
+  padding: 0.75rem 0;
+  list-style: none;
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: clamp(1.5rem, 3.5vw, 2rem);
+  cursor: pointer;
+}
+
+.trigger::-webkit-details-marker {
+  display: none;
+}
+
+.heading {
+  margin: 0;
+  font: inherit;
+}
+
+.count {
+  font-family: var(--font-text);
+  font-size: 1.125rem;
+  color: var(--color-surface-muted);
+}
+
+/*
+ * A kolam knot, one line looped round one dot. As the list opens it turns an
+ * eighth of a turn, from a diamond to a square, and its dot swells: the knot is
+ * nearly round, so the dot is what shows the list is open at a glance.
+ */
+.knot {
+  flex: none;
+  margin-inline-start: auto;
+  align-self: center;
+  width: 0.9em;
+  height: auto;
+  --kolam-line-width: 4px;
+}
+
+.knot,
+.knot circle {
+  transition: transform var(--duration-move) var(--ease-out);
+}
+
+.knot circle {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.root[open] .knot {
+  transform: rotate(45deg);
+}
+
+.root[open] .knot circle {
+  transform: scale(1.8);
+}
+
+.list {
+  margin: 0;
+  padding: 0 0 1.5rem 1.5rem;
+  display: grid;
+  gap: 0.75rem;
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+/*
+ * The list fades in as it opens. Fading only: animating height would make the
+ * page re-layout on every frame. A browser that skips styling a closed list's
+ * contents starts it from @starting-style instead.
+ */
+@media (prefers-reduced-motion: no-preference) {
+  .list {
+    transition: opacity var(--duration-quick) var(--ease-out);
+  }
+
+  .root:not([open]) .list {
+    opacity: 0;
+  }
+
+  @starting-style {
+    .root[open] .list {
+      opacity: 0;
+    }
+  }
+}

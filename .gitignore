@@ -1,0 +1,28 @@
+# dependencies
+node_modules/
+
+# Next.js
+.next/
+out/
+next-env.d.ts
+*.tsbuildinfo
+
+# generated content registry (scripts/content/registry.mjs writes it)
+/src/content/generated/
+
+# test output
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+.lighthouseci/
+
+# local tooling
+.venv-fonts/
+.vercel/
+.env*
+!.env.example
+
+# OS and editors
+.DS_Store
+*.pem

@@ -1,0 +1,33 @@
+/*
+ * Scaled on the root scroll timeline, not by a scroll listener. It sits in the
+ * top 3 px of the screen, above the scroll padding, so a control that focus
+ * scrolls into view always lands below it; presses pass through it.
+ */
+.thread {
+  display: none;
+}
+
+@keyframes read {
+  from {
+    transform: scaleX(0);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: scroll()) {
+    .thread {
+      display: block;
+      position: fixed;
+      inset: 0 0 auto;
+      z-index: 10;
+      height: 3px;
+      background: var(--color-accent);
+      /* An indigo edge, so the turmeric still reads where it crosses the paper. */
+      box-shadow: 0 1px 0 var(--color-ground);
+      transform-origin: left;
+      pointer-events: none;
+      animation: read linear both;
+      animation-timeline: scroll(root);
+    }
+  }
+}

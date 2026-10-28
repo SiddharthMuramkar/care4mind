@@ -1,0 +1,120 @@
+.card {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-areas:
+    'title deva'
+    'gloss gloss'
+    'summary summary'
+    'action action';
+  align-items: baseline;
+  gap: 0.5rem 1rem;
+  padding: 2rem;
+  background: var(--color-surface);
+  color: var(--color-surface-ink);
+  border-radius: 2px;
+  box-shadow:
+    0 0 0 1px rgb(29 26 46 / 0.35),
+    inset 0 0 0 6px var(--color-surface),
+    inset 0 0 0 7px rgb(29 26 46 / 0.55);
+  transition:
+    transform var(--duration-instant) var(--ease-press),
+    box-shadow var(--duration-instant) var(--ease-press);
+  --color-focus: var(--color-surface-focus);
+}
+
+/* Pressing the card presses it into the page, like type into paper. */
+.card:has(.action :is(a, button):active) {
+  transform: translateY(2px);
+  box-shadow:
+    0 0 0 1px rgb(29 26 46 / 0.35),
+    inset 0 0 0 6px var(--color-surface),
+    inset 0 0 0 7px rgb(29 26 46 / 0.55),
+    inset 0 3px 8px rgb(0 0 0 / 0.18);
+}
+
+.title {
+  grid-area: title;
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 2.75rem;
+  line-height: 1.05;
+  font-weight: 500;
+}
+
+.deva {
+  grid-area: deva;
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.gloss {
+  grid-area: gloss;
+  margin: 0;
+  color: var(--color-surface-muted);
+  font-variant-caps: all-small-caps;
+  letter-spacing: 0.08em;
+  font-size: 1.125rem;
+}
+
+.summary {
+  grid-area: summary;
+  margin: 0;
+  max-width: 48ch;
+}
+
+.action {
+  grid-area: action;
+  margin-top: 0.75rem;
+}
+
+.action :is(a, button) {
+  display: inline-flex;
+  align-items: center;
+  min-height: 48px;
+  padding: 0 1.25rem;
+  background: var(--color-accent);
+  color: var(--color-accent-ink);
+  font-weight: 600;
+  text-decoration: none;
+  border-radius: 2px;
+  box-shadow: 0 3px 0 #8a5b00;
+}
+
+.action :is(a, button):active {
+  box-shadow: 0 1px 0 #8a5b00;
+}
+
+/* The action covers the whole card, so the card is one large target (WCAG 2.5.8). */
+.action :is(a, button)::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+}
+
+.action :is(a, button):focus-visible {
+  outline: none;
+}
+
+.action :is(a, button):focus-visible::after {
+  outline: 3px solid var(--color-surface-focus);
+  outline-offset: 3px;
+}
+
+@media (max-width: 30rem) {
+  .card {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      'title'
+      'deva'
+      'gloss'
+      'summary'
+      'action';
+    padding: 1.5rem;
+  }
+
+  .title {
+    font-size: 2.25rem;
+  }
+}

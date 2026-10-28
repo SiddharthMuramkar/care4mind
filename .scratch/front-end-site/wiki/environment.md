@@ -1,0 +1,21 @@
+# Environment lessons
+
+Each entry is dated, with what was true at that point.
+
+- **2026-10-27, pnpm 12.15.0:** `minimumReleaseAge` refuses packages that are too new. typescript-eslint was pinned to 8.72.0 because 8.72.1 was refused. Build-script approvals live in `pnpm-workspace.yaml` under `allowBuilds`.
+- **2026-10-27, version pins:** ESLint is held at 9.39.5 (eslint-plugin-react doesn't support 10), and TypeScript at 6.0.3 (typescript-eslint needs < 6.1).
+- **2026-10-27, `pkill -f`:** it kills the agent's own shell (exit 144). Free a port with `fuser -k <port>/tcp` instead.
+- **2026-10-27, WebKit:** Playwright WebKit can't run on Fedora. It runs only in CI, on Ubuntu.
+- **2026-10-27, plan mode:** plan mode in the main session also blocks running workflow subagents from editing. Run `wf_aa7e4283-991` stopped at ticket 01 with nothing committed. Never enter plan mode while a workflow is building.
+- **2026-10-27, Tailwind 4:** it emits only the `@theme` variables some source uses. The contrast unit test reads hex values only, from blocks that declare `--color-ground`.
+- **2026-10-27, Vercel:** the claude.ai Vercel connector is on a personal Hobby account and can't see team `acme-ef4b`. Use the CLI, `npx --yes vercel@65.4.0 … --scope acme-ef4b`; `vercel curl` needs a linked folder (the scratchpad's `vercel-link`).
+- **2026-10-27, GitHub:** the GitHub MCP server fails to connect, so use the `gh` CLI. Pushing workflow files needed `gh auth refresh -s workflow`.
+- **2026-10-27, captures:** the saved site copies are in `/home/fedora/care4mind-captures` (`CARE4MIND_CAPTURES`), moved from the session scratchpad so a reboot can't lose them. They were stripped of the answer key, bands, passwords and user fields, and are never committed.
+- **2026-10-27, machine:** 8 CPUs and 15 GB of RAM. At most 3 heavy lanes, with Playwright and Lighthouse serialised under `flock /tmp/care4mind-heavy.lock`.
+- **2026-10-28, Vitest under load:** with three content lanes at once the load average reached 17–28 on 8 CPUs, and whole-content unit tests passed Vitest's 5-second default (each passed alone). Lanes loaded the content once in a `beforeAll` with 60 s; site ticket 01 sets a global `testTimeout`.
+- **2026-10-28, stuck `ssh-add`:** eight `ssh-add` processes started by `gcr-ssh-agent` sat at full CPU for hours and pushed Lighthouse's Total Blocking Time over budget. Before measuring speed, check with `ps -C ssh-add -o pid,etime,pcpu` and stop any stuck ones by PID.
+- **2026-10-28, Lighthouse 12.6's LCP model:** a script counts towards LCP if it finished downloading and started running before the page's observed LCP. A script on the edge makes LCP flip between two values from run to run (the Concept page: about 2.26 s or 2.75 s). Code loaded after start-up (`React.lazy`, `next/dynamic` with `ssr: false`) doesn't count. Further savings come in whole network round trips of about 150 ms each, such as a document under 14.6 kB compressed (ticket 05's Comments).
+- **2026-10-28, GitHub's runner lays pages out differently:** at 1440 px the Concept card's title and the Concept page's heading sat level there (both at y = 283), but not locally. Browser tests mustn't assume which way something moves or exactly where it sits.
+- **2026-10-28, CI cancels superseded runs:** the CI workflow has `cancel-in-progress: true`, so a new push stops the running checks. To see a run's results, wait for it to finish before pushing again.
+- **2026-10-28, timing on GitHub's runner:** two browser tests failed once there and passed on retry; neither failed locally, even ten times over with eight workers. Scroll-driven animations update only on the next frame, so a test that scrolls and reads at once can see the old drawing; and the first-contentful-paint entry can appear after the load event. Wait two animation frames after scrolling, and poll for a performance entry before reading it (`10b6161`).
+- **2026-10-28, waiting on a list:** `every()` is true for an empty list, so "wait until every recorded page turn is sampled" returns at once when nothing has been recorded yet. The page-turn header test measured the header before the turn started and failed on CI's first try at every width. Wait for the thing to exist (`expect.poll(... .length).toBe(1)`), not only for all of them to be ready.
