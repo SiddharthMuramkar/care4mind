@@ -1,0 +1,168 @@
+/*
+ * Toasts: dark slips edged in turmeric, at the foot of a phone's screen and in the corner of a
+ * computer's. Newer ones lie in front, older ones peek out behind until pointed at. They move
+ * by transform and opacity, and only when motion is welcome.
+ */
+.viewport {
+  position: fixed;
+  z-index: var(--layer-toast);
+  inset-inline: 0;
+  bottom: 1rem;
+  width: min(24rem, calc(100vw - 2rem));
+  margin-inline: auto;
+}
+
+@media (min-width: 40rem) {
+  .viewport {
+    inset-inline: auto 2rem;
+    bottom: 2rem;
+  }
+}
+
+.toast {
+  --gap: 0.75rem;
+  --peek: 0.6rem;
+  --scale: calc(max(0, 1 - (var(--toast-index) * 0.06)));
+  --offset-y: calc(var(--toast-offset-y) * -1 + var(--toast-index) * var(--gap) * -1);
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0;
+  z-index: calc(1000 - var(--toast-index));
+  border: 1px solid var(--color-toast-line);
+  border-radius: 3px;
+  background: var(--color-toast);
+  color: var(--color-toast-ink);
+  box-shadow: 0 1.25rem 2.5rem -1.25rem color-mix(in srgb, var(--color-ground) 90%, transparent);
+  transform-origin: bottom center;
+  transform: translateX(var(--toast-swipe-movement-x))
+    translateY(calc(var(--toast-swipe-movement-y) - var(--toast-index) * var(--peek)))
+    scale(var(--scale));
+  user-select: none;
+  cursor: default;
+}
+
+.toast[data-expanded] {
+  transform: translateX(var(--toast-swipe-movement-x))
+    translateY(calc(var(--offset-y) + var(--toast-swipe-movement-y)));
+}
+
+.toast[data-limited] {
+  opacity: 0;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .toast {
+    transition:
+      transform var(--duration-move) var(--ease-out),
+      opacity var(--duration-move) var(--ease-out);
+  }
+
+  .toast[data-starting-style],
+  .toast[data-ending-style] {
+    opacity: 0;
+    transform: translateY(1rem);
+  }
+
+  .toast[data-ending-style][data-swipe-direction='right'] {
+    transform: translateX(calc(var(--toast-swipe-movement-x) + 110%));
+  }
+
+  .toast[data-ending-style][data-swipe-direction='down'] {
+    transform: translateY(calc(var(--toast-swipe-movement-y) + 150%));
+  }
+
+  .toast[data-swiping] {
+    transition-duration: 0ms;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .toast[data-ending-style] {
+    opacity: 0;
+  }
+}
+
+/* The gap between toasts still counts as a toast when the pointer crosses it. */
+.toast::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  inset-inline: 0;
+  height: calc(var(--gap) + 1px);
+}
+
+.content {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 0.6rem 0.4rem 0.6rem 0.9rem;
+}
+
+.content[data-behind] {
+  opacity: 0;
+}
+
+.content[data-expanded] {
+  opacity: 1;
+}
+
+/* A kolam knot: one loop closing round its dot, like a seal pressed on the slip. */
+.knot {
+  flex: none;
+  width: 2rem;
+  height: auto;
+  --kolam-line-width: 3px;
+  --color-kolam-line: var(--color-toast-line);
+  --color-kolam-dot: var(--color-highlight);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .content .knot path {
+    animation-duration: 640ms;
+    animation-delay: 80ms;
+  }
+}
+
+.text {
+  display: grid;
+  gap: 0.15rem;
+  flex: 1;
+  min-width: 0;
+}
+
+.title {
+  margin: 0;
+  font-size: 1.0625rem;
+  line-height: 1.3;
+}
+
+.description {
+  margin: 0;
+  color: var(--color-toast-muted);
+  font-size: 0.9375rem;
+  line-height: 1.35;
+}
+
+.close {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 0;
+  border-radius: 2px;
+  background: none;
+  color: var(--color-toast-muted);
+  cursor: pointer;
+}
+
+.close:hover {
+  color: var(--color-toast-ink);
+}
+
+.closeGlyph {
+  width: 18px;
+  height: 18px;
+}
