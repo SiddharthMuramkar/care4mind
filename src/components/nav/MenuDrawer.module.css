@@ -26,7 +26,7 @@
   position: relative;
   width: min(24rem, calc(100vw - 2.5rem));
   height: 100%;
-  overflow-y: auto;
+  overflow: hidden auto;
   overscroll-behavior: contain;
   background: var(--color-drawer);
   color: var(--color-drawer-ink);
@@ -165,11 +165,23 @@
   --color-kolam-dot: transparent;
 }
 
+@keyframes arrive {
+  from {
+    opacity: 0;
+    transform: translateX(1.5rem);
+  }
+}
+
 @media (prefers-reduced-motion: no-preference) {
-  /* The knots draw one after another as the page settles. */
+  /* The sections follow the page in, one after another, and their knots draw as they settle. */
+  .section {
+    animation: arrive var(--duration-sheet) var(--ease-sheet) backwards;
+    animation-delay: calc(60ms + var(--index, 0) * 55ms);
+  }
+
   .numeral .knot path {
     animation-duration: 620ms;
-    animation-delay: calc(140ms + var(--index, 0) * 90ms);
+    animation-delay: calc(160ms + var(--index, 0) * 90ms);
   }
 }
 

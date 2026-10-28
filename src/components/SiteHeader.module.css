@@ -185,3 +185,18 @@
 .drawerSearch[aria-current] {
   border-color: var(--color-highlight);
 }
+
+/* Windows' contrast themes repaint backgrounds: draw the current section's dot in the text colour. */
+@media (forced-colors: active) {
+  .search[aria-current]::after {
+    forced-color-adjust: none;
+    background: CanvasText;
+  }
+}
+
+/* A printed page is its content alone: the header stays off paper. */
+@media print {
+  .header {
+    display: none;
+  }
+}

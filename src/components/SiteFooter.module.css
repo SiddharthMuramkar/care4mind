@@ -146,3 +146,10 @@
   letter-spacing: 0.1em;
   font-size: 1.0625rem;
 }
+
+/* A printed page is its content alone: the footer stays off paper. */
+@media print {
+  .footer {
+    display: none;
+  }
+}

@@ -3,7 +3,7 @@
 import { NavigationMenu } from '@base-ui/react/navigation-menu'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { type ReactNode, useCallback, useLayoutEffect, useState } from 'react'
+import { type CSSProperties, type ReactNode, useCallback, useLayoutEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
 
 import { kolam } from '@/lib/kolam'
@@ -180,8 +180,12 @@ function ConceptsPanel({ site, pathname, mapNote }: PanelProps & { mapNote?: Rea
           <path d={thread.d} pathLength={1} />
         </svg>
         <ul className={styles.topicList}>
-          {topics.map((topic) => (
-            <li key={topic.slug} data-topic={topic.slug}>
+          {topics.map((topic, index) => (
+            <li
+              key={topic.slug}
+              data-topic={topic.slug}
+              style={{ '--index': index } as CSSProperties}
+            >
               <PanelLink href={topic.href} pathname={pathname} className={styles.topic}>
                 <span className={styles.dot} aria-hidden />
                 <span className={styles.topicName}>
@@ -232,7 +236,12 @@ function LibraryPanel({ site, pathname }: PanelProps) {
         {pages.map((page, position) => {
           const cloth = CLOTHS[position % CLOTHS.length]
           return (
-            <li key={page.slug} className={styles.book} data-cloth={cloth}>
+            <li
+              key={page.slug}
+              className={styles.book}
+              data-cloth={cloth}
+              style={{ '--index': position } as CSSProperties}
+            >
               <PanelLink href={page.href} pathname={pathname} className={styles.spine}>
                 <span className={styles.title}>{page.label}</span>
                 {page.count === undefined ? null : (

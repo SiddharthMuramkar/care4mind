@@ -58,6 +58,22 @@ const moving = (page: Page) =>
       .map((animation) => (animation as CSSAnimation).animationName ?? 'a transition'),
   )
 
+/** Wait until what opened has finished arriving, so checks see it as it rests. */
+const settled = (page: Page) =>
+  expect
+    .poll(() =>
+      page.evaluate(
+        () =>
+          document
+            .getAnimations()
+            .filter(
+              (animation) =>
+                animation.timeline instanceof DocumentTimeline && animation.playState === 'running',
+            ).length,
+      ),
+    )
+    .toBe(0)
+
 test.describe('without JavaScript', () => {
   test.use({ javaScriptEnabled: false })
 
@@ -299,6 +315,7 @@ test.describe('panels, on a computer', () => {
       await toggle(page, section).focus()
       await page.keyboard.press('Enter')
       await expect(panel(page, section)).toBeVisible()
+      await settled(page)
       await expectNoAxeViolations(page)
     })
   }
@@ -433,6 +450,7 @@ test.describe('the Drawer, on a phone', () => {
     await gotoReady(page, '/concepts/vikshepa/')
     await menu(page).click()
     await expect(drawer(page)).toBeVisible()
+    await settled(page)
     await expectNoAxeViolations(page)
   })
 

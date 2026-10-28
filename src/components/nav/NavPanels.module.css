@@ -150,9 +150,50 @@
   }
 }
 
+@keyframes light {
+  from {
+    opacity: 0;
+    transform: scale(0.2);
+  }
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(0.4rem);
+  }
+}
+
+@keyframes shelve {
+  from {
+    opacity: 0;
+    transform: translateX(-1.25rem);
+  }
+}
+
+/*
+ * As the panel opens the line draws down through its loops, and each topic's dot lights as the
+ * line reaches it; the books are laid on the pile one by one. Only where motion is welcome.
+ */
 @media (prefers-reduced-motion: no-preference) {
   .thread path {
     animation: draw 700ms var(--ease-in-out) backwards;
+  }
+
+  .dot {
+    animation: light var(--duration-panel) var(--ease-out) backwards;
+    animation-delay: calc(80ms + var(--index, 0) * 120ms);
+  }
+
+  .topicName,
+  .count {
+    animation: rise var(--duration-panel) var(--ease-out) backwards;
+    animation-delay: calc(40ms + var(--index, 0) * 45ms);
+  }
+
+  .book {
+    animation: shelve var(--duration-move) var(--ease-out) backwards;
+    animation-delay: calc(var(--index, 0) * 55ms);
   }
 }
 

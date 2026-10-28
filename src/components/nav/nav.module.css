@@ -125,3 +125,16 @@
 .menu {
   display: contents;
 }
+
+/* Windows' contrast themes repaint backgrounds: draw the current section's dot in the text colour. */
+@media (forced-colors: active) {
+  .link[aria-current]::before {
+    forced-color-adjust: none;
+    background: CanvasText;
+  }
+
+  .link[aria-current='true']::before {
+    background: transparent;
+    box-shadow: inset 0 0 0 1.5px CanvasText;
+  }
+}
