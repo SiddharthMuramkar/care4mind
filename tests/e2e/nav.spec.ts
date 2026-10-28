@@ -101,10 +101,7 @@ test.describe('without JavaScript', () => {
   })
 
   test('every header link opens its page', async ({ page }) => {
-    // Once the page is interactive Search opens the palette (ticket 09, search.spec.ts); without
-    // JavaScript it is the link to /search/ checked above.
-    test.skip(!isWide(page), 'below 72rem the header’s one link is Search, which opens the palette')
-    const names = SECTIONS.filter(({ name }) => name !== 'Search')
+    const names = isWide(page) ? SECTIONS : SECTIONS.filter(({ name }) => name === 'Search')
     for (const { name, path } of names) {
       await page.goto('/concepts/vikshepa/')
       await banner(page).getByRole('link', { name, exact: true }).click()
