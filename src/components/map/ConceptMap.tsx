@@ -14,7 +14,12 @@ import { MapFilters } from './MapFilters'
 function ConceptLink({ point }: { point: MapPoint | undefined }) {
   if (!point) return null
   return (
-    <Link href={hrefFor({ kind: 'concept', id: point.slug })} transitionTypes={turnForward}>
+    // The plate's points prefetch these pages already: the list's 148 links needn't watch too.
+    <Link
+      href={hrefFor({ kind: 'concept', id: point.slug })}
+      transitionTypes={turnForward}
+      prefetch={false}
+    >
       <span {...(point.lang ? { lang: point.lang } : {})}>{point.name}</span>
     </Link>
   )
@@ -115,7 +120,7 @@ export function ConceptMap({ layout }: { layout: MapLayout }) {
                           data-ink
                           style={
                             {
-                              '--x': `${point.x / 10}%`,
+                              '--x': `${Math.round(point.x * 10) / 100}%`,
                               '--y': `${Math.round(((point.y - top) / height) * 10000) / 100}%`,
                               '--room': point.room,
                               '--i': layout.points.indexOf(point),

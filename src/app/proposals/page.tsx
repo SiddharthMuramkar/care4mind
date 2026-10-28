@@ -24,6 +24,19 @@ export function generateMetadata(): Promise<Metadata> {
   return metadataFor(PATH)
 }
 
+/** A sentence with its settings (`FEATURE_CONCEPT_MAP=0`) set as code. */
+function withSettings(text: string) {
+  return text.split(/(FEATURE_[A-Z_]+=\d)/).map((part, index) =>
+    index % 2 === 1 ? (
+      <code key={part} className={styles.setting}>
+        {part}
+      </code>
+    ) : (
+      part
+    ),
+  )
+}
+
 /** What a built proposal offers to try, and where. */
 async function TryIt({ proposal }: { proposal: Proposal }) {
   if (proposal.key === 'concept-map') {
@@ -119,7 +132,7 @@ export default function ProposalsPage() {
                       </p>
                     </dd>
                     <dt>How it is switched off</dt>
-                    <dd>{proposal.off}</dd>
+                    <dd>{withSettings(proposal.off)}</dd>
                   </dl>
                   <TryIt proposal={proposal} />
                 </article>

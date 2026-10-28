@@ -74,13 +74,21 @@
 /* Wide: the labels in a margin of their own, as a printed form's. */
 @media (min-width: 40rem) {
   .facts {
-    grid-template-columns: 10rem minmax(0, 1fr);
+    grid-template-columns: 8.5rem minmax(0, 1fr);
   }
 
   .facts dt {
     padding-top: 0.15rem;
     text-align: end;
   }
+}
+
+.setting {
+  padding: 0 0.25em;
+  background: color-mix(in srgb, var(--color-surface) 70%, var(--color-ink));
+  font-family: ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
+  font-size: 0.85em;
+  overflow-wrap: anywhere;
 }
 
 .cost {
