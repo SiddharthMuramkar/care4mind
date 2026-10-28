@@ -71,7 +71,7 @@ const chrome = devices['Desktop Chrome']
 const widthProject = (width: number, height: number): Project => ({
   name: `chromium-${width}`,
   use: { ...chrome, viewport: { width, height } },
-  testIgnore: [/motion\.spec\.ts/, /smoke\.spec\.ts/, /reflow\.spec\.ts/],
+  testIgnore: [/motion\.spec\.ts/, /smoke\.spec\.ts/, /reflow\.spec\.ts/, /crawler\.spec\.ts/],
 })
 
 const projects: Project[] = [
@@ -94,6 +94,12 @@ const projects: Project[] = [
       contextOptions: { reducedMotion: 'reduce' },
     },
     testMatch: /motion\.spec\.ts/,
+  },
+  // NFR-04: the link crawler reads the HTML the server sends, so it runs once, at no width.
+  {
+    name: 'crawler',
+    use: { ...chrome },
+    testMatch: /crawler\.spec\.ts/,
   },
   // Firefox lacks scroll-driven animations and WebKit renders Devanagari with its own engine.
   {

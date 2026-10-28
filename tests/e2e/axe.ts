@@ -4,13 +4,17 @@ import { expect, type Page } from '@playwright/test'
 // wcag22aa must be asked for explicitly, or axe skips its WCAG 2.2 rule (target size, 2.5.8).
 export const WCAG_TAGS = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa']
 
-/** Scan what is on screen now; open menus, popovers and panels before calling it. */
-export async function expectNoAxeViolations(page: Page) {
+/**
+ * Scan what is on screen now; open menus, popovers and panels before calling it. A failure
+ * lists each rule broken, what it asks for and where; `where` names the page and width too.
+ */
+export async function expectNoAxeViolations(page: Page, where?: string) {
   const results = await new AxeBuilder({ page }).withTags(WCAG_TAGS).analyze()
   const summary = results.violations.map((violation) => ({
     rule: violation.id,
     impact: violation.impact,
+    help: violation.help,
     targets: violation.nodes.map((node) => node.target.join(' ')),
   }))
-  expect(summary).toEqual([])
+  expect(summary, where).toEqual([])
 }
