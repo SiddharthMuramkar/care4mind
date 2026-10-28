@@ -4,7 +4,7 @@ Memory for the long front-end build (chief-of-staff). A historical record: every
 
 ## Decisions
 - [Decision log](decisions-log.md): what the developer decided, and when.
-- [Provisional structure register](../decisions.md): D01–D20, each with its confirming planning ticket.
+- [Provisional structure register](../decisions.md): D01–D21, each with its confirming planning ticket.
 
 ## People
 - [The developer](developer.md): how they like to work.

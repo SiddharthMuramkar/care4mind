@@ -26,11 +26,6 @@
   /* Decorative only, never behind or as text: */
   --color-ink-wash: #232a5c;
   --color-surface-rule: #8c7a55;
-  /* Kolam drawings: rice-flour cream and turmeric on indigo; indigo and vermilion on paper. */
-  --color-kolam-line: #f3ecdc;
-  --color-kolam-dot: #f0b429;
-  --color-surface-kolam-line: #151a3d;
-  --color-surface-kolam-dot: #c8342a;
   /* The ink a pressed control spreads under its label: vermilion at 70%, translucent over the control. */
   --color-ink-spread: #c8342ab3;
 
@@ -46,8 +41,6 @@
   --duration-quick: 160ms;
   --duration-move: 320ms;
   --duration-slow: 400ms;
-  --duration-redraw: 700ms;
-  --duration-draw: 1600ms;
 
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
   --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
@@ -315,4 +308,9 @@
     clip-path: circle(150% at var(--ink-x, 50%) var(--ink-y, 50%));
     opacity: 0;
   }
+}
+
+/* Front-end-site ticket 16: Press ornaments. One stroke of the Fleuron drawing itself in as a page opens. */
+@theme {
+  --duration-stroke: 900ms;
 }

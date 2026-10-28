@@ -1,12 +1,12 @@
 # Front-end site: every public page
 
 Status: ready-for-agent
-Source: [Design notes](design.md), [Provisional structure decisions](decisions.md) (D01–D20), [Content model v1](../content-v1/spec.md), [Front-end foundation: Press × Kolam](../front-end-foundation/spec.md), [Design direction (planning ticket 21)](../rebuild/issues/21-design-direction.md)
+Source: [Design notes](design.md), [Provisional structure decisions](decisions.md) (D01–D21), [Content model v1](../content-v1/spec.md), [Front-end foundation](../front-end-foundation/spec.md) (superseded in its Kolam parts by D21), [Design direction (planning ticket 21)](../rebuild/issues/21-design-direction.md)
 Tickets: [issues/](issues/)
 
 ## Problem Statement
 
-The developer has a foundation: four pages in the Press × Kolam look (the homepage, one Concept page, the KarmaYoga Scale's intro page and the 404 page), with the kolam logo, kolam drawings, ink, page turns, the reading thread and the script switch. Alongside it, [content-v1](../content-v1/spec.md) carries everything worth keeping from the current site into one typed content module: 19 Concepts, five topics, the traditional texts and the verses the site quotes, the shared References, the glossary, the Library lists and 18 Questionnaire records.
+The developer has a foundation: four pages in the Press look (the homepage, one Concept page, the KarmaYoga Scale's intro page and the 404 page), with paper folios on indigo, printer's ornaments, ink, page turns, the reading thread and the script switch. The foundation blended Press with the Kolam direction's logo and drawings; on 2026-10-28 the developer dropped that blend (D21), so everything is Press, and ticket 16 replaces each Kolam element with its Press counterpart. Alongside the foundation, [content-v1](../content-v1/spec.md) carries everything worth keeping from the current site into one typed content module: 19 Concepts, five topics, the traditional texts and the verses the site quotes, the shared References, the glossary, the Library lists and 18 Questionnaire records.
 
 Visitors can't reach most of that yet. The header has two links. There is no A–Z, no topic page, no texts, no Library, no search and no way to take a Questionnaire.
 
@@ -47,9 +47,13 @@ Two more constraints shape the build:
 
 Every address ends with a slash. Every address the current site served leads to its new page in one hop, meaning one redirect and no chains.
 
+### The look: Press only (D21)
+
+Every page is set as a scholar's edition: Playfair at fixed weights with Tiro Devanagari Sanskrit, small capitals for labels, menus and buttons, IAST in italic; indigo, cream, paper, turmeric, vermilion and the ink wash; folios, the lotus Fleuron, OrnamentRule, a faintly ruled indigo hero, Devanagari numerals, contents with dotted leaders and verses set like a manuscript. Motion speaks the same language of ink, rules and paper. The [decision register](decisions.md#d21-press-replacements) lists the Press element that replaces each Kolam one.
+
 ### On every page
 
-- **Header:** the kolam logo, then Concepts · Texts · Questionnaires · Library · Search.
+- **Header:** the Press wordmark (Care4Mind, with the 4 in a vermilion roundel), then Concepts · Texts · Questionnaires · Library · Search.
   - On a computer, Concepts opens a panel with the five topics, how many Concepts each has, the A–Z and the map. Library opens a panel with its five pages.
   - On a phone, a Menu button opens a sheet that slides in and can be swiped away.
   - Every link works without JavaScript.
@@ -57,7 +61,7 @@ Every address ends with a slash. Every address the current site served leads to 
 - **Previews:** pointing at or focusing a link to a Concept, a citation or a verse shows a short preview card.
 - **Feedback:** "Copy verse" and "Copy citation" confirm with a short message in the corner, called a toast.
 - **Breadcrumbs** on every page below the homepage.
-- **Motion:** the foundation's kolam drawings, ink, page turns and underlines everywhere, plus three additions:
+- **Motion:** Press's ornaments (the Fleuron drawn once, rules and leaders that ink in), ink, page turns and underlines everywhere, plus three additions:
   - card titles fly into page titles for topics, works and Questionnaires, as they already do for Concepts;
   - filtered lists glide into their new order;
   - the Questionnaire flow slides between parts.
@@ -69,7 +73,7 @@ Every address ends with a slash. Every address the current site served leads to 
 
 - **Home:** the foundation's opening folio stays. Below it:
   - a search box with sample spellings (vikshepa · विक्षेप · viksepa) that opens the palette filled in;
-  - a kolam rosette with one petal per topic, drawn as you scroll, each petal a link;
+  - the Topics contents plate: the five topics set like a book's contents, with Devanagari numerals and dotted leaders, each row a link that lights as you point at it, its leader inking in;
   - one verse from each traditional text;
   - the KarmaYoga card and a shelf of Questionnaires coming later;
   - a row of book spines, set in type, leading to the Library;
@@ -80,17 +84,17 @@ Every address ends with a slash. Every address the current site served leads to 
   - Glossary entries link to DharmaWiki, marked as another site.
 - **Concept page:** everything the foundation built, plus:
   - a table of contents that stays in view and highlights the section you're reading;
-  - a "Linked knowledge" panel that gathers the related Concepts (each with its reason), the texts quoted, the applications, the comparisons, the References and the Questionnaire, joined by kolam threads that draw as you scroll;
+  - a "Linked knowledge" panel that gathers the related Concepts (each with its reason), the texts quoted, the applications, the comparisons, the References and the Questionnaire, joined by cross-reference rules, dotted leaders that ink in as you scroll;
   - citations that jump to their Reference and open the list;
   - verse cards with "Copy verse";
   - tables whose first column stays in view;
   - previous and next links within the topic.
-- **Topic page:** the topic's Concepts round a rosette, and a card lights its petal when you point at or focus it. Below come the verses its Concepts quote. The values topic also shows its shared yama–niyama introduction.
+- **Topic page:** the topic's Concepts set as a contents plate, like a book's contents, and a card lights its row when you point at or focus it, the row's leader inking in. Below come the verses its Concepts quote. The values topic also shows its shared yama–niyama introduction.
 - **Texts:** each work is shown like a manuscript: every verse the site quotes, in order, in Devanagari and IAST, with its translations attributed and chips linking to the Concepts that quote it. A rail of verse numbers stays in view, and each verse has its own link, such as `/texts/yoga-sutra/#1-30`.
 - **Questionnaires:** the KarmaYoga Scale is featured as a preview. The 17 coming later are grouped by topic, and every status is written in words.
 - **The KarmaYoga flow (preview):**
   - purpose and limitations first;
-  - then four parts, one per screen, with large answer buttons and a kolam that fills in as you answer;
+  - then four parts, one per screen, with large answer buttons and a tally of short rules that inks in as you answer;
   - incomplete parts are refused without losing anything;
   - a review step, then an end screen that says plainly the scoring isn't confirmed yet;
   - nothing stored or sent anywhere.
@@ -101,10 +105,10 @@ Every address ends with a slash. Every address the current site served leads to 
 
 Both are built behind feature flags and labelled Proposal:
 
-- **Concept map:** the 19 Concepts round a rosette, one sector per topic, joined by curved kolam threads for a shared verse, a shared work or a rarely cited shared Reference. Pointing at a Concept lights its neighbours. A "Connections" list says the same in words, and it is what phones show first.
+- **Concept map:** the 19 Concepts round a circle, one sector per topic, on a printed plate: hairline curves join them for a shared verse, a shared work or a rarely cited shared Reference, each kind in its own line style. Pointing at a Concept lights its neighbours. A "Connections" list says the same in words, and it is what phones show first.
 - **Site-wide "Devanagari first":** one choice puts Devanagari before IAST on every page and remembers it, with no flash on load.
 
-`/proposals/` lists them for sign-off, with two more ideas that are described but not built: audio pronunciation and a "kolam of your reading path".
+`/proposals/` lists them for sign-off, with one more idea that is described but not built: audio pronunciation.
 
 ### Behind the scenes
 
@@ -116,7 +120,7 @@ Both are built behind feature flags and labelled Proposal:
 
 ### Visitors (general public)
 
-1. As a first-time visitor, I want the homepage to show the five topics as petals of one kolam that draws itself as I scroll, so that I see at a glance what the site covers and can step into any part of it.
+1. As a first-time visitor, I want the homepage to show the five topics set like a book's contents, so that I see at a glance what the site covers and can step into any part of it.
 2. As a visitor, I want a search box on the homepage that suggests spellings like "vikshepa · विक्षेप · viksepa" and opens search already filled in, so that I learn I can type a term however I know it.
 3. As a visitor, I want one verse from each traditional text on the homepage, so that I meet the texts before I go looking for them.
 4. As a visitor, I want the homepage to show the KarmaYoga Scale and a shelf of Questionnaires coming later, so that I know what I can try now and what is on its way.
@@ -129,7 +133,7 @@ Both are built behind feature flags and labelled Proposal:
 11. As a visitor, I want each related Concept to say why it's related ("Both quote Yoga Sūtra 2.30"), so that I know what I'll find before I click.
 12. As a visitor reading a long Concept page, I want a table of contents beside the text that highlights the section I'm in, so that I can find my way round.
 13. As a visitor, I want "previous" and "next" links to the Concepts on either side in the same topic, turning the page as I go, so that I can read a topic like a book.
-14. As a visitor, I want each topic to have its own page, with its Concepts round a kolam rosette whose petal lights up when I point at a card, so that a topic feels like one whole (FR-01).
+14. As a visitor, I want each topic to have its own page, with its Concepts set as a contents plate whose row lights up when I point at a card, so that a topic feels like one whole (FR-01).
 15. As a visitor, I want one A–Z of every Concept, every term explained inside a Concept and every glossary entry, so that I can find any term the site covers.
 16. As a visitor, I want to filter the A–Z by topic, by text, or to Concept pages only, and see the list glide into its new order, so that I can narrow it without losing my place.
 17. As a visitor, I want glossary entries that lead to DharmaWiki to say so, so that I'm not surprised to land on another site.
@@ -137,7 +141,7 @@ Both are built behind feature flags and labelled Proposal:
 19. As a visitor, I want "Copy verse" and "Copy citation" to confirm with a short message, so that I know the copy worked.
 20. As a visitor, I want the Questionnaires page to say in words which Questionnaire I can try, which is a preview and which come later, so that I'm never sent into something that doesn't work.
 21. As a visitor with an old care4mind.org bookmark, such as `/vikshepa/`, I want to land straight on its new page, so that my links keep working (FR-07).
-22. As a visitor, I want the site to answer every scroll and click (threads drawing, ink spreading, pages turning) while the text I'm reading stays still, so that it's fun to explore and easy to read.
+22. As a visitor, I want the site to answer every scroll and click (rules inking in, ink spreading, pages turning) while the text I'm reading stays still, so that it's fun to explore and easy to read.
 23. As a visitor, I want to print a Concept page without the menus and decoration, so that I can read it on paper.
 
 ### Students and educators
@@ -172,7 +176,7 @@ Both are built behind feature flags and labelled Proposal:
 45. As someone about to take the KarmaYoga Scale, I want to read its purpose and limitations before Start, so that I know what it is and what it isn't (FR-05).
 46. As someone taking it, I want one part per screen, each opening with its own instructions, so that 45 statements don't overwhelm me.
 47. As someone taking it on a phone, I want large answer buttons with their labels in words, so that I don't pick the wrong one by accident.
-48. As someone taking it, I want to see "Part 2 of 4 · 14 of 45 answered" and a kolam that fills in as I answer, so that I know how far I've come.
+48. As someone taking it, I want to see "Part 2 of 4 · 14 of 45 answered" and a tally of short rules that inks in as I answer, so that I know how far I've come.
 49. As someone taking it, I want "Next" to refuse a part I haven't finished and point me to each statement I missed, without losing the answers I gave, so that I can finish quickly (FR-05).
 50. As someone taking it, I want the browser's Back button to take me to the previous part with my answers still there, so that I can change my mind.
 51. As someone taking it, I want to review every statement and my answer before I finish, with a way to change any of them, so that I can check my answers.
@@ -202,14 +206,14 @@ Both are built behind feature flags and labelled Proposal:
 69. As a screen-reader user, I want the Concept map's "Connections" list to tell me everything the picture shows, so that I miss nothing.
 70. As a screen-reader user, I want "Copied" confirmations announced politely without moving my focus, so that I know the copy worked and keep my place.
 71. As a screen-reader user, I want IAST and Devanagari tagged with their language everywhere, so that my reader pronounces them (WCAG 3.1.2).
-72. As a screen-reader user, I want decorative kolams, threads and petal drawings to stay silent while their links are properly named, so that I hear only what matters.
+72. As a screen-reader user, I want decorative ornaments, rules, leaders and tallies to stay silent while their links are properly named, so that I hear only what matters.
 73. As a screen-reader user, I want filter results announced ("12 entries") when I change a filter, so that I know the list changed (WCAG 4.1.3).
 74. As a screen-reader user submitting a search on the results page, I want focus moved to the results heading, so that I know the results arrived.
 75. As a screen-reader user, I want links that leave the site to say so, so that I know before I go.
 
 ### People who reduce motion
 
-76. As someone whose device asks to reduce motion, I want every new drawing (the rosettes, the linked-knowledge threads, the progress kolam, the map's threads) to appear finished and still, so that nothing moves.
+76. As someone whose device asks to reduce motion, I want every new ornament (the contents plates' leaders, the cross-reference rules, the progress tally, the map's plate) to appear finished and still, so that nothing moves.
 77. As someone who reduces motion, I want filtered lists, title morphs, part changes, menus and page turns to change instantly, so that nothing slides or fades.
 78. As someone who reduces motion, I want every feature to keep working without its movement, so that I lose the animation, never the feature.
 
@@ -239,7 +243,7 @@ Both are built behind feature flags and labelled Proposal:
 
 ### The Project owner and the Client
 
-94. As the Project owner, I want a Proposals page listing what the design suggests beyond the brief (the Concept map, site-wide Devanagari first, audio pronunciation and a "kolam of your reading path"), so that I can accept or refuse each one in the sign-off pack.
+94. As the Project owner, I want a Proposals page listing what the design suggests beyond the brief (the Concept map, site-wide Devanagari first and audio pronunciation), so that I can accept or refuse each one in the sign-off pack.
 95. As the Project owner, I want every provisional structure decision in one register with the planning ticket that confirms it, so that I can sign them off together.
 96. As the Project owner, I want a refused proposal to switch off without code changes, so that saying no costs nothing.
 97. As the Client, I want the site kept out of search engines until launch, even with titles, canonical addresses and a sitemap in place, so that it isn't confused with the current site.
@@ -266,22 +270,24 @@ Both are built behind feature flags and labelled Proposal:
 112. As the developer, I want `pnpm shots` to screenshot every page type at 360 and 1440 px, so that I can review the look without running the site.
 113. As the developer, I want a list of what I must still check by hand (screen reader, keyboard, zoom, a real phone), so that automated checks aren't mistaken for the whole story.
 114. As an agent, I want one conventions doc for motion, links, files and slots, and a place in my ticket's Comments to ask for anything I don't own, so that I never break another lane.
+115. As the developer, I want one look, Press, with no Kolam trace left in the code, the tests or the docs, so that every agent builds in the same vocabulary of ink, rules and paper (D21).
 
 ## Implementation Decisions
 
 ### How the work is split
 
-- **Fifteen tickets.** They start once foundation ticket 05 is resolved and content-v1 is merged into the integration branch, `SiddharthMuramkar/frontend`.
+- **Sixteen tickets.** They start once foundation ticket 05 is resolved and content-v1 is merged into the integration branch, `SiddharthMuramkar/frontend`. Ticket 16 came later, with D21.
 - **Order:**
   - 01 makes testing safe for parallel lanes.
   - Then 03 (every route) and 04 (the shell) run side by side.
-  - 02 (route tests and crawler) and 14 (redirects) need only 03.
+  - 16 (Press only, D21) needs only 03. 04 merges it before finishing, and removes its own Kolam uses.
+  - 02 (route tests and crawler) needs 03 and 16, and 14 (redirects) needs only 03.
   - 05–10 and 12 need 03 and 04, and run in parallel.
   - 11 waits for 06, 09 and 10; 13 waits for 05 and 06; 15 waits for all the others.
 - **Lanes.** Each ticket runs in its own git worktree (a second working copy of the repo) on its own branch, cut from the integration branch. Lanes never push. A merger merges them one at a time and runs the full checks after each.
 - **File ownership.** Each ticket lists the files and folders it owns, and its lane creates or edits only those.
-  - The colour and motion tokens and the root layout belong to ticket 04 alone. Later tickets style their parts in their own CSS Modules (stylesheets scoped to one component) and ask in their ticket's Comments if a token is missing.
-  - The foundation's shared parts (the kolam, logo, folio, ornaments, breadcrumbs, cards, citation and verse) are read-only once ticket 03 has adapted them, unless a ticket's Owns list names one.
+  - The colour and motion tokens and the root layout belong to ticket 04 alone; the one exception is ticket 16, which removes the kolam tokens. Later tickets style their parts in their own CSS Modules (stylesheets scoped to one component) and ask in their ticket's Comments if a token is missing.
+  - The foundation's shared parts (the logo, folio, ornaments, breadcrumbs, cards, citation and verse) are read-only once ticket 03 has adapted them, unless a ticket's Owns list names one.
   - Some files are written early and owned later. Ticket 03 writes the first plain version of the prose renderer, which ticket 05 then owns. Ticket 04 writes the slot stubs, each owned afterwards by the ticket that fills it.
   - The content module belongs to content-v1. A site ticket may adjust only the one derived-data file its Owns list names. It keeps `@/content`'s interface and the content tests unchanged, and asks in Comments for anything else.
   - Each end-to-end spec file tests one page type or one shared part, and belongs to the ticket that owns it.
@@ -366,6 +372,19 @@ Both are built behind feature flags and labelled Proposal:
 
   Every new colour pair joins the contrast test: 4.5:1 for text, 3:1 for graphics and focus rings.
 
+### Press only (ticket 16, D21)
+
+- **Replacements built now.** Each Kolam element the foundation built becomes its Press counterpart, as the [decision register](decisions.md#d21-press-replacements) lists:
+  - the logo becomes the Press wordmark, Care4Mind with the 4 in a vermilion roundel. It keeps its export name, its accessible name "Care4Mind home" and its 48 px target, and loses its redraw;
+  - the homepage hero's frame and drift become the lotus Fleuron, drawn once on the faintly ruled indigo hero, with no parallax;
+  - the homepage's section bands become OrnamentRules inking in from the centre, and the Contents knots plain Devanagari numerals;
+  - the 404 page's drawing becomes the Fleuron;
+  - the References knot becomes a plus that folds into a minus;
+  - the script switch runs on a printer's-rule track with a vermilion roundel knob.
+- **Replacements built later,** each by the ticket that owns its page: the contents plate (06 and 11), cross-reference rules (05), the progress tally (10) and the Concept map's printed plate (12).
+- **Removed.** The kolam generator and component, their tests, the kolam colours and timings, and the "Kolam of your reading path" proposal. No Kolam trace stays in the code, tests or docs.
+- **Kept.** The interactions that never used Kolam code: ink spread, page turns, the card-to-title morph, underlines drawing in, press-in, the reading thread and the script swap.
+
 ### Site-wide interactions
 
 - **Base UI 1.9 only** (design C1), following its bundled docs and recipes. `filter-dropdown` isn't exported, so don't use it. No new dependency.
@@ -388,12 +407,12 @@ Both are built behind feature flags and labelled Proposal:
 
 ### Motion
 
-- **The foundation's language applies everywhere:**
-  - kolam behaviours (still, draw on load, draw on scroll, redraw on hover), finished by default;
+- **The foundation's language applies everywhere, in Press (D21):**
+  - Press ornaments, finished by default: the Fleuron drawing itself once on load, and rules and dotted leaders inking in on scroll or as a row is pointed at;
   - ink spread, opted into with a data attribute and handled by one delegated listener;
   - page turn, underline draw and the reading thread.
 - **Page-turn types.** Links get a page-turn type through Next's `Link` and its `transitionTypes`:
-  - forward for links that go deeper or onward: cards, related links, "next", search results, A–Z entries, petals, map points and Start;
+  - forward for links that go deeper or onward: cards, related links, "next", search results, A–Z entries, contents-plate rows, map points and Start;
   - back for breadcrumbs and "previous";
   - none for header, footer and menu links, so moving between sections doesn't feel like reading on;
   - browser Back and Forward stay untyped and don't animate.
@@ -409,7 +428,7 @@ Both are built behind feature flags and labelled Proposal:
 - **Home (ticket 11).**
   - The foundation's hero stays, and its heading stays the LCP element.
   - The search entry's sample spellings open the palette pre-filled; without JavaScript they link to `/search/?q=…`.
-  - The topic rosette's petals are real links; the drawing round them is decoration.
+  - The Topics contents plate's rows are real links; their numerals and leaders are decoration.
   - One verse per work.
   - The KarmaYoga card and the coming-later shelf.
   - Book spines leading to the Library.
@@ -431,7 +450,7 @@ Both are built behind feature flags and labelled Proposal:
   - Previous and next within the primary topic.
   - A print stylesheet.
 - **Topic (ticket 06).**
-  - The rosette has one petal per Concept. Hovering or focusing a card lights its petal through CSS `:has()`, a selector that styles an element by what it contains.
+  - The contents plate has one row per Concept, with a Devanagari numeral and a dotted leader. Hovering or focusing a card lights its row through CSS `:has()`, a selector that styles an element by what it contains, and the row's leader inks in.
   - Computed facts and the verses the topic's Concepts quote.
   - The values introduction, stored once.
   - No other topic description is written (design B3), and the page adds no JavaScript of its own.
@@ -495,7 +514,7 @@ Both are built behind feature flags and labelled Proposal:
   - Each statement is a native fieldset whose legend is the statement, with five native radio buttons styled as pills at least 44 px tall.
   - Options appear in the source's order. Items 34–42 run Strongly Agree → Strongly Disagree, as the source has them, and are flagged for the Psychology expert.
   - Choosing an answer never moves on by itself (WCAG 3.2.2), and there are no single-key shortcuts.
-- **Progress.** A decorative 9×5 kolam lights one dot per answer, and its line draws in proportion. Beside it, the text "Part 2 of 4 · 14 of 45 answered" sits inside a Base UI Progress element with `aria-valuetext`, not a live region.
+- **Progress.** A decorative tally of 45 short rules, in four groups of 12, 6, 9 and 18, inks in one rule per statement answered. Beside it, the text "Part 2 of 4 · 14 of 45 answered" sits inside a Base UI Progress element with `aria-valuetext`, not a live region.
 - **Refusing incomplete parts.**
   - Next on an unfinished part shows an error summary at the top and moves focus to it.
   - Each error links to its statement, which gets `aria-invalid` and a text message.
@@ -518,8 +537,8 @@ Both are built behind feature flags and labelled Proposal:
 ### Proposals (tickets 12 and 13)
 
 - **Concept map.**
-  - The layout is computed at build time, so the browser runs no layout code: a rosette with one sector per topic.
-  - The edges are curved kolam threads, typed as shared passage, shared work or rarely cited shared Reference. Tomar (2024) is left out, because it would connect everything. Each type is told apart without colour, by line style and a legend.
+  - The layout is computed at build time, so the browser runs no layout code: a circle with one sector per topic.
+  - The edges form a printed plate: hairline curves, typed as shared passage (solid), shared work (dashed) or rarely cited shared Reference (dotted), and inked once on load. Tomar (2024) is left out, because it would connect everything. Each type is told apart without colour, by line style and a legend.
   - The points are HTML links over an SVG layer of edges.
   - Hovering or focusing a point lights its neighbours through `:has()` rules generated at build time.
   - A ToggleGroup filters by connection type and topic.
@@ -529,7 +548,7 @@ Both are built behind feature flags and labelled Proposal:
   - The foundation's per-page switch becomes the global one, and the header gets a toggle.
   - ScriptPair orders the two scripts with CSS on every page.
   - The DOM order, and with it what a screen reader hears, never changes.
-- **`/proposals/`** lists the two built proposals with how to try them, plus audio pronunciation and a "kolam of your reading path", described but not built. Each entry says what it adds and what it costs.
+- **`/proposals/`** lists the two built proposals with how to try them, plus audio pronunciation, described but not built. Each entry says what it adds and what it costs.
 - **Every proposal surface** carries a ProposalNote.
 
 ### Guardrails, site-wide
@@ -583,7 +602,7 @@ Ticket 01 writes a front-end conventions doc for agents, next to the content-mig
 
 - the page-turn types and how links get them;
 - `data-ink`;
-- the Kolam behaviours and the "finished by default" rule;
+- the Press ornaments and the "finished by default" rule (ticket 16 rewrote this section for D21);
 - no scroll listeners, observers or new uses of Motion;
 - what may animate;
 - colours only as tokens;
@@ -634,6 +653,7 @@ Lanes don't edit the doc. They leave notes in their Comments, and ticket 15 fold
   - the scoring stub returns "pending" for every complete answer set.
 
   FR-05's "every possible result" can't be tested until scoring rules exist (planning tickets 26 and 28).
+- **Press only (ticket 16).** Tests of Kolam-only behaviour go with the Kolam. Tests that checked Press behaviour through a Kolam element (the hero's text and LCP, the section bands, the Contents numerals, nothing shifting, the logo's name, finished drawings, the References control) are rewritten against its Press replacement, and each new Press behaviour gets a test of its own. No other test is weakened.
 - **Redirects (ticket 14).** Every old address answers one 301 to a page that returns 200. Fragment targets exist. A unit test cross-checks the table against the registry and the content's provenance.
 - **Flags.** Unit tests cover the defaults and overrides (ticket 04). One CI job builds with every flag off and checks that switched-off features are absent (ticket 15).
 - **Speed (ticket 15):**
@@ -642,14 +662,14 @@ Lanes don't edit the doc. They leave notes in their Comments, and ticket 15 fold
   - Script-size budgets per route.
 - **Prior art:**
   - the foundation's end-to-end specs: the per-page checks (status, h1, axe, noindex, title), the Concept and Questionnaire specs, the reduced-motion check, reflow, the Firefox and WebKit smoke run, the axe helper and the interaction-latency check;
-  - the unit tests for Sanskrit, content, contrast and the kolam generator.
+  - the unit tests for Sanskrit, content and contrast.
 
   Extend them; never weaken them.
 - **Every ticket's done-check:**
   - `pnpm check` passes;
   - the lane's end-to-end run passes with `E2E_SCOPE=sample` on the lane's port, under the heavy-step lock;
   - the merger runs `E2E_SCOPE=full` after each merge;
-  - tickets 01 and 15 also run Lighthouse.
+  - tickets 01 and 15 also run Lighthouse, and ticket 16 runs it once as advice.
 
 ## Out of Scope
 
@@ -658,7 +678,8 @@ Lanes don't edit the doc. They leave notes in their Comments, and ticket 15 fold
 - The content back end and editing (FR-02), and logins, backups and restores (FR-08).
 - The production domain, DNS and the launch switch.
 - Analytics, and social-sharing preview images (planning ticket 25).
-- Building audio pronunciation or a "kolam of your reading path". They appear on `/proposals/` only.
+- Building audio pronunciation. It appears on `/proposals/` only.
+- Anything in the Kolam style (D21).
 - Curated related links and links to modern constructs (planning ticket 14).
 - Pages for people, journals or single passages.
 - Redirects for media files, `?p=` shortlinks, attachment pages and search URLs, which planning ticket 24 decides.
@@ -668,7 +689,7 @@ Lanes don't edit the doc. They leave notes in their Comments, and ticket 15 fold
 
 ## Further Notes
 
-- **Ticket numbers.** These tickets are 01–15; the design notes call them S01–S15. "Planning ticket NN" always means a ticket in the [rebuild map](../rebuild/map.md), whose numbers overlap these. Ticket 10, for example, builds what planning ticket 12 asked for.
+- **Ticket numbers.** These tickets are 01–16; the design notes call the first fifteen S01–S15, and ticket 16 came later, with D21. "Planning ticket NN" always means a ticket in the [rebuild map](../rebuild/map.md), whose numbers overlap these. Ticket 10, for example, builds what planning ticket 12 asked for.
 - **Machine and lanes.** The machine has 8 CPUs and 15 GB of memory, enough for at most three heavy lanes and three light ones. Site lanes merge into `SiddharthMuramkar/frontend`, one at a time.
 - **Sign-off.** The Project owner sees the decision register, the proposals and the placeholder flow in the sign-off pack (planning ticket 29). Nothing here is final until then.
 - **Captures.** The saved copies of the current site never enter the repo, and no test or script requests care4mind.org.

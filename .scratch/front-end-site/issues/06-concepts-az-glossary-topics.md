@@ -2,7 +2,7 @@
 
 Status: ready-for-agent
 Blocked by: 03, 04
-Spec: [Front-end site: every public page](../spec.md) · Design: [design.md](../design.md) §B3, §C3 · Decisions: D03, D14, D15
+Spec: [Front-end site: every public page](../spec.md) · Design: [design.md](../design.md) §B3, §C3 · Decisions: D03, D14, D15, D21
 
 **What to build:** two ways into the Concepts.
 
@@ -12,9 +12,9 @@ Spec: [Front-end site: every public page](../spec.md) · Design: [design.md](../
 - Filter chips narrow it by topic, by text, or to Concept pages only, and the list glides into its new order.
 - Glossary entries without a page of their own lead to DharmaWiki and say so.
 
-**Each topic page** at `/topics/<slug>/` shows the topic's Concepts round a kolam rosette.
+**Each topic page** at `/topics/<slug>/` shows the topic's Concepts as a contents plate, set like a book's contents with Devanagari numerals and dotted leaders.
 
-- A card lights its petal when you point at or focus it.
+- A card lights its row when you point at or focus it, and the row's leader inks in.
 - Below come the verses the topic's Concepts quote, and, for the values topic, its shared yama–niyama introduction.
 
 ## Owns
@@ -22,7 +22,7 @@ Spec: [Front-end site: every public page](../spec.md) · Design: [design.md](../
 - `src/app/concepts/page.tsx` and its CSS Module (not `concepts/[slug]/` or `concepts/map/`)
 - `src/app/topics/**`
 - `src/components/az/**` (new): the letter rail, filter chips and entries
-- `src/components/topics/**` (new): topic cards and the Rosette, which ticket 11 reuses
+- `src/components/topics/**` (new): topic cards and the contents plate, which ticket 11 reuses for the five topics
 - `src/content/derive/az-index.ts`: adjust only if needed, keeping `@/content`'s interface and the content tests unchanged
 - `tests/e2e/concepts-index.spec.ts` and `tests/e2e/topics.spec.ts` (new)
 
@@ -60,18 +60,18 @@ Spec: [Front-end site: every public page](../spec.md) · Design: [design.md](../
   - It shows the verses its Concepts quote, each linking to its passage.
   - The values topic shows its shared yama–niyama introduction, stored once.
   - No other topic gets a written description (design B3).
-- [ ] **The Rosette:**
-  - It has one petal per Concept, and each petal is a real link with the Concept's name.
-  - Hovering or focusing a card lights its petal through CSS `:has()`, with no JavaScript.
-  - It draws on scroll, following the Kolam conventions; it is finished by default and still under reduced motion.
-  - The drawing is hidden from assistive technology, and the links are not.
-  - It is built to be reused: ticket 11 draws the homepage's topic rosette with it.
+- [ ] **The contents plate (D21):**
+  - It has one row per Concept, set like a book's contents: a Devanagari numeral, the Concept's name and a dotted leader. Each row is a real link with the Concept's name.
+  - Hovering or focusing a card, or the row itself, lights the row through CSS `:has()`, with no JavaScript, and the row's leader inks in.
+  - It follows the Press ornament conventions: finished by default and still in print. Under reduced motion it keeps still, and a row lights at once, with nothing inking in.
+  - The numerals and leaders are hidden from assistive technology, and the links are not.
+  - It is built to be reused: ticket 11 sets the homepage's five topics with it.
 - [ ] **No JavaScript of their own:** topic pages add no client component, and the A–Z's only islands are the chips and the previews.
 - [ ] **Breadcrumbs (D15):** Home › Concepts on the A–Z, and Home › Concepts › {topic} on topic pages.
-- [ ] **Reflow:** both page types fit 320 px with no sideways scroll (WCAG 1.4.10), and the rosette scales down without hiding any link.
+- [ ] **Reflow:** both page types fit 320 px with no sideways scroll (WCAG 1.4.10), and the contents plate wraps without hiding any link.
 - [ ] **Tests:**
   - `concepts-index.spec.ts` covers: the rail by keyboard, a filter by mouse and by keyboard with the announced count, the address keeping the filter, JavaScript off, axe with a filter applied, and a glossary anchor reached from another page.
-  - `topics.spec.ts` covers: petals lighting on card focus (computed style), petal links, the values introduction, and axe.
+  - `topics.spec.ts` covers: rows lighting and their leaders inking in on card focus (computed style), row links, the values introduction, and axe.
 - [ ] **Done-check:**
   - `pnpm check` passes;
   - the lane's end-to-end run passes: `E2E_SCOPE=sample E2E_PORT=<lane port> scripts/lane/heavy.sh pnpm check:e2e`, covering Chromium at 360, 768 and 1440 px, reflow at 320 px, reduced motion and Firefox, with WebKit in CI.

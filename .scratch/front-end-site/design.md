@@ -1,6 +1,6 @@
 # Design notes: the whole public front end
 
-Status: reference (2026-10-27). The specs [content-v1](../content-v1/spec.md) and [front-end-site](spec.md) are built from these notes. Every structure choice here is **provisional**: the decision register, [decisions.md](decisions.md), names the planning ticket that confirms each one.
+Status: reference (2026-10-27; re-scoped to Press only on 2026-10-28). The specs [content-v1](../content-v1/spec.md) and [front-end-site](spec.md) are built from these notes. Every structure choice here is **provisional**: the decision register, [decisions.md](decisions.md), names the planning ticket that confirms each one.
 
 These notes record the developer's decisions of 2026-10-27:
 
@@ -9,6 +9,8 @@ These notes record the developer's decisions of 2026-10-27:
 - Build the KarmaYoga flow with the real statements and a placeholder result.
 - Build the Concept map and the site-wide "Devanagari first" setting as labelled Proposals.
 - Delegate the structure decisions to the agent.
+
+On 2026-10-28 the developer added one more: the look is Press only (D21). Every Kolam element in these notes now reads as its Press replacement, as the [decision register](decisions.md#d21-press-replacements) lists, and front-end-site ticket 16 builds the ones that exist today.
 
 ## Facts from the saved copies
 
@@ -345,7 +347,7 @@ Its exports (checked in `node_modules/@base-ui/react`): accordion, alert-dialog,
 - **Toasts** confirm "Copy citation" and "Copy verse" politely.
 - **Print stylesheet** for the reading pages and the Questionnaire result.
 - **Motion.**
-  - The foundation's language applies throughout: kolam behaviours, page turn, ink, underline draw.
+  - The foundation's language applies throughout, in Press (D21): ornaments finished by default (the Fleuron drawn once, rules and dotted leaders inking in), page turn, ink, underline draw.
   - Additions: card-to-title morphs for topics, works and Questionnaires, and view transitions when filters reorder lists and when the questionnaire changes part.
   - Active-section highlighting is CSS only. Check `scroll-target-group` and `:target-current` support first, with `timeline-scope` scroll-driven animations as the alternative.
   - No scroll listeners or observers, and no new uses of Motion. Under reduced motion everything is still.
@@ -354,10 +356,10 @@ Its exports (checked in `node_modules/@base-ui/react`): accordion, alert-dialog,
 
 | Route | Signature interactions | Accessibility and speed |
 | --- | --- | --- |
-| `/` | Foundation hero; a search entry with sample spellings (vikshepa · विक्षेप · viksepa) that opens the palette pre-filled; a topic rosette kolam, one petal per topic, drawn on scroll; one verse per work; the KarmaYoga card plus a coming-later shelf; typographic book spines leading to the Library; a static map teaser (Proposal) | The hero stays the LCP element; petals are real links |
+| `/` | Foundation hero, with the Fleuron drawn once; a search entry with sample spellings (vikshepa · विक्षेप · viksepa) that opens the palette pre-filled; the Topics contents plate, the five topics set like a book's contents with Devanagari numerals and dotted leaders, the row pointed at lit through `:has()` and its leader inked in; one verse per work; the KarmaYoga card plus a coming-later shelf; typographic book spines leading to the Library; a static map teaser (Proposal) | The hero stays the LCP element; the plate's rows are real links |
 | `/concepts/` | A–Z rail (a `Toolbar` of letter links, active letter in CSS); filter chips (`ToggleGroup`: topics, works, "Concept pages / glossary"), reordered with a view transition; glossary entries open DharmaWiki (marked external); previews on Concept entries | `content-visibility: auto` with an intrinsic size; view-transition names only on the first 40 visible items; chip INP < 200 ms at 4× CPU slowdown |
-| `/concepts/<slug>/` | Foundation features; a sticky table of contents with the active section highlighted; a "Linked knowledge" panel with kolam threads drawn on scroll; citations that link to `#ref-<id>` with previews and open the accordion; verse cards with "Copy verse"; tables with a sticky first column and scroll shadows; previous and next in the topic (page turn); print | FR-01 one-click test; server components with small client islands |
-| `/topics/<slug>/` | Rosette with one petal per Concept; hovering or focusing a card lights its petal (CSS `:has()`); the topic's verses; the values introduction | No JavaScript |
+| `/concepts/<slug>/` | Foundation features; a sticky table of contents with the active section highlighted; a "Linked knowledge" panel joined by cross-reference rules, dotted leaders inked in on scroll; citations that link to `#ref-<id>` with previews and open the accordion; verse cards with "Copy verse"; tables with a sticky first column and scroll shadows; previous and next in the topic (page turn); print | FR-01 one-click test; server components with small client islands |
+| `/topics/<slug>/` | A contents plate with one row per Concept; hovering or focusing a card lights its row (CSS `:has()`) and inks in its leader; the topic's verses; the values introduction | No JavaScript |
 | `/texts/`, `/texts/<slug>/` | A manuscript view with verses in order, Devanagari and IAST, translations attributed, "quoted in" chips; a sticky locator rail; deep links `#1-30` | No JavaScript; reflow at 320 px for long Devanagari lines |
 | `/questionnaires/` | KarmaYoga preview featured; coming-later cards grouped by topic | Status in text, not colour only |
 | `/questionnaires/karmayoga-scale/` | Purpose and limitations before Start; a Preview badge; "Your answers aren't scored yet" | FR-05 order |
@@ -369,7 +371,7 @@ Its exports (checked in `node_modules/@base-ui/react`): accordion, alert-dialog,
 
 - **Purpose and limitations come first.** Start leads to `/take/`. The step is reflected as `?step=part-2` (with pushState) so browser Back moves between parts. Answers never appear in the URL; a reload with no answers in memory returns to the start.
 - **One part per screen.** Four parts, each opening with its real instruction text. Each statement is a native `<fieldset><legend>` with 5 native radio buttons styled as pills of at least 44 px, in the source's option order (reversed for items 34–42; flagged). No auto-advance (WCAG 3.2.2) and no single-key shortcuts.
-- **Progress.** A decorative 9×5 kolam: each answer lights a dot and the line draws in proportion. Beside it, the text "Part 2 of 4 · 14 of 45 answered" inside a Base UI Progress element with `aria-valuetext` (not a live region).
+- **Progress.** A decorative tally of 45 short rules in four groups (12, 6, 9 and 18): each answer inks in one rule. Beside it, the text "Part 2 of 4 · 14 of 45 answered" inside a Base UI Progress element with `aria-valuetext` (not a live region).
 - **Refusing incomplete parts.** Next shows an error summary at the top and moves focus to it. Each error links to its unanswered statement, which gets `aria-invalid` and a text message. Answers already given are kept, and Back keeps everything.
 - **Review.** Every statement with its answer, and a "Change" link per part that returns focus to that statement.
 - **Result.**
@@ -383,15 +385,15 @@ Its exports (checked in `node_modules/@base-ui/react`): accordion, alert-dialog,
 ### C5. Proposals (labelled with `ProposalNote` and switched by `src/config/features.ts`)
 
 - **Concept map** (`/concepts/map/`).
-  - Layout is computed at build time, with no layout JavaScript: a rosette with one sector per topic.
-  - Edges are curved kolam threads, typed as shared passage, shared work or rarely cited shared Reference. Tomar (2024) is excluded, because it would connect everything.
+  - Layout is computed at build time, with no layout JavaScript: a circle with one sector per topic.
+  - Edges form a printed plate: hairline curves typed by line style, solid for a shared passage, dashed for a shared work and dotted for a rarely cited shared Reference, inked once on load. Tomar (2024) is excluded, because it would connect everything.
   - Nodes are HTML links laid over an SVG edge layer. Hover or focus highlights neighbours through build-generated `:has()` rules. Filters use a `ToggleGroup`.
   - The accessible equivalent is a "Connections" list with reasons. It is the default below about 600 px.
 - **Site-wide "Devanagari first".**
   - An inline head script of about 200 bytes reads localStorage and sets `html[data-script]` before first paint, so nothing flashes or shifts.
   - The foundation's switch becomes global.
   - `ScriptPair` orders the two scripts with CSS everywhere.
-- **`/proposals/`** lists the proposals for sign-off: these two, plus audio pronunciation and a "kolam of your reading path", which are described but not built.
+- **`/proposals/`** lists the proposals for sign-off: these two, plus audio pronunciation, which is described but not built.
 
 ## D. Orchestration notes
 
@@ -427,7 +429,7 @@ Its exports (checked in `node_modules/@base-ui/react`): accordion, alert-dialog,
 4. **Agent docs.** `docs/agents/content-migration.md` (C02) and `docs/agents/frontend-conventions.md` (S01), which records:
    - page-turn and `transitionTypes`;
    - `data-ink`;
-   - the Kolam behaviours;
+   - the Press ornaments (D21);
    - no scroll listeners or new Motion;
    - colours only in `globals.css`;
    - `hrefFor()` for every internal link.

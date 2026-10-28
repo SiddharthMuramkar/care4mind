@@ -1,7 +1,6 @@
 import type { ReferenceView } from '@/content'
 
 import { Citation } from './Citation'
-import { Kolam } from './Kolam'
 import styles from './ReferenceList.module.css'
 
 /**
@@ -17,7 +16,10 @@ export function ReferenceList({ references }: { references: readonly ReferenceVi
       <summary className={styles.trigger}>
         <h2 className={styles.heading}>References</h2>
         <span className={styles.count}>({references.length})</span>
-        <Kolam columns={1} rows={1} className={styles.knot} />
+        <span className={styles.icon} aria-hidden>
+          <span />
+          <span />
+        </span>
       </summary>
       <ol className={styles.list}>
         {references.map((reference) => (

@@ -168,7 +168,7 @@ A flag is `{ for, note, ticket? }` in `provenance.flags`: a question for a perso
 - It skips ids, links between records, URLs and DOIs, kinds and statuses, and the meta fields `provenance`, `heldBack`, `scoring`, `rights` and `noStableLink`; it lists drafted fields as skipped. A Reference's year is checked like its title: the dates it skips are the retrieval dates in provenance.
 - A topic's name and order are the design notes' structure, never checked; a topic introduction is checked against its own sources.
 - A record with no saved source, such as `navare-pandey-2022` (from research ticket 11), is listed as unchecked, never as passed. A care4mind.org source with no saved copy fails.
-- A miss prints the field path, the string, the closest text on its pages, and where the two part ways. Fix it by matching the page's text, or by listing the edit that explains it. Text the legacy snapshot pins changes by an edit only.
+- A miss prints the field path, the string, the closest text on its pages, and where the two part ways. Fix it by matching the page's text, or by listing the edit that explains it. Text pinned by the foundation snapshot (`tests/unit/__snapshots__/content-foundation.test.ts.snap`, which replaced the legacy one when site ticket 03 deleted the legacy adapter) changes by an edit only.
 
 ## The flags pack
 

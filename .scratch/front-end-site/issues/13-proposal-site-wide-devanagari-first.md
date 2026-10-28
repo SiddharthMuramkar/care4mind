@@ -16,7 +16,7 @@ It is labelled Proposal and exists only while its flag is on. With the flag off,
 ## Owns
 
 - `src/components/script/**`: ScriptPreference, HeadScript and ScriptPair, from ticket 04
-- `src/components/SanskritTerm.*` and the foundation's script switch component
+- `src/components/SanskritTerm.*` and the foundation's script switch component. Its Press styling, the printer's-rule track and the vermilion roundel knob, is ticket 16's (D21), already merged: keep it, and keep its contrast pairs.
 - in ticket 05's Concept page and ticket 06's A–Z, only the lines that render the script switch or a pair of scripts (both tickets have merged, and no running lane owns these files)
 - `tests/e2e/script-preference.spec.ts` (new)
 

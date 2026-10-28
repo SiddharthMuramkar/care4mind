@@ -1,7 +1,7 @@
 import { site } from '@/config/site'
 
 import { expectNoAxeViolations } from './axe'
-import { animationsStartedOn, isDrawing, recordAnimationStarts } from './drawings'
+import { unfinishedDrawings } from './drawings'
 import { expect, gotoReady, scrollsSideways, test } from './fixtures'
 import { at, MISSING, ROUTES_IN_SCOPE } from './routes'
 
@@ -96,20 +96,19 @@ test.describe('404 page', () => {
     await expectNoAxeViolations(page)
   })
 
-  test('draws a small kolam on load, once, which ends complete and is silent', async ({ page }) => {
-    await recordAnimationStarts(page)
+  test('shows the Fleuron, still and hidden from assistive technology', async ({ page }) => {
     await gotoReady(page, MISSING)
-    const kolam = page.getByRole('main').locator('svg')
-    await expect(kolam).toHaveAttribute('aria-hidden', 'true')
-    const line = kolam.locator('path')
-    await expect(line, 'one unbroken line').toHaveCount(1)
-    await expect.poll(() => isDrawing(line)).toBe(false)
-    await expect(line).toHaveCSS('stroke-dashoffset', '0px')
-    expect(await animationsStartedOn(line)).toEqual([
-      { byScroll: false, duration: expect.closeTo(1600, -3) },
-    ])
-    const box = await kolam.boundingBox()
-    expect(box?.width, 'a small one').toBeLessThanOrEqual(200)
+    const main = page.getByRole('main')
+    const fleuron = main.locator('svg')
+    await expect(fleuron).toHaveCount(1)
+    await expect(fleuron).toBeVisible()
+    await expect(fleuron).toHaveAttribute('aria-hidden', 'true')
+    await expect(main.getByRole('img')).toHaveCount(0)
+    // Still: nothing draws it in, and every stroke is whole.
+    expect(
+      await fleuron.evaluate((element) => element.getAnimations({ subtree: true }).length),
+    ).toBe(0)
+    expect(await unfinishedDrawings(page)).toEqual([])
   })
 })
 

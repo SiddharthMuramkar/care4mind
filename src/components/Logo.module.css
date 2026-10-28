@@ -1,18 +1,48 @@
-.logo {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35em;
-  font-family: var(--font-text);
-  font-size: 1.625rem;
-  font-style: italic;
-  font-weight: 400;
+.wordmark {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 500;
+  letter-spacing: -0.005em;
   line-height: 1;
   white-space: nowrap;
 }
 
-/* A heavier line than the default, so the small mark holds its shape. */
-.mark {
-  width: 2.25em;
-  height: auto;
-  --kolam-line-width: 5px;
+/*
+ * The 4 in a vermilion roundel. The 4 stays inline text, so "Care4Mind" reads
+ * as one word: a box of its own (the first Press build's inline-grid) makes
+ * browsers announce "Care 4 Mind". Playfair's 4 is old-style and drops below
+ * the line, so the whole is raised to sit level with the capitals. Its own
+ * stacking context keeps the roundel behind the figure and above the ground.
+ */
+.four {
+  position: relative;
+  z-index: 0;
+  margin-inline: 0.08em;
+  /* The roundel is 1.48em across: what of it lies past the figure. */
+  padding-inline-end: 0.5em;
+  color: var(--color-highlight-ink);
+  font-family: var(--font-text);
+  font-size: 0.78em;
+  font-weight: 600;
+  vertical-align: 0.16em;
+}
+
+/*
+ * The roundel: a disc behind the figure, which it pulls back over its middle,
+ * centred on the figure's height. It sits a fraction of a pixel along, after
+ * "Care", and Chrome draws a curve there a shade differently live and in a page
+ * turn's snapshot of the header. On a layer of its own it is drawn once, so the
+ * header looks exactly the same while the page turns.
+ */
+.roundel {
+  /* Inline, against the base styles' block: it sits in the line with the figure. */
+  display: inline;
+  position: relative;
+  z-index: -1;
+  width: 1.48em;
+  height: 1.48em;
+  margin-inline-end: -0.98em;
+  vertical-align: -0.61em;
+  fill: var(--color-highlight);
+  will-change: transform;
 }
