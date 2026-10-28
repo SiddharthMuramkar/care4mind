@@ -70,13 +70,18 @@ test('the header stays put while the page turns', async ({ page }) => {
 
 test('links in the header change page at once, without turning it', async ({ page }) => {
   await recordPageTurns(page)
-  await gotoReady(page, '/concepts/vikshepa')
+  await gotoReady(page, '/concepts/vikshepa/')
+  // The sections are in the header from 72rem; on narrower screens, in the Menu's Drawer.
+  if ((page.viewportSize()?.width ?? 0) < 1152) {
+    await page.getByRole('banner').getByRole('button', { name: 'Menu' }).click()
+  }
   const link = page
     .getByRole('navigation', { name: 'Main' })
     .getByRole('link', { name: 'Questionnaires', exact: true })
-  await prefetched(link)
+  // An untyped link has no turn to lose, so it needn't wait for its page to be prefetched.
   await link.click()
-  await expect(page.getByRole('heading', { name: 'Questionnaires', level: 2 })).toBeInViewport()
+  await expect(page).toHaveURL(/\/questionnaires\/?$/)
+  await expect(page.getByRole('heading', { level: 1 })).toBeVisible()
   for (const change of await pageTurns(page)) {
     expect(change.leaving).toBeNull()
     expect(change.arriving).toBeNull()

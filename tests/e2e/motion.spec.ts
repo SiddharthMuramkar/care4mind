@@ -59,10 +59,9 @@ test('the 404 page shows its kolam finished, with reduced motion', async ({ page
   expect(await movingAnimations(page)).toEqual([])
 })
 
-for (const { from, name } of [
-  { from: 'main', name: 'Explore Concepts' },
-  { from: 'navigation', name: 'Concepts' },
-] as const) {
+// The header's Concepts opens the Concepts page since front-end-site ticket 04 (D01); its
+// reduced-motion checks are in nav.spec.ts.
+for (const { from, name } of [{ from: 'main', name: 'Explore Concepts' }] as const) {
   test(`"${name}" in the ${from === 'main' ? 'opening folio' : 'header'} jumps straight to the Concepts, with reduced motion`, async ({
     page,
   }) => {

@@ -165,10 +165,11 @@ test('each Contents numeral keeps its Devanagari digit, ringed by a kolam knot t
   }
 })
 
+// The header's Concepts opens the Concepts page since front-end-site ticket 04 (D01), so only the
+// opening folio's calls to action glide down this page.
 for (const { from, name, to } of [
   { from: 'main', name: 'Explore Concepts', to: 'Concepts' },
   { from: 'main', name: 'Questionnaires', to: 'Questionnaires' },
-  { from: 'navigation', name: 'Concepts', to: 'Concepts' },
 ] as const) {
   test(`"${name}" in the ${from === 'main' ? 'opening folio' : 'header'} glides down to the ${to} section, its heading in full view`, async ({
     page,
@@ -209,12 +210,14 @@ test('links to another page open it at once, without gliding from where you were
 
   await page.evaluate(() => window.scrollTo({ top: 600, behavior: 'instant' }))
   const backHome = await scrollPath(page, async () => {
+    // The header stays on screen; its logo leads home.
     await page
-      .getByRole('navigation', { name: 'Main' })
-      .getByRole('link', { name: 'Concepts', exact: true })
+      .getByRole('banner')
+      .getByRole('link', { name: 'Care4Mind home', exact: true })
       .click()
-    await expect(page.getByRole('heading', { name: 'Concepts', level: 2 })).toBeInViewport()
+    await expect(page.getByRole('heading', { level: 1 })).toBeInViewport()
   })
+  expect(backHome.at(-1)).toBe(0)
   expect(backHome.length, 'a jump, not a glide').toBeLessThanOrEqual(3)
 })
 
