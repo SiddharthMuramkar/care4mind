@@ -9,6 +9,7 @@ import { Folio } from '@/components/Folio'
 import { PageTurn, turnForward } from '@/components/PageTurn'
 import { citationLinks, Provenance, Sections } from '@/components/prose'
 import { ReferenceList } from '@/components/ReferenceList'
+import { ScriptPair } from '@/components/script/ScriptPair'
 import { ContentsPlate, plateCard, plateScope, type PlateRow } from '@/components/topics'
 import {
   hrefFor,
@@ -136,14 +137,11 @@ export default async function TopicPage({ params }: PageProps<'/topics/[slug]'>)
               </h1>
             </ViewTransition>
             {topic.term ? (
-              <p className={reading.gloss}>
-                <span lang="sa-Latn">{topic.term.iast}</span>
-                {topic.term.devanagari ? (
-                  <>
-                    {' '}
-                    <span lang="sa-Deva">{topic.term.devanagari}</span>
-                  </>
-                ) : null}
+              <p className={styles.term}>
+                <ScriptPair
+                  iast={topic.term.iast}
+                  {...(topic.term.devanagari ? { devanagari: topic.term.devanagari } : {})}
+                />
               </p>
             ) : null}
             <p className={styles.facts}>

@@ -11,19 +11,37 @@ main.page {
   color: var(--color-highlight);
 }
 
+/* The topic's own Sanskrit word, in italic as transliteration always is, beside its Devanagari. */
+.term {
+  margin: 0;
+  font-size: 1.375rem;
+  color: var(--color-surface-muted);
+}
+
+.term :lang(sa-Latn) {
+  font-style: italic;
+}
+
+.term :lang(sa-Deva) {
+  font-family: var(--font-deva);
+}
+
 /* What the topic holds, counted: "5 Concepts · 23 verses quoted, from …". */
 .facts {
   margin: 0;
   max-width: 60ch;
+  text-wrap: balance;
   font-variant-caps: all-small-caps;
   letter-spacing: 0.08em;
   font-size: 1.125rem;
   color: var(--color-surface-muted);
 }
 
+/* A work's title stays whole on its line. */
 .workName {
   font-variant-caps: normal;
   letter-spacing: 0;
+  white-space: nowrap;
 }
 
 /* The values topic's shared introduction keeps a reading measure on the wide page. */
