@@ -51,7 +51,7 @@ Each check also runs on its own:
 | `pnpm typecheck` | TypeScript, strict |
 | `pnpm test` | Vitest unit tests |
 | `pnpm test:e2e` | Playwright at 360, 768 and 1440 px, axe at WCAG 2.2 AA (including the `wcag22aa` rules), noindex on every page, reflow at 320 px, reduced motion, and a Firefox smoke run (WebKit too, in CI). It builds nothing: run `pnpm build` first. |
-| `pnpm lhci` | Lighthouse CI on a throttled mobile profile: LCP ≤ 2.5 s, CLS ≤ 0.1, Total Blocking Time ≤ 200 ms (standing in for INP) |
+| `pnpm lhci` | Lighthouse CI on a throttled mobile profile, with the build served over HTTP/2 and TLS as Vercel serves it: LCP ≤ 2.5 s, CLS ≤ 0.1, Total Blocking Time ≤ 200 ms (standing in for INP) |
 
 The registry the content module reads is generated, never committed. `pnpm dev`, `build`, `typecheck`, `test` and `test:e2e` write it first; `pnpm check` only checks it, so in a fresh checkout run `node scripts/content/registry.mjs` once.
 
@@ -65,6 +65,8 @@ Several agents can test at once on one machine, each in its own git worktree, ca
 | --- | --- | --- |
 | Main worktree (the default) | 3100 | 3200 |
 | Lanes | 3110, 3120 and 3130 | 3210, 3220 and 3230 |
+
+A Lighthouse run also takes the port after its own (3201, 3211, …), for `next start` behind its HTTP/2 server.
 
 Playwright and Lighthouse are heavy, so they take turns: run them through `scripts/lane/heavy.sh`, which queues them behind one lock (`flock` on `/tmp/care4mind-heavy.lock`). A run that has to wait says so, and the command's exit status comes back unchanged.
 
@@ -83,7 +85,10 @@ LHCI_PORT=3210 scripts/lane/heavy.sh pnpm lhci
 | `E2E_RETRIES` | `0`, and `1` in CI | How often a failed test is tried again. A failed run keeps its trace, and so does each retry. |
 | `E2E_SCOPE` | `full` | `full` tests every route; `sample` tests one route of each kind. Every spec runs either way; specs that loop over routes choose them with `inScope()` from `tests/e2e/fixtures.ts`. |
 | `E2E_ONLY` | all specs | Spec names, comma-separated: `E2E_ONLY=concept,questionnaire` runs only `tests/e2e/concept.spec.ts` and `questionnaire.spec.ts`. |
-| `LHCI_PORT` | `3200` | The port of the server `pnpm lhci` starts. A taken port stops it at once, naming the port. |
+| `LHCI_PORT` | `3200` | The port of the server `pnpm lhci` starts; `next start` takes the one after it. A taken port stops it at once, naming the port. |
+| `LHCI_HTTP` | `2` | `2` serves the build over HTTP/2 with TLS, as Vercel does; `1.1` serves it from `next start` alone, plain HTTP/1.1 on `LHCI_PORT`, to compare. |
+
+Why HTTP/2: Lighthouse doesn't slow the page down as it loads. It loads it at full speed, then works out how long the same files would take on slow 4G (its "simulated throttling", called Lantern), and it models HTTP/1.1 and HTTP/2 differently. Over plain HTTP/1.1, which is all `next start` speaks, it opens six connections that each pay their own handshake and share the bandwidth, and React's 72 kB script waits for the first stylesheet's connection. So whether that stylesheet fit in one round trip (about 4.3 kB) moved the Concept page's LCP by 150 ms, and any CSS a ticket added could tip it over 2.5 s. Visitors get HTTP/2 over TLS from Vercel, which Lantern models as one connection carrying every file in turn at the whole bandwidth, after one more round trip for the TLS handshake. `pnpm lhci` measures that: `scripts/lhci/h2-server.mjs` answers over HTTP/2 with a certificate made at start-up, and passes each request to `next start` unchanged. Size still counts: every 30 kB or so more that a page loads before its largest paint costs one more 150 ms round trip. Only the cliff at the first stylesheet's 4.3 kB is gone.
 
 GitHub Actions (`.github/workflows/ci.yml`) runs `pnpm check`, then `pnpm check:e2e` with `E2E_SCOPE=full`, WebKit included, then `pnpm lhci` on the same build, on every pull request and every push to `main`. Reports from Playwright and Lighthouse are attached to each run as artifacts.
 
