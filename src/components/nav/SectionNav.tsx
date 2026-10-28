@@ -17,6 +17,13 @@ interface Enhanced {
   slots: Slots
   open?: PanelId
   focus?: PanelId
+  hover?: PanelId
+}
+
+/** What brought the panels in: a toggle pressed, or a mouse resting on one. */
+interface Upgrade {
+  open?: PanelId
+  hover?: PanelId
 }
 
 /**
@@ -31,7 +38,7 @@ export function SectionNav({ nav, mapNote }: { nav: SiteNav; mapNote?: ReactNode
   const list = useRef<HTMLUListElement>(null)
   const [enhanced, setEnhanced] = useState<Enhanced>()
 
-  const upgrade = useCallback((open?: PanelId) => {
+  const upgrade = useCallback(({ open, hover }: Upgrade = {}) => {
     void loadPanels().then((Panels) => {
       const slots: Slots = {}
       for (const slot of list.current?.querySelectorAll<HTMLElement>('[data-panel]') ?? []) {
@@ -46,6 +53,7 @@ export function SectionNav({ nav, mapNote }: { nav: SiteNav; mapNote?: ReactNode
         slots: current?.slots ?? slots,
         open: current?.open ?? open,
         focus: current?.focus ?? focus,
+        hover: current?.hover ?? hover,
       }))
     })
   }, [])
@@ -88,13 +96,16 @@ export function SectionNav({ nav, mapNote }: { nav: SiteNav; mapNote?: ReactNode
                       aria-expanded={false}
                       // Shown once it works: without JavaScript there is no panel, only the link.
                       data-ready={hydrated || undefined}
-                      onClick={() => upgrade(panel)}
+                      onClick={() => upgrade({ open: panel })}
                       onKeyDown={(event) => {
                         // As the NavigationMenu's toggles do.
                         if (event.key === 'ArrowDown') {
                           event.preventDefault()
-                          upgrade(panel)
+                          upgrade({ open: panel })
                         }
+                      }}
+                      onPointerEnter={(event) => {
+                        if (event.pointerType === 'mouse') upgrade({ hover: panel })
                       }}
                     >
                       <ChevronGlyph className={styles.chevron} />
@@ -113,6 +124,7 @@ export function SectionNav({ nav, mapNote }: { nav: SiteNav; mapNote?: ReactNode
           mapNote={mapNote}
           initialOpen={enhanced.open}
           initialFocus={enhanced.focus}
+          initialHover={enhanced.hover}
         />
       ) : null}
     </>

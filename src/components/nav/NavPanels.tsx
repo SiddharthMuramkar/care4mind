@@ -3,7 +3,14 @@
 import { NavigationMenu } from '@base-ui/react/navigation-menu'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { type CSSProperties, type ReactNode, useCallback, useLayoutEffect, useState } from 'react'
+import {
+  type CSSProperties,
+  type ReactNode,
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useState,
+} from 'react'
 import { createPortal } from 'react-dom'
 
 import { kolam } from '@/lib/kolam'
@@ -24,7 +31,13 @@ export interface NavPanelsProps {
   initialOpen?: PanelId
   /** The panel whose toggle had focus as this arrived. */
   initialFocus?: PanelId
+  /** The panel whose toggle a mouse came onto before this arrived. */
+  initialHover?: PanelId
 }
+
+// How long a pointer rests on a toggle before its panel opens, and leaves before it closes.
+const OPEN_DELAY = 120
+const CLOSE_DELAY = 240
 
 export type Slots = Partial<Record<PanelId, HTMLElement>>
 
@@ -40,6 +53,7 @@ export function NavPanels({
   mapNote,
   initialOpen,
   initialFocus,
+  initialHover,
 }: NavPanelsProps) {
   const pathname = usePathname()
   const [value, setValue] = useState<PanelId | null>(initialOpen ?? null)
@@ -53,6 +67,16 @@ export function NavPanels({
   useLayoutEffect(() => {
     if (initialFocus) slots[initialFocus]?.querySelector('button')?.focus({ preventScroll: true })
   }, [initialFocus, slots])
+
+  // A mouse that came onto a toggle before this arrived, and rests there, opens its panel as
+  // moving onto it would have: a pointer that stays still gets no new event to open it with.
+  useEffect(() => {
+    if (!initialHover) return
+    const timer = setTimeout(() => {
+      if (slots[initialHover]?.matches(':hover')) setValue((open) => open ?? initialHover)
+    }, OPEN_DELAY)
+    return () => clearTimeout(timer)
+  }, [initialHover, slots])
 
   // A panel hangs from its whole item, label and toggle, not the toggle alone.
   const anchor = useCallback(
@@ -76,8 +100,8 @@ export function NavPanels({
         }
         setValue(panelOf(String(next)) ?? null)
       }}
-      delay={120}
-      closeDelay={240}
+      delay={OPEN_DELAY}
+      closeDelay={CLOSE_DELAY}
     >
       <NavigationMenu.List render={<div className={nav.menu} />}>
         {site.sections.map((section) => {
