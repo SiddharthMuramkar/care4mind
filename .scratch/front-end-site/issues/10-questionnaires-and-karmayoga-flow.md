@@ -1,6 +1,6 @@
 # 10: Questionnaires and the KarmaYoga flow
 
-Status: ready-for-agent
+Status: resolved
 Blocked by: 03, 04
 Spec: [Front-end site: every public page](../spec.md) · Design: [design.md](../design.md) §C3, §C4 · Decisions: D12, D16, D21 · Planning: builds what [planning ticket 12](../../rebuild/issues/12-questionnaire-flow-prototype.md) asked to prototype
 
@@ -28,68 +28,68 @@ This is the build side of planning ticket 12. The developer reacts to it there.
 
 ## Acceptance criteria
 
-- [ ] **Index (D16):**
+- [x] **Index (D16):**
   - The KarmaYoga Scale comes first, with its status in words: "Preview" while `questionnairePreview` is on, "Coming soon" while it's off.
   - The 17 coming-later Questionnaires (the 16 description pages and the Dosha Survey) are grouped by topic. Each card shows its anchor (`#dosha-survey` and the rest), its source title, the words "Coming later" and a link to its Concept.
   - Status is never shown by colour alone (WCAG 1.4.1).
   - The KarmaYoga card morphs into its page's title (`questionnaire-title-<slug>`).
-- [ ] **Intro page (FR-05 order):**
+- [x] **Intro page (FR-05 order):**
   - Purpose and limitations come before Start on the page and in reading order.
   - A Preview badge.
   - The text "Your answers aren't scored yet".
   - The draft limitations marked as not yet reviewed by the Psychology expert.
   - The source citation.
   - Start is a link to the flow while the flag is on. While it's off, Start is the foundation's disabled "Coming soon" button.
-- [ ] **Gate (C4):**
+- [x] **Gate (C4):**
   - The flow's route exists only while `features.questionnairePreview` is on, or for a Questionnaire whose status is live.
   - A unit test covers the gate and the intro's Start in both states. Ticket 15's flags-off build checks the 404.
-- [ ] **Parts:**
+- [x] **Parts:**
   - Four parts of 12, 6, 9 and 18 statements, in the order of the record's settings, each opening with its real instruction text.
   - Each statement is a native `fieldset` whose `legend` is the statement exactly as stored, with five native radio buttons styled as pills at least 44 px tall.
   - Options appear in the source's order. Items 34–42 list Strongly Agree first, as the source does.
-- [ ] **No surprises:**
+- [x] **No surprises:**
   - Choosing an answer never moves focus or changes the part (WCAG 3.2.2).
   - There are no single-key shortcuts (WCAG 2.1.4).
   - The arrow keys move within a statement's options, as native radio buttons do.
-- [ ] **Steps and history:**
+- [x] **Steps and history:**
   - The step shows in the address as `?step=part-2`, added with pushState, so browser Back and Forward move between parts with every answer kept.
   - Answers never appear in the address.
   - Reloading with no answers in memory returns to the first part.
-- [ ] **Progress:**
+- [x] **Progress:**
   - A decorative tally of 45 short rules in four groups of 12, 6, 9 and 18, one group per part, hidden from assistive technology (`aria-hidden`), inks in one rule per statement answered (D21). It is built in this ticket's folder, reserves its box so nothing shifts as it fills, and is finished and still under reduced motion and in print: each rule shows its state at once.
   - Beside it, the text "Part 2 of 4 · 14 of 45 answered" sits inside a Base UI Progress element with `aria-valuetext`, not in a live region.
-- [ ] **Refusing incomplete parts (FR-05):**
+- [x] **Refusing incomplete parts (FR-05):**
   - Next on an unfinished part shows an error summary at the top and moves focus to it.
   - Each error links to its statement, which gets `aria-invalid` and a visible text message (WCAG 3.3.1).
   - Every answer already given stays selected, and the part doesn't change.
-- [ ] **Back:** the flow's Back button and the browser's both return to the previous part with every answer kept.
-- [ ] **Review:** every statement with its chosen answer, grouped by part. Each statement has a Change link that returns to its part and moves focus to it.
-- [ ] **End screen:**
+- [x] **Back:** the flow's Back button and the browser's both return to the previous part with every answer kept.
+- [x] **Review:** every statement with its chosen answer, grouped by part. Each statement has a Change link that returns to its part and moves focus to it.
+- [x] **End screen:**
   - It is labelled "Placeholder" and says: "The KarmaYoga Scale's scoring rules are with the Psychology expert; your result appears here once they are confirmed."
   - It shows no numbers, percentages or bands.
   - It shows the "not a diagnosis" limitation, the visitor's answers and the source citation.
   - Retake asks for confirmation in a Base UI AlertDialog. Cancel keeps every answer; confirm clears them and returns to part 1.
   - Print uses a stylesheet that prints the placeholder and the answers.
   - It links to the related Concepts.
-- [ ] **Scoring stub:**
+- [x] **Scoring stub:**
   - `scoreQuestionnaire(form, answers)` returns `{ status: 'pending' }`.
   - Unit tests try all-first, all-last and mixed complete answer sets.
   - No answer key, points or bands exist anywhere in the code.
-- [ ] **Nothing stored or sent (D16, OQ8):**
+- [x] **Nothing stored or sent (D16, OQ8):**
   - Answers live only in a reducer.
   - After finishing the flow, localStorage, sessionStorage, cookies and IndexedDB hold nothing the flow wrote.
   - During the flow, no request uses a method other than GET, no request goes to another origin, and no request's address carries an answer.
   - A `beforeunload` warning appears while at least one answer is given and the end screen isn't reached.
-- [ ] **Without JavaScript:** the flow's page says it needs JavaScript, because answers may go neither into the address nor to a server, and links back to the intro.
-- [ ] **Motion:**
+- [x] **Without JavaScript:** the flow's page says it needs JavaScript, because answers may go neither into the address nor to a server, and links back to the intro.
+- [x] **Motion:**
   - Part changes use a view transition, instant under reduced motion.
   - There is no celebratory motion, and the end screen keeps still.
-- [ ] **Speed:** choosing an answer is measured once at 4× CPU slowdown, kept under 200 ms, and recorded in Comments. Ticket 15 adds the standing check.
-- [ ] **Breadcrumbs (D15):**
+- [x] **Speed:** choosing an answer is measured once at 4× CPU slowdown, kept under 200 ms, and recorded in Comments. Ticket 15 adds the standing check.
+- [x] **Breadcrumbs (D15):**
   - Home › Questionnaires;
   - Home › Questionnaires › KarmaYoga Scale;
   - Home › Questionnaires › KarmaYoga Scale › Take it.
-- [ ] **Tests:** `questionnaire-flow.spec.ts` covers, at 360 and 1440 px:
+- [x] **Tests:** `questionnaire-flow.spec.ts` covers, at 360 and 1440 px:
   - the whole flow by keyboard alone, from Start to the end screen;
   - refusal with focus on the summary, and answers kept;
   - browser Back and Forward;
@@ -101,8 +101,8 @@ This is the build side of planning ticket 12. The developer reacts to it there.
   - axe on each part, the error state, the review and the end screen.
 
   `questionnaire.spec.ts` keeps the foundation's intro checks for the flag-on state.
-- [ ] **For the developer:** Comments records the preview address of the flow, so the developer can react to it under planning ticket 12.
-- [ ] **Done-check:**
+- [x] **For the developer:** Comments records the preview address of the flow, so the developer can react to it under planning ticket 12.
+- [x] **Done-check:**
   - `pnpm check` passes;
   - the lane's end-to-end run passes: `E2E_SCOPE=sample E2E_PORT=<lane port> scripts/lane/heavy.sh pnpm check:e2e`, covering Chromium at 360, 768 and 1440 px, reflow at 320 px, reduced motion and Firefox, with WebKit in CI.
 
@@ -156,3 +156,28 @@ This is the build side of planning ticket 12. The developer reacts to it there.
 - A radio group's legend inside a CSS grid fieldset: float it (`float: inline-start; width: 100%`) so it lays out as the first row; a rendered legend sits outside the padding box and absolutely placed marginalia miss it.
 
 **Left over:** nothing in this ticket. With the flag off, the intro's disabled "Coming soon" Start and the index's "Coming soon" badge are covered by the unit test; ticket 15's flags-off build checks the 404 of the flow.
+
+### Check notes (lane/site-10, 2026-10-28)
+
+Checked every criterion against the code and tests: all met. Fixed and polished on top of the build:
+
+- **Index title:** "Questionnaires" broke mid-word at 360 px ("Questionnaire / s", already so in the foundation). It is now set to fit a phone's folio (`clamp(2.25rem, 10.5vw, 5.75rem)`) and is as large as the other indexes' titles where there is room.
+- **Leaders on the review and end screen:** beside a wrapped statement the dotted leader was a short stub after a wide gap. Each now runs from the statement's last word to its answer, like a contents line. New test: "sets each answer like a contents line" (360, 768, 1440 px; none drawn under 480 px, where the answer sits under its statement).
+- **Print:** the end screen printed Source and Related Concepts over the last answers, past the folio's foot, and a blank fifth sheet (Chrome fragments `break-inside: avoid` grid items badly). In print the end screen is now block flow, keeping only rows and headings together: four sheets, nothing overlapping. A printed part keeps its progress words and tally (`print-color-adjust: exact`), and its chosen answers stay legible (the indigo fill isn't printed, so the label takes the ink colour).
+- **Controls on a phone:** Back and Next, Print and Retake stand one under another at full width below 30rem. The Retake dialog's two choices stand as a column at every width: they wrapped unevenly even at 1440 px.
+- **Colours:** the new folio-style shadows used raw `rgb(29 26 46 / …)` (copied from Folio and ConceptCard). They are now `color-mix()` of `--color-surface-ink`, and the dialog's drop shadow is `--color-backdrop`. No new tokens.
+- The end screen's kicker reads "Every part answered" rather than hard-coding "four".
+
+**Decision:** the review's leaders ink out from the statement towards the answer, not from their centres: a clipped leader's centre lies off its visible part.
+
+**Measured (final build):** sample e2e 590 passed, 112 skipped by design. `pnpm lhci` (HTTP/2, LHCI_PORT=3210), median of 3: `/` LCP 2.02 s, TBT 83 ms, CLS 0.000; `/concepts/vikshepa/` 1.96 s, 150 ms, 0.001; `/questionnaires/karmayoga-scale/` 2.02 s, 138 ms, 0.001; accessibility 1.0 on each. Other lanes' builds shared the CPU.
+
+**Tests changed:** `tests/e2e/questionnaire-flow.spec.ts` gains the leader test. No existing test changed.
+
+**Notes for the conventions doc (ticket 15)**
+
+- A dotted leader after text that wraps: an `inline-block` leader, `width: 100%` with `margin-inline: 0.5em calc(-100% - 0.5em)`, in a cell with `overflow: clip`. It starts after the last word and never wraps to a line alone. A flex leader beside a wrapped text box leaves a gap.
+- In print, don't put `break-inside: avoid` on grid items that may cross a page: switch the grid to block flow in `@media print`, or Chrome prints later items over earlier ones.
+- Check print with Playwright's `page.pdf()` turned into images (`pdftoppm`): `emulateMedia({ media: 'print' })` doesn't break pages.
+
+**Left over:** nothing in this ticket. The site has no shared print stylesheet yet: only the header and footer hide themselves in print, so the other reading pages print with the browser’s defaults.
