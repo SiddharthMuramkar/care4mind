@@ -414,7 +414,7 @@ function EndStep({ form, state, limits, sources, onRetake }: EndProps) {
   return (
     <section className={styles.end} aria-labelledby={STEP_TITLE}>
       <header className={styles.stepHead}>
-        <p className={styles.kicker}>All four parts answered</p>
+        <p className={styles.kicker}>Every part answered</p>
         <h2 id={STEP_TITLE} className={styles.stepTitle} tabIndex={-1}>
           Your result
         </h2>

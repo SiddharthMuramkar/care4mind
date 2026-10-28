@@ -7,6 +7,7 @@ import { OrnamentRule } from '@/components/OrnamentRule'
 import { PageTurn, turnForward } from '@/components/PageTurn'
 import { QuestionnaireCard } from '@/components/QuestionnaireCard'
 import { hrefFor, questionnaires, topics, type QuestionnaireCard as Card } from '@/content'
+import { cx } from '@/lib/cx'
 import { metadataFor } from '@/lib/metadata'
 import { statusWords } from '@/lib/questionnaire/gate'
 
@@ -75,7 +76,7 @@ export default async function QuestionnairesPage() {
         <Breadcrumbs path={PATH} />
         <Folio as="article" className={reading.article} aria-labelledby="questionnaires-title">
           <header className={reading.titlePage}>
-            <h1 id="questionnaires-title" className={reading.title}>
+            <h1 id="questionnaires-title" className={cx(reading.title, styles.title)}>
               Questionnaires
             </h1>
             <p className={reading.summary}>
