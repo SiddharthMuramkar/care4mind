@@ -18,7 +18,7 @@ import styles from './ScriptChoice.module.css'
 
 type Choice = [devanagariFirst: boolean, choose: (devanagariFirst: boolean) => void]
 
-const DevanagariFirst = createContext<Choice>([false, () => {}])
+export const DevanagariFirst = createContext<Choice>([false, () => {}])
 
 /**
  * Which script leads a term's heading, as the visitor chose with the

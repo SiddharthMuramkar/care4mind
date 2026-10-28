@@ -1,0 +1,175 @@
+/*
+ * Linked knowledge, set like a scholar's index of cross-references: each group headed like a line
+ * of contents with its count, each entry joined to its note by a dotted leader. The leaders ink in
+ * from the centre as they come into view; drawn finished wherever there is no scrolling to follow.
+ */
+.panel {
+  display: grid;
+  gap: 1.75rem;
+  padding-top: 1.5rem;
+  border-top: 3px double var(--color-surface-rule);
+  scroll-margin-top: 1.5rem;
+}
+
+@supports (timeline-scope: none) and (not (scroll-target-group: auto)) {
+  .panel {
+    view-timeline-name: var(--timeline);
+    view-timeline-inset: 30% 69%;
+  }
+}
+
+.title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: clamp(1.75rem, 4.5vw, 2.25rem);
+  line-height: 1.15;
+}
+
+.group {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.groupTitle {
+  margin: 0;
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  font-family: var(--font-text);
+  font-weight: 600;
+  font-variant-caps: all-small-caps;
+  letter-spacing: 0.14em;
+  font-size: 1.125rem;
+  color: var(--color-surface-muted);
+}
+
+.count {
+  font-weight: 400;
+  letter-spacing: 0;
+  font-variant-numeric: oldstyle-nums;
+}
+
+.rows {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.6rem;
+}
+
+/* An entry, its leader and its note on one line where they fit; the note wraps beneath where not. */
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  column-gap: 0.5rem;
+}
+
+/* The entry: a link, or a link in its preview's span. */
+.row > :first-child {
+  flex: none;
+  max-width: 100%;
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  line-height: 1.35;
+}
+
+.row > :first-child[lang],
+.row > :first-child [lang] {
+  font-style: italic;
+}
+
+.note {
+  flex: 0 1 auto;
+  max-width: min(100%, 26rem);
+  margin-inline-start: auto;
+  text-align: end;
+  color: var(--color-surface-muted);
+  font-size: 1rem;
+  line-height: 1.45;
+}
+
+.note a {
+  font-variant-numeric: lining-nums;
+}
+
+/* The leader: faint dots always there, and the same dots in ink over them. */
+.leader {
+  position: relative;
+  flex: 1 1 2.5rem;
+  min-width: 2.5rem;
+  height: 2px;
+  align-self: baseline;
+  border-bottom: 2px dotted color-mix(in srgb, var(--color-surface-rule) 45%, transparent);
+}
+
+.ink {
+  position: absolute;
+  inset: 0 0 -2px;
+  border-bottom: 2px dotted var(--color-highlight);
+}
+
+/* The References, by name, each leading to its entry in the list below. */
+.references {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 0;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+.references li:not(:last-child)::after {
+  content: '·';
+  margin-inline: 0.6rem;
+  color: var(--color-surface-rule);
+}
+
+.references a {
+  overflow-wrap: anywhere;
+}
+
+.cards {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 18rem), 1fr));
+}
+
+/* Inked in from the centre as each leader comes into view, where motion is welcome. */
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    .ink {
+      animation: ink-in linear both;
+      animation-timeline: view();
+      animation-range: entry 0% cover 30%;
+    }
+  }
+}
+
+@keyframes ink-in {
+  from {
+    clip-path: inset(0 50%);
+  }
+
+  to {
+    clip-path: inset(0);
+  }
+}
+
+@media print {
+  .panel {
+    break-before: auto;
+  }
+
+  .ink {
+    animation: none;
+    clip-path: none;
+  }
+
+  .row {
+    break-inside: avoid;
+  }
+}

@@ -1,20 +1,23 @@
 import type { Metadata } from 'next'
-import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { ViewTransition } from 'react'
+import { ViewTransition, type CSSProperties } from 'react'
 
 import { Breadcrumbs } from '@/components/Breadcrumbs'
+import { Contents, type ContentsEntry } from '@/components/concept/Contents'
+import { LinkedKnowledge } from '@/components/concept/LinkedKnowledge'
+import { TitleSpellings } from '@/components/concept/TitleSpellings'
+import { TopicPager } from '@/components/concept/TopicPager'
 import { Folio } from '@/components/Folio'
 import { OrnamentRule } from '@/components/OrnamentRule'
-import { PageTurn, turnForward } from '@/components/PageTurn'
+import { PageTurn } from '@/components/PageTurn'
 import { citationLinks, Provenance, Sections, Text } from '@/components/prose'
-import { statusOf } from '@/components/QuestionnaireCard'
+import { VerseCard } from '@/components/prose/VerseCard'
 import { ReadingThread } from '@/components/ReadingThread'
 import { ReferenceList } from '@/components/ReferenceList'
-import { ScriptChoice, ScriptSwitch, TermSpellings } from '@/components/ScriptChoice'
-import { Shloka } from '@/components/Shloka'
+import { ScriptChoice, ScriptSwitch } from '@/components/ScriptChoice'
 import { SpellingsPopover } from '@/components/SpellingsPopover'
-import { concepts, hrefFor } from '@/content'
+import { concepts, hrefFor, type BlockView, type ConceptView, type VerseView } from '@/content'
+import { capitalise } from '@/lib/text'
 import { cx } from '@/lib/cx'
 import { metadataFor } from '@/lib/metadata'
 
@@ -33,20 +36,56 @@ export async function generateMetadata({
   return metadataFor(hrefFor({ kind: 'concept', id: (await params).slug }))
 }
 
+/** Every verse the page sets, at its head and inside its sections, by passage. */
+function versesOf(concept: ConceptView): Map<string, VerseView> {
+  const verses = new Map(concept.verses.map((verse) => [verse.passage, verse]))
+  const walk = (blocks: readonly BlockView[]) => {
+    for (const block of blocks) {
+      if (block.kind === 'verse') verses.set(block.verse.passage, block.verse)
+      else if (block.kind === 'term') walk(block.blocks)
+      else if (block.kind === 'topic-intro') block.sections.forEach((s) => walk(s.blocks))
+    }
+  }
+  concept.sections.forEach((section) => walk(section.blocks))
+  return verses
+}
+
+/** The page's contents: its sections, then Linked knowledge and the References. */
+function contentsOf(concept: ConceptView): ContentsEntry[] {
+  return [
+    ...concept.toc.map(({ id, heading, role, terms }) => ({
+      id,
+      heading,
+      ...(role ? { role } : {}),
+      terms: terms.map((term) => ({ id: term.id, name: term.name })),
+    })),
+    { id: 'linked-knowledge', heading: 'Linked knowledge' },
+    ...(concept.references.length > 0 ? [{ id: 'references', heading: 'References' }] : []),
+  ]
+}
+
 export default async function ConceptPage({ params }: PageProps<'/concepts/[slug]'>) {
   const concept = await concepts.get((await params).slug)
   if (!concept) notFound()
 
   const citations = citationLinks(concept.citations, concept.references)
+  const cards = new Map((await concepts.list()).map((card) => [card.slug, card]))
+  const previous = concept.previous && cards.get(concept.previous.slug)
+  const next = concept.next && cards.get(concept.next.slug)
+  const contents = contentsOf(concept)
   // A Concept card's title flies into the heading's IAST spelling, or its English title.
   const morph = `concept-title-${concept.slug}`
 
   return (
     <PageTurn>
-      <main id="main" className={reading.page}>
+      <main id="main" className={cx(reading.page, styles.page)}>
         <ReadingThread />
         <Breadcrumbs path={hrefFor({ kind: 'concept', id: concept.slug })} />
-        <Folio as="article" className={reading.article} aria-labelledby="concept-title">
+        <Folio
+          as="article"
+          className={cx(reading.article, styles.article)}
+          aria-labelledby="concept-title"
+        >
           <ScriptChoice>
             <header className={reading.titlePage}>
               <p className={reading.kicker}>Concept</p>
@@ -54,11 +93,17 @@ export default async function ConceptPage({ params }: PageProps<'/concepts/[slug
                 id="concept-title"
                 className={concept.term ? reading.title : cx(reading.title, reading.titleLong)}
               >
-                {concept.term ? (
-                  <TermSpellings term={concept.term} capitalised name={morph} />
+                {concept.term?.devanagari ? (
+                  <TitleSpellings
+                    iast={capitalise(concept.term.iast)}
+                    devanagari={concept.term.devanagari}
+                    name={morph}
+                  />
                 ) : (
                   <ViewTransition name={morph} share="morph" default="none">
-                    <span>{concept.name}</span>
+                    <span {...(concept.term ? { lang: 'sa-Latn' } : {})}>
+                      {concept.term ? capitalise(concept.term.iast) : concept.name}
+                    </span>
                   </ViewTransition>
                 )}
               </h1>
@@ -77,59 +122,52 @@ export default async function ConceptPage({ params }: PageProps<'/concepts/[slug
             </header>
           </ScriptChoice>
 
-          {concept.verses.map((verse) => (
-            <Shloka key={verse.passage} verse={verse} className={styles.shloka} />
-          ))}
+          <div
+            className={styles.body}
+            // The sections' view timelines, for the contents to follow (see Contents).
+            style={
+              {
+                timelineScope: contents.map(({ id }) => `--section-${id}`).join(', '),
+              } as CSSProperties
+            }
+          >
+            <Contents entries={contents} />
 
-          <OrnamentRule className={styles.rule} />
-
-          <Sections sections={concept.sections} citations={citations} />
-
-          {concept.linked.questionnaires.length > 0 ? (
-            <section className={reading.section} aria-labelledby="related-title">
-              <h2 id="related-title" className={reading.sectionTitle}>
-                Related Questionnaires
-              </h2>
-              <ul className={styles.related}>
-                {concept.linked.questionnaires.map(({ slug, title, status, summary }) => (
-                  <li key={slug}>
-                    <Link
-                      href={hrefFor({ kind: 'questionnaire', id: slug, status })}
-                      transitionTypes={turnForward}
-                    >
-                      {title}
-                    </Link>
-                    <span className={styles.relatedNote}>
-                      {statusOf(status)}
-                      {summary ? (
-                        <>
-                          {' · '}
-                          <Text text={summary} />
-                        </>
-                      ) : null}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            </section>
-          ) : null}
-
-          {concept.external.length > 0 ? (
-            <p className={styles.external}>
-              Read more on another site:{' '}
-              {concept.external.map((link, index) => (
-                <span key={link.url}>
-                  {index > 0 ? ', ' : null}
-                  <a href={link.url}>{link.label}</a>
-                </span>
+            <div className={styles.text}>
+              {concept.verses.map((verse) => (
+                <VerseCard key={verse.passage} verse={verse} />
               ))}
-              .
-            </p>
-          ) : null}
 
-          <ReferenceList references={concept.references} />
+              <OrnamentRule className={styles.rule} />
 
-          <Provenance of={concept} />
+              <Sections sections={concept.sections} citations={citations} />
+
+              <LinkedKnowledge concept={concept} verses={versesOf(concept)} />
+
+              {concept.external.length > 0 ? (
+                <p className={styles.external}>
+                  Read more on another site:{' '}
+                  {concept.external.map((link, index) => (
+                    <span key={link.url}>
+                      {index > 0 ? ', ' : null}
+                      <a href={link.url}>{link.label}</a>
+                    </span>
+                  ))}
+                  .
+                </p>
+              ) : null}
+
+              <ReferenceList references={concept.references} />
+
+              <TopicPager
+                topic={concept.topic}
+                {...(previous ? { previous } : {})}
+                {...(next ? { next } : {})}
+              />
+
+              <Provenance of={concept} />
+            </div>
+          </div>
         </Folio>
       </main>
     </PageTurn>

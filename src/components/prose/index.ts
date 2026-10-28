@@ -5,4 +5,4 @@
 export { Blocks, Sections } from './Blocks'
 export { Provenance } from './Provenance'
 export { RecordLink } from './RecordLink'
-export { citationLinks, Text, type CitationLinks } from './Text'
+export { citationLinks, Text, type CitationLinks, type CitedEntry } from './Text'

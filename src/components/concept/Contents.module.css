@@ -1,0 +1,145 @@
+/*
+ * The contents, set like a book's: a running head over a double rule, Devanagari numerals, and
+ * the terms of each section in italic beneath it. The section being read is marked with a
+ * vermilion lozenge and set in ink.
+ */
+.contents {
+  display: grid;
+  align-content: start;
+  gap: 0.75rem;
+  font-size: 1rem;
+  line-height: 1.4;
+}
+
+.title {
+  margin: 0;
+  padding-bottom: 0.4rem;
+  border-bottom: 3px double var(--color-surface-rule);
+  font-family: var(--font-text);
+  font-weight: 600;
+  font-variant-caps: all-small-caps;
+  letter-spacing: 0.16em;
+  font-size: 1.0625rem;
+  color: var(--color-surface-muted);
+}
+
+.list,
+.terms {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+}
+
+.list {
+  gap: 0.15rem;
+  /* Each link here is a scroll marker; the one for the section in view is :target-current. */
+  scroll-target-group: auto;
+}
+
+.entry,
+.term {
+  position: relative;
+  display: grid;
+  min-height: 2rem;
+  align-items: baseline;
+  color: var(--color-surface-muted);
+  text-decoration: none;
+}
+
+.entry {
+  grid-template-columns: 1.75rem minmax(0, 1fr);
+  padding-block: 0.3rem;
+}
+
+.entry:hover,
+.term:hover {
+  color: var(--color-surface-ink);
+}
+
+.numeral {
+  font-family: var(--font-deva);
+  line-height: inherit;
+  color: var(--color-surface-rule);
+}
+
+.role {
+  font-variant-caps: all-small-caps;
+  letter-spacing: 0.08em;
+}
+
+/* Terms show beside the text on a wide screen; above it on a phone the sections are enough. */
+.terms {
+  display: none;
+  padding-inline-start: 1.75rem;
+}
+
+.term {
+  padding-block: 0.15rem;
+  font-style: italic;
+}
+
+/* The marker: a vermilion lozenge in the margin, shown beside the section being read. */
+.entry::before,
+.term::before {
+  content: '';
+  position: absolute;
+  inset-inline-start: -1rem;
+  top: 0.95em;
+  width: 0.4rem;
+  height: 0.4rem;
+  background: var(--color-highlight);
+  transform: rotate(45deg) scale(0);
+  opacity: 0;
+}
+
+/* The line for the section in view (:target-current) is set in Contents.tsx. */
+
+@media (prefers-reduced-motion: no-preference) {
+  .entry::before,
+  .term::before {
+    transition:
+      transform var(--duration-quick) var(--ease-out),
+      opacity var(--duration-quick) var(--ease-out);
+  }
+}
+
+/* Without scroll markers, each section's view timeline lights its line while it is being read. */
+@supports (timeline-scope: none) and (not (scroll-target-group: auto)) {
+  .entry::before {
+    animation: current linear;
+    animation-timeline: var(--timeline);
+    animation-range: cover;
+  }
+}
+
+@keyframes current {
+  from,
+  to {
+    transform: rotate(45deg) scale(1);
+    opacity: 1;
+  }
+}
+
+/* Beside the text, the contents stay in view as the page scrolls, and scroll on their own if long. */
+@media (min-width: 64rem) {
+  .contents {
+    position: sticky;
+    top: var(--sticky-top);
+    max-height: calc(100dvh - var(--sticky-top) - 1rem);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding-inline-start: 1rem;
+    margin-inline-start: -1rem;
+  }
+
+  .terms {
+    display: grid;
+  }
+}
+
+@media print {
+  .contents {
+    display: none;
+  }
+}

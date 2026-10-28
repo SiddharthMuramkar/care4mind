@@ -1,0 +1,84 @@
+/* The preview card: a slip of paper laid beside the link, ruled twice at its head like a folio. */
+.positioner {
+  z-index: var(--layer-popup);
+}
+
+.popup {
+  box-sizing: border-box;
+  width: min(22rem, calc(100vw - 2rem));
+  padding: 1rem 1.25rem 1.125rem;
+  display: grid;
+  gap: 0.35rem;
+  background: var(--color-preview);
+  color: var(--color-preview-ink);
+  border: 1px solid var(--color-preview-line);
+  border-top: 3px double var(--color-preview-line);
+  box-shadow: 0 0.75rem 2rem -0.75rem var(--color-scroll-shadow);
+  font-size: 1rem;
+  line-height: 1.5;
+  transform-origin: var(--transform-origin);
+}
+
+.popup p {
+  margin: 0;
+}
+
+.kind {
+  color: var(--color-preview-muted);
+  font-variant-caps: all-small-caps;
+  letter-spacing: 0.14em;
+  font-size: 1rem;
+}
+
+.name {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0 0.6rem;
+  font-family: var(--font-display);
+  font-size: 1.375rem;
+  line-height: 1.25;
+}
+
+.name [lang='sa-Latn'],
+.name [lang='pi-Latn'] {
+  font-style: italic;
+}
+
+.deva {
+  font-family: var(--font-deva);
+  font-size: 1.125rem;
+  font-style: normal;
+}
+
+.gloss {
+  color: var(--color-preview-muted);
+  font-variant-caps: all-small-caps;
+  letter-spacing: 0.08em;
+  font-size: 1.0625rem;
+}
+
+/* A line or four of the content: the link's page has the rest. */
+.text {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 4;
+  overflow: hidden;
+  padding-top: 0.35rem;
+  border-top: 1px solid var(--color-preview-line);
+}
+
+/* Laid down like paper: it rises a little as it fades in, and settles back as it goes. */
+@media (prefers-reduced-motion: no-preference) {
+  .popup {
+    transition:
+      opacity var(--duration-quick) var(--ease-out),
+      transform var(--duration-quick) var(--ease-out);
+  }
+
+  .popup[data-starting-style],
+  .popup[data-ending-style] {
+    opacity: 0;
+    transform: translateY(0.25rem) scale(0.98);
+  }
+}
