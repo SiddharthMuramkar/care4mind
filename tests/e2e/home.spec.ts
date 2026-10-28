@@ -1,4 +1,4 @@
-import { expect, type Locator, type Page, test } from '@playwright/test'
+import type { Locator, Page } from '@playwright/test'
 
 import {
   animationsStartedOn,
@@ -8,6 +8,7 @@ import {
   recordAnimationStarts,
   undrawn,
 } from './drawings'
+import { expect, gotoReady, test } from './fixtures'
 import { placeOnScreen, scrollPath, travel } from './scrolling'
 
 const section = (page: Page, name: string) => page.getByRole('region', { name, exact: true })
@@ -28,7 +29,7 @@ async function drawingBetween(page: Page, above: Locator, below: Locator) {
 
 test.describe('the opening kolam', () => {
   test('frames the opening folio and is hidden from assistive technology', async ({ page }) => {
-    await page.goto('/')
+    await gotoReady(page, '/')
     const frame = await frameKolam(page)
     await expect(frame).toBeVisible()
     await expect(frame).toHaveAttribute('aria-hidden', 'true')
@@ -37,7 +38,7 @@ test.describe('the opening kolam', () => {
 
   test('draws itself once on load, in about 1.6 s, and ends complete', async ({ page }) => {
     await recordAnimationStarts(page)
-    await page.goto('/')
+    await gotoReady(page, '/')
     const line = (await frameKolam(page)).locator('path')
     await expect.poll(() => isDrawing(line)).toBe(false)
     await expect(line).toHaveCSS('stroke-dashoffset', '0px')
@@ -57,7 +58,7 @@ test.describe('the opening kolam', () => {
     page,
   }) => {
     await recordAnimationStarts(page)
-    await page.goto('/')
+    await gotoReady(page, '/')
     const heading = page.getByRole('heading', { level: 1 })
     const translation = page.getByText('As are the thoughts, so are the manifestations.')
     for (const text of [heading, translation]) {
@@ -69,7 +70,7 @@ test.describe('the opening kolam', () => {
   })
 
   test('drifts a little slower than the page as it scrolls', async ({ page }) => {
-    await page.goto('/')
+    await gotoReady(page, '/')
     const [kolam = NaN, folio = NaN] = await travel(
       page,
       240,
@@ -82,7 +83,7 @@ test.describe('the opening kolam', () => {
   })
 
   test('is never the largest contentful paint', async ({ page }) => {
-    await page.goto('/')
+    await gotoReady(page, '/')
     const largest = await page.evaluate(
       () =>
         new Promise<{ inDrawing: boolean; text: string }>((resolve) => {
@@ -104,7 +105,7 @@ test.describe('the opening kolam', () => {
 test('a kolam band between each pair of sections draws itself in as it scrolls into view', async ({
   page,
 }) => {
-  await page.goto('/')
+  await gotoReady(page, '/')
   const neighbours: [string, string][] = [
     ['Contents', 'Concepts'],
     ['Concepts', 'Questionnaires'],
@@ -130,7 +131,7 @@ test('a kolam band between each pair of sections draws itself in as it scrolls i
 test('each Contents numeral keeps its Devanagari digit, ringed by a kolam knot that draws in as it scrolls up', async ({
   page,
 }) => {
-  await page.goto('/')
+  await gotoReady(page, '/')
   const entries = section(page, 'Contents').getByRole('listitem')
   const numerals = ['१', '२', '३', '४', '५', '६']
   await expect(entries).toHaveCount(numerals.length)
@@ -172,7 +173,7 @@ for (const { from, name, to } of [
   test(`"${name}" in the ${from === 'main' ? 'opening folio' : 'header'} glides down to the ${to} section, its heading in full view`, async ({
     page,
   }) => {
-    await page.goto('/')
+    await gotoReady(page, '/')
     const around =
       from === 'main' ? page.getByRole('main') : page.getByRole('navigation', { name: 'Main' })
     const link = around.getByRole('link', { name, exact: true })
@@ -196,7 +197,7 @@ for (const { from, name, to } of [
 test('links to another page open it at once, without gliding from where you were', async ({
   page,
 }) => {
-  await page.goto('/')
+  await gotoReady(page, '/')
   const card = page.getByRole('link', { name: 'Read about Vikṣepa' })
   await placeOnScreen(card, 0.5)
   const toConcept = await scrollPath(page, async () => {
@@ -232,7 +233,7 @@ test('nothing shifts while the kolams draw in, from load to the foot of the page
       }
     }).observe({ type: 'layout-shift', buffered: true })
   })
-  await page.goto('/')
+  await gotoReady(page, '/')
   const frame = (await frameKolam(page)).locator('path')
   await expect.poll(() => isDrawing(frame)).toBe(false)
   const height = await page.evaluate(() => document.documentElement.scrollHeight)

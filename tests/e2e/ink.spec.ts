@@ -1,5 +1,6 @@
-import { expect, type Locator, type Page, test } from '@playwright/test'
+import type { Locator, Page } from '@playwright/test'
 
+import { expect, gotoReady, test } from './fixtures'
 import { centre, inkSpreadsOn, recordInkSpreads } from './presses'
 import { MISSING } from './routes'
 
@@ -43,7 +44,7 @@ const PRESSES: Record<string, (cta: Locator) => Promise<void>> = {
 for (const { from, name, to, heading } of CALLS_TO_ACTION) {
   for (const [how, press] of Object.entries(PRESSES)) {
     test(`${how} "${name}" takes you where it says`, async ({ page }) => {
-      await page.goto(from)
+      await gotoReady(page, from)
       await press(page.getByRole('main').getByRole('link', { name, exact: true }))
       await expect(page).toHaveURL(to)
       await expect(heading(page)).toBeInViewport()
@@ -52,7 +53,7 @@ for (const { from, name, to, heading } of CALLS_TO_ACTION) {
 }
 
 test('pressing "Explore Concepts" spreads ink from the point pressed', async ({ page }) => {
-  await page.goto('/')
+  await gotoReady(page, '/')
   const cta = page.getByRole('main').getByRole('link', { name: 'Explore Concepts', exact: true })
   await cta.click({ position: { x: 14, y: 9 } })
   await expect.poll(() => inkSpreadsOn(cta)).toHaveLength(1)
@@ -63,7 +64,7 @@ test('pressing "Explore Concepts" spreads ink from the point pressed', async ({ 
 })
 
 test('pressing a call to action again spreads fresh ink from the new point', async ({ page }) => {
-  await page.goto('/')
+  await gotoReady(page, '/')
   const cta = page.getByRole('main').getByRole('link', { name: 'Questionnaires', exact: true })
   const heading = page.getByRole('heading', { name: 'Questionnaires', level: 2 })
   await cta.click({ position: { x: 10, y: 10 } })
@@ -79,7 +80,7 @@ test('pressing a call to action again spreads fresh ink from the new point', asy
 
 // A plain press leaves the 404 at once; opening the homepage in a new tab keeps it in view.
 test('pressing the 404 page\'s "Go to the homepage" spreads ink too', async ({ page, context }) => {
-  await page.goto(MISSING)
+  await gotoReady(page, MISSING)
   const cta = page.getByRole('main').getByRole('link', { name: 'Go to the homepage', exact: true })
   const opened = context.waitForEvent('page')
   await cta.click({ modifiers: ['ControlOrMeta'], position: { x: 20, y: 12 } })
@@ -91,7 +92,7 @@ test('pressing the 404 page\'s "Go to the homepage" spreads ink too', async ({ p
 })
 
 test('pressing Enter on "Explore Concepts" spreads ink from its centre', async ({ page }) => {
-  await page.goto('/')
+  await gotoReady(page, '/')
   const cta = page.getByRole('main').getByRole('link', { name: 'Explore Concepts', exact: true })
   await cta.focus()
   await page.keyboard.press('Enter')

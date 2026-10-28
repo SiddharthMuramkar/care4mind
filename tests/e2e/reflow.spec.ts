@@ -1,11 +1,10 @@
-import { expect, test } from '@playwright/test'
-
+import { expect, gotoReady, test } from './fixtures'
 import { PAGES } from './routes'
 
 // WCAG 1.4.10 Reflow: content fits 320 CSS px without scrolling sideways.
 for (const { path, name } of PAGES) {
   test(`${name} reflows at 320 px`, async ({ page }) => {
-    await page.goto(path)
+    await gotoReady(page, path)
     const overflow = await page.evaluate(
       () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
     )
@@ -14,7 +13,7 @@ for (const { path, name } of PAGES) {
 }
 
 test('the Concept page still reflows at 320 px with the Devanagari leading', async ({ page }) => {
-  await page.goto('/concepts/vikshepa')
+  await gotoReady(page, '/concepts/vikshepa')
   const toggle = page.getByRole('button', { name: 'Devanagari first' })
   const box = await toggle.boundingBox()
   expect(box?.x ?? -1, 'the switch fits the screen').toBeGreaterThanOrEqual(0)

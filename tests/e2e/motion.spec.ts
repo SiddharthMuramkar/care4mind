@@ -1,6 +1,7 @@
-import { expect, type Page, test } from '@playwright/test'
+import type { Page } from '@playwright/test'
 
 import { frameKolam, openingFolio, unfinishedDrawings } from './drawings'
+import { expect, gotoReady, test } from './fixtures'
 import { inPageTransitions, pageTurns, prefetched, recordPageTurns } from './page-turns'
 import { inkSpreadsOn, recordInkSpreads } from './presses'
 import { READING_PAGES, readingThread, readTo } from './reading'
@@ -25,7 +26,7 @@ async function movingAnimations(page: Page) {
 // NFR-01: with "reduce motion" on, nothing moves on load, on scroll or on click.
 for (const { path, name } of PAGES) {
   test(`${name} keeps still with reduced motion`, async ({ page }) => {
-    await page.goto(path)
+    await gotoReady(page, path)
     expect(await movingAnimations(page)).toEqual([])
 
     await page.mouse.wheel(0, 4000)
@@ -43,7 +44,7 @@ for (const { path, name } of PAGES) {
   })
 
   test(`${name} shows every drawing finished with reduced motion`, async ({ page }) => {
-    await page.goto(path)
+    await gotoReady(page, path)
     expect(await unfinishedDrawings(page)).toEqual([])
 
     await page.mouse.wheel(0, 4000)
@@ -53,7 +54,7 @@ for (const { path, name } of PAGES) {
 }
 
 test('the 404 page shows its kolam finished, with reduced motion', async ({ page }) => {
-  await page.goto(MISSING)
+  await gotoReady(page, MISSING)
   expect(await unfinishedDrawings(page)).toEqual([])
   expect(await movingAnimations(page)).toEqual([])
 })
@@ -65,7 +66,7 @@ for (const { from, name } of [
   test(`"${name}" in the ${from === 'main' ? 'opening folio' : 'header'} jumps straight to the Concepts, with reduced motion`, async ({
     page,
   }) => {
-    await page.goto('/')
+    await gotoReady(page, '/')
     const around =
       from === 'main' ? page.getByRole('main') : page.getByRole('navigation', { name: 'Main' })
     const link = around.getByRole('link', { name, exact: true })
@@ -84,7 +85,7 @@ test('pressing a call to action spreads no ink and moves nothing, with reduced m
   page,
 }) => {
   await recordInkSpreads(page)
-  await page.goto('/')
+  await gotoReady(page, '/')
   const cta = page.getByRole('main').getByRole('link', { name: 'Explore Concepts', exact: true })
   await cta.click()
   await expect(page.getByRole('heading', { name: 'Concepts', level: 2 })).toBeInViewport()
@@ -99,7 +100,7 @@ for (const { from, link, to } of [
 ]) {
   test(`following "${link}" changes the page at once, with reduced motion`, async ({ page }) => {
     await recordPageTurns(page)
-    await page.goto(from)
+    await gotoReady(page, from)
     const target = page.getByRole('link', { name: link, exact: true })
     await prefetched(target)
     await target.click()
@@ -115,7 +116,7 @@ for (const { from, link, to } of [
 }
 
 test('the opening kolam scrolls with the page, with reduced motion', async ({ page }) => {
-  await page.goto('/')
+  await gotoReady(page, '/')
   const [kolam, folio] = await travel(page, 240, await frameKolam(page), openingFolio(page))
   expect(folio).toBe(240)
   expect(kolam).toBe(folio)
@@ -125,7 +126,7 @@ test('the opening kolam scrolls with the page, with reduced motion', async ({ pa
 test('pointing at or focusing the logo starts no drawing, with reduced motion', async ({
   page,
 }) => {
-  await page.goto('/')
+  await gotoReady(page, '/')
   const logo = page.getByRole('banner').getByRole('link', { name: 'Care4Mind home', exact: true })
   await expect(logo.locator('svg path')).toHaveCount(1)
   const started = await page.evaluateHandle(() => {
@@ -149,7 +150,7 @@ test('the "Devanagari first" switch still swaps the scripts, at once, with reduc
 }) => {
   await recordPageTurns(page)
   await recordScriptedAnimations(page)
-  await page.goto('/concepts/vikshepa')
+  await gotoReady(page, '/concepts/vikshepa')
   const toggle = page.getByRole('button', { name: 'Devanagari first' })
   const spellings = page.getByRole('heading', { level: 1 }).locator('[lang]')
   await expect(spellings.first()).toHaveAttribute('lang', 'sa-Latn')
@@ -167,7 +168,7 @@ test('the "Devanagari first" switch still swaps the scripts, at once, with reduc
 
 for (const { path, name } of READING_PAGES) {
   test(`${name} has no reading thread, with reduced motion`, async ({ page }) => {
-    await page.goto(path)
+    await gotoReady(page, path)
     await readTo(page, 0.5)
     expect(await readingThread(page)).toBeNull()
   })

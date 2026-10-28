@@ -1,6 +1,7 @@
-import { expect, type Locator, type Page, test } from '@playwright/test'
+import type { Locator, Page } from '@playwright/test'
 
 import { recordAnimationStarts, transitionedOn } from './drawings'
+import { expect, gotoReady, test } from './fixtures'
 import { MISSING } from './routes'
 
 /** Focus a link as a keyboard user would, so it shows its focus state. */
@@ -32,7 +33,7 @@ for (const { page: path, name, in: around } of DRAWN) {
     ['focusing', focusFromKeyboard],
   ] as const) {
     test(`${how} "${name}" draws a line under it, by transform`, async ({ page }) => {
-      await page.goto(path)
+      await gotoReady(page, path)
       const link = around(page).getByRole('link', { name, exact: true })
       await expect(link).toHaveCSS('text-decoration-line', 'none')
       await act(page, link)
@@ -66,7 +67,7 @@ for (const { page: path, name, in: around } of IN_TEXT) {
     test(`${how} "${name}" in running text draws an accent over its underline`, async ({
       page,
     }) => {
-      await page.goto(path)
+      await gotoReady(page, path)
       const link = around(page).getByRole('link', { name, exact: true })
       await expect(link).toHaveCSS('text-decoration-line', 'underline')
       const atRest = await link.screenshot()
@@ -80,7 +81,7 @@ for (const { page: path, name, in: around } of IN_TEXT) {
 }
 
 test('pressing a card still presses it into the page', async ({ page }) => {
-  await page.goto('/')
+  await gotoReady(page, '/')
   const action = page.getByRole('link', { name: 'Read about Vikṣepa' })
   const card = page.getByRole('article').filter({ has: action })
   await action.scrollIntoViewIfNeeded()
@@ -95,7 +96,7 @@ test('pressing a card still presses it into the page', async ({ page }) => {
 })
 
 test('a call to action keeps its focus ring', async ({ page }) => {
-  await page.goto('/')
+  await gotoReady(page, '/')
   const cta = page.getByRole('main').getByRole('link', { name: 'Explore Concepts', exact: true })
   await focusFromKeyboard(page, cta)
   await expect(cta).toHaveCSS('outline-style', 'solid')

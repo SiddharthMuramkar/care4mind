@@ -1,5 +1,6 @@
-import { expect, type Page, test } from '@playwright/test'
+import type { Page } from '@playwright/test'
 
+import { expect, test } from './fixtures'
 import { PAGES } from './routes'
 
 /** A font as "family style weight", from an element's computed style or a font face. */

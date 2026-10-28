@@ -1,5 +1,6 @@
-import { expect, type Page, test } from '@playwright/test'
+import type { Page } from '@playwright/test'
 
+import { expect, gotoReady, test } from './fixtures'
 import { READING_PAGES, readingThread, readTo } from './reading'
 
 /** Wait until the page has kept still for a few frames: focus glides a control into view. */
@@ -23,7 +24,7 @@ for (const { path, name } of READING_PAGES) {
   test(`${name}: a thread across the top fills as you read, silent and out of the way`, async ({
     page,
   }) => {
-    await page.goto(path)
+    await gotoReady(page, path)
     const unread = await readingThread(page)
     expect(unread, 'a thread lies across the top of the screen').not.toBeNull()
     expect(unread?.width, 'nothing read yet').toBe(0)
@@ -56,7 +57,7 @@ for (const { path, name } of READING_PAGES) {
         }
       }).observe({ type: 'layout-shift', buffered: true })
     })
-    await page.goto(path)
+    await gotoReady(page, path)
     for (let fraction = 0; fraction <= 1; fraction += 0.1) await readTo(page, fraction)
     const shift = await page.evaluate(() =>
       (window as unknown as { __layoutShifts: number[] }).__layoutShifts.reduce((a, b) => a + b, 0),
@@ -68,7 +69,7 @@ for (const { path, name } of READING_PAGES) {
 test('the thread never hides a focused control, tabbing down the page or back up', async ({
   page,
 }) => {
-  await page.goto('/concepts/vikshepa')
+  await gotoReady(page, '/concepts/vikshepa')
   // The page has about a dozen stops; this goes past the last and back to the first.
   const steps = [...Array<string>(15).fill('Tab'), ...Array<string>(15).fill('Shift+Tab')]
   let checked = 0

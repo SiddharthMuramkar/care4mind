@@ -1,5 +1,7 @@
 import { type CDPSession, expect, type Page } from '@playwright/test'
 
+import { gotoReady } from './fixtures'
+
 interface Timing {
   interactionId: number
   /** From the press until the next frame is shown, in ms: what INP is made of. */
@@ -48,7 +50,7 @@ async function cpuSlowdown(page: Page, rate: number) {
  */
 export async function openOnSlowPhone(page: Page, path: string) {
   await cpuSlowdown(page, 1)
-  await page.goto(path)
+  await gotoReady(page, path)
   await page.evaluate(() => new Promise((done) => requestIdleCallback(done, { timeout: 5000 })))
   await cpuSlowdown(page, 4)
 }

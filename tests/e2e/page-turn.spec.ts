@@ -1,6 +1,5 @@
-import { expect, test } from '@playwright/test'
-
 import { expectNoAxeViolations } from './axe'
+import { expect, gotoReady, test } from './fixtures'
 import {
   expectPageTurned,
   pageTurns,
@@ -11,7 +10,7 @@ import {
 
 test('following a Concept card turns the page forward to the Concept page', async ({ page }) => {
   await recordPageTurns(page)
-  await page.goto('/')
+  await gotoReady(page, '/')
   const card = page.getByRole('link', { name: 'Read about Vikṣepa' })
   await prefetched(card)
   await card.click()
@@ -28,7 +27,7 @@ test("a Concept card's title flies into the Concept page's heading as the page t
   page,
 }) => {
   await recordPageTurns(page)
-  await page.goto('/')
+  await gotoReady(page, '/')
   const card = page.getByRole('link', { name: 'Read about Vikṣepa' })
   await prefetched(card)
   const from = await page.getByRole('heading', { name: 'Vikṣepa', level: 3 }).boundingBox()
@@ -54,7 +53,7 @@ test("a Concept card's title flies into the Concept page's heading as the page t
 
 test('the header stays put while the page turns', async ({ page }) => {
   await recordPageTurns(page, { hold: true })
-  await page.goto('/')
+  await gotoReady(page, '/')
   const card = page.getByRole('link', { name: 'Read about Vikṣepa' })
   await prefetched(card)
   await card.click()
@@ -71,7 +70,7 @@ test('the header stays put while the page turns', async ({ page }) => {
 
 test('links in the header change page at once, without turning it', async ({ page }) => {
   await recordPageTurns(page)
-  await page.goto('/concepts/vikshepa')
+  await gotoReady(page, '/concepts/vikshepa')
   const link = page
     .getByRole('navigation', { name: 'Main' })
     .getByRole('link', { name: 'Questionnaires', exact: true })
@@ -86,7 +85,7 @@ test('links in the header change page at once, without turning it', async ({ pag
 
 test("the browser's back button changes page at once, without turning it", async ({ page }) => {
   await recordPageTurns(page)
-  await page.goto('/')
+  await gotoReady(page, '/')
   const card = page.getByRole('link', { name: 'Read about Vikṣepa' })
   await prefetched(card)
   await card.click()
@@ -101,7 +100,7 @@ test("the browser's back button changes page at once, without turning it", async
 
 test('the "Home" breadcrumb turns the page back to the homepage', async ({ page }) => {
   await recordPageTurns(page)
-  await page.goto('/concepts/vikshepa')
+  await gotoReady(page, '/concepts/vikshepa')
   const home = page.getByRole('navigation', { name: 'Breadcrumb' }).getByRole('link', {
     name: 'Home',
   })
@@ -120,7 +119,7 @@ test('the "Questionnaires" breadcrumb turns back to the homepage\'s Questionnair
   page,
 }) => {
   await recordPageTurns(page)
-  await page.goto('/questionnaires/karmayoga-scale')
+  await gotoReady(page, '/questionnaires/karmayoga-scale')
   const crumb = page.getByRole('navigation', { name: 'Breadcrumb' }).getByRole('link', {
     name: 'Questionnaires',
   })
@@ -135,7 +134,7 @@ test('related links turn the page forward, from a Concept to its Questionnaire a
   page,
 }) => {
   await recordPageTurns(page)
-  await page.goto('/concepts/vikshepa')
+  await gotoReady(page, '/concepts/vikshepa')
   const questionnaire = page.getByRole('link', { name: 'KarmaYoga Scale' })
   await prefetched(questionnaire)
   await questionnaire.click()

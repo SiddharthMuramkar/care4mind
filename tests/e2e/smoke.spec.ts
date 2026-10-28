@@ -1,6 +1,5 @@
-import { expect, test } from '@playwright/test'
-
 import { frameKolam, openingFolio, unfinishedDrawings } from './drawings'
+import { expect, test } from './fixtures'
 import { READING_PAGES, readingThread, readTo } from './reading'
 import { PAGES } from './routes'
 import { travel } from './scrolling'

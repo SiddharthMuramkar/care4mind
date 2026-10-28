@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next'
 import type { ReactNode } from 'react'
 
+import { HydrationMarker } from '@/components/HydrationMarker'
 import { InkSpread } from '@/components/InkSpread'
 import { LateFonts } from '@/components/LateFonts'
 import { SiteFooter } from '@/components/SiteFooter'
@@ -41,6 +42,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         {children}
         <SiteFooter />
         <InkSpread />
+        <HydrationMarker />
         <LateFonts faces={[...playfairTextStyles, playfairDisplay, tiroDevanagariSanskrit]} />
       </body>
     </html>

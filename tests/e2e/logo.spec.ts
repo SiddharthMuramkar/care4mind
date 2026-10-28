@@ -1,6 +1,7 @@
-import { expect, type Page, test } from '@playwright/test'
+import type { Page } from '@playwright/test'
 
 import { animationsStartedOn, isDrawing, recordAnimationStarts } from './drawings'
+import { expect, gotoReady, test } from './fixtures'
 import { MISSING, PAGES } from './routes'
 
 const homeLink = (page: Page) =>
@@ -8,7 +9,7 @@ const homeLink = (page: Page) =>
 
 for (const { path, name } of [...PAGES, { path: MISSING, name: '404 page' }]) {
   test(`${name} shows the kolam logo, still named "Care4Mind home"`, async ({ page }) => {
-    await page.goto(path)
+    await gotoReady(page, path)
     const logo = homeLink(page)
     await expect(logo).toHaveText('care4mind')
     await expect(logo.locator('svg')).toBeVisible()
@@ -22,13 +23,13 @@ for (const { path, name } of [...PAGES, { path: MISSING, name: '404 page' }]) {
 }
 
 test('the logo is a target at least 48 px tall', async ({ page }) => {
-  await page.goto('/')
+  await gotoReady(page, '/')
   const box = await homeLink(page).boundingBox()
   expect(box?.height ?? 0).toBeGreaterThanOrEqual(48)
 })
 
 test('the mark adds no stop of its own to the tab order', async ({ page }) => {
-  await page.goto('/')
+  await gotoReady(page, '/')
   await page.keyboard.press('Tab')
   await page.keyboard.press('Tab')
   await expect(homeLink(page)).toBeFocused()
@@ -42,7 +43,7 @@ const REDRAW = [{ byScroll: false, duration: expect.closeTo(700, -2) }]
 
 test('pointing at the logo redraws its mark, which ends complete', async ({ page }) => {
   await recordAnimationStarts(page)
-  await page.goto('/')
+  await gotoReady(page, '/')
   const line = homeLink(page).locator('svg path')
   expect(await isDrawing(line)).toBe(false)
   await homeLink(page).hover()
@@ -53,7 +54,7 @@ test('pointing at the logo redraws its mark, which ends complete', async ({ page
 
 test('focusing the logo from the keyboard redraws its mark', async ({ page }) => {
   await recordAnimationStarts(page)
-  await page.goto('/')
+  await gotoReady(page, '/')
   await page.keyboard.press('Tab')
   await page.keyboard.press('Tab')
   await expect(homeLink(page)).toBeFocused()
@@ -63,7 +64,7 @@ test('focusing the logo from the keyboard redraws its mark', async ({ page }) =>
 test('the footer shows the same mark and wordmark, and pointing at it draws nothing', async ({
   page,
 }) => {
-  await page.goto('/')
+  await gotoReady(page, '/')
   const wordmark = page.getByRole('contentinfo').getByText('care4mind', { exact: true })
   await expect(wordmark.locator('svg')).toBeVisible()
   await wordmark.hover()

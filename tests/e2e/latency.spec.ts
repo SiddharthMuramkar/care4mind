@@ -1,5 +1,4 @@
-import { expect, test } from '@playwright/test'
-
+import { expect, test } from './fixtures'
 import { latencyOf, openOnSlowPhone, recordEventTimings, visitLatency } from './latency'
 
 // NFR-02 asks for INP ≤ 200 ms on mobile, which Lighthouse can't measure. So the presses that do
