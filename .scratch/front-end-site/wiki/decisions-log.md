@@ -10,3 +10,4 @@
 
   Plan: `~/.claude/plans/pasted-content-id-e4d6-wayfinder-scratc-lazy-falcon.md`. Design: [design.md](../design.md).
 - 2026-10-27: GLOSSARY.md stays unchanged during this build, because provisional terms aren't settled terms. No ADRs either, since none of the structure choices is final.
+- 2026-10-28: the developer chose Press only (D21, confirming planning ticket 21): the blend with Kolam is dropped, and each Kolam element gets a Press replacement ([decisions.md](../decisions.md#d21-press-replacements)). [Ticket 16](../issues/16-press-only-remove-kolam.md) builds the replacements that exist today and removes every Kolam trace.

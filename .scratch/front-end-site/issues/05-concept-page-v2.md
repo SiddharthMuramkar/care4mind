@@ -2,12 +2,12 @@
 
 Status: ready-for-agent
 Blocked by: 03, 04
-Spec: [Front-end site: every public page](../spec.md) · Design: [design.md](../design.md) §C2, §C3 · Decisions: D05, D06, D07
+Spec: [Front-end site: every public page](../spec.md) · Design: [design.md](../design.md) §C2, §C3 · Decisions: D05, D06, D07, D21
 
 **What to build:** the Concept page becomes the heart of linked knowledge (FR-01). A reader of any of the 19 Concepts gets:
 
 - a table of contents that stays in view and highlights the section they're reading;
-- a "Linked knowledge" panel gathering everything the Concept connects to, each one click away, joined by kolam threads that draw as they scroll;
+- a "Linked knowledge" panel gathering everything the Concept connects to, each one click away, joined by cross-reference rules, dotted leaders that ink in as they scroll;
 - citations that jump to their Reference and open the list;
 - previews of linked Concepts, citations and verses on hover or focus;
 - verse cards they can copy;
@@ -29,7 +29,7 @@ Everything the foundation built stays. The site-wide link previews switch on her
 
 ## Acceptance criteria
 
-- [ ] **The foundation stays:** the card-to-title morph, the reading thread, the "Devanagari first" switch, the "Also spelled" popover, the References accordion with its kolam knot, ink and page turn all still work, and their tests still pass.
+- [ ] **The foundation stays:** the card-to-title morph, the reading thread, the "Devanagari first" switch, the "Also spelled" popover, the References accordion with its plus that folds into a minus (from ticket 16), ink and page turn all still work, and their tests still pass.
 - [ ] **Heading (D07):**
   - The capitalised IAST term leads, with the Devanagari beneath and the English gloss in small capitals.
   - Concepts with an English title lead with it (five-steps-of-perfection, momentum-of-spiritual-practice, spiritual-practitioner).
@@ -50,7 +50,7 @@ Everything the foundation built stays. The site-wide link previews switch on her
   - its References, linking to the list;
   - its Questionnaire card.
 
-  Empty groups are left out, never shown empty. Kolam threads join the groups and draw on scroll; they are decorative and hidden from assistive technology.
+  Empty groups are left out, never shown empty. Cross-reference rules join the groups (D21): dotted leaders that ink in on scroll, finished and still in print and under reduced motion. They are decorative and hidden from assistive technology.
 - [ ] **One-click test (FR-01).** An end-to-end test reads each Concept's view (the sample in `sample` scope, all 19 in `full`) and checks that every related Concept, work, application, comparison, Reference and Questionnaire it lists is a link on the page, and that each link's target returns 200 and holds its anchor.
 - [ ] **Citations:**
   - Each in-text citation links to `#ref-<id>`.
@@ -75,7 +75,7 @@ Everything the foundation built stays. The site-wide link previews switch on her
   - Links to the Concepts before and after this one in its primary topic: "next" turns the page forward and "previous" turns it back.
   - There is no "previous" on the first Concept and no "next" on the last.
 - [ ] **Print:**
-  - The printout drops the header, footer, table of contents, panel threads, buttons and decoration.
+  - The printout drops the header, footer, table of contents, buttons and decoration. The panel's cross-reference rules print finished and still.
   - It prints the References open, and the address after each external link.
   - Verses and tables stay legible.
 - [ ] **Islands stay small:**
@@ -83,7 +83,7 @@ Everything the foundation built stays. The site-wide link previews switch on her
   - Only the copy button, the previews and the accordion are client islands; the table of contents needs none.
   - No new dependency is added.
   - First-load JavaScript for the page is recorded in Comments.
-- [ ] **Reduced motion:** the threads are drawn and still, nothing morphs or turns, and every feature still works.
+- [ ] **Reduced motion:** the cross-reference rules are inked in and still, nothing morphs or turns, and every feature still works.
 - [ ] **Tests:** `concept.spec.ts` covers these criteria at 360 and 1440 px, including:
   - axe with a preview open, with the accordion open, and with a toast showing;
   - a keyboard-only path from a citation to its entry;
