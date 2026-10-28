@@ -72,8 +72,9 @@ How every front-end lane builds and tests, so lanes working at once stay coheren
 
 ## Lane commands
 
-- Use the ports your task names: 3110, 3120 or 3130 for Playwright (`E2E_PORT`) and 3210, 3220 or 3230 for Lighthouse (`LHCI_PORT`); the main worktree keeps 3100 and 3200. A run on a taken port stops at once rather than test another lane's server.
-- Free your own port before a run with `fuser -k <port>/tcp`, never `pkill -f`: that kills your own shell.
+- Use the ports your task names: 3110, 3120 or 3130 for Playwright (`E2E_PORT`) and 3210, 3220 or 3230 for Lighthouse (`LHCI_PORT`); the main worktree keeps 3100 and 3200. A Lighthouse run also takes the port after its own, for `next start` behind its HTTP/2 server. A run on a taken port stops at once rather than test another lane's server.
+- `pnpm lhci` serves the build over HTTP/2 with TLS, as Vercel does, since Lighthouse's simulated slow 4G models HTTP/1.1's six connections differently. Judge budgets on that default; `LHCI_HTTP=1.1` (plain `next start`) is only for comparing.
+- Free your own port (for Lighthouse, the one after it too) before a run with `fuser -k <port>/tcp`, never `pkill -f`: that kills your own shell.
 - Run Playwright and Lighthouse only through `scripts/lane/heavy.sh <command…>`: heavy runs queue behind one lock, so the machine is never overloaded.
 - In a new worktree, run `pnpm install`, then `node scripts/content/registry.mjs` once: `pnpm check` checks the content registry but doesn't write it.
 - While working, narrow runs with `E2E_ONLY=<spec,…>` and `E2E_SCOPE=sample`: the full suite is for the done-check and the merger.
