@@ -1,0 +1,9 @@
+/* The Concept map's page: a wider folio than a reading page's, so the plate and its list sit side by side. */
+.page {
+  display: grid;
+  gap: 1.25rem;
+  width: 100%;
+  max-width: 84rem;
+  margin-inline: auto;
+  padding: clamp(1rem, 3vw, 2rem) clamp(1rem, 4vw, 3rem) 0;
+}

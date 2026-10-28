@@ -3,7 +3,7 @@
  * the address (`?kind=passage&topic=mind,self`). A connection shows if it is of the chosen kind
  * and touches a chosen topic; with nothing chosen, everything shows, as it does without JavaScript.
  */
-import { KINDS, type ConnectionKind } from './layout'
+import { KINDS, type ConnectionKind } from './kinds'
 
 export interface Selection {
   kind: ConnectionKind | null

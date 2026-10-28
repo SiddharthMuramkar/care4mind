@@ -1,0 +1,501 @@
+/*
+ * The Concept map (ticket 12): a printed plate of hairline curves under the Concepts, and the
+ * same connections in words. Lighting is CSS: the page's generated `:has()` rules give the
+ * neighbours of whatever is pointed at `--lit: 1`, and pointing at anything gives the map `--dim: 1`.
+ */
+.map {
+  --dim: 0;
+  display: grid;
+  gap: 2rem;
+}
+
+.map:has([data-p]:is(:hover, :focus-visible), li[data-c]:is(:hover, :focus-within)) {
+  --dim: 1;
+}
+
+/* Below about 600 px the list leads; the plate shows once its link is followed (#plate). */
+.toPlate,
+.toList {
+  display: none;
+  margin: 0;
+}
+
+@media (max-width: 37.49rem) {
+  .toPlate,
+  .toList {
+    display: block;
+  }
+
+  .figure:not(:target) {
+    display: none;
+  }
+}
+
+.spread {
+  display: grid;
+  gap: 2rem;
+}
+
+/*
+ * Wide: the plate stays in view on the left while the filters and the list run beside it. The
+ * filters come first in the page's order, so Tab reaches them before the Concepts.
+ */
+@media (min-width: 64rem) {
+  .spread {
+    grid-template-columns: minmax(0, 3fr) minmax(19rem, 2fr);
+    grid-template-areas:
+      'plate filters'
+      'plate list';
+    grid-template-rows: auto 1fr;
+    align-items: start;
+    gap: 2rem 3.5rem;
+  }
+
+  .spread > :first-child {
+    grid-area: filters;
+  }
+
+  .figure {
+    grid-area: plate;
+    position: sticky;
+    top: var(--sticky-top);
+  }
+
+  .connections {
+    grid-area: list;
+  }
+}
+
+.figure {
+  display: grid;
+  justify-items: center;
+  gap: 1.25rem;
+  min-width: 0;
+  margin: 0;
+}
+
+.plate {
+  position: relative;
+  width: 100%;
+  max-width: 44rem;
+  aspect-ratio: 1;
+  container-type: inline-size;
+}
+
+/* Beside the list, the plate fits the screen's height with its legend under it. */
+@media (min-width: 64rem) {
+  .plate {
+    max-width: min(46rem, calc((100svh - var(--sticky-top) - 13rem) * 1.5));
+  }
+}
+
+.plate > svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.ring {
+  fill: none;
+  stroke: var(--color-surface-rule);
+  stroke-width: 1px;
+  vector-effect: non-scaling-stroke;
+}
+
+.arc {
+  fill: none;
+  stroke: var(--topic);
+  stroke-width: 3.5px;
+  vector-effect: non-scaling-stroke;
+}
+
+/* The still picture of the plate (PlatePicture): no names, nothing lit, nothing moving. */
+.picture {
+  --dim: 0;
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.stillArc {
+  fill: none;
+  stroke: var(--topic);
+  stroke-width: 3px;
+  vector-effect: non-scaling-stroke;
+}
+
+.stillMark {
+  fill: var(--topic);
+  stroke: var(--color-surface-ink);
+  stroke-width: 1px;
+  vector-effect: non-scaling-stroke;
+}
+
+.numeral {
+  fill: var(--color-surface-muted);
+  font-size: 30px;
+  text-anchor: middle;
+  dominant-baseline: central;
+}
+
+/* A connection's line. Its kind sets its style; lit, it inks vermilion and thickens. */
+.line {
+  --lit: 0;
+  fill: none;
+  stroke: color-mix(in srgb, var(--color-highlight) calc(var(--lit) * 100%), var(--ink));
+  stroke-width: calc(var(--weight) + var(--lit) * 1px);
+  vector-effect: non-scaling-stroke;
+  opacity: calc(1 - var(--dim) * (1 - var(--lit)) * 0.85);
+}
+
+.line[data-kind='passage'] {
+  --ink: var(--color-surface-ink);
+  --weight: 1.4px;
+}
+
+.line[data-kind='reference'] {
+  --ink: var(--color-surface-ink);
+  --weight: 2.6px;
+  stroke-dasharray: 0 6;
+  stroke-linecap: round;
+}
+
+.line[data-kind='work'] {
+  --ink: var(--color-surface-muted);
+  --weight: 1px;
+  stroke-dasharray: 6 4;
+}
+
+.line[data-off] {
+  display: none;
+}
+
+/* A swatch takes its text's colour, and never dims. */
+.swatch {
+  --dim: 0;
+  display: inline-block;
+  flex: none;
+  width: 2.25em;
+  height: 0.6em;
+  overflow: visible;
+}
+
+.swatch .line {
+  stroke: currentColor;
+}
+
+/* The Concepts, laid over the curves: each a link, its mark on the circle, its name set outward. */
+.points,
+.sector {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.point {
+  --lit: 0;
+  --rest: var(--color-surface-ink);
+  --mark: 0.62em;
+  position: absolute;
+  left: var(--x);
+  top: var(--y);
+  display: flex;
+  align-items: center;
+  gap: 0.45em;
+  width: max-content;
+  max-width: calc(var(--room) * 100cqi);
+  min-height: 24px;
+  font-size: clamp(0.6875rem, 2.2cqi, 1.0625rem);
+  line-height: 1.15;
+  color: color-mix(
+    in srgb,
+    var(--color-surface-link) calc(var(--lit) * 100%),
+    color-mix(in srgb, var(--color-surface-muted) calc(var(--dim) * 100%), var(--rest))
+  );
+  text-decoration: none;
+  transform: translate(calc(var(--mark) / -2), -50%);
+}
+
+.point[data-side='left'] {
+  flex-direction: row-reverse;
+  text-align: end;
+  transform: translate(calc(-100% + var(--mark) / 2), -50%);
+}
+
+.point:is(:hover, :focus-visible) {
+  --lit: 1;
+}
+
+.point[data-faint] {
+  --rest: var(--color-surface-muted);
+}
+
+.point:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+.label:lang(sa-Latn) {
+  font-style: italic;
+}
+
+.point:is(:hover, :focus-visible) .label {
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.18em;
+}
+
+/* The mark: a lozenge in its topic's hue, outlined in ink; lit, it inks vermilion and grows. */
+.mark {
+  flex: none;
+  width: var(--mark);
+  height: var(--mark);
+  border: 1px solid var(--color-surface-ink);
+  background: color-mix(in srgb, var(--color-highlight) calc(var(--lit) * 100%), var(--topic));
+  transform: rotate(45deg) scale(calc(1 + var(--lit) * 0.35));
+}
+
+.point[data-faint] .mark {
+  background: var(--color-surface);
+}
+
+/*
+ * A small plate (a phone, after "See the map"): each name keeps to one line, cut short where it
+ * can't fit, so neighbours never overlap. The list below names everything in full, with links
+ * of full size to the same pages.
+ */
+@container (width < 30rem) {
+  .point {
+    min-height: 0;
+    font-size: max(0.625rem, 3.2cqi);
+  }
+
+  .label {
+    min-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+}
+
+.caption {
+  max-width: 34rem;
+  font-size: 0.9375rem;
+  line-height: 1.5;
+  text-align: center;
+  color: var(--color-surface-muted);
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1rem 2.5rem;
+  width: 100%;
+  padding-top: 1rem;
+  border-top: 1px solid var(--color-surface-rule);
+  font-size: 0.9375rem;
+  line-height: 1.4;
+}
+
+.legendTitle {
+  margin: 0 0 0.35rem;
+  font-variant-caps: all-small-caps;
+  letter-spacing: 0.12em;
+  color: var(--color-surface-muted);
+}
+
+.legendList {
+  display: grid;
+  gap: 0.3rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.legendList > li {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.topicKey {
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  width: 1.6rem;
+  height: 1.6rem;
+  border-bottom: 3.5px solid var(--topic);
+  color: var(--color-surface-muted);
+  line-height: 1;
+}
+
+/* The connections in words, set like a book's index. */
+.connections {
+  display: grid;
+  align-content: start;
+  gap: 1.75rem;
+  min-width: 0;
+  scroll-margin-top: var(--sticky-top);
+}
+
+.listTitle {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: clamp(1.75rem, 4.5vw, 2.25rem);
+  line-height: 1.15;
+}
+
+.listNote {
+  margin: -1rem 0 0;
+  font-size: 1rem;
+  color: var(--color-surface-muted);
+}
+
+.kind {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.kindTitle {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin: 0;
+  font-variant-caps: all-small-caps;
+  letter-spacing: 0.1em;
+  font-size: 1.1875rem;
+  font-weight: 400;
+}
+
+.rows {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* A row lit from the plate shows a vermilion rule at its edge, inked from its centre. */
+.row {
+  --lit: 0;
+  position: relative;
+  padding: 0.55rem 0 0.6rem 0.9rem;
+  border-top: 1px solid color-mix(in srgb, var(--color-surface-rule) 50%, transparent);
+}
+
+.row::after {
+  content: '';
+  position: absolute;
+  inset-block: 0.6rem;
+  inset-inline-start: 0;
+  width: 2px;
+  background: var(--color-highlight);
+  transform: scaleY(var(--lit));
+}
+
+.pair {
+  margin: 0;
+  font-size: 1.0625rem;
+  line-height: 1.45;
+}
+
+.pair :lang(sa-Latn) {
+  font-style: italic;
+}
+
+.reasons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 0.9rem;
+  margin: 0.1rem 0 0;
+  font-size: 0.9375rem;
+  line-height: 1.45;
+  color: var(--color-surface-muted);
+}
+
+/*
+ * Motion, only when it is welcome: the topics' arcs ink from their middles, the curves ink out
+ * from the plate's centre (strongest kind first), the marks set down round the circle, and
+ * lighting fades. Finished and still by default, under reduced motion and in print.
+ */
+@keyframes draw {
+  from {
+    stroke-dasharray: 1 1.1;
+    stroke-dashoffset: 1.05;
+  }
+  to {
+    stroke-dasharray: 1 1.1;
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes ink-out {
+  from {
+    clip-path: circle(0 at 50% 50%);
+  }
+  to {
+    clip-path: circle(75% at 50% 50%);
+  }
+}
+
+@keyframes set-down {
+  from {
+    opacity: 0;
+    transform: rotate(45deg) scale(0);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .arc {
+    animation: draw var(--duration-stroke) var(--ease-in-out) backwards;
+  }
+
+  .lines {
+    animation: ink-out calc(var(--duration-stroke) * 1.4) var(--ease-out) backwards;
+    animation-delay: calc(var(--duration-stroke) / 3);
+  }
+
+  .lines[data-layer='reference'] {
+    animation-delay: calc(var(--duration-stroke) / 2);
+  }
+
+  .lines[data-layer='work'] {
+    animation-delay: calc(var(--duration-stroke) * 2 / 3);
+  }
+
+  .mark {
+    animation: set-down var(--duration-quick) var(--ease-out) backwards;
+    animation-delay: calc(var(--duration-stroke) / 4 + var(--i) * 30ms);
+    transition: transform var(--duration-quick) var(--ease-out);
+  }
+
+  .line {
+    transition: opacity var(--duration-quick) var(--ease-out);
+  }
+
+  .row::after {
+    transition: transform var(--duration-quick) var(--ease-out);
+  }
+}
+
+@media print {
+  .arc,
+  .lines,
+  .mark {
+    animation: none;
+  }
+
+  .figure,
+  .figure:not(:target) {
+    display: grid;
+    position: static;
+    break-inside: avoid;
+  }
+
+  .toPlate,
+  .toList {
+    display: none;
+  }
+}

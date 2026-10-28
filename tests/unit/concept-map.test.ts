@@ -23,7 +23,7 @@ const TOPICS = [
 
 const node = (slug: string, topic: string, also: string[] = []) => ({
   slug,
-  name: slug[0]!.toUpperCase() + slug.slice(1),
+  name: slug.charAt(0).toUpperCase() + slug.slice(1),
   href: `/concepts/${slug}/`,
   topic,
   topics: [topic, ...also],
@@ -69,10 +69,10 @@ describe('layoutMap', () => {
   it('sets every Concept on one circle, in the graph’s order, so the tab order follows the topics', () => {
     expect(map.size).toBe(1000)
     expect(map.points.map(({ slug }) => slug)).toEqual(GRAPH.nodes.map(({ slug }) => slug))
-    const radii = map.points.map(radius)
-    for (const r of radii) expect(r).toBeCloseTo(radii[0]!, 0)
-    expect(radii[0]).toBeGreaterThan(200)
-    expect(radii[0]).toBeLessThan(400)
+    const [first = 0, ...rest] = map.points.map(radius)
+    for (const r of rest) expect(r).toBeCloseTo(first, 0)
+    expect(first).toBeGreaterThan(200)
+    expect(first).toBeLessThan(400)
   })
 
   it('goes round the circle clockwise, one sector per topic, each holding only its own Concepts', () => {
@@ -87,8 +87,10 @@ describe('layoutMap', () => {
       expect(inside.map(({ topic }) => topic)).toEqual(inside.map(() => sector.topic))
       expect(inside.length).toBe(GRAPH.nodes.filter(({ topic }) => topic === sector.topic).length)
     }
-    for (const [before, after] of map.sectors.slice(1).map((s, i) => [map.sectors[i]!, s]))
-      expect(after!.from).toBeGreaterThan(before!.to)
+    map.sectors.reduce((before, after) => {
+      expect(after.from).toBeGreaterThan(before.to)
+      return after
+    })
   })
 
   it('draws one curve for each pair of Concepts and kind of connection, strongest kind first, keeping every reason', () => {
@@ -127,17 +129,20 @@ describe('layoutMap', () => {
   it('runs each curve from one of its Concepts to the other, bowed in towards the centre', () => {
     const place = new Map(map.points.map((point) => [point.slug, point]))
     for (const { source, target, path } of map.connections) {
-      const numbers = path.match(/-?\d+(\.\d+)?/g)!.map(Number)
       expect(path).toMatch(/^M[\d. -]+Q[\d. -]+$/)
-      const [x1, y1, cx, cy, x2, y2] = numbers as [number, number, number, number, number, number]
-      expect({ x: x1, y: y1 }).toEqual({ x: place.get(source)!.x, y: place.get(source)!.y })
-      expect({ x: x2, y: y2 }).toEqual({ x: place.get(target)!.x, y: place.get(target)!.y })
+      const [x1 = 0, y1 = 0, cx = 0, cy = 0, x2 = 0, y2 = 0] = (
+        path.match(/-?\d+(\.\d+)?/g) ?? []
+      ).map(Number)
+      const from = place.get(source)
+      const to = place.get(target)
+      expect({ x: x1, y: y1 }).toEqual({ x: from?.x, y: from?.y })
+      expect({ x: x2, y: y2 }).toEqual({ x: to?.x, y: to?.y })
       const middle = { x: (x1 + x2) / 2, y: (y1 + y2) / 2 }
       expect(radius({ x: cx, y: cy })).toBeLessThanOrEqual(radius(middle) + 0.1)
     }
     // Two kinds joining the same pair take different curves.
     const [passage, reference] = map.connections.filter(({ source }) => source === 'citta')
-    expect(passage!.path).not.toBe(reference!.path)
+    expect(passage?.path).not.toBe(reference?.path)
   })
 
   it('names each Concept’s neighbours, whatever joins them', () => {

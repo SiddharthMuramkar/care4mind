@@ -6,7 +6,9 @@
  * their names are set across, so even spacing down the page keeps neighbouring names apart.
  * Coordinates are in a square of SIZE units, its centre at the middle.
  */
-import type { ConceptGraph, ConceptGraphEdge, ConceptGraphNode } from '@/content'
+import type { ConceptGraph, ConceptGraphNode } from '@/content'
+
+import { KINDS, type ConnectionKind } from './kinds'
 
 export const SIZE = 1000
 const CENTRE = SIZE / 2
@@ -18,11 +20,12 @@ const REACH = 68
 const TOPIC_GAP = 0.8
 /** How far a sector's arc runs past its first and last Concept, in degrees. */
 const SECTOR_PAD = 4
-
-export type ConnectionKind = ConceptGraphEdge['kind']
-
-/** The kinds of connection, strongest first (D06): the list's order, and the plate's top layer first. */
-export const KINDS: readonly ConnectionKind[] = ['passage', 'reference', 'work']
+/** The space between a Concept's mark and the plate's edge its name can't use. */
+const LABEL_OFFSET = 40
+/** The margin the plate keeps above and below the circle. */
+const VIEW_MARGIN = 24
+/** How far inside the circle a sector's number sits. */
+const NUMERAL_INSET = 44
 
 /**
  * How far each kind's curve stays from the centre, as a share of the way from the centre to the
@@ -43,6 +46,8 @@ export interface MapPoint extends ConceptGraphNode {
   bearing: number
   /** The half of the circle it sits on: its name is set outward from there. */
   side: 'right' | 'left'
+  /** How wide its name may run outward before the plate's edge, as a share of the plate (0 to 1). */
+  room: number
   /** The Concepts it shares a connection with, of any kind, in the graph's order. */
   near: string[]
 }
@@ -69,12 +74,16 @@ export interface MapSector {
   /** Where its arc starts and ends, clockwise from the top, in degrees. */
   from: number
   to: number
-  /** Its arc on the circle, as an SVG path. */
-  arc: string
+  /** Its arc on the circle, as two SVG paths running out from its middle, so it inks from the centre. */
+  arcs: [string, string]
+  /** Where its number sits, just inside the circle at the middle of its arc. */
+  numeral: { x: number; y: number }
 }
 
 export interface MapLayout {
   size: number
+  /** The band of the square the plate shows: the circle and a margin, with the empty top and foot cut. */
+  view: { top: number; height: number }
   points: MapPoint[]
   sectors: MapSector[]
   connections: MapConnection[]
@@ -100,11 +109,11 @@ function split(groups: readonly ConceptGraphNode[][]) {
   let best = groups.length
   let gap = Infinity
   let before = 0
-  for (let index = 0; index < groups.length; index++) {
+  groups.forEach((group, index) => {
     const off = Math.abs(total - 2 * before)
     if (index > 0 && off < gap) [best, gap] = [index, off]
-    before += groups[index]!.length
-  }
+    before += group.length
+  })
   if (groups.length === 1) best = 1
   return [groups.slice(0, best), groups.slice(best)] as const
 }
@@ -125,19 +134,20 @@ function placeHalf(groups: readonly ConceptGraphNode[][], side: 'right' | 'left'
       const dx = Math.sqrt(RADIUS * RADIUS - dy * dy) * (side === 'right' ? 1 : -1)
       const x = round(CENTRE + dx)
       const y = round(CENTRE + dy)
-      points.push({ ...node, x, y, bearing: round(bearingOf(x, y)), side, near: [] })
+      const room = Math.round(((side === 'right' ? SIZE - x : x) - LABEL_OFFSET) / 10) / 100
+      points.push({ ...node, x, y, bearing: round(bearingOf(x, y)), side, room, near: [] })
       offset += step
     }
   })
   return points
 }
 
-/** An arc of the circle, clockwise from one bearing to another. */
+/** An arc of the circle from one bearing to another, either way round. */
 function arcPath(from: number, to: number) {
   const start = at(from)
   const end = at(to)
-  const large = to - from > 180 ? 1 : 0
-  return `M${start.x} ${start.y}A${RADIUS} ${RADIUS} 0 ${large} 1 ${end.x} ${end.y}`
+  const large = Math.abs(to - from) > 180 ? 1 : 0
+  return `M${start.x} ${start.y}A${RADIUS} ${RADIUS} 0 ${large} ${to > from ? 1 : 0} ${end.x} ${end.y}`
 }
 
 /** The plate: where each Concept sits and each topic's sector. */
@@ -157,11 +167,19 @@ export function layoutMap(graph: ConceptGraph, topics: readonly MapTopic[]): Map
       order: topic.order,
       from,
       to,
-      arc: arcPath(from, to),
+      arcs: [arcPath((from + to) / 2, from), arcPath((from + to) / 2, to)] as [string, string],
+      numeral: at((from + to) / 2, RADIUS - NUMERAL_INSET),
     }
   })
 
-  return { size: SIZE, points, sectors, connections: connect(graph, points) }
+  const top = CENTRE - RADIUS - VIEW_MARGIN
+  return {
+    size: SIZE,
+    view: { top, height: SIZE - 2 * top },
+    points,
+    sectors,
+    connections: connect(graph, points),
+  }
 }
 
 /** The graph's facts as curves: one for each pair and kind, strongest kind first, then in the graph's order. */
@@ -192,7 +210,7 @@ function connect(graph: ConceptGraph, points: MapPoint[]): MapConnection[] {
     if (!to.near.includes(source)) to.near.push(source)
   }
   const order = new Map(points.map(({ slug }, index) => [slug, index]))
-  for (const point of points) point.near.sort((a, b) => order.get(a)! - order.get(b)!)
+  for (const point of points) point.near.sort((a, b) => (order.get(a) ?? 0) - (order.get(b) ?? 0))
   const all = [...byId.values()]
   return KINDS.flatMap((kind) => all.filter((connection) => connection.kind === kind))
 }
@@ -203,4 +221,25 @@ function curve(from: MapPoint, to: MapPoint, kind: ConnectionKind) {
   const cx = round(CENTRE + ((from.x + to.x) / 2 - CENTRE) * bow)
   const cy = round(CENTRE + ((from.y + to.y) / 2 - CENTRE) * bow)
   return `M${from.x} ${from.y}Q${cx} ${cy} ${to.x} ${to.y}`
+}
+
+/**
+ * The plate's lighting, as CSS made while the site builds (no JavaScript): pointing at or focusing
+ * a Concept lights its neighbours and its curves (and their rows in the list); pointing at or
+ * focusing a row of the list lights its curve and its two Concepts. Lit elements take `--lit: 1`.
+ * A point carries `data-p` and `data-near`; a curve and a row carry `data-c` and `data-ends`.
+ * The filters rewrite `data-near` to the neighbours still shown.
+ */
+export function litRules({ points, connections }: MapLayout, anchor = '[data-map]'): string {
+  const lit = '{--lit:1}'
+  return [
+    ...points.map(
+      ({ slug }) =>
+        `${anchor}:has([data-p="${slug}"]:is(:hover,:focus-visible)) :is([data-near~="${slug}"],[data-ends~="${slug}"])${lit}`,
+    ),
+    ...connections.map(
+      ({ source, target }, index) =>
+        `${anchor}:has(li[data-c="c${index}"]:is(:hover,:focus-within)) :is(path[data-c="c${index}"],[data-p="${source}"],[data-p="${target}"])${lit}`,
+    ),
+  ].join('\n')
 }
