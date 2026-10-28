@@ -21,6 +21,7 @@
     "check": "node scripts/content/registry.mjs --check && pnpm lint && pnpm format:check && pnpm typecheck && pnpm test && pnpm build",
     "check:e2e": "playwright test",
     "lhci": "lhci autorun",
+    "shots": "node scripts/shots.mjs",
     "content:new": "node scripts/content/new.mjs"
   },
   "dependencies": {
