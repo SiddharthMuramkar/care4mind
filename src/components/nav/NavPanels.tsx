@@ -238,7 +238,7 @@ function ConceptsPanel({ site, pathname, mapNote }: PanelProps & { mapNote?: Rea
   )
 }
 
-/** The Library's pages as a catalogue: References first, then the reading lists, each with its count. */
+/** The Library's pages as a catalogue: References first, then the reading lists, then its pages, each with what it holds. */
 function LibraryPanel({ site, pathname }: PanelProps) {
   const { pages, index } = site.library
   return (
@@ -249,14 +249,14 @@ function LibraryPanel({ site, pathname }: PanelProps) {
           <li key={page.slug} style={{ '--index': position } as CSSProperties}>
             <PanelLink href={page.href} pathname={pathname} className={styles.entry}>
               <span className={styles.name}>{page.label}</span>
-              {page.count === undefined ? null : (
+              {page.holds ? (
                 <>
                   <span className={styles.leader} aria-hidden />
                   <span className={styles.count}>
-                    {page.count} {page.count === 1 ? 'entry' : 'entries'}
+                    {page.holds.count} {page.holds.count === 1 ? page.holds.one : page.holds.many}
                   </span>
                 </>
-              )}
+              ) : null}
             </PanelLink>
           </li>
         ))}

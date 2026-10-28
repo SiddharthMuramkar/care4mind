@@ -25,10 +25,17 @@ export interface TopicLink extends NavLink {
   count: number
 }
 
+/** What a Library page holds, counted as the Library page counts it: "188 References". */
+export interface Holding {
+  count: number
+  /** The unit, singular then plural: entries for a reading list, sections for a page. */
+  one: string
+  many: string
+}
+
 export interface LibraryLink extends NavLink {
   slug: string
-  /** How many entries the page holds, where it is a list. */
-  count?: number
+  holds?: Holding
 }
 
 /**

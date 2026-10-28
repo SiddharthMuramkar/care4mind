@@ -25,12 +25,13 @@ const TOPICS = [
   { name: /^Guṇa and temperament/, path: '/topics/temperament/', count: 2 },
 ] as const
 
+// Each with what it holds, counted as the Library page counts it.
 const LIBRARY = [
-  { name: /^References/, path: '/library/references/' },
-  { name: /^Text Books/, path: '/library/textbooks/' },
-  { name: /^Inspirational Books/, path: '/library/inspirational-books/' },
-  { name: /^Courses/, path: '/library/courses/' },
-  { name: /^Methods/, path: '/library/methods/' },
+  { name: /^References/, path: '/library/references/', holds: '188 References' },
+  { name: /^Text Books/, path: '/library/textbooks/', holds: '20 entries' },
+  { name: /^Inspirational Books/, path: '/library/inspirational-books/', holds: '13 entries' },
+  { name: /^Courses/, path: '/library/courses/', holds: '8 entries' },
+  { name: /^Methods/, path: '/library/methods/', holds: '5 sections' },
 ] as const
 
 const isWide = (page: Page) => (page.viewportSize()?.width ?? 0) >= WIDE
@@ -243,7 +244,7 @@ test.describe('panels, on a computer', () => {
     await expect(toggle(page, 'Concepts')).toBeFocused()
   })
 
-  test('Library opens with ArrowDown, lists its five pages, and Escape from inside gives focus back', async ({
+  test('Library opens with ArrowDown, lists its five pages with what each holds, and Escape from inside gives focus back', async ({
     page,
   }) => {
     await gotoReady(page, '/')
@@ -254,8 +255,10 @@ test.describe('panels, on a computer', () => {
       ...LIBRARY.map(({ name }) => name),
       /The whole Library/,
     ])
-    for (const { name, path } of LIBRARY) {
-      expect(await pathOf(library.getByRole('link', { name }))).toBe(path)
+    for (const { name, path, holds } of LIBRARY) {
+      const link = library.getByRole('link', { name })
+      await expect(link).toContainText(holds)
+      expect(await pathOf(link)).toBe(path)
     }
     await page.keyboard.press('Tab')
     await expect(library.getByRole('link', { name: LIBRARY[0].name })).toBeFocused()
@@ -383,6 +386,9 @@ test.describe('the Drawer, on a phone', () => {
     for (const { name, path } of [...TOPICS, ...LIBRARY]) {
       expect(await pathOf(nav.getByRole('link', { name }))).toBe(path)
     }
+    for (const { name, holds } of LIBRARY) {
+      await expect(nav.getByRole('link', { name })).toHaveAccessibleName(new RegExp(`${holds}$`))
+    }
     expect(await pathOf(drawer(page).getByRole('link', { name: 'Search' }))).toBe('/search/')
 
     // Focus is inside, and Tab keeps it there, forwards and back.
@@ -429,6 +435,8 @@ test.describe('the Drawer, on a phone', () => {
   test('a swipe to the right puts it away', async ({ page }) => {
     await gotoReady(page, '/')
     await menu(page).click()
+    // A swipe begins on the sheet as it rests, not while it is still sliding in.
+    await settled(page)
     const box = await drawer(page).getByText('Menu', { exact: true }).boundingBox()
     if (!box) throw new Error('the Drawer has its title')
     await page.mouse.move(box.x + 4, box.y + box.height / 2)

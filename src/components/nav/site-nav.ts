@@ -2,7 +2,7 @@ import type { Route } from 'next'
 
 import { hrefFor, library, references, site, topics } from '@/content'
 
-import type { LibraryLink, NavLink, SiteNav } from './types'
+import type { Holding, LibraryLink, NavLink, SiteNav } from './types'
 
 // Views give their pages' paths as plain strings; Next's Link wants a Route.
 const route = (path: string) => path as Route
@@ -32,19 +32,32 @@ async function build(): Promise<SiteNav> {
   const lists = libraryCards
     .filter((card) => card.kind === 'resource-list')
     .sort((a, b) => b.itemCount - a.itemCount)
-  const pages = libraryCards.filter((card) => card.kind === 'page')
+  const pages = await Promise.all(
+    libraryCards
+      .filter((card) => card.kind === 'page')
+      .map(async (card) => {
+        const view = await library.get(card.slug)
+        const sections = view?.kind === 'page' ? view.sections.length : 0
+        return { card, sections }
+      }),
+  )
+  const holds = (count: number, one: string, many: string): Holding => ({ count, one, many })
   const libraryPages: LibraryLink[] = [
     {
       slug: 'references',
       ...link('References', hrefFor({ page: 'references' })),
-      count: allReferences.length,
+      holds: holds(allReferences.length, 'Reference', 'References'),
     },
     ...lists.map((card) => ({
       slug: card.slug,
       ...link(card.title, card.href),
-      count: card.itemCount,
+      holds: holds(card.itemCount, 'entry', 'entries'),
     })),
-    ...pages.map((card) => ({ slug: card.slug, ...link(card.title, card.href) })),
+    ...pages.map(({ card, sections }) => ({
+      slug: card.slug,
+      ...link(card.title, card.href),
+      ...(sections > 0 ? { holds: holds(sections, 'section', 'sections') } : {}),
+    })),
   ]
 
   const topicLinks = [...topicCards]

@@ -159,7 +159,7 @@ function ConceptsList({ nav, pathname, mapNote }: ListProps & { mapNote?: ReactN
   )
 }
 
-/** Under Library: its five pages, each list with a leader to its count. */
+/** Under Library: its five pages, each with a leader to what it holds. */
 function LibraryList({ nav, pathname }: ListProps) {
   return (
     <ul className={styles.pages}>
@@ -171,15 +171,18 @@ function LibraryList({ nav, pathname }: ListProps) {
             aria-current={currentFor(pathname, page.href)}
           >
             <span className={styles.name}>{page.label}</span>
-            {page.count === undefined ? null : (
+            {page.holds ? (
               <>
                 <span className={styles.leader} aria-hidden />
                 <span className={styles.count}>
-                  {page.count}
-                  <span className="sr-only"> {page.count === 1 ? 'entry' : 'entries'}</span>
+                  {page.holds.count}
+                  <span className="sr-only">
+                    {' '}
+                    {page.holds.count === 1 ? page.holds.one : page.holds.many}
+                  </span>
                 </span>
               </>
-            )}
+            ) : null}
           </Link>
         </li>
       ))}
