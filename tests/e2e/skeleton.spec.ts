@@ -9,7 +9,8 @@ import { expect, gotoReady, inScope, test } from './fixtures'
 const routes = await site.routes()
 const ORIGIN = 'https://care4mind.org'
 
-// The page-level sweep runs at 1440 px; the HTTP checks need no browser width at all.
+// Everything here runs once, in the 1440 px project: pages are swept at that width, and the
+// HTTP checks need no width at all.
 test.skip(({ viewport }) => viewport?.width !== 1440, 'swept once, at 1440 px')
 
 test.describe('every page in the route registry', () => {
