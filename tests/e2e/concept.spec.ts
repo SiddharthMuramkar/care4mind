@@ -37,7 +37,7 @@ function focusUnderDialog(page: Page) {
 
 test.describe('Concept page', () => {
   test.beforeEach(async ({ page }) => {
-    await gotoReady(page, '/concepts/vikshepa')
+    await gotoReady(page, '/concepts/vikshepa/')
   })
 
   test('names the term in IAST and Devanagari, each with its language tag', async ({ page }) => {
@@ -143,7 +143,7 @@ test.describe('Concept page', () => {
   }) => {
     const entry = page.locator('#ref-bhavanani-2012')
     await expect(entry).toBeHidden()
-    await gotoReady(page, '/concepts/vikshepa#ref-bhavanani-2012')
+    await gotoReady(page, '/concepts/vikshepa/#ref-bhavanani-2012')
     await expect(entry).toBeVisible()
     await expect(entry).toBeInViewport()
   })
@@ -151,8 +151,8 @@ test.describe('Concept page', () => {
   test('a link from another page to one of its References opens them at that entry', async ({
     page,
   }) => {
-    await gotoReady(page, '/questionnaires/karmayoga-scale')
-    await gotoReady(page, '/concepts/vikshepa#ref-gurubhaktananda-2018')
+    await gotoReady(page, '/questionnaires/karmayoga-scale/')
+    await gotoReady(page, '/concepts/vikshepa/#ref-gurubhaktananda-2018')
     const entry = page.locator('#ref-gurubhaktananda-2018')
     await expect(entry).toBeVisible()
     await expect(entry).toBeInViewport()
@@ -160,7 +160,7 @@ test.describe('Concept page', () => {
 
   test('reaches its related Questionnaire in one click (FR-01)', async ({ page }) => {
     await page.getByRole('link', { name: 'KarmaYoga Scale' }).click()
-    await expect(page).toHaveURL('/questionnaires/karmayoga-scale')
+    await expect(page).toHaveURL('/questionnaires/karmayoga-scale/')
     await expect(page.getByRole('heading', { level: 1 })).toHaveText('KarmaYoga Scale')
   })
 
@@ -177,7 +177,7 @@ test.describe('with JavaScript off', () => {
   test.use({ javaScriptEnabled: false })
 
   test('the Concept page still shows the other spellings, and closes them', async ({ page }) => {
-    await page.goto('/concepts/vikshepa')
+    await page.goto('/concepts/vikshepa/')
     const popup = spellingsPopup(page)
     await spellingsButton(page).click()
     await expect(popup).toBeVisible()
@@ -189,30 +189,20 @@ test.describe('with JavaScript off', () => {
   test('the Concept page still opens its References, and a link to one of them', async ({
     page,
   }) => {
-    await page.goto('/concepts/vikshepa#ref-bhavanani-2012')
+    await page.goto('/concepts/vikshepa/#ref-bhavanani-2012')
     const linked = page.locator('#ref-bhavanani-2012')
     await expect(linked).toBeVisible()
     await expect(linked).toBeInViewport()
 
-    await page.goto('/concepts/vikshepa')
+    await page.goto('/concepts/vikshepa/')
     const doi = page.getByRole('link', { name: 'doi:10.3389/fpsyg.2025.1554014' })
     await expect(doi).toBeHidden()
     await references(page).toggle.click()
     await expect(doi).toBeVisible()
 
     await page.getByRole('link', { name: 'KarmaYoga Scale' }).click()
-    await expect(page).toHaveURL('/questionnaires/karmayoga-scale')
+    await expect(page).toHaveURL('/questionnaires/karmayoga-scale/')
   })
-})
-
-test('the homepage card opens the Concept page', async ({ page }) => {
-  const errors: string[] = []
-  page.on('pageerror', (error) => errors.push(error.message))
-  await gotoReady(page, '/')
-  await page.getByRole('link', { name: 'Read about Vikṣepa' }).click()
-  await expect(page).toHaveURL('/concepts/vikshepa')
-  await expect(page.getByRole('heading', { level: 1 })).toContainText('Vikṣepa')
-  expect(errors).toEqual([])
 })
 
 // Arriving by a link, the page is drawn by React in the browser, not from the server's HTML.
@@ -221,7 +211,7 @@ test('arriving from the homepage, the other spellings and the References still o
 }) => {
   await gotoReady(page, '/')
   await page.getByRole('link', { name: 'Read about Vikṣepa' }).click()
-  await expect(page).toHaveURL('/concepts/vikshepa')
+  await expect(page).toHaveURL('/concepts/vikshepa/')
   const popup = spellingsPopup(page)
   await spellingsButton(page).click()
   await expect(popup).toBeVisible()
@@ -234,7 +224,7 @@ test('arriving from the homepage, the other spellings and the References still o
 
 test('the References list fades in as it opens, by opacity alone', async ({ page }) => {
   await recordAnimationStarts(page)
-  await gotoReady(page, '/concepts/vikshepa')
+  await gotoReady(page, '/concepts/vikshepa/')
   const doi = page.getByRole('link', { name: 'doi:10.3389/fpsyg.2025.1554014' })
   const { toggle, list } = references(page)
   await toggle.click()
@@ -254,7 +244,7 @@ test('the References control wears a kolam knot that turns as the list opens, an
   page,
 }) => {
   await recordAnimationStarts(page)
-  await gotoReady(page, '/concepts/vikshepa')
+  await gotoReady(page, '/concepts/vikshepa/')
   const { toggle: trigger, disclosure } = references(page)
   const knot = trigger.locator('svg')
   // A 1×1 kolam: one unbroken line looped round one dot, silent to assistive technology.

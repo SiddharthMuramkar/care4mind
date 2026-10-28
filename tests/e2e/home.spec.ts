@@ -249,3 +249,26 @@ test('nothing shifts while the kolams draw in, from load to the foot of the page
   )
   expect(shift).toBeLessThan(0.01)
 })
+
+// Moved here from concept.spec.ts by front-end-site ticket 03.
+test('the homepage card opens the Concept page', async ({ page }) => {
+  const errors: string[] = []
+  page.on('pageerror', (error) => errors.push(error.message))
+  await gotoReady(page, '/')
+  await page.getByRole('link', { name: 'Read about Vikṣepa' }).click()
+  await expect(page).toHaveURL('/concepts/vikshepa/')
+  await expect(page.getByRole('heading', { level: 1 })).toContainText('Vikṣepa')
+  expect(errors).toEqual([])
+})
+
+test('the homepage leads on to every Concept and every Questionnaire', async ({ page }) => {
+  await gotoReady(page, '/')
+  const main = page.getByRole('main')
+  await main.getByRole('link', { name: /^All \d+ Concepts, from A to Z$/ }).click()
+  await expect(page).toHaveURL('/concepts/')
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Concepts')
+  await page.goBack()
+  await main.getByRole('link', { name: /more Questionnaires from the current site/ }).click()
+  await expect(page).toHaveURL('/questionnaires/')
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Questionnaires')
+})

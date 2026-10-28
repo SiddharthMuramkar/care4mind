@@ -1,0 +1,66 @@
+.titleDeva {
+  margin: 0;
+  font-size: clamp(1.5rem, 6vw, 2.25rem);
+}
+
+/* One verse between rules, its locator set like a running head. */
+.passage {
+  display: grid;
+  gap: 0.85rem;
+  padding-top: 1.75rem;
+  border-top: 1px solid var(--color-surface-rule);
+  scroll-margin-top: 1.5rem;
+}
+
+.passage > * {
+  min-width: 0;
+}
+
+.passage:target {
+  background: color-mix(in srgb, var(--color-highlight) 8%, transparent);
+  box-shadow: 0 0 0 0.75rem color-mix(in srgb, var(--color-highlight) 8%, transparent);
+}
+
+.locator {
+  margin: 0;
+  font-variant-caps: all-small-caps;
+  letter-spacing: 0.12em;
+  font-weight: 600;
+  font-size: 1.125rem;
+}
+
+.deva {
+  margin: 0;
+  font-size: clamp(1.125rem, 5.5vw, 1.5rem);
+  line-height: 1.7;
+  overflow-wrap: anywhere;
+}
+
+.transliteration {
+  margin: 0;
+  font-style: italic;
+  font-size: 1.0625rem;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+
+.line {
+  display: block;
+}
+
+.number {
+  white-space: nowrap;
+}
+
+.translation {
+  display: grid;
+  gap: 0.35rem;
+  max-width: 62ch;
+}
+
+.label {
+  font-variant-caps: all-small-caps;
+  letter-spacing: 0.08em;
+  font-weight: 600;
+  margin-inline-end: 0.35em;
+}

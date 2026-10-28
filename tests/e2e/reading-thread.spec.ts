@@ -69,7 +69,7 @@ for (const { path, name } of READING_PAGES) {
 test('the thread never hides a focused control, tabbing down the page or back up', async ({
   page,
 }) => {
-  await gotoReady(page, '/concepts/vikshepa')
+  await gotoReady(page, '/concepts/vikshepa/')
   // The page has about a dozen stops; this goes past the last and back to the first.
   const steps = [...Array<string>(15).fill('Tab'), ...Array<string>(15).fill('Shift+Tab')]
   let checked = 0

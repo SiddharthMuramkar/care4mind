@@ -50,12 +50,12 @@ for (const { page: path, name, in: around, width } of DRAWN) {
 const IN_TEXT = [
   { page: '/', name: 'Concepts', in: (page: Page) => page.getByRole('main') },
   {
-    page: '/concepts/vikshepa',
+    page: '/concepts/vikshepa/',
     name: 'KarmaYoga Scale',
     in: (page: Page) => page.getByRole('main'),
   },
   {
-    page: '/concepts/vikshepa',
+    page: '/concepts/vikshepa/',
     name: 'Home',
     in: (page: Page) => page.getByRole('navigation', { name: 'Breadcrumb' }),
   },
