@@ -100,3 +100,49 @@ Everything the foundation built stays. The site-wide link previews switch on her
 - **Values Concepts (ahimsa, satya, asteya, brahmacharya):** each one's first section and the values topic's introduction share an id and a heading, and the view gives both: the section, then the introduction's section inside its topic-intro block. Draw the introduction's section in that section's place, so the heading shows once and the anchor stays unique.
 - **Ahimsa's EPRA citation:** `graph.ts` reads only innermost parentheses, so “(“EPRA International Journal of Multidisciplinary Research (IJMR),” 2019b)” isn't read as a citation and doesn't link to `epra-2019`. Fix the reader (owned above) with a unit test for nested parentheses.
 - The KarmaYoga form has no form-level description field; its quiz description line stays out and is flagged for the Psychology expert.
+
+### Build notes (lane/site-05, 2026-10-28)
+
+**What is built**
+
+- **Heading (D07):** `concept/TitleSpellings.tsx` sets the capitalised IAST and the Devanagari beneath it through ScriptPair, each with its `lang`; the gloss stays in small capitals; English-titled Concepts lead with their title. The foundation's "Devanagari first" switch still reorders what is read and seen: switched, the heading draws its own two spans in the other order, and both spellings are named (`concept-title-<slug>` and `concept-title-<slug>-devanagari`) so they fly as a shared pair. One-line change outside my files: `DevanagariFirst` is exported from `ScriptChoice.tsx` (ticket 13's).
+- **Blocks:** every kind renders as before. A term keeps its heading one level below its section, its id, and gains a visible pilcrow link to its anchor ("Link to Vyādhi"). Applications and comparison sections carry a small-caps label above the heading; the heading's name reads "Comparison: …" (the lozenge is CSS with empty alt text). Verses quoted mid-section are verse cards.
+- **Contents** (`concept/Contents.tsx`): a `nav` named "Contents" with its own h2, listing the sections (with their terms from 64rem), then Linked knowledge and References, with Devanagari numerals. From 64rem it sits beside the text, sticky, scrolling on its own if long; below that it sits after the opening verses, above the sections, unstuck. The section in view gets a vermilion lozenge and ink: `scroll-target-group: auto` + `:target-current` where supported; else a `timeline-scope` on the body and each section's `view-timeline-name` (a one-line band 30% down the screen); else nothing. No JavaScript, no listener, no observer.
+- **Linked knowledge** (`concept/LinkedKnowledge.tsx`): Related Concepts with their reasons (D06), Texts it quotes (each work, then its passages to `/texts/<work>/#<locator>`), On this page (applications and comparison sections), References (each by label to its entry) and the Questionnaire card(s). Empty groups are left out. Each group head and row is joined to its count or note by a dotted leader, the cross-reference rule: faint dots with vermilion dots over them, inked from the centre by `animation-timeline: view()` only under `no-preference` with support, finished everywhere else and in print, `aria-hidden`.
+- **Citations:** `graph.ts`'s reader now reads every balanced pair of parentheses (outer before nested) and a comma inside a closing quote, so Ahimsa's EPRA citation resolves to `epra-2019`; unit test `tests/unit/content-citations.test.ts` (new). `Text` reads the same way. The accordion's island (`concept/OpenReferences.tsx`, mounted by `ReferenceList`) opens the list on any `#ref-…` link, by mouse or Enter, and once the browser has jumped puts focus on the entry (`tabIndex=-1`); it opens the list for printing too. Without JavaScript the native `details` still opens at the entry.
+- **Previews** (`preview/**`): `LinkPreview` keeps its props. Each link sits in an inline span; at a mouse's or keyboard's first move (never touch) the card's code is fetched, and once a pointer or keyboard focus reaches a previewed link, every span becomes a detached `PreviewCard.Trigger` (`createHandle<PreviewPayload>()`, typed payload) of the one root in the layout. Opens after 450 ms on hover or visible focus, closes after 200 ms, can be hovered, Escape closes it, it sits beside (never over) the link, and its data comes with the page. Used here for related Concepts, previous/next, citations (Reference title) and passage links (first Devanagari line and translation). A page without LinkPreview never loads it.
+- **Verse cards** (`prose/VerseCard.tsx`, `prose/CopyVerse.tsx`): the verse, its source as a chip leading to the passage, and "Copy verse" (Devanagari, transliteration, translation with its source, locator, as plain text), confirmed by `toast()` ("Verse copied", the locator). Keyboard works; focus stays put.
+- **Tables:** the focusable region named by its caption stays; the first column is sticky; scroll shadows are CSS backgrounds (`local` paper over `scroll` shades); printed, the table wraps instead.
+- **Previous and next** (`concept/TopicPager.tsx`): `nav` "Concepts in <topic>"; next turns forward, previous back; none on the first/last.
+- **Print:** header, footer, contents, buttons, pager, ornaments and folio corners drop; References print open (`::details-content` plus `beforeprint`); each external link is followed by its address; leaders print finished; tables wrap; verses and tables avoid breaks.
+
+**Decisions the spec left open**
+
+- The opening verses stand across the page under the title, like an epigraph (side by side from 64rem), so the contents column starts with the sections; on a phone the contents come after the verses.
+- The Linked knowledge panel replaces the old "Related Questionnaires" section; References are listed by label rather than as one "see the list" link, so each is one click from its entry.
+- Previous/next carry no morph names: either one would pair the old title with the new page's pager link.
+- Preview links are wrapped, not cloned: an element a server component hands to a client one can arrive as an unresolved lazy node, and cloning it throws "Element type is invalid".
+- Triggers are swapped in only while no button is held and no view transition runs, and the card refuses to open during a page turn or within 1 s of a press: React skips a running view transition when another commit lands in it (seen as `AbortError: skipTransition()` on page turns).
+- `content-visibility: auto` on prose sections (with 0.5rem of room for focus rings). Not on the panel: there it made Lighthouse's axe fail colour contrast and target size (0.93).
+
+**Islands and weight**
+
+- Client islands added: `CopyVerse`, `LinkPreview` (+ `LinkPreviewRoot`, and `PreviewCard` loaded lazily), `OpenReferences`, `TitleSpellings` (the foundation's switch, now through ScriptPair). The contents need none.
+- **First-load JS** for `/concepts/[slug]`: 139.9 kB gzip (465.9 kB raw), against 138.8 kB for `/`; the page's own chunk is 1.9 kB gzip. Base UI's preview card is never in first load. Concept HTML: 29.7 kB gzip (was about 21 kB), still two round trips.
+- **Lighthouse** (`pnpm lhci`, HTTP/2, LHCI_PORT=3220), median of 3: Concept LCP 2.17 s, TBT 189 ms, a11y 1.0; `/` 2.03 s, 153 ms; Questionnaire 2.02 s, 133 ms. The machine was busy (the homepage's TBT was 28 ms in ticket 04's run, 94–167 here), but the Concept page's TBT margin is thin: its style and layout run about 0.5 s against 0.3 s for `/`. Ticket 15 should re-measure on a quiet machine; the leaders' 40 view timelines and the panel's size are the places to trim.
+
+**Tests**
+
+- New: `tests/e2e/concept-page-links.spec.ts` (the FR-01 one-click test, sample or all 19 Concepts) and 24 tests in `concept.spec.ts` (heading, blocks, contents, linked knowledge, citations by keyboard, mouse and without JavaScript, previews incl. touch and no data requests, verse cards with clipboard and toast, tables, previous/next turns, print, reduced motion; axe with a preview open, the accordion open and a toast showing).
+- Changed, where this ticket changes what they check: `underlines.spec.ts` (the Concept page's running-text example is now the work link "Yoga Sūtra" in Linked knowledge: the Questionnaire is a card); `reading-thread.spec.ts` (25 Tabs each way instead of 15: the contents and verse cards add stops).
+- Done here: lint, format, typecheck, 673 unit tests, build; `E2E_SCOPE=sample` on every project.
+
+**For the conventions doc (ticket 15)**
+
+- Turbopack's CSS parser rejects `:target-current`: put such rules in a `<style href precedence>` element in the component.
+- Never `cloneElement` a `children` a server component passed in; wrap it.
+- A React commit during a running view transition skips it: popups and lazy swaps must wait (`document.activeViewTransition`).
+- Decorative generated content keeps out of accessible names with alt text: `content: '◆' / ''`.
+- `content-visibility: auto` needs a little padding for focus rings, and breaks axe's measurements on content it skips.
+
+**Left over:** nothing in this ticket. The A–Z (ticket 06) can pass glossary entries with a Concept page to `LinkPreview` with `kind: 'glossary'`.
