@@ -1,16 +1,19 @@
-import type { Metadata, Route } from 'next'
+import type { Metadata } from 'next'
 import Link from 'next/link'
 
+import { AzIndex, AzLetter, type ChipGroup, type RailLetter } from '@/components/az'
 import { Breadcrumbs } from '@/components/Breadcrumbs'
 import { Folio } from '@/components/Folio'
 import { PageTurn, turnForward } from '@/components/PageTurn'
-import { Text } from '@/components/prose'
+import type { PreviewPayload } from '@/components/preview/LinkPreview'
+import { TopicCard } from '@/components/topics'
 import { features } from '@/config/features'
-import { hrefFor, site, topics, type AzEntry } from '@/content'
+import { concepts, hrefFor, site, topics, works, type AzEntry as Entry } from '@/content'
+import { cx } from '@/lib/cx'
 import { metadataFor } from '@/lib/metadata'
 
-import listing from '../listing.module.css'
 import reading from '../reading.module.css'
+import styles from './page.module.css'
 
 const PATH = hrefFor({ page: 'concepts' })
 
@@ -21,79 +24,80 @@ export function generateMetadata(): Promise<Metadata> {
 /** A letter's anchor on the page: `#letter-a`, and `#letter-other` for names starting otherwise. */
 const letterId = (letter: string) => `letter-${letter === '#' ? 'other' : letter.toLowerCase()}`
 
-/** What an entry is, in words: a Concept, a term inside one, or a glossary entry. */
-function KindOf({ entry }: { entry: AzEntry }) {
-  if (entry.kind === 'concept') return <>Concept</>
-  if (entry.concept)
-    return (
-      <>
-        Term in{' '}
-        <Link
-          href={hrefFor({ kind: 'concept', id: entry.concept.slug })}
-          transitionTypes={turnForward}
-        >
-          <span lang={entry.concept.lang}>{entry.concept.name}</span>
-        </Link>
-      </>
-    )
-  if (entry.external && entry.href)
-    return <>Glossary · on {new URL(entry.href).hostname.replace(/^www\./, '')}, another site</>
-  return <>Glossary</>
-}
+const KINDS = [
+  { value: 'concept', label: 'Concept pages' },
+  { value: 'term', label: 'Terms' },
+  { value: 'glossary', label: 'Glossary' },
+] as const
 
-function Entry({ entry }: { entry: AzEntry }) {
-  // A glossary entry merged into a Concept's keeps its own anchor (/concepts/#<slug>) here too.
-  const [anchor, ...more] = entry.anchors
-  const name = <span lang={entry.lang}>{entry.name}</span>
-  return (
-    <li id={anchor} className={listing.entry}>
-      {more.map((id) => (
-        <span key={id} id={id} />
-      ))}
-      <p className={listing.entryName}>
-        {entry.href === undefined ? (
-          name
-        ) : entry.external ? (
-          <a href={entry.href}>{name}</a>
-        ) : (
-          // An A–Z entry's page or anchor, made by hrefFor() in the content module.
-          <Link href={entry.href as Route} transitionTypes={turnForward}>
-            {name}
-          </Link>
-        )}
-        {entry.devanagari ? <span lang="sa-Deva">{entry.devanagari}</span> : null}
-      </p>
-      <p className={listing.meta}>
-        {entry.gloss ? <>{entry.gloss} · </> : null}
-        <KindOf entry={entry} />
-      </p>
-      {entry.definition ? (
-        <p>
-          <Text text={entry.definition} />
-        </p>
-      ) : null}
-      {entry.spellings.length > 0 ? (
-        <p className={listing.note}>
-          Also spelled <span lang="sa-Latn">{entry.spellings.join(', ')}</span>
-        </p>
-      ) : null}
-    </li>
-  )
-}
+const counted = (count: number, one: string, many: string) => `${count} ${count === 1 ? one : many}`
 
 /**
- * The Concepts A–Z (D14): every Concept, every term explained inside one and every glossary
- * entry, by letter, with the topics above them. Front-end-site ticket 06 builds the letter rail
- * and the filters here.
+ * The Concepts A–Z (D14): the topics as cards, then every Concept, every term explained inside
+ * one (or in a topic's introduction) and every glossary entry, by letter, under a rail of letters
+ * and filter chips.
  */
 export default async function ConceptsPage() {
-  const [letters, topicCards] = await Promise.all([site.azIndex(), topics.list()])
+  const [letters, topicCards, workCards, conceptCards] = await Promise.all([
+    site.azIndex(),
+    topics.list(),
+    works.list(),
+    concepts.list(),
+  ])
+  const all = letters.flatMap(({ entries }) => entries)
+  const count = (kind: Entry['kind']) => all.filter((entry) => entry.kind === kind).length
+  const quoted = new Set(all.flatMap((entry) => entry.works))
+  const topicNames = new Map(topicCards.map(({ slug, name }) => [slug, name]))
+  const summaries = new Map(conceptCards.map(({ href, summary }) => [href, summary]))
+
+  const groups: ChipGroup[] = [
+    {
+      group: 'topic',
+      label: 'Topic',
+      chips: topicCards.map(({ slug, name }) => ({ value: slug, label: name })),
+    },
+    {
+      group: 'text',
+      label: 'Text',
+      chips: workCards
+        .filter(({ slug }) => quoted.has(slug))
+        .map(({ slug, title, lang }) => ({ value: slug, label: title, lang })),
+    },
+    { group: 'kind', label: 'Show', chips: KINDS },
+  ]
+  const rail: RailLetter[] = letters.map(({ letter, entries }) => ({
+    letter,
+    id: letterId(letter),
+    filled: entries.length > 0,
+  }))
+
+  /** A Concept's link shows its preview: its names and its summary. */
+  const previewOf = (entry: Entry): PreviewPayload | undefined => {
+    const text = entry.href === undefined ? undefined : summaries.get(entry.href)
+    if (entry.kind !== 'concept' || text === undefined) return undefined
+    return {
+      kind: 'concept',
+      name: entry.name,
+      text,
+      ...(entry.lang ? { lang: entry.lang } : {}),
+      ...(entry.devanagari ? { devanagari: entry.devanagari } : {}),
+      ...(entry.gloss ? { gloss: entry.gloss } : {}),
+    }
+  }
+
+  // Each entry's place in the whole list, which names it as the list reorders.
   const filled = letters.filter(({ entries }) => entries.length > 0)
-  const count = filled.reduce((sum, { entries }) => sum + entries.length, 0)
+  const starts = filled.map((_, at) =>
+    filled.slice(0, at).reduce((sum, { entries }) => sum + entries.length, 1),
+  )
+  const sections = filled.map(({ letter, entries }, at) => ({
+    letter,
+    entries: entries.map((entry, offset) => ({ entry, index: (starts[at] ?? 1) + offset })),
+  }))
 
   return (
     <PageTurn>
-      <main id="main" className={reading.page}>
+      <main id="main" className={cx(reading.page, styles.page)}>
         <Breadcrumbs path={PATH} />
         <Folio as="article" className={reading.article} aria-labelledby="concepts-title">
           <header className={reading.titlePage}>
@@ -104,67 +108,58 @@ export default async function ConceptsPage() {
             <p className={reading.summary}>
               Every Concept, every term explained inside one, and every glossary entry.
             </p>
-            <p className={listing.facts}>{count} entries</p>
+            <p className={styles.facts}>
+              {counted(all.length, 'entry', 'entries')}:{' '}
+              {counted(count('concept'), 'Concept page', 'Concept pages')},{' '}
+              {counted(count('term'), 'term', 'terms')} and{' '}
+              {counted(count('glossary'), 'glossary entry', 'glossary entries')}
+            </p>
           </header>
 
           <section className={reading.section} aria-labelledby="topics-title">
             <h2 id="topics-title" className={reading.sectionTitle}>
               By topic
             </h2>
-            <ul className={listing.contents}>
+            <ul className={styles.topics}>
               {topicCards.map((topic) => (
                 <li key={topic.slug}>
-                  <Link
-                    href={hrefFor({ kind: 'topic', id: topic.slug })}
-                    transitionTypes={turnForward}
-                  >
-                    {topic.name}
-                  </Link>
-                  <span className={listing.leader} aria-hidden />
-                  <span className={listing.count}>
-                    {topic.conceptCount} {topic.conceptCount === 1 ? 'Concept' : 'Concepts'}
-                  </span>
+                  <TopicCard topic={topic} />
                 </li>
               ))}
-              {features.conceptMap ? (
-                <li>
-                  <Link href={hrefFor({ page: 'concept-map' })} transitionTypes={turnForward}>
-                    Concept map
-                  </Link>
-                  <span className={listing.leader} aria-hidden />
-                  <span className={listing.count}>Proposal</span>
-                </li>
-              ) : null}
             </ul>
-            <p className={listing.note}>
+            <p className={styles.note}>
               Looking for a term by another spelling?{' '}
               <Link href={hrefFor({ page: 'search' })}>Search the site</Link>.
+              {features.conceptMap ? (
+                <>
+                  {' '}
+                  Or see how the Concepts connect on the{' '}
+                  <Link href={hrefFor({ page: 'concept-map' })} transitionTypes={turnForward}>
+                    Concept map
+                  </Link>{' '}
+                  (a proposal).
+                </>
+              ) : null}
             </p>
           </section>
 
-          <nav aria-label="Letters">
-            <ul className={listing.letters}>
-              {filled.map(({ letter }) => (
-                <li key={letter}>
-                  <a href={`#${letterId(letter)}`}>{letter}</a>
-                </li>
+          <section className={reading.section} aria-labelledby="az-title">
+            <h2 id="az-title" className={reading.sectionTitle}>
+              From A to Z
+            </h2>
+            <AzIndex letters={rail} groups={groups} total={all.length}>
+              {sections.map(({ letter, entries }) => (
+                <AzLetter
+                  key={letter}
+                  letter={letter}
+                  id={letterId(letter)}
+                  entries={entries}
+                  topicNames={topicNames}
+                  previewOf={previewOf}
+                />
               ))}
-            </ul>
-          </nav>
-
-          {filled.map(({ letter, entries }) => (
-            <section key={letter} id={letterId(letter)} className={listing.lettered}>
-              <h2 className={listing.letter}>{letter}</h2>
-              <ul className={listing.entries}>
-                {entries.map((entry) => (
-                  <Entry
-                    key={`${entry.kind}:${entry.anchors[0] ?? entry.href ?? entry.name}`}
-                    entry={entry}
-                  />
-                ))}
-              </ul>
-            </section>
-          ))}
+            </AzIndex>
+          </section>
         </Folio>
       </main>
     </PageTurn>

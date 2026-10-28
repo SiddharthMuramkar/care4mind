@@ -1,0 +1,148 @@
+/*
+ * The Topics contents plate (D21): a book's contents, set on the paper of the folio. A lit row
+ * takes the link colour and its leader inks in from the centre; only the ink's clip-path moves.
+ */
+.plate {
+  display: grid;
+  gap: 1rem;
+  color: var(--color-surface-ink);
+}
+
+/* The running head, over a printer's double rule. */
+.head {
+  margin: 0;
+  padding-bottom: 0.4rem;
+  border-bottom: 3px double var(--color-surface-rule);
+  font-variant-caps: all-small-caps;
+  letter-spacing: 0.14em;
+  font-size: 1.0625rem;
+  color: var(--color-surface-muted);
+}
+
+.group {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.groupTitle {
+  margin: 0.75rem 0 0;
+  font-variant-caps: all-small-caps;
+  letter-spacing: 0.1em;
+  color: var(--color-surface-muted);
+}
+
+.rows {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+}
+
+.row {
+  position: relative;
+  display: grid;
+  grid-template-columns: 2rem minmax(0, max-content) minmax(1rem, 1fr) auto;
+  grid-template-areas: 'numeral name leader trailing';
+  /* A name that wraps runs its leader out from its last line, as a book's contents do. */
+  align-items: last baseline;
+  column-gap: 0.5rem;
+  padding: 0.45rem 0.5rem;
+  margin-inline: -0.5rem;
+  border-radius: 2px;
+  background: color-mix(in srgb, var(--color-highlight) calc(var(--lit, 0) * 9%), transparent);
+}
+
+/* The row is lit while it, or the card that stands for it, is pointed at or focused. */
+.row:is(:hover, :focus-within),
+.scope:has([data-plate-card='1']:is(:hover, :focus-within)) .row[data-plate-row='1'],
+.scope:has([data-plate-card='2']:is(:hover, :focus-within)) .row[data-plate-row='2'],
+.scope:has([data-plate-card='3']:is(:hover, :focus-within)) .row[data-plate-row='3'],
+.scope:has([data-plate-card='4']:is(:hover, :focus-within)) .row[data-plate-row='4'],
+.scope:has([data-plate-card='5']:is(:hover, :focus-within)) .row[data-plate-row='5'],
+.scope:has([data-plate-card='6']:is(:hover, :focus-within)) .row[data-plate-row='6'],
+.scope:has([data-plate-card='7']:is(:hover, :focus-within)) .row[data-plate-row='7'],
+.scope:has([data-plate-card='8']:is(:hover, :focus-within)) .row[data-plate-row='8'],
+.scope:has([data-plate-card='9']:is(:hover, :focus-within)) .row[data-plate-row='9'],
+.scope:has([data-plate-card='10']:is(:hover, :focus-within)) .row[data-plate-row='10'],
+.scope:has([data-plate-card='11']:is(:hover, :focus-within)) .row[data-plate-row='11'],
+.scope:has([data-plate-card='12']:is(:hover, :focus-within)) .row[data-plate-row='12'] {
+  --lit: 1;
+}
+
+.numeral {
+  grid-area: numeral;
+  font-family: var(--font-deva);
+  font-size: 1.125rem;
+  color: color-mix(
+    in srgb,
+    var(--color-highlight) calc(var(--lit, 0) * 100%),
+    var(--color-surface-muted)
+  );
+}
+
+.link {
+  grid-area: name;
+  color: inherit;
+  text-decoration: none;
+}
+
+/* The whole row answers the pointer: the link reaches over it. */
+.link::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+}
+
+.name {
+  overflow-wrap: anywhere;
+  font-family: var(--font-display);
+  font-size: 1.375rem;
+  line-height: 1.25;
+  color: color-mix(
+    in srgb,
+    var(--color-surface-link) calc(var(--lit, 0) * 100%),
+    var(--color-surface-ink)
+  );
+}
+
+.leader {
+  grid-area: leader;
+  position: relative;
+  border-bottom: 2px dotted var(--color-surface-rule);
+}
+
+/* With nothing after it, the leader runs out to the edge. */
+.leader:last-child {
+  grid-column-end: -1;
+}
+
+/* The leader's ink: vermilion dots over the plain ones, uncovered from the centre outwards. */
+.ink {
+  position: absolute;
+  inset-inline: 0;
+  bottom: -2px;
+  border-bottom: 2px dotted var(--color-highlight);
+  clip-path: inset(0 calc(50% - var(--lit, 0) * 50%));
+}
+
+.trailing {
+  grid-area: trailing;
+  max-width: 14rem;
+  text-align: end;
+  font-variant-caps: all-small-caps;
+  letter-spacing: 0.08em;
+  color: var(--color-surface-muted);
+}
+
+.trailing:lang(sa-Deva) {
+  font-family: var(--font-deva);
+  font-variant-caps: normal;
+  letter-spacing: 0;
+  font-size: 1.125rem;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .ink {
+    transition: clip-path var(--duration-slow) var(--ease-out);
+  }
+}

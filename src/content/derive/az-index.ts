@@ -1,13 +1,21 @@
 /**
- * The Concepts A–Z (D14): every Concept, every term inside one and every glossary entry, by
- * letter, sorted by name with diacritics ignored. A glossary entry that names a Concept merges
- * into that Concept's entry.
+ * The Concepts A–Z (D14): every Concept, every term inside one or inside a topic's introduction,
+ * and every glossary entry, by letter, sorted by name with diacritics ignored. A glossary entry
+ * that names a Concept merges into that Concept's entry.
  */
 import { stripDiacritics } from '@/lib/sanskrit'
 import { capitalise } from '@/lib/text'
 
 import type { ContentGraph } from '../graph'
-import type { ConceptRecord, GlossaryEntryRecord, Slug } from '../schema'
+import type {
+  Block,
+  ConceptRecord,
+  GlossaryEntryRecord,
+  PassageQuote,
+  Slug,
+  TermBlock,
+  TopicRecord,
+} from '../schema'
 import type { AzEntry, AzLetter } from '../types'
 import { conceptQuotes, termsIn } from '../views/blocks'
 import { byName, must, present } from '../views/common'
@@ -39,6 +47,51 @@ function facets(concept: ConceptRecord, graph: ContentGraph) {
   }
 }
 
+/** A term's entry, at its anchor on the page that explains it. */
+function termEntry(
+  block: TermBlock,
+  href: string,
+  filters: Pick<AzEntry, 'topics' | 'works'>,
+): Omit<AzEntry, 'concept'> {
+  const name = displayName(block)
+  return {
+    kind: 'term',
+    name,
+    lang: 'sa-Latn',
+    spellings: spellings(name, asciiSpellings(block.term)),
+    ...present({ devanagari: block.term.devanagari, gloss: block.gloss }),
+    href,
+    external: false,
+    anchors: [],
+    ...filters,
+  }
+}
+
+/** The verses quoted anywhere in some blocks, a term's own blocks included. */
+function quotesIn(blocks: readonly Block[]): PassageQuote[] {
+  return blocks.flatMap((block) =>
+    block.kind === 'verse' ? [block.quote] : block.kind === 'term' ? quotesIn(block.blocks) : [],
+  )
+}
+
+/**
+ * The terms a topic's introduction explains (the values topic's yama and niyama), at their
+ * anchors on the topic's page, where the introduction is stored once.
+ */
+function introEntries(topic: TopicRecord, graph: ContentGraph): AzEntry[] {
+  const sections = topic.intro?.sections ?? []
+  const quoted = sections.flatMap((section) => quotesIn(section.blocks))
+  const filters = {
+    topics: [topic.slug],
+    works: [...new Set(quoted.map(({ passage }) => must(graph, 'passage', passage).work))],
+  }
+  return sections
+    .flatMap((section) => termsIn(section.blocks))
+    .map((block) =>
+      termEntry(block, hrefFor({ kind: 'topic', id: topic.slug, anchor: block.id }), filters),
+    )
+}
+
 function conceptEntries(
   concept: ConceptRecord,
   glossary: readonly GlossaryEntryRecord[],
@@ -68,21 +121,14 @@ function conceptEntries(
   }
   const terms = concept.sections
     .flatMap((section) => termsIn(section.blocks))
-    .map((block): AzEntry => {
-      const termName = displayName(block)
-      return {
-        kind: 'term',
-        name: termName,
-        lang: 'sa-Latn',
-        spellings: spellings(termName, asciiSpellings(block.term)),
-        ...present({ devanagari: block.term.devanagari, gloss: block.gloss }),
-        href: hrefFor({ kind: 'concept', id: concept.slug, anchor: block.id }),
-        external: false,
-        anchors: [],
-        concept: conceptRef(concept),
-        ...filters,
-      }
-    })
+    .map((block): AzEntry => ({
+      ...termEntry(
+        block,
+        hrefFor({ kind: 'concept', id: concept.slug, anchor: block.id }),
+        filters,
+      ),
+      concept: conceptRef(concept),
+    }))
   return [own, ...terms]
 }
 
@@ -119,6 +165,7 @@ export function azIndex(graph: ContentGraph): AzLetter[] {
     ...graph
       .records('concept')
       .flatMap((concept) => conceptEntries(concept, naming.get(concept.slug) ?? [], graph)),
+    ...graph.records('topic').flatMap((topic) => introEntries(topic, graph)),
     ...graph
       .records('glossary')
       .filter((entry) => entry.concept === undefined)
