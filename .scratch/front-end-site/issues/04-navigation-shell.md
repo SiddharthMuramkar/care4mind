@@ -149,7 +149,7 @@ Spec: [Front-end site: every public page](../spec.md) · Design: [design.md](../
 - **Breakpoint 72rem (1152 px).** Below it, the sections move into the Drawer and Search becomes a reading-glass icon. The five sections alone fit from about 60rem. 72rem keeps room for what later tickets add to the strip: the ScriptPreference control (about 48 px, ticket 13) and the ⌘K hint in SearchTrigger (ticket 09). At 768 px the Menu is shown.
 - The header is sticky. `html { scroll-padding-top: calc(var(--header-height) + 1rem) }` keeps in-page links and focused controls clear of it.
   - While a native popover is open (the Concept page's "Also spelled"), the header scrolls with the page instead of sticking, so it never covers the popover's focus (2.4.11).
-- Header links carry no page-turn type (D-page-turns: none for header, footer and menu).
+- Header, footer and Menu links carry no page-turn type, as the page-turn rule asks.
 - An earlier run shrank the wordmark below 24rem in `Logo.module.css` (ticket 16's file). That change is reverted: the header fits at 320 px with the logo as ticket 16 left it (`nav.spec.ts` "fits on one line" and `reflow.spec.ts` pass).
 
 **Measured**
