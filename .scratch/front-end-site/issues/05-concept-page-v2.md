@@ -123,13 +123,14 @@ Everything the foundation built stays. The site-wide link previews switch on her
 - Previous/next carry no morph names: either one would pair the old title with the new page's pager link.
 - Preview links are wrapped, not cloned: an element a server component hands to a client one can arrive as an unresolved lazy node, and cloning it throws "Element type is invalid".
 - Triggers are swapped in only while no button is held and no view transition runs, and the card refuses to open during a page turn or within 1 s of a press: React skips a running view transition when another commit lands in it (seen as `AbortError: skipTransition()` on page turns).
-- `content-visibility: auto` on prose sections (with 0.5rem of room for focus rings). Not on the panel: there it made Lighthouse's axe fail colour contrast and target size (0.93).
+- No `content-visibility: auto` on the page. Tried on the sections, it let links to References and anchors land off screen (the skipped sections above changed size as they rendered); on the panel, it made Lighthouse's axe fail colour contrast and target size (0.93).
+- The leaders in a group all follow that group's one view timeline (`--group`), so the page starts with five timelines, not forty, and a group's rules ink in together as it comes into view.
 
 **Islands and weight**
 
 - Client islands added: `CopyVerse`, `LinkPreview` (+ `LinkPreviewRoot`, and `PreviewCard` loaded lazily), `OpenReferences`, `TitleSpellings` (the foundation's switch, now through ScriptPair). The contents need none.
 - **First-load JS** for `/concepts/[slug]`: 139.9 kB gzip (465.9 kB raw), against 138.8 kB for `/`; the page's own chunk is 1.9 kB gzip. Base UI's preview card is never in first load. Concept HTML: 29.7 kB gzip (was about 21 kB), still two round trips.
-- **Lighthouse** (`pnpm lhci`, HTTP/2, LHCI_PORT=3220), median of 3: Concept LCP 2.17 s, TBT 189 ms, a11y 1.0; `/` 2.03 s, 153 ms; Questionnaire 2.02 s, 133 ms. The machine was busy (the homepage's TBT was 28 ms in ticket 04's run, 94–167 here), but the Concept page's TBT margin is thin: its style and layout run about 0.5 s against 0.3 s for `/`. Ticket 15 should re-measure on a quiet machine; the leaders' 40 view timelines and the panel's size are the places to trim.
+- **Lighthouse** (`pnpm lhci`, HTTP/2, LHCI_PORT=3220), median of 3, on the final code: Concept LCP 2.18 s, **TBT 215 ms (over the 200 ms budget)**, CLS 0.001, a11y 1.0; `/` 2.02 s, 83 ms; Questionnaire 2.03 s, 98 ms. The machine was busy (the homepage's TBT was 28 ms in ticket 04's run, 76–87 ms here), but the Concept page is clearly heavier now: style and layout take about 0.68 s against 0.31 s for `/` (734 elements), and hydration is one 190 ms task. An earlier run on a lighter build state passed at 189 ms. Places to trim, for ticket 15 or a follow-up: the ~20 more Next `Link`s in the panel and pager (each hydrates and watches the viewport for prefetch), the 35 `LinkPreview` islands (one per citation; a delegated design without a component per link would save most of that), and the panel's size.
 
 **Tests**
 
@@ -143,6 +144,6 @@ Everything the foundation built stays. The site-wide link previews switch on her
 - Never `cloneElement` a `children` a server component passed in; wrap it.
 - A React commit during a running view transition skips it: popups and lazy swaps must wait (`document.activeViewTransition`).
 - Decorative generated content keeps out of accessible names with alt text: `content: '◆' / ''`.
-- `content-visibility: auto` needs a little padding for focus rings, and breaks axe's measurements on content it skips.
+- `content-visibility: auto` above an anchor makes in-page links land off screen, and breaks axe's measurements on content it skips: keep it to long lists below their anchors.
 
-**Left over:** nothing in this ticket. The A–Z (ticket 06) can pass glossary entries with a Concept page to `LinkPreview` with `kind: 'glossary'`.
+**Left over:** the Concept page's Lighthouse TBT sits at the 200 ms budget (215 ms median in the last run, 189 ms in the one before; see Islands and weight). Everything else in this ticket is built. The A–Z (ticket 06) can pass glossary entries with a Concept page to `LinkPreview` with `kind: 'glossary'`.
