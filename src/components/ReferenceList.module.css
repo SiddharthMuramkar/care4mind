@@ -2,27 +2,27 @@
   border-block: 1px solid var(--color-surface-rule);
 }
 
-.header {
-  margin: 0;
-  font-family: var(--font-display);
-  font-weight: 500;
-  font-size: clamp(1.5rem, 3.5vw, 2rem);
-}
-
+/* The summary is the whole row: heading, count and knot, with no disclosure triangle. */
 .trigger {
-  appearance: none;
   display: flex;
-  width: 100%;
   align-items: baseline;
   gap: 0.5rem;
   min-height: 56px;
   padding: 0.75rem 0;
-  border: 0;
-  background: none;
-  color: inherit;
-  font: inherit;
-  text-align: start;
+  list-style: none;
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: clamp(1.5rem, 3.5vw, 2rem);
   cursor: pointer;
+}
+
+.trigger::-webkit-details-marker {
+  display: none;
+}
+
+.heading {
+  margin: 0;
+  font: inherit;
 }
 
 .count {
@@ -55,22 +55,12 @@
   transform-origin: center;
 }
 
-.trigger[data-panel-open] .knot {
+.root[open] .knot {
   transform: rotate(45deg);
 }
 
-.trigger[data-panel-open] .knot circle {
+.root[open] .knot circle {
   transform: scale(1.8);
-}
-
-/* Fade only: animating height would make the page re-layout on every frame. */
-.panel {
-  transition: opacity var(--duration-quick) var(--ease-out);
-}
-
-.panel[data-starting-style],
-.panel[data-ending-style] {
-  opacity: 0;
 }
 
 .list {
@@ -80,4 +70,25 @@
   gap: 0.75rem;
   font-size: 1rem;
   line-height: 1.6;
+}
+
+/*
+ * The list fades in as it opens. Fading only: animating height would make the
+ * page re-layout on every frame. A browser that skips styling a closed list's
+ * contents starts it from @starting-style instead.
+ */
+@media (prefers-reduced-motion: no-preference) {
+  .list {
+    transition: opacity var(--duration-quick) var(--ease-out);
+  }
+
+  .root:not([open]) .list {
+    opacity: 0;
+  }
+
+  @starting-style {
+    .root[open] .list {
+      opacity: 0;
+    }
+  }
 }
