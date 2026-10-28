@@ -3,38 +3,26 @@
  *
  * Under it, one content source supplies records (today the generated registry of the files in
  * `data/`; later a CMS) and the graph resolves every link between them once. Pages get views:
- * plain, serialisable data shaped for a page. Until the front-end-site spec moves the pages, the
- * foundation's functions and types come from the legacy adapter, unchanged.
+ * plain, serialisable data shaped for a page.
  */
+import type { Route } from 'next'
+
 import { features } from '@/config/features'
 
 import { localSource } from './source'
+import type { HrefTarget } from './types'
 import { createContent } from './views'
-
-export type {
-  Block,
-  Comparison,
-  Concept,
-  Homepage,
-  Provenance,
-  Questionnaire,
-  Reference,
-  ReviewStatus,
-  SanskritTerm,
-  Section,
-  Shloka,
-} from './legacy'
-export {
-  getConcept,
-  getHomepage,
-  getQuestionnaire,
-  listConcepts,
-  listQuestionnaires,
-} from './legacy'
+import { hrefFor as pathFor } from './views/href'
 
 export type * from './types'
-export { hrefFor } from './views/href'
 export { asciiSpellings, displayName } from './views/names'
+
+/**
+ * The path of a page, or of an anchor on one, with its trailing slash: every internal link on
+ * the site is made here. Typed as a route for Next's Link, whose own route types know no
+ * trailing slashes.
+ */
+export const hrefFor = pathFor as (target: HrefTarget) => Route
 
 /** The site's own content: the local source's records, with this build's feature flags. */
 const content = createContent(localSource, features)

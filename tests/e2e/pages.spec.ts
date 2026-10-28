@@ -64,7 +64,7 @@ test.describe('404 page', () => {
 })
 
 test('the skip link is the first thing keyboard focus reaches, and it works', async ({ page }) => {
-  await gotoReady(page, '/concepts/vikshepa')
+  await gotoReady(page, '/concepts/vikshepa/')
   await page.keyboard.press('Tab')
   const skip = page.getByRole('link', { name: 'Skip to content' })
   await expect(skip).toBeFocused()

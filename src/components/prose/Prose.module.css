@@ -1,0 +1,139 @@
+/* Running text set on a paper folio: a record's sections and their blocks. */
+.section {
+  display: grid;
+  gap: 1.25rem;
+  /* An anchored section lands clear of the top edge. */
+  scroll-margin-top: 1.5rem;
+}
+
+/* Grid children may shrink below their content, so a wide table scrolls inside its own frame. */
+.section > *,
+.term > *,
+.intro > * {
+  min-width: 0;
+}
+
+.section :where(p),
+.term :where(p) {
+  margin: 0;
+}
+
+.sectionTitle {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: clamp(1.75rem, 4.5vw, 2.25rem);
+  line-height: 1.15;
+}
+
+/* A term inside a Concept (each of the nine vikṣepas), ruled off in vermilion and anchored at its id. */
+.term {
+  display: grid;
+  gap: 0.75rem;
+  padding-inline-start: 1.25rem;
+  border-inline-start: 2px solid var(--color-highlight);
+  scroll-margin-top: 1.5rem;
+}
+
+.termTitle {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: 1.5rem;
+  line-height: 1.3;
+}
+
+.list {
+  margin: 0;
+  padding-inline-start: 1.25rem;
+  display: grid;
+  gap: 0.6rem;
+}
+
+.list li::marker {
+  color: var(--color-highlight);
+}
+
+.figure {
+  margin: 0;
+  scroll-margin-top: 1.5rem;
+}
+
+/* A data table keeps its columns; on narrow screens it scrolls inside its own frame
+   (WCAG 1.4.10 lets two-dimensional tables do this). */
+.frame {
+  overflow-x: auto;
+  border: 1px solid var(--color-surface-rule);
+}
+
+.table {
+  width: 100%;
+  min-width: calc(var(--columns, 4) * 11rem);
+  border-collapse: collapse;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+.caption {
+  caption-side: top;
+  padding: 1rem;
+  text-align: start;
+  font-style: italic;
+  color: var(--color-surface-muted);
+}
+
+.table th,
+.table td {
+  padding: 0.75rem 1rem;
+  text-align: start;
+  vertical-align: top;
+  border-top: 1px solid var(--color-surface-rule);
+}
+
+.table thead th {
+  font-variant-caps: all-small-caps;
+  letter-spacing: 0.08em;
+  font-size: 1.0625rem;
+  font-weight: 600;
+}
+
+.table tbody th {
+  font-weight: 600;
+  min-width: 10rem;
+}
+
+/* A verse quoted mid-section sits between rules, centred like the verses at the top of a page. */
+.verse {
+  padding: clamp(1.25rem, 4vw, 2rem) 0;
+  border-block: 1px solid var(--color-surface-rule);
+  text-align: center;
+  justify-items: center;
+}
+
+/* Shared text stored once on a topic, set off as a quotation of its introduction. */
+.intro,
+.introSection {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.introSection {
+  scroll-margin-top: 1.5rem;
+}
+
+.shared {
+  margin: 0;
+  color: var(--color-surface-muted);
+  font-style: italic;
+  font-size: 1rem;
+}
+
+.provenance {
+  margin: 0;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--color-surface-rule);
+  color: var(--color-surface-muted);
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}

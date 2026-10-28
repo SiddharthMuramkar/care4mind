@@ -1,4 +1,7 @@
-/* Shared by the reading pages (Concept, Questionnaire, 404): a long paper folio on the indigo ground. */
+/*
+ * Shared by the reading pages (Concept, Questionnaire, 404) and by every page still waiting for
+ * its own ticket: a long paper folio on the indigo ground, set like a printed book.
+ */
 .page {
   display: grid;
   gap: 1.25rem;
@@ -45,6 +48,21 @@
   font-weight: 500;
   font-size: clamp(3rem, 12vw, 5.75rem);
   line-height: 1;
+  overflow-wrap: anywhere;
+}
+
+/* At 320 px (400% zoom, WCAG 1.4.10) the longest one-word titles still fit their line. */
+@media (max-width: 21rem) {
+  .title {
+    font-size: 2.375rem;
+  }
+}
+
+/* A long name (a topic, an English-titled page) is set a size down. */
+.titleLong {
+  font-size: clamp(2.25rem, 8vw, 4rem);
+  line-height: 1.1;
+  text-wrap: balance;
 }
 
 .gloss {
@@ -82,12 +100,9 @@
 .section {
   display: grid;
   gap: 1.25rem;
+  scroll-margin-top: 1.5rem;
 }
 
-.provenance {
-  padding-top: 1.25rem;
-  border-top: 1px solid var(--color-surface-rule);
-  color: var(--color-surface-muted);
-  font-size: 0.9375rem;
-  line-height: 1.6;
+.section > * {
+  min-width: 0;
 }

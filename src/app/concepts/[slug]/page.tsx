@@ -1,19 +1,22 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
+import { ViewTransition } from 'react'
 
 import { Breadcrumbs } from '@/components/Breadcrumbs'
 import { Folio } from '@/components/Folio'
 import { OrnamentRule } from '@/components/OrnamentRule'
 import { PageTurn, turnForward } from '@/components/PageTurn'
+import { citationLinks, Provenance, Sections, Text } from '@/components/prose'
+import { statusOf } from '@/components/QuestionnaireCard'
 import { ReadingThread } from '@/components/ReadingThread'
 import { ReferenceList } from '@/components/ReferenceList'
-import { SanskritTerm } from '@/components/SanskritTerm'
 import { ScriptChoice, ScriptSwitch, TermSpellings } from '@/components/ScriptChoice'
 import { Shloka } from '@/components/Shloka'
 import { SpellingsPopover } from '@/components/SpellingsPopover'
-import { asciiSpellings, getConcept, getQuestionnaire, listConcepts } from '@/content'
-import { capitalise } from '@/lib/text'
+import { concepts, hrefFor } from '@/content'
+import { cx } from '@/lib/cx'
+import { metadataFor } from '@/lib/metadata'
 
 import reading from '../../reading.module.css'
 import styles from './page.module.css'
@@ -21,161 +24,112 @@ import styles from './page.module.css'
 export const dynamicParams = false
 
 export async function generateStaticParams() {
-  return (await listConcepts()).map((concept) => ({ slug: concept.slug }))
+  return (await concepts.list()).map(({ slug }) => ({ slug }))
 }
 
 export async function generateMetadata({
   params,
 }: PageProps<'/concepts/[slug]'>): Promise<Metadata> {
-  const concept = await getConcept((await params).slug)
-  if (!concept) return {}
-  return {
-    title: `${capitalise(concept.term.iast)} (${concept.gloss})`,
-    description: concept.summary,
-  }
+  return metadataFor(hrefFor({ kind: 'concept', id: (await params).slug }))
 }
 
 export default async function ConceptPage({ params }: PageProps<'/concepts/[slug]'>) {
-  const concept = await getConcept((await params).slug)
+  const concept = await concepts.get((await params).slug)
   if (!concept) notFound()
 
-  const questionnaires = (
-    await Promise.all(concept.relatedQuestionnaires.map((slug) => getQuestionnaire(slug)))
-  ).filter((questionnaire) => questionnaire !== null)
-  const name = capitalise(concept.term.iast)
+  const citations = citationLinks(concept.citations, concept.references)
+  // A Concept card's title flies into the heading's IAST spelling, or its English title.
+  const morph = `concept-title-${concept.slug}`
 
   return (
     <PageTurn>
       <main id="main" className={reading.page}>
         <ReadingThread />
-        <Breadcrumbs
-          trail={[
-            { label: 'Home', href: '/' },
-            { label: 'Concepts', href: '/#concepts' },
-            { label: <span lang="sa-Latn">{name}</span> },
-          ]}
-        />
+        <Breadcrumbs path={hrefFor({ kind: 'concept', id: concept.slug })} />
         <Folio as="article" className={reading.article} aria-labelledby="concept-title">
           <ScriptChoice>
             <header className={reading.titlePage}>
               <p className={reading.kicker}>Concept</p>
-              <h1 id="concept-title" className={reading.title}>
-                {/* A Concept card's title flies into the IAST spelling (ConceptCard). */}
-                <TermSpellings
-                  term={concept.term}
-                  capitalised
-                  name={`concept-title-${concept.slug}`}
-                />
+              <h1
+                id="concept-title"
+                className={concept.term ? reading.title : cx(reading.title, reading.titleLong)}
+              >
+                {concept.term ? (
+                  <TermSpellings term={concept.term} capitalised name={morph} />
+                ) : (
+                  <ViewTransition name={morph} share="morph" default="none">
+                    <span>{concept.name}</span>
+                  </ViewTransition>
+                )}
               </h1>
-              <p className={reading.gloss}>{concept.gloss}</p>
-              <div className={styles.spellingTools}>
-                <SpellingsPopover
-                  iast={concept.term.iast}
-                  spellings={asciiSpellings(concept.term)}
-                />
-                {concept.term.devanagari ? <ScriptSwitch /> : null}
-              </div>
-              <p className={reading.summary}>{concept.summary}</p>
+              {concept.term && concept.english ? (
+                <p className={reading.gloss}>{concept.english}</p>
+              ) : null}
+              {concept.term ? (
+                <div className={styles.spellingTools}>
+                  <SpellingsPopover iast={concept.term.iast} spellings={concept.spellings} />
+                  {concept.term.devanagari ? <ScriptSwitch /> : null}
+                </div>
+              ) : null}
+              <p className={reading.summary}>
+                <Text text={concept.summary} citations={citations} />
+              </p>
             </header>
           </ScriptChoice>
 
-          {concept.shlokas.map((shloka) => (
-            <Shloka key={shloka.source} shloka={shloka} className={styles.shloka} />
+          {concept.verses.map((verse) => (
+            <Shloka key={verse.passage} verse={verse} className={styles.shloka} />
           ))}
 
           <OrnamentRule className={styles.rule} />
 
-          {concept.sections.map((section) => (
-            <section key={section.heading} className={reading.section}>
-              <h2 className={reading.sectionTitle}>{section.heading}</h2>
-              {section.blocks.map((block, index) =>
-                block.kind === 'paragraph' ? (
-                  <p key={index}>{block.text}</p>
-                ) : (
-                  <div key={block.term.iast} className={styles.term}>
-                    <h3 className={styles.termTitle}>
-                      <SanskritTerm term={block.term} gloss={block.gloss} capitalised />
-                    </h3>
-                    {block.paragraphs.map((paragraph, paragraphIndex) => (
-                      <p key={paragraphIndex}>{paragraph}</p>
-                    ))}
-                  </div>
-                ),
-              )}
-            </section>
-          ))}
+          <Sections sections={concept.sections} citations={citations} />
 
-          {concept.comparison ? (
-            <figure className={styles.comparison}>
-              <div
-                className={styles.tableScroll}
-                role="region"
-                aria-labelledby="comparison-caption"
-                tabIndex={0}
-              >
-                <table className={styles.table}>
-                  <caption id="comparison-caption" className={styles.caption}>
-                    {concept.comparison.caption}
-                  </caption>
-                  <thead>
-                    <tr>
-                      {concept.comparison.columns.map((column) => (
-                        <th key={column} scope="col">
-                          {column}
-                        </th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {concept.comparison.rows.map((row) => (
-                      <tr key={row.term.iast}>
-                        <th scope="row">
-                          <SanskritTerm
-                            term={row.term}
-                            gloss={row.gloss}
-                            devanagari={false}
-                            capitalised
-                          />
-                        </th>
-                        {row.cells.map((cell, index) => (
-                          <td key={index}>{cell}</td>
-                        ))}
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </figure>
-          ) : null}
-
-          {questionnaires.length > 0 ? (
+          {concept.linked.questionnaires.length > 0 ? (
             <section className={reading.section} aria-labelledby="related-title">
               <h2 id="related-title" className={reading.sectionTitle}>
                 Related Questionnaires
               </h2>
               <ul className={styles.related}>
-                {questionnaires.map((questionnaire) => (
-                  <li key={questionnaire.slug}>
+                {concept.linked.questionnaires.map(({ slug, title, status, summary }) => (
+                  <li key={slug}>
                     <Link
-                      href={`/questionnaires/${questionnaire.slug}`}
+                      href={hrefFor({ kind: 'questionnaire', id: slug, status })}
                       transitionTypes={turnForward}
                     >
-                      {questionnaire.title}
+                      {title}
                     </Link>
-                    <span className={styles.relatedNote}>{questionnaire.summary}</span>
+                    <span className={styles.relatedNote}>
+                      {statusOf(status)}
+                      {summary ? (
+                        <>
+                          {' · '}
+                          <Text text={summary} />
+                        </>
+                      ) : null}
+                    </span>
                   </li>
                 ))}
               </ul>
             </section>
           ) : null}
 
+          {concept.external.length > 0 ? (
+            <p className={styles.external}>
+              Read more on another site:{' '}
+              {concept.external.map((link, index) => (
+                <span key={link.url}>
+                  {index > 0 ? ', ' : null}
+                  <a href={link.url}>{link.label}</a>
+                </span>
+              ))}
+              .
+            </p>
+          ) : null}
+
           <ReferenceList references={concept.references} />
 
-          <p className={reading.provenance}>
-            Carried over from the current site’s page{' '}
-            <a href={concept.provenance.url}>{concept.provenance.url.replace('https://', '')}</a>,
-            read on {concept.provenance.retrieved}. Not yet reviewed by the Research editor.
-          </p>
+          <Provenance of={concept} />
         </Folio>
       </main>
     </PageTurn>

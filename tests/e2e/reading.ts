@@ -2,8 +2,8 @@ import type { Page } from '@playwright/test'
 
 /** The long reading pages that carry a reading thread. */
 export const READING_PAGES = [
-  { path: '/concepts/vikshepa', name: 'Concept page' },
-  { path: '/questionnaires/karmayoga-scale', name: 'Questionnaire page' },
+  { path: '/concepts/vikshepa/', name: 'Concept page' },
+  { path: '/questionnaires/karmayoga-scale/', name: 'Questionnaire page' },
 ] as const
 
 export interface Thread {

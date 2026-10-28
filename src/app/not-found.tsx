@@ -4,14 +4,18 @@ import Link from 'next/link'
 import { Folio } from '@/components/Folio'
 import { Kolam } from '@/components/Kolam'
 import { PageTurn, turnForward } from '@/components/PageTurn'
+import { concepts, hrefFor } from '@/content'
+import { notFoundMetadata } from '@/lib/metadata'
 
 import cta from './cta.module.css'
 import reading from './reading.module.css'
 import styles from './not-found.module.css'
 
-export const metadata: Metadata = { title: 'Page not found' }
+export const metadata: Metadata = notFoundMetadata
 
-export default function NotFound() {
+export default async function NotFound() {
+  // The foundation's first Concept, offered as somewhere to start reading.
+  const start = await concepts.get('vikshepa')
   return (
     <PageTurn>
       <main id="main" className={reading.page}>
@@ -25,15 +29,20 @@ export default function NotFound() {
           </p>
           <ul className={styles.links}>
             <li>
-              <Link href="/" className={cta.primary} data-ink>
+              <Link href={hrefFor({ page: 'home' })} className={cta.primary} data-ink>
                 Go to the homepage
               </Link>
             </li>
-            <li>
-              <Link href="/concepts/vikshepa" transitionTypes={turnForward}>
-                Read about&nbsp;<span lang="sa-Latn">Vikṣepa</span>
-              </Link>
-            </li>
+            {start ? (
+              <li>
+                <Link
+                  href={hrefFor({ kind: 'concept', id: start.slug })}
+                  transitionTypes={turnForward}
+                >
+                  Read about&nbsp;<span lang={start.lang}>{start.name}</span>
+                </Link>
+              </li>
+            ) : null}
           </ul>
         </Folio>
       </main>

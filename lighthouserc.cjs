@@ -7,7 +7,7 @@ const { spawnSync } = process.getBuiltinModule('node:child_process')
 // server on its own port (README.md, "Checks").
 const PORT = port()
 // Lighthouse won't audit a page that answers 404, so the 404 page is covered by Playwright instead.
-const paths = ['/', '/concepts/vikshepa', '/questionnaires/karmayoga-scale']
+const paths = ['/', '/concepts/vikshepa/', '/questionnaires/karmayoga-scale/']
 
 function port() {
   const value = process.env.LHCI_PORT || '3200'

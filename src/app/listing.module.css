@@ -1,0 +1,201 @@
+/*
+ * Shared by the pages still waiting for their own ticket: what a page holds, a book's contents,
+ * entries set like a dictionary's, and letters to jump by. Each feature ticket that builds its
+ * page stops using these; the reading pages (Concept, Questionnaire) never load them.
+ */
+/* What a page holds, counted: "5 Concepts · 12 verses". */
+.facts {
+  margin: 0;
+  font-variant-caps: all-small-caps;
+  letter-spacing: 0.1em;
+  font-size: 1.0625rem;
+  color: var(--color-surface-muted);
+}
+
+/* A book's contents: each name, a dotted leader, then what it holds. */
+.contents {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.85rem;
+}
+
+.contents > li {
+  display: flex;
+  align-items: baseline;
+  gap: 0.6rem;
+}
+
+.contents a {
+  font-family: var(--font-display);
+  font-size: 1.375rem;
+  line-height: 1.3;
+}
+
+.leader {
+  flex: 1;
+  min-width: 1.5rem;
+  border-bottom: 2px dotted var(--color-surface-rule);
+}
+
+.count {
+  flex: none;
+  max-width: 50%;
+  text-align: end;
+  font-variant-caps: all-small-caps;
+  letter-spacing: 0.08em;
+  color: var(--color-surface-muted);
+}
+
+/* On a phone the leader gives way, and what each holds sits under its name. */
+@media (max-width: 30rem) {
+  .contents > li {
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .leader {
+    display: none;
+  }
+
+  .count {
+    max-width: none;
+    text-align: start;
+  }
+}
+
+/* Entries set like a dictionary's: a name, what it is, then its text. */
+.entries {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 1.5rem;
+}
+
+.entry {
+  display: grid;
+  gap: 0.3rem;
+  scroll-margin-top: 1.5rem;
+  /* A long Devanagari compound or link still fits a 320 px screen. */
+  overflow-wrap: anywhere;
+}
+
+.entries > *,
+.entry > *,
+.lettered > * {
+  min-width: 0;
+}
+
+/* The entry a link leads to stands out for a moment's reading. */
+.entry:target {
+  background: color-mix(in srgb, var(--color-highlight) 10%, transparent);
+  box-shadow: 0 0 0 0.5rem color-mix(in srgb, var(--color-highlight) 10%, transparent);
+}
+
+.entryName {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: 1.375rem;
+  line-height: 1.3;
+}
+
+.entryName :lang(sa-Deva) {
+  margin-inline-start: 0.5em;
+  font-family: var(--font-deva);
+  font-size: 0.9em;
+}
+
+.meta {
+  font-variant-caps: all-small-caps;
+  letter-spacing: 0.08em;
+  font-size: 1.0625rem;
+  color: var(--color-surface-muted);
+}
+
+/* A jump list of letters, each a target at least 44 px square. */
+.letters {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.25rem;
+}
+
+.letters a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  min-height: 44px;
+  font-family: var(--font-display);
+  font-size: 1.375rem;
+}
+
+.lettered {
+  display: grid;
+  gap: 1.25rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--color-surface-rule);
+  scroll-margin-top: 1.5rem;
+}
+
+.letter {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: 2.5rem;
+  line-height: 1;
+  color: var(--color-highlight);
+}
+
+/* Running lists of links, separated by middle dots. */
+.inline {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 0;
+}
+
+.inline > li:not(:last-child)::after {
+  content: '·' / '';
+  margin-inline: 0.5em;
+  color: var(--color-highlight);
+}
+
+.note {
+  color: var(--color-surface-muted);
+  font-style: italic;
+}
+
+/* "Cited in", "Quoted in": the pages that use an entry, as a running list of links. */
+.cited {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0 0.5em;
+  color: var(--color-surface-muted);
+  font-size: 1rem;
+}
+
+/* A group of entries under its own heading: Questionnaires by topic, results by kind. */
+.group {
+  display: grid;
+  gap: 1rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--color-surface-rule);
+}
+
+.groupTitle {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: 1.5rem;
+  line-height: 1.25;
+}
