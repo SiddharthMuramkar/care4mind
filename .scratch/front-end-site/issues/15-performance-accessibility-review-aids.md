@@ -1,7 +1,7 @@
 # 15: Performance, accessibility and review aids
 
 Status: ready-for-agent
-Blocked by: 02, 05, 06, 07, 08, 09, 10, 11, 12, 13, 14, 16
+Blocked by: 02, 05, 06, 07, 08, 09, 10, 11, 12, 13, 14, 16, 17
 Spec: [Front-end site: every public page](../spec.md) · Design: [design.md](../design.md) §C2, §F
 
 **What to build:** proof that the finished site is still fast and accessible on a cheap phone, plus the aids the developer needs to review it.
@@ -10,17 +10,15 @@ Spec: [Front-end site: every public page](../spec.md) · Design: [design.md](../
 - Interaction checks time the five busiest controls at phone speed.
 - Script-size budgets stop the JavaScript from creeping up.
 - A build with every flag off proves production hides what it should.
-- `pnpm shots` screenshots every page type.
 - A manual-checks doc lists what only a person can check.
 
 ## Owns
 
 - `lighthouserc.cjs`
 - `tests/e2e/performance.spec.ts` (new), which takes over the foundation's interaction-latency check
-- `scripts/shots.mjs` and `scripts/size-budget.mjs` (new), and their `package.json` scripts (`shots`, `size`)
+- `scripts/size-budget.mjs` (new), and its `package.json` script (`size`)
 - `playwright.config.ts`: a project for the flags-off build, if needed
 - `.github/workflows/ci.yml`: the budget step and the flags-off job
-- `.gitignore`: the screenshots folder
 - `docs/manual-checks.md` (new)
 - `README.md`: the Checks section
 - `docs/agents/frontend-conventions.md`: folding in the notes the lanes left in their Comments
@@ -56,10 +54,6 @@ Spec: [Front-end site: every public page](../spec.md) · Design: [design.md](../
     - the KarmaYoga intro shows "Coming soon" with Start disabled;
     - no page shows a ProposalNote or the script toggle.
   - It runs locally under the heavy-step lock too.
-- [ ] **`pnpm shots`:**
-  - Writes JPEG screenshots of each sample route in the registry (one per kind) at 360 and 1440 px, with reduced motion off and on, into a git-ignored folder.
-  - Files are named route, width and motion, and the command prints the folder.
-  - Runs under the heavy-step lock.
 - [ ] **Manual checks doc:** `docs/manual-checks.md` lists what automated checks can't prove. Each check has its steps and a place to record who checked it, when, and the result:
   - keyboard only, through every page type and the whole flow;
   - NVDA with Firefox, and VoiceOver with Safari, on the palette, the letter rails, the navigation panels, the Drawer, previews, the flow and the map;
