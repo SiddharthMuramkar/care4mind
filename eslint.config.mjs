@@ -46,6 +46,76 @@ const contentBoundary = {
   },
 }
 
+// Every internal link comes from hrefFor() (front-end-site spec, "Addresses"), so an address
+// changes in one place. A path typed into an href fails, however it is written; a fragment
+// (#main), another site (https://, //) and a path a view or hrefFor() made pass.
+const INTERNAL_PATH = /^\/(?!\/)/
+
+function startsInternal(node) {
+  switch (node?.type) {
+    case 'Literal':
+      return typeof node.value === 'string' && INTERNAL_PATH.test(node.value)
+    case 'TemplateLiteral':
+      return INTERNAL_PATH.test(node.quasis[0]?.value.cooked ?? '')
+    case 'BinaryExpression':
+      return node.operator === '+' && startsInternal(node.left)
+    case 'ConditionalExpression':
+      return startsInternal(node.consequent) || startsInternal(node.alternate)
+    case 'LogicalExpression':
+      return startsInternal(node.left) || startsInternal(node.right)
+    case 'JSXExpressionContainer':
+    case 'TSAsExpression':
+    case 'TSSatisfiesExpression':
+    case 'TSNonNullExpression':
+      return startsInternal(node.expression)
+    case 'ObjectExpression':
+      // Next's Link also takes { pathname }.
+      return node.properties.some(
+        (property) => keyOf(property) === 'pathname' && startsInternal(property.value),
+      )
+    default:
+      return false
+  }
+}
+
+const keyOf = (property) =>
+  property.type !== 'Property' || property.computed
+    ? undefined
+    : (property.key.name ?? property.key.value)
+
+const hrefFromHrefFor = {
+  meta: {
+    type: 'problem',
+    docs: { description: 'Internal links come from hrefFor(), never a typed path.' },
+    messages: {
+      typed:
+        'Make internal links with hrefFor() from @/content, not a typed path: an address then changes in one place.',
+    },
+    schema: [],
+  },
+  create(context) {
+    return {
+      JSXAttribute(node) {
+        if (node.name.name === 'href' && startsInternal(node.value))
+          context.report({ node, messageId: 'typed' })
+      },
+      Property(node) {
+        if (keyOf(node) === 'href' && startsInternal(node.value))
+          context.report({ node, messageId: 'typed' })
+      },
+    }
+  },
+}
+
+const internalLinks = {
+  files: ['src/**/*.{ts,tsx}'],
+  // Front-end-site ticket 04 rebuilds the header with hrefFor(); until it merges, the
+  // foundation's header keeps its three typed links. Drop this line once it has.
+  ignores: ['src/components/SiteHeader.tsx'],
+  plugins: { care4mind: { rules: { 'href-from-hreffor': hrefFromHrefFor } } },
+  rules: { 'care4mind/href-from-hreffor': 'error' },
+}
+
 export default defineConfig([
   ...nextVitals,
   ...nextTypescript,
@@ -60,6 +130,7 @@ export default defineConfig([
   },
   ...tseslint.configs.strict.map((config) => ({ ...config, files: ['**/*.{ts,tsx}'] })),
   contentBoundary,
+  internalLinks,
   prettier,
   globalIgnores([
     '.next/**',
