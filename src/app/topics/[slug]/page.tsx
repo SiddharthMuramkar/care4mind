@@ -1,19 +1,28 @@
-import type { Metadata } from 'next'
+import type { Metadata, Route } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { ViewTransition } from 'react'
+import { Fragment, ViewTransition, type ReactNode } from 'react'
 
 import { Breadcrumbs } from '@/components/Breadcrumbs'
+import { ConceptCard } from '@/components/ConceptCard'
 import { Folio } from '@/components/Folio'
 import { PageTurn, turnForward } from '@/components/PageTurn'
-import { citationLinks, Provenance, Sections, Text } from '@/components/prose'
+import { citationLinks, Provenance, Sections } from '@/components/prose'
 import { ReferenceList } from '@/components/ReferenceList'
-import { hrefFor, topics, type ConceptCard, type PassageView, type WorkRef } from '@/content'
+import { ContentsPlate, plateCard, plateScope, type PlateRow } from '@/components/topics'
+import {
+  hrefFor,
+  topics,
+  type ConceptCard as Concept,
+  type PassageView,
+  type WorkRef,
+} from '@/content'
 import { cx } from '@/lib/cx'
 import { metadataFor } from '@/lib/metadata'
+import { toDevanagariDigits } from '@/lib/text'
 
-import listing from '../../listing.module.css'
 import reading from '../../reading.module.css'
+import styles from './page.module.css'
 
 export const dynamicParams = false
 
@@ -25,25 +34,30 @@ export async function generateMetadata({ params }: PageProps<'/topics/[slug]'>):
   return metadataFor(hrefFor({ kind: 'topic', id: (await params).slug }))
 }
 
-/** A Concept in the topic: its name, which flies into its page's heading, and its summary. */
-function ConceptEntry({ concept }: { concept: ConceptCard }) {
-  return (
-    <li className={listing.entry}>
-      <p className={listing.entryName}>
-        <Link href={hrefFor({ kind: 'concept', id: concept.slug })} transitionTypes={turnForward}>
-          <ViewTransition name={`concept-title-${concept.slug}`} share="morph" default="none">
-            <span lang={concept.lang}>{concept.name}</span>
-          </ViewTransition>
-        </Link>
-        {concept.term?.devanagari ? <span lang="sa-Deva">{concept.term.devanagari}</span> : null}
-      </p>
-      {concept.term && concept.english ? <p className={listing.meta}>{concept.english}</p> : null}
-      <p>
-        <Text text={concept.summary} />
-      </p>
-    </li>
-  )
+/** A `lang` attribute only where there is one: an undefined prop still travels with the page. */
+const langOf = (lang: string | undefined) => (lang ? { lang } : {})
+
+const plural = (count: number, one: string) => `${count} ${count === 1 ? one : `${one}s`}`
+
+/** Names in words: "A", "A and B", "A, B and C". */
+function inWords(items: readonly ReactNode[]) {
+  return items.map((item, index) => (
+    <Fragment key={index}>
+      {index === 0 ? null : index === items.length - 1 ? ' and ' : ', '}
+      {item}
+    </Fragment>
+  ))
 }
+
+/** A Concept's row in the plate: its name, and its Devanagari where a book has its page number. */
+const rowOf = (concept: Concept): PlateRow => ({
+  key: concept.slug,
+  href: hrefFor({ kind: 'concept', id: concept.slug }),
+  name: <span {...langOf(concept.lang)}>{concept.name}</span>,
+  ...(concept.term?.devanagari
+    ? { trailing: concept.term.devanagari, trailingLang: 'sa-Deva' as const }
+    : {}),
+})
 
 /** The verses, by the work they come from, in each work's order. */
 function byWork(verses: readonly PassageView[]) {
@@ -56,27 +70,71 @@ function byWork(verses: readonly PassageView[]) {
   return [...works.values()]
 }
 
+/** Who speaks a verse ("अर्जुन उवाच ।"): a line before the verse, not its opening. */
+const SPEAKER = /(उवाच|uvāca)\s*[।|]?$/
+
 /**
- * A topic (D03): its Concepts, the introduction it shares where it has one (the values topic's
- * yama–niyama text), and the verses its Concepts quote. Front-end-site ticket 06 builds its
- * rosette here.
+ * A verse's opening, as a manuscript's index gives it: its first line after any speaker's, in
+ * Devanagari where there is some, else in transliteration.
+ */
+function Opening({ verse }: { verse: PassageView }) {
+  const first = (lines: readonly string[]) =>
+    lines.find((line) => !SPEAKER.test(line.trim())) ?? lines[0]
+  const deva = first(verse.devanagari)
+  if (deva) return <span lang="sa-Deva">{deva}</span>
+  const line = first(verse.transliteration?.lines ?? [])
+  return line ? <span lang={verse.work.lang}>{line}</span> : <>{verse.label}</>
+}
+
+/**
+ * A topic (D03): its Concepts as cards beside a contents plate, set like a book's, whose rows
+ * light as their cards are pointed at; the introduction it shares where it has one (the values
+ * topic's yama–niyama text, stored once); and the verses its Concepts quote. No JavaScript.
  */
 export default async function TopicPage({ params }: PageProps<'/topics/[slug]'>) {
   const topic = await topics.get((await params).slug)
   if (!topic) notFound()
   const citations = topic.intro ? citationLinks(topic.intro.citations, topic.intro.references) : {}
   const works = byWork(topic.verses)
+  const all = [...topic.concepts, ...topic.secondaryConcepts]
+  const card = (concept: Concept) => (
+    <li key={concept.slug} {...plateCard(all.indexOf(concept) + 1)}>
+      <ConceptCard
+        concept={concept}
+        className={styles.card}
+        action={
+          <Link
+            href={hrefFor({ kind: 'concept', id: concept.slug })}
+            transitionTypes={turnForward}
+            data-ink
+          >
+            {/* One span: the action is a flex box, which would swallow the space. */}
+            <span>
+              Read about <span {...langOf(concept.lang)}>{concept.name}</span>
+            </span>
+          </Link>
+        }
+      />
+    </li>
+  )
 
   return (
     <PageTurn>
-      <main id="main" className={reading.page}>
+      <main id="main" className={cx(reading.page, styles.page)}>
         <Breadcrumbs path={hrefFor({ kind: 'topic', id: topic.slug })} />
         <Folio as="article" className={reading.article} aria-labelledby="topic-title">
           <header className={reading.titlePage}>
-            <p className={reading.kicker}>Topic</p>
-            <h1 id="topic-title" className={cx(reading.title, reading.titleLong)}>
-              {topic.name}
-            </h1>
+            <p className={reading.kicker}>
+              Topic{' '}
+              <span className={styles.order} aria-hidden>
+                {toDevanagariDigits(String(topic.order))}
+              </span>
+            </p>
+            <ViewTransition name={`topic-title-${topic.slug}`} share="morph" default="none">
+              <h1 id="topic-title" className={cx(reading.title, reading.titleLong)}>
+                {topic.name}
+              </h1>
+            </ViewTransition>
             {topic.term ? (
               <p className={reading.gloss}>
                 <span lang="sa-Latn">{topic.term.iast}</span>
@@ -88,69 +146,107 @@ export default async function TopicPage({ params }: PageProps<'/topics/[slug]'>)
                 ) : null}
               </p>
             ) : null}
-            <p className={listing.facts}>
-              {topic.conceptCount} {topic.conceptCount === 1 ? 'Concept' : 'Concepts'} ·{' '}
-              {topic.verses.length} {topic.verses.length === 1 ? 'verse' : 'verses'} quoted
+            <p className={styles.facts}>
+              {plural(topic.conceptCount, 'Concept')}
+              {topic.secondaryConcepts.length > 0
+                ? ` · ${topic.secondaryConcepts.length} more also here`
+                : null}{' '}
+              · {plural(topic.verses.length, 'verse')} quoted
+              {topic.works.length > 0 ? (
+                <>
+                  , from{' '}
+                  {inWords(
+                    topic.works.map((work) => (
+                      <cite key={work.slug} lang={work.lang} className={styles.workName}>
+                        {work.title}
+                      </cite>
+                    )),
+                  )}
+                </>
+              ) : null}
             </p>
           </header>
 
-          {topic.intro ? <Sections sections={topic.intro.sections} citations={citations} /> : null}
+          {topic.intro ? (
+            <div className={styles.prose}>
+              <Sections sections={topic.intro.sections} citations={citations} />
+            </div>
+          ) : null}
 
           <section className={reading.section} aria-labelledby="concepts-title">
             <h2 id="concepts-title" className={reading.sectionTitle}>
               Its Concepts
             </h2>
-            <ul className={listing.entries}>
-              {topic.concepts.map((concept) => (
-                <ConceptEntry key={concept.slug} concept={concept} />
-              ))}
-            </ul>
+            <div className={cx(plateScope, styles.spread)}>
+              <ContentsPlate
+                label="Contents"
+                className={styles.plate}
+                groups={[
+                  { rows: topic.concepts.map(rowOf) },
+                  ...(topic.secondaryConcepts.length > 0
+                    ? [{ title: 'Also in this topic', rows: topic.secondaryConcepts.map(rowOf) }]
+                    : []),
+                ]}
+              />
+              <div className={styles.cards}>
+                <ul className={styles.cardList}>{topic.concepts.map(card)}</ul>
+                {topic.secondaryConcepts.length > 0 ? (
+                  <>
+                    <h3 className={styles.also}>Also in this topic</h3>
+                    <ul className={styles.cardList}>{topic.secondaryConcepts.map(card)}</ul>
+                  </>
+                ) : null}
+              </div>
+            </div>
           </section>
-
-          {topic.secondaryConcepts.length > 0 ? (
-            <section className={reading.section} aria-labelledby="also-title">
-              <h2 id="also-title" className={reading.sectionTitle}>
-                Also in this topic
-              </h2>
-              <ul className={listing.entries}>
-                {topic.secondaryConcepts.map((concept) => (
-                  <ConceptEntry key={concept.slug} concept={concept} />
-                ))}
-              </ul>
-            </section>
-          ) : null}
 
           {works.length > 0 ? (
             <section className={reading.section} aria-labelledby="verses-title">
               <h2 id="verses-title" className={reading.sectionTitle}>
                 Verses its Concepts quote
               </h2>
-              <ul className={listing.entries}>
-                {works.map(({ work, verses }) => (
-                  <li key={work.slug} className={listing.entry}>
-                    <p className={listing.entryName}>
-                      <Link
-                        href={hrefFor({ kind: 'work', id: work.slug })}
-                        transitionTypes={turnForward}
-                      >
-                        <span lang={work.lang}>{work.title}</span>
-                      </Link>
-                    </p>
-                    <ul className={listing.inline}>
-                      {verses.map((verse) => (
-                        <li key={verse.id}>
-                          <Link
-                            href={hrefFor({ kind: 'passage', id: verse.id })}
-                            transitionTypes={turnForward}
-                          >
-                            {verse.locator}
-                          </Link>
-                        </li>
-                      ))}
-                    </ul>
-                  </li>
-                ))}
-              </ul>
+              {works.map(({ work, verses }) => (
+                <div key={work.slug} className={styles.work}>
+                  <h3 className={styles.workTitle}>
+                    <Link
+                      href={hrefFor({ kind: 'work', id: work.slug })}
+                      transitionTypes={turnForward}
+                    >
+                      <span lang={work.lang}>{work.title}</span>
+                    </Link>
+                  </h3>
+                  <ol className={styles.verses}>
+                    {verses.map((verse) => (
+                      <li key={verse.id} className={styles.verseItem}>
+                        {/* A passage's anchor on its work's page, made by hrefFor() in the content module. */}
+                        <Link
+                          href={verse.href as Route}
+                          className={styles.verse}
+                          transitionTypes={turnForward}
+                        >
+                          <span className={styles.opening}>
+                            <Opening verse={verse} />
+                          </span>
+                          <span className={styles.verseLeader} aria-hidden />
+                          <span className={styles.locator}>{verse.locator}</span>
+                        </Link>
+                        {verse.quotedIn.length > 0 ? (
+                          <p className={styles.quotedIn}>
+                            Quoted in{' '}
+                            {inWords(
+                              verse.quotedIn.map((record) => (
+                                <span key={`${record.kind}:${record.id}`} {...langOf(record.lang)}>
+                                  {record.title}
+                                </span>
+                              )),
+                            )}
+                          </p>
+                        ) : null}
+                      </li>
+                    ))}
+                  </ol>
+                </div>
+              ))}
             </section>
           ) : null}
 

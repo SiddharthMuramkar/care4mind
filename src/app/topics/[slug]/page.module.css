@@ -1,0 +1,172 @@
+/* A topic's page: wider than a reading page, so its contents plate can stand beside its cards. */
+main.page {
+  max-width: 76rem;
+}
+
+.order {
+  margin-inline-start: 0.35em;
+  font-family: var(--font-deva);
+  font-variant-caps: normal;
+  letter-spacing: 0;
+  color: var(--color-highlight);
+}
+
+/* What the topic holds, counted: "5 Concepts · 23 verses quoted, from …". */
+.facts {
+  margin: 0;
+  max-width: 60ch;
+  font-variant-caps: all-small-caps;
+  letter-spacing: 0.08em;
+  font-size: 1.125rem;
+  color: var(--color-surface-muted);
+}
+
+.workName {
+  font-variant-caps: normal;
+  letter-spacing: 0;
+}
+
+/* The values topic's shared introduction keeps a reading measure on the wide page. */
+.prose {
+  display: grid;
+  gap: 2.5rem;
+  width: 100%;
+  max-width: 46rem;
+  justify-self: center;
+}
+
+/* The plate stands to the left of the cards, and stays in view while they pass. */
+.spread {
+  display: grid;
+  gap: 2rem;
+}
+
+.plate {
+  align-self: start;
+}
+
+.cards {
+  display: grid;
+  gap: 1.25rem;
+  min-width: 0;
+}
+
+.cardList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 1.25rem;
+}
+
+.cardList > li {
+  min-width: 0;
+}
+
+.card {
+  height: 100%;
+  overflow-wrap: anywhere;
+}
+
+.also {
+  margin: 1rem 0 0;
+  font-variant-caps: all-small-caps;
+  letter-spacing: 0.12em;
+  font-size: 1.125rem;
+  font-weight: 400;
+  color: var(--color-surface-muted);
+}
+
+@media (min-width: 64rem) {
+  .spread {
+    grid-template-columns: minmax(17rem, 21rem) minmax(0, 1fr);
+    gap: 3rem;
+  }
+
+  .plate {
+    position: sticky;
+    top: var(--sticky-top);
+  }
+}
+
+/* The verses, set like a manuscript's index: each opening line, a dotted leader, its number. */
+.work + .work {
+  margin-top: 1.5rem;
+}
+
+.workTitle {
+  margin: 0 0 0.75rem;
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: 1.5rem;
+}
+
+.workTitle a {
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.3em;
+}
+
+.verses {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.9rem;
+}
+
+.verseItem {
+  display: grid;
+  min-width: 0;
+  line-height: 1.5;
+}
+
+.verse {
+  display: flex;
+  align-items: baseline;
+  gap: 0.6rem;
+  color: inherit;
+  text-decoration: none;
+}
+
+.opening {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.opening :lang(sa-Deva) {
+  font-family: var(--font-deva);
+  font-size: 1.1875rem;
+}
+
+.opening :is(:lang(sa-Latn), :lang(pi-Latn)) {
+  font-style: italic;
+}
+
+.verseLeader {
+  flex: 1 1 1.5rem;
+  min-width: 1.5rem;
+  border-bottom: 2px dotted var(--color-surface-rule);
+}
+
+.locator {
+  flex: none;
+  font-family: var(--font-display);
+  font-size: 1.125rem;
+  color: var(--color-link);
+  font-variant-numeric: oldstyle-nums;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.2em;
+}
+
+.verse:hover .locator,
+.verse:focus-visible .locator {
+  text-decoration-thickness: 2px;
+}
+
+.quotedIn {
+  margin: 0;
+  font-size: 0.875rem;
+  font-style: italic;
+  color: var(--color-surface-muted);
+}
