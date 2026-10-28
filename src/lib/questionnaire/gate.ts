@@ -15,12 +15,17 @@ const WORDS: Record<QuestionnaireStatus, string> = {
   'coming-later': 'Coming later',
 }
 
-/**
- * A Questionnaire's status in words, never by colour alone (WCAG 1.4.1). A preview can be taken
- * only where its flag is on; elsewhere it is coming soon (D16).
- */
+/** The status a visitor sees: a preview can be taken only where its flag is on (D16). */
+export function shownStatus(
+  status: QuestionnaireStatus,
+  flags: Features = features,
+): QuestionnaireStatus {
+  return status === 'preview' && !flags.questionnairePreview ? 'coming-soon' : status
+}
+
+/** A Questionnaire's status in words, never by colour alone (WCAG 1.4.1). */
 export function statusWords(status: QuestionnaireStatus, flags: Features = features): string {
-  return status === 'preview' && !flags.questionnairePreview ? WORDS['coming-soon'] : WORDS[status]
+  return WORDS[shownStatus(status, flags)]
 }
 
 /** The intro's Start: a link to the flow, or disabled where the Questionnaire can't be taken. */

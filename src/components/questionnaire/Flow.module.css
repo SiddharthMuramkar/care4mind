@@ -1,0 +1,585 @@
+/*
+ * The KarmaYoga flow on its folio: one part per screen, statements set like a printed
+ * questionnaire with rubricated numbers in the margin, answers as pills pressed into the paper.
+ */
+.flow {
+  display: grid;
+  gap: 2rem;
+}
+
+/* Without JavaScript the flow can keep no answers: it gives way to the page's note. */
+@media (scripting: none) {
+  .flow {
+    display: none;
+  }
+}
+
+/* The progress strip, tally and words, stays under the header as a part scrolls. */
+:global(html):has(.progress) {
+  scroll-padding-top: calc(var(--sticky-top) + 5.5rem);
+}
+
+.progress {
+  position: sticky;
+  top: var(--sticky-top);
+  z-index: var(--layer-sticky);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.35rem 1.5rem;
+  padding: 0.85rem 0 0.75rem;
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-surface-rule);
+  /* Paper above it too, so text scrolling under the header's margin is hidden. */
+  box-shadow: 0 -1rem 0 var(--color-surface);
+}
+
+.progressText {
+  font-variant-caps: all-small-caps;
+  font-variant-numeric: lining-nums tabular-nums;
+  letter-spacing: 0.08em;
+  font-size: 1.0625rem;
+  line-height: 1.3;
+  color: var(--color-surface-muted);
+  white-space: nowrap;
+}
+
+/* The tally: 45 short rules in groups by part, a box that never changes size. */
+.tally {
+  display: grid;
+  column-gap: clamp(0.6rem, 2.5vw, 1.25rem);
+  height: 1.5rem;
+}
+
+.group {
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+}
+
+.rule {
+  position: relative;
+  width: 2px;
+  background: color-mix(in srgb, var(--color-surface-rule) 40%, transparent);
+}
+
+/* Each rule inks in from its centre as its statement is answered. */
+.rule::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--color-surface-ink);
+  transform: scaleY(0);
+}
+
+.rule[data-inked]::after {
+  transform: none;
+}
+
+/* The part on screen: a vermilion rule under its group, like a printer's mark. */
+.group[data-current]::after {
+  content: '';
+  position: absolute;
+  inset-inline: -2px;
+  bottom: -0.45rem;
+  height: 2px;
+  background: var(--color-highlight);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .rule::after {
+    transition: transform var(--duration-move) var(--ease-out);
+  }
+}
+
+@media (max-width: 34rem) {
+  .progress {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .progressText {
+    font-size: 1rem;
+  }
+}
+
+.step {
+  display: grid;
+  min-width: 0;
+}
+
+.part,
+.review,
+.end {
+  display: grid;
+  gap: 2.25rem;
+  min-width: 0;
+}
+
+.stepHead {
+  display: grid;
+  gap: 0.6rem;
+}
+
+.kicker {
+  margin: 0;
+  font-variant-caps: all-small-caps;
+  letter-spacing: 0.16em;
+  font-size: 1.0625rem;
+  color: var(--color-surface-muted);
+}
+
+.stepTitle {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: clamp(1.875rem, 5vw, 2.5rem);
+  line-height: 1.1;
+  text-wrap: balance;
+  /* Clear of the header and the progress strip, with the kicker above it in view. */
+  scroll-margin-top: calc(var(--sticky-top) + 8rem);
+}
+
+.stepTitle:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* The part's instructions, set as a rubric between hairlines. */
+.instructions {
+  max-width: 62ch;
+  margin-top: 0.4rem;
+  padding: 0.9rem 0;
+  border-block: 1px solid color-mix(in srgb, var(--color-surface-rule) 70%, transparent);
+  font-style: italic;
+  line-height: 1.65;
+}
+
+.sectionTitle {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: clamp(1.5rem, 4vw, 1.875rem);
+  line-height: 1.15;
+}
+
+/* Statements: a margin for their numbers, then each one with its options under it. */
+.statements {
+  display: grid;
+  gap: 2.5rem;
+  padding-inline-start: 2.5rem;
+}
+
+.statement {
+  position: relative;
+  display: grid;
+  gap: 0.85rem;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  scroll-margin-top: calc(var(--sticky-top) + 6rem);
+}
+
+/* Floated, the legend is laid out as the statement's first row, not in the fieldset's border. */
+.legend {
+  float: inline-start;
+  width: 100%;
+  padding: 0;
+  font-size: 1.1875rem;
+  line-height: 1.55;
+  text-wrap: pretty;
+}
+
+/* Its number, rubricated in the margin as a manuscript numbers its verses. */
+.number {
+  position: absolute;
+  inset-inline-end: calc(100% + 0.85rem);
+  top: 0;
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  line-height: 1.2;
+  font-variant-numeric: oldstyle-nums;
+  color: var(--color-surface-link);
+}
+
+.error {
+  display: flex;
+  align-items: baseline;
+  gap: 0.55rem;
+  margin: 0;
+  color: var(--color-surface-link);
+  font-weight: 600;
+}
+
+/* A vermilion diamond, as at the folio's corners. */
+.error::before {
+  content: '';
+  flex: none;
+  width: 0.5rem;
+  height: 0.5rem;
+  background: var(--color-highlight);
+  transform: rotate(45deg) translateY(-0.1rem);
+}
+
+/* An unanswered statement is marked by a vermilion rule in the margin as well as its words. */
+.statement[aria-invalid='true']::before {
+  content: '';
+  position: absolute;
+  inset-block: 0.35rem 0;
+  inset-inline-start: -0.6rem;
+  width: 3px;
+  background: var(--color-highlight);
+}
+
+.options {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.option {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-height: 48px;
+  padding: 0.45rem 1rem;
+  border: 1px solid color-mix(in srgb, var(--color-surface-ink) 45%, transparent);
+  border-radius: 1.5rem;
+  background: color-mix(in srgb, var(--color-ink) 45%, var(--color-surface));
+  color: var(--color-surface-ink);
+  font-variant-caps: all-small-caps;
+  letter-spacing: 0.07em;
+  font-size: 1.125rem;
+  line-height: 1.15;
+  cursor: pointer;
+  transition: transform var(--duration-instant) var(--ease-press);
+}
+
+/* With room, the five options run in a row as a scale, each mark over its label. */
+@media (min-width: 46rem) {
+  .options {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+
+  /* Marks level across the row, labels hanging under them. */
+  .option {
+    flex-direction: column;
+    justify-content: flex-start;
+    gap: 0.45rem;
+    padding: 0.8rem 0.35rem 0.65rem;
+    border-radius: 1.25rem;
+    font-size: 1.0625rem;
+    letter-spacing: 0.05em;
+    text-align: center;
+  }
+}
+
+/* The ink a chosen answer takes, spreading from the middle of its pill. */
+.option::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: var(--color-ground);
+  border-radius: inherit;
+  opacity: 0;
+  transform: scale(0.85);
+}
+
+.option:hover {
+  border-color: var(--color-surface-ink);
+}
+
+.option:active {
+  transform: translateY(1px);
+}
+
+.option:has(.radio:checked) {
+  border-color: var(--color-ground);
+  color: var(--color-ink);
+}
+
+.option:has(.radio:checked)::before {
+  opacity: 1;
+  transform: none;
+}
+
+.option:has(.radio:focus-visible) {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .option::before {
+    transition:
+      opacity var(--duration-quick) var(--ease-out),
+      transform var(--duration-quick) var(--ease-out);
+  }
+}
+
+/* The native radio button covers its pill, so the whole pill takes the press and the focus. */
+.radio {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+/* A hollow roundel; chosen, it fills with vermilion, as the wordmark's 4 sits in one. */
+.mark {
+  position: relative;
+  flex: none;
+  width: 0.95rem;
+  height: 0.95rem;
+  border: 1.5px solid currentColor;
+  border-radius: 50%;
+}
+
+.mark::after {
+  content: '';
+  position: absolute;
+  inset: 2px;
+  border-radius: 50%;
+  background: var(--color-highlight);
+  transform: scale(0);
+}
+
+.option:has(.radio:checked) .mark {
+  border-color: var(--color-ink);
+}
+
+.option:has(.radio:checked) .mark::after {
+  transform: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .mark::after {
+    transition: transform var(--duration-quick) var(--ease-out);
+  }
+}
+
+.optionText {
+  min-width: 0;
+  text-wrap: balance;
+}
+
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  padding-top: 1.75rem;
+  border-top: 1px solid var(--color-surface-rule);
+}
+
+.controls > :only-child {
+  margin-inline-start: auto;
+}
+
+/* Next refused: the summary at the top of the part. */
+.summary {
+  display: grid;
+  gap: 0.75rem;
+  padding: 1.25rem clamp(1rem, 4vw, 1.75rem);
+  border: 2px solid var(--color-surface-link);
+  background: color-mix(in srgb, var(--color-ink) 50%, var(--color-surface));
+  scroll-margin-top: calc(var(--sticky-top) + 6rem);
+}
+
+.summary p {
+  margin: 0;
+}
+
+.summaryTitle {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: 1.5rem;
+  line-height: 1.2;
+}
+
+.summaryList {
+  display: grid;
+  gap: 0.45rem;
+  margin: 0;
+  padding-inline-start: 1.25rem;
+}
+
+.summaryList li::marker {
+  color: var(--color-highlight);
+}
+
+/* Answers, set like a book's contents. */
+.answersPart {
+  display: grid;
+  gap: 0.85rem;
+}
+
+.answersTitle {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: 1.375rem;
+  line-height: 1.2;
+}
+
+.answers {
+  display: grid;
+  gap: 0.35rem;
+  margin: 0;
+}
+
+.row {
+  display: flex;
+  align-items: last baseline;
+  gap: 0.75rem;
+  break-inside: avoid;
+}
+
+.rowStatement {
+  flex: 1 1 auto;
+  display: flex;
+  align-items: last baseline;
+  gap: 0.6rem;
+  min-width: 0;
+}
+
+.leader {
+  flex: 1 0 1.5rem;
+  border-bottom: 2px dotted var(--color-surface-rule);
+}
+
+.answer {
+  flex: none;
+  max-width: 38%;
+  margin: 0;
+  font-variant-caps: all-small-caps;
+  letter-spacing: 0.08em;
+  font-size: 1.125rem;
+  text-align: end;
+}
+
+.change {
+  flex: none;
+  margin: 0;
+}
+
+.change a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding-inline: 0.35rem;
+}
+
+/* On review, the leaders ink in from their centres as the page arrives. */
+@media (prefers-reduced-motion: no-preference) {
+  .review .leader {
+    animation: leader-ink var(--duration-slow) var(--ease-out) both;
+  }
+}
+
+@keyframes leader-ink {
+  from {
+    transform: scaleX(0);
+  }
+}
+
+@media (max-width: 30rem) {
+  .row {
+    flex-wrap: wrap;
+    gap: 0 0.75rem;
+  }
+
+  .rowStatement {
+    flex-basis: 100%;
+  }
+
+  .leader {
+    display: none;
+  }
+
+  .answer {
+    max-width: none;
+    margin-inline-end: auto;
+    text-align: start;
+  }
+}
+
+/* The result: a plate left blank for the printer, captioned as a placeholder. */
+.plate {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  gap: 1rem;
+  margin: 0.75rem 0 0;
+  padding: clamp(2rem, 6vw, 3rem) clamp(1.25rem, 5vw, 3rem) clamp(1.5rem, 5vw, 2.5rem);
+  text-align: center;
+  box-shadow:
+    inset 0 0 0 1px rgb(29 26 46 / 0.55),
+    inset 0 0 0 6px var(--color-surface),
+    inset 0 0 0 7px rgb(29 26 46 / 0.3);
+}
+
+.plateLabel {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  translate: -50% -50%;
+  padding: 0 0.85rem;
+  background: var(--color-surface);
+  font-variant-caps: all-small-caps;
+  letter-spacing: 0.2em;
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--color-surface-link);
+  white-space: nowrap;
+}
+
+.plateOrnament {
+  width: 7.5rem;
+  height: auto;
+  color: var(--color-surface-muted);
+}
+
+.plateText {
+  max-width: 44ch;
+  margin: 0;
+  font-size: 1.25rem;
+  line-height: 1.55;
+  text-wrap: balance;
+}
+
+.yourAnswers {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.visuallyHidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* Printed, the end screen keeps the placeholder, the limits, the answers and the source. */
+@media print {
+  .progress,
+  .controls,
+  .change {
+    display: none;
+  }
+
+  .flow {
+    display: grid;
+  }
+
+  .plate,
+  .answersPart {
+    break-inside: avoid;
+  }
+}

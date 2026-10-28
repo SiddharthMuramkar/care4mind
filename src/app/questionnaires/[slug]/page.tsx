@@ -1,16 +1,17 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
+import { ViewTransition } from 'react'
 
 import { Breadcrumbs } from '@/components/Breadcrumbs'
 import { Citation } from '@/components/Citation'
 import { Folio } from '@/components/Folio'
 import { PageTurn, turnForward } from '@/components/PageTurn'
 import { Provenance, Text } from '@/components/prose'
-import { statusOf } from '@/components/QuestionnaireCard'
 import { ReadingThread } from '@/components/ReadingThread'
 import { concepts, hrefFor, questionnaires } from '@/content'
 import { metadataFor } from '@/lib/metadata'
+import { shownStatus, startOf, statusWords } from '@/lib/questionnaire/gate'
 
 import cta from '../../cta.module.css'
 import reading from '../../reading.module.css'
@@ -45,7 +46,7 @@ export default async function QuestionnairePage({ params }: PageProps<'/question
   if (!questionnaire || questionnaire.status === 'coming-later') notFound()
 
   const { slug, status } = questionnaire
-  const open = (await questionnaires.form(slug)) !== null
+  const start = startOf(questionnaire, await questionnaires.form(slug))
   const related = (await concepts.list()).filter((concept) =>
     questionnaire.concepts.some((ref) => ref.slug === concept.slug),
   )
@@ -59,9 +60,14 @@ export default async function QuestionnairePage({ params }: PageProps<'/question
           <header className={reading.titlePage}>
             <p className={reading.kicker}>Questionnaire</p>
             <h1 id="questionnaire-title" className={reading.title}>
-              {questionnaire.title}
+              {/* The Questionnaires page's card flies into this heading. */}
+              <ViewTransition name={`questionnaire-title-${slug}`} share="morph" default="none">
+                <span>{questionnaire.title}</span>
+              </ViewTransition>
             </h1>
-            <p className={reading.badge}>{statusOf(status)}</p>
+            <p className={styles.status} data-status={shownStatus(status)}>
+              {statusWords(status)}
+            </p>
             {questionnaire.summary ? (
               <p className={reading.summary}>
                 <Text text={questionnaire.summary} />
@@ -132,15 +138,22 @@ export default async function QuestionnairePage({ params }: PageProps<'/question
           ) : null}
 
           <div className={styles.start}>
-            {open ? (
-              <Link
-                href={hrefFor({ kind: 'questionnaire', id: slug, status, flow: true })}
-                className={cta.primary}
-                transitionTypes={turnForward}
-                data-ink
-              >
-                Start the Questionnaire
-              </Link>
+            {start.open ? (
+              <>
+                <Link
+                  href={start.href}
+                  className={cta.primary}
+                  transitionTypes={turnForward}
+                  data-ink
+                  aria-describedby="start-note"
+                >
+                  Start the Questionnaire
+                </Link>
+                <p id="start-note" className={styles.startNote}>
+                  <strong>Your answers aren’t scored yet.</strong> Its scoring rules are with the
+                  Psychology expert. Nothing you answer is saved or sent anywhere.
+                </p>
+              </>
             ) : (
               <>
                 <button
