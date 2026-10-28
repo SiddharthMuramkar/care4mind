@@ -84,6 +84,7 @@
   flex: 0 1 auto;
   max-width: min(100%, 26rem);
   margin-inline-start: auto;
+  /* A note on its own line keeps to the right; one beside its leader starts where the dots stop. */
   text-align: end;
   color: var(--color-surface-muted);
   font-size: 1rem;
@@ -110,6 +111,12 @@
   border-bottom: 2px dotted var(--color-highlight);
 }
 
+@media (min-width: 40rem) {
+  .note {
+    text-align: start;
+  }
+}
+
 /* The References, by name, each leading to its entry in the list below. */
 .references {
   list-style: none;
@@ -129,6 +136,8 @@
 }
 
 .references a {
+  display: inline-block;
+  padding-block: 0.25rem;
   overflow-wrap: anywhere;
 }
 

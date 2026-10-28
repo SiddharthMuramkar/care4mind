@@ -1,10 +1,13 @@
 'use client'
 
 import { PreviewCard } from '@base-ui/react/preview-card'
+import { useEffect } from 'react'
 
 import type { PreviewPayload } from './LinkPreview'
 import styles from './PreviewCard.module.css'
 import type { PreviewParts } from './store'
+
+export { OPEN_DELAY } from './delays'
 
 const handle = PreviewCard.createHandle<PreviewPayload>()
 
@@ -35,14 +38,36 @@ function Slip({ payload }: { payload: PreviewPayload }) {
   )
 }
 
+/** When a link was last pressed: following one turns the page, which a card opening would cut short. */
+let pressedAt = -Infinity
+const PRESS_QUIET = 1000
+
+/** A card about to open while a page turns, or just after a press that may start one, stays shut. */
+function onOpenChange(open: boolean, details: PreviewCard.Root.ChangeEventDetails) {
+  const turning = Boolean((document as { activeViewTransition?: unknown }).activeViewTransition)
+  if (open && (turning || performance.now() - pressedAt < PRESS_QUIET)) details.cancel()
+}
+
 /**
  * The page's one preview card. It opens beside the link that asked for it, never over it, so
  * the focused link stays in view (WCAG 2.4.11); Escape closes it, and the pointer can move onto
  * it (WCAG 1.4.13). Base UI keeps it out of the tab order: everything on it is on the link's page.
  */
 function Card() {
+  useEffect(() => {
+    const press = () => (pressedAt = performance.now())
+    const key = (event: KeyboardEvent) => {
+      if (event.key === 'Enter' || event.key === ' ') press()
+    }
+    document.addEventListener('pointerdown', press, { capture: true, passive: true })
+    document.addEventListener('keydown', key, { capture: true, passive: true })
+    return () => {
+      document.removeEventListener('pointerdown', press, { capture: true })
+      document.removeEventListener('keydown', key, { capture: true })
+    }
+  }, [])
   return (
-    <PreviewCard.Root handle={handle}>
+    <PreviewCard.Root handle={handle} onOpenChange={onOpenChange}>
       {({ payload }) => (
         <PreviewCard.Portal>
           <PreviewCard.Positioner

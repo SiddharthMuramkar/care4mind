@@ -544,7 +544,9 @@ test.describe('Concept page v2: previews', () => {
     const card = previewCard(page)
     await expect(card).toContainText('Concept')
     await expect(card).toContainText('Citta-bhūmi')
-    expect(overlap(await card.boundingBox(), await link.boundingBox())).toBe(0)
+    await expect
+      .poll(async () => overlap(await card.boundingBox(), await link.boundingBox()))
+      .toBe(0)
     await card.hover()
     await page.waitForTimeout(600)
     await expect(card).toBeVisible()
@@ -559,7 +561,9 @@ test.describe('Concept page v2: previews', () => {
     await link.focus()
     const card = previewCard(page)
     await expect(card).toContainText('Reference')
-    expect(overlap(await card.boundingBox(), await link.boundingBox())).toBe(0)
+    await expect
+      .poll(async () => overlap(await card.boundingBox(), await link.boundingBox()))
+      .toBe(0)
     await page.keyboard.press('Escape')
     await expect(card).toBeHidden()
     await expect(link).toBeFocused()
@@ -576,13 +580,18 @@ test.describe('Concept page v2: previews', () => {
     await page.mouse.move(1, 1)
     await expect(previewCard(page)).toBeHidden()
 
+    // Data the page asks for, not the code or prefetches its links make.
     const requests: string[] = []
-    page.on('request', (request) => requests.push(request.url()))
+    page.on('request', (request) => {
+      if (['fetch', 'xhr'].includes(request.resourceType()) && !request.url().includes('_rsc')) {
+        requests.push(request.url())
+      }
+    })
     const verse = linked(page).getByRole('link', { name: 'Yoga Sūtra 1.30' })
     await verse.hover()
     await expect(previewCard(page)).toContainText('Verse')
     await expect(previewCard(page)).toContainText('Yoga Sūtra 1.30')
-    expect(requests.filter((url) => !url.includes('_rsc'))).toEqual([])
+    expect(requests).toEqual([])
   })
 
   test('shows nothing on touch', async ({ browser }) => {

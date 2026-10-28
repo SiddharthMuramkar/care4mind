@@ -122,6 +122,17 @@ export default async function ConceptPage({ params }: PageProps<'/concepts/[slug
             </header>
           </ScriptChoice>
 
+          {/* The verses it opens with stand across the page, like an epigraph. */}
+          {concept.verses.length > 0 ? (
+            <div className={styles.epigraph}>
+              {concept.verses.map((verse) => (
+                <VerseCard key={verse.passage} verse={verse} />
+              ))}
+            </div>
+          ) : null}
+
+          <OrnamentRule className={styles.rule} />
+
           <div
             className={styles.body}
             // The sections' view timelines, for the contents to follow (see Contents).
@@ -134,12 +145,6 @@ export default async function ConceptPage({ params }: PageProps<'/concepts/[slug
             <Contents entries={contents} />
 
             <div className={styles.text}>
-              {concept.verses.map((verse) => (
-                <VerseCard key={verse.passage} verse={verse} />
-              ))}
-
-              <OrnamentRule className={styles.rule} />
-
               <Sections sections={concept.sections} citations={citations} />
 
               <LinkedKnowledge concept={concept} verses={versesOf(concept)} />

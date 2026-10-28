@@ -4,6 +4,7 @@ import { useEffect, useId, useSyncExternalStore, type ReactElement } from 'react
 
 import type { LatinScript } from '@/content'
 
+import { CLOSE_DELAY, OPEN_DELAY } from './delays'
 import { getNoParts, getParts, subscribe, want } from './store'
 
 /** What a link's preview card shows. Supplementary only: all of it is on the page the link opens. */
@@ -25,10 +26,6 @@ export interface LinkPreviewProps {
   children: ReactElement
   preview: PreviewPayload
 }
-
-/** How long a pointer or keyboard focus rests on a link before its preview opens, and leaves. */
-const OPEN_DELAY = 450
-const CLOSE_DELAY = 200
 
 /**
  * Gives a link to a Concept, a glossary entry with a Concept page, a citation or a verse a
@@ -53,6 +50,7 @@ export function LinkPreview({ children, preview }: LinkPreviewProps) {
       payload={preview}
       delay={OPEN_DELAY}
       closeDelay={CLOSE_DELAY}
+      id={key}
       render={<span data-preview={key} />}
     >
       {children}
