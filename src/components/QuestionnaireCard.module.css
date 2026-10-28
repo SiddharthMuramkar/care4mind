@@ -10,8 +10,9 @@
   align-self: center;
   margin: 0;
   padding: 0.2rem 0.65rem;
-  background: var(--color-highlight);
-  color: var(--color-highlight-ink);
+  /* Its status's colour (globals.css), always beside the words. */
+  background: var(--status);
+  color: var(--status-ink);
   font-variant-caps: all-small-caps;
   letter-spacing: 0.1em;
   font-size: 1.0625rem;
