@@ -56,7 +56,9 @@ for (const route of ROUTES_IN_SCOPE) {
     await gotoReady(page, route.path)
     expect.soft(await movingAnimations(page), `${where}: moving on load`).toEqual([])
     expect.soft(await unfinishedDrawings(page), `${where}: unfinished on load`).toEqual([])
-    expect.soft(await unfinishedRules(page), `${where}: rules short of full width on load`).toEqual([])
+    expect
+      .soft(await unfinishedRules(page), `${where}: rules short of full width on load`)
+      .toEqual([])
 
     await page.mouse.wheel(0, 4000)
     await page.waitForTimeout(100)
