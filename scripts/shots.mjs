@@ -111,7 +111,7 @@ function pick(only, routes) {
     const found = path
       ? routes.find((route) => route.path === path)
       : routes.find((route) => route.kind === item && route.sample)
-    if (!found) throw new UsageError(`“${item}” is neither. ${takes}`)
+    if (!found) throw new UsageError(`“${item}” is no route path or kind here. ${takes}`)
     wanted.add(found)
   }
   return routes.filter((route) => wanted.has(route))
@@ -191,10 +191,10 @@ function built() {
 }
 
 /**
- * Start the build on the port and wait until it answers. `stop()` ends it and everything it
- * started (its own process group), and waits until the port is free.
+ * Start the build on the port. `ready()` waits until it answers; `stop()` ends it and everything
+ * it started (its own process group), and waits until the port is free.
  */
-async function startServer(port) {
+function startServer(port) {
   const server = spawn('pnpm', ['start', '-p', String(port)], {
     cwd: ROOT,
     detached: true,
@@ -214,9 +214,17 @@ async function startServer(port) {
       // Already gone.
     }
   }
-  const handle = {
-    /** Last resort, when the command itself is ending: no waiting. */
-    kill: () => running() && signal('SIGKILL'),
+  return {
+    async ready() {
+      for (let waited = 0; !(await listening(port)); waited += 200) {
+        if (!running() || waited > 60_000) {
+          throw new Error(
+            `pnpm start -p ${port} didn’t serve the site${failed ? `: ${failed.message}` : ''}.\n${output.trim()}`,
+          )
+        }
+        await delay(200)
+      }
+    },
     async stop() {
       if (server.pid === undefined) return
       signal('SIGTERM')
@@ -226,17 +234,9 @@ async function startServer(port) {
         await delay(100)
       }
     },
+    /** Last resort, when the command itself is ending: no waiting. */
+    kill: () => running() && signal('SIGKILL'),
   }
-  for (let waited = 0; !(await listening(port)); waited += 200) {
-    if (!running() || waited > 60_000) {
-      await handle.stop()
-      throw new Error(
-        `pnpm start -p ${port} didn’t serve the site${failed ? `: ${failed.message}` : ''}.\n${output.trim()}`,
-      )
-    }
-    await delay(200)
-  }
-  return handle
 }
 
 /**
@@ -347,7 +347,8 @@ async function main(argv) {
     )
   }
   const shots = planShots(options, await loadRoutes())
-  const server = serving ? null : await startServer(port)
+  const server = serving ? null : startServer(port)
+  // Ctrl-C stops the server too, even while it starts: it runs in its own process group.
   const stop = (signal) => {
     void (server?.stop() ?? Promise.resolve()).finally(() =>
       process.exit(signal === 'SIGINT' ? 130 : 143),
@@ -357,6 +358,7 @@ async function main(argv) {
   process.once('SIGTERM', stop)
   process.once('exit', () => server?.kill())
   try {
+    await server?.ready()
     await shootAll(shots, `http://localhost:${port}`, options.full)
   } finally {
     await server?.stop()
