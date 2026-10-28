@@ -2,8 +2,8 @@
  * The Concept map's layout (D20, design C5), worked out while the site builds so the browser runs
  * no layout code. The Concepts sit on one circle, one sector per topic, clockwise from the top in
  * the graph's order (so the tab order follows the topics). The topics are split between the
- * circle's right and left halves, and each half spaces its Concepts evenly from top to bottom:
- * their names are set across, so even spacing down the page keeps neighbouring names apart.
+ * circle's right and left halves, and each half spaces its Concepts from top to bottom: their
+ * names are set across, so spacing them down the page, a long name by its lines, keeps them apart.
  * Coordinates are in a square of SIZE units, its centre at the middle.
  */
 import type { ConceptGraph, ConceptGraphNode } from '@/content'
@@ -26,6 +26,12 @@ const LABEL_OFFSET = 40
 const VIEW_MARGIN = 24
 /** How far inside the circle a sector's number sits. */
 const NUMERAL_INSET = 44
+/** The names' size, in the plate's units: ConceptMap.module.css sets them at 2.2cqi. */
+const NAME_SIZE = 22
+/** A Concept's mark and the space after it, in ems of its name (ConceptMap.module.css). */
+const MARK_EMS = 1.07
+/** A generous average width of a letter of the names' face, in ems: a printer's copyfitting rule. */
+const LETTER_EMS = 0.48
 
 /**
  * How far each kind's curve stays from the centre, as a share of the way from the centre to the
@@ -118,28 +124,57 @@ function split(groups: readonly ConceptGraphNode[][]) {
   return [groups.slice(0, best), groups.slice(best)] as const
 }
 
-/** One half's Concepts, spaced evenly down it (right) or up it (left). */
+/** How many lines a name takes in its room, estimated as a printer copyfits: by its letters. */
+function linesOf({ name, room }: MapPoint) {
+  const measure = Math.max(room * SIZE - MARK_EMS * NAME_SIZE, NAME_SIZE)
+  return Math.max(1, Math.ceil((name.length * LETTER_EMS * NAME_SIZE) / measure))
+}
+
+/**
+ * One half's Concepts, spaced down it (right) or up it (left). Names in one line each are spaced
+ * evenly; a name set in more lines takes room in proportion, so it never stacks on its neighbours.
+ * Where a Concept sits sets its room, and its room its lines: a few passes settle both, a name's
+ * lines only ever growing.
+ */
 function placeHalf(groups: readonly ConceptGraphNode[][], side: 'right' | 'left'): MapPoint[] {
-  const nodes = groups.flat()
-  const steps = Math.max(nodes.length - 1 + (groups.length - 1) * TOPIC_GAP, 0)
+  let lines = groups.flat().map(() => 1)
+  let points = spaceHalf(groups, side, lines)
+  for (let pass = 0; pass < 4; pass++) {
+    const next = points.map((point, index) => Math.max(linesOf(point), lines[index] ?? 1))
+    if (next.every((count, index) => count === lines[index])) break
+    lines = next
+    points = spaceHalf(groups, side, lines)
+  }
+  return points
+}
+
+function spaceHalf(
+  groups: readonly ConceptGraphNode[][],
+  side: 'right' | 'left',
+  lines: readonly number[],
+): MapPoint[] {
+  // The steps before each Concept after the first: its name's lines and its neighbour's, halved,
+  // and a topic's gap where a topic starts.
+  const gaps = groups.flatMap((group, topic) =>
+    group.map((_, index) => (topic > 0 && index === 0 ? TOPIC_GAP : 0)),
+  )
+  const before = gaps.map((gap, index) =>
+    index === 0 ? 0 : gap + ((lines[index - 1] ?? 1) + (lines[index] ?? 1)) / 2,
+  )
+  const steps = before.reduce((sum, gap) => sum + gap, 0)
   const span = 2 * RADIUS * Math.sin((REACH * Math.PI) / 180)
   const step = steps === 0 ? 0 : span / steps
-  const points: MapPoint[] = []
   let offset = steps === 0 ? span / 2 : 0
-  groups.forEach((group, index) => {
-    if (index > 0) offset += step * TOPIC_GAP
-    for (const node of group) {
-      // Right: top to bottom. Left: bottom to top, so the whole goes round clockwise.
-      const dy = side === 'right' ? offset - span / 2 : span / 2 - offset
-      const dx = Math.sqrt(RADIUS * RADIUS - dy * dy) * (side === 'right' ? 1 : -1)
-      const x = round(CENTRE + dx)
-      const y = round(CENTRE + dy)
-      const room = Math.round(((side === 'right' ? SIZE - x : x) - LABEL_OFFSET) / 10) / 100
-      points.push({ ...node, x, y, bearing: round(bearingOf(x, y)), side, room, near: [] })
-      offset += step
-    }
+  return groups.flat().map((node, index) => {
+    offset += step * (before[index] ?? 0)
+    // Right: top to bottom. Left: bottom to top, so the whole goes round clockwise.
+    const dy = side === 'right' ? offset - span / 2 : span / 2 - offset
+    const dx = Math.sqrt(RADIUS * RADIUS - dy * dy) * (side === 'right' ? 1 : -1)
+    const x = round(CENTRE + dx)
+    const y = round(CENTRE + dy)
+    const room = Math.round(((side === 'right' ? SIZE - x : x) - LABEL_OFFSET) / 10) / 100
+    return { ...node, x, y, bearing: round(bearingOf(x, y)), side, room, near: [] }
   })
-  return points
 }
 
 /** An arc of the circle from one bearing to another, either way round. */

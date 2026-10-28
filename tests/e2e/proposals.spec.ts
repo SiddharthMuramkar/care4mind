@@ -30,6 +30,35 @@ test.describe('the proposals page', () => {
     await expect(page.getByRole('main')).not.toContainText(/reading path/i)
   })
 
+  test('sets each setting as code inside its sentence, not on a line of its own', async ({
+    page,
+  }) => {
+    await gotoReady(page, PATH)
+    const answers = page
+      .getByRole('main')
+      .getByRole('definition')
+      .filter({ has: page.getByRole('code') })
+    await expect(answers.getByRole('code')).toHaveText([
+      'FEATURE_CONCEPT_MAP=0',
+      'FEATURE_DEVANAGARI_FIRST=0',
+    ])
+    for (const answer of await answers.all()) {
+      await expect(answer).toContainText(/One setting, FEATURE_\w+=0, with no code change/)
+      // The comma after the setting sits on the line where the setting ends.
+      const sameLine = await answer.getByRole('code').evaluate((code) => {
+        const end = [...code.getClientRects()].at(-1)
+        const next = code.nextSibling
+        if (!end || !next) return false
+        const comma = document.createRange()
+        comma.setStart(next, 0)
+        comma.setEnd(next, 1)
+        const { top, bottom } = comma.getBoundingClientRect()
+        return top < end.bottom && bottom > end.top
+      })
+      expect(sameLine).toBe(true)
+    }
+  })
+
   test('is labelled a proposal by its heading, under Home › Proposals', async ({ page }) => {
     await gotoReady(page, PATH)
     const header = page.getByRole('main').locator('header').first()

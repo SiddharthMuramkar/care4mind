@@ -164,6 +164,27 @@ describe('layoutMap', () => {
     expect(topicsOf('jiva', 'satya')).toEqual(['self', 'values'])
     expect(topicsOf('citta', 'vikshepa')).toEqual(['mind', 'self'])
   })
+
+  it('gives a name too long for one line beside the circle more room from its neighbours', () => {
+    // One topic, so every Concept is on the right half, top to bottom. Only the middle name is
+    // too long for the room beside the circle and is set in more than one line.
+    const long = { ...node('momentum', 'self'), name: 'Momentum of Spiritual Practice' }
+    const graph: ConceptGraph = {
+      nodes: [
+        node('atman', 'self'),
+        node('jiva', 'self'),
+        long,
+        node('citta', 'self'),
+        node('klesha', 'self'),
+      ],
+      edges: [],
+    }
+    const [a = 0, b = 0, c = 0, d = 0, e = 0] = layoutMap(graph, TOPICS).points.map(({ y }) => y)
+    const short = b - a
+    expect(e - d).toBeCloseTo(short, 0)
+    expect(c - b).toBeGreaterThan(short * 1.4)
+    expect(d - c).toBeGreaterThan(short * 1.4)
+  })
 })
 
 // The filters' state lives in the address: one kind of connection at a time, and any topics.

@@ -132,7 +132,9 @@ export default function ProposalsPage() {
                       </p>
                     </dd>
                     <dt>How it is switched off</dt>
-                    <dd>{withSettings(proposal.off)}</dd>
+                    <dd>
+                      <p>{withSettings(proposal.off)}</p>
+                    </dd>
                   </dl>
                   <TryIt proposal={proposal} />
                 </article>

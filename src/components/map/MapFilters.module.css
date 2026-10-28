@@ -119,10 +119,7 @@
 
 @media (prefers-reduced-motion: no-preference) {
   .chip {
-    transition:
-      background-color var(--duration-quick) var(--ease-out),
-      color var(--duration-quick) var(--ease-out),
-      transform var(--duration-instant) var(--ease-press);
+    transition: transform var(--duration-instant) var(--ease-press);
   }
 
   .chip:active {
