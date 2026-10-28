@@ -104,3 +104,19 @@ test.describe('Questionnaires page (D16)', () => {
     expect(turn?.flights.map(({ name }) => name)).toContain('questionnaire-title-karmayoga-scale')
   })
 })
+
+test('names each Questionnaire page’s place in its breadcrumbs (D15)', async ({ page }) => {
+  for (const [path, trail] of [
+    ['/questionnaires/', ['Home', 'Questionnaires']],
+    ['/questionnaires/karmayoga-scale/', ['Home', 'Questionnaires', 'KarmaYoga Scale']],
+    [
+      '/questionnaires/karmayoga-scale/take/',
+      ['Home', 'Questionnaires', 'KarmaYoga Scale', 'Take it'],
+    ],
+  ] as const) {
+    await page.goto(path)
+    const crumbs = page.getByRole('navigation', { name: 'Breadcrumb' }).getByRole('listitem')
+    await expect(crumbs).toHaveText([...trail])
+    await expect(crumbs.last().locator('[aria-current="page"]')).toHaveText(trail.at(-1) ?? '')
+  }
+})
