@@ -1,6 +1,6 @@
 # 06: Concepts A–Z, glossary and topic pages
 
-Status: ready-for-agent
+Status: resolved
 Blocked by: 03, 04
 Spec: [Front-end site: every public page](../spec.md) · Design: [design.md](../design.md) §B3, §C3 · Decisions: D03, D14, D15, D21
 
@@ -28,51 +28,51 @@ Spec: [Front-end site: every public page](../spec.md) · Design: [design.md](../
 
 ## Acceptance criteria
 
-- [ ] **One A–Z (D14):**
+- [x] **One A–Z (D14):**
   - `/concepts/` lists every entry from `site.azIndex()`: every Concept, every term (linking to its anchor on its Concept page) and every glossary entry, de-duplicated and sorted.
   - Each entry shows its leading name (IAST, or the English title), its Devanagari where known, and its gloss.
   - Both scripts go through ScriptPair with their `lang` tags.
-- [ ] **Glossary entries:**
+- [x] **Glossary entries:**
   - An entry with a Concept page links there.
   - An entry with only a DharmaWiki article links to it, and says it leads to DharmaWiki in words, not only with an icon.
   - An entry with neither shows as text.
   - Every glossary entry has its anchor (`/concepts/#<slug>`), which the old `/anubandha-chatushtaya/` address redirects to.
-- [ ] **Letter rail:**
+- [x] **Letter rail:**
   - A Base UI Toolbar of letter links (`Toolbar.Link`): one Tab stop, with the arrow keys moving between letters.
   - Letters with no entries are shown as plain text, not links.
   - The letter for the section in view is highlighted with CSS only, using the same technique as the Concept page's table of contents.
   - With JavaScript off, every letter is still an ordinary link.
-- [ ] **Filter chips:**
+- [x] **Filter chips:**
   - A Base UI ToggleGroup with the five topics, the works, and "Concept pages / glossary".
   - Choosing chips filters the list and reorders it with a view transition. Only the first 40 items shown get view-transition names.
   - The new count is announced politely ("12 entries", WCAG 4.1.3).
   - The filter state lives in the address's query string, so a filtered view can be shared and browser Back undoes a filter.
   - With JavaScript off, the chips are hidden and the full list shows.
-- [ ] **Speed on a long list:**
+- [x] **Speed on a long list:**
   - Entries use `content-visibility: auto` with an intrinsic size.
   - Loading the page causes no layout shift (CLS ≤ 0.1).
   - A chip press is measured once at 4× CPU slowdown, kept under 200 ms, and recorded in Comments; ticket 15 adds the standing check.
-- [ ] **Previews:** Concept entries and glossary entries that have a Concept page use the LinkPreview slot, so they show previews once ticket 05 merges.
-- [ ] **Topic cards morph:** each topic card on `/concepts/` morphs into its topic page's title (`topic-title-<slug>`) inside the forward page turn.
-- [ ] **Topic pages (FR-01, D03):**
+- [x] **Previews:** Concept entries and glossary entries that have a Concept page use the LinkPreview slot, so they show previews once ticket 05 merges.
+- [x] **Topic cards morph:** each topic card on `/concepts/` morphs into its topic page's title (`topic-title-<slug>`) inside the forward page turn.
+- [x] **Topic pages (FR-01, D03):**
   - `/topics/<slug>/` lists every Concept whose primary topic it is, as cards, then the Concepts that list it as a secondary topic.
   - It shows computed facts: how many Concepts, how many verses they quote, and from which works.
   - It shows the verses its Concepts quote, each linking to its passage.
   - The values topic shows its shared yama–niyama introduction, stored once.
   - No other topic gets a written description (design B3).
-- [ ] **The contents plate (D21):**
+- [x] **The contents plate (D21):**
   - It has one row per Concept, set like a book's contents: a Devanagari numeral, the Concept's name and a dotted leader. Each row is a real link with the Concept's name.
   - Hovering or focusing a card, or the row itself, lights the row through CSS `:has()`, with no JavaScript, and the row's leader inks in.
   - It follows the Press ornament conventions: finished by default and still in print. Under reduced motion it keeps still, and a row lights at once, with nothing inking in.
   - The numerals and leaders are hidden from assistive technology, and the links are not.
   - It is built to be reused: ticket 11 sets the homepage's five topics with it.
-- [ ] **No JavaScript of their own:** topic pages add no client component, and the A–Z's only islands are the chips and the previews.
-- [ ] **Breadcrumbs (D15):** Home › Concepts on the A–Z, and Home › Concepts › {topic} on topic pages.
-- [ ] **Reflow:** both page types fit 320 px with no sideways scroll (WCAG 1.4.10), and the contents plate wraps without hiding any link.
-- [ ] **Tests:**
+- [x] **No JavaScript of their own:** topic pages add no client component, and the A–Z's only islands are the chips and the previews.
+- [x] **Breadcrumbs (D15):** Home › Concepts on the A–Z, and Home › Concepts › {topic} on topic pages.
+- [x] **Reflow:** both page types fit 320 px with no sideways scroll (WCAG 1.4.10), and the contents plate wraps without hiding any link.
+- [x] **Tests:**
   - `concepts-index.spec.ts` covers: the rail by keyboard, a filter by mouse and by keyboard with the announced count, the address keeping the filter, JavaScript off, axe with a filter applied, and a glossary anchor reached from another page.
   - `topics.spec.ts` covers: rows lighting and their leaders inking in on card focus (computed style), row links, the values introduction, and axe.
-- [ ] **Done-check:**
+- [x] **Done-check:**
   - `pnpm check` passes;
   - the lane's end-to-end run passes: `E2E_SCOPE=sample E2E_PORT=<lane port> scripts/lane/heavy.sh pnpm check:e2e`, covering Chromium at 360, 768 and 1440 px, reflow at 320 px, reduced motion and Firefox, with WebKit in CI.
 
@@ -125,3 +125,13 @@ For the conventions doc (ticket 15):
 - Swapping a server-rendered control for its Base UI version on idle can land between a pointerdown and its click and lose the press: hold the swap until the press ends.
 
 Left over: nothing in this ticket.
+
+**Checked and resolved, 2026-10-28 (lane/site-06):** every criterion checked against the code and tests after merging `SiddharthMuramkar/frontend` (ticket 10); `pnpm check` and the sample end-to-end run pass (659 passed, 112 outside the sample).
+
+- **A chip press was over budget at 1440 px** (208–256 ms at 4× CPU on a quiet machine): the filter's view transition pictured the whole page, the header and the footer as well as the entries. While the list reorders, `AzIndex` now sets `data-az-reorder` on the page, and its `<style>` takes the names off the root and off anything else named by its inline style, so only the entries are captured; the chips and the count change at once, which reads better too. Remeasured alone under the heavy lock (four presses: Mind, Concept pages, both off; three visits): 360 px 120–136, 96–104, 64–72, 80–96 ms; 1440 px 160–192, 152–160, 80–88, 144–160 ms. Every press is under 200 ms.
+- **Topic pages:** the topic's Sanskrit word ("citta") was set in the small capitals of an English gloss; it now goes through ScriptPair in italic. The facts line balances, and keeps a work's title whole (it had left "Sūtra" alone on a line).
+- **Print:** the A–Z's chips, count and letter rail are off paper; the list prints as the page.
+- **Test changed:** `concepts-index.spec.ts` "the list glides into its new order, naming at most 40 entries" is now "… and nothing else", and also checks that no group but the entries' is captured (it failed on the old build with `root`).
+- **A decision:** a glossary entry whose name is plain ASCII (Ahamkara) but has Devanagari still goes through ScriptPair, so its name is tagged `sa-Latn` and set in italic like the rest of the list. It is Sanskrit in Latin letters, so the tag is accurate, though `AzEntry.lang` is left unset for such names. Ticket 13 may want ScriptPair to take an untagged name.
+
+For the conventions doc (ticket 15): a view transition started for part of a page (a reordering list) still pictures the root and everything named for page turns (header, footer). Take their names off while it runs (an attribute on `<html>` and `view-transition-name: none`, `!important` over the inline names) so only the moving parts are captured. On the A–Z this saved 30–60 ms a press at 4× CPU.
