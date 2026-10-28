@@ -1,13 +1,14 @@
 'use client'
 
 import type { Route } from 'next'
-import { type ComponentType, useEffect, useRef, useState, useSyncExternalStore } from 'react'
+import { type ComponentType, startTransition, useEffect, useState } from 'react'
 
 import { whenIdle } from '@/components/nav/current'
 
 import type { PaletteProps } from './Palette'
 import {
   closePalette,
+  isFieldReady,
   isShortcut,
   loadPalette,
   openPalette,
@@ -54,14 +55,24 @@ function returnTarget(): HTMLElement | false | null {
  * soon as they do, with whatever was typed meanwhile in its field.
  */
 export function PaletteHost({ searchPath }: { searchPath: Route }) {
-  const { open, query } = useSyncExternalStore(subscribe, paletteState, paletteState)
+  const [open, setOpen] = useState(false)
   const [Palette, setPalette] = useState<ComponentType<PaletteProps>>()
-  const shown = useRef(false)
-  useEffect(() => {
-    shown.current = Palette !== undefined
-  }, [Palette])
 
   useEffect(() => {
+    // Opening renders as a transition: the press is answered at once, and the card follows.
+    const load = () =>
+      loadPalette().then(
+        (component) => setPalette(() => component),
+        () => undefined,
+      )
+    const unsubscribe = subscribe(() => {
+      const next = paletteState().open
+      if (next) {
+        prepareSearch()
+        void load()
+      }
+      startTransition(() => setOpen(next))
+    })
     const onKeyDown = (event: KeyboardEvent) => {
       if (isShortcut(event)) {
         event.preventDefault()
@@ -69,8 +80,8 @@ export function PaletteHost({ searchPath }: { searchPath: Route }) {
         else openPalette()
         return
       }
-      // Typed after ⌘K but before the palette's code arrives: kept for its field.
-      if (!paletteState().open || shown.current || event.isComposing) return
+      // Typed after ⌘K but before the field is there: kept for the field.
+      if (!paletteState().open || isFieldReady() || event.isComposing) return
       if (event.key === 'Escape') closePalette()
       else if (event.key === 'Backspace') typeAhead((typed) => typed.slice(0, -1))
       else if (event.key.length === 1 && !event.ctrlKey && !event.metaKey && !event.altKey) {
@@ -79,27 +90,16 @@ export function PaletteHost({ searchPath }: { searchPath: Route }) {
       event.preventDefault()
     }
     document.addEventListener('keydown', onKeyDown)
-    const cancel = afterLoad(prepareSearch)
+    const cancel = afterLoad(() => {
+      prepareSearch()
+      void load()
+    })
     return () => {
+      unsubscribe()
       document.removeEventListener('keydown', onKeyDown)
       cancel()
     }
   }, [])
-
-  useEffect(() => {
-    if (!open || Palette) return
-    prepareSearch()
-    let current = true
-    loadPalette().then(
-      (component) => {
-        if (current) setPalette(() => component)
-      },
-      () => undefined,
-    )
-    return () => {
-      current = false
-    }
-  }, [open, Palette])
 
   if (!Palette) return null
   return (
@@ -108,7 +108,6 @@ export function PaletteHost({ searchPath }: { searchPath: Route }) {
       onOpenChange={(next) => {
         if (!next) closePalette()
       }}
-      initialQuery={query}
       finalFocus={returnTarget}
       searchPath={searchPath}
     />

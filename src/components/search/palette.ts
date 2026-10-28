@@ -38,6 +38,15 @@ export function typeAhead(change: (typed: string) => string) {
   if (state.open) set({ ...state, query: change(state.query) })
 }
 
+let fieldReady = false
+
+/** Whether the palette's field is there and focused: until then, typing is kept for it. */
+export const isFieldReady = () => fieldReady
+
+export function setFieldReady(ready: boolean) {
+  fieldReady = ready
+}
+
 export function closePalette() {
   if (state.open) set({ ...state, open: false })
 }

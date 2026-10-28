@@ -5,7 +5,7 @@ import type { Ref } from 'react'
 import { turnForward } from '@/components/PageTurn'
 import type { SearchHit } from '@/lib/search/search'
 
-import { groupByKind, langOf, resultCount, shownVariant, SUGGESTIONS } from './kinds'
+import { groupByKind, langOf, matchLabel, resultCount, shownVariant, SUGGESTIONS } from './kinds'
 import styles from './SearchResults.module.css'
 
 /** The results listed of one kind before the rest wait behind "more". */
@@ -128,7 +128,7 @@ function Entries({ hits }: { hits: readonly SearchHit[] }) {
                 ) : null}
                 {variant ? (
                   <span className={styles.chip}>
-                    matched{' '}
+                    {matchLabel(hit)}{' '}
                     <i className={styles.variant} {...tag(variant)}>
                       {variant}
                     </i>

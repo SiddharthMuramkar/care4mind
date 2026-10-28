@@ -417,8 +417,8 @@
   margin: 0;
 }
 
-/* Keys only where there is a keyboard to press them. */
-@media (hover: hover) and (pointer: fine) {
+/* Keys only where there is a keyboard to press them, and room to name them. */
+@media (hover: hover) and (pointer: fine) and (min-width: 30rem) {
   .keys {
     display: block;
   }

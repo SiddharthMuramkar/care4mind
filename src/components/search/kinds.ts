@@ -60,5 +60,15 @@ export function shownVariant(hit: SearchHit): string | undefined {
   return fold(hit.title).includes(fold(variant)) ? undefined : variant
 }
 
+/**
+ * How a hit's chip names the way it was found: "matched Sanshay" for a spelling or locator, "by
+ * Tomar" for an author, "cites Tomar" for a Concept citing them, "mentions" for its text.
+ */
+export function matchLabel(hit: SearchHit): string {
+  const { field } = hit.matched
+  if (field === 'people') return hit.kind === 'concept' ? 'cites' : 'by'
+  return field === 'excerpt' ? 'mentions' : 'matched'
+}
+
 /** "1 result", "12 results". */
 export const resultCount = (count: number) => `${count} ${count === 1 ? 'result' : 'results'}`

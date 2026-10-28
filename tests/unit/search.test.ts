@@ -109,6 +109,13 @@ describe('the search engine, on the real corpus', () => {
     expect(query(index, 'brahma vih')[0]?.id).toBe('concept:brahma-vihara')
   })
 
+  it.each(['yama', 'niyama', 'यम', 'नियम'])(
+    'finds the values topic by “%s”, a term its introduction sets out',
+    (q) => {
+      expect(ids(query(index, q))).toContain('topic:values')
+    },
+  )
+
   it.each(['', '   ', '·', '—'])('returns nothing for the empty query “%s”', (q) => {
     expect(query(index, q)).toEqual([])
   })

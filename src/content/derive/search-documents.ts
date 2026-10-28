@@ -226,7 +226,12 @@ export function searchDocuments(graph: ContentGraph): SearchDocument[] {
     title: topic.name.english,
     href: hrefFor({ kind: 'topic', id: topic.slug }),
     names: topic.name.term ? spellingsOf(topic.name.term) : [],
-    keywords: [],
+    // The terms its introduction sets out (yama and niyama), in every spelling, so they are found.
+    keywords: unique(
+      (topic.intro?.sections ?? [])
+        .flatMap((section) => termsIn(section.blocks))
+        .flatMap((block) => [...spellingsOf(block.term), block.gloss]),
+    ),
     people: [],
     excerpt: excerpt(
       topic.intro?.sections.map((section) => firstText(section.blocks)).find(Boolean),

@@ -5,29 +5,57 @@ import { Dialog } from '@base-ui/react/dialog'
 import { ScrollArea } from '@base-ui/react/scroll-area'
 import type { Route } from 'next'
 import Link from 'next/link'
-import { type RefObject, useEffect, useId, useRef, useState } from 'react'
+import {
+  type RefObject,
+  startTransition,
+  useEffect,
+  useId,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from 'react'
 
 import { CloseGlyph, SearchGlyph } from '@/components/nav/glyphs'
 import { turnForward } from '@/components/PageTurn'
 import { search } from '@/lib/search/client'
 import type { SearchHit } from '@/lib/search/search'
 
-import { groupByKind, langOf, resultCount, shownVariant, SUGGESTIONS, type HitGroup } from './kinds'
+import {
+  groupByKind,
+  langOf,
+  matchLabel,
+  resultCount,
+  shownVariant,
+  SUGGESTIONS,
+  type HitGroup,
+} from './kinds'
 import styles from './Palette.module.css'
+import { isFieldReady, paletteState, setFieldReady, subscribe } from './palette'
 
 export interface PaletteProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  /** What the field holds as it opens: empty, or a query handed over (the homepage's entry). */
-  initialQuery: string
   /** Where focus goes as it closes: whatever opened it. */
   finalFocus: () => HTMLElement | false | null
   /** The results page's path, for "All results". */
   searchPath: Route
 }
 
-/** The most hits of one kind the palette lists; the results page has the rest. */
-const PER_KIND = 6
+/** The most hits of one kind the palette lists, and the most in all; the results page has the rest. */
+const PER_KIND = 5
+const IN_ALL = 24
+
+/** The groups the palette lists, each cut to its share. */
+function listed(hits: readonly SearchHit[]): (HitGroup & { items: SearchHit[] })[] {
+  let room = IN_ALL
+  return groupByKind(hits)
+    .map((group) => {
+      const items = group.hits.slice(0, Math.min(PER_KIND, room))
+      room -= items.length
+      return { ...group, items }
+    })
+    .filter(({ items }) => items.length > 0)
+}
 
 /**
  * The command palette (design C2): a Base UI Dialog holding an inline Autocomplete, set as a
@@ -35,13 +63,7 @@ const PER_KIND = 6
  * the arrow keys move through them and Enter turns to the chosen page. Escape closes it and
  * focus goes back to whatever opened it.
  */
-export function Palette({
-  open,
-  onOpenChange,
-  initialQuery,
-  finalFocus,
-  searchPath,
-}: PaletteProps) {
+export function Palette({ open, onOpenChange, finalFocus, searchPath }: PaletteProps) {
   const input = useRef<HTMLInputElement>(null)
   return (
     <Dialog.Root open={open} onOpenChange={(next) => onOpenChange(next)}>
@@ -50,12 +72,7 @@ export function Palette({
         <Dialog.Viewport className={styles.viewport}>
           <Dialog.Popup className={styles.card} initialFocus={input} finalFocus={finalFocus}>
             <Dialog.Title className={styles.title}>Search</Dialog.Title>
-            <Finder
-              input={input}
-              initialQuery={initialQuery}
-              searchPath={searchPath}
-              close={() => onOpenChange(false)}
-            />
+            <Finder input={input} searchPath={searchPath} close={() => onOpenChange(false)} />
           </Dialog.Popup>
         </Dialog.Viewport>
       </Dialog.Portal>
@@ -65,7 +82,6 @@ export function Palette({
 
 interface FinderProps {
   input: RefObject<HTMLInputElement | null>
-  initialQuery: string
   searchPath: Route
   close: () => void
 }
@@ -76,43 +92,47 @@ interface Answer {
   hits: SearchHit[]
 }
 
-function Finder({ input, initialQuery, searchPath, close }: FinderProps) {
-  const [query, setQuery] = useState(initialQuery)
+function Finder({ input, searchPath, close }: FinderProps) {
+  // What it opened with (a query handed over, or typed before the field was there), until the
+  // field is typed in.
+  const handed = useSyncExternalStore(
+    subscribe,
+    () => paletteState().query,
+    () => '',
+  )
+  const [own, setOwn] = useState<string | null>(null)
+  const query = own ?? handed
   const [answer, setAnswer] = useState<Answer>({ query: '', hits: [] })
   const [failed, setFailed] = useState(false)
   const keysId = useId()
 
-  // Opened holding a query (typed ahead, or handed over): the caret goes after it.
-  useEffect(() => {
-    const field = input.current
-    if (field && initialQuery !== '')
-      field.setSelectionRange(initialQuery.length, initialQuery.length)
-  }, [input, initialQuery])
+  useEffect(() => () => setFieldReady(false), [])
 
   const typed = query.trim()
   useEffect(() => {
     if (typed === '') return
     let current = true
-    search(typed).then(
-      (hits) => {
-        if (current) setAnswer({ query: typed, hits })
-      },
-      () => {
-        if (current) setFailed(true)
-      },
-    )
+    // In a task of its own, after the field has shown what was typed; the list follows.
+    const id = setTimeout(() => {
+      search(typed).then(
+        (hits) => {
+          if (current) startTransition(() => setAnswer({ query: typed, hits }))
+        },
+        () => {
+          if (current) setFailed(true)
+        },
+      )
+    })
     return () => {
       current = false
+      clearTimeout(id)
     }
   }, [typed])
 
   // Until search answers, the last answer stays, so the list doesn't flicker as you type.
   const hits = typed === '' ? [] : answer.hits
   const answered = typed !== '' && answer.query === typed
-  const groups = groupByKind(hits).map((group) => ({
-    ...group,
-    items: group.hits.slice(0, PER_KIND),
-  }))
+  const groups = listed(hits)
 
   const status =
     typed === '' ? null : failed ? (
@@ -127,7 +147,7 @@ function Finder({ input, initialQuery, searchPath, close }: FinderProps) {
     )
 
   const choose = (text: string) => {
-    setQuery(text)
+    setOwn(text)
     input.current?.focus()
   }
 
@@ -142,7 +162,7 @@ function Finder({ input, initialQuery, searchPath, close }: FinderProps) {
       value={query}
       onValueChange={(value, details) => {
         // Choosing a result fills the field with its title; the page is already turning.
-        if (details.reason !== 'item-press') setQuery(value)
+        if (details.reason !== 'item-press') setOwn(value)
       }}
       onOpenChange={(next, details) => {
         if (!next && details.reason === 'escape-key') close()
@@ -159,6 +179,13 @@ function Finder({ input, initialQuery, searchPath, close }: FinderProps) {
           placeholder="A Concept, a term, a verse, an author…"
           autoComplete="off"
           spellCheck={false}
+          onFocus={(event) => {
+            if (isFieldReady()) return
+            // Holding what was typed ahead or handed over: the caret goes after it.
+            const { length } = event.currentTarget.value
+            event.currentTarget.setSelectionRange(length, length)
+            setFieldReady(true)
+          }}
         />
         <Dialog.Close className={styles.close} aria-label="Close search">
           <CloseGlyph className={styles.closeGlyph} />
@@ -256,7 +283,7 @@ function Result({ hit, close }: { hit: SearchHit; close: () => void }) {
           ) : null}
           {variant ? (
             <span className={styles.chip}>
-              matched{' '}
+              {matchLabel(hit)}{' '}
               <i {...(variantLang ? { lang: variantLang } : {})} className={styles.variant}>
                 {variant}
               </i>
