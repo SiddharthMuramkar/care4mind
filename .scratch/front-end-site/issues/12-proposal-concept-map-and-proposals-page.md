@@ -1,6 +1,6 @@
 # 12: Proposal: Concept map and the proposals page
 
-Status: ready-for-agent
+Status: resolved
 Blocked by: 03, 04
 Spec: [Front-end site: every public page](../spec.md) · Design: [design.md](../design.md) §C5 · Decisions: D06, D20, D21
 
@@ -30,44 +30,44 @@ Both pages are labelled Proposal, and both disappear when their flags are off.
 
 ## Acceptance criteria
 
-- [ ] **Gates (D20):**
+- [x] **Gates (D20):**
   - `/concepts/map/` exists only while `conceptMap` is on, and `/proposals/` only while `conceptMap` or `devanagariFirst` is on.
   - When off, each returns 404 and drops out of the registry, the sitemap, the navigation, search and every link.
   - A unit test covers both conditions.
-- [ ] **Labelled:** both pages carry a ProposalNote near their heading, saying in words that this is a proposal awaiting the Project owner's decision.
-- [ ] **Layout at build time:**
+- [x] **Labelled:** both pages carry a ProposalNote near their heading, saying in words that this is a proposal awaiting the Project owner's decision.
+- [x] **Layout at build time:**
   - The positions come from `site.graph()` and are computed during the build: a circle with one sector per topic.
   - The browser runs no layout code.
   - The map reserves its box, so nothing shifts as it loads.
-- [ ] **The printed plate (D21):**
+- [x] **The printed plate (D21):**
   - The edges are hairline curves, one per connection, typed by line style: solid for a shared passage, dashed for a shared work, dotted for a rarely cited shared Reference. Tomar (2024) is excluded.
   - The types differ by line style, never by colour alone, and a legend names them (WCAG 1.4.1).
   - The curves ink in once on load, following the Press ornament conventions, and are finished and still under reduced motion and in print.
   - The line layer is hidden from assistive technology.
-- [ ] **Points:**
+- [x] **Points:**
   - Each Concept is an HTML link laid over the SVG line layer, named with the Concept, and opens its page with a forward page turn.
   - The tab order follows the topics.
   - Hovering or focusing a point highlights its neighbours and their curves through `:has()` rules generated at build time, with no JavaScript.
-- [ ] **Filters:**
+- [x] **Filters:**
   - A Base UI ToggleGroup filters by connection type and by topic.
   - The state lives in the address's query string, and the visible connections are announced politely.
   - With JavaScript off, everything shows.
-- [ ] **Connections list:**
+- [x] **Connections list:**
   - A list states every connection and its reason, for example "Vikṣepa and Pañca kleśa: both quote Yoga Sūtra 1.30", with both Concepts as links.
   - Below about 600 px it shows first, with the map one tap away. Above that, both are on the page.
-- [ ] **The proposals page:**
+- [x] **The proposals page:**
   - **Concept map:** built; with a link to it.
   - **Site-wide "Devanagari first":** built; with how to try it.
   - **Audio pronunciation:** described, not built.
 
   There is no fourth entry: the "reading path" idea was dropped with D21. Each entry says, in plain interface text, what it adds, what it costs in speed and upkeep, and how it is switched off.
-- [ ] **Breadcrumbs (D15):** Home › Concepts › Concept map, and Home › Proposals.
-- [ ] **Reflow:** both pages fit 320 px with no sideways scroll (WCAG 1.4.10). At narrow widths the map scales down or gives way to the list, and never scrolls sideways.
-- [ ] **Speed:** no client JavaScript beyond the filter chips. Record the page's first-load JavaScript and its SVG size in Comments.
-- [ ] **Tests:**
+- [x] **Breadcrumbs (D15):** Home › Concepts › Concept map, and Home › Proposals.
+- [x] **Reflow:** both pages fit 320 px with no sideways scroll (WCAG 1.4.10). At narrow widths the map scales down or gives way to the list, and never scrolls sideways.
+- [x] **Speed:** no client JavaScript beyond the filter chips. Record the page's first-load JavaScript and its SVG size in Comments.
+- [x] **Tests:**
   - `concept-map.spec.ts` covers: neighbours lighting on focus (computed style), a point opening its Concept, filters by keyboard, the Connections list against `site.graph()`, the 360 px default, and axe.
   - `proposals.spec.ts` covers: the three entries and no others, links, and axe.
-- [ ] **Done-check:**
+- [x] **Done-check:**
   - `pnpm check` passes;
   - the lane's end-to-end run passes: `E2E_SCOPE=sample E2E_PORT=<lane port> scripts/lane/heavy.sh pnpm check:e2e`, covering Chromium at 360, 768 and 1440 px, reflow at 320 px, reduced motion and Firefox, with WebKit in CI.
 
@@ -117,3 +117,14 @@ For the conventions doc (ticket 15):
 - `:target` can show a part on a phone without JavaScript ("See the map"); a filter's `pushState` must keep the fragment (`location.hash`) or the part hides again.
 
 Left over: nothing in this ticket. Notes for others: ticket 11 can use `PlatePicture` for its teaser; ticket 13's header toggle is what the proposals page's "Try it" names ("Devanagari first", in the header and the Menu).
+
+**Checked, 2026-10-29 (lane/site-12, check pass):** every criterion checked against the code and tests, not the build report. Fixed and polished:
+
+- **Long names on the plate:** at 1440 px "Spiritual Practitioner" and "Momentum of Spiritual Practice" each wrapped into two lines and stacked with no gap, reading as one four-line name. `layoutMap` now copyfits each name against the room beside the circle (letters × 0.48 em at the names' 2.2cqi size, less the mark) and gives a name in more lines room from its neighbours in proportion; one-line names stay evenly spaced (the right half is unchanged). New unit test: "gives a name too long for one line beside the circle more room from its neighbours". The CSS name size carries a comment tying it to `layout.ts`.
+- **Proposals, "How it is switched off":** the answer's `dd` is a grid, so the `FEATURE_*=0` code took a row of its own and split the sentence in three. It is one paragraph now. New e2e test: "sets each setting as code inside its sentence, not on a line of its own" (the comma after the setting sits on the setting's line).
+- **Guardrail:** the map's chips transitioned `background-color` and `color`; now only `transform`, as the A–Z's.
+- **Wrapped small-caps labels** (the proposals form's terms, the list's kind headings) set at 1.3 with `text-wrap: balance`, so a second line no longer floats a body line below; the form's label column is 10rem, so "What it adds" fits on one line.
+
+No existing test weakened; the two new tests are added to this ticket's own files. JS unchanged (the fixes are CSS and build-time layout). Checks on the final state: `pnpm check` (707 unit tests, build) and `E2E_PORT=3130 E2E_SCOPE=sample` e2e (701 passed, 118 skipped by design).
+
+For the conventions doc (ticket 15): a `dd` or other container set to `display: grid` turns each run of text and each inline element into its own row; wrap mixed text and inline code in a `p`. Small-caps labels that may wrap need their own line height (about 1.3) and `text-wrap: balance`, or they inherit the body's 1.7.
