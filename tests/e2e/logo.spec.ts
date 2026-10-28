@@ -45,8 +45,10 @@ test('the mark adds no stop of its own to the tab order', async ({ page }) => {
   await page.keyboard.press('Tab')
   await expect(homeLink(page)).toBeFocused()
   await page.keyboard.press('Tab')
+  // The header's next control: Concepts where the sections fit (from 72rem), else Search.
+  const next = (page.viewportSize()?.width ?? 0) >= 1152 ? 'Concepts' : 'Search'
   const main = page.getByRole('navigation', { name: 'Main' })
-  await expect(main.getByRole('link', { name: 'Concepts', exact: true })).toBeFocused()
+  await expect(main.getByRole('link', { name: next, exact: true })).toBeFocused()
 })
 
 /**

@@ -45,13 +45,116 @@
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
   --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
   --ease-press: cubic-bezier(0.3, 0, 0.2, 1);
+
+  /*
+   * Front-end-site ticket 04: every token the site's pages need, added once.
+   * Later tickets use these and ask in their Comments for anything missing.
+   */
+
+  /*
+   * Topic hues (design B3), for drawings only: lozenges, rules, leaders and swatches. Never text:
+   * a topic is always named in words. Each keeps 3:1 against the indigo ground and the paper alike.
+   */
+  --color-topic-self: #b44d6b;
+  --color-topic-mind: #2f7fa3;
+  --color-topic-practice: #b8661f;
+  --color-topic-values: #3f8a4a;
+  --color-topic-temperament: #7d5fb8;
+
+  /* A Questionnaire's status (D16) as a badge, its text on its ground. Always written in words. */
+  --color-status-live: #79c795;
+  --color-status-live-ink: #151a3d;
+  --color-status-preview: #f0b429;
+  --color-status-preview-ink: #151a3d;
+  --color-status-soon: #c9c2d8;
+  --color-status-soon-ink: #151a3d;
+  --color-status-later: #3b4178;
+  --color-status-later-ink: #f3ecdc;
+
+  /* The Proposal label (D20): an editor's blue pencil, on any ground. */
+  --color-proposal: #8fd0f5;
+  --color-proposal-ink: #151a3d;
+
+  /* Surfaces that rise over the page. Paper ones take surface-link and surface-focus for links and focus. */
+  /* Navigation panels: index cards hung from the header. */
+  --color-panel: #f1e6c8;
+  --color-panel-ink: #1d1a2e;
+  --color-panel-muted: #5a4a2e;
+  --color-panel-line: #8c7a55;
+  /* The Drawer: a fresh page slid over the site. */
+  --color-drawer: #f6eedb;
+  --color-drawer-ink: #1d1a2e;
+  --color-drawer-muted: #5a4a2e;
+  --color-drawer-line: #8c7a55;
+  /* The search palette: a card in a catalogue, its chosen row marked as with a highlighter. */
+  --color-palette: #f6eedb;
+  --color-palette-ink: #1d1a2e;
+  --color-palette-muted: #5a4a2e;
+  --color-palette-line: #8c7a55;
+  --color-palette-highlight: #f0b429;
+  --color-palette-highlight-ink: #151a3d;
+  /* Link previews: a slip of paper, ruled off from the page it lies on. */
+  --color-preview: #f6eedb;
+  --color-preview-ink: #1d1a2e;
+  --color-preview-muted: #5a4a2e;
+  --color-preview-line: #8c7a55;
+  /* Toasts: a dark slip edged in turmeric, clear on indigo and on paper. */
+  --color-toast: #232a5c;
+  --color-toast-ink: #f3ecdc;
+  --color-toast-muted: #c9c2d8;
+  --color-toast-line: #f0b429;
+
+  /* Behind a modal Drawer or the palette; and the shadow at a scrolling table's edge. Translucent. */
+  --color-backdrop: #0b0d1fb3;
+  --color-scroll-shadow: #0b0d1f59;
+
+  /*
+   * The header sticks to the top of the screen. Sticky parts (tables of contents, letter and
+   * locator rails) stick at --sticky-top, clear of it; in-page links and focus land below it.
+   */
+  --header-height: 4rem;
+  --sticky-top: calc(var(--header-height) + 1rem);
+
+  /* Stacking, lowest first. The reading thread (10) runs along the header's top edge. */
+  --layer-raised: 1;
+  --layer-sticky: 2;
+  --layer-header: 8;
+  --layer-thread: 10;
+  --layer-popup: 20;
+  --layer-drawer: 30;
+  --layer-palette: 40;
+  --layer-toast: 50;
+  --layer-skip-link: 100;
+
+  /* A title flying into a page's heading; a filtered list gliding into its new order. */
+  --duration-morph: 400ms;
+  --duration-reorder: 280ms;
+  /* Panels and toasts appearing; the Drawer sliding in. */
+  --duration-panel: 220ms;
+  --duration-sheet: 420ms;
+  /* A sheet settling with a slight give, like paper laid down. */
+  --ease-sheet: linear(
+    0,
+    0.012 1.3%,
+    0.106 4.6%,
+    0.383 11.2%,
+    0.635 18.4%,
+    0.808 25.6%,
+    0.912 33%,
+    0.968 40.6%,
+    0.995 48.8%,
+    1.006 58%,
+    1.004 72%,
+    1
+  );
 }
 
 @layer base {
   html {
     -webkit-text-size-adjust: 100%;
     text-rendering: optimizeLegibility;
-    scroll-padding-top: 5rem;
+    /* In-page links and focus land clear of the sticky header. */
+    scroll-padding-top: calc(var(--header-height) + 1rem);
   }
 
   /* In-page links glide to their section. The layout's data-scroll-behavior makes page changes jump. */
@@ -110,10 +213,65 @@
     border-radius: 2px;
   }
 
+  /*
+   * A part names its topic or Questionnaire status with a data attribute and reads the colour
+   * back as --topic or --status/--status-ink, so a slug from content picks its token without the
+   * component spelling out each one.
+   */
+  [data-topic='self'] {
+    --topic: var(--color-topic-self);
+  }
+
+  [data-topic='mind'] {
+    --topic: var(--color-topic-mind);
+  }
+
+  [data-topic='practice'] {
+    --topic: var(--color-topic-practice);
+  }
+
+  [data-topic='values'] {
+    --topic: var(--color-topic-values);
+  }
+
+  [data-topic='temperament'] {
+    --topic: var(--color-topic-temperament);
+  }
+
+  [data-status='live'] {
+    --status: var(--color-status-live);
+    --status-ink: var(--color-status-live-ink);
+  }
+
+  [data-status='preview'] {
+    --status: var(--color-status-preview);
+    --status-ink: var(--color-status-preview-ink);
+  }
+
+  [data-status='coming-soon'] {
+    --status: var(--color-status-soon);
+    --status-ink: var(--color-status-soon-ink);
+  }
+
+  [data-status='coming-later'] {
+    --status: var(--color-status-later);
+    --status-ink: var(--color-status-later-ink);
+  }
+
   ::selection {
     background: var(--color-highlight);
     color: var(--color-highlight-ink);
   }
+}
+
+/*
+ * Base UI's focus guards: empty, silent stops that hand focus on round a popup (a panel, a
+ * preview). Shrunk to nothing a pointer can meet, so checkers don't take them for hidden controls.
+ */
+[data-base-ui-focus-guard] {
+  width: 0 !important;
+  height: 0 !important;
+  pointer-events: none;
 }
 
 /* Clicks keep working while a view transition plays (Next.js view transitions guide). */
@@ -124,7 +282,7 @@
 /* A Concept card's title flies above both turning pages, or the arriving page would cover it. */
 ::view-transition-group(.morph) {
   z-index: 1;
-  animation-duration: var(--duration-slow);
+  animation-duration: var(--duration-morph);
   animation-timing-function: var(--ease-out);
 }
 
@@ -154,10 +312,10 @@
   }
 }
 
-/* The header and footer keep their own names, so they stay put, above the turning page. */
+/* The header and footer keep their own names, so they stay put, above the turning page and any flying title. */
 ::view-transition-group(site-header),
 ::view-transition-group(site-footer) {
-  z-index: 1;
+  z-index: 2;
   animation: none;
 }
 
@@ -236,7 +394,7 @@
     position: absolute;
     inset-inline-start: 1rem;
     inset-block-start: 1rem;
-    z-index: 100;
+    z-index: var(--layer-skip-link);
     padding: 0.75rem 1rem;
     background: var(--color-accent);
     color: var(--color-accent-ink);

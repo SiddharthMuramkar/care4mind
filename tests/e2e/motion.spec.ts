@@ -139,10 +139,9 @@ test('the References plus becomes a minus at once, with nothing moving, with red
   expect(await turns(rules), 'a plus again').toEqual([0, 90])
 })
 
-for (const { from, name } of [
-  { from: 'main', name: 'Explore Concepts' },
-  { from: 'navigation', name: 'Concepts' },
-] as const) {
+// The header's Concepts opens the Concepts page since front-end-site ticket 04 (D01); its
+// reduced-motion checks are in nav.spec.ts.
+for (const { from, name } of [{ from: 'main', name: 'Explore Concepts' }] as const) {
   test(`"${name}" in the ${from === 'main' ? 'opening folio' : 'header'} jumps straight to the Concepts, with reduced motion`, async ({
     page,
   }) => {

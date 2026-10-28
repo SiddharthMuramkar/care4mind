@@ -1,0 +1,141 @@
+/*
+ * The header's four sections, shared by the server-rendered list and the NavigationMenu that
+ * replaces it, so the swap changes nothing you can see. They show from 72rem (WIDE in
+ * current.ts); narrower screens reach them through the Menu.
+ */
+.sections {
+  display: none;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+@media (min-width: 72rem) {
+  .sections {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+}
+
+.section {
+  display: flex;
+  align-items: center;
+}
+
+.link {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  color: var(--color-ink-muted);
+  font-variant-caps: all-small-caps;
+  letter-spacing: 0.12em;
+  font-size: 1.1875rem;
+  text-decoration: none;
+}
+
+/* On hover and focus a line draws in under the label (short of its last letter-space), by transform. */
+.link::after {
+  content: '';
+  position: absolute;
+  inset-inline: 0 0.12em;
+  top: calc(50% + 0.6em);
+  height: 1px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform var(--duration-quick) var(--ease-out);
+}
+
+.link:is(:hover, :focus-visible) {
+  color: var(--color-ink);
+}
+
+.link:is(:hover, :focus-visible)::after {
+  transform: none;
+}
+
+/*
+ * The section you are in: its label in full ink over a turmeric lozenge, the folio's corner
+ * diamond, so it reads by shape as well as colour. On the section's own page the lozenge is
+ * filled; below it, only its outline.
+ */
+.link[aria-current] {
+  color: var(--color-ink);
+}
+
+.link[aria-current]::before {
+  content: '';
+  position: absolute;
+  left: calc(50% - 0.06em - 3.5px);
+  bottom: -1px;
+  width: 7px;
+  height: 7px;
+  background: var(--color-accent);
+  transform: rotate(45deg);
+}
+
+.link[aria-current='true']::before {
+  background: transparent;
+  box-shadow: inset 0 0 0 1.5px var(--color-accent);
+}
+
+/* Opens the section's panel. Hidden, though holding its place, until it works. */
+.toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  margin-inline-start: -0.5rem;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--color-ink-muted);
+  cursor: pointer;
+  visibility: hidden;
+}
+
+.toggle[data-ready] {
+  visibility: visible;
+}
+
+.toggle:hover,
+.toggle[aria-expanded='true'] {
+  color: var(--color-ink);
+}
+
+.chevron {
+  width: 12px;
+  height: 12px;
+}
+
+.toggle[aria-expanded='true'] .chevron {
+  transform: rotate(180deg);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .chevron {
+    transition: transform var(--duration-panel) var(--ease-out);
+  }
+}
+
+/* Where a panel's toggle stands, and the NavigationMenu's own wrappers: no box of their own. */
+.slot,
+.menu {
+  display: contents;
+}
+
+/* Windows' contrast themes repaint backgrounds: draw the current section's lozenge in the text colour. */
+@media (forced-colors: active) {
+  .link[aria-current]::before {
+    forced-color-adjust: none;
+    background: CanvasText;
+  }
+
+  .link[aria-current='true']::before {
+    background: transparent;
+    box-shadow: inset 0 0 0 1.5px CanvasText;
+  }
+}

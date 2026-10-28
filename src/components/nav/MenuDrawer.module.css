@@ -1,0 +1,308 @@
+/*
+ * The Drawer: a fresh leaf of paper laid over the site from the right, its contents numbered in
+ * Devanagari like the homepage's, with dotted leaders to what each holds. It slides in and out by
+ * transform alone; under reduced motion it simply appears and goes.
+ */
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: var(--layer-drawer);
+  background: var(--color-backdrop);
+  opacity: calc(1 - var(--drawer-swipe-progress, 0));
+}
+
+.viewport {
+  position: fixed;
+  inset: 0;
+  z-index: var(--layer-drawer);
+  display: flex;
+  justify-content: flex-end;
+}
+
+.sheet {
+  --color-focus: var(--color-surface-focus);
+  --color-link: var(--color-surface-link);
+  position: relative;
+  width: min(24rem, calc(100vw - 2.5rem));
+  height: 100%;
+  overflow: hidden auto;
+  overscroll-behavior: contain;
+  background: var(--color-drawer);
+  color: var(--color-drawer-ink);
+  box-shadow:
+    inset 1px 0 0 var(--color-drawer-line),
+    inset 7px 0 0 var(--color-drawer),
+    inset 8px 0 0 color-mix(in srgb, var(--color-highlight) 55%, transparent),
+    -2rem 0 4rem -2rem color-mix(in srgb, var(--color-ground) 85%, transparent);
+  transform: translateX(var(--drawer-swipe-movement-x, 0px));
+  outline: 0;
+  touch-action: pan-y;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .backdrop {
+    transition: opacity var(--duration-sheet) var(--ease-out);
+  }
+
+  .backdrop[data-starting-style],
+  .backdrop[data-ending-style] {
+    opacity: 0;
+  }
+
+  .backdrop[data-swiping] {
+    transition-duration: 0ms;
+  }
+
+  .sheet {
+    transition: transform var(--duration-sheet) var(--ease-sheet);
+  }
+
+  .sheet[data-starting-style],
+  .sheet[data-ending-style] {
+    transform: translateX(calc(100% + 2rem));
+  }
+
+  .sheet[data-swiping] {
+    transition-duration: 0ms;
+  }
+
+  .sheet[data-ending-style] {
+    transition-duration: calc(var(--drawer-swipe-strength, 1) * var(--duration-move));
+    transition-timing-function: var(--ease-out);
+  }
+}
+
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  min-height: 100%;
+  padding: 0.5rem 1.25rem 2.5rem 1.75rem;
+}
+
+.head {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: var(--header-height);
+}
+
+/* A printer's double rule under the sheet's head, inking out from the centre as it arrives. */
+.head::after {
+  content: '';
+  position: absolute;
+  inset-inline: 0;
+  bottom: -0.25rem;
+  height: 4px;
+  border-block: 2px solid var(--color-drawer-ink);
+  border-block-end-width: 1px;
+  transform-origin: center;
+}
+
+.title {
+  margin: 0;
+  color: var(--color-drawer-muted);
+  font-size: 1.0625rem;
+  font-weight: 400;
+  font-variant-caps: all-small-caps;
+  letter-spacing: 0.16em;
+}
+
+.close {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0 0.75rem 0 0.55rem;
+  border: 1px solid color-mix(in srgb, var(--color-drawer-ink) 35%, transparent);
+  border-radius: 2px;
+  background: none;
+  color: var(--color-drawer-ink);
+  font: inherit;
+  font-variant-caps: all-small-caps;
+  letter-spacing: 0.12em;
+  font-size: 1.0625rem;
+  cursor: pointer;
+}
+
+.close:hover {
+  border-color: var(--color-drawer-ink);
+}
+
+.closeGlyph {
+  width: 18px;
+  height: 18px;
+}
+
+.tools {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.sections {
+  list-style: none;
+  display: grid;
+  gap: 1.1rem;
+  margin: 0;
+  padding: 0;
+}
+
+.section {
+  display: grid;
+  grid-template-columns: 2.25rem 1fr;
+  align-items: baseline;
+  column-gap: 0.75rem;
+}
+
+/* A Devanagari numeral, set at the section's size on its baseline, as the homepage's Contents. */
+.numeral {
+  align-self: baseline;
+  color: var(--color-highlight);
+  font-size: 1.625rem;
+  line-height: 1;
+  text-align: center;
+}
+
+@keyframes arrive {
+  from {
+    opacity: 0;
+    transform: translateX(1.5rem);
+  }
+}
+
+@keyframes uncover {
+  from {
+    clip-path: inset(0 100% 0 0);
+  }
+}
+
+@keyframes ink-in {
+  from {
+    transform: scaleX(0.05);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  /* The sections follow the page in, one after another, and their leaders ink in as they settle. */
+  .section {
+    animation: arrive var(--duration-sheet) var(--ease-sheet) backwards;
+    animation-delay: calc(60ms + var(--index, 0) * 55ms);
+  }
+
+  .leader {
+    animation: uncover var(--duration-sheet) var(--ease-out) backwards;
+    animation-delay: calc(220ms + var(--index, 0) * 55ms);
+  }
+
+  .head::after {
+    animation: ink-in var(--duration-sheet) var(--ease-out) backwards;
+    animation-delay: 80ms;
+  }
+}
+
+.sectionLink {
+  justify-self: start;
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  color: var(--color-drawer-ink);
+  font-family: var(--font-display);
+  font-size: 1.75rem;
+  line-height: 1.15;
+  text-decoration: none;
+}
+
+.sectionLink:hover {
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.18em;
+}
+
+.sectionLink[aria-current] {
+  text-decoration: underline;
+  text-decoration-color: var(--color-highlight);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 0.18em;
+}
+
+.pages {
+  grid-column: 2;
+  list-style: none;
+  margin: 0.25rem 0 0;
+  padding: 0;
+}
+
+/* A name that wraps keeps its leader and count on its last line, as a book's contents do. */
+.page {
+  display: flex;
+  align-items: last baseline;
+  gap: 0.6rem;
+  min-height: 44px;
+  padding-block: 0.6rem 0.4rem;
+  color: var(--color-drawer-ink);
+  font-size: 1.0625rem;
+  line-height: 1.3;
+  text-decoration: none;
+}
+
+.page:hover .name {
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.18em;
+}
+
+.page[aria-current] .name {
+  font-style: italic;
+  text-decoration: underline;
+  text-decoration-color: var(--color-highlight);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.18em;
+}
+
+/* A topic's hue, as a small lozenge before its name (the folio's corner diamond), on its first line. */
+.lozenge {
+  position: absolute;
+  inset-inline-start: 1px;
+  top: calc(0.55lh - 3.5px);
+  width: 7px;
+  height: 7px;
+  background: var(--topic);
+  transform: rotate(45deg);
+}
+
+.name:has(.lozenge) {
+  position: relative;
+  padding-inline-start: 1.25rem;
+}
+
+.leader {
+  flex: 1;
+  min-width: 1rem;
+  align-self: end;
+  margin-bottom: 0.35rem;
+  border-bottom: 2px dotted var(--color-drawer-line);
+}
+
+.count {
+  color: var(--color-drawer-muted);
+  font-variant-numeric: oldstyle-nums proportional-nums;
+}
+
+.proposal {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  column-gap: 0.75rem;
+}
+
+/* The sheet's colophon: the lotus, still, at the foot of the contents. */
+.fleuron {
+  display: block;
+  width: 7rem;
+  height: auto;
+  margin: auto auto 0;
+  padding-top: 1rem;
+  color: var(--color-highlight);
+}

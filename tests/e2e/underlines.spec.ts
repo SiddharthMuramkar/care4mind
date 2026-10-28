@@ -16,23 +16,26 @@ test.beforeEach(async ({ page }) => {
 })
 
 // Navigation and calls to action: no underline at rest; a line draws in, by transform alone.
-const DRAWN = [
+const DRAWN: { page: string; name: string; in: (page: Page) => Locator; width?: number }[] = [
   {
     page: '/',
     name: 'Concepts',
     in: (page: Page) => page.getByRole('navigation', { name: 'Main' }),
+    // The header shows its sections from 72rem; narrower screens find them in the Menu.
+    width: 1440,
   },
   { page: '/', name: 'Explore Concepts', in: (page: Page) => page.getByRole('main') },
   { page: '/', name: 'Questionnaires', in: (page: Page) => page.getByRole('main') },
   { page: MISSING, name: 'Go to the homepage', in: (page: Page) => page.getByRole('main') },
 ]
 
-for (const { page: path, name, in: around } of DRAWN) {
+for (const { page: path, name, in: around, width } of DRAWN) {
   for (const [how, act] of [
     ['pointing at', (_page: Page, link: Locator) => link.hover()],
     ['focusing', focusFromKeyboard],
   ] as const) {
     test(`${how} "${name}" draws a line under it, by transform`, async ({ page }) => {
+      if (width) await page.setViewportSize({ width, height: 900 })
       await gotoReady(page, path)
       const link = around(page).getByRole('link', { name, exact: true })
       await expect(link).toHaveCSS('text-decoration-line', 'none')
