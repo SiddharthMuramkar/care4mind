@@ -2,6 +2,8 @@ CLAUDE.md is a symlink to this file. Edit AGENTS.md only.
 
 Before creating or editing anything in `src/content/data/`, read `docs/agents/content-migration.md`, the content migration standard.
 
+Before building or testing the front end, read `docs/agents/frontend-conventions.md`: motion, links, files, slots and the lane commands.
+
 ## Agent skills
 
 ### Issue tracker
