@@ -11,7 +11,7 @@ import { expect, gotoReady, test } from './fixtures'
 import { inPageTransitions, pageTurns, prefetched, recordPageTurns } from './page-turns'
 import { inkSpreadsOn, recordInkSpreads } from './presses'
 import { READING_PAGES, readingThread, readTo } from './reading'
-import { MISSING, PAGES } from './routes'
+import { at, MISSING, ROUTES_IN_SCOPE } from './routes'
 import { scrollPath } from './scrolling'
 import { knobPath, recordScriptedAnimations } from './switches'
 
@@ -46,35 +46,38 @@ const turns = (rules: Locator) =>
       .sort((a, b) => a - b),
   )
 
-// NFR-01: with "reduce motion" on, nothing moves on load, on scroll or on click.
-for (const { path, name } of PAGES) {
-  test(`${name} keeps still with reduced motion`, async ({ page }) => {
-    await gotoReady(page, path)
-    expect(await movingAnimations(page)).toEqual([])
+// NFR-01: with "reduce motion" on, on every route in the registry, nothing moves on load, on
+// scroll or on click, and every drawing shows finished.
+for (const route of ROUTES_IN_SCOPE) {
+  test(`${route.path} keeps still, its drawings finished, with reduced motion`, async ({
+    page,
+  }) => {
+    const where = at(page, route.path)
+    await gotoReady(page, route.path)
+    expect.soft(await movingAnimations(page), `${where}: moving on load`).toEqual([])
+    expect.soft(await unfinishedDrawings(page), `${where}: unfinished on load`).toEqual([])
+    expect
+      .soft(await unfinishedRules(page), `${where}: rules short of full width on load`)
+      .toEqual([])
 
     await page.mouse.wheel(0, 4000)
     await page.waitForTimeout(100)
-    expect(await movingAnimations(page)).toEqual([])
+    expect.soft(await movingAnimations(page), `${where}: moving after a scroll`).toEqual([])
+    expect.soft(await unfinishedDrawings(page), `${where}: unfinished after a scroll`).toEqual([])
+    expect
+      .soft(await unfinishedRules(page), `${where}: rules short of full width after a scroll`)
+      .toEqual([])
 
-    // Disabled buttons (the Questionnaire's "Start") can't be clicked, so pick the first one that can.
-    const button = page.locator('main button:enabled').first()
-    if (await button.count()) {
-      await button.scrollIntoViewIfNeeded()
-      await button.click()
+    // The first control in the page's content that takes a click: disabled buttons (a Start not
+    // yet open) can't. A click that leads to another page is followed there.
+    const control = page.locator('main :is(button:enabled, summary)').first()
+    if (await control.count()) {
+      await control.scrollIntoViewIfNeeded()
+      await control.click()
+      await page.waitForLoadState()
       await page.waitForTimeout(50)
-      expect(await movingAnimations(page)).toEqual([])
+      expect(await movingAnimations(page), `${where}: moving after a click`).toEqual([])
     }
-  })
-
-  test(`${name} shows every drawing finished with reduced motion`, async ({ page }) => {
-    await gotoReady(page, path)
-    expect(await unfinishedDrawings(page)).toEqual([])
-    expect(await unfinishedRules(page), 'every rule at full width').toEqual([])
-
-    await page.mouse.wheel(0, 4000)
-    await page.waitForTimeout(100)
-    expect(await unfinishedDrawings(page)).toEqual([])
-    expect(await unfinishedRules(page), 'every rule at full width').toEqual([])
   })
 }
 
