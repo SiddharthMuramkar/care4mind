@@ -1,8 +1,7 @@
-import { frameKolam, openingFolio, unfinishedDrawings } from './drawings'
+import { unfinishedDrawings, unfinishedRules } from './drawings'
 import { expect, test } from './fixtures'
 import { READING_PAGES, readingThread, readTo } from './reading'
 import { PAGES } from './routes'
-import { travel } from './scrolling'
 
 // Firefox and WebKit: each page renders, without errors or sideways scroll.
 for (const { path, name } of PAGES) {
@@ -19,25 +18,17 @@ for (const { path, name } of PAGES) {
     expect(errors).toEqual([])
   })
 
-  // Drawings these browsers can't drive by scroll are simply shown finished.
-  test(`${name} shows the kolam logo and finished drawings`, async ({ page }) => {
+  // Drawings and rules these browsers can't drive by scroll are simply shown finished.
+  test(`${name} shows the wordmark, finished drawings and full-width rules`, async ({ page }) => {
     await page.goto(path)
     const logo = page.getByRole('banner').getByRole('link', { name: 'Care4Mind home', exact: true })
-    await expect(logo.locator('svg')).toBeVisible()
+    await expect(logo).toBeVisible()
+    await expect(logo).toHaveText('Care4Mind')
+    await expect(logo.locator('path, line, polyline, polygon, img, canvas')).toHaveCount(0)
     await expect.poll(() => unfinishedDrawings(page)).toEqual([])
+    await expect.poll(() => unfinishedRules(page)).toEqual([])
   })
 }
-
-test('the opening kolam scrolls with the page where scroll timelines are missing', async ({
-  page,
-}) => {
-  await page.goto('/')
-  const scrollTimelines = await page.evaluate(() => CSS.supports('animation-timeline: scroll()'))
-  test.skip(scrollTimelines, 'this browser drifts the kolam on a scroll timeline')
-  const [kolam, folio] = await travel(page, 240, await frameKolam(page), openingFolio(page))
-  expect(folio).toBe(240)
-  expect(kolam).toBe(folio)
-})
 
 for (const { path, name } of READING_PAGES) {
   test(`${name} has no reading thread where scroll timelines are missing`, async ({ page }) => {

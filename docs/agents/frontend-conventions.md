@@ -4,7 +4,7 @@ How every front-end lane builds and tests, so lanes working at once stay coheren
 
 ## Page turns
 
-- Give a `Link` that goes deeper or onward `transitionTypes={turnForward}` (cards, related links, "next", search results, A–Z entries, petals, map points, Start): the page turns forward, like reading on.
+- Give a `Link` that goes deeper or onward `transitionTypes={turnForward}` (cards, related links, "next", search results, A–Z entries, contents-plate rows, map points, Start): the page turns forward, like reading on.
 - Give breadcrumbs and "previous" `transitionTypes={turnBack}`: stepping back up turns the page back.
 - Leave header, footer and menu links untyped: moving between sections isn't reading on, so the page changes at once.
 - Never type the browser's Back and Forward: moving through history stays instant.
@@ -16,21 +16,23 @@ How every front-end lane builds and tests, so lanes working at once stay coheren
 - Add `data-ink` to a link or button to spread ink from the point pressed: one delegated listener in the layout (`InkSpread`) serves the whole site, so the control stays a server component.
 - Never add a click listener of your own for ink: the shared one is passive, so it can't delay or swallow a press.
 
-## Kolam behaviours
+## Press ornaments
 
-- Draw with `<Kolam columns rows behaviour>` from `@/components/Kolam`: one unbroken line looped round a grid of dots is the site's signature.
-- Pick columns and rows that share no factor (3×2, 9×7): otherwise the line isn't one loop, and the generator refuses it.
-- Choose a behaviour: `still` (the default), `draw-on-load` (once, for a page's opening), `draw-on-scroll` (as it scrolls into view) or `redraw-on-hover` (inside a link, on hover or focus).
-- Keep the finished drawing the default, and animate only inside `@media (prefers-reduced-motion: no-preference)`: reduced motion, browsers without scroll timelines and visits without JavaScript all see the whole kolam.
-- Keep a scroll-drawn kolam more than about half a screen above the end of its page: it finishes drawing 60% of the way through its pass, so one lower stays part-drawn.
-- Leave kolams `aria-hidden`, and name the link around one instead: drawings are decoration.
+- Draw only in Press's vocabulary of ink, rules and paper (D21 in the site decisions): the folio, the lotus Fleuron, OrnamentRule, rules and dotted leaders. No dot grids, looped line drawings, knots, rosettes or threads.
+- Use `<Fleuron />` from `@/components/Fleuron` still, and `<Fleuron draw />` only for a page's one opening moment: it draws itself in once on load, stroke by stroke (`--duration-stroke` a stroke), and scrolling never redraws it.
+- Use `<OrnamentRule />` from `@/components/OrnamentRule` as a section break: its two rules ink in from the centre, out from the Fleuron, as it scrolls into view (a scroll-driven animation, no listener or observer).
+- Ink a rule or a dotted leader in by transform (`scaleX` from the end it grows out of) or, in SVG, by stroke offset: never by width, which moves layout.
+- Keep the finished ornament the default, and animate only inside `@media (prefers-reduced-motion: no-preference)` (and `@supports (animation-timeline: view())` for scroll): reduced motion, browsers without scroll timelines and visits without JavaScript all see it whole.
+- Keep a scroll-inked ornament more than about half a screen above the end of its page: an OrnamentRule finishes inking 40% of the way through its pass, so one lower stays part-inked.
+- Leave ornaments `aria-hidden`, and name the link round one instead: they are decoration.
+- Build the later Press replacements in the same way, each in its own ticket: the Topics contents plate (06 and 11: rows set like a book's contents, with Devanagari numerals and dotted leaders, the row pointed at or focused lit through `:has()` and its leader inked in), cross-reference rules on the Concept page (05: dotted leaders inked in on scroll, still in print and under reduced motion), the KarmaYoga progress tally (10: 45 short rules in groups of 12, 6, 9 and 18, inked as statements are answered, `aria-hidden` beside the Progress element) and the Concept map's printed plate (12: hairline curves, solid, dashed or dotted by link type, inked once on load).
 
 ## What moves, and what never does
 
 - Animate only transform, opacity, clip-path and SVG stroke offsets (plus the foundation's link underlines): they don't move layout, so nothing shifts or janks.
 - Add no scroll or resize listeners and no observers (IntersectionObserver, ResizeObserver, MutationObserver): scroll effects are CSS (scroll-driven animations, `:has()`), which run no script.
 - Add no new uses of Motion: it loads lazily for the script switch's knob alone, and more of it would weigh on first loads.
-- Reserve every drawing's box (width and height attributes, as `Kolam` does): drawing in must never shift what is around it.
+- Reserve every drawing's box (width and height attributes, as `Fleuron` does): drawing in must never shift what is around it.
 - Under "reduce motion", keep everything still and every feature working: lose the animation, never the feature (NFR-01).
 
 ## Colours
@@ -51,7 +53,7 @@ How every front-end lane builds and tests, so lanes working at once stay coheren
 
 - Create and edit only the files your ticket's Owns list names: lanes build at once and merge one by one, and two lanes editing one file collide.
 - Ask in your ticket's Comments for a change to any other file; a one-line change you can't avoid (an export, a type) is allowed if your summary names it.
-- Treat the foundation's shared parts (Kolam, logo, folio, ornaments, breadcrumbs, cards, citation, verse) as read-only once ticket 03 has adapted them, unless your Owns list names one.
+- Treat the foundation's shared parts (the wordmark, folio, Fleuron, OrnamentRule, breadcrumbs, cards, citation, verse) as read-only once ticket 03 has adapted them, unless your Owns list names one.
 - Test each page type or shared part in its own spec file, owned by its ticket: no two lanes edit one spec.
 
 ## Shared pieces

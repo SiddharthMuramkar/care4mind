@@ -14,7 +14,6 @@ import {
 import type { SanskritName } from '@/content'
 import { capitalise } from '@/lib/text'
 
-import { Kolam } from './Kolam'
 import styles from './ScriptChoice.module.css'
 
 type Choice = [devanagariFirst: boolean, choose: (devanagariFirst: boolean) => void]
@@ -84,8 +83,9 @@ const Knob = lazy(() => import('./SwitchKnob').then((module) => ({ default: modu
 
 /**
  * The "Devanagari first" switch: a toggle button that reorders the
- * TermSpellings around it. Its track is the logo's mark, one line looped
- * round two dots, and its knob is a dot that springs from one loop to the other.
+ * TermSpellings around it. Its track is a printer's rule, and its knob a
+ * vermilion roundel that springs from one end of the rule to the other,
+ * inking the rule behind it.
  */
 export function ScriptSwitch() {
   const [devanagariFirst, choose] = use(DevanagariFirst)
@@ -97,7 +97,7 @@ export function ScriptSwitch() {
       onClick={() => choose(!devanagariFirst)}
     >
       <span className={styles.track} aria-hidden>
-        <Kolam columns={2} rows={1} className={styles.loops} />
+        <span className={styles.ink} />
         <Suspense
           fallback={
             <span

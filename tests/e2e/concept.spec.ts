@@ -232,40 +232,42 @@ test('the References list fades in as it opens, by opacity alone', async ({ page
   await expect.poll(() => transitionedOn(list)).toEqual(['opacity'])
 })
 
-/** How far a drawing is turned, in degrees, as it is drawn on screen. */
-const turned = (drawing: Locator) =>
-  drawing.evaluate((element) => {
-    const { transform } = getComputedStyle(element)
-    const matrix = new DOMMatrixReadOnly(transform === 'none' ? undefined : transform)
-    return Math.round((Math.atan2(matrix.b, matrix.a) * 180) / Math.PI)
-  })
+/** How far each of these rules is turned from lying flat, in degrees (0 to 90), as drawn on screen. */
+const turns = (rules: Locator) =>
+  rules.evaluateAll((elements) =>
+    elements
+      .map((element) => {
+        const { transform } = getComputedStyle(element)
+        const matrix = new DOMMatrixReadOnly(transform === 'none' ? undefined : transform)
+        return Math.abs(Math.round((Math.atan2(matrix.b, matrix.a) * 180) / Math.PI)) % 180
+      })
+      .sort((a, b) => a - b),
+  )
 
-test('the References control wears a kolam knot that turns as the list opens, and back', async ({
+test('the References control shows a plus that folds into a minus as the list opens, and back', async ({
   page,
 }) => {
   await recordAnimationStarts(page)
   await gotoReady(page, '/concepts/vikshepa/')
   const { toggle: trigger, disclosure } = references(page)
-  const knot = trigger.locator('svg')
-  // A 1×1 kolam: one unbroken line looped round one dot, silent to assistive technology.
-  await expect(knot).toHaveAttribute('aria-hidden', 'true')
-  await expect(knot.locator('path')).toHaveCount(1)
-  await expect(knot.locator('circle')).toHaveCount(1)
-  expect(await turned(knot)).toBe(0)
-  const dot = knot.locator('circle')
-  const closedDot = (await dot.boundingBox())?.width ?? NaN
+  // Two vermilion rules, silent to assistive technology.
+  const icon = trigger.locator('[aria-hidden="true"]')
+  await expect(icon).toHaveCount(1)
+  const rules = icon.locator(':scope > *')
+  await expect(rules).toHaveCount(2)
+  for (const rule of await rules.all()) {
+    await expect(rule).toBeVisible()
+    await expect(rule).toHaveCSS('background-color', 'rgb(200, 52, 42)')
+  }
+  expect(await turns(rules), 'a plus while closed').toEqual([0, 90])
 
   await trigger.click()
   await expect(disclosure).toHaveAttribute('open')
-  await expect.poll(() => turned(knot)).toBe(45)
-  expect(await transitionedOn(knot), 'it turns by transform').toEqual(['transform'])
-  // A near-round knot looks much the same turned, so its dot swells too: the open state shows at a
-  // glance. Turning alone widens the dot's box by √2; swelling widens it well past that.
-  await expect.poll(async () => (await dot.boundingBox())?.width).toBeGreaterThan(closedDot * 2)
-  expect(await transitionedOn(dot), 'it swells by transform').toEqual(['transform'])
+  await expect.poll(() => turns(rules), 'a minus once open').toEqual([0, 0])
+  const moved = await Promise.all((await rules.all()).map((rule) => transitionedOn(rule)))
+  expect(moved.flat(), 'the upright rule folds flat, by transform').toEqual(['transform'])
 
   await trigger.click()
   await expect(disclosure).not.toHaveAttribute('open')
-  await expect.poll(() => turned(knot)).toBe(0)
-  await expect.poll(async () => (await dot.boundingBox())?.width).toBeCloseTo(closedDot, 0)
+  await expect.poll(() => turns(rules), 'a plus again once closed').toEqual([0, 90])
 })
