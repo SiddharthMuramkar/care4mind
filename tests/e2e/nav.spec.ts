@@ -39,12 +39,10 @@ const header = (page: Page) => banner(page).getByRole('navigation', { name: 'Mai
 const footerNav = (page: Page) =>
   page.getByRole('contentinfo').getByRole('navigation', { name: 'All sections' })
 
-/** A link's address without its trailing slash: the slash arrives with ticket 03's trailingSlash. */
+/** A link's address, as a path: every address ends with a slash (D02). */
 const pathOf = async (link: Locator) =>
-  new URL((await link.getAttribute('href')) ?? '', 'http://site').pathname.replace(/(.)\/$/, '$1')
-const bare = (path: string) => path.replace(/(.)\/$/, '$1')
-const atPath = (path: string) =>
-  new RegExp(`${bare(path).replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}/?$`)
+  new URL((await link.getAttribute('href')) ?? '', 'http://site').pathname
+const atPath = (path: string) => new RegExp(`${path.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`)
 
 /** Every animation still running on the page, after a reduced-motion rule has had its 1 ms. */
 const moving = (page: Page) =>
@@ -88,14 +86,14 @@ test.describe('without JavaScript', () => {
         ...SECTIONS.map(({ name }) => new RegExp(`^\\s*${name}\\s*$`)),
       ])
       for (const { name, path } of SECTIONS) {
-        expect(await pathOf(header(page).getByRole('link', { name, exact: true }))).toBe(bare(path))
+        expect(await pathOf(header(page).getByRole('link', { name, exact: true }))).toBe(path)
       }
     } else {
       // On a phone the sections wait behind Menu, which is a link to the footer's navigation.
       await expect(links).toHaveText(['care4mind', /Search/, /Menu/])
       const menu = banner(page).getByRole('link', { name: 'Menu' })
       await expect(menu).toHaveAttribute('href', '#site-nav')
-      expect(await pathOf(banner(page).getByRole('link', { name: 'Search' }))).toBe('/search')
+      expect(await pathOf(banner(page).getByRole('link', { name: 'Search' }))).toBe('/search/')
     }
     // Panels need JavaScript, so their toggles don't show without it.
     await expect(banner(page).getByRole('button')).toHaveCount(0)
@@ -128,19 +126,19 @@ test.describe('without JavaScript', () => {
     await page.goto('/')
     const nav = footerNav(page)
     for (const { name, path } of SECTIONS) {
-      expect(await pathOf(nav.getByRole('link', { name, exact: true }))).toBe(bare(path))
+      expect(await pathOf(nav.getByRole('link', { name, exact: true }))).toBe(path)
     }
-    expect(await pathOf(nav.getByRole('link', { name: 'Concepts A–Z' }))).toBe('/concepts')
+    expect(await pathOf(nav.getByRole('link', { name: 'Concepts A–Z' }))).toBe('/concepts/')
     for (const { name, path } of [...TOPICS, ...LIBRARY]) {
-      expect(await pathOf(nav.getByRole('link', { name }))).toBe(bare(path))
+      expect(await pathOf(nav.getByRole('link', { name }))).toBe(path)
     }
     // Both proposals are on outside production, so the map and the proposals page are listed.
-    expect(await pathOf(nav.getByRole('link', { name: 'Concept map' }))).toBe('/concepts/map')
+    expect(await pathOf(nav.getByRole('link', { name: 'Concept map' }))).toBe('/concepts/map/')
     expect(await pathOf(nav.getByRole('link', { name: 'Proposals', exact: true }))).toBe(
-      '/proposals',
+      '/proposals/',
     )
     expect(await pathOf(nav.getByRole('link', { name: 'Proposal', exact: true }))).toBe(
-      '/proposals',
+      '/proposals/',
     )
     const footer = page.getByRole('contentinfo')
     await expect(footer.getByText('care4mind', { exact: true })).toBeVisible()
@@ -231,10 +229,10 @@ test.describe('panels, on a computer', () => {
     for (const { name, path, count } of TOPICS) {
       const link = concepts.getByRole('link', { name })
       await expect(link).toContainText(`${count} Concepts`)
-      expect(await pathOf(link)).toBe(bare(path))
+      expect(await pathOf(link)).toBe(path)
     }
-    expect(await pathOf(concepts.getByRole('link', { name: 'Concepts A–Z' }))).toBe('/concepts')
-    expect(await pathOf(concepts.getByRole('link', { name: 'Concept map' }))).toBe('/concepts/map')
+    expect(await pathOf(concepts.getByRole('link', { name: 'Concepts A–Z' }))).toBe('/concepts/')
+    expect(await pathOf(concepts.getByRole('link', { name: 'Concept map' }))).toBe('/concepts/map/')
     await expect(concepts.getByRole('link', { name: 'Proposal', exact: true })).toBeVisible()
 
     await page.keyboard.press('Escape')
@@ -255,7 +253,7 @@ test.describe('panels, on a computer', () => {
       /The whole Library/,
     ])
     for (const { name, path } of LIBRARY) {
-      expect(await pathOf(library.getByRole('link', { name }))).toBe(bare(path))
+      expect(await pathOf(library.getByRole('link', { name }))).toBe(path)
     }
     await page.keyboard.press('Tab')
     await expect(library.getByRole('link', { name: LIBRARY[0].name })).toBeFocused()
@@ -378,12 +376,12 @@ test.describe('the Drawer, on a phone', () => {
     await expect(menuElement(page)).toHaveAttribute('aria-expanded', 'true')
     const nav = drawer(page).getByRole('navigation', { name: 'Main' })
     for (const { name, path } of SECTIONS.filter(({ name }) => name !== 'Search')) {
-      expect(await pathOf(nav.getByRole('link', { name, exact: true }))).toBe(bare(path))
+      expect(await pathOf(nav.getByRole('link', { name, exact: true }))).toBe(path)
     }
     for (const { name, path } of [...TOPICS, ...LIBRARY]) {
-      expect(await pathOf(nav.getByRole('link', { name }))).toBe(bare(path))
+      expect(await pathOf(nav.getByRole('link', { name }))).toBe(path)
     }
-    expect(await pathOf(drawer(page).getByRole('link', { name: 'Search' }))).toBe('/search')
+    expect(await pathOf(drawer(page).getByRole('link', { name: 'Search' }))).toBe('/search/')
 
     // Focus is inside, and Tab keeps it there, forwards and back.
     await expect.poll(() => focusInDrawer(page)).toBe(true)
