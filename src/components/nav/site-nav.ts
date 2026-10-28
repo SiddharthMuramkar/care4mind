@@ -4,7 +4,7 @@ import { hrefFor, library, references, site, topics } from '@/content'
 
 import type { LibraryLink, NavLink, SiteNav } from './types'
 
-// hrefFor() gives a string until the route registry types it as a Route (front-end-site ticket 03).
+// Views give their pages' paths as plain strings; Next's Link wants a Route.
 const route = (path: string) => path as Route
 
 let built: Promise<SiteNav> | undefined
@@ -57,7 +57,7 @@ async function build(): Promise<SiteNav> {
     }))
 
   return {
-    home: route(hrefFor({ page: 'home' })),
+    home: hrefFor({ page: 'home' }),
     sections: [
       {
         id: 'concepts',

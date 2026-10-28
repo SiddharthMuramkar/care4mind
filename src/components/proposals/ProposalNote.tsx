@@ -1,4 +1,3 @@
-import type { Route } from 'next'
 import Link from 'next/link'
 import type { ReactNode } from 'react'
 
@@ -21,7 +20,7 @@ export interface ProposalNoteProps {
 export function ProposalNote({ children, className }: ProposalNoteProps) {
   return (
     <span className={cx(styles.note, className)}>
-      <Link href={hrefFor({ page: 'proposals' }) as Route} className={styles.label}>
+      <Link href={hrefFor({ page: 'proposals' })} className={styles.label}>
         Proposal
       </Link>
       {children ? <span className={styles.text}>{children}</span> : null}
