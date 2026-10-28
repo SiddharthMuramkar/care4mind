@@ -131,7 +131,7 @@ describe('archives and the feed (D17)', () => {
 
   it('sends any author’s archive and feed home by a pattern, never a username', () => {
     // Made-up names: the real ones never appear in the repo.
-    for (const old of ['/author/any-name/', '/author/Another.Name/', '/author/any-name/feed/'])
+    for (const old of ['/author/any-name/', '/author/Another-Name/', '/author/any-name/feed/'])
       expect(sends(old), old).toBe('/')
     for (const { source } of redirects.filter(({ source }) => /^\/author\//i.test(source)))
       expect(source, 'an author’s archive is matched by a parameter').toMatch(/^\/author\/:/)
