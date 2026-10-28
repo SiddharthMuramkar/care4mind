@@ -82,6 +82,10 @@ How every front-end lane builds and tests, so lanes working at once stay coheren
 - While working, narrow runs with `E2E_ONLY=<spec,…>` and `E2E_SCOPE=sample`: the full suite is for the done-check and the merger.
 - Done-check: `pnpm check`, then `E2E_SCOPE=sample E2E_PORT=<port> scripts/lane/heavy.sh pnpm check:e2e`; the merger runs `E2E_SCOPE=full` after merging. Tickets 01 and 15 also run `LHCI_PORT=<port> CHROME_PATH=/usr/bin/google-chrome scripts/lane/heavy.sh pnpm lhci`.
 
+## Screenshots
+
+Look at what you built with `SHOTS_PORT=<your Playwright port> pnpm shots`, after `pnpm build`: it writes a JPEG of each sample route in the route registry (one page of each kind) at 360×800 and 1440×900, the screen's worth only and with motion, to `.shots/<the path's parts joined by hyphens>-<width>[-reduced].jpg` (`.shots/home-360.jpg`; git-ignored), once each page has hydrated, its fonts have loaded and its opening drawings have finished. `--only /,concept` takes route paths or kinds (a kind gives its sample route), `--widths 320,768` other widths, `--full` whole pages, `--reduced` reduced motion and `--both` each page both ways. It shoots the server listening on `SHOTS_PORT` (default 3100), or starts the build there and stops it afterwards. It prints the path of each file it wrote and nothing else: open only those, a handful at most, and a whole-page shot only for one specific question.
+
 ## Tests
 
 - Import `test` and `expect` from `tests/e2e/fixtures.ts`: a fixture added there reaches every spec.

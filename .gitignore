@@ -16,6 +16,7 @@ next-env.d.ts
 /blob-report/
 /playwright/.cache/
 .lighthouseci/
+/.shots/
 
 # local tooling
 .venv-fonts/
