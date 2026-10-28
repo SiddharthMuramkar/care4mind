@@ -26,7 +26,7 @@ export async function SiteHeader() {
     <header className={styles.header} style={{ viewTransitionName: 'site-header' }}>
       <div className={styles.strip}>
         <Link href={nav.home} className={styles.home} aria-label="Care4Mind home">
-          <Logo redraw />
+          <Logo />
         </Link>
         <nav aria-label="Main" className={styles.nav}>
           <SectionNav nav={nav} mapNote={mapNote} />

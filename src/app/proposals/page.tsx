@@ -62,10 +62,6 @@ export default function ProposalsPage() {
               <p className={listing.entryName}>Audio pronunciation</p>
               <p className={listing.meta}>Described, not built</p>
             </li>
-            <li className={listing.entry}>
-              <p className={listing.entryName}>A kolam of your reading path</p>
-              <p className={listing.meta}>Described, not built</p>
-            </li>
           </ul>
         </Folio>
       </main>

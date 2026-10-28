@@ -1,4 +1,54 @@
 .fleuron {
   display: block;
+  height: auto;
   overflow: visible;
+}
+
+/*
+ * The opening draw, as a pen would make it: the middle petal, then the two
+ * beside it, then the rules running out from the flower, and last the dot set
+ * in the middle. Each line is one dash as long as itself (pathLength 1), so
+ * drawing it is one dash offset. The gap is a little longer than the dash, so
+ * no dash ends exactly where the line starts: a round cap would show it there
+ * as a dot. The dash is there only while it draws: a browser's dash can stop
+ * just short of a closed petal's end, leaving a gap. The finished ornament is
+ * the default, so reduced motion sees it whole.
+ */
+@keyframes draw {
+  from {
+    stroke-dasharray: 1 1.1;
+    stroke-dashoffset: 1.05;
+  }
+  to {
+    stroke-dasharray: 1 1.1;
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes set-down {
+  from {
+    transform: scale(0);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .draw path {
+    animation: draw var(--duration-stroke) var(--ease-in-out) backwards;
+  }
+
+  .draw path:nth-child(2),
+  .draw path:nth-child(3) {
+    animation-delay: calc(var(--duration-stroke) / 3);
+  }
+
+  .draw path:nth-child(n + 4) {
+    animation-delay: calc(var(--duration-stroke) * 2 / 3);
+    animation-timing-function: var(--ease-out);
+  }
+
+  .draw circle {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: set-down var(--duration-quick) var(--ease-out) var(--duration-stroke) backwards;
+  }
 }

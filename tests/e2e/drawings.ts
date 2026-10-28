@@ -1,22 +1,7 @@
-import { expect, type Locator, type Page } from '@playwright/test'
+import type { Locator, Page } from '@playwright/test'
 
 /** The homepage's opening folio: the paper page the verse is printed on. */
 export const openingFolio = (page: Page) => page.getByRole('heading', { level: 1 }).locator('..')
-
-/** The kolam round the opening folio: the one drawing that reaches past its top and both sides. */
-export async function frameKolam(page: Page): Promise<Locator> {
-  const folio = await openingFolio(page).boundingBox()
-  if (!folio) throw new Error('the opening folio is not on screen')
-  const frames: Locator[] = []
-  for (const drawing of await page.getByRole('main').locator('svg').all()) {
-    const box = await drawing.boundingBox()
-    if (box && box.y < folio.y && box.x < folio.x && box.x + box.width > folio.x + folio.width) {
-      frames.push(drawing)
-    }
-  }
-  expect(frames, 'one drawing frames the opening folio').toHaveLength(1)
-  return frames[0] as Locator
-}
 
 /**
  * Lines in decorative drawings that are not fully drawn. Lines a scroll
@@ -30,6 +15,25 @@ export function unfinishedDrawings(page: Page) {
       )
       .filter((line) => parseFloat(getComputedStyle(line).strokeDashoffset) !== 0)
       .map((line) => line.outerHTML.slice(0, 80)),
+  )
+}
+
+/**
+ * Rules in decorative ornaments (thin lines across, such as an OrnamentRule's)
+ * drawn short of their full width. Rules a scroll timeline is inking in are
+ * left out: they finish as the visitor scrolls. So are the parts of controls
+ * (a switch's track, a disclosure's plus), which show a state rather than finish.
+ */
+export function unfinishedRules(page: Page) {
+  return page.evaluate(() =>
+    [...document.querySelectorAll<HTMLElement>('[aria-hidden="true"] *, [aria-hidden="true"]')]
+      .filter((rule) => rule.offsetHeight <= 3 && rule.offsetWidth > 8)
+      .filter((rule) => !rule.closest('a, button, summary, [role]'))
+      .filter((rule) =>
+        rule.getAnimations().every((animation) => animation.timeline instanceof DocumentTimeline),
+      )
+      .filter((rule) => rule.getBoundingClientRect().width < rule.offsetWidth - 0.5)
+      .map((rule) => rule.outerHTML.slice(0, 80)),
   )
 }
 
@@ -47,6 +51,8 @@ interface Start {
   target: Element
   /** How long it runs, in ms. Scroll-driven animations have no duration in time. */
   duration: number | null
+  /** How long after it was set going it began, in ms. */
+  delay: number
   byScroll: boolean
   /** The property a transition changes; empty for an animation. */
   property: string
@@ -66,10 +72,12 @@ export function recordAnimationStarts(page: Page) {
             ? (candidate as CSSAnimation).animationName === event.animationName
             : (candidate as CSSTransition).transitionProperty === event.propertyName,
         )
-      const duration = animation?.effect?.getComputedTiming().duration
+      const timing = animation?.effect?.getComputedTiming()
+      const duration = timing?.duration
       starts.push({
         target,
         duration: typeof duration === 'number' ? duration : null,
+        delay: Number(timing?.delay ?? 0),
         byScroll: Boolean(animation && !(animation.timeline instanceof DocumentTimeline)),
         property: 'propertyName' in event ? event.propertyName : '',
       })
@@ -91,6 +99,15 @@ export function animationsStartedOn(locator: Locator, { orAncestors = false } = 
 }
 
 /**
+ * How long after being set going each animation that has started on this
+ * element began, in ms: drawings that go stroke by stroke start their strokes
+ * at different times. Call recordAnimationStarts before loading the page.
+ */
+export function delaysStartedOn(locator: Locator) {
+  return startsOn(locator, false).then((starts) => starts.map(({ delay }) => delay))
+}
+
+/**
  * The properties that have transitioned on this element or its pseudo-elements
  * since the page began, each once. Call recordAnimationStarts before loading the page.
  */
@@ -105,7 +122,12 @@ function startsOn(locator: Locator, orAncestors: boolean) {
     (element, orAncestors) =>
       (window as unknown as { __animationStarts: Start[] }).__animationStarts
         .filter(({ target }) => target === element || (orAncestors && target.contains(element)))
-        .map(({ duration, byScroll, property }) => ({ duration, byScroll, property })),
+        .map(({ duration, delay, byScroll, property }) => ({
+          duration,
+          delay,
+          byScroll,
+          property,
+        })),
     orAncestors,
   )
 }
