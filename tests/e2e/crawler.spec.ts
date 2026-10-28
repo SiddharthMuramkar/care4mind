@@ -124,7 +124,8 @@ async function crawl(request: APIRequestContext, parser: Page, origin: string): 
 function pagesIn(addresses: readonly string[]): string {
   const pages = [...new Set(addresses)]
   if (pages.length <= 2) return pages.join(' and ')
-  return `${pages.slice(0, 2).join(', ')} and ${pages.length - 2} more pages`
+  const more = pages.length - 2
+  return `${pages.slice(0, 2).join(', ')} and ${more} more ${more === 1 ? 'page' : 'pages'}`
 }
 
 /** Links grouped by a key, each group non-empty, in the order its key first appears. */
