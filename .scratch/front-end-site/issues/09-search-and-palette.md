@@ -130,7 +130,7 @@ Spec: [Front-end site: every public page](../spec.md) · Design: [design.md](../
 **Tests**
 
 - New: `tests/unit/search.test.ts` (35 cases on the real corpus: every case in the criteria, held-back phrases, precision, prefix-as-you-type, the yama/niyama keywords, the index's size), `tests/e2e/search.spec.ts` (20 tests: both shortcuts and no single key, the header's Search and its shortcut on Linux and Mac, its width before and after, keyboard-only search to a forward page turn, a term and a locator, Devanagari typed and composed through an input method, the announced count, suggestions, focus return from the header, from a focused link and from the Drawer, reduced motion, axe empty and with results, loading on intent only; the results page refining, focus and axe; Home › Search; without JavaScript the results and the form; the index route).
-- Changed: `tests/e2e/nav.spec.ts` "every header link opens its page" leaves Search out (and skips below 72rem, where Search is the header's one link): with JavaScript it now opens the palette; its link to `/search/` is still checked without JavaScript.
+- ~~Changed: `tests/e2e/nav.spec.ts` "every header link opens its page" leaves Search out~~ Restored in the check pass: that test runs without JavaScript, where Search is still the link to `/search/`, and it passes unchanged.
 
 **For the conventions doc (ticket 15)**
 

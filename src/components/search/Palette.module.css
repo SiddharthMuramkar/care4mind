@@ -439,6 +439,25 @@
   color: var(--color-palette-ink);
 }
 
+.keyGlyph {
+  display: inline-block;
+  width: 0.9em;
+  height: 0.9em;
+  vertical-align: -0.1em;
+}
+
+/*
+ * Before anything is typed the foot holds only the keys: where they aren't shown it folds away.
+ * Its status stays in place, empty, to announce the first count.
+ */
+@media not all and (hover: hover) and (pointer: fine) and (min-width: 30rem) {
+  .foot[data-idle] {
+    min-height: 0;
+    padding-block: 0;
+    border-top-color: transparent;
+  }
+}
+
 .all {
   display: inline-flex;
   align-items: center;

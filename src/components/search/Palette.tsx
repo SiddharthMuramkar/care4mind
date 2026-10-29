@@ -240,14 +240,14 @@ function Finder({ input, searchPath, close }: FinderProps) {
         </ScrollArea.Scrollbar>
       </ScrollArea.Root>
 
-      <div className={styles.foot}>
+      <div className={styles.foot} data-idle={typed === '' ? '' : undefined}>
         <Autocomplete.Status className={styles.status}>{status}</Autocomplete.Status>
         <p id={keysId} className={styles.hidden}>
           The up and down arrows move through the results, Enter opens one, Escape closes search.
         </p>
         <p className={styles.keys} aria-hidden>
-          <kbd>↑</kbd>
-          <kbd>↓</kbd> move <kbd>↵</kbd> open <kbd>esc</kbd> close
+          <Key name="up" />
+          <Key name="down" /> move <Key name="enter" /> open <kbd>esc</kbd> close
         </p>
         {typed === '' ? null : (
           // The results page's own path, from hrefFor() on the server, with the query.
@@ -308,6 +308,35 @@ function Result({ hit, close }: { hit: SearchHit; close: () => void }) {
         </span>
       ) : null}
     </Autocomplete.Item>
+  )
+}
+
+/** The arrow keys and Enter, drawn: the text faces have no arrows of their own. */
+const KEY_STROKES = {
+  up: 'M6 10V2.5M3 5.5l3-3 3 3',
+  down: 'M6 2v7.5M3 6.5l3 3 3-3',
+  enter: 'M10 2.5V7H2.5M5 4.5 2.5 7 5 9.5',
+} as const
+
+function Key({ name }: { name: keyof typeof KEY_STROKES }) {
+  return (
+    <kbd>
+      <svg
+        className={styles.keyGlyph}
+        viewBox="0 0 12 12"
+        width="12"
+        height="12"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth={1.25}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        aria-hidden
+        focusable="false"
+      >
+        <path d={KEY_STROKES[name]} />
+      </svg>
+    </kbd>
   )
 }
 
