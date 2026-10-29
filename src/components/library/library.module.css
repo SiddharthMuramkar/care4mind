@@ -1,0 +1,13 @@
+/* What every Library page shares: links to other sites that say so, and a missing link's reason. */
+
+/* "archive.org, another site ↗": the words that say the link leaves, a size down. */
+.awayNote {
+  font-variant-caps: all-small-caps;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+}
+
+.noLink {
+  font-style: italic;
+  color: var(--color-surface-muted);
+}
