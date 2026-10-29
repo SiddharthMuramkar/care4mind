@@ -1,0 +1,14 @@
+/* The heading's two spellings, one above the other; the second is set at half the size. */
+.pair {
+  display: grid;
+  justify-items: center;
+  row-gap: 0.1em;
+}
+
+.pair > * {
+  line-height: 1.3;
+}
+
+.pair > :last-child {
+  font-size: 0.5em;
+}

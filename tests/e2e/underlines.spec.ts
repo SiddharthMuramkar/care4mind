@@ -49,10 +49,11 @@ for (const { page: path, name, in: around, width } of DRAWN) {
 // Links in running text keep their underline at rest (WCAG 1.4.1) and draw an accent over it.
 const IN_TEXT = [
   { page: '/', name: 'Concepts', in: (page: Page) => page.getByRole('main') },
+  // Since front-end-site ticket 05 the Questionnaire is a card in Linked knowledge; its works stay text.
   {
     page: '/concepts/vikshepa/',
-    name: 'KarmaYoga Scale',
-    in: (page: Page) => page.getByRole('main'),
+    name: 'Yoga Sūtra',
+    in: (page: Page) => page.getByRole('region', { name: 'Linked knowledge' }),
   },
   {
     page: '/concepts/vikshepa/',
