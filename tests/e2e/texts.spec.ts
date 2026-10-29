@@ -48,7 +48,9 @@ test.describe('the shelf', () => {
       await expect(leaf.getByRole('link')).toHaveAttribute('href', entry.href)
       await expect(leaf.locator(`[lang="${entry.lang}"]`).first()).toHaveText(entry.title)
       if (entry.term.devanagari)
-        await expect(leaf.locator('[lang="sa-Deva"]')).toHaveText(entry.term.devanagari)
+        await expect(leaf.getByRole('heading').locator('[lang="sa-Deva"]')).toHaveText(
+          entry.term.devanagari,
+        )
       if (entry.english) await expect(leaf).toContainText(entry.english)
       if (entry.attribution) await expect(leaf).toContainText(entry.attribution)
       await expect(leaf).toContainText(
@@ -58,7 +60,9 @@ test.describe('the shelf', () => {
     // As the content has them.
     await expect(card(page, 'Yoga Sūtra')).toContainText('Patanjali')
     await expect(card(page, 'Yoga Sūtra')).toContainText('15 verses quoted')
-    await expect(card(page, 'Bhagavad Gītā').locator('[lang="sa-Deva"]')).toHaveText('भगवद्गीता')
+    await expect(
+      card(page, 'Bhagavad Gītā').getByRole('heading').locator('[lang="sa-Deva"]'),
+    ).toHaveText('भगवद्गीता')
     await expect(card(page, 'Dhammapada')).toContainText('1 verse quoted')
   })
 

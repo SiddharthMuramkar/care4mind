@@ -1,0 +1,60 @@
+/*
+ * A tally: short printer's rules, grouped by part. Each carries a vermilion ink that rises from its
+ * foot; only that ink's transform moves, and its box is reserved, so nothing shifts.
+ */
+.tally {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 0.3rem 0.55rem;
+}
+
+.part {
+  display: inline-flex;
+  gap: 3px;
+}
+
+.mark {
+  position: relative;
+  width: 2px;
+  height: 0.95rem;
+  background: var(--color-surface-rule);
+}
+
+.mark::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--color-highlight);
+  transform: scaleY(var(--lit, 0));
+  transform-origin: bottom;
+}
+
+/* On a work's page the tally is inked: finished and still unless motion is welcome. */
+.ink {
+  --lit: 1;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .mark::after {
+    transition: transform var(--duration-quick) var(--ease-out) calc(var(--i, 0) * 14ms);
+  }
+
+  /* Inked once, rule by rule, after the title has landed from its card. */
+  .ink .mark::after {
+    animation: rise var(--duration-move) var(--ease-out) backwards;
+    animation-delay: calc(var(--duration-morph) + var(--i, 0) * 28ms);
+  }
+}
+
+@keyframes rise {
+  from {
+    transform: scaleY(0);
+  }
+}
+
+@media print {
+  .tally {
+    display: none;
+  }
+}
