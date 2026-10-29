@@ -1,17 +1,58 @@
 import type { Locator, Page } from '@playwright/test'
 
-import { concepts, hrefFor, references, topics } from '@/content'
+import {
+  concepts,
+  hrefFor,
+  library,
+  type PageView,
+  references,
+  type ResourceItemView,
+  type ResourceListView,
+  topics,
+} from '@/content'
 
 import { expectNoAxeViolations } from './axe'
 import { expect, gotoReady, scrollsSideways, test } from './fixtures'
+import { expectPageTurned, pageTurns, prefetched, recordPageTurns } from './page-turns'
 
 // The Library (front-end-site ticket 08): its shelf, every Reference in one style with filters,
 // an author rail, "cited in" chips and "Copy citation", the two book lists as spines, the course
 // cards and the Methods tables.
 
+const LIBRARY = hrefFor({ page: 'library' })
 const REFERENCES = hrefFor({ page: 'references' })
 const all = await references.list()
 const topicCards = await topics.list()
+const cards = await library.list()
+const views = (await Promise.all(cards.map(({ slug }) => library.get(slug)))).flatMap((view) =>
+  view ? [view] : [],
+)
+const lists = views.filter((view): view is ResourceListView => view.kind === 'resource-list')
+type Course = Extract<ResourceItemView, { type: 'course' }>
+type BookItem = Extract<ResourceItemView, { type: 'reference' }>
+const coursesOf = (list: ResourceListView) =>
+  list.groups.flatMap(({ items }) => items.filter((item): item is Course => item.type === 'course'))
+const booksOf = (group: ResourceListView['groups'][number]) =>
+  group.items.filter((item): item is BookItem => item.type === 'reference')
+const bookLists = lists.filter((list) => list.groups.some((group) => booksOf(group).length > 0))
+const courseLists = lists.filter((list) => coursesOf(list).length > 0)
+const textPages = views.filter((view): view is PageView => view.kind === 'page')
+/** What each section holds, in the words its spine says it (an independent tally, by its slug). */
+const UNITS: Readonly<Record<string, string>> = {
+  textbooks: 'books',
+  'inspirational-books': 'books',
+  courses: 'courses',
+  methods: 'sections',
+}
+const VOLUMES = [
+  { title: 'References', href: REFERENCES, holds: `${all.length} sources` },
+  ...views.map((view) => ({
+    title: view.title,
+    href: view.href,
+    holds: `${view.kind === 'page' ? view.sections.length : view.groups.flatMap((g) => g.items).length} ${UNITS[view.slug] ?? '?'}`,
+  })),
+]
+const LIBRARY_PAGES = [LIBRARY, ...VOLUMES.map(({ href }) => href)]
 
 // A Reference's topics are those of the Concepts that cite it (and of a topic citing it itself).
 const conceptTopics = new Map(
@@ -293,9 +334,197 @@ test.describe('References without JavaScript', () => {
   })
 })
 
+test.describe('The Library home', () => {
+  test('stands its five sections on a shelf, each leading to its page with what it holds', async ({
+    page,
+  }) => {
+    await gotoReady(page, LIBRARY)
+    const links = page.getByRole('navigation', { name: 'The Library’s sections' }).getByRole('link')
+    await expect(links).toHaveCount(5)
+    for (const [at, volume] of VOLUMES.entries()) {
+      await expect(links.nth(at)).toHaveAccessibleName(`${volume.title} ${volume.holds}`)
+      await expect(links.nth(at)).toHaveAttribute('href', volume.href)
+      await expect(links.nth(at)).toBeVisible()
+    }
+    // D18: nothing from the current site but its words.
+    await expect(page.getByRole('main').locator('img, picture, video, svg image')).toHaveCount(0)
+  })
+
+  test('a volume lifts from the shelf under the pointer and turns the page forward', async ({
+    page,
+  }) => {
+    await recordPageTurns(page)
+    await gotoReady(page, LIBRARY)
+    const volume = VOLUMES[1]
+    if (!volume) throw new Error('The Library has a reading list.')
+    const link = page
+      .getByRole('navigation', { name: 'The Library’s sections' })
+      .getByRole('link', { name: `${volume.title} ${volume.holds}` })
+    await prefetched(link)
+    if ((page.viewportSize()?.width ?? 0) >= 640)
+      await expect
+        .poll(() => link.evaluate((element) => getComputedStyle(element).transform))
+        .not.toBe('none')
+    await link.click()
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText(volume.title)
+    const [turn] = await pageTurns(page)
+    expectPageTurned(turn, 'forward')
+  })
+})
+
+test('every Library page has its breadcrumbs: Home › Library › the page', async ({ page }) => {
+  for (const path of LIBRARY_PAGES) {
+    await gotoReady(page, path)
+    const crumbs = page.getByRole('navigation', { name: 'Breadcrumb' }).getByRole('listitem')
+    const title = VOLUMES.find(({ href }) => href === path)?.title
+    await expect(crumbs, path).toHaveText(title ? ['Home', 'Library', title] : ['Home', 'Library'])
+    await expect(crumbs.last().locator('[aria-current="page"]')).toHaveCount(1)
+  }
+})
+
+for (const list of bookLists)
+  test.describe(`${list.title}: the books`, () => {
+    test('stand on a shelf per group, set in type, over each book with its note', async ({
+      page,
+    }) => {
+      await gotoReady(page, list.href)
+      for (const group of list.groups) {
+        // The group keeps the anchor the old addresses redirect to.
+        const section = page.locator(`section[id="${group.id}"]`)
+        await expect(section.getByRole('heading', { level: 2 })).toHaveText(group.heading)
+        const shelf = section.getByRole('navigation', { name: `Shelf: ${group.heading}` })
+        if (isWide(page)) {
+          await expect(shelf.getByRole('link')).toHaveCount(booksOf(group).length)
+          for (const [at, { reference }] of booksOf(group).entries()) {
+            const spine = shelf.getByRole('link').nth(at)
+            await expect(spine).toHaveAttribute('href', `#${reference.anchor}`)
+            await expect(spine).toContainText(reference.title)
+          }
+        } else await expect(shelf, 'a phone shows the list alone').toBeHidden()
+        for (const { reference, annotation } of booksOf(group)) {
+          const book = section.locator(`li[id="${reference.anchor}"]`)
+          await expect(book.getByRole('heading', { level: 3 })).toHaveText(reference.title)
+          if (reference.authors) await expect(book).toContainText(reference.authors)
+          if (annotation) await expect(book).toContainText(annotation)
+          await expect(book.getByRole('link', { name: 'In References' })).toHaveAttribute(
+            'href',
+            reference.href,
+          )
+        }
+      }
+      // Shops and other sites are named as such, in words.
+      const away = page.getByRole('main').locator('a[href^="http"]')
+      await expect(away).not.toHaveCount(0)
+      for (const link of await away.all())
+        await expect(link).toHaveAccessibleName(/, another site$/)
+    })
+
+    test('a spine leads to its book below, which takes the eye', async ({ page }) => {
+      test.skip(!isWide(page), 'the shelf stands on wide screens')
+      await gotoReady(page, list.href)
+      const group = list.groups.at(-1)
+      const book = group && booksOf(group).at(-1)
+      if (!group || !book) throw new Error(`${list.title} has a book.`)
+      const spine = page
+        .getByRole('navigation', { name: `Shelf: ${group.heading}` })
+        .getByRole('link')
+        .last()
+      await spine.scrollIntoViewIfNeeded()
+      await spine.click()
+      await expect(page).toHaveURL(new RegExp(`#${book.reference.anchor}$`))
+      const entry = page.locator(`li[id="${book.reference.anchor}"]`)
+      await expect(entry).toBeInViewport()
+      expect(await entry.evaluate((element) => element.matches(':target'))).toBe(true)
+    })
+  })
+
+for (const list of courseLists)
+  test(`${list.title}: each course is a card with its provider, name, description and link`, async ({
+    page,
+  }) => {
+    await gotoReady(page, list.href)
+    for (const group of list.groups)
+      await expect(
+        page.locator(`section[id="${group.id}"]`).getByRole('heading', { level: 2 }),
+      ).toHaveText(group.heading)
+    for (const course of coursesOf(list)) {
+      const card = page
+        .getByRole('main')
+        .getByRole('listitem')
+        .filter({ has: page.getByRole('heading', { level: 3, name: course.name, exact: true }) })
+        .filter({ hasText: course.provider })
+      await expect(card, course.name).toHaveCount(1)
+      if (course.description) await expect(card).toContainText(course.description)
+      if (course.url) {
+        const link = card.getByRole('link')
+        await expect(link).toHaveAttribute('href', course.url)
+        await expect(link).toHaveAccessibleName(/^Visit .+, another site$/)
+      } else await expect(card.getByRole('link')).toHaveCount(0)
+    }
+  })
+
+for (const textPage of textPages)
+  test(`${textPage.title}: its sections, each table scrolling in its own named, focusable frame`, async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 360, height: 800 })
+    await gotoReady(page, textPage.href)
+    const contents = page.getByRole('navigation', { name: 'Contents' })
+    await expect(contents.getByRole('link')).toHaveCount(textPage.toc.length)
+    for (const section of textPage.sections)
+      await expect(
+        page.locator(`section[id="${section.id}"]`).getByRole('heading', { level: 2 }),
+      ).toHaveText(section.heading)
+    const tables = textPage.sections.flatMap(({ blocks }) =>
+      blocks.flatMap((block) => (block.kind === 'table' ? [block] : [])),
+    )
+    expect(tables.length).toBeGreaterThan(0)
+    for (const table of tables) {
+      const frame = page.getByRole('region', { name: table.caption })
+      await frame.scrollIntoViewIfNeeded()
+      await frame.focus()
+      await expect(frame).toBeFocused()
+      expect(await frame.evaluate((element) => element.scrollWidth > element.clientWidth)).toBe(
+        true,
+      )
+      await page.keyboard.press('ArrowRight')
+      await expect.poll(() => frame.evaluate((element) => element.scrollLeft)).toBeGreaterThan(0)
+    }
+    expect(await scrollsSideways(page)).toEqual([])
+  })
+
+test.describe('Every Library page without JavaScript', () => {
+  test.use({ javaScriptEnabled: false })
+
+  test('shows its whole content', async ({ page }) => {
+    await page.goto(LIBRARY)
+    await expect(
+      page.getByRole('navigation', { name: 'The Library’s sections' }).getByRole('link'),
+    ).toHaveCount(5)
+    for (const list of bookLists) {
+      await page.goto(list.href)
+      await expect(page.getByRole('heading', { level: 1 })).toHaveText(list.title)
+      for (const group of list.groups)
+        for (const { reference } of booksOf(group))
+          await expect(page.locator(`li[id="${reference.anchor}"]`)).toBeVisible()
+    }
+    for (const list of courseLists) {
+      await page.goto(list.href)
+      await expect(page.getByRole('main').getByRole('heading', { level: 3 })).toHaveCount(
+        coursesOf(list).length,
+      )
+    }
+    for (const textPage of textPages) {
+      await page.goto(textPage.href)
+      await expect(page.getByRole('main').getByRole('table')).not.toHaveCount(0)
+      await expect(page.getByRole('main').getByRole('table').first()).toBeVisible()
+    }
+  })
+})
+
 test('every Library page fits 320 px', async ({ page }) => {
   await page.setViewportSize({ width: 320, height: 720 })
-  for (const path of [hrefFor({ page: 'library' }), REFERENCES]) {
+  for (const path of LIBRARY_PAGES) {
     await gotoReady(page, path)
     expect(await scrollsSideways(page), path).toEqual([])
   }

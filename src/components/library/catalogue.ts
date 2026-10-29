@@ -1,9 +1,11 @@
 import {
   concepts,
+  type PageView,
   references,
-  topics,
   type ReferenceType,
   type ReferenceView,
+  type ResourceListView,
+  topics,
   type TopicCard,
 } from '@/content'
 
@@ -21,6 +23,24 @@ export const TYPE_NAMES: Readonly<Record<ReferenceType, { one: string; many: str
 
 export const counted = (count: number, one: string, many: string) =>
   `${count} ${count === 1 ? one : many}`
+
+/** What a Library page holds, counted from its content: its books, courses, entries or sections. */
+export function holdingsOf(view: ResourceListView | PageView): { count: number; unit: string } {
+  if (view.kind === 'page')
+    return {
+      count: view.sections.length,
+      unit: view.sections.length === 1 ? 'section' : 'sections',
+    }
+  const items = view.groups.flatMap((group) => group.items)
+  const books = items.every((item) => item.type === 'reference' && item.reference.type === 'book')
+  const courses = items.every((item) => item.type === 'course')
+  const [one, many] = books
+    ? ['book', 'books']
+    : courses
+      ? ['course', 'courses']
+      : ['entry', 'entries']
+  return { count: items.length, unit: items.length === 1 ? one : many }
+}
 
 /** Another site's name, as a link to it says: `archive.org`. */
 export const siteOf = (url: string) => new URL(url).hostname.replace(/^www\./, '')

@@ -1,0 +1,303 @@
+/*
+ * A shelf of books set in type: spines standing on a double-ruled board, each bound in one of the
+ * site's colours, its title up the spine between gilt rules. A spine lifts from the shelf under
+ * the pointer or focus and presses back as it is followed.
+ */
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: flex-end;
+  row-gap: 2rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* Each book's stretch of the board: side by side, the board runs unbroken under a row. */
+.slot {
+  display: flex;
+  align-items: flex-end;
+  padding: 0 1.5px;
+  border-bottom: 0.5rem double var(--color-surface-rule);
+}
+
+.spine {
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.9rem;
+  /* Up the spine: the inline direction runs top to bottom, so its inline size is its height. */
+  writing-mode: vertical-rl;
+  inline-size: calc(14rem + var(--height) * 4.5rem);
+  padding: 1.5rem calc(0.5rem + var(--thickness) * 0.55rem);
+  border-radius: 3px 3px 1px 1px;
+  background: var(--tone);
+  color: var(--tone-ink);
+  /* The rounded back of the binding: light on its left edge, shade on its right. */
+  box-shadow:
+    inset 3px 0 0 color-mix(in srgb, var(--color-ink) 14%, transparent),
+    inset -4px 0 0 color-mix(in srgb, var(--color-surface-ink) 24%, transparent);
+  font-family: var(--font-display);
+  font-size: 1rem;
+  line-height: 1.15;
+  text-decoration: none;
+  --color-focus: var(--color-surface-focus);
+}
+
+.spine[data-tone='ground'] {
+  --tone: var(--color-ground);
+  --tone-ink: var(--color-ink);
+  --gilt: var(--color-accent);
+}
+
+/* Pale paper, lighter than the page, so it stands out from it. */
+.spine[data-tone='paper'] {
+  --tone: color-mix(in srgb, var(--color-surface) 45%, var(--color-ink));
+  --tone-ink: var(--color-surface-ink);
+  --gilt: var(--color-surface-rule);
+  outline: 1px solid color-mix(in srgb, var(--color-surface-ink) 30%, transparent);
+  outline-offset: -1px;
+}
+
+.spine[data-tone='accent'] {
+  --tone: var(--color-accent);
+  --tone-ink: var(--color-accent-ink);
+  --gilt: var(--color-accent-ink);
+}
+
+.spine[data-tone='highlight'] {
+  --tone: var(--color-highlight);
+  --tone-ink: var(--color-highlight-ink);
+  --gilt: var(--color-highlight-ink);
+}
+
+/* Gilt rules across the head and the foot: two hairlines each, as a cloth binding is tooled. */
+.spine::before,
+.spine::after {
+  content: '';
+  position: absolute;
+  left: 0.3rem;
+  right: 0.3rem;
+  height: 4px;
+  border-top: 1px solid var(--gilt);
+  border-bottom: 1px solid var(--gilt);
+  opacity: 0.75;
+}
+
+.spine::before {
+  top: 0.6rem;
+}
+
+.spine::after {
+  bottom: 0.6rem;
+}
+
+.head {
+  flex: none;
+  writing-mode: horizontal-tb;
+  font-family: var(--font-deva);
+  font-size: 1.25rem;
+  line-height: 1;
+}
+
+.title {
+  flex: 0 1 auto;
+  min-inline-size: 0;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  text-wrap: balance;
+}
+
+.foot {
+  flex: none;
+  max-inline-size: 48%;
+  font-family: var(--font-text);
+  font-variant-caps: all-small-caps;
+  letter-spacing: 0.08em;
+  font-size: 0.875rem;
+  line-height: 1.1;
+}
+
+/* Lifted from the shelf a little under the pointer or focus; pressed back as it is followed. */
+.spine:hover,
+.spine:focus-visible {
+  transform: translateY(-0.5rem);
+}
+
+.spine:active {
+  transform: translateY(-0.2rem);
+}
+
+.spine:focus-visible {
+  outline: 3px solid var(--color-surface-focus);
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .spine {
+    transition: transform var(--duration-quick) var(--ease-out);
+  }
+
+  .spine:active {
+    transition-duration: var(--duration-instant);
+  }
+}
+
+/*
+ * A reading list's shelf: its books rise onto the board one after another as it scrolls into
+ * view, each uncovered from the board up, so none ever shows below it. Finished once the shelf
+ * is in view, and still where motion is reduced or the browser has no view timelines.
+ */
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    .books .spine {
+      animation: rise linear both;
+      animation-timeline: view();
+      animation-range: entry calc(min(var(--at), 12) * 4%) entry calc(52% + min(var(--at), 12) * 4%);
+    }
+  }
+}
+
+@keyframes rise {
+  from {
+    translate: 0 100%;
+    clip-path: inset(-1rem -1rem 100% -1rem);
+  }
+
+  to {
+    translate: 0 0;
+    clip-path: inset(-1rem -1rem -1rem -1rem);
+  }
+}
+
+/* On a phone the books leave their shelf: the list below it names each of them. */
+@media (max-width: 47.99rem) {
+  .books {
+    display: none;
+  }
+}
+
+/* The Library's sections: tall volumes, as thick as what they hold, on one long board. */
+.volumes .row {
+  width: fit-content;
+  margin-inline: auto;
+  padding-inline: 1.5rem;
+  border-bottom: 0.6rem double var(--color-surface-rule);
+}
+
+.volumes .slot {
+  border-bottom: 0;
+}
+
+.volumes .spine {
+  inline-size: calc(19rem + var(--height) * 3.5rem);
+  padding: 2.5rem calc(1rem + var(--thickness) * 1.9rem);
+  gap: 1.25rem;
+  font-size: 1.625rem;
+}
+
+.volumes .foot {
+  writing-mode: horizontal-tb;
+  max-inline-size: none;
+  font-family: var(--font-display);
+  font-variant-caps: normal;
+  font-size: 1.375rem;
+  letter-spacing: 0;
+}
+
+/* What a volume holds, as a number on its spine; in words to a screen reader and on a phone. */
+.unit {
+  font-family: var(--font-text);
+  font-variant-caps: all-small-caps;
+  letter-spacing: 0.08em;
+  font-size: 1.0625rem;
+}
+
+@media (min-width: 40rem) {
+  .volumes .unit {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+}
+
+/* On a phone the volumes become a book's contents: numeral, title, dotted leader, what it holds. */
+@media (max-width: 39.99rem) {
+  .volumes .row {
+    display: grid;
+    row-gap: 0;
+  }
+
+  .volumes .row {
+    width: auto;
+    padding: 0;
+    border: 0;
+  }
+
+  .volumes .slot {
+    display: block;
+    padding: 0;
+  }
+
+  .volumes .spine {
+    writing-mode: horizontal-tb;
+    inline-size: auto;
+    align-items: baseline;
+    gap: 0.75rem;
+    min-height: 3rem;
+    padding: 0.6rem 0;
+    background: none;
+    color: var(--color-surface-ink);
+    box-shadow: none;
+    outline: 0;
+    font-size: 1.375rem;
+  }
+
+  .volumes .spine:hover,
+  .volumes .spine:focus-visible,
+  .volumes .spine:active {
+    transform: none;
+  }
+
+  .volumes .spine:focus-visible {
+    outline: 3px solid var(--color-surface-focus);
+  }
+
+  .volumes .head {
+    width: 1.5rem;
+    color: var(--color-highlight);
+    font-size: 1.125rem;
+  }
+
+  .volumes .spine::before {
+    content: none;
+  }
+
+  /* The gilt rule at the foot becomes the leader. */
+  .volumes .spine::after {
+    position: static;
+    order: 2;
+    flex: 1;
+    height: 0;
+    border: 0;
+    border-bottom: 2px dotted var(--color-surface-rule);
+    opacity: 1;
+  }
+
+  .volumes .foot {
+    order: 3;
+    font-size: 1.125rem;
+  }
+}
+
+@media print {
+  .books {
+    display: none;
+  }
+}

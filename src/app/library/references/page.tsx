@@ -4,6 +4,7 @@ import { AzIndex, type ChipGroup, type RailLetter } from '@/components/az'
 import { Breadcrumbs } from '@/components/Breadcrumbs'
 import { Folio } from '@/components/Folio'
 import { catalogue, counted, TYPE_NAMES } from '@/components/library/catalogue'
+import library from '@/components/library/library.module.css'
 import { type CitingConcept, ReferenceEntry } from '@/components/library/ReferenceEntry'
 import styles from '@/components/library/references.module.css'
 import { PageTurn } from '@/components/PageTurn'
@@ -71,7 +72,7 @@ export default async function ReferencesPage() {
 
   return (
     <PageTurn>
-      <main id="main" className={cx(reading.page, styles.page)}>
+      <main id="main" className={cx(reading.page, library.page)}>
         <Breadcrumbs path={PATH} />
         <Folio as="article" className={reading.article} aria-labelledby="references-title">
           <header className={reading.titlePage}>
@@ -80,7 +81,7 @@ export default async function ReferencesPage() {
               References
             </h1>
             <p className={reading.summary}>Every source the site cites, once, filed by author.</p>
-            <p className={styles.facts}>
+            <p className={library.facts}>
               {counted(all.length, 'Reference', 'References')}:{' '}
               {byCount
                 .map(({ type, count }) =>
@@ -115,7 +116,7 @@ export default async function ReferencesPage() {
             </AzIndex>
           </section>
 
-          <p className={styles.provenance}>
+          <p className={library.provenance}>
             Carried over from the current site’s pages, each source once however many pages cite it.{' '}
             {reviewed === all.length
               ? 'Each has been reviewed by the Research editor.'
