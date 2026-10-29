@@ -1,0 +1,280 @@
+/**
+ * The Concept map's layout (D20, design C5), worked out while the site builds so the browser runs
+ * no layout code. The Concepts sit on one circle, one sector per topic, clockwise from the top in
+ * the graph's order (so the tab order follows the topics). The topics are split between the
+ * circle's right and left halves, and each half spaces its Concepts from top to bottom: their
+ * names are set across, so spacing them down the page, a long name by its lines, keeps them apart.
+ * Coordinates are in a square of SIZE units, its centre at the middle.
+ */
+import type { ConceptGraph, ConceptGraphNode } from '@/content'
+
+import { KINDS, type ConnectionKind } from './kinds'
+
+export const SIZE = 1000
+const CENTRE = SIZE / 2
+/** The circle the Concepts sit on. */
+export const RADIUS = 300
+/** How far up and down each half reaches, in degrees from the level: the poles stay clear. */
+const REACH = 68
+/** The extra space between two topics on the same half, in steps between Concepts. */
+const TOPIC_GAP = 0.8
+/** How far a sector's arc runs past its first and last Concept, in degrees. */
+const SECTOR_PAD = 4
+/** The space between a Concept's mark and the plate's edge its name can't use. */
+const LABEL_OFFSET = 40
+/** The margin the plate keeps above and below the circle. */
+const VIEW_MARGIN = 24
+/** How far inside the circle a sector's number sits. */
+const NUMERAL_INSET = 44
+/** The names' size, in the plate's units: ConceptMap.module.css sets them at 2.2cqi. */
+const NAME_SIZE = 22
+/** A Concept's mark and the space after it, in ems of its name (ConceptMap.module.css). */
+const MARK_EMS = 1.07
+/** A generous average width of a letter of the names' face, in ems: a printer's copyfitting rule. */
+const LETTER_EMS = 0.48
+
+/**
+ * How far each kind's curve stays from the centre, as a share of the way from the centre to the
+ * middle of the straight line between its Concepts: two kinds joining one pair take apart curves.
+ */
+const BOW: Readonly<Record<ConnectionKind, number>> = { passage: 0.22, reference: 0.46, work: 0.1 }
+
+export interface MapTopic {
+  slug: string
+  name: string
+  order: number
+}
+
+export interface MapPoint extends ConceptGraphNode {
+  x: number
+  y: number
+  /** Clockwise from the top, in degrees. */
+  bearing: number
+  /** The half of the circle it sits on: its name is set outward from there. */
+  side: 'right' | 'left'
+  /** How wide its name may run outward before the plate's edge, as a share of the plate (0 to 1). */
+  room: number
+  /** The Concepts it shares a connection with, of any kind, in the graph's order. */
+  near: string[]
+}
+
+/** One curve on the plate: two Concepts joined by one kind of connection, with every fact behind it. */
+export interface MapConnection {
+  /** `passage:ahimsa:satya` */
+  id: string
+  source: string
+  target: string
+  kind: ConnectionKind
+  /** Each fact, as the content gives it: "Both quote Yoga Sūtra 2.30". */
+  reasons: string[]
+  /** Every topic either Concept is in. */
+  topics: string[]
+  /** Its curve, as an SVG path from the source to the target. */
+  path: string
+}
+
+export interface MapSector {
+  topic: string
+  name: string
+  order: number
+  /** Where its arc starts and ends, clockwise from the top, in degrees. */
+  from: number
+  to: number
+  /** Its arc on the circle, as two SVG paths running out from its middle, so it inks from the centre. */
+  arcs: [string, string]
+  /** Where its number sits, just inside the circle at the middle of its arc. */
+  numeral: { x: number; y: number }
+}
+
+export interface MapLayout {
+  size: number
+  /** The band of the square the plate shows: the circle and a margin, with the empty top and foot cut. */
+  view: { top: number; height: number }
+  points: MapPoint[]
+  sectors: MapSector[]
+  connections: MapConnection[]
+}
+
+const round = (value: number) => Math.round(value * 10) / 10
+
+/** The place on a circle at a bearing (degrees clockwise from the top). */
+export function at(bearing: number, radius = RADIUS) {
+  const angle = (bearing * Math.PI) / 180
+  return {
+    x: round(CENTRE + radius * Math.sin(angle)),
+    y: round(CENTRE - radius * Math.cos(angle)),
+  }
+}
+
+const bearingOf = (x: number, y: number) =>
+  ((Math.atan2(x - CENTRE, CENTRE - y) * 180) / Math.PI + 360) % 360
+
+/** The topics on the right half, the rest on the left: as near an even split as the topics allow. */
+function split(groups: readonly ConceptGraphNode[][]) {
+  const total = groups.reduce((sum, group) => sum + group.length, 0)
+  let best = groups.length
+  let gap = Infinity
+  let before = 0
+  groups.forEach((group, index) => {
+    const off = Math.abs(total - 2 * before)
+    if (index > 0 && off < gap) [best, gap] = [index, off]
+    before += group.length
+  })
+  if (groups.length === 1) best = 1
+  return [groups.slice(0, best), groups.slice(best)] as const
+}
+
+/** How many lines a name takes in its room, estimated as a printer copyfits: by its letters. */
+function linesOf({ name, room }: MapPoint) {
+  const measure = Math.max(room * SIZE - MARK_EMS * NAME_SIZE, NAME_SIZE)
+  return Math.max(1, Math.ceil((name.length * LETTER_EMS * NAME_SIZE) / measure))
+}
+
+/**
+ * One half's Concepts, spaced down it (right) or up it (left). Names in one line each are spaced
+ * evenly; a name set in more lines takes room in proportion, so it never stacks on its neighbours.
+ * Where a Concept sits sets its room, and its room its lines: a few passes settle both, a name's
+ * lines only ever growing.
+ */
+function placeHalf(groups: readonly ConceptGraphNode[][], side: 'right' | 'left'): MapPoint[] {
+  let lines = groups.flat().map(() => 1)
+  let points = spaceHalf(groups, side, lines)
+  for (let pass = 0; pass < 4; pass++) {
+    const next = points.map((point, index) => Math.max(linesOf(point), lines[index] ?? 1))
+    if (next.every((count, index) => count === lines[index])) break
+    lines = next
+    points = spaceHalf(groups, side, lines)
+  }
+  return points
+}
+
+function spaceHalf(
+  groups: readonly ConceptGraphNode[][],
+  side: 'right' | 'left',
+  lines: readonly number[],
+): MapPoint[] {
+  // The steps before each Concept after the first: its name's lines and its neighbour's, halved,
+  // and a topic's gap where a topic starts.
+  const gaps = groups.flatMap((group, topic) =>
+    group.map((_, index) => (topic > 0 && index === 0 ? TOPIC_GAP : 0)),
+  )
+  const before = gaps.map((gap, index) =>
+    index === 0 ? 0 : gap + ((lines[index - 1] ?? 1) + (lines[index] ?? 1)) / 2,
+  )
+  const steps = before.reduce((sum, gap) => sum + gap, 0)
+  const span = 2 * RADIUS * Math.sin((REACH * Math.PI) / 180)
+  const step = steps === 0 ? 0 : span / steps
+  let offset = steps === 0 ? span / 2 : 0
+  return groups.flat().map((node, index) => {
+    offset += step * (before[index] ?? 0)
+    // Right: top to bottom. Left: bottom to top, so the whole goes round clockwise.
+    const dy = side === 'right' ? offset - span / 2 : span / 2 - offset
+    const dx = Math.sqrt(RADIUS * RADIUS - dy * dy) * (side === 'right' ? 1 : -1)
+    const x = round(CENTRE + dx)
+    const y = round(CENTRE + dy)
+    const room = Math.round(((side === 'right' ? SIZE - x : x) - LABEL_OFFSET) / 10) / 100
+    return { ...node, x, y, bearing: round(bearingOf(x, y)), side, room, near: [] }
+  })
+}
+
+/** An arc of the circle from one bearing to another, either way round. */
+function arcPath(from: number, to: number) {
+  const start = at(from)
+  const end = at(to)
+  const large = Math.abs(to - from) > 180 ? 1 : 0
+  return `M${start.x} ${start.y}A${RADIUS} ${RADIUS} 0 ${large} ${to > from ? 1 : 0} ${end.x} ${end.y}`
+}
+
+/** The plate: where each Concept sits and each topic's sector. */
+export function layoutMap(graph: ConceptGraph, topics: readonly MapTopic[]): MapLayout {
+  const used = topics.filter((topic) => graph.nodes.some((node) => node.topic === topic.slug))
+  const groups = used.map((topic) => graph.nodes.filter((node) => node.topic === topic.slug))
+  const [right, left] = split(groups)
+  const points = [...placeHalf(right, 'right'), ...placeHalf(left, 'left')]
+
+  const sectors = used.map((topic) => {
+    const own = points.filter((point) => point.topic === topic.slug)
+    const from = round(Math.min(...own.map(({ bearing }) => bearing)) - SECTOR_PAD)
+    const to = round(Math.max(...own.map(({ bearing }) => bearing)) + SECTOR_PAD)
+    return {
+      topic: topic.slug,
+      name: topic.name,
+      order: topic.order,
+      from,
+      to,
+      arcs: [arcPath((from + to) / 2, from), arcPath((from + to) / 2, to)] as [string, string],
+      numeral: at((from + to) / 2, RADIUS - NUMERAL_INSET),
+    }
+  })
+
+  const top = CENTRE - RADIUS - VIEW_MARGIN
+  return {
+    size: SIZE,
+    view: { top, height: SIZE - 2 * top },
+    points,
+    sectors,
+    connections: connect(graph, points),
+  }
+}
+
+/** The graph's facts as curves: one for each pair and kind, strongest kind first, then in the graph's order. */
+function connect(graph: ConceptGraph, points: MapPoint[]): MapConnection[] {
+  const place = new Map(points.map((point) => [point.slug, point]))
+  const byId = new Map<string, MapConnection>()
+  for (const { source, target, kind, reason } of graph.edges) {
+    const from = place.get(source)
+    const to = place.get(target)
+    if (!from || !to) continue
+    const id = `${kind}:${source}:${target}`
+    const known = byId.get(id)
+    if (known) {
+      if (!known.reasons.includes(reason)) known.reasons.push(reason)
+      continue
+    }
+    const topics = [...new Set([...from.topics, ...to.topics])]
+    byId.set(id, {
+      id,
+      source,
+      target,
+      kind,
+      reasons: [reason],
+      topics,
+      path: curve(from, to, kind),
+    })
+    if (!from.near.includes(target)) from.near.push(target)
+    if (!to.near.includes(source)) to.near.push(source)
+  }
+  const order = new Map(points.map(({ slug }, index) => [slug, index]))
+  for (const point of points) point.near.sort((a, b) => (order.get(a) ?? 0) - (order.get(b) ?? 0))
+  const all = [...byId.values()]
+  return KINDS.flatMap((kind) => all.filter((connection) => connection.kind === kind))
+}
+
+/** A curve between two places, bowed in towards the centre by its kind's share. */
+function curve(from: MapPoint, to: MapPoint, kind: ConnectionKind) {
+  const bow = BOW[kind]
+  const cx = round(CENTRE + ((from.x + to.x) / 2 - CENTRE) * bow)
+  const cy = round(CENTRE + ((from.y + to.y) / 2 - CENTRE) * bow)
+  return `M${from.x} ${from.y}Q${cx} ${cy} ${to.x} ${to.y}`
+}
+
+/**
+ * The plate's lighting, as CSS made while the site builds (no JavaScript): pointing at or focusing
+ * a Concept lights its neighbours and its curves (and their rows in the list); pointing at or
+ * focusing a row of the list lights its curve and its two Concepts. Lit elements take `--lit: 1`.
+ * A point carries `data-p` and `data-near`; a curve and a row carry `data-c` and `data-ends`.
+ * The filters rewrite `data-near` to the neighbours still shown.
+ */
+export function litRules({ points, connections }: MapLayout, anchor = '[data-map]'): string {
+  const lit = '{--lit:1}'
+  return [
+    ...points.map(
+      ({ slug }) =>
+        `${anchor}:has([data-p="${slug}"]:is(:hover,:focus-visible)) :is([data-near~="${slug}"],[data-ends~="${slug}"])${lit}`,
+    ),
+    ...connections.map(
+      ({ source, target }, index) =>
+        `${anchor}:has(li[data-c="c${index}"]:is(:hover,:focus-within)) :is(path[data-c="c${index}"],[data-p="${source}"],[data-p="${target}"])${lit}`,
+    ),
+  ].join('\n')
+}
