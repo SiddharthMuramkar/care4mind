@@ -80,6 +80,16 @@ test.describe('the shelf', () => {
     expect(turn?.flights.map(({ name }) => name)).toContain('work-title-yoga-sutra')
   })
 
+  test('a press anywhere on a card opens its work, not only on the title', async ({ page }) => {
+    await gotoReady(page, TEXTS)
+    const count = card(page, 'Yoga Sūtra').getByText('15 verses quoted')
+    await count.scrollIntoViewIfNeeded()
+    const box = await count.boundingBox()
+    if (!box) throw new Error('The card shows its count.')
+    await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2)
+    await expect(page).toHaveURL(new RegExp(`${yogaSutra.href}$`))
+  })
+
   test('its breadcrumbs read Home › Texts, and a work’s Home › Texts › the work', async ({
     page,
   }) => {
@@ -196,6 +206,14 @@ test.describe('a work’s page', () => {
         return `${style.backgroundColor} ${style.boxShadow}`
       })
     expect(await look(verse)).not.toBe(await look(passage(page, 'Sutra 1.31')))
+
+    // Each locator is the verse's own address, to cite: following it marks that verse instead.
+    const next = passage(page, 'Sutra 1.31')
+    await next.getByRole('link', { name: 'Sutra 1.31', exact: true }).click()
+    await expect(page).toHaveURL(new RegExp(`${yogaSutra.href}#1-31$`))
+    await expect.poll(() => next.evaluate((element) => element.matches(':target'))).toBe(true)
+    expect(await look(next)).not.toBe(await look(passage(page, 'Sutra 1.33')))
+    expect(await look(verse)).toBe(await look(passage(page, 'Sutra 1.33')))
   })
 
   test('on a wide screen its verse rail lists every locator and stays in view as the text scrolls', async ({

@@ -57,7 +57,7 @@ export function TextCard({ work, className }: { work: WorkView; className?: stri
           <span className={styles.at}>{incipit.at}</span>{' '}
           <span lang={incipit.lang} className={styles.line}>
             {incipit.line}
-            {incipit.more ? ' …' : null}
+            {incipit.more ? '\u00a0…' : null}
           </span>
         </p>
       ) : null}

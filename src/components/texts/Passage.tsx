@@ -64,7 +64,10 @@ export function Passage({ passage, unit }: { passage: PassageView; unit: string 
     >
       <header className={styles.head}>
         <h2 id={`verse-${anchor}`} className={styles.locator}>
-          {unit} {passage.locator}
+          {/* The verse's own address, to cite or share: following it marks the verse. */}
+          <a href={`#${anchor}`} className={styles.self}>
+            {unit} {passage.locator}
+          </a>
         </h2>
         <span lang="sa-Deva" className={styles.numeral} aria-hidden>
           {deva}

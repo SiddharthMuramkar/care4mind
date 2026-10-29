@@ -6,6 +6,8 @@
 .card {
   --leaf: color-mix(in srgb, var(--color-surface) 62%, var(--color-ink));
   position: relative;
+  /* The press's ink spreads within the card, under its words. */
+  isolation: isolate;
   display: grid;
   grid-template-rows: auto auto 1fr auto;
   align-content: start;
@@ -22,12 +24,20 @@
 }
 
 .title {
-  margin: 0;
+  margin: -1.6rem -1.5rem 0;
   font-weight: 500;
   line-height: 1.1;
 }
 
+/*
+ * The link's box starts at the card's corner, so the ink of a press (data-ink) spreads across the
+ * whole card from the very point pressed.
+ */
 .link {
+  position: static;
+  isolation: auto;
+  display: block;
+  padding: 1.6rem 1.5rem 0;
   color: inherit;
   text-decoration: none;
 }
@@ -102,11 +112,9 @@
 
 .count {
   margin: 0;
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 0.5rem 1rem;
+  display: grid;
+  justify-items: start;
+  gap: 0.45rem;
   padding-top: 0.6rem;
   border-top: 3px double color-mix(in srgb, var(--color-surface-rule) 70%, transparent);
   font-variant-caps: all-small-caps;
