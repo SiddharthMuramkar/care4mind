@@ -1,6 +1,6 @@
 # Care4Mind.org rebuild: working brief
 
-> This brief is the source of truth for planning and building the project. Where it differs from the client's original ([client-brief.md](client-brief.md)), this one wins. The biggest difference is the decision to rebuild ([ADR-0001](adr/0001-rebuild-instead-of-enhancing.md)). Facts about the current site, with sources, are in [current-site.md](current-site.md). Concept, Reference, Questionnaire, Content editor, Research editor and Psychology expert are defined in [GLOSSARY.md](../GLOSSARY.md).
+> This brief is the source of truth for planning and building the project. Where it differs from the client's original ([the client's brief](https://github.com/SiddharthMuramkar/care4mind/blob/505105015beb09f12a7532c9ed33377e131061cf/docs/client-brief.md)), this one wins. The biggest difference is the decision to rebuild ([ADR-0001](adr/0001-rebuild-instead-of-enhancing.md)). Facts about the current site, with sources, are in [the current site](https://github.com/SiddharthMuramkar/care4mind/blob/505105015beb09f12a7532c9ed33377e131061cf/docs/current-site.md). Concept, Reference, Questionnaire, Content editor, Research editor and Psychology expert are defined in [GLOSSARY.md](../GLOSSARY.md).
 
 ## Goal
 
@@ -52,7 +52,7 @@ Targets marked † are standard defaults, chosen where the client brief set no m
 | FR-04 | Search | Site search finds content by title, Concept name in any spelling (NFR-03), author, traditional text and keyword. |
 | FR-05 | Questionnaires | Every in-scope Questionnaire shows its purpose and limitations before it starts, refuses incomplete answers, and ends on a results page giving the result its documented scoring rules produce. Automated tests cover every possible result and, where results come from score ranges, the lowest and highest score in each range. |
 | FR-06 | Screen sizes | Navigation, content, search and Questionnaires work at every width from 360 to 1440 px.† |
-| FR-07 | URLs | After launch, every URL the current site served returns 200, or a 301 to a URL that returns 200. None returns 404.† The URLs to test include at least the 43 in its sitemap (see current-site.md), its 71 media files and its feed. |
+| FR-07 | URLs | After launch, every URL the current site served returns 200, or a 301 to a URL that returns 200. None returns 404.† The URLs to test include at least the 43 in its sitemap (see [the current site](https://github.com/SiddharthMuramkar/care4mind/blob/505105015beb09f12a7532c9ed33377e131061cf/docs/current-site.md)), its 71 media files and its feed. |
 | FR-08 | Security and recovery | Editing requires a login. Backups run automatically, and a restore has been tested and written up. |
 | FR-09 | Handover | Code, configuration, content model and deployment steps are documented in the repo, plus a short guide for Content editors. The repo and every account the site runs on are handed over to the client. |
 | NFR-01 | Accessibility | WCAG 2.2 AA.† |
@@ -77,7 +77,7 @@ Taken from the client brief. The relationships and final fields are a planning d
 
 ## Priorities
 
-The client marked two things as critical: knowing what exists (now [current-site.md](current-site.md)) and the knowledge architecture (content model and navigation). Questionnaires are a parallel track, so they never hold up the rest of the site.
+The client marked two things as critical: knowing what exists (now [the current site](https://github.com/SiddharthMuramkar/care4mind/blob/505105015beb09f12a7532c9ed33377e131061cf/docs/current-site.md)) and the knowledge architecture (content model and navigation). Questionnaires are a parallel track, so they never hold up the rest of the site.
 
 ## Out of scope
 
@@ -102,9 +102,9 @@ This brief decides none of these. "(Client)" means the Project owner answers it.
    - Framework: decided in [ADR-0003](adr/0003-nextjs-for-the-front-end.md) (Next.js).
    - Content back end and search: decided in the map's [Architecture review](https://github.com/SiddharthMuramkar/care4mind/issues/19).
 2. **Who runs the site after launch? (Client)** Who edits content, who keeps the site patched, and who pays for the hosting. The answer shapes what Content editors need to meet FR-02.
-3. **Which Questionnaires are in scope?** Only two have questions on the site today: KarmaYoga Scale (45 questions) and Dosha Survey (12). Sixteen more pages describe a questionnaire and its High/Moderate/Low results but contain no questions: Triguna, the eight "Profiling" pages and seven others (listed in current-site.md). The homepage also links to a separate questionnaire app, which refused connections on 2026-10-26; whether these questionnaires lived there is unknown.
+3. **Which Questionnaires are in scope?** Only two have questions on the site today: KarmaYoga Scale (45 questions) and Dosha Survey (12). Sixteen more pages describe a questionnaire and its High/Moderate/Low results but contain no questions: Triguna, the eight "Profiling" pages and seven others (listed in [the current site](https://github.com/SiddharthMuramkar/care4mind/blob/505105015beb09f12a7532c9ed33377e131061cf/docs/current-site.md)). The homepage also links to a separate questionnaire app, which refused connections on 2026-10-26; whether these questionnaires lived there is unknown.
 4. **Where do each Questionnaire's questions and scoring rules come from?** For now: scrape what's public, then revisit. The public pages show only part of the scoring: the KarmaYoga Scale page flags one answer per question as correct and shows a percentage result, the sixteen pages above give no cut-offs, and nothing public shows how the Dosha Survey scores. Other possible sources are the client, whoever built the questionnaire app, and web archives. Without an in-scope Questionnaire's questions and scoring rules, it can't be rebuilt faithfully.
-5. **Which pages to keep, merge or drop, and which topics matter most?** This includes the duplicate and empty pages listed in current-site.md.
+5. **Which pages to keep, merge or drop, and which topics matter most?** This includes the duplicate and empty pages listed in [the current site](https://github.com/SiddharthMuramkar/care4mind/blob/505105015beb09f12a7532c9ed33377e131061cf/docs/current-site.md).
 6. **Does the Dosha Survey give a result?** Finding out from the public site means submitting the live form, which sends an entry to the current site. If it only collects answers, it isn't a Questionnaire as the glossary defines it, and what becomes of it is part of question 5.
 7. **Analytics:** which tool, and what it may record.
 8. **Privacy and consent for Questionnaires. (Client and advisers)** What is stored about the person answering, if anything, and for how long. Do past responses on the current site need keeping? Only the client can export them.

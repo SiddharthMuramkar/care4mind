@@ -145,7 +145,7 @@ let questionnaireRecords: readonly QuestionnaireRecord[] = []
 
 /**
  * Reading every record and building the graph takes a few seconds, and more on a machine busy
- * with parallel lanes; done once here, with room to spare, every test after it is quick.
+ * with parallel builders; done once here, with room to spare, every test after it is quick.
  */
 const LOADING_TIMEOUT = 60_000
 

@@ -3,7 +3,7 @@
 #
 #   scripts/lane/heavy.sh <command…>      e.g. E2E_PORT=3110 scripts/lane/heavy.sh pnpm check:e2e
 #
-# Every lane (a ticket built in its own worktree) shares one lock file, so heavy
+# Every builder (a ticket built in its own worktree) shares one lock file, so heavy
 # runs queue instead of overloading the machine. While another run holds the
 # lock this says so and waits; then it runs the command and exits with the
 # command's status. The lock is this script's alone: the command's processes

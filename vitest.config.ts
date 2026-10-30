@@ -11,7 +11,7 @@ export default defineConfig({
     // A record file changes the registry, and vitest on its own never writes it.
     globalSetup: ['./vitest.global-setup.ts'],
     environment: 'node',
-    // The whole-content tests pass Vitest's 5 s default while three lanes build at once.
+    // The whole-content tests pass Vitest's 5 s default while three builders build at once.
     testTimeout: 30_000,
   },
 })

@@ -5,7 +5,7 @@ import { defineConfig, devices, type Project } from '@playwright/test'
 
 import { e2eScope } from './tests/e2e/fixtures'
 
-// Lanes (tickets built in their own worktrees) test side by side on one machine, so each run's
+// Builders (tickets built in their own worktrees) test side by side on one machine, so each run's
 // port and size come from the environment (README.md, "Checks"). A knob set to something it
 // can't use stops the run before it starts.
 
@@ -149,7 +149,7 @@ export default defineConfig({
       // By port, so anything already listening there counts, not only a server that answers.
       port: PORT,
       // Each run starts its own server. If the port is taken the run stops at once, naming it
-      // ("http://localhost:3110 is already used"), rather than test another lane's server.
+      // ("http://localhost:3110 is already used"), rather than test another builder's server.
       reuseExistingServer: reuse(),
       timeout: 120_000,
     },
