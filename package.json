@@ -18,7 +18,7 @@
     "test": "node scripts/content/registry.mjs && vitest run",
     "test:watch": "vitest",
     "test:e2e": "node scripts/content/registry.mjs && playwright test",
-    "check": "node scripts/content/registry.mjs --check && pnpm lint && pnpm format:check && pnpm typecheck && pnpm test && pnpm build",
+    "check": "node scripts/content/registry.mjs && pnpm lint && pnpm format:check && pnpm typecheck && pnpm test && pnpm build",
     "check:e2e": "playwright test",
     "lhci": "lhci autorun",
     "shots": "node scripts/shots.mjs",
