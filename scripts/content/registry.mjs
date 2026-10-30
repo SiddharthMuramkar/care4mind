@@ -3,8 +3,8 @@
 // file under src/content/data (one record per file, as its default export), in sorted path order.
 //
 // The registry is generated, never committed, so it can't go stale in a branch or conflict in a
-// merge. Git, Prettier and ESLint ignore it. The dev, build, typecheck, test and test:e2e scripts
-// run this first.
+// merge. Git, Prettier and ESLint ignore it. The dev, build, check, typecheck, test and test:e2e
+// scripts run this first, and so does Vitest's global setup.
 //
 //   node scripts/content/registry.mjs            write the registry (only if it changed)
 //   node scripts/content/registry.mjs --check    exit 1 if the registry is missing or stale

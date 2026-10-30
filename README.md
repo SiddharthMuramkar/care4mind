@@ -11,7 +11,6 @@ Node 22.12 or newer (CI and Vercel use 24) and the pnpm version pinned in `packa
 
 ```bash
 pnpm install
-node scripts/content/registry.mjs   # once, in a fresh checkout
 pnpm dev                            # http://localhost:3000
 pnpm check                          # lint, types, unit tests and the production build
 ```

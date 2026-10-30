@@ -18,7 +18,6 @@ The code is the documentation.
 - Comments say why, in one line, and only what the code can't: a browser bug, a standard, a measured trade-off. Ticket numbers, decision codes and dates belong in git and in issues.
 - Press is the only design language: ink, rules and paper. The first Press build, tag `archive/press-original`, is the design reference.
 - `src/content/data/` holds text carried over from the old site. Edit it only to fix a listed error, and record the edit in that record's provenance. Sanskrit is NFC and uses ṃ, not ṁ. IAST takes `lang="sa-Latn"` and Devanagari `lang="sa-Deva"`.
-- In a fresh checkout, run `node scripts/content/registry.mjs` once: the content registry is generated, and `pnpm check` only verifies it.
 
 ## Research
 

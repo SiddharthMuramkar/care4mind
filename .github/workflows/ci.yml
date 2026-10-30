@@ -27,8 +27,6 @@ jobs:
           node-version-file: .nvmrc
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      # The content registry is generated, never committed, so a fresh checkout writes it first.
-      - run: node scripts/content/registry.mjs
       - id: check
         run: pnpm check
       - run: pnpm exec playwright install --with-deps chromium firefox webkit
