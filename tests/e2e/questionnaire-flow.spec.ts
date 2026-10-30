@@ -133,8 +133,10 @@ test.describe('the KarmaYoga flow', () => {
     for (let part = 1; part < 4; part++) {
       await answerPart(page)
       await next(page).click()
+      // The page turn keeps the old part in the DOM for a moment; wait for the new one before
+      // counting its statements, or the count can be the old part's.
+      await expect(partHeading(page, part + 1)).toBeVisible()
     }
-    await expect(partHeading(page, 4)).toBeVisible()
     await expect(page.getByText(/^Next is the collection of statements/)).toBeVisible()
     const options = await statements(page).evaluateAll((groups) =>
       groups.map((group) => [...group.querySelectorAll('input')].map((input) => input.value)),
