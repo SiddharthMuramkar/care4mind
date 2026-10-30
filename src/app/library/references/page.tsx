@@ -19,8 +19,7 @@ export function generateMetadata(): Promise<Metadata> {
 
 /**
  * Every Reference the site cites, once, in one style (FR-03, D09), each anchored where citations
- * lead (`#ref-<id>`) and with the pages that cite it. Front-end-site ticket 08 adds its filters
- * and author rail here.
+ * lead (`#ref-<id>`) and with the pages that cite it.
  */
 export default async function ReferencesPage() {
   const all = await references.list()

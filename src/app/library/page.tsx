@@ -18,7 +18,6 @@ export function generateMetadata(): Promise<Metadata> {
 
 /**
  * The Library (D13): every Reference the site cites, its reading lists and its pages.
- * Front-end-site ticket 08 builds its shelf here.
  */
 export default async function LibraryPage() {
   const [pages, all] = await Promise.all([library.list(), references.list()])

@@ -92,7 +92,7 @@ function Passage({ passage, unit }: { passage: PassageView; unit: string }) {
 
 /**
  * A traditional text (D08): every verse the site quotes from it, in the work's own order, each
- * at its own address. Front-end-site ticket 07 sets it as a manuscript here.
+ * at its own address.
  */
 export default async function WorkPage({ params }: PageProps<'/texts/[slug]'>) {
   const work = await works.get((await params).slug)

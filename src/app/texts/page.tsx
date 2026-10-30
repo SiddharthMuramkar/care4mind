@@ -18,7 +18,6 @@ export function generateMetadata(): Promise<Metadata> {
 
 /**
  * The traditional texts the site quotes (D08), each with how many of its verses it quotes.
- * Front-end-site ticket 07 builds the shelf of works here.
  */
 export default async function TextsPage() {
   const all = await works.list()
