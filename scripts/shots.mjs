@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Front-end-site ticket 17: screenshots of the built site, one page of each kind, so every lane,
+// Screenshots of the built site, one page of each kind, so every builder,
 // review and finish looks at the site the same way. It prints each file it wrote, and nothing
 // else, so an agent can open exactly those.
 //

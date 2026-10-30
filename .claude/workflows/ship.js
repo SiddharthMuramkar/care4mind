@@ -59,7 +59,7 @@ const frontier = (skip) =>
 const build = (ticket, slot) =>
   agent(
     `You are a builder in ${REPO}. Ship ticket #${ticket.number} ("${ticket.title}") of spec #${spec}: one PR into main, merged.
-You are in a worktree of your own. Your browser-test port is ${3110 + 10 * slot} (E2E_PORT); no other builder uses it.
+You are in a worktree of your own. Your browser-test port is ${3110 + 10 * slot} (E2E_PORT); no other builder uses it. Run browser tests and Lighthouse through \`scripts/lane/heavy.sh\`, which queues them one at a time on this machine.
 
 1. git fetch origin. If an open PR already says it closes #${ticket.number}, check it out (gh pr checkout) and carry on where it stopped. Otherwise branch from origin/main as ticket-${ticket.number}-<two or three words>.
 2. Read the ticket (gh issue view ${ticket.number} --comments) and the spec (gh issue view ${spec}). Follow CLAUDE.md.

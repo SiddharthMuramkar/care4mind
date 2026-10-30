@@ -1,4 +1,4 @@
-# Checks every pull request and every push to main with the commands every lane finishes with:
+# Checks every pull request and every push to main with the commands every builder finishes with:
 # pnpm check, then the browser tests and Lighthouse on the build it made. See README.md, "Checks".
 name: CI
 
@@ -35,7 +35,7 @@ jobs:
       - run: pnpm check:e2e
         env:
           E2E_SCOPE: full
-          # Half the runner's cores, Playwright's own default: the lanes' 4 suit an 8-core machine.
+          # Half the runner's cores, Playwright's own default: the builders' 4 suit an 8-core machine.
           E2E_WORKERS: 50%
       # Lighthouse measures the same build, whether or not a browser test failed.
       - if: ${{ !cancelled() && steps.check.outcome == 'success' }}

@@ -10,7 +10,7 @@ const { spawnSync } = process.getBuiltinModule('node:child_process')
 // over HTTP/2 with TLS and puts next start on the port after. LHCI_HTTP=1.1 serves it from
 // next start alone, plain HTTP/1.1 on PORT, to compare.
 const H2 = protocol() === '2'
-// Lanes (tickets built in their own worktrees) audit side by side on one machine, each its own
+// Builders (tickets built in their own worktrees) audit side by side on one machine, each its own
 // server on its own port (README.md, "Checks").
 const PORT = port()
 // Lighthouse won't audit a page that answers 404, so the 404 page is covered by Playwright instead.
