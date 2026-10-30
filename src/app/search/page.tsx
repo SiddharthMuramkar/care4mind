@@ -48,9 +48,8 @@ function holds(document: SearchDocument, query: string): boolean {
 }
 
 /**
- * Search, rendered on the server for each query, so it works without JavaScript. This first,
- * plain search finds a query inside any stored spelling; front-end-site ticket 09 brings the
- * engine that forgives typos and sounds, and the palette.
+ * Search, rendered on the server for each query, so it works without JavaScript. It finds a
+ * query inside any stored spelling.
  */
 export default async function SearchPage({ searchParams }: PageProps<'/search'>) {
   const { q } = await searchParams

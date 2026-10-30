@@ -61,8 +61,7 @@ function Item({ item }: { item: ResourceItemView }) {
 
 /**
  * A Library page (D13): a reading list, its groups anchored where links lead
- * (`/library/textbooks/#positive-psychology`), or a page of text such as Methods. Front-end-site
- * ticket 08 builds the shelf of spines and the course cards here.
+ * (`/library/textbooks/#positive-psychology`), or a page of text such as Methods.
  */
 export default async function LibraryItemPage({ params }: PageProps<'/library/[slug]'>) {
   const page = await library.get((await params).slug)
