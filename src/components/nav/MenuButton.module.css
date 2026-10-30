@@ -1,0 +1,42 @@
+/* The narrow screen's Menu, gone from 72rem (WIDE in current.ts), where the sections fit. */
+.menu {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0 0.65rem 0 0.5rem;
+  border: 1px solid color-mix(in srgb, var(--color-ink-muted) 45%, transparent);
+  border-radius: 2px;
+  color: var(--color-ink);
+  font-variant-caps: all-small-caps;
+  letter-spacing: 0.1em;
+  font-size: 1.125rem;
+  line-height: 1;
+  text-decoration: none;
+}
+
+.menu:hover,
+.menu[aria-expanded='true'] {
+  border-color: var(--color-ink-muted);
+}
+
+.glyph {
+  width: 19px;
+  height: 19px;
+  flex: none;
+}
+
+@media (max-width: 24rem) {
+  .menu {
+    gap: 0.3rem;
+    padding: 0 0.55rem 0 0.45rem;
+    font-size: 1.0625rem;
+  }
+}
+
+@media (min-width: 72rem) {
+  .menu {
+    display: none;
+  }
+}

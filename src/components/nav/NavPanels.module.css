@@ -1,0 +1,337 @@
+/*
+ * The header's panels: leaves of paper hung from the strip, ruled like the folio. They open and
+ * close by opacity and transform alone, and at once under reduced motion.
+ */
+.positioner {
+  z-index: var(--layer-popup);
+}
+
+.popup {
+  --color-focus: var(--color-surface-focus);
+  --color-link: var(--color-surface-link);
+  position: relative;
+  max-width: calc(100vw - 2rem);
+  background: var(--color-panel);
+  color: var(--color-panel-ink);
+  box-shadow:
+    inset 0 0 0 1px color-mix(in srgb, var(--color-panel-line) 70%, transparent),
+    inset 0 0 0 5px var(--color-panel),
+    inset 0 0 0 6px color-mix(in srgb, var(--color-panel-line) 45%, transparent),
+    0 28px 48px -20px color-mix(in srgb, var(--color-ground) 80%, transparent);
+  transform-origin: var(--transform-origin);
+  outline: 0;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .popup {
+    transition:
+      opacity var(--duration-panel) var(--ease-out),
+      transform var(--duration-panel) var(--ease-out);
+  }
+
+  .popup[data-starting-style],
+  .popup[data-ending-style] {
+    opacity: 0;
+    transform: translateY(-0.5rem) scale(0.985);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .popup[data-starting-style],
+  .popup[data-ending-style] {
+    opacity: 0;
+  }
+}
+
+/* A small diamond, the folio's corner, pointing up at the item that opened the panel. */
+.arrow {
+  width: 14px;
+  height: 14px;
+}
+
+.arrow[data-side='bottom'] {
+  top: -7px;
+}
+
+.arrow::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--color-panel);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-panel-line) 70%, transparent);
+  transform: rotate(45deg);
+  clip-path: polygon(0 0, 100% 0, 0 100%);
+}
+
+.arrow::after {
+  content: '';
+  position: absolute;
+  inset: 4px;
+  background: var(--color-highlight);
+  transform: rotate(45deg);
+}
+
+.viewport {
+  position: relative;
+  overflow: hidden;
+}
+
+.content {
+  padding: 1.5rem 1.75rem 1.25rem;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  /* Moving from one panel to the other, the new one slides in from the side it was opened from. */
+  .content {
+    transition:
+      opacity var(--duration-panel) var(--ease-out),
+      transform var(--duration-panel) var(--ease-out);
+  }
+
+  .content[data-starting-style],
+  .content[data-ending-style] {
+    opacity: 0;
+  }
+
+  .content[data-starting-style][data-activation-direction='right'],
+  .content[data-ending-style][data-activation-direction='left'] {
+    transform: translateX(2.5rem);
+  }
+
+  .content[data-starting-style][data-activation-direction='left'],
+  .content[data-ending-style][data-activation-direction='right'] {
+    transform: translateX(-2.5rem);
+  }
+}
+
+/* A panel's running head: small capitals over a printer's double rule, a thick line over a thin. */
+.head {
+  margin-bottom: 0.5rem;
+}
+
+.kicker {
+  margin: 0 0 0.5rem;
+  color: var(--color-panel-muted);
+  font-variant-caps: all-small-caps;
+  letter-spacing: 0.14em;
+  font-size: 1rem;
+}
+
+.headRule {
+  display: block;
+  height: 4px;
+  border-block: 2px solid var(--color-panel-ink);
+  border-block-end-width: 1px;
+  transform-origin: center;
+}
+
+.concepts {
+  width: min(34rem, calc(100vw - 5.5rem));
+}
+
+.library {
+  width: min(27rem, calc(100vw - 5.5rem));
+}
+
+.contents {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+/*
+ * One entry, set like a line of a book's contents: its numeral, its name, a dotted leader and,
+ * where the page number would be, what it holds. Pointing at it or focusing it lights the row,
+ * and its leader inks over in the topic's hue (vermilion in the Library).
+ */
+.entry {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto minmax(1.5rem, 1fr) auto;
+  align-items: baseline;
+  column-gap: 0.6rem;
+  min-height: 48px;
+  padding: 0.7rem 0.5rem 0.55rem 0.6rem;
+  color: var(--color-panel-ink);
+  text-decoration: none;
+  --leader-ink: var(--topic, var(--color-highlight));
+}
+
+.concepts .entry {
+  grid-template-columns: 1.75rem auto minmax(1.5rem, 1fr) auto;
+}
+
+/* A wash behind the row, faded in by opacity. */
+.entry::before {
+  content: '';
+  position: absolute;
+  inset: 3px 0;
+  background: color-mix(in srgb, var(--leader-ink) 11%, transparent);
+  opacity: 0;
+  transition: opacity var(--duration-quick) var(--ease-out);
+}
+
+.entry > * {
+  position: relative;
+}
+
+.numeral {
+  color: var(--color-surface-link);
+  font-size: 1.375rem;
+  line-height: 1;
+  text-align: center;
+}
+
+.name {
+  font-size: 1.0625rem;
+  line-height: 1.3;
+}
+
+.term {
+  margin-inline-start: 0.4em;
+  color: var(--color-panel-muted);
+  font-style: italic;
+}
+
+.term::before {
+  content: '·' / '';
+  margin-inline-end: 0.4em;
+  font-style: normal;
+}
+
+.leader {
+  align-self: end;
+  margin-bottom: 0.4rem;
+  border-bottom: 2px dotted var(--color-panel-line);
+}
+
+/* The leader again in ink, over the first, uncovered from the left by clip-path. */
+.leader::after {
+  content: '';
+  position: absolute;
+  inset: 0 0 -2px;
+  border-bottom: 2px dotted var(--leader-ink);
+  clip-path: inset(0 100% 0 0);
+  transition: clip-path var(--duration-move) var(--ease-out);
+}
+
+.count {
+  color: var(--color-panel-muted);
+  font-variant-caps: all-small-caps;
+  letter-spacing: 0.08em;
+  font-variant-numeric: oldstyle-nums proportional-nums;
+  white-space: nowrap;
+}
+
+.entry:is(:hover, :focus-visible)::before {
+  opacity: 1;
+}
+
+.entry:is(:hover, :focus-visible) .leader::after {
+  clip-path: inset(0);
+}
+
+.entry:is(:hover, :focus-visible) .count {
+  color: var(--color-panel-ink);
+}
+
+.entry[aria-current] .name {
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.2em;
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(0.35rem);
+  }
+}
+
+@keyframes ink-in {
+  from {
+    transform: scaleX(0.05);
+  }
+}
+
+@keyframes uncover {
+  from {
+    clip-path: inset(0 100% 0 0);
+  }
+}
+
+/*
+ * As a panel opens its double rule inks out from the centre, the entries rise in turn and their
+ * leaders ink in from the left behind them. Only where motion is welcome.
+ */
+@media (prefers-reduced-motion: no-preference) {
+  .headRule {
+    animation: ink-in var(--duration-sheet) var(--ease-out) backwards;
+  }
+
+  .contents > li {
+    animation: rise var(--duration-panel) var(--ease-out) backwards;
+    animation-delay: calc(60ms + var(--index, 0) * 45ms);
+  }
+
+  .leader {
+    animation: uncover var(--duration-sheet) var(--ease-out) backwards;
+    animation-delay: calc(140ms + var(--index, 0) * 60ms);
+  }
+}
+
+/* Onward: the A–Z, the map, the Library's home. */
+.more {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem 1.75rem;
+  margin-top: 0.75rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid color-mix(in srgb, var(--color-panel-line) 60%, transparent);
+}
+
+.onward {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 44px;
+  color: var(--color-surface-link);
+  font-variant-caps: all-small-caps;
+  letter-spacing: 0.1em;
+  font-size: 1.0625rem;
+  text-decoration: none;
+}
+
+.onward::after {
+  content: '';
+  position: absolute;
+  inset-inline: 0 1.5rem;
+  top: calc(50% + 0.65em);
+  height: 1px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform var(--duration-quick) var(--ease-out);
+}
+
+.onward:is(:hover, :focus-visible)::after {
+  transform: none;
+}
+
+.arrowGlyph {
+  width: 16px;
+  height: 12px;
+  transition: transform var(--duration-quick) var(--ease-out);
+}
+
+.onward:is(:hover, :focus-visible) .arrowGlyph {
+  transform: translateX(3px);
+}
+
+.proposal {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+}

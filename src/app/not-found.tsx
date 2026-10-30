@@ -1,8 +1,8 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 
+import { Fleuron } from '@/components/Fleuron'
 import { Folio } from '@/components/Folio'
-import { Kolam } from '@/components/Kolam'
 import { PageTurn, turnForward } from '@/components/PageTurn'
 import { concepts, hrefFor } from '@/content'
 import { notFoundMetadata } from '@/lib/metadata'
@@ -22,7 +22,7 @@ export default async function NotFound() {
         <Folio className={styles.folio}>
           <p className={reading.kicker}>Error 404 · Page not found</p>
           <h1 className={styles.title}>This page isn’t in the book</h1>
-          <Kolam columns={3} rows={2} behaviour="draw-on-load" className={styles.kolam} />
+          <Fleuron className={styles.fleuron} />
           <p className={styles.text}>
             The address may be mistyped, or the page may not have moved across yet: the new site is
             still being built from the current one.

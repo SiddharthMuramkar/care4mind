@@ -109,9 +109,6 @@ const hrefFromHrefFor = {
 
 const internalLinks = {
   files: ['src/**/*.{ts,tsx}'],
-  // Front-end-site ticket 04 rebuilds the header with hrefFor(); until it merges, the
-  // foundation's header keeps its three typed links. Drop this line once it has.
-  ignores: ['src/components/SiteHeader.tsx'],
   plugins: { care4mind: { rules: { 'href-from-hreffor': hrefFromHrefFor } } },
   rules: { 'care4mind/href-from-hreffor': 'error' },
 }

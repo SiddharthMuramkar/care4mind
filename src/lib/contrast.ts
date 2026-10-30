@@ -32,7 +32,7 @@ function luminance(hex: string): number {
 
 /**
  * The colour-token pairs every palette must pass. Text pairs need 4.5:1
- * (WCAG 1.4.3); focus rings, control edges and kolam drawings need 3:1 (WCAG 1.4.11).
+ * (WCAG 1.4.3); focus rings and the parts that show a control and its state need 3:1 (WCAG 1.4.11).
  */
 export const CONTRAST_PAIRS = [
   { foreground: 'ink', background: 'ground', minimum: 4.5 },
@@ -46,13 +46,45 @@ export const CONTRAST_PAIRS = [
   { foreground: 'focus', background: 'ground', minimum: 3 },
   { foreground: 'surface-focus', background: 'surface', minimum: 3 },
   { foreground: 'accent', background: 'ground', minimum: 3 },
-  { foreground: 'kolam-line', background: 'ground', minimum: 3 },
-  { foreground: 'kolam-dot', background: 'ground', minimum: 3 },
-  { foreground: 'surface-kolam-line', background: 'surface', minimum: 3 },
-  { foreground: 'surface-kolam-dot', background: 'surface', minimum: 3 },
+  // The "Devanagari first" switch, on the paper: its printer's-rule track, and its vermilion roundel knob.
+  { foreground: 'surface-ink', background: 'surface', minimum: 3 },
+  { foreground: 'highlight', background: 'surface', minimum: 3 },
   // A pressed control's label over its ink at the ink's strongest; the ink is translucent, so it is laid over the control.
   { foreground: 'ink', background: 'ink-spread', over: 'ground', minimum: 4.5 },
   { foreground: 'surface-ink', background: 'ink-spread', over: 'surface', minimum: 4.5 },
+
+  // Front-end-site ticket 04. Topic hues are drawings, never text, on the page and on paper alike.
+  ...(['self', 'mind', 'practice', 'values', 'temperament'] as const).flatMap(
+    (topic) =>
+      [
+        { foreground: `topic-${topic}`, background: 'ground', minimum: 3 },
+        { foreground: `topic-${topic}`, background: 'surface', minimum: 3 },
+        { foreground: `topic-${topic}`, background: 'panel', minimum: 3 },
+        { foreground: `topic-${topic}`, background: 'drawer', minimum: 3 },
+      ] as const,
+  ),
+  // Badges: a Questionnaire's status and the Proposal label, each written on its own ground.
+  { foreground: 'status-live-ink', background: 'status-live', minimum: 4.5 },
+  { foreground: 'status-preview-ink', background: 'status-preview', minimum: 4.5 },
+  { foreground: 'status-soon-ink', background: 'status-soon', minimum: 4.5 },
+  { foreground: 'status-later-ink', background: 'status-later', minimum: 4.5 },
+  { foreground: 'proposal-ink', background: 'proposal', minimum: 4.5 },
+  // The paper surfaces that rise over the page: text, links and focus rings on each.
+  ...(['panel', 'drawer', 'palette', 'preview'] as const).flatMap(
+    (surface) =>
+      [
+        { foreground: `${surface}-ink`, background: surface, minimum: 4.5 },
+        { foreground: `${surface}-muted`, background: surface, minimum: 4.5 },
+        { foreground: 'surface-link', background: surface, minimum: 4.5 },
+        { foreground: 'surface-focus', background: surface, minimum: 3 },
+      ] as const,
+  ),
+  { foreground: 'palette-highlight-ink', background: 'palette-highlight', minimum: 4.5 },
+  // The toast: its text and focus ring on its dark slip, and its turmeric edge on the indigo page.
+  { foreground: 'toast-ink', background: 'toast', minimum: 4.5 },
+  { foreground: 'toast-muted', background: 'toast', minimum: 4.5 },
+  { foreground: 'focus', background: 'toast', minimum: 3 },
+  { foreground: 'toast-line', background: 'ground', minimum: 3 },
 ] as const
 
 export type ColourToken = (typeof CONTRAST_PAIRS)[number]['foreground' | 'background']

@@ -22,7 +22,7 @@ The design should look made by a dedicated team of human designers: custom, rich
 - **The live site is the record of what exists.** The client brief is what the client first asked for; the rebuild's scope is this brief's Requirements and Out of scope. The live site is in worse shape than the client brief assumes: most questionnaires don't work, and several pages are empty or placeholders.
 - **The current site stays live and untouched until launch.** Its upkeep stays with the client.
 - **Subject-matter calls aren't the developer's.** Questionnaire scoring and interpretation belong to the Psychology expert; source accuracy belongs to the Research editor.
-- **No estimates, schedule or fixed launch date yet.** Estimate once the planning map ([.scratch/rebuild/map.md](../.scratch/rebuild/map.md)) is done.
+- **No estimates, schedule or fixed launch date yet.** Estimate once the [planning map](https://github.com/SiddharthMuramkar/care4mind/issues/6) is done.
 
 ## Roles
 
@@ -95,12 +95,12 @@ New ideas go on a later-phases list, not into this project.
 
 ## Open questions
 
-This brief decides none of these. "(Client)" means the Project owner answers it. They are worked in the planning map ([.scratch/rebuild/map.md](../.scratch/rebuild/map.md)). Once one is decided, it gets a one-line pointer here to where its answer lives.
+This brief decides none of these. "(Client)" means the Project owner answers it. They are worked in the [planning map](https://github.com/SiddharthMuramkar/care4mind/issues/6). Once one is decided, it gets a one-line pointer here to where its answer lives.
 
 1. **Platform and hosting.** What the site is built with and where it runs.
    - Hosting and data: decided in [ADR-0002](adr/0002-vercel-and-neon.md).
    - Framework: decided in [ADR-0003](adr/0003-nextjs-for-the-front-end.md) (Next.js).
-   - Content back end and search: decided in the map's [Architecture review](../.scratch/rebuild/issues/23-architecture-review.md).
+   - Content back end and search: decided in the map's [Architecture review](https://github.com/SiddharthMuramkar/care4mind/issues/19).
 2. **Who runs the site after launch? (Client)** Who edits content, who keeps the site patched, and who pays for the hosting. The answer shapes what Content editors need to meet FR-02.
 3. **Which Questionnaires are in scope?** Only two have questions on the site today: KarmaYoga Scale (45 questions) and Dosha Survey (12). Sixteen more pages describe a questionnaire and its High/Moderate/Low results but contain no questions: Triguna, the eight "Profiling" pages and seven others (listed in current-site.md). The homepage also links to a separate questionnaire app, which refused connections on 2026-10-26; whether these questionnaires lived there is unknown.
 4. **Where do each Questionnaire's questions and scoring rules come from?** For now: scrape what's public, then revisit. The public pages show only part of the scoring: the KarmaYoga Scale page flags one answer per question as correct and shows a percentage result, the sixteen pages above give no cut-offs, and nothing public shows how the Dosha Survey scores. Other possible sources are the client, whoever built the questionnaire app, and web archives. Without an in-scope Questionnaire's questions and scoring rules, it can't be rebuilt faithfully.

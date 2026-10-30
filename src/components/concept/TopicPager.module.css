@@ -1,0 +1,77 @@
+/* Previous and next in the topic, set at the foot of the folio like a book's catchwords. */
+.pager {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr));
+  gap: 1rem;
+}
+
+.previous,
+.next {
+  position: relative;
+  display: grid;
+  gap: 0.15rem;
+  min-height: 44px;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--color-surface-rule);
+  color: var(--color-surface-ink);
+  text-decoration: none;
+}
+
+.next {
+  grid-column: -2;
+  justify-items: end;
+  text-align: end;
+}
+
+.previous:hover,
+.next:hover {
+  border-color: var(--color-surface-ink);
+}
+
+.previous:active,
+.next:active {
+  transform: translateY(1px);
+}
+
+.direction {
+  font-variant-caps: all-small-caps;
+  letter-spacing: 0.14em;
+  font-size: 1rem;
+  color: var(--color-surface-muted);
+}
+
+.direction::before,
+.direction::after {
+  color: var(--color-highlight);
+}
+
+.previous .direction::before {
+  content: '← ' / '';
+}
+
+.next .direction::after {
+  content: ' →' / '';
+}
+
+.name {
+  font-family: var(--font-display);
+  font-size: 1.375rem;
+  line-height: 1.25;
+}
+
+.name[lang] {
+  font-style: italic;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .previous,
+  .next {
+    transition: transform var(--duration-instant) var(--ease-press);
+  }
+}
+
+@media print {
+  .pager {
+    display: none;
+  }
+}

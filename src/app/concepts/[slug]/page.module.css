@@ -1,3 +1,10 @@
+/* A Concept page: the reading folio, wider where its contents sit beside the text. */
+@media (min-width: 64rem) {
+  .page {
+    max-width: 78rem;
+  }
+}
+
 /* "Also spelled" and the "Devanagari first" switch, side by side when they fit. */
 .spellingTools {
   display: flex;
@@ -7,15 +14,51 @@
   gap: 0.25rem 1rem;
 }
 
-.shloka {
-  padding: clamp(1.25rem, 4vw, 2rem) 0;
-  border-block: 1px solid var(--color-surface-rule);
-  text-align: center;
-  justify-items: center;
+/* The contents, then the text; beside each other on a wide screen, divided by a hairline. */
+.body {
+  display: grid;
+  gap: 2.5rem;
 }
 
-.shloka figcaption {
-  color: var(--color-surface-muted);
+.body > * {
+  min-width: 0;
+}
+
+.text {
+  display: grid;
+  gap: 2.5rem;
+}
+
+.text > * {
+  min-width: 0;
+}
+
+@media (min-width: 64rem) {
+  .body {
+    grid-template-columns: 14.5rem minmax(0, 1fr);
+    column-gap: clamp(2rem, 4vw, 3.5rem);
+  }
+
+  /* A hairline down the middle of the gap, between the contents and the text. */
+  .text {
+    padding-inline-start: calc(0.5 * clamp(2rem, 4vw, 3.5rem));
+    margin-inline-start: calc(-0.5 * clamp(2rem, 4vw, 3.5rem));
+    border-inline-start: 1px solid color-mix(in srgb, var(--color-surface-rule) 50%, transparent);
+  }
+}
+
+/* The opening verses, across the page; side by side where two fit. */
+.epigraph {
+  display: grid;
+  gap: 1.5rem;
+}
+
+@media (min-width: 64rem) {
+  .epigraph {
+    grid-template-columns: repeat(auto-fit, minmax(24rem, 1fr));
+    column-gap: 2.5rem;
+    align-items: start;
+  }
 }
 
 .rule {
@@ -23,28 +66,52 @@
   margin-inline: auto;
 }
 
-.related {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: grid;
-  gap: 1rem;
-}
-
-.related li {
-  display: grid;
-  gap: 0.25rem;
-}
-
-.related a {
-  font-family: var(--font-display);
-  font-size: 1.5rem;
-}
-
-.relatedNote {
-  color: var(--color-surface-muted);
-}
-
 .external {
   color: var(--color-surface-muted);
+}
+
+/*
+ * The printout: the text alone, on white. No header, footer, contents, buttons or ornaments;
+ * the References open; each link that leaves the site followed by its address.
+ */
+@media print {
+  .page {
+    max-width: none;
+    padding: 0;
+  }
+
+  .page > :not(.article) {
+    display: none;
+  }
+
+  .article {
+    font-size: 11pt;
+    line-height: 1.5;
+    color: var(--color-surface-ink);
+  }
+
+  .article > span[aria-hidden],
+  .rule,
+  .article button,
+  .article [popover] {
+    display: none;
+  }
+
+  .body {
+    display: block;
+  }
+
+  .text {
+    display: grid;
+    gap: 1.5rem;
+    padding: 0;
+    margin: 0;
+    border: 0;
+  }
+
+  .text a[href^='http']::after {
+    content: ' (' attr(href) ')';
+    font-size: 0.9em;
+    overflow-wrap: anywhere;
+  }
 }

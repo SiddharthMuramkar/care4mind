@@ -2,7 +2,7 @@
   border-block: 1px solid var(--color-surface-rule);
 }
 
-/* The summary is the whole row: heading, count and knot, with no disclosure triangle. */
+/* The summary is the whole row: heading, count and plus, with no disclosure triangle. */
 .trigger {
   display: flex;
   align-items: baseline;
@@ -32,35 +32,38 @@
 }
 
 /*
- * A kolam knot, one line looped round one dot. As the list opens it turns an
- * eighth of a turn, from a diamond to a square, and its dot swells: the knot is
- * nearly round, so the dot is what shows the list is open at a glance.
+ * A plus that folds into a minus: two vermilion rules. As the list opens the
+ * upright rule turns flat, by transform; as it closes it turns upright again.
+ * With reduced motion it simply changes.
  */
-.knot {
+.icon {
+  position: relative;
   flex: none;
   margin-inline-start: auto;
   align-self: center;
-  width: 0.9em;
-  height: auto;
-  --kolam-line-width: 4px;
+  width: 18px;
+  height: 18px;
 }
 
-.knot,
-.knot circle {
-  transition: transform var(--duration-move) var(--ease-out);
+.icon > * {
+  position: absolute;
+  inset: 8px 0 auto;
+  height: 2px;
+  background: var(--color-highlight);
 }
 
-.knot circle {
-  transform-box: fill-box;
-  transform-origin: center;
+.icon > :last-child {
+  transform: rotate(90deg);
 }
 
-.root[open] .knot {
-  transform: rotate(45deg);
+.root[open] .icon > :last-child {
+  transform: rotate(0deg);
 }
 
-.root[open] .knot circle {
-  transform: scale(1.8);
+@media (prefers-reduced-motion: no-preference) {
+  .icon > :last-child {
+    transition: transform var(--duration-move) var(--ease-out);
+  }
 }
 
 .list {
@@ -90,5 +93,46 @@
     .root[open] .list {
       opacity: 0;
     }
+  }
+}
+
+/* An entry a citation has led to: marked in the margin with a vermilion rule, and focused. */
+.list > li {
+  scroll-margin-top: 1.5rem;
+}
+
+.list > li:target {
+  box-shadow: -0.75rem 0 0 -0.5rem var(--color-highlight);
+}
+
+.list > li:focus {
+  outline: 2px solid var(--color-surface-focus);
+  outline-offset: 0.25rem;
+}
+
+.list > li:focus:not(:focus-visible):not(:target) {
+  outline: none;
+}
+
+/* The view timeline a table of contents follows where it lacks :target-current. */
+@supports (timeline-scope: none) and (not (scroll-target-group: auto)) {
+  .root {
+    view-timeline-name: --section-references;
+    view-timeline-inset: 30% 69%;
+  }
+}
+
+/* On paper the References are always open, with the plus that opens them left off. */
+@media print {
+  .root::details-content {
+    content-visibility: visible;
+  }
+
+  .root .list {
+    opacity: 1;
+  }
+
+  .icon {
+    display: none;
   }
 }

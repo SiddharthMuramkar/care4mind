@@ -1,31 +1,57 @@
 import Link from 'next/link'
 
+import { MenuButton } from '@/components/nav/MenuButton'
+import { SearchGlyph } from '@/components/nav/glyphs'
+import { SectionNav } from '@/components/nav/SectionNav'
+import { siteNav } from '@/components/nav/site-nav'
+import { ProposalNote } from '@/components/proposals/ProposalNote'
+import { ScriptPreference } from '@/components/script/ScriptPreference'
+import { SearchTrigger } from '@/components/search/SearchTrigger'
+import { features } from '@/config/features'
+
 import { Logo } from './Logo'
 import styles from './SiteHeader.module.css'
 
-// Only sections that exist are linked. The site map ticket decides the full navigation
-// and its mobile pattern; until then two links fit at every width.
-export function SiteHeader() {
+/**
+ * The header every page shares (D01), stuck to the top of the screen: the logo, then
+ * Concepts · Texts · Questionnaires · Library · Search, each a server-rendered link that works
+ * without JavaScript. On a computer Concepts and Library open panels; on a narrow screen the
+ * sections move into the Menu's Drawer, and Search stays.
+ */
+export async function SiteHeader() {
+  const nav = await siteNav()
+  const mapNote = nav.concepts.map ? <ProposalNote /> : null
   return (
     // Its own transition name keeps it still while the page turns (globals.css).
     <header className={styles.header} style={{ viewTransitionName: 'site-header' }}>
-      <Link href="/" className={styles.home} aria-label="Care4Mind home">
-        <Logo redraw />
-      </Link>
-      <nav aria-label="Main">
-        <ul className={styles.links}>
-          <li>
-            <Link href="/#concepts" className={styles.link}>
-              Concepts
-            </Link>
-          </li>
-          <li>
-            <Link href="/#questionnaires" className={styles.link}>
-              Questionnaires
-            </Link>
-          </li>
-        </ul>
-      </nav>
+      <div className={styles.strip}>
+        <Link href={nav.home} className={styles.home} aria-label="Care4Mind home">
+          <Logo />
+        </Link>
+        <nav aria-label="Main" className={styles.nav}>
+          <SectionNav nav={nav} mapNote={mapNote} />
+          <SearchTrigger placement="header" className={styles.search}>
+            <SearchGlyph className={styles.searchGlyph} />
+            <span className={styles.searchLabel}>Search</span>
+          </SearchTrigger>
+        </nav>
+        {features.devanagariFirst ? (
+          <div className={styles.script}>
+            <ScriptPreference placement="header" />
+          </div>
+        ) : null}
+        <MenuButton
+          nav={nav}
+          search={
+            <SearchTrigger placement="drawer" className={styles.drawerSearch}>
+              <SearchGlyph className={styles.searchGlyph} />
+              Search
+            </SearchTrigger>
+          }
+          script={features.devanagariFirst ? <ScriptPreference placement="drawer" /> : null}
+          mapNote={mapNote}
+        />
+      </div>
     </header>
   )
 }
