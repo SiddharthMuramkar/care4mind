@@ -15,8 +15,8 @@ import {
   type FlowAction,
   type FlowState,
 } from '@/lib/questionnaire/flow'
-import { startOf, statusWords } from '@/lib/questionnaire/gate'
 import { scoreQuestionnaire } from '@/lib/questionnaire/score'
+import { statusWords } from '@/components/StatusBadge'
 
 // Front-end-site ticket 10: the KarmaYoga flow's state, kept only in a reducer (D16), and the
 // Questionnaire gate. Two seams: the pure flow module (what each press does to the flow) and the
@@ -227,43 +227,65 @@ describe('the gate (D16)', () => {
     },
   }
 
-  /** Whether the flow is a route, and what the intro's Start and badge are, for these flags. */
+  /**
+   * Whether the flow is a route, where Start leads and the status a visitor sees, for these flags,
+   * on the Questionnaire's page, its card on the list and its card on its Concept's page.
+   */
   async function gate(flags: Features, source: ContentSource = localSource) {
-    const { questionnaires, site } = createContent(source, flags)
+    const { questionnaires, concepts, site } = createContent(source, flags)
     const questionnaire = await questionnaires.get('karmayoga-scale')
     if (!questionnaire) throw new Error('No KarmaYoga Scale.')
+    const card = (await questionnaires.list()).find(({ slug }) => slug === 'karmayoga-scale')
+    const linked = (await concepts.get('vikshepa'))?.linked.questionnaires.find(
+      ({ slug }) => slug === 'karmayoga-scale',
+    )
     const paths = (await site.routes()).map(({ path }) => path)
+    const seen = ({ shownStatus, takeHref }: { shownStatus: string; takeHref?: string }) => ({
+      shownStatus,
+      takeHref,
+    })
+    expect(card && seen(card)).toEqual(seen(questionnaire))
+    expect(linked && seen(linked)).toEqual(seen(questionnaire))
     return {
       routed: paths.includes(FLOW),
-      start: startOf(questionnaire, await questionnaires.form('karmayoga-scale')),
-      badge: statusWords(questionnaire.status, flags),
+      form: (await questionnaires.form('karmayoga-scale')) !== null,
+      ...seen(questionnaire),
     }
   }
 
   it('opens the preview flow while questionnairePreview is on, and Start links to it', async () => {
     expect(await gate(ON)).toEqual({
       routed: true,
-      start: { open: true, href: FLOW },
-      badge: 'Preview',
+      form: true,
+      shownStatus: 'preview',
+      takeHref: FLOW,
     })
   })
 
   it('has no flow while the flag is off, and Start is disabled: coming soon', async () => {
-    expect(await gate(OFF)).toEqual({ routed: false, start: { open: false }, badge: 'Coming soon' })
+    expect(await gate(OFF)).toEqual({
+      routed: false,
+      form: false,
+      shownStatus: 'coming-soon',
+      takeHref: undefined,
+    })
   })
 
   it('opens a live Questionnaire whatever the flag', async () => {
     for (const flags of [ON, OFF]) {
       expect(await gate(flags, liveSource)).toEqual({
         routed: true,
-        start: { open: true, href: FLOW },
-        badge: 'Open',
+        form: true,
+        shownStatus: 'live',
+        takeHref: FLOW,
       })
     }
   })
 
-  it('names every other status in words', () => {
-    expect(statusWords('coming-soon', ON)).toBe('Coming soon')
-    expect(statusWords('coming-later', ON)).toBe('Coming later')
+  it('names every status in words', () => {
+    expect(statusWords('live')).toBe('Open')
+    expect(statusWords('preview')).toBe('Preview')
+    expect(statusWords('coming-soon')).toBe('Coming soon')
+    expect(statusWords('coming-later')).toBe('Coming later')
   })
 })
