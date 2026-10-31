@@ -18,8 +18,8 @@ import { localSource } from '@/content/source'
 import { isNormalisedSanskrit } from '@/lib/sanskrit'
 
 // Every content rule of the content-v1 spec (Testing Decisions → Integrity), run over every real
-// record, read through the content source. They hold from ticket 01 on: a record that breaks one
-// fails CI. Rules that can only pass once all content has arrived are in content-completeness.
+// record, read through the content source. They hold for any amount of content: a record that
+// breaks one fails CI. What the migration carried over is pinned apart, in tests/fidelity.
 
 let records: ContentRecord[] = []
 let graph: ContentGraph
@@ -27,7 +27,7 @@ let graph: ContentGraph
 beforeAll(async () => {
   records = (await Promise.all(CONTENT_KINDS.map((kind) => localSource.records(kind)))).flat()
   graph = await contentGraph()
-})
+}, 60_000)
 
 function ofKind<K extends ContentRecord['kind']>(kind: K): RecordOf<K>[] {
   return records.filter((record): record is RecordOf<K> => record.kind === kind)
@@ -516,3 +516,33 @@ function characterMap(file: string): Set<number> {
   }
   return points
 }
+
+describe('links between records', () => {
+  it('gives every topic a Concept', () => {
+    const empty = ofKind('topic')
+      .filter((topic) => graph.conceptsInTopic(topic.slug).primary.length === 0)
+      .map((topic) => topic.slug)
+    expect(empty).toEqual([])
+  })
+
+  it('has every Reference cited by a record', () => {
+    const uncited = ofKind('reference')
+      .filter((reference) => graph.citedBy(reference.id).length === 0)
+      .map((reference) => reference.id)
+    expect(uncited).toEqual([])
+  })
+
+  it('has every passage quoted', () => {
+    const unquoted = ofKind('passage')
+      .filter((passage) => graph.quotedIn(passage.id).length === 0)
+      .map((passage) => passage.id)
+    expect(unquoted).toEqual([])
+  })
+
+  it('gives every work a passage', () => {
+    const empty = ofKind('work')
+      .filter((work) => !ofKind('passage').some((passage) => passage.work === work.slug))
+      .map((work) => work.slug)
+    expect(empty).toEqual([])
+  })
+})
