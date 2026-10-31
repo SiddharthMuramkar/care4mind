@@ -5,6 +5,7 @@ import { HydrationMarker } from '@/components/HydrationMarker'
 import { InkSpread } from '@/components/InkSpread'
 import { LateFonts } from '@/components/LateFonts'
 import { LotusHeadScript } from '@/components/LotusHeadScript'
+import { LotusPointer } from '@/components/LotusPointer'
 import { LinkPreviewRoot } from '@/components/preview/LinkPreviewRoot'
 import { HeadScript } from '@/components/script/HeadScript'
 import { SiteFooter } from '@/components/SiteFooter'
@@ -56,6 +57,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <Toaster />
         <LinkPreviewRoot />
         <InkSpread />
+        <LotusPointer />
         <HydrationMarker />
         <LateFonts faces={[...playfairTextStyles, playfairDisplay, tiroDevanagariSanskrit]} />
       </body>

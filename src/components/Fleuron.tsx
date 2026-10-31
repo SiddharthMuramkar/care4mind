@@ -1,3 +1,5 @@
+import type { ReactNode } from 'react'
+
 import { cx } from '@/lib/cx'
 
 import styles from './Fleuron.module.css'
@@ -71,23 +73,46 @@ export function LotusMark({ className }: { className?: string }) {
   )
 }
 
-/** Each petal in a group of its own, to move alone; the heart rides on the centre petal. */
+/**
+ * Each petal in groups of its own, one per kind of motion: a running transition overrides an
+ * animation on the same element. The heart rides on the centre petal.
+ */
 function Flower() {
   return (
     <>
-      <g className={cx(styles.breath, styles.breathCentre)}>
+      <Petal petal={styles.petalCentre} breath={styles.breathCentre}>
         <path className={styles.centre} pathLength={1} d={LOTUS.petals.centre} />
         <g className={styles.heart} fill="currentColor" stroke="none">
           <circle className={styles.halo} cx={LOTUS.dot.cx} cy={LOTUS.dot.cy} r={LOTUS.dot.r} />
           <circle className={styles.dot} cx={LOTUS.dot.cx} cy={LOTUS.dot.cy} r={LOTUS.dot.r} />
         </g>
-      </g>
-      <g className={cx(styles.breath, styles.breathLeft)}>
+      </Petal>
+      <Petal petal={styles.petalLeft} breath={styles.breathLeft}>
         <path className={styles.side} pathLength={1} d={LOTUS.petals.left} />
-      </g>
-      <g className={cx(styles.breath, styles.breathRight)}>
+      </Petal>
+      <Petal petal={styles.petalRight} breath={styles.breathRight}>
         <path className={styles.side} pathLength={1} d={LOTUS.petals.right} />
-      </g>
+      </Petal>
     </>
+  )
+}
+
+function Petal({
+  petal,
+  breath,
+  children,
+}: {
+  petal?: string
+  breath?: string
+  children: ReactNode
+}) {
+  return (
+    <g className={cx(styles.lean, petal)}>
+      <g className={styles.open}>
+        <g className={styles.bloom}>
+          <g className={cx(styles.breath, breath)}>{children}</g>
+        </g>
+      </g>
+    </g>
   )
 }

@@ -1,5 +1,6 @@
 .fleuron {
   display: block;
+  user-select: none;
   height: auto;
   overflow: visible;
 }
@@ -13,6 +14,8 @@
 /* Drawn small, so its strokes are thicker than the Fleuron's. */
 .mark {
   stroke-width: 2.6;
+  /* A double press on a lotus would otherwise select the words beside it. */
+  user-select: none;
 }
 
 /* The glow and the ripples show only as the lotus breathes. */
@@ -248,5 +251,88 @@
   :root[data-lotus-motion='breathing'] .draw .halo,
   :root[data-lotus-motion='breathing'] .draw .ripple {
     animation-delay: calc(var(--duration-stroke) * 5 / 3);
+  }
+}
+
+/*
+ * The lotus answers the pointer: it leans toward it and opens as it nears, and blooms when
+ * pressed. LotusPointer writes --lotus-lean and --lotus-near, and flips data-lotus-bloom.
+ */
+@keyframes bloom-side-a {
+  40% {
+    transform: rotate(calc(var(--bloom-turn) * 7deg));
+  }
+}
+
+@keyframes bloom-side-b {
+  40% {
+    transform: rotate(calc(var(--bloom-turn) * 7deg));
+  }
+}
+
+@keyframes bloom-centre-a {
+  40% {
+    transform: scale(1.06);
+  }
+}
+
+@keyframes bloom-centre-b {
+  40% {
+    transform: scale(1.06);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  :root:not([data-lotus-motion='still']) .lean,
+  :root:not([data-lotus-motion='still']) .open,
+  :root:not([data-lotus-motion='still']) .bloom {
+    transform-origin: 80px 36px;
+  }
+
+  :root:not([data-lotus-motion='still']) .lean {
+    transform: rotate(calc(var(--lotus-lean, 0) * 5deg));
+  }
+
+  :root:not([data-lotus-motion='still']) .lean,
+  :root:not([data-lotus-motion='still']) .open {
+    transition: transform var(--duration-slow) var(--ease-out);
+  }
+
+  .petalLeft {
+    --bloom-turn: -1;
+  }
+
+  .petalRight {
+    --bloom-turn: 1;
+  }
+
+  :root:not([data-lotus-motion='still']) :is(.petalLeft, .petalRight) .open {
+    transform: rotate(calc(var(--bloom-turn) * var(--lotus-near, 0) * 5deg));
+  }
+
+  :root:not([data-lotus-motion='still']) .petalCentre .open {
+    transform: scale(calc(1 + var(--lotus-near, 0) * 0.03));
+  }
+
+  :root:not([data-lotus-motion='still'])
+    [data-lotus-bloom='a']
+    :is(.petalLeft, .petalRight)
+    .bloom {
+    animation: bloom-side-a var(--duration-bloom) var(--ease-in-out);
+  }
+
+  :root:not([data-lotus-motion='still'])
+    [data-lotus-bloom='b']
+    :is(.petalLeft, .petalRight)
+    .bloom {
+    animation: bloom-side-b var(--duration-bloom) var(--ease-in-out);
+  }
+
+  :root:not([data-lotus-motion='still']) [data-lotus-bloom='a'] .petalCentre .bloom {
+    animation: bloom-centre-a var(--duration-bloom) var(--ease-in-out);
+  }
+
+  :root:not([data-lotus-motion='still']) [data-lotus-bloom='b'] .petalCentre .bloom {
+    animation: bloom-centre-b var(--duration-bloom) var(--ease-in-out);
   }
 }

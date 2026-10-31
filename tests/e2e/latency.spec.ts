@@ -42,6 +42,17 @@ test(`pressing the "Devanagari first" switch answers within ${BUDGET} ms on a sl
   expect(quickest, `visits: ${visits.join(', ')} ms`).toBeLessThan(BUDGET)
 })
 
+test(`pressing the opening lotus answers within ${BUDGET} ms on a slow phone`, async ({ page }) => {
+  const lotus = page.getByRole('main').locator('svg[data-lotus]').first()
+  const { quickest, visits } = await visitLatency(BUDGET, async () => {
+    await openOnSlowPhone(page, '/')
+    const latency = await latencyOf(page, () => lotus.click())
+    await expect(lotus).toHaveAttribute('data-lotus-bloom', 'a')
+    return [latency]
+  })
+  expect(quickest, `visits: ${visits.join(', ')} ms`).toBeLessThan(BUDGET)
+})
+
 test(`pressing "Pause the lotus" answers within ${BUDGET} ms on a slow phone`, async ({ page }) => {
   const { quickest, visits } = await visitLatency(BUDGET, async () => {
     await openOnSlowPhone(page, '/')

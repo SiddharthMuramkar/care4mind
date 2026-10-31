@@ -185,8 +185,11 @@ test('pointing at or focusing the logo animates nothing beside its breathing lot
     await logo.evaluate(
       (link) =>
         (
-          window as unknown as { __animationStarts: { target: Element }[] }
-        ).__animationStarts.filter(({ target }) => link.contains(target)).length,
+          window as unknown as { __animationStarts: { target: Element; property: string }[] }
+        ).__animationStarts.filter(
+          // Pointing leans and opens the lotus by transition; only animations count here.
+          ({ target, property }) => link.contains(target) && property === '',
+        ).length,
     )
   const before = await startsOnTheLogo()
   await logo.hover()
