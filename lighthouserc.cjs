@@ -79,7 +79,11 @@ module.exports = {
       // The certificate is self-signed, which Chrome would refuse. Every Lighthouse setting,
       // throttling included, stays its default.
       ...(H2 && { settings: { chromeFlags: '--ignore-certificate-errors' } }),
-      numberOfRuns: 3,
+      // Five runs. TBT is the median of those runs, so one garbage-collection pause
+      // cannot fail the 200 ms budget. LCP and CLS stay on the representative run:
+      // a pause shows up as blocking time, not as layout shift, and LCP's 2.5 s
+      // budget is not the one a cold run has been failing.
+      numberOfRuns: 5,
     },
     assert: {
       assertions: {
@@ -91,7 +95,8 @@ module.exports = {
           'error',
           { maxNumericValue: 0.1, aggregationMethod: 'median-run' },
         ],
-        'total-blocking-time': ['error', { maxNumericValue: 200, aggregationMethod: 'median-run' }],
+        // Median of the five TBT values. The others stay on the representative run.
+        'total-blocking-time': ['error', { maxNumericValue: 200, aggregationMethod: 'median' }],
         'categories:accessibility': ['error', { minScore: 0.95 }],
         'categories:performance': ['warn', { minScore: 0.9 }],
       },
