@@ -40,8 +40,12 @@ test('the hero lotus breathes once, after it draws in, and is still within 5 s o
     expect(endTime, 'it ends within 5 s').toBeLessThanOrEqual(STILL_BY)
   }
   const drawnBy = Math.max(...timings.filter((t) => !isBreath(t.name)).map((t) => t.endTime))
-  const breaths = (await lotusStarts(page)).filter(({ name }) => isBreath(name))
-  expect(breaths.length, 'it breathes').toBeGreaterThan(0)
+  // The breath's animationstart fires only once its delay has passed.
+  const breathStarts = async () => (await lotusStarts(page)).filter(({ name }) => isBreath(name))
+  await expect
+    .poll(async () => (await breathStarts()).length, { message: 'it breathes' })
+    .toBeGreaterThan(0)
+  const breaths = await breathStarts()
   for (const { delay } of breaths) {
     expect(delay, 'the breath sets off once the drawing is done').toBeGreaterThanOrEqual(drawnBy)
   }
