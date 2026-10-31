@@ -27,7 +27,6 @@ export default async function TextsPage() {
         <Breadcrumbs path={PATH} />
         <Folio as="article" className={reading.article} aria-labelledby="texts-title">
           <header className={reading.titlePage}>
-            <p className={reading.kicker}>The tradition</p>
             <h1 id="texts-title" className={reading.title}>
               Traditional texts
             </h1>
