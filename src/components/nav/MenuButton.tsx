@@ -12,7 +12,8 @@ import {
 } from 'react'
 
 import { MenuGlyph } from './glyphs'
-import { useHydrated, WIDE, whenIdle } from './current'
+import { useHydrated, whenIdle } from '../browser'
+import { WIDE } from './current'
 import styles from './MenuButton.module.css'
 import type { MenuDrawerProps } from './MenuDrawer'
 import type { SiteNav } from './types'

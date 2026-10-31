@@ -6,7 +6,7 @@ import { hrefFor, type ConceptView, type VerseView } from '@/content'
 import { statusWords } from '@/lib/questionnaire/gate'
 
 import { turnForward } from '../PageTurn'
-import { LinkPreview } from '../preview/LinkPreview'
+import { LinkPreview } from '../preview'
 import { Text } from '../prose'
 import { conceptPreview, passagePreview } from './previews'
 import styles from './LinkedKnowledge.module.css'

@@ -14,7 +14,7 @@ import { concepts, hrefFor, questionnaires } from '@/content'
 import { metadataFor } from '@/lib/metadata'
 import { shownStatus, startOf, statusWords } from '@/lib/questionnaire/gate'
 
-import cta from '../../cta.module.css'
+import cta from '@/components/Cta'
 import reading from '../../reading.module.css'
 import styles from './page.module.css'
 

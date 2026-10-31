@@ -2,9 +2,9 @@ import type { Route } from 'next'
 import Link from 'next/link'
 
 import { turnForward } from '@/components/PageTurn'
-import { LinkPreview, type PreviewPayload } from '@/components/preview/LinkPreview'
+import { LinkPreview, type PreviewPayload } from '@/components/preview'
 import { Text } from '@/components/prose'
-import { ScriptPair } from '@/components/script/ScriptPair'
+import { ScriptPair } from '@/components/script'
 import type { AzEntry as Entry } from '@/content'
 
 import styles from './az.module.css'

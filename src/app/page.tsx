@@ -12,7 +12,7 @@ import { concepts, home, hrefFor, questionnaires, site } from '@/content'
 import { metadataFor } from '@/lib/metadata'
 import { toDevanagariDigits } from '@/lib/text'
 
-import cta from './cta.module.css'
+import cta from '@/components/Cta'
 import styles from './page.module.css'
 
 export function generateMetadata(): Promise<Metadata> {

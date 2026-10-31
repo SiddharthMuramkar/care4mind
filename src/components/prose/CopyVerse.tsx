@@ -2,7 +2,7 @@
 
 import type { LatinScript } from '@/content'
 
-import { toast } from '../toast/toast'
+import { toast } from '../toast'
 import styles from './Prose.module.css'
 
 /** "Copy verse": puts the verse on the clipboard as plain text, and says so in a polite toast. */

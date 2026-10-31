@@ -9,7 +9,7 @@ import { Folio } from '@/components/Folio'
 import { PageTurn, turnForward } from '@/components/PageTurn'
 import { citationLinks, Provenance, Sections } from '@/components/prose'
 import { ReferenceList } from '@/components/ReferenceList'
-import { ScriptPair } from '@/components/script/ScriptPair'
+import { ScriptPair } from '@/components/script'
 import { ContentsPlate, plateCard, plateScope, type PlateRow } from '@/components/topics'
 import {
   hrefFor,

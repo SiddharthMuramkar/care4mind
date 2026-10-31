@@ -1,14 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
-import {
-  countText,
-  NOTHING,
-  readSelection,
-  shows,
-  stands,
-  writeSelection,
-} from '@/components/map/filter'
-import { layoutMap, type MapLayout } from '@/components/map/layout'
+import { countText, NOTHING, readSelection, shows, stands, writeSelection } from '@/components/map'
+import { layoutMap, type MapLayout } from '@/components/map'
 import type { ConceptGraph, ConceptGraphEdge } from '@/content'
 
 // Front-end-site ticket 12: the Concept map's layout, worked out while the site builds (the

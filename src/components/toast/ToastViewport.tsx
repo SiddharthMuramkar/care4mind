@@ -3,7 +3,7 @@
 import { Toast } from '@base-ui/react/toast'
 import { useEffect } from 'react'
 
-import { CloseGlyph, SealGlyph } from '@/components/nav/glyphs'
+import { CloseGlyph, SealGlyph } from '@/components/nav'
 
 import { connectToasts } from './toast'
 import styles from './ToastViewport.module.css'

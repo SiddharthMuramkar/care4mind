@@ -107,6 +107,70 @@ const hrefFromHrefFor = {
   },
 }
 
+// A component lives in a folder named for it, and that folder's index is its interface.
+// Another folder's files, and the app's files, stay private.
+const componentPatterns = [
+  {
+    regex: '^@/components/[^/]+/',
+    caseSensitive: true,
+    message:
+      "A component folder's index is its interface. Import the folder, not a file inside it.",
+  },
+]
+
+const contentPatterns = [
+  {
+    regex: '^@/content/',
+    caseSensitive: true,
+    message: 'Content internals are private: import the public interface, @/content.',
+  },
+  {
+    regex: '^\\.{1,2}/(?:.+/)?content(?:/|$)',
+    caseSensitive: true,
+    message: 'Reach the content module through @/content, never by a relative path.',
+  },
+]
+
+const componentStructure = [
+  {
+    files: ['src/app/**/*.{ts,tsx}', 'src/lib/**/*.{ts,tsx}'],
+    rules: {
+      'no-restricted-imports': ['error', { patterns: [...contentPatterns, ...componentPatterns] }],
+    },
+  },
+  {
+    files: ['src/components/**/*.{ts,tsx}'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            ...contentPatterns,
+            ...componentPatterns,
+            {
+              regex: '^@/app/',
+              caseSensitive: true,
+              message:
+                'A component does not import from the app. Share the piece from a component folder.',
+            },
+            {
+              regex: '^\\.\./(?!content/)[^/]+/.+',
+              caseSensitive: true,
+              message: 'Import another component through its folder, not a file inside it.',
+            },
+          ],
+        },
+      ],
+    },
+  },
+  {
+    files: ['tests/**/*.{ts,tsx}'],
+    rules: {
+      'no-restricted-imports': ['error', { patterns: componentPatterns }],
+    },
+  },
+]
+
 const internalLinks = {
   files: ['src/**/*.{ts,tsx}'],
   plugins: { care4mind: { rules: { 'href-from-hreffor': hrefFromHrefFor } } },
@@ -127,6 +191,7 @@ export default defineConfig([
   },
   ...tseslint.configs.strict.map((config) => ({ ...config, files: ['**/*.{ts,tsx}'] })),
   contentBoundary,
+  ...componentStructure,
   internalLinks,
   prettier,
   globalIgnores([

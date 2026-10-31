@@ -19,7 +19,7 @@ import {
   type ReactNode,
 } from 'react'
 
-import cta from '@/app/cta.module.css'
+import cta from '@/components/Cta'
 import { Fleuron } from '@/components/Fleuron'
 import { turnBack } from '@/components/PageTurn'
 import type { QuestionnaireFormView } from '@/content'

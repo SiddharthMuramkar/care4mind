@@ -3,7 +3,7 @@
 import { use, useDeferredValue, useState, ViewTransition } from 'react'
 
 import { DevanagariFirst } from '../ScriptChoice'
-import { ScriptPair } from '../script/ScriptPair'
+import { ScriptPair } from '../script'
 import styles from './TitleSpellings.module.css'
 
 /**

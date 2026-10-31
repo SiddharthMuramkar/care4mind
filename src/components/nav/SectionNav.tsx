@@ -4,7 +4,8 @@ import { type ComponentType, type ReactNode, useCallback, useEffect, useRef, use
 
 import { ChevronGlyph } from './glyphs'
 import { CurrentLink } from './CurrentLink'
-import { panelOf, useHydrated, WIDE, whenIdle } from './current'
+import { useHydrated, whenIdle } from '../browser'
+import { panelOf, WIDE } from './current'
 import styles from './nav.module.css'
 import type { NavPanelsProps, Slots } from './NavPanels'
 import type { PanelId, SiteNav } from './types'
