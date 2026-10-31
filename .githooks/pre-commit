@@ -1,0 +1,10 @@
+#!/bin/sh
+# care4mind-githook v1
+# Refuses a commit on main: main changes only through a pull request the developer merges, so
+# work happens on a branch, in a worktree of its own.
+branch=$(git symbolic-ref --quiet --short HEAD) || exit 0
+if [ "$branch" = main ]; then
+  echo "Blocked: this checkout is on main, which changes only through a pull request." >&2
+  echo "Make a branch first: git switch -c <name> origin/main" >&2
+  exit 1
+fi

@@ -34,7 +34,7 @@ function port() {
 
 /**
  * Collect starts its own server, and would audit whatever already answers on a
- * taken port: another lane's build. So it stops first, naming the port.
+ * taken port: another builder's build. So it stops first, naming the port.
  */
 function stopIfTaken(port, so = 'Lighthouse would audit whatever is listening there') {
   const probe = `
