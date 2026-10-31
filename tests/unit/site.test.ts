@@ -9,6 +9,7 @@ import sitemap from '@/app/sitemap'
 import { redirects } from '@/config/redirects'
 import { site as config } from '@/config/site'
 import { concepts, site } from '@/content'
+import { customProperties, resolveColour } from '@/lib/contrast'
 import { metadataFor, shareCardText } from '@/lib/metadata'
 import { CARD_COLOURS } from '@/lib/share-card'
 
@@ -41,9 +42,11 @@ function withShareTags(meta: {
 
 describe('the share card', () => {
   it('draws in the Press paper tokens', () => {
-    const css = readFileSync(join(process.cwd(), 'src/styles/globals.css'), 'utf8')
+    const declarations = customProperties(
+      readFileSync(join(process.cwd(), 'src/styles/globals.css'), 'utf8'),
+    )
     for (const [token, value] of Object.entries(CARD_COLOURS)) {
-      expect(css.match(new RegExp(`${token}:\\s*(#[0-9a-f]+);`))?.[1], token).toBe(value)
+      expect(resolveColour(`var(${token})`, declarations), token).toBe(value)
     }
   })
 })
