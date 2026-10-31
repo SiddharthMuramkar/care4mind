@@ -1,68 +1,10 @@
-/*
- * Shared by the reading pages (Concept, Questionnaire, 404) and by every page still waiting for
- * its own ticket: a long paper folio on the indigo ground, set like a printed book.
- */
-.page {
-  display: grid;
-  gap: 1.25rem;
-  width: 100%;
-  max-width: 52rem;
-  margin-inline: auto;
-  padding: clamp(1rem, 3vw, 2rem) clamp(1rem, 4vw, 3rem) 0;
-}
-
-.article {
-  display: grid;
-  gap: 2.5rem;
-  font-size: 1.125rem;
-  line-height: 1.7;
-}
-
-/* Grid children may shrink below their content, so a wide table scrolls inside its own frame. */
-.article > * {
-  min-width: 0;
-}
-
-.article :where(p) {
-  margin: 0;
-}
-
-.titlePage {
-  display: grid;
-  justify-items: center;
-  gap: 0.75rem;
-  text-align: center;
-}
-
+/* The parts a reading page sets inside its folio (the shell, ReadingPage, sets the folio itself). */
 .kicker {
   margin: 0;
   font-variant-caps: all-small-caps;
   letter-spacing: 0.16em;
   font-size: 1.125rem;
   color: var(--color-surface-muted);
-}
-
-.title {
-  margin: 0;
-  font-family: var(--font-display);
-  font-weight: 500;
-  font-size: clamp(3rem, 12vw, 5.75rem);
-  line-height: 1;
-  overflow-wrap: anywhere;
-}
-
-/* At 320 px (400% zoom, WCAG 1.4.10) the longest one-word titles still fit their line. */
-@media (max-width: 21rem) {
-  .title {
-    font-size: 2.375rem;
-  }
-}
-
-/* A long name (a topic, an English-titled page) is set a size down. */
-.titleLong {
-  font-size: clamp(2.25rem, 8vw, 4rem);
-  line-height: 1.1;
-  text-wrap: balance;
 }
 
 .gloss {

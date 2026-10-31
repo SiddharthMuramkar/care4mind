@@ -1,13 +1,11 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 
-import { Breadcrumbs } from '@/components/Breadcrumbs'
-import { Folio } from '@/components/Folio'
 import { OrnamentRule } from '@/components/OrnamentRule'
-import { PageTurn, turnForward } from '@/components/PageTurn'
+import { turnForward } from '@/components/PageTurn'
 import { QuestionnaireCard } from '@/components/QuestionnaireCard'
+import { PageTitle, ReadingPage, TitlePage } from '@/components/ReadingPage'
 import { hrefFor, questionnaires, topics, type QuestionnaireCard as Card } from '@/content'
-import { cx } from '@/lib/cx'
 import { metadataFor } from '@/lib/metadata'
 import { statusWords } from '@/lib/questionnaire/gate'
 
@@ -71,85 +69,77 @@ export default async function QuestionnairesPage() {
   const ungrouped = later.filter(({ topics }) => topics.length === 0)
 
   return (
-    <PageTurn>
-      <main id="main" className={reading.page}>
-        <Breadcrumbs path={PATH} />
-        <Folio as="article" className={reading.article} aria-labelledby="questionnaires-title">
-          <header className={reading.titlePage}>
-            <h1 id="questionnaires-title" className={cx(reading.title, styles.title)}>
-              Questionnaires
-            </h1>
-            <p className={reading.summary}>
-              Each one sets out what it is for, and its limits, before you start.
-            </p>
-            <p className={listing.facts}>
-              {featured.length} with a page of {featured.length === 1 ? 'its' : 'their'} own ·{' '}
-              {later.length} coming later
-            </p>
-          </header>
+    <ReadingPage path={PATH}>
+      <TitlePage>
+        <PageTitle className={styles.title}>Questionnaires</PageTitle>
+        <p className={reading.summary}>
+          Each one sets out what it is for, and its limits, before you start.
+        </p>
+        <p className={listing.facts}>
+          {featured.length} with a page of {featured.length === 1 ? 'its' : 'their'} own ·{' '}
+          {later.length} coming later
+        </p>
+      </TitlePage>
 
-          {featured.length > 0 ? (
-            <section className={reading.section} aria-labelledby="featured-title">
-              <h2 id="featured-title" className={styles.visuallyHidden}>
-                With a page of {featured.length === 1 ? 'its' : 'their'} own
-              </h2>
-              <ul className={styles.featured}>
-                {featured.map((questionnaire) => (
-                  <li key={questionnaire.slug}>
-                    <QuestionnaireCard questionnaire={questionnaire} />
-                  </li>
+      {featured.length > 0 ? (
+        <section className={reading.section} aria-labelledby="featured-title">
+          <h2 id="featured-title" className={styles.visuallyHidden}>
+            With a page of {featured.length === 1 ? 'its' : 'their'} own
+          </h2>
+          <ul className={styles.featured}>
+            {featured.map((questionnaire) => (
+              <li key={questionnaire.slug}>
+                <QuestionnaireCard questionnaire={questionnaire} />
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
+
+      {later.length > 0 ? (
+        <section className={reading.section} aria-labelledby="later-title">
+          <OrnamentRule />
+          <h2 id="later-title" className={reading.sectionTitle}>
+            Coming later
+          </h2>
+          <p className={styles.note}>
+            The current site describes these {later.length} Questionnaires. Each opens here once its
+            questions and scoring rules are confirmed; until then its Concept says what it is about.
+          </p>
+          {groups.map(({ topic, questionnaires }) => (
+            <section
+              key={topic.slug}
+              className={styles.group}
+              data-topic={topic.slug}
+              aria-labelledby={`later-${topic.slug}`}
+            >
+              <header className={styles.groupHead}>
+                <h3 id={`later-${topic.slug}`} className={styles.groupTitle}>
+                  <Link
+                    href={hrefFor({ kind: 'topic', id: topic.slug })}
+                    transitionTypes={turnForward}
+                  >
+                    {topic.name}
+                  </Link>
+                </h3>
+                <p className={styles.groupCount}>{questionnaires.length} coming later</p>
+              </header>
+              <ul className={styles.slips}>
+                {questionnaires.map((questionnaire) => (
+                  <Later key={questionnaire.slug} questionnaire={questionnaire} />
                 ))}
               </ul>
             </section>
-          ) : null}
-
-          {later.length > 0 ? (
-            <section className={reading.section} aria-labelledby="later-title">
-              <OrnamentRule />
-              <h2 id="later-title" className={reading.sectionTitle}>
-                Coming later
-              </h2>
-              <p className={styles.note}>
-                The current site describes these {later.length} Questionnaires. Each opens here once
-                its questions and scoring rules are confirmed; until then its Concept says what it
-                is about.
-              </p>
-              {groups.map(({ topic, questionnaires }) => (
-                <section
-                  key={topic.slug}
-                  className={styles.group}
-                  data-topic={topic.slug}
-                  aria-labelledby={`later-${topic.slug}`}
-                >
-                  <header className={styles.groupHead}>
-                    <h3 id={`later-${topic.slug}`} className={styles.groupTitle}>
-                      <Link
-                        href={hrefFor({ kind: 'topic', id: topic.slug })}
-                        transitionTypes={turnForward}
-                      >
-                        {topic.name}
-                      </Link>
-                    </h3>
-                    <p className={styles.groupCount}>{questionnaires.length} coming later</p>
-                  </header>
-                  <ul className={styles.slips}>
-                    {questionnaires.map((questionnaire) => (
-                      <Later key={questionnaire.slug} questionnaire={questionnaire} />
-                    ))}
-                  </ul>
-                </section>
+          ))}
+          {ungrouped.length > 0 ? (
+            <ul className={styles.slips}>
+              {ungrouped.map((questionnaire) => (
+                <Later key={questionnaire.slug} questionnaire={questionnaire} />
               ))}
-              {ungrouped.length > 0 ? (
-                <ul className={styles.slips}>
-                  {ungrouped.map((questionnaire) => (
-                    <Later key={questionnaire.slug} questionnaire={questionnaire} />
-                  ))}
-                </ul>
-              ) : null}
-            </section>
+            </ul>
           ) : null}
-        </Folio>
-      </main>
-    </PageTurn>
+        </section>
+      ) : null}
+    </ReadingPage>
   )
 }

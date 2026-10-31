@@ -45,8 +45,22 @@ for (const route of ROUTES_IN_SCOPE) {
       .soft(canonical.first(), `${where}: canonical address ends in /`)
       .toHaveAttribute('href', /\/$/)
 
+    // The skip link's target: one main landmark, and it is #main.
+    await expect.soft(page.getByRole('main'), `${where}: one main landmark`).toHaveCount(1)
+    await expect
+      .soft(page.locator('main#main'), `${where}: the main landmark is #main`)
+      .toHaveCount(1)
+
     // FR-01, D15: every page below the homepage shows its trail, ending at itself.
     if (route.kind !== 'home') {
+      // The page's folio is an article named by its one h1.
+      const title = (await page.locator('h1').first().textContent())?.trim() ?? ''
+      await expect
+        .soft(
+          page.getByRole('main').getByRole('article', { name: title, exact: true }).first(),
+          `${where}: the folio is named by the page's title`,
+        )
+        .toBeVisible()
       const trail = page.getByRole('navigation', { name: 'Breadcrumb', exact: true })
       await expect.soft(trail, `${where}: one Breadcrumb landmark`).toHaveCount(1)
       const home = trail.getByRole('link', { name: 'Home', exact: true })

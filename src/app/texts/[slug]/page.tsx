@@ -1,12 +1,9 @@
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 
-import { Breadcrumbs } from '@/components/Breadcrumbs'
-import { Folio } from '@/components/Folio'
-import { PageTurn } from '@/components/PageTurn'
+import { PageTitle, ReadingPage, TitlePage } from '@/components/ReadingPage'
 import { Provenance, RecordLink, Text } from '@/components/prose'
 import { hrefFor, works, type PassageView, type RecordRef } from '@/content'
-import { cx } from '@/lib/cx'
 import { metadataFor } from '@/lib/metadata'
 import { toDevanagariDigits } from '@/lib/text'
 
@@ -99,34 +96,29 @@ export default async function WorkPage({ params }: PageProps<'/texts/[slug]'>) {
   if (!work) notFound()
 
   return (
-    <PageTurn>
-      <main id="main" className={reading.page}>
-        <Breadcrumbs path={hrefFor({ kind: 'work', id: work.slug })} />
-        <Folio as="article" className={reading.article} aria-labelledby="work-title">
-          <header className={reading.titlePage}>
-            <p className={reading.kicker}>Traditional text</p>
-            <h1 id="work-title" className={cx(reading.title, reading.titleLong)}>
-              <span lang={work.lang}>{work.title}</span>
-            </h1>
-            {work.term.devanagari ? (
-              <p lang="sa-Deva" className={styles.titleDeva}>
-                {work.term.devanagari}
-              </p>
-            ) : null}
-            {work.english ? <p className={reading.gloss}>{work.english}</p> : null}
-            <p className={listing.facts}>
-              {work.attribution ? <>{work.attribution} · </> : null}
-              {work.passageCount} {work.passageCount === 1 ? 'verse' : 'verses'} quoted
-            </p>
-          </header>
+    <ReadingPage path={hrefFor({ kind: 'work', id: work.slug })}>
+      <TitlePage>
+        <p className={reading.kicker}>Traditional text</p>
+        <PageTitle long>
+          <span lang={work.lang}>{work.title}</span>
+        </PageTitle>
+        {work.term.devanagari ? (
+          <p lang="sa-Deva" className={styles.titleDeva}>
+            {work.term.devanagari}
+          </p>
+        ) : null}
+        {work.english ? <p className={reading.gloss}>{work.english}</p> : null}
+        <p className={listing.facts}>
+          {work.attribution ? <>{work.attribution} · </> : null}
+          {work.passageCount} {work.passageCount === 1 ? 'verse' : 'verses'} quoted
+        </p>
+      </TitlePage>
 
-          {work.passages.map((passage) => (
-            <Passage key={passage.id} passage={passage} unit={work.locatorLabel} />
-          ))}
+      {work.passages.map((passage) => (
+        <Passage key={passage.id} passage={passage} unit={work.locatorLabel} />
+      ))}
 
-          <Provenance of={work} />
-        </Folio>
-      </main>
-    </PageTurn>
+      <Provenance of={work} />
+    </ReadingPage>
   )
 }
