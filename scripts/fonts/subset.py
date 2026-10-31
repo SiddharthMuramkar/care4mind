@@ -9,7 +9,10 @@ Google's own served subsets drop the combining marks ISO 15919 needs
 
 Usage (from the repo root):
     python -m venv .venv-fonts && .venv-fonts/bin/pip install -r scripts/fonts/requirements.txt
-    .venv-fonts/bin/python scripts/fonts/subset.py [--cache DIR] [--update-lock]
+    .venv-fonts/bin/python scripts/fonts/subset.py [--cache DIR] [--update-lock] [--only SLUG ...]
+
+--only rebuilds just the named family folders (playfair, tiro-devanagari-sanskrit). With
+--update-lock it re-records only those families' hashes and keeps the rest of the lock.
 """
 
 from __future__ import annotations
@@ -140,13 +143,14 @@ def ranges_to_unicodes(ranges: list[tuple[int, int]]) -> list[int]:
 
 
 def build(source_path: Path, source: Source, script: str, out_path: Path) -> None:
-    font = TTFont(source_path, lazy=False)
+    # Keep the source's head.modified, so the output depends only on the input.
+    font = TTFont(source_path, lazy=False, recalcTimestamp=False)
     if source.axes:
         # Round-trip through bytes so the subsetter sees fully compiled tables.
         buffer = io.BytesIO()
         instancer.instantiateVariableFont(font, source.axes).save(buffer)
         buffer.seek(0)
-        font = TTFont(buffer, lazy=False)
+        font = TTFont(buffer, lazy=False, recalcTimestamp=False)
     options = subset.Options()
     options.flavor = "woff2"
     options.layout_features = source.features
@@ -171,11 +175,14 @@ def main() -> None:
     parser.add_argument("--only", nargs="*", help="build only these family slugs")
     args = parser.parse_args()
 
-    # With --update-lock, start empty so the lock lists only the files this build uses.
-    lock: dict[str, str] = {} if args.update_lock or not LOCK_FILE.exists() else json.loads(LOCK_FILE.read_text())
-    for family in FAMILIES:
-        if args.only and family.slug not in args.only:
-            continue
+    lock: dict[str, str] = json.loads(LOCK_FILE.read_text()) if LOCK_FILE.exists() else {}
+    families = [family for family in FAMILIES if not args.only or family.slug in args.only]
+    if args.update_lock:
+        # Drop only the rebuilt families' entries, so the lock lists the files the build uses
+        # and keeps the hashes of families --only skipped.
+        rebuilt = {source.dir for family in families for source in family.sources}
+        lock = {key: digest for key, digest in lock.items() if key.split("/", 1)[0] not in rebuilt}
+    for family in families:
         for source in family.sources:
             path = fetch(source.dir, source.file, args.cache, lock, args.update_lock)
             build(path, source, family.script, OUT_DIR / family.slug / f"{source.out}.woff2")
