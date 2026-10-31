@@ -6,6 +6,8 @@ import { hrefFor, site } from '@/content'
 import { CONTENT_KINDS, type ContentRecord, type RecordOf } from '@/content/schema'
 import { localSource } from '@/content/source'
 
+import nextConfig from '../../next.config'
+
 // Front-end-site ticket 14: every address the current site served leads to its new page in one
 // hop (FR-07, D11, D17). The expected rows are design B4's decisions, with the slugs content-v1
 // shipped (`chittabhumi`, not the design's `citta-bhumi`).
@@ -153,6 +155,11 @@ describe('the table (FR-07)', () => {
     )
     // Next matches sources ignoring case, so two differing only in case would share a source too.
     expect(new Set(sources.map((source) => source.toLowerCase())).size).toBe(sources.length)
+  })
+
+  it('ignores case only while next.config leaves routes case-insensitive', () => {
+    // rowsCatching copies getPathMatch without the sensitive flag Next sets from this.
+    expect(nextConfig.experimental?.caseSensitiveRoutes).not.toBe(true)
   })
 
   it('writes each old address as the current site served it: lower case, with its slash', () => {
