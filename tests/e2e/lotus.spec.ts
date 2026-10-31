@@ -134,8 +134,13 @@ test('the choice holds across a client navigation, a reload and a new tab', asyn
 }) => {
   const elsewhere = ROUTES_IN_SCOPE.find(({ path }) => path !== '/')?.path ?? '/'
   await gotoReady(page, elsewhere)
-  await (await pauseButton(page)).click()
+  const pause = await pauseButton(page)
+  await pause.click()
+  await expect(pause).toHaveAttribute('aria-pressed', 'true')
+  const menu = page.getByRole('dialog', { name: 'Menu' })
+  const menuWasOpen = await menu.isVisible()
   await page.keyboard.press('Escape')
+  if (menuWasOpen) await expect(menu).toBeHidden()
   await page.getByRole('banner').getByRole('link', { name: 'Care4Mind home', exact: true }).click()
   await expect(page).toHaveURL(/\/$/)
   await expect.poll(() => noneMoving(page)).toBe(true)
