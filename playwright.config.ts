@@ -112,7 +112,6 @@ const projects: Project[] = [
     name: 'latency',
     use: { ...chrome, viewport: { width: 360, height: 800 } },
     testMatch: /latency\.spec\.ts/,
-    workers: 1,
   },
   // Firefox lacks scroll-driven animations and WebKit renders Devanagari with its own engine.
   {
