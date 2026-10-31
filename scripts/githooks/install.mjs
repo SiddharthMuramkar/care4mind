@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+// @ts-check
 // Installs the repo's git hooks (.githooks/) into the hooks folder that every checkout of the
 // repo shares, so each worktree is covered whichever branch it is on. pnpm runs it as `prepare`,
 // after an install that changed something.
@@ -36,7 +37,7 @@ export function plan(source, installed) {
   const is = versionOf(source)
   if (was === null)
     return { write: false, warning: 'it was not written by this script, so it is left alone' }
-  if (was > is)
+  if (typeof is === 'number' && was > is)
     return {
       write: false,
       warning: `the installed version (v${was}) is newer than this one (v${is})`,
@@ -86,6 +87,7 @@ if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1]
     for (const note of install(at === -1 ? process.cwd() : resolve(process.argv[at + 1] ?? '.')))
       console.error(`githooks: ${note}`)
   } catch (error) {
-    console.error(`githooks: not installed (${error.message})`)
+    const message = error instanceof Error ? error.message : String(error)
+    console.error(`githooks: not installed (${message})`)
   }
 }

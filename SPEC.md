@@ -87,6 +87,8 @@ An agent's PR is done when it's open, green and every review thread is answered.
 
 The content registry is rewritten by `dev`, `build`, `typecheck`, `test`, `test:e2e`, `check` and every Vitest run. A running `next dev` sees a new record file only once the registry is rewritten: rerun the registry script, or restart.
 
+The tools under `scripts/` are plain JavaScript checked by `tsc -p scripts` in `typecheck`: every one starts `// @ts-check`, and `tests/unit/scripts-typecheck.test.ts` keeps that true.
+
 ## Decisions still open
 
 The planning map, issue #6, lists them. Until each is decided, the code leaves its seam empty:

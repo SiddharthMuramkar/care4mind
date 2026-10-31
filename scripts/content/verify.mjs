@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+// @ts-check
 // The no-invented-text check: every string in a record must be found on the saved page it came
 // from, after normalising both sides and applying the record's listed edits.
 //
@@ -178,11 +179,14 @@ function parseEdit(edit) {
     }
   }
   const replacements = []
-  for (let at = 0; at + 1 < quotes.length; at += 1)
-    if (/^\s*→\s*$/.test(edit.slice(quotes[at].end, quotes[at + 1].start))) {
-      replacements.push([quotes[at].text, quotes[at + 1].text])
+  for (let at = 0; at + 1 < quotes.length; at += 1) {
+    const left = quotes[at]
+    const right = quotes[at + 1]
+    if (left && right && /^\s*→\s*$/.test(edit.slice(left.end, right.start))) {
+      replacements.push([left.text, right.text])
       at += 1
     }
+  }
   return { quotes: quotes.map((quote) => quote.text), replacements }
 }
 
@@ -207,15 +211,16 @@ function editDistance(a, b) {
   let previous = Array.from({ length: b.length + 1 }, (_, i) => i)
   for (let i = 1; i <= a.length; i += 1) {
     const current = [i]
+    const cell = (row, index) => row[index] ?? 0
     for (let j = 1; j <= b.length; j += 1)
       current[j] = Math.min(
-        previous[j] + 1,
-        current[j - 1] + 1,
-        previous[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1),
+        cell(previous, j) + 1,
+        cell(current, j - 1) + 1,
+        cell(previous, j - 1) + (a[i - 1] === b[j - 1] ? 0 : 1),
       )
     previous = current
   }
-  return previous[b.length]
+  return previous[b.length] ?? 0
 }
 
 function closestText(string, pages) {
@@ -224,11 +229,14 @@ function closestText(string, pages) {
   for (const word of target) wanted.set(word, (wanted.get(word) ?? 0) + 1)
   let best
   for (const page of pages) {
-    const words = [...page.text.matchAll(/\S+/g)].map((match) => ({
-      start: match.index,
-      end: match.index + match[0].length,
-      word: normalise(match[0]),
-    }))
+    const words = [...page.text.matchAll(/\S+/g)].map((match) => {
+      const start = match.index ?? 0
+      return {
+        start,
+        end: start + match[0].length,
+        word: normalise(match[0]),
+      }
+    })
     const size = Math.min(target.length, words.length)
     if (size === 0) continue
     // Shared words in a sliding window, kept up to date as it moves.
@@ -239,16 +247,23 @@ function closestText(string, pages) {
       held.set(word, (held.get(word) ?? 0) + change)
       shared += Math.min(held.get(word), wanted.get(word) ?? 0) - before
     }
-    for (let at = 0; at < size; at += 1) move(words[at].word, 1)
+    const wordAt = (index) => {
+      const found = words[index]
+      if (!found) throw new Error('the window ran past the page')
+      return found
+    }
+    for (let at = 0; at < size; at += 1) move(wordAt(at).word, 1)
     const windows = []
     for (let start = 0; ; start += 1) {
       windows.push({ start, shared })
       if (start + size >= words.length) break
-      move(words[start].word, -1)
-      move(words[start + size].word, 1)
+      move(wordAt(start).word, -1)
+      move(wordAt(start + size).word, 1)
     }
     windows.sort((a, b) => b.shared - a.shared)
-    const nothingShared = windows[0].shared === 0
+    const top = windows[0]
+    if (!top) continue
+    const nothingShared = top.shared === 0
     if (nothingShared && size > 3) continue
     const compared = nothingShared ? windows : windows.slice(0, WINDOWS_COMPARED)
     const wantedText = target.join(' ')
@@ -262,12 +277,15 @@ function closestText(string, pages) {
           .join(' ').length
       while (end < words.length && end < start + size + 5 && length() < wantedText.length) end += 1
       const window = words.slice(start, end)
+      const first = window[0]
+      const last = window.at(-1)
+      if (!first || !last) continue
       const distance = editDistance(wantedText, window.map((w) => w.word).join(' '))
       if (!best || distance < best.distance)
         best = {
           distance,
           url: page.url,
-          text: page.text.slice(window[0].start, window.at(-1).end),
+          text: page.text.slice(first.start, last.end),
         }
     }
   }

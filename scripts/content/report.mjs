@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+// @ts-check
 // Gathers every flag in the records into one pack, grouped by who must answer it, with the
 // drafted fields, each Questionnaire's held-back items and a map of the saved pages.
 //
@@ -49,7 +50,11 @@ export function buildReport(records, captures) {
         if (flag.ticket !== undefined) line.tickets.add(flag.ticket)
         notes.set(flag.note, line)
       }
-  const flagCount = (role) => [...byRole.get(role).values()].reduce((sum, l) => sum + l.count, 0)
+  const flagCount = (role) => {
+    const notes = byRole.get(role)
+    if (!notes) return 0
+    return [...notes.values()].reduce((sum, line) => sum + line.count, 0)
+  }
 
   out.push(
     '# Content v1 flags',
@@ -61,8 +66,10 @@ export function buildReport(records, captures) {
     ...ROLES.map(([role, title]) => `- ${title}: ${plural(flagCount(role), 'flag')}`),
   )
   for (const [role, title] of ROLES) {
+    const notes = byRole.get(role)
+    if (!notes) continue
     out.push('', `## ${title}: ${plural(flagCount(role), 'flag')}`, '')
-    for (const [note, line] of byRole.get(role)) {
+    for (const [note, line] of notes) {
       const tickets = [...line.tickets].sort((a, b) => a - b)
       const ticket =
         tickets.length === 0
@@ -71,10 +78,10 @@ export function buildReport(records, captures) {
       const named =
         line.records.length > 1
           ? `${line.records.length} records: ${line.records.join(', ')}`
-          : line.records[0]
+          : (line.records[0] ?? '')
       out.push(`- ${note} — ${named}${ticket}`)
     }
-    if (byRole.get(role).size === 0) out.push('None.')
+    if (notes.size === 0) out.push('None.')
   }
 
   // Fields written for the new site rather than carried over.
