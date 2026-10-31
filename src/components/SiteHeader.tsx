@@ -16,7 +16,7 @@ import styles from './SiteHeader.module.css'
 
 /**
  * The header every page shares, stuck to the top of the screen: the lotus and the wordmark,
- * leading home, then Concepts · Texts · Questionnaires · Library · Search, each a server-rendered
+ * leading home, then the section links and Search, each a server-rendered
  * link that works without JavaScript. On a computer Concepts and Library open panels, and "Pause
  * the lotus" ends the strip; on a narrow screen the sections and the pause move into the Menu's
  * Drawer, and Search stays.
