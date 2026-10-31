@@ -455,6 +455,7 @@ export interface HomepageView extends CarriedOver {
   intro: Inline
   areas: readonly { title: string; text: Inline; href?: string }[]
   closing: Inline
+  helpLine?: Inline
 }
 
 // Site derivations (`site`)
