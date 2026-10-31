@@ -48,14 +48,14 @@ test('a lotus moves by transform and opacity alone, its strokes whole, at most 3
   }
 })
 
-test('the button is on every page, unpressed', async ({ page }) => {
-  for (const { path } of ROUTES_IN_SCOPE) {
+for (const { path } of ROUTES_IN_SCOPE) {
+  test(`the button is on ${path}, unpressed`, async ({ page }) => {
     await gotoReady(page, path)
     const pause = await pauseButton(page)
-    await expect(pause, path).toBeVisible()
-    await expect(pause, path).toHaveAttribute('aria-pressed', 'false')
-  }
-})
+    await expect(pause).toBeVisible()
+    await expect(pause).toHaveAttribute('aria-pressed', 'false')
+  })
+}
 
 test('pressing it stills every lotus within two frames, and pressing again sets them breathing', async ({
   page,
