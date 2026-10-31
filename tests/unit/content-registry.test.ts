@@ -441,6 +441,34 @@ describe('the graph', () => {
     )
   })
 
+  describe('a Questionnaire form', () => {
+    const item = (id: string) => ({ id, text: 'A made-up statement.', responseSet: 'yes' })
+    const part = (id: string, ...items: string[]) => ({
+      id,
+      title: 'A part',
+      instructions: 'Answer each.',
+      items: items.map(item),
+    })
+    const withParts = (...parts: ReturnType<typeof part>[]) =>
+      defineQuestionnaire({ ...profile, form: { responseSets: { yes: ['Yes', 'No'] }, parts } })
+    const others = world.filter((record) => record !== profile)
+
+    it('refuses an item id repeated within the form', async () => {
+      const build = buildGraph(sourceOf(...others, withParts(part('a', 'q1'), part('b', 'q1'))))
+      await expect(build).rejects.toThrow(DanglingIdError)
+      await expect(build).rejects.toThrow(
+        'questionnaire “example”, field form.parts[1].items[0].id: item “q1” repeated',
+      )
+    })
+
+    it('refuses a repeated part id', async () => {
+      const build = buildGraph(sourceOf(...others, withParts(part('a', 'q1'), part('a', 'q2'))))
+      await expect(build).rejects.toThrow(
+        'questionnaire “example”, field form.parts[1].id: part “a” repeated',
+      )
+    })
+  })
+
   it('is built once per source', async () => {
     const source = sourceOf(...world)
     expect(await graphFor(source)).toBe(await graphFor(source))

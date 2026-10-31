@@ -67,6 +67,16 @@ describe('the flow', () => {
     expect(progressText(progressOf(state))).toBe('Part 1 of 4 · 0 of 45 answered')
   })
 
+  it('starts a statement named like an object property unanswered', () => {
+    const item = { ...nth(itemsOf(1), 0), id: 'constructor' }
+    const named = { parts: [{ ...nth(form.parts, 0), items: [item] }] }
+    const state = flowReducer(startFlow(named), { type: 'next' })
+    expect(state.step).toBe('part-1')
+    expect(state.missing).toEqual(['constructor'])
+    expect(progressOf(state).answered).toBe(0)
+    expect(scoreQuestionnaire(named, {})).toEqual({ status: 'incomplete' })
+  })
+
   it('counts each statement answered, once however often it changes', () => {
     const [first, second] = [nth(itemsOf(1), 0), nth(itemsOf(1), 1)]
     const state = play(
