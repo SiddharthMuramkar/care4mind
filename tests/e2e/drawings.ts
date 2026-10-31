@@ -47,7 +47,7 @@ export const isDrawing = (line: Locator) =>
 export const undrawn = (line: Locator) =>
   line.evaluate((element) => parseFloat(getComputedStyle(element).strokeDashoffset))
 
-interface Start {
+export interface Start {
   target: Element
   /** How long it runs, in ms. Scroll-driven animations have no duration in time. */
   duration: number | null

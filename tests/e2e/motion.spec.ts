@@ -106,7 +106,11 @@ test("the opening folio's Fleuron is finished from the first paint, with nothing
     await expect(stroke).toHaveCSS('stroke-dashoffset', '0px')
     expect(await animationsStartedOn(stroke), 'nothing started on it').toEqual([])
   }
-  expect(await animationsStartedOn(fleuron.locator('circle'))).toEqual([])
+  const circles = await fleuron.locator('circle').all()
+  expect(circles.length).toBeGreaterThan(0)
+  for (const circle of circles) {
+    expect(await animationsStartedOn(circle), 'nothing started on it').toEqual([])
+  }
 })
 
 test('the References plus becomes a minus at once, with nothing moving, with reduced motion', async ({

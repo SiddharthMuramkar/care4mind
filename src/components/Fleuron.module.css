@@ -15,6 +15,12 @@
   stroke-width: 2.6;
 }
 
+/* The glow and the ripples show only as the lotus breathes. */
+.halo,
+.ripple {
+  opacity: 0;
+}
+
 /*
  * The opening draw, as a pen would make it: the middle petal, then the two
  * beside it, then the rules running out from the flower, and last the dot set
@@ -43,21 +49,22 @@
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  .draw path {
+  .draw .centre,
+  .draw .side,
+  .draw .rule {
     animation: draw var(--duration-stroke) var(--ease-in-out) backwards;
   }
 
-  .draw path:nth-child(2),
-  .draw path:nth-child(3) {
+  .draw .side {
     animation-delay: calc(var(--duration-stroke) / 3);
   }
 
-  .draw path:nth-child(n + 4) {
+  .draw .rule {
     animation-delay: calc(var(--duration-stroke) * 2 / 3);
     animation-timing-function: var(--ease-out);
   }
 
-  .draw circle {
+  .draw .dot {
     transform-box: fill-box;
     transform-origin: center;
     animation: set-down var(--duration-quick) var(--ease-out) var(--duration-stroke) backwards;
