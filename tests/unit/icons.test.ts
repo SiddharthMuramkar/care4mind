@@ -44,6 +44,20 @@ describe('the tab icon, icon.svg', () => {
     )
   })
 
+  it('is drawn in lines: the petals stroked and unfilled, and no disc behind them', () => {
+    const svg = iconSvg()
+    expect(elements(svg, 'g')).toContainEqual(
+      expect.objectContaining({ fill: 'none', stroke: colourTokens().get('highlight') }),
+    )
+    expect(elements(svg, 'circle'), 'circles in the icon beside its dot').toHaveLength(1)
+  })
+
+  it('turns to the paper ink on a dark tab bar, where vermilion lines would sink', () => {
+    const svg = iconSvg()
+    expect(svg).toContain('prefers-color-scheme: dark')
+    expect(svg).toContain(colourTokens().get('ink'))
+  })
+
   it('paints only in colour tokens, as an SVG served on its own can’t read var()', () => {
     const hexes = iconSvg().match(/#[0-9a-f]{3,8}\b/gi) ?? []
     expect(hexes, 'colours in icon.svg').not.toEqual([])

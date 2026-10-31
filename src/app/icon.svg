@@ -1,7 +1,12 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="42 -16 76 76">
-  <!-- The Fleuron's lotus on the wordmark's roundel. pnpm icons redraws apple-icon.png from this. -->
-  <circle cx="80" cy="22" r="38" fill="#c8342a"/>
-  <g fill="#ffffff" stroke="#ffffff" stroke-width="3" stroke-linejoin="round">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="46 -14 68 68">
+  <!-- The Fleuron's lotus in lines. pnpm icons redraws apple-icon.png from this. -->
+  <style>
+    @media (prefers-color-scheme: dark) {
+      g { stroke: #f3ecdc; }
+      circle { fill: #f3ecdc; }
+    }
+  </style>
+  <g fill="none" stroke="#c8342a" stroke-width="4.2" stroke-linejoin="round" stroke-linecap="round">
     <path d="M80 4c7 9 7 21 0 32-7-11-7-23 0-32Z"/>
     <path d="M80 36c-9-8-20-11-31-9 8-8 22-7 31 9Z"/>
     <path d="M80 36c9-8 20-11 31-9-8-8-22-7-31 9Z"/>

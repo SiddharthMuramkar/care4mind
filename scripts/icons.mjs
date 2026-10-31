@@ -30,7 +30,11 @@ const icon = `data:image/svg+xml;base64,${readFileSync(ICON).toString('base64')}
 const { chromium } = await import('@playwright/test')
 const browser = await chromium.launch()
 try {
-  const page = await browser.newPage({ viewport: { width: SIZE, height: SIZE } })
+  // Dark, as the ground is dark: the icon's own dark colours (paper ink, not vermilion) are drawn.
+  const page = await browser.newPage({
+    viewport: { width: SIZE, height: SIZE },
+    colorScheme: 'dark',
+  })
   await page.setContent(
     `<!doctype html><body style="margin:0;height:100vh;display:grid;place-items:center;background:${ground()}">` +
       `<img src="${icon}" width="${DRAWN}" height="${DRAWN}" alt=""></body>`,

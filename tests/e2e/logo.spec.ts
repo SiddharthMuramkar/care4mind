@@ -12,7 +12,7 @@ const footerWordmark = (page: Page) =>
 
 const LOTUS = 'svg[data-lotus]'
 
-/** Line art or pictures: anything drawn beyond the lotus, the type and the 4's roundel. */
+/** Line art or pictures: anything drawn beyond the lotus, the type and the 4's ring. */
 const LINE_ART = `:is(path, line, polyline, polygon, img, canvas):not(${LOTUS} *)`
 
 /** Animations on the element or anything inside it, running or finished, since the page began. */
@@ -47,9 +47,9 @@ for (const { path, name } of [...PAGES, { path: MISSING, name: '404 page' }]) {
       'the lotus is left of the wordmark',
     ).toBeLessThanOrEqual(wordmark?.x ?? -Infinity)
     await expect(logo).toHaveText('Care4Mind')
-    // The lotus, then type and its roundel: no other line drawing in it.
+    // The lotus, then type and its ring: no other line drawing in it.
     await expect(logo.locator(LINE_ART)).toHaveCount(0)
-    // WCAG 2.5.3: the visible "Care4Mind" is in the name, and the roundel adds nothing to what is announced.
+    // WCAG 2.5.3: the visible "Care4Mind" is in the name, and the ring adds nothing to what is announced.
     await expect(logo).toMatchAriaSnapshot(`
       - /children: deep-equal
       - link "Care4Mind home":
@@ -77,11 +77,11 @@ test('the mark adds no stop of its own to the tab order', async ({ page }) => {
 })
 
 /**
- * The roundel behind the wordmark's 4, as drawn on screen: whether it is
- * vermilion, round, and has the white 4 at its centre. Read from a screenshot
- * round the figure, so it holds however the roundel is made.
+ * The ring round the wordmark's 4, as drawn on screen: whether it is vermilion,
+ * round, hollow, and has the white 4 at its centre. Read from a screenshot
+ * round the figure, so it holds however the ring is made.
  */
-async function roundel(wordmark: Locator) {
+async function ring(wordmark: Locator) {
   const four = wordmark.getByText('4', { exact: true })
   await four.scrollIntoViewIfNeeded()
   const box = await four.boundingBox()
@@ -130,9 +130,19 @@ async function roundel(wordmark: Locator) {
       }
       return found
     }
-    const disc = extent(vermilion)
-    const centre = { x: (disc.left + disc.right) / 2, y: (disc.top + disc.bottom) / 2 }
-    const radius = (disc.right - disc.left) / 2
+    const outline = extent(vermilion)
+    const centre = {
+      x: (outline.left + outline.right) / 2,
+      y: (outline.top + outline.bottom) / 2,
+    }
+    const radius = (outline.right - outline.left) / 2
+    // How much of its bounding square the vermilion covers: a filled disc most of it, less
+    // the white figure; a ring only its band.
+    let vermilionPixels = 0
+    for (let y = 0; y < height; y++) {
+      for (let x = 0; x < width; x++) if (vermilion(x, y)) vermilionPixels++
+    }
+    const coverage = vermilionPixels / (2 * radius * (2 * radius))
     // How far the vermilion reaches from the centre in a direction: its outermost pixel that way.
     const reach = (dx: number, dy: number) => {
       let furthest = 0
@@ -155,8 +165,9 @@ async function roundel(wordmark: Locator) {
     }
     return {
       vermilion: radius > 5,
-      // A disc reaches as far every way; a square would reach 1.41 times as far on its diagonals.
+      // A circle reaches as far every way; a square would reach 1.41 times as far on its diagonals.
       round: Math.max(...reaches) / Math.min(...reaches) < 1.15,
+      hollow: coverage < 0.45,
       holdsTheFigure:
         figure.right > figure.left &&
         Math.abs(figureCentre.x - centre.x) < radius * 0.2 &&
@@ -165,14 +176,14 @@ async function roundel(wordmark: Locator) {
   }, shot.toString('base64'))
 }
 
-const VERMILION_ROUNDEL = { vermilion: true, round: true, holdsTheFigure: true }
+const VERMILION_RING = { vermilion: true, round: true, hollow: true, holdsTheFigure: true }
 
-test("the wordmark's 4 sits in a vermilion roundel, in the header and the footer", async ({
+test("the wordmark's 4 sits in a vermilion ring, in the header and the footer", async ({
   page,
 }) => {
   await gotoReady(page, '/')
-  expect(await roundel(homeLink(page))).toEqual(VERMILION_ROUNDEL)
-  expect(await roundel(footerWordmark(page))).toEqual(VERMILION_ROUNDEL)
+  expect(await ring(homeLink(page))).toEqual(VERMILION_RING)
+  expect(await ring(footerWordmark(page))).toEqual(VERMILION_RING)
 })
 
 test('pointing at or focusing the logo animates nothing beside its breathing lotus', async ({
