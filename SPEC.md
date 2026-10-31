@@ -18,7 +18,7 @@ Each module is named by its capability, and outside code reaches it only through
 - **Feature flags**: `features`, read once at build, on the server. A client component gets a flag as a prop. A feature that's built but not yet approved for launch is on in previews and off in production. _Tests: features. Review for the server-only reading._
 - **Redirects**: one table, each entry served as a 301. _Tests: redirects (unit and browser)._
 - **Questionnaire flow**: one reducer holds a person's answers, and nothing else does (no storage, cookies, address or request). No record stores scoring until the Psychology expert's rules arrive. _Types (`scoring.status` is `'pending'`), the content-integrity "held back" test, review._
-- **Press**, the one design language. Colours, durations, easings and layers are tokens in the global stylesheet. Each component styles itself through its own CSS module, reading those tokens with `var()`. Tailwind supplies only the tokens and Preflight: the one global class markup uses from it is `sr-only`, and the site adds `skip-link` of its own. A colour chosen by content (a topic, a Questionnaire status) is mapped from a data attribute in the global stylesheet. _The contrast test checks the listed colour pairs; review checks the rest._
+- **Press**, the one design language. Colours, durations, easings and layers are tokens in the global stylesheet. Each component styles itself through its own CSS module, reading those tokens with `var()`. Tailwind supplies only the tokens and Preflight: the one global class markup uses from it is `sr-only`, and the site adds `skip-link` of its own. A colour chosen by content (a topic, a Questionnaire status) is mapped from a data attribute in the global stylesheet. Every lotus breathes by CSS alone, moving transform and opacity; it is still under reduced motion and once the visitor pauses it. _Browser: lotus, motion._ _The contrast test checks the listed colour pairs; review checks the rest._
 - **The agent guard**: `.claude/hooks/guard.mjs`, which Claude Code runs before every Bash, Edit and Write call in this repo, subagents included (`.claude/settings.json`). One pure `decide()` reads the command the way the shell would and answers deny, ask or nothing. _Tests: guard._
 - **The ruleset as code**: `.github/rulesets/main.json`, compared with GitHub by `pnpm ruleset:check` and applied by `pnpm ruleset:apply --commit <sha>`. _Tests: ruleset._
 
@@ -43,6 +43,7 @@ These are judgement calls, so review checks them against the diff, in the codeba
 | No record stores scoring | types and the content-integrity test |
 | Press colour pairs meet contrast | contrast test, for the pairs it lists. Colours mixed inside modules are unchecked (#79) |
 | Icon and manifest colours equal their tokens | icons test |
+| Lotus motion is CSS only, transform and opacity, still under reduced motion and when paused | lotus and motion specs |
 | A `styles.x` lookup names a class its CSS module defines | nothing yet (#67) |
 | IAST and Devanagari carry `lang` | components, for name fields and Devanagari runs. IAST inside running text is untagged (#76) |
 | Carried-over text changes only to fix a listed error | `verify.mjs`, which runs only on a machine with the captures; nothing in CI (#48) |

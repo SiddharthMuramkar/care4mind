@@ -1,3 +1,5 @@
+import type { ReactNode } from 'react'
+
 import { cx } from '@/lib/cx'
 
 import styles from './Fleuron.module.css'
@@ -12,6 +14,7 @@ import { LOTUS } from './lotus'
 export function Fleuron({ className, draw = false }: { className?: string; draw?: boolean }) {
   return (
     <svg
+      data-lotus=""
       className={cx(styles.fleuron, draw && styles.draw, className)}
       viewBox="0 0 160 40"
       width={160}
@@ -20,13 +23,25 @@ export function Fleuron({ className, draw = false }: { className?: string; draw?
       focusable="false"
     >
       <g fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round">
-        <path pathLength={1} d={LOTUS.petals.centre} />
-        <path pathLength={1} d={LOTUS.petals.left} />
-        <path pathLength={1} d={LOTUS.petals.right} />
-        <path pathLength={1} d="M42 30H2" />
-        <path pathLength={1} d="M118 30h40" />
+        <Flower />
+        <path className={styles.rule} pathLength={1} d="M42 30H2" />
+        <path className={styles.rule} pathLength={1} d="M118 30h40" />
+        {/* Lines, not paths: a path here is a stroke of the draw-in, and a ripple never draws in. */}
+        <line
+          className={cx(styles.ripple, styles.rippleLeft)}
+          x1={40}
+          y1={33.5}
+          x2={28}
+          y2={33.5}
+        />
+        <line
+          className={cx(styles.ripple, styles.rippleRight)}
+          x1={120}
+          y1={33.5}
+          x2={132}
+          y2={33.5}
+        />
       </g>
-      <circle cx={LOTUS.dot.cx} cy={LOTUS.dot.cy} r={LOTUS.dot.r} fill="currentColor" />
     </svg>
   )
 }
@@ -51,12 +66,53 @@ export function LotusMark({ className }: { className?: string }) {
     >
       <svg viewBox="0 0 160 40" width={160} height={40}>
         <g fill="none" stroke="currentColor" strokeLinecap="round">
-          <path d={LOTUS.petals.centre} />
-          <path d={LOTUS.petals.left} />
-          <path d={LOTUS.petals.right} />
+          <Flower />
         </g>
-        <circle cx={LOTUS.dot.cx} cy={LOTUS.dot.cy} r={LOTUS.dot.r} fill="currentColor" />
       </svg>
     </svg>
+  )
+}
+
+/**
+ * Each petal in groups of its own, one per kind of motion: a running transition overrides an
+ * animation on the same element. The heart rides on the centre petal.
+ */
+function Flower() {
+  return (
+    <>
+      <Petal petal={styles.petalCentre} breath={styles.breathCentre}>
+        <path className={styles.centre} pathLength={1} d={LOTUS.petals.centre} />
+        <g className={styles.heart} fill="currentColor" stroke="none">
+          <circle className={styles.halo} cx={LOTUS.dot.cx} cy={LOTUS.dot.cy} r={LOTUS.dot.r} />
+          <circle className={styles.dot} cx={LOTUS.dot.cx} cy={LOTUS.dot.cy} r={LOTUS.dot.r} />
+        </g>
+      </Petal>
+      <Petal petal={styles.petalLeft} breath={styles.breathLeft}>
+        <path className={styles.side} pathLength={1} d={LOTUS.petals.left} />
+      </Petal>
+      <Petal petal={styles.petalRight} breath={styles.breathRight}>
+        <path className={styles.side} pathLength={1} d={LOTUS.petals.right} />
+      </Petal>
+    </>
+  )
+}
+
+function Petal({
+  petal,
+  breath,
+  children,
+}: {
+  petal?: string
+  breath?: string
+  children: ReactNode
+}) {
+  return (
+    <g className={cx(styles.lean, petal)}>
+      <g className={styles.open}>
+        <g className={styles.bloom}>
+          <g className={cx(styles.breath, breath)}>{children}</g>
+        </g>
+      </g>
+    </g>
   )
 }

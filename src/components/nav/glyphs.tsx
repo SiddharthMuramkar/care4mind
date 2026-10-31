@@ -98,6 +98,40 @@ export function ArrowGlyph({ className }: GlyphProps) {
 }
 
 /**
+ * Pause the lotus: two bars in a hairline roundel. Pressed, a white play triangle in a vermilion
+ * roundel, like the wordmark's 4.
+ */
+export function PauseGlyph({ className, pressed }: GlyphProps & { pressed: boolean }) {
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 32 32"
+      width="32"
+      height="32"
+      strokeWidth={2.25}
+      {...common}
+    >
+      {pressed ? (
+        <>
+          <circle cx="16" cy="16" r="15" fill="var(--color-highlight)" stroke="none" />
+          <path
+            d="M13 10.5 22 16l-9 5.5Z"
+            fill="var(--color-highlight-ink)"
+            stroke="var(--color-highlight-ink)"
+            strokeWidth={1.5}
+          />
+        </>
+      ) : (
+        <>
+          <circle cx="16" cy="16" r="14.5" strokeWidth={1} />
+          <path d="M13 11v10M19 11v10" />
+        </>
+      )}
+    </svg>
+  )
+}
+
+/**
  * Done: a tick in a vermilion roundel, like the wordmark's 4. The tick is one stroke
  * (`pathLength` 1), so a parent can ink it in by its dash offset.
  */

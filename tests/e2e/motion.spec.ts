@@ -8,6 +8,7 @@ import {
   unfinishedRules,
 } from './drawings'
 import { expect, gotoReady, test } from './fixtures'
+import { breathes, lotuses, lotusStarts } from './lotuses'
 import { inPageTransitions, pageTurns, prefetched, recordPageTurns } from './page-turns'
 import { inkSpreadsOn, recordInkSpreads } from './presses'
 import { READING_PAGES, readingThread, readTo } from './reading'
@@ -84,12 +85,15 @@ for (const route of ROUTES_IN_SCOPE) {
 test('the 404 page shows its Fleuron finished and still, with reduced motion', async ({ page }) => {
   await recordAnimationStarts(page)
   await gotoReady(page, MISSING)
-  const strokes = page.getByRole('main').locator('svg path')
-  await expect(strokes.first()).toBeVisible()
+  const fleuron = page.getByRole('main').locator('svg[data-lotus]')
+  await expect(fleuron).toBeVisible()
   expect(await unfinishedDrawings(page)).toEqual([])
   expect(await movingAnimations(page)).toEqual([])
-  for (const stroke of await strokes.all()) {
-    expect(await animationsStartedOn(stroke), 'nothing started on it').toEqual([])
+  expect(await breathes(fleuron), 'it never breathes').toBe(false)
+  const parts = await fleuron.locator('*').all()
+  expect(parts.length).toBeGreaterThan(1)
+  for (const part of parts) {
+    expect(await animationsStartedOn(part), 'nothing started on it').toEqual([])
   }
 })
 
@@ -98,15 +102,48 @@ test("the opening folio's Fleuron is finished from the first paint, with nothing
 }) => {
   await recordAnimationStarts(page)
   await gotoReady(page, '/')
-  const fleuron = openingFolio(page).locator('svg')
+  const fleuron = openingFolio(page).locator('svg[data-lotus]')
   await expect(fleuron).toBeVisible()
   const strokes = await fleuron.locator('path').all()
   expect(strokes.length).toBeGreaterThan(1)
   for (const stroke of strokes) {
     await expect(stroke).toHaveCSS('stroke-dashoffset', '0px')
-    expect(await animationsStartedOn(stroke), 'nothing started on it').toEqual([])
   }
-  expect(await animationsStartedOn(fleuron.locator('circle'))).toEqual([])
+  // The halo and the dot at the heart.
+  const circles = await fleuron.locator('circle').all()
+  expect(circles).toHaveLength(2)
+  for (const circle of circles) {
+    expect(await animationsStartedOn(circle), 'nothing started on a circle').toEqual([])
+  }
+  for (const part of await fleuron.locator('*').all()) {
+    expect(await animationsStartedOn(part), 'nothing started on any part').toEqual([])
+  }
+  expect(await breathes(fleuron), 'it never breathes').toBe(false)
+})
+
+for (const path of ['/', '/concepts/vikshepa/', MISSING]) {
+  test(`every lotus on ${path} is still, with reduced motion`, async ({ page }) => {
+    await recordAnimationStarts(page)
+    await gotoReady(page, path)
+    const all = await lotuses(page).all()
+    expect(all.length).toBeGreaterThan(0)
+    for (const lotus of all) {
+      expect(await breathes(lotus), 'it never breathes').toBe(false)
+    }
+    expect(await lotusStarts(page), 'nothing started on a lotus').toEqual([])
+  })
+}
+
+test('there is no "Pause the lotus" button to press, with reduced motion', async ({ page }) => {
+  await gotoReady(page, '/')
+  const pause = { name: 'Pause the lotus', exact: true }
+  await expect(page.getByRole('button', pause)).toHaveCount(0)
+  const menu = page.getByRole('banner').getByRole('button', { name: 'Menu', exact: true })
+  if (await menu.isVisible()) {
+    await menu.click()
+    await expect(page.getByRole('dialog', { name: 'Menu' })).toBeVisible()
+    await expect(page.getByRole('button', pause)).toHaveCount(0)
+  }
 })
 
 test('the References plus becomes a minus at once, with nothing moving, with reduced motion', async ({
@@ -222,3 +259,27 @@ for (const { path, name } of READING_PAGES) {
     expect(await readingThread(page)).toBeNull()
   })
 }
+
+test("pointing at and pressing a lotus moves nothing, with reduced motion, and the logo's still leads home", async ({
+  page,
+}) => {
+  await gotoReady(page, '/')
+  const main = page.getByRole('main').locator('svg[data-lotus]')
+  const logo = page
+    .getByRole('banner')
+    .getByRole('link', { name: 'Care4Mind home', exact: true })
+    .locator('svg[data-lotus]')
+  for (const lotus of [main.first(), main.last(), logo]) {
+    const box = await lotus.boundingBox()
+    if (!box) continue
+    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2)
+    await lotus.click({ force: true })
+    await expect(lotus).not.toHaveAttribute('data-lotus-bloom')
+    expect(await lotus.evaluate((svg) => svg.style.getPropertyValue('--lotus-near'))).toBe('')
+    expect(await movingAnimations(page)).toEqual([])
+  }
+  await expect(page).toHaveURL('/')
+  await gotoReady(page, '/concepts/')
+  await logo.click()
+  await expect(page).toHaveURL('/')
+})

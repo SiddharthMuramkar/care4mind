@@ -4,6 +4,8 @@ import type { ReactNode } from 'react'
 import { HydrationMarker } from '@/components/HydrationMarker'
 import { InkSpread } from '@/components/InkSpread'
 import { LateFonts } from '@/components/LateFonts'
+import { LotusHeadScript } from '@/components/LotusHeadScript'
+import { LotusPointer } from '@/components/LotusPointer'
 import { LinkPreviewRoot } from '@/components/preview/LinkPreviewRoot'
 import { HeadScript } from '@/components/script/HeadScript'
 import { SiteFooter } from '@/components/SiteFooter'
@@ -38,10 +40,13 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       // Smooth scrolling is for in-page links: with this, Next.js jumps on page changes.
       data-scroll-behavior="smooth"
       className={playfairText.variable}
-      // The head script (ticket 13) marks <html> with the reader's script before React hydrates.
+      // The head scripts mark <html> with the reader's choices before React hydrates.
       suppressHydrationWarning
     >
-      <head>{features.devanagariFirst ? <HeadScript /> : null}</head>
+      <head>
+        <LotusHeadScript />
+        {features.devanagariFirst ? <HeadScript /> : null}
+      </head>
       <body>
         <a href="#main" className="skip-link">
           Skip to content
@@ -52,6 +57,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <Toaster />
         <LinkPreviewRoot />
         <InkSpread />
+        <LotusPointer />
         <HydrationMarker />
         <LateFonts faces={[...playfairTextStyles, playfairDisplay, tiroDevanagariSanskrit]} />
       </body>
