@@ -47,8 +47,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # 21 minutes of tests on one worker: 3 shards of 2 workers take about 5 minutes each.
-        shard: [1, 2, 3]
+        # Sized from measured test times: 4 shards of 2 workers take about 5 minutes each.
+        shard: [1, 2, 3, 4]
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
