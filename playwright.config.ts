@@ -125,7 +125,8 @@ export default defineConfig({
   forbidOnly: Boolean(process.env.CI),
   workers: workers(),
   retries: retries(),
-  reporter: process.env.CI ? [['github'], ['html', { open: 'never' }]] : 'list',
+  // CI runs the tests in shards and merges their blobs into one HTML report.
+  reporter: process.env.CI ? [['github'], ['blob']] : 'list',
   use: {
     baseURL,
     // A failed run keeps its trace, and so does each retry, even one that passes.
