@@ -14,7 +14,7 @@
   max-width: 16ch;
 }
 
-/* The lotus Fleuron, still: a wrong turn is still a page of the book. */
+/* The lotus Fleuron, breathing as on every page: a wrong turn is still a page of the book. */
 .fleuron {
   width: min(10rem, 50%);
   color: var(--color-highlight);
