@@ -20,6 +20,8 @@
     0 28px 48px -20px color-mix(in srgb, var(--color-ground) 80%, transparent);
   transform-origin: var(--transform-origin);
   outline: 0;
+  /* Forced colours drop the shadow and paint this border; elsewhere it is invisible. */
+  border: 1px solid transparent;
 }
 
 @media (prefers-reduced-motion: no-preference) {

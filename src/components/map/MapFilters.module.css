@@ -113,6 +113,16 @@
   outline-offset: 2px;
 }
 
+/* Windows' contrast themes repaint a pressed chip's fill, so it takes the highlight colours. */
+@media (forced-colors: active) {
+  .chip[aria-pressed='true'] {
+    forced-color-adjust: none;
+    background: Highlight;
+    color: HighlightText;
+    border-color: Highlight;
+  }
+}
+
 .swatch {
   width: 1.9em;
 }

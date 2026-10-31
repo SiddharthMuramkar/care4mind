@@ -38,7 +38,8 @@
 .popup {
   /* Centred on the screen, as browsers place a popover, until the anchored placement below. */
   margin: auto;
-  border: 0;
+  /* Forced colours drop the shadow and paint this border; elsewhere it is invisible. */
+  border: 1px solid transparent;
   min-width: 14rem;
   max-width: min(22rem, calc(100vw - 2rem));
   padding: 1.25rem 1.5rem;

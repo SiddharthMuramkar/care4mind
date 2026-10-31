@@ -20,6 +20,8 @@
   background: var(--color-surface);
   color: var(--color-surface-ink);
   transform: translate(-50%, -50%);
+  /* Forced colours drop the shadow and paint this border; elsewhere it is invisible. */
+  border: 1px solid transparent;
   box-shadow:
     inset 0 0 0 8px var(--color-surface),
     inset 0 0 0 9px color-mix(in srgb, var(--color-surface-ink) 55%, transparent),

@@ -52,6 +52,8 @@
 .secondary {
   color: var(--color-surface-ink);
   box-shadow: inset 0 0 0 1px currentColor;
+  /* Forced colours drop the shadow and paint this border; elsewhere it is invisible. */
+  border: 1px solid transparent;
 }
 
 .secondary:active {

@@ -655,3 +655,11 @@
     border-color: currentColor;
   }
 }
+
+/* Windows' contrast themes repaint the pill's fill and border, so a chosen answer keeps an edge. */
+@media (forced-colors: active) {
+  .option:has(.radio:checked) {
+    outline: 2px solid CanvasText;
+    outline-offset: -4px;
+  }
+}

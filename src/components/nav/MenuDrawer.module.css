@@ -36,6 +36,8 @@
     -2rem 0 4rem -2rem color-mix(in srgb, var(--color-ground) 85%, transparent);
   transform: translateX(var(--drawer-swipe-movement-x, 0px));
   outline: 0;
+  /* Forced colours drop the shadow and paint this border; elsewhere it is invisible. */
+  border: 1px solid transparent;
   touch-action: pan-y;
 }
 
