@@ -15,7 +15,6 @@ import {
   useRef,
   useState,
   ViewTransition,
-  type MouseEvent,
   type ReactNode,
 } from 'react'
 
@@ -79,9 +78,16 @@ function focusStatement(item: string, behavior?: ScrollBehavior) {
   option?.focus({ preventScroll: true })
 }
 
-/** A plain press of a link, which the flow answers itself; others open the link as usual. */
-const plainPress = (event: MouseEvent) =>
-  event.button === 0 && !event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey
+/** A plain press: the left button, with no modifier. Modified clicks open the link as usual. */
+const plainPress = (event: {
+  button: number
+  metaKey: boolean
+  ctrlKey: boolean
+  shiftKey: boolean
+  altKey: boolean
+}) => event.button === 0 && !event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey
+
+const LEAVE = 'Leave this Questionnaire? The answers you gave will be lost.'
 
 /**
  * Taking a Questionnaire, one part per screen, then a review and the end screen (C4). Every
@@ -147,13 +153,27 @@ export function Flow({ form, instructions, intro, limits, sources }: Props) {
     return () => window.removeEventListener('popstate', listener)
   }, [])
 
-  // Leaving with answers given and the end screen not reached asks first.
+  // A reload asks, and so does a plain press on a same-origin link to another page.
+  // Same-page links are the flow's own (a statement's hash, and Change). Browser Back from
+  // part 1 is a traversal this cannot cancel.
   const dirty = unsaved(state)
   useEffect(() => {
     if (!dirty) return
     const warn = (event: BeforeUnloadEvent) => event.preventDefault()
+    const ask = (event: globalThis.MouseEvent) => {
+      if (!plainPress(event)) return
+      const link = event.target instanceof Element ? event.target.closest('a[href]') : null
+      if (!(link instanceof HTMLAnchorElement)) return
+      if (link.origin !== window.location.origin) return
+      if (link.pathname === window.location.pathname) return
+      if (!window.confirm(LEAVE)) event.preventDefault()
+    }
     window.addEventListener('beforeunload', warn)
-    return () => window.removeEventListener('beforeunload', warn)
+    document.addEventListener('click', ask, true)
+    return () => {
+      window.removeEventListener('beforeunload', warn)
+      document.removeEventListener('click', ask, true)
+    }
   }, [dirty])
 
   const part = partOf(state.step)

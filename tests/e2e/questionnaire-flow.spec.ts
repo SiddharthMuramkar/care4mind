@@ -439,6 +439,50 @@ test.describe('the KarmaYoga flow', () => {
     }
   })
 
+  test('asks before a link leaves, and dismissing it keeps the answer', async ({ page }) => {
+    const dialogs: string[] = []
+    let accept = false
+    page.on('dialog', (dialog) => {
+      dialogs.push(dialog.type())
+      void (accept ? dialog.accept() : dialog.dismiss())
+    })
+    await gotoReady(page, FLOW)
+    const answer = statements(page).first().getByRole('radio').first()
+    await answer.check()
+
+    await page.getByRole('link', { name: 'Back to its purpose and limits' }).click()
+    await expect.poll(() => dialogs).toEqual(['confirm'])
+    await expect(page).toHaveURL(FLOW)
+    await expect(answer).toBeChecked()
+
+    await page.getByRole('banner').getByRole('link', { name: 'Care4Mind home' }).click()
+    await expect.poll(() => dialogs).toEqual(['confirm', 'confirm'])
+    await expect(page).toHaveURL(FLOW)
+    await expect(answer).toBeChecked()
+
+    accept = true
+    await page.getByRole('link', { name: 'Back to its purpose and limits' }).click()
+    await expect(page).toHaveURL(INTRO)
+  })
+
+  test('browser Back from part 1 leaves without asking, because that traversal cannot be cancelled', async ({
+    page,
+  }) => {
+    const dialogs: string[] = []
+    page.on('dialog', (dialog) => {
+      dialogs.push(dialog.type())
+      void dialog.dismiss()
+    })
+    await gotoReady(page, INTRO)
+    await page.getByRole('link', { name: 'Start the Questionnaire' }).click()
+    await expect(page).toHaveURL(FLOW)
+    await expect(page.locator('html')).toHaveAttribute('data-hydrated')
+    await statements(page).first().getByRole('radio').first().check()
+    await page.goBack()
+    await expect(page).toHaveURL(INTRO)
+    expect(dialogs).toEqual([])
+  })
+
   test('warns before leaving while answers are given and the end screen is not reached', async ({
     page,
   }) => {
