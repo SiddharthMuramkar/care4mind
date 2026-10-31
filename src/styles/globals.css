@@ -367,8 +367,8 @@
 
 /*
  * Reduced motion (NFR-01). Every animation and transition finishes at once,
- * view transitions swap instantly, and scroll-driven effects are only ever
- * declared inside `prefers-reduced-motion: no-preference`.
+ * view transitions swap instantly, and scroll-driven effects and the lotus's
+ * breath are only ever declared inside `prefers-reduced-motion: no-preference`.
  */
 @media (prefers-reduced-motion: reduce) {
   *,
