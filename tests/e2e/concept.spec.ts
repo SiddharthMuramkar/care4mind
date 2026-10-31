@@ -4,6 +4,7 @@ import { expectNoAxeViolations } from './axe'
 import { recordAnimationStarts, transitionedOn } from './drawings'
 import { expect, gotoReady, scrollsSideways, test } from './fixtures'
 import { expectPageTurned, pageTurns, prefetched, recordPageTurns } from './page-turns'
+import { ROUTES_IN_SCOPE } from './routes'
 
 const spellingsButton = (page: Page) => page.getByRole('button', { name: 'Also spelled' })
 const spellingsPopup = (page: Page) =>
@@ -47,19 +48,6 @@ test.describe('Concept page', () => {
     await expect(heading.locator('[lang="sa-Latn"]')).toHaveText('Vikṣepa')
     await expect(heading.locator('[lang="sa-Deva"]')).toHaveText('विक्षेप')
     expect(await page.locator('main [lang="sa-Deva"]').count()).toBeGreaterThan(5)
-  })
-
-  test("sets the title's IAST before its Devanagari, on screen and to a screen reader", async ({
-    page,
-  }) => {
-    const order = await page.getByRole('heading', { level: 1 }).evaluate((h) => {
-      const iast = h.querySelector('[lang="sa-Latn"]')
-      const deva = h.querySelector('[lang="sa-Deva"]')
-      return iast && deva
-        ? iast.compareDocumentPosition(deva) & Node.DOCUMENT_POSITION_FOLLOWING
-        : -1
-    })
-    expect(order).toBeGreaterThan(0)
   })
 
   test('shows the other spellings in a popover that keyboard users can close', async ({ page }) => {
@@ -773,3 +761,18 @@ test.describe('Concept page v2: print', () => {
     await expect(page.locator('blockquote [lang="sa-Deva"]').first()).toBeVisible()
   })
 })
+
+for (const { path } of ROUTES_IN_SCOPE.filter((r) => r.path.startsWith('/concepts/'))) {
+  test(`${path} sets its title's IAST before its Devanagari, in DOM order`, async ({ page }) => {
+    await gotoReady(page, path)
+    const order = await page.getByRole('heading', { level: 1 }).evaluate((h) => {
+      const iast = h.querySelector('[lang="sa-Latn"], [lang="pi-Latn"]')
+      const deva = h.querySelector('[lang="sa-Deva"]')
+      if (!deva) return 'no-devanagari'
+      return iast && iast.compareDocumentPosition(deva) & Node.DOCUMENT_POSITION_FOLLOWING
+        ? 'iast-first'
+        : 'wrong'
+    })
+    expect(order).not.toBe('wrong')
+  })
+}

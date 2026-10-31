@@ -4,9 +4,9 @@ import { expectNoAxeViolations } from './axe'
 import { expect, gotoReady, test } from './fixtures'
 import { expectPageTurned, pageTurns, prefetched, recordPageTurns } from './page-turns'
 
-// The proposals page (front-end-site ticket 12): what the design suggests beyond the brief, for
-// the Project owner's sign-off. Local runs and CI build with the Concept map's flag on (D20), so
-// the Concept map is listed, with audio pronunciation, described only, and nothing else.
+// The proposals page: what the design suggests beyond the brief, for the Project owner's sign-off.
+// Local runs and CI build with the Concept map's flag on, so the page lists the Concept map and
+// audio pronunciation, described only, and nothing else.
 
 const PATH = hrefFor({ page: 'proposals' })
 const ENTRIES = ['Concept map', 'Audio pronunciation']

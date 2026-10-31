@@ -18,5 +18,5 @@ Next.js was the framework every piece of research assumed or suggested: [App fra
 
 - The [Architecture review](https://github.com/SiddharthMuramkar/care4mind/issues/19) confirms this choice rather than making it, and records its own decisions in ADR-0004.
 - The content back end, search, media storage and editor login are still open. Until the Architecture review and the Editing trial decide them, pages read content through one small typed content module that reads local files, so a back end can replace it without changing the pages.
-- The front-end stack from ticket 06 comes with it: Tailwind CSS 4 tokens plus CSS Modules, Base UI for accessible parts, and motion layered from CSS through React's `<ViewTransition>` to Motion (dropped once its only user, the script switch, went). GSAP and Lenis are not used.
+- The front-end stack from ticket 06 comes with it: Tailwind CSS 4 tokens plus CSS Modules, Base UI for accessible parts, and motion layered from CSS through React's `<ViewTransition>` to Motion (dropped when nothing used it any more). GSAP and Lenis are not used.
 - Whoever maintains the site after handover (FR-09) inherits a Next.js and React codebase.
