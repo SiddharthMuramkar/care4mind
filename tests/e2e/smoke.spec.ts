@@ -18,7 +18,10 @@ for (const route of ROUTES_IN_SCOPE) {
     const logo = page.getByRole('banner').getByRole('link', { name: 'Care4Mind home', exact: true })
     await expect.soft(logo, `${where}: the wordmark`).toHaveText('Care4Mind')
     await expect
-      .soft(logo.locator('path, line, polyline, polygon, img, canvas'), `${where}: a set wordmark`)
+      .soft(
+        logo.locator(':is(path, line, polyline, polygon, img, canvas):not(svg[data-lotus] *)'),
+        `${where}: the lotus and a set wordmark`,
+      )
       .toHaveCount(0)
     await expect
       .poll(() => unfinishedDrawings(page), { message: `${where}: unfinished drawings` })

@@ -2,7 +2,8 @@ import styles from './Logo.module.css'
 
 /**
  * The Press wordmark: Care4Mind in Playfair, with the 4 set in a vermilion
- * roundel. Type and its roundel only: nothing in it is drawn in or animated.
+ * roundel. Type and its roundel only, still: the header sets the lotus beside
+ * it, and the footer shows it alone.
  */
 export function Logo() {
   return (

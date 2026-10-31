@@ -4,6 +4,17 @@
   overflow: visible;
 }
 
+/* The flower alone (LotusMark). Its box holds every pose, so nothing need clip it. */
+.mark,
+.mark svg {
+  overflow: visible;
+}
+
+/* Drawn small, so its strokes are thicker than the Fleuron's. */
+.mark {
+  stroke-width: 2.6;
+}
+
 /*
  * The opening draw, as a pen would make it: the middle petal, then the two
  * beside it, then the rules running out from the flower, and last the dot set

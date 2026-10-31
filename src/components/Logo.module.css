@@ -1,6 +1,7 @@
 .wordmark {
   font-family: var(--font-display);
-  font-size: 1.5rem;
+  /* Only the header sets it, to fit a narrow screen. */
+  font-size: var(--wordmark-size, 1.5rem);
   font-weight: 500;
   letter-spacing: -0.005em;
   line-height: 1;
