@@ -27,3 +27,7 @@ next-env.d.ts
 # OS and editors
 .DS_Store
 *.pem
+
+# Claude Code: agents' worktrees, and each person's own permissions
+/.claude/worktrees/
+/.claude/settings.local.json

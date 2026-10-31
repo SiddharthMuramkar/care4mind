@@ -140,5 +140,7 @@ export default defineConfig([
     '.lighthouseci/**',
     // Written by scripts/content/registry.mjs, never committed.
     'src/content/generated/**',
+    // Agents' worktrees: whole copies of the repo, each linted in its own checkout.
+    '.claude/worktrees/**',
   ]),
 ])
