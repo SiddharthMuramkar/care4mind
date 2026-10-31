@@ -1,0 +1,32 @@
+/* The shelf of texts: the reading folio, wide enough on a large screen for three cards a row. */
+@media (min-width: 64rem) {
+  .page {
+    max-width: 68rem;
+  }
+}
+
+.facts {
+  margin: 0;
+  font-variant-caps: all-small-caps;
+  letter-spacing: 0.12em;
+  font-size: 1.125rem;
+  color: var(--color-surface-muted);
+}
+
+.fleuron {
+  margin-top: 0.5rem;
+  color: var(--color-surface-rule);
+}
+
+.shelf {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 15.5rem), 1fr));
+  gap: clamp(1rem, 3vw, 1.75rem);
+}
+
+.item {
+  display: grid;
+}

@@ -1,0 +1,4 @@
+/* One box, wrapping inside itself, so the title flies as one piece between card and heading. */
+.whole {
+  display: inline-block;
+}
