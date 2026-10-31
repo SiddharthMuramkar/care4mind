@@ -4,12 +4,12 @@
  * are the map's sectors. The map's layout is the front end's to add.
  */
 import type { ContentGraph } from '../graph'
-import type { ConceptGraph, ConceptGraphEdge } from '../types'
+import { RELATION_STRENGTH, type ConceptGraph, type ConceptGraphEdge } from '../types'
 import { byName } from '../views/common'
 import { displayName } from '../views/names'
 import { conceptRef } from '../views/refs'
 
-const EDGE_KINDS: readonly ConceptGraphEdge['kind'][] = ['passage', 'work', 'reference']
+const EDGE_KINDS = RELATION_STRENGTH.filter((kind) => kind !== 'topic')
 
 /** The Concept map's nodes, by topic then name, and its edges, each pair's facts once. */
 export function conceptGraph(graph: ContentGraph): ConceptGraph {

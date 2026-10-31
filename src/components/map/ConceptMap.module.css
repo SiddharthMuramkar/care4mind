@@ -409,13 +409,16 @@
 }
 
 .reasons {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0 0.9rem;
   margin: 0.1rem 0 0;
+  padding: 0;
+  list-style: none;
   font-size: 0.9375rem;
   line-height: 1.45;
   color: var(--color-surface-muted);
+}
+
+.reasons li {
+  display: inline;
 }
 
 /*
@@ -460,11 +463,12 @@
     animation-delay: calc(var(--duration-stroke) / 3);
   }
 
-  .lines[data-layer='reference'] {
+  /* passage, then work, then reference: strongest kind first. */
+  .lines[data-layer='work'] {
     animation-delay: calc(var(--duration-stroke) / 2);
   }
 
-  .lines[data-layer='work'] {
+  .lines[data-layer='reference'] {
     animation-delay: calc(var(--duration-stroke) * 2 / 3);
   }
 

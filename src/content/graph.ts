@@ -24,7 +24,7 @@ import {
   type Target,
 } from './schema'
 import { localSource, type ContentSource } from './source'
-import type { RelationKind } from './types'
+import { RELATION_STRENGTH, type RelationKind } from './types'
 import { displayName, passageLabel, referenceLabel } from './views/names'
 
 /** A record named by its kind and id (ids are unique within a kind, not across kinds). */
@@ -425,14 +425,14 @@ function relationsOf(
       const passages = inBoth(mine.passages, theirs.passages)
       // A shared passage already says both quote its work: the work counts only without one.
       const quotedTogether = new Set(passages.map(workOf))
-      const facts: [RelationKind, readonly string[]][] = [
-        ['passage', passages],
-        ['work', inBoth(mine.works, theirs.works).filter((work) => !quotedTogether.has(work))],
-        ['reference', inBoth(mine.references, theirs.references)],
-        ['topic', inBoth(mine.topics, theirs.topics)],
-      ]
-      for (const [kind, vias] of facts)
-        for (const via of vias)
+      const byKind: Record<RelationKind, readonly string[]> = {
+        passage: passages,
+        work: inBoth(mine.works, theirs.works).filter((work) => !quotedTogether.has(work)),
+        reference: inBoth(mine.references, theirs.references),
+        topic: inBoth(mine.topics, theirs.topics),
+      }
+      for (const kind of RELATION_STRENGTH)
+        for (const via of byKind[kind])
           relations.push({ concept: theirs.slug, kind, via, reason: reasons[kind](via) })
     }
     related.set(mine.slug, relations)
