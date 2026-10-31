@@ -9,6 +9,7 @@ import {
   useCallback,
   useEffect,
   useLayoutEffect,
+  useRef,
   useState,
 } from 'react'
 import { createPortal } from 'react-dom'
@@ -78,6 +79,16 @@ export function NavPanels({
     return () => clearTimeout(timer)
   }, [initialHover, slots])
 
+  // Base UI drops a panel's hover opening when hover switches panels, so the click that follows
+  // would toggle it shut: a press closing a panel that hover opened keeps it open instead.
+  const openedByHover = useRef(false)
+
+  // The webfonts move the toggles once they load, which no resize reports: the panel and its
+  // pointer measure again, as they do on a resize.
+  useEffect(() => {
+    void document.fonts?.ready.then(() => window.dispatchEvent(new Event('resize')))
+  }, [])
+
   // A panel hangs from its whole item, label and toggle, not the toggle alone.
   const anchor = useCallback(
     () => (value ? (slots[value]?.closest('li') ?? null) : null),
@@ -98,6 +109,12 @@ export function NavPanels({
             return
           }
         }
+        if (next == null && details.reason === 'trigger-press' && openedByHover.current) {
+          openedByHover.current = false
+          details.cancel()
+          return
+        }
+        openedByHover.current = next != null && details.reason === 'trigger-hover'
         setValue(panelOf(String(next)) ?? null)
       }}
       delay={OPEN_DELAY}
