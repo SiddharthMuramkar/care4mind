@@ -20,6 +20,7 @@ Each module is named by its capability, and outside code reaches it only through
 - **Questionnaire flow**: one reducer holds a person's answers, and nothing else does (no storage, cookies, address or request). No record stores scoring until the Psychology expert's rules arrive. _Types (`scoring.status` is `'pending'`), the content-integrity "held back" test, review._
 - **Press**, the one design language. Colours, durations, easings and layers are tokens in the global stylesheet. Each component styles itself through its own CSS module, reading those tokens with `var()`. Tailwind supplies only the tokens and Preflight: the one global class markup uses from it is `sr-only`, and the site adds `skip-link` of its own. A colour chosen by content (a topic, a Questionnaire status) is mapped from a data attribute in the global stylesheet. Every lotus breathes by CSS alone, moving transform and opacity; it is still under reduced motion and once the visitor pauses it. _Browser: lotus, motion._ _The contrast test checks the listed colour pairs; review checks the rest._
 - **The agent guard**: `.claude/hooks/guard.mjs`, which Claude Code runs before every Bash, Edit and Write call in this repo, subagents included (`.claude/settings.json`). One pure `decide()` reads the command the way the shell would and answers deny, ask or nothing. _Tests: guard._
+- **The handoff check**: `.claude/hooks/lint-handoff.mjs`, which Claude Code runs when a session or a builder stops. Uncommitted changes to source run `pnpm lint` and `pnpm typecheck`; the first failure sends the session back, and a second one stops it and prints the errors. _Tests: lint-handoff._
 - **The ruleset as code**: `.github/rulesets/main.json`, compared with GitHub by `pnpm ruleset:check` and applied by `pnpm ruleset:apply --commit <sha>`. _Tests: ruleset._
 
 ## Standards a reviewer applies
@@ -52,6 +53,7 @@ These are judgement calls, so review checks them against the diff, in the codeba
 | `main` changes only through a squashed PR whose required check passed on an up-to-date branch | the ruleset on GitHub, whose file the ruleset test checks; `pnpm ruleset:check` compares the two |
 | Nobody commits to `main` or pushes to it, the developer included | the git hooks in `.githooks/`, installed by `prepare` (githooks test). `--no-verify` skips them, and the guard refuses that to agents |
 | `ship` opens PRs and stops, and its agents run light | ship test |
+| A session doesn't stop on a lint or type error in uncommitted source | the handoff check (lint-handoff). A second failure in a row stops the session and prints the errors |
 | Each "Code that misleads" line names an open ticket | review |
 | Names use glossary terms; comments say why; Press only; depth; tests at the seam | review |
 

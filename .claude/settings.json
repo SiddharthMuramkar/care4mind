@@ -35,6 +35,26 @@
           }
         ]
       }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "PATH=\"$PATH:/usr/bin:/bin:/usr/local/bin:/opt/homebrew/bin\"; r=; for d in \"$(git rev-parse --show-toplevel 2>/dev/null)\" \"$CLAUDE_PROJECT_DIR\" \"$(c=$(git rev-parse --path-format=absolute --git-common-dir 2>/dev/null) && dirname \"$c\")\"; do if [ -n \"$d\" ] && [ -f \"$d/.claude/hooks/run-lint-handoff.sh\" ]; then r=\"$d/.claude/hooks/run-lint-handoff.sh\"; break; fi; done; if [ -z \"$r\" ]; then r=$(git worktree list --porcelain 2>/dev/null | sed -n 's/^worktree //p' | while IFS= read -r w; do if [ -f \"$w/.claude/hooks/run-lint-handoff.sh\" ]; then printf '%s' \"$w/.claude/hooks/run-lint-handoff.sh\"; break; fi; done); fi; if [ -n \"$r\" ]; then exec sh \"$r\"; fi; exit 0"
+          }
+        ]
+      }
+    ],
+    "SubagentStop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "PATH=\"$PATH:/usr/bin:/bin:/usr/local/bin:/opt/homebrew/bin\"; r=; for d in \"$(git rev-parse --show-toplevel 2>/dev/null)\" \"$CLAUDE_PROJECT_DIR\" \"$(c=$(git rev-parse --path-format=absolute --git-common-dir 2>/dev/null) && dirname \"$c\")\"; do if [ -n \"$d\" ] && [ -f \"$d/.claude/hooks/run-lint-handoff.sh\" ]; then r=\"$d/.claude/hooks/run-lint-handoff.sh\"; break; fi; done; if [ -z \"$r\" ]; then r=$(git worktree list --porcelain 2>/dev/null | sed -n 's/^worktree //p' | while IFS= read -r w; do if [ -f \"$w/.claude/hooks/run-lint-handoff.sh\" ]; then printf '%s' \"$w/.claude/hooks/run-lint-handoff.sh\"; break; fi; done); fi; if [ -n \"$r\" ]; then exec sh \"$r\"; fi; exit 0"
+          }
+        ]
+      }
     ]
   }
 }
