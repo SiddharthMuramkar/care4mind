@@ -265,7 +265,7 @@ describe('site.routes', () => {
         sample: true,
       },
       { path: '/topics/self/', kind: 'topic', pattern: '/topics/[slug]/', title: 'Self' },
-      { path: '/texts/', kind: 'texts', pattern: '/texts/', title: 'Texts', sample: true },
+      { path: '/texts/', kind: 'texts', pattern: '/texts/', title: 'Traditional texts', sample: true },
       {
         path: '/texts/dhammapada/',
         kind: 'work',
@@ -413,10 +413,10 @@ describe('site.trail', () => {
       concepts,
       { label: 'Mind', href: '/topics/mind/' },
     ])
-    expect(await trail('/texts/')).toEqual([homeCrumb, { label: 'Texts', href: '/texts/' }])
+    expect(await trail('/texts/')).toEqual([homeCrumb, { label: 'Traditional texts', href: '/texts/' }])
     expect(await trail('/texts/dhammapada/')).toEqual([
       homeCrumb,
-      { label: 'Texts', href: '/texts/' },
+      { label: 'Traditional texts', href: '/texts/' },
       { label: 'Dhammapada', href: '/texts/dhammapada/', lang: 'pi-Latn' },
     ])
     expect(await trail('/questionnaires/')).toEqual([homeCrumb, questionnaires])
