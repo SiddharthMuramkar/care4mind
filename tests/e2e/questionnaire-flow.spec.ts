@@ -159,6 +159,10 @@ test.describe('the KarmaYoga flow', () => {
     await expect(progress(page)).not.toHaveAttribute('aria-live')
     await answerPart(page)
     await next(page).click()
+    // The leaving part stays through the turn. A click before it goes can land on a statement
+    // already answered, so the tally reads one short.
+    await expect(partHeading(page, 2)).toBeVisible()
+    await expect(statements(page)).toHaveCount(PARTS[1].count)
     await statements(page).nth(0).getByRole('radio').first().check()
     await statements(page).nth(1).getByRole('radio').first().check()
     await expect(progress(page)).toHaveAttribute(
