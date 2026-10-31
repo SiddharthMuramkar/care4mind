@@ -21,8 +21,8 @@ export function ToastViewport() {
     let disconnect = () => {}
     let frame = requestAnimationFrame(() => {
       frame = requestAnimationFrame(() => {
-        disconnect = connectToasts(({ title, description }) => {
-          manager.add({ title, description, priority: 'low' })
+        disconnect = connectToasts(({ title, description, lang }) => {
+          manager.add({ title, description, priority: 'low', data: { lang } })
         })
       })
     })
@@ -53,7 +53,10 @@ function Toasts() {
           {/* Paragraphs, not headings: a toast is a passing note, not part of the page's outline. */}
           <Toast.Title className={styles.title} render={<p />} />
           {toast.description ? (
-            <Toast.Description className={styles.description} render={<p />} />
+            <Toast.Description
+              className={styles.description}
+              render={<p lang={toast.data?.lang} />}
+            />
           ) : null}
         </div>
         <Toast.Close className={styles.close} aria-label="Dismiss">
