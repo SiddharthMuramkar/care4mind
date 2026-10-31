@@ -947,16 +947,21 @@ describe('topics', () => {
     ])
   })
 
-  it('gives a topic its Concepts, then those also in it, and the verses its Concepts quote', async () => {
+  it('gives a topic its Concepts, then those also in it, and the verses its Concepts quote by work', async () => {
     const view = await content().topics.get('mind')
     expect(view?.concepts.map(({ slug }) => slug)).toEqual(['calm', 'obstacles'])
     expect(view?.secondaryConcepts.map(({ slug }) => slug)).toEqual(['refuge'])
-    expect(view?.works).toEqual([
-      { slug: 'dhammapada', title: 'Dhammapada', lang: 'pi-Latn', href: '/texts/dhammapada/' },
-      { slug: 'yoga-sutra', title: 'Yoga Sūtra', lang: 'sa-Latn', href: '/texts/yoga-sutra/' },
+    expect(view?.works.map(({ slug, title, lang, href }) => ({ slug, title, lang, href }))).toEqual(
+      [
+        { slug: 'dhammapada', title: 'Dhammapada', lang: 'pi-Latn', href: '/texts/dhammapada/' },
+        { slug: 'yoga-sutra', title: 'Yoga Sūtra', lang: 'sa-Latn', href: '/texts/yoga-sutra/' },
+      ],
+    )
+    expect(view?.works.map(({ slug, verses }) => [slug, verses.map(({ id }) => id)])).toEqual([
+      ['dhammapada', ['dhammapada/160']],
+      ['yoga-sutra', ['yoga-sutra/1.30']],
     ])
-    expect(view?.verses.map(({ id }) => id)).toEqual(['dhammapada/160', 'yoga-sutra/1.30'])
-    expect(view?.verses[1]).toEqual({
+    expect(view?.works[1]?.verses[0]).toEqual({
       id: 'yoga-sutra/1.30',
       work: {
         slug: 'yoga-sutra',

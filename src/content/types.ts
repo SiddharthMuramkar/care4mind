@@ -302,11 +302,14 @@ export interface TopicView extends TopicCard {
   concepts: readonly ConceptCard[]
   /** The Concepts that are also in it, by name. */
   secondaryConcepts: readonly ConceptCard[]
-  /** The works its Concepts quote. */
-  works: readonly WorkRef[]
-  /** The verses its Concepts quote, by work, then in each work's order. */
-  verses: readonly PassageView[]
+  /** The works its Concepts quote, each with the verses they quote from it in the work's order. */
+  works: readonly QuotedWork[]
   intro?: TopicIntroView
+}
+
+/** A work a topic's Concepts quote, with the verses they quote from it. */
+export interface QuotedWork extends WorkRef {
+  verses: readonly PassageView[]
 }
 
 // Traditional texts
