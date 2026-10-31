@@ -70,6 +70,16 @@ test('says how many Concepts it has, how many verses they quote and from which w
   for (const work of mind.works) await expect(facts).toContainText(work.title)
 })
 
+test('opens Bhagavad Gītā 2.55 on प्रजहाति, not its sandhi-joined speaker', async ({ page }) => {
+  await gotoReady(page, hrefFor({ kind: 'topic', id: 'mind' }))
+  const verse = page
+    .getByRole('region', { name: 'Verses its Concepts quote' })
+    .getByRole('link')
+    .filter({ hasText: '2.55' })
+  await expect(verse).toContainText('प्रजहाति यदा कामान्सर्वान्पार्थ मनोगतान् ।')
+  await expect(verse).not.toContainText('उवाच')
+})
+
 test('lists the verses its Concepts quote, each leading to its passage', async ({ page }) => {
   await gotoReady(page, hrefFor({ kind: 'topic', id: 'mind' }))
   const verses = page.getByRole('region', { name: 'Verses its Concepts quote' })
