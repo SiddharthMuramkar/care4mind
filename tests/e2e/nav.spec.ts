@@ -57,7 +57,10 @@ const moving = (page: Page) =>
       .map((animation) => (animation as CSSAnimation).animationName ?? 'a transition'),
   )
 
-/** Wait until what opened has finished arriving, so checks see it as it rests. */
+/**
+ * Wait until what opened has finished arriving, so checks see it as it rests. A lotus's breath
+ * never finishes, so animations without an end are left out.
+ */
 const settled = (page: Page) =>
   expect
     .poll(() =>
@@ -67,7 +70,9 @@ const settled = (page: Page) =>
             .getAnimations()
             .filter(
               (animation) =>
-                animation.timeline instanceof DocumentTimeline && animation.playState === 'running',
+                animation.timeline instanceof DocumentTimeline &&
+                animation.playState === 'running' &&
+                Number.isFinite(animation.effect?.getComputedTiming().endTime ?? Infinity),
             ).length,
       ),
     )

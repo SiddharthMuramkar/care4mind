@@ -49,10 +49,14 @@ export const undrawn = (line: Locator) =>
 
 export interface Start {
   target: Element
+  /** The keyframes an animation runs; empty for a transition. */
+  name: string
   /** How long it runs, in ms. Scroll-driven animations have no duration in time. */
   duration: number | null
   /** How long after it was set going it began, in ms. */
   delay: number
+  /** Whether it repeats without end, as a lotus's breath does. */
+  loops: boolean
   byScroll: boolean
   /** The property a transition changes; empty for an animation. */
   property: string
@@ -76,8 +80,10 @@ export function recordAnimationStarts(page: Page) {
       const duration = timing?.duration
       starts.push({
         target,
+        name: 'animationName' in event ? event.animationName : '',
         duration: typeof duration === 'number' ? duration : null,
         delay: Number(timing?.delay ?? 0),
+        loops: timing?.iterations === Infinity,
         byScroll: Boolean(animation && !(animation.timeline instanceof DocumentTimeline)),
         property: 'propertyName' in event ? event.propertyName : '',
       })

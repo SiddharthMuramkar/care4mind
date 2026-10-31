@@ -3,6 +3,7 @@ import type { Locator, Page } from '@playwright/test'
 import { expectNoAxeViolations } from './axe'
 import { unfinishedRules } from './drawings'
 import { expect, gotoReady, test } from './fixtures'
+import { moving } from './lotuses'
 
 // Front-end-site ticket 10: taking the KarmaYoga Scale (C4, D16). Local runs and CI build with the
 // preview flag on, so the flow exists. What is checked is what a visitor sees and does: parts,
@@ -505,7 +506,9 @@ const transitions = (page: Page) =>
   )
 
 test.describe('motion', () => {
-  test('turns the page between parts, and keeps the end screen still', async ({ page }) => {
+  test('turns the page between parts, and keeps the end screen still but for its breathing lotus', async ({
+    page,
+  }) => {
     await recordTransitions(page)
     await gotoReady(page, FLOW)
     await answerPart(page)
@@ -532,11 +535,17 @@ test.describe('motion', () => {
         (section) =>
           document.getAnimations().filter((animation) => {
             const target = (animation.effect as KeyframeEffect | null)?.target
-            return target && section.contains(target) && animation.playState === 'running'
+            return (
+              target &&
+              section.contains(target) &&
+              !target.closest('svg[data-lotus]') &&
+              animation.playState === 'running'
+            )
           }).length,
       ),
-      'nothing moves on the end screen',
+      'nothing on the end screen moves but its lotus',
     ).toBe(0)
+    expect(await moving(end.locator('svg[data-lotus]')), 'its lotus breathes').toBe(true)
   })
 
   test.describe('reduced', () => {
