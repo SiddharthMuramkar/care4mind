@@ -1,4 +1,4 @@
-import type { Metadata } from 'next'
+import type { Metadata, Route } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { ViewTransition } from 'react'
@@ -10,9 +10,9 @@ import { HelpLine } from '@/components/HelpLine'
 import { PageTurn, turnForward } from '@/components/PageTurn'
 import { Provenance, Text } from '@/components/prose'
 import { ReadingThread } from '@/components/ReadingThread'
+import { StatusBadge } from '@/components/StatusBadge'
 import { concepts, hrefFor, questionnaires } from '@/content'
 import { metadataFor } from '@/lib/metadata'
-import { shownStatus, startOf, statusWords } from '@/lib/questionnaire/gate'
 
 import cta from '../../cta.module.css'
 import reading from '../../reading.module.css'
@@ -46,8 +46,7 @@ export default async function QuestionnairePage({ params }: PageProps<'/question
   const questionnaire = await questionnaires.get((await params).slug)
   if (!questionnaire || questionnaire.status === 'coming-later') notFound()
 
-  const { slug, status } = questionnaire
-  const start = startOf(questionnaire, await questionnaires.form(slug))
+  const { slug, status, shownStatus, takeHref } = questionnaire
   const related = (await concepts.list()).filter((concept) =>
     questionnaire.concepts.some((ref) => ref.slug === concept.slug),
   )
@@ -66,9 +65,7 @@ export default async function QuestionnairePage({ params }: PageProps<'/question
                 <span>{questionnaire.title}</span>
               </ViewTransition>
             </h1>
-            <p className={styles.status} data-status={shownStatus(status)}>
-              {statusWords(status)}
-            </p>
+            <StatusBadge status={shownStatus} />
             {questionnaire.summary ? (
               <p className={reading.summary}>
                 <Text text={questionnaire.summary} />
@@ -142,10 +139,10 @@ export default async function QuestionnairePage({ params }: PageProps<'/question
           ) : null}
 
           <div className={styles.start}>
-            {start.open ? (
+            {takeHref ? (
               <>
                 <Link
-                  href={start.href}
+                  href={takeHref as Route}
                   className={cta.primary}
                   transitionTypes={turnForward}
                   data-ink
