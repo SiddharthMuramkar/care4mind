@@ -2,10 +2,11 @@
 
 import { Folio } from '@/components/Folio'
 import { site } from '@/config/site'
+import { playfairText } from '@/fonts/playfair'
 import { cx } from '@/lib/cx'
 
 import cta from './cta.module.css'
-import styles from './error.module.css'
+import styles from './error-page.module.css'
 import reading from './reading.module.css'
 
 import '@/styles/globals.css'
@@ -18,7 +19,7 @@ export default function GlobalError({
   retry: () => void
 }) {
   return (
-    <html lang="en">
+    <html lang="en" className={playfairText.variable}>
       <body>
         <title>{`Page not shown · ${site.name}`}</title>
         <main id="main" className={reading.page}>
