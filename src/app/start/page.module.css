@@ -11,6 +11,19 @@
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr));
 }
 
+/* Three cards: one row of three where they fit, otherwise one column, never two and a stray. */
+@media (min-width: 48rem) {
+  .cards {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 47.99rem) {
+  .cards {
+    grid-template-columns: 1fr;
+  }
+}
+
 .reads {
   grid-template-columns: repeat(auto-fill, minmax(min(100%, 22rem), 1fr));
 }
