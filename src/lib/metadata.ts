@@ -34,12 +34,6 @@ export function absoluteUrl(path: string): string {
   return new URL(path, config.url).href
 }
 
-/** The path's segment where its route's pattern has `[slug]`. */
-function slugOf(route: RouteEntry): string {
-  const at = route.pattern.split('/').indexOf('[slug]')
-  return route.path.split('/')[at] ?? ''
-}
-
 /** "1 entry", "20 entries". */
 function count(n: number, one: string, many: string): string {
   return `${n} ${n === 1 ? one : many}`
@@ -51,18 +45,19 @@ function count(n: number, one: string, many: string): string {
  */
 async function describe(route: RouteEntry): Promise<{ name: string; description: string }> {
   const name = route.title
+  const slug = route.record?.id ?? ''
   switch (route.kind) {
     case 'home':
       return { name: HOME_TITLE, description: config.tagline }
     case 'concept': {
-      const concept = await concepts.get(slugOf(route))
+      const concept = await concepts.get(slug)
       if (!concept) notFound()
       // A Sanskrit headword is named with its gloss, as the Concept page sets them.
       const named = concept.term && concept.english ? `${name} (${concept.english})` : name
       return { name: named, description: concept.summary }
     }
     case 'topic': {
-      const topic = await topics.get(slugOf(route))
+      const topic = await topics.get(slug)
       if (!topic) notFound()
       const concepts = count(topic.conceptCount, 'Concept', 'Concepts')
       const quote = topic.conceptCount === 1 ? 'it quotes' : 'they quote'
@@ -75,7 +70,7 @@ async function describe(route: RouteEntry): Promise<{ name: string; description:
       }
     case 'questionnaire':
     case 'questionnaire-flow': {
-      const questionnaire = await questionnaires.get(slugOf(route))
+      const questionnaire = await questionnaires.get(slug)
       if (!questionnaire) notFound()
       const { title, summary } = questionnaire
       return route.kind === 'questionnaire'
@@ -89,7 +84,7 @@ async function describe(route: RouteEntry): Promise<{ name: string; description:
     }
     case 'resource-list':
     case 'page': {
-      const page = await library.get(slugOf(route))
+      const page = await library.get(slug)
       if (!page) notFound()
       if (page.kind === 'page') return { name, description: page.summary }
       const entries = page.groups.reduce((sum, group) => sum + group.items.length, 0)
@@ -111,7 +106,7 @@ async function describe(route: RouteEntry): Promise<{ name: string; description:
  */
 export async function metadataFor(path: string): Promise<Metadata> {
   const bare = path.replace(/[?#].*$/, '')
-  const route = (await site.routes()).find((entry) => entry.path === bare)
+  const route = await site.route(bare)
   if (!route) notFound()
   const { name, description } = await describe(route)
   return {

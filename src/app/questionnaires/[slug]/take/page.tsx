@@ -8,7 +8,7 @@ import { Folio } from '@/components/Folio'
 import { PageTurn, turnForward } from '@/components/PageTurn'
 import { Text } from '@/components/prose'
 import { Flow } from '@/components/questionnaire/Flow'
-import { hrefFor, questionnaires } from '@/content'
+import { hrefFor, questionnaires, site } from '@/content'
 import { cx } from '@/lib/cx'
 import { metadataFor } from '@/lib/metadata'
 import { shownStatus, statusWords } from '@/lib/questionnaire/gate'
@@ -18,12 +18,7 @@ import styles from './page.module.css'
 
 export const dynamicParams = false
 
-/** A flow exists only for a Questionnaire that can be taken in this build (D16). */
-export async function generateStaticParams() {
-  const all = await questionnaires.list()
-  const open = await Promise.all(all.map(({ slug }) => questionnaires.form(slug)))
-  return open.flatMap((form) => (form ? [{ slug: form.slug }] : []))
-}
+export const generateStaticParams = () => site.params('/questionnaires/[slug]/take/')
 
 export async function generateMetadata({
   params,

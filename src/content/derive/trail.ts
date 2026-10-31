@@ -41,7 +41,7 @@ export function trail(graph: ContentGraph, flags: Features, path: string): Crumb
     if (route) above.push(route)
   }
   pathsAbove(page.entry.path).forEach(add)
-  const { kind, id } = page.record ?? {}
+  const { kind, id } = page.entry.record ?? {}
   if (kind === 'topic') add(hrefFor({ page: 'concepts' }))
   if (kind === 'concept' && id !== undefined) {
     const topic = graph.record('concept', id)?.topics.primary

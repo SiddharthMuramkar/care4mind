@@ -6,6 +6,7 @@
  * JSON round trip unchanged and a server component can hand it to a client island as it is.
  */
 import type {
+  ContentKind,
   Inline,
   Provenance,
   QuestionnaireStatus,
@@ -492,6 +493,8 @@ export interface RouteEntry {
   pattern: string
   /** The page's name, as the last crumb of its trail shows it. */
   title: string
+  /** The record the page shows, on a route whose pattern has `[slug]`: its id is the slug. */
+  record?: { kind: ContentKind; id: Slug }
   /** One representative route per kind, for sampled end-to-end runs. */
   sample?: true
   /** A Proposal awaiting the Project owner's decision (D20): the Concept map and `/proposals/`. */

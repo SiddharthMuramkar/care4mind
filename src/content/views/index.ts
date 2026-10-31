@@ -12,7 +12,7 @@ import { conceptGraph } from '../derive/graph-data'
 import { routes } from '../derive/routes'
 import { searchDocuments } from '../derive/search-documents'
 import { trail } from '../derive/trail'
-import { graphFor } from '../graph'
+import { graphFor, type ContentGraph } from '../graph'
 import type { ReferenceType, Slug } from '../schema'
 import type { ContentSource } from '../source'
 import type {
@@ -53,6 +53,21 @@ import { workCard, workView } from './work'
 
 export function createContent(source: ContentSource, flags: Features) {
   const graph = () => graphFor(source)
+
+  /** A derivation of the graph, made once per graph: flags are fixed for this interface. */
+  function perGraph<T>(derive: (read: ContentGraph) => T): () => Promise<T> {
+    const made = new WeakMap<ContentGraph, T>()
+    return async () => {
+      const read = await graph()
+      if (!made.has(read)) made.set(read, derive(read))
+      return made.get(read) as T
+    }
+  }
+  const registry = perGraph((read) => {
+    const list = routes(read, flags)
+    return { list, byPath: new Map(list.map((entry) => [entry.path, entry])) }
+  })
+  const corpus = perGraph(searchDocuments)
 
   return {
     concepts: {
@@ -202,7 +217,20 @@ export function createContent(source: ContentSource, flags: Features) {
     site: {
       /** One entry per public page, for the content present and this build's flags. */
       async routes(): Promise<RouteEntry[]> {
-        return routes(await graph(), flags)
+        return (await registry()).list
+      },
+      /** The public page at a path, as the registry writes it, or null where there is none. */
+      async route(path: string): Promise<RouteEntry | null> {
+        return (await registry()).byPath.get(path) ?? null
+      },
+      /**
+       * A page file's static params: one per entry in the registry with its pattern, the slug
+       * being its record's id. So a page has exactly the routes the registry lists.
+       */
+      async params(pattern: string): Promise<{ slug: Slug }[]> {
+        return (await registry()).list.flatMap((entry) =>
+          entry.pattern === pattern && entry.record ? [{ slug: entry.record.id }] : [],
+        )
       },
       /** A page's breadcrumbs (design B6), the page itself last; none for a path that isn't one. */
       async trail(path: string): Promise<Crumb[]> {
@@ -214,7 +242,7 @@ export function createContent(source: ContentSource, flags: Features) {
       },
       /** The search corpus: one document per thing search can find. */
       async searchDocuments(): Promise<SearchDocument[]> {
-        return searchDocuments(await graph())
+        return corpus()
       },
       /** The Concept map's data: the Concepts and the facts that connect them. */
       async graph(): Promise<ConceptGraph> {

@@ -11,7 +11,7 @@ import { citationLinks, Provenance, Sections } from '@/components/prose'
 import { ReferenceList } from '@/components/ReferenceList'
 import { ScriptPair } from '@/components/script/ScriptPair'
 import { ContentsPlate, plateCard, plateScope, type PlateRow } from '@/components/topics'
-import { hrefFor, topics, type ConceptCard as Concept, type PassageView } from '@/content'
+import { hrefFor, site, topics, type ConceptCard as Concept, type PassageView } from '@/content'
 import { cx } from '@/lib/cx'
 import { metadataFor } from '@/lib/metadata'
 import { toDevanagariDigits } from '@/lib/text'
@@ -21,9 +21,7 @@ import styles from './page.module.css'
 
 export const dynamicParams = false
 
-export async function generateStaticParams() {
-  return (await topics.list()).map(({ slug }) => ({ slug }))
-}
+export const generateStaticParams = () => site.params('/topics/[slug]/')
 
 export async function generateMetadata({ params }: PageProps<'/topics/[slug]'>): Promise<Metadata> {
   return metadataFor(hrefFor({ kind: 'topic', id: (await params).slug }))

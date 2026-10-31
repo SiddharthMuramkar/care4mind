@@ -16,7 +16,14 @@ import { ReadingThread } from '@/components/ReadingThread'
 import { ReferenceList } from '@/components/ReferenceList'
 import { ScriptChoice, ScriptSwitch } from '@/components/ScriptChoice'
 import { SpellingsPopover } from '@/components/SpellingsPopover'
-import { concepts, hrefFor, type BlockView, type ConceptView, type VerseView } from '@/content'
+import {
+  concepts,
+  hrefFor,
+  site,
+  type BlockView,
+  type ConceptView,
+  type VerseView,
+} from '@/content'
 import { capitalise } from '@/lib/text'
 import { cx } from '@/lib/cx'
 import { metadataFor } from '@/lib/metadata'
@@ -26,9 +33,7 @@ import styles from './page.module.css'
 
 export const dynamicParams = false
 
-export async function generateStaticParams() {
-  return (await concepts.list()).map(({ slug }) => ({ slug }))
-}
+export const generateStaticParams = () => site.params('/concepts/[slug]/')
 
 export async function generateMetadata({
   params,

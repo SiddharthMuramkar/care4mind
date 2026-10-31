@@ -68,7 +68,7 @@ These are judgement calls, so review checks them against the diff, in the codeba
   6. The pages, the navigation, Linked knowledge and the search page's headings.
   7. The tools behind `content:new` and `verify`.
   8. GLOSSARY.md.
-- **A page:** a route that reads `@/content`. Its address is an `hrefFor()` target, and its entry in `site.routes()` puts it in the sitemap, breadcrumbs and crawler.
+- **A page:** a route that reads `@/content`. Its address is an `hrefFor()` target, and its entry in `site.routes()` puts it in the sitemap, breadcrumbs and crawler. A page with a `[slug]` builds the params `site.params(pattern)` gives it, so it has exactly the routes the registry lists.
 - **A topic:** its record, plus its colour token, its `[data-topic]` rule and its contrast pair. Nothing checks the last three yet (#81).
 - **A colour, duration or easing:** a token in the global stylesheet. A colour pair that carries text joins the contrast list.
 - **A feature awaiting the Project owner's approval:** a flag in `features`.

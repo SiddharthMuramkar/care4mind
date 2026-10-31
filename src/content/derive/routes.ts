@@ -4,7 +4,7 @@
  */
 import { proposalsPageOn, type Features } from '@/config/features'
 
-import type { ContentGraph, RecordKey } from '../graph'
+import type { ContentGraph } from '../graph'
 import type { FixedPage, LatinScript, RouteEntry, RouteKind } from '../types'
 import { byName } from '../views/common'
 import { hrefFor } from '../views/href'
@@ -12,10 +12,9 @@ import { displayName } from '../views/names'
 import { latinScript } from '../views/passage'
 import { canTake } from '../views/questionnaire'
 
-/** A route, with the record its page shows and the language of its title where that is IAST. */
+/** A route, with the language of its title where that is IAST. */
 export interface PageRoute {
   entry: RouteEntry
-  record?: RecordKey
   lang?: LatinScript
 }
 
@@ -39,8 +38,8 @@ export function pageRoutes(graph: ContentGraph, flags: Features): PageRoute[] {
       kind: 'concept',
       pattern: '/concepts/[slug]/',
       title: displayName(concept.name),
+      record: { kind: 'concept', id: concept.slug },
     },
-    record: { kind: 'concept', id: concept.slug },
     ...(concept.name.term ? { lang: 'sa-Latn' as const } : {}),
   }))
 
@@ -52,8 +51,8 @@ export function pageRoutes(graph: ContentGraph, flags: Features): PageRoute[] {
         kind: 'topic',
         pattern: '/topics/[slug]/',
         title: topic.name.english,
+        record: { kind: 'topic', id: topic.slug },
       },
-      record: { kind: 'topic', id: topic.slug },
     }))
 
   const works: PageRoute[] = graph.records('work').map((work) => ({
@@ -62,8 +61,8 @@ export function pageRoutes(graph: ContentGraph, flags: Features): PageRoute[] {
       kind: 'work',
       pattern: '/texts/[slug]/',
       title: displayName({ term: work.title }),
+      record: { kind: 'work', id: work.slug },
     },
-    record: { kind: 'work', id: work.slug },
     lang: latinScript(work),
   }))
 
@@ -78,8 +77,8 @@ export function pageRoutes(graph: ContentGraph, flags: Features): PageRoute[] {
           kind: 'questionnaire',
           pattern: '/questionnaires/[slug]/',
           title: questionnaire.title,
+          record: target,
         },
-        record: target,
       }
       if (!canTake(questionnaire, flags)) return [intro]
       const flow: PageRoute = {
@@ -88,8 +87,8 @@ export function pageRoutes(graph: ContentGraph, flags: Features): PageRoute[] {
           kind: 'questionnaire-flow',
           pattern: '/questionnaires/[slug]/take/',
           title: 'Take it',
+          record: target,
         },
-        record: target,
       }
       return [intro, flow]
     })
@@ -101,8 +100,8 @@ export function pageRoutes(graph: ContentGraph, flags: Features): PageRoute[] {
         kind: record.kind,
         pattern: '/library/[slug]/',
         title: record.title,
+        record: { kind: record.kind, id: record.slug },
       },
-      record: { kind: record.kind, id: record.slug },
     }),
   )
 
