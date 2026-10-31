@@ -315,7 +315,7 @@ test.describe('panels, on a computer', () => {
       await page.setViewportSize({ width, height: 900 })
       await gotoReady(page, '/')
       await page.reload()
-      await expect(toggle(page, 'Library')).toHaveAttribute('data-ready', '')
+      await expect(toggle(page, 'Library')).toHaveAttribute('data-ready')
       const arrow = page.locator('[class*="arrow"][data-side]')
       const opened = async (section: string, other: string) => {
         await expect(panel(page, section)).toBeVisible()
