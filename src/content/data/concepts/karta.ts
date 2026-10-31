@@ -172,7 +172,6 @@ export default defineConcept({
     drafted: ['keywords'],
     sources: [{ url: 'https://care4mind.org/karta-2/', retrieved: '2026-10-27' }],
     edits: [
-      'Keywords drafted from the page’s own words, for search; a keyword never names a modern construct or a condition.',
       'IAST written for the headword, which the page spells “Karta” and ‘karta’: “kartā”. The page prints no Devanagari for it, so none is stored.',
       'IAST for the three types, which the page spells “Sattvik Karta”, “Rajasic Karta” and “Tamasic Karta”: each adjective split out of the verse the page sets under that type, in its dictionary form (“sāttvikam” in 18.23, “rājasam” in 18.24, “tāmasam” in 18.25), with the headword: “sāttvika kartā”, “rājasa kartā” and “tāmasa kartā”. The page’s spellings are kept as the terms’ ASCII spellings; no Devanagari is stored, since the page prints none for kartā.',
       'The page’s first heading, “Karta Profile Introduction”, heads no text of its own: it names the page’s questionnaire, whose record takes “Karta Profile” as its title, and is left out here.',

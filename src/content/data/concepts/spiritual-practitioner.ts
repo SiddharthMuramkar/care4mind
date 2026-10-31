@@ -121,7 +121,6 @@ export default defineConcept({
       { url: 'https://care4mind.org/spiritualpractitionerprofiling/', retrieved: '2026-10-27' },
     ],
     edits: [
-      'Keywords drafted from the page’s own words, for search; a keyword never names a modern construct or a condition.',
       'Named by its English title: the page title, “Spiritual Practitioner Profiling”, without “Profiling”, the word for its questionnaire. The page gives no Sanskrit headword (flagged).',
       'The heading over the verses, “Shlokas from Adi Sankaracharya’ Sadhana Panchakam”, is left out: each verse is shown with its work and number, and the Sādhana Pañcakam’s record keeps the page’s attribution to Adi Sankaracharya.',
       'Typo fixed: “Absence of Spirituality Practitioner Profiling” → “Absence of Spiritual Practitioner Profiling”.',

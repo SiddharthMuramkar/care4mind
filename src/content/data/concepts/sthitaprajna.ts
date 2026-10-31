@@ -249,7 +249,6 @@ export default defineConcept({
     drafted: ['keywords'],
     sources: [{ url: 'https://care4mind.org/sthitaprajna/', retrieved: '2026-10-27' }],
     edits: [
-      'Keywords drafted from the page’s own words, for search; a keyword never names a modern construct or a condition.',
       'Headword forms split out of the inflected words of Bhagavad Gītā 2.54: the IAST “sthitaprajña” from “sthitaprajñasya”, and the Devanagari “स्थितप्रज्ञ” from “स्थितप्रज्ञस्य”. The page’s spellings, “Sthitaprajna” and, in a verse’s reading, “sthita-prajna”, are kept as ASCII spellings.',
       'Verse heading dropped: “Shlokas from Bhagavad Gita (Chapter 2, Verse 54-58, 68)”. Each verse shows its work and number.',
       'The sub-headings “Similarities” and “Differences” under “Indian vs Western concept” each start a section of their own, and all three sections take the comparison role.',

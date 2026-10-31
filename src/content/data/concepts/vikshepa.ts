@@ -358,7 +358,6 @@ export default defineConcept({
   provenance: {
     sources: [{ url: 'https://care4mind.org/vikshepa/', retrieved: '2026-10-27' }],
     edits: [
-      'Keywords drafted from the page’s own words, for search; a keyword never names a modern construct or a condition.',
       // The front-end foundation's edits (planning ticket 21), kept as it wrote them.
       'The first shloka was headed “Bhagavad Gita (Chapter 1, Sutra 30)”; its text and verse number are Yoga Sūtra 1.30, as the page’s own body says. Relabelled; the Research editor should confirm.',
       'Obstacle names in IAST and Devanagari are taken from the page’s Yoga Sūtra 1.30 shloka. The page’s headings used other forms (for example “Steyan- Steya”, “Alabdhi- Alābdhi”, “Anvastitva- Anavasthitva”); those are kept as ASCII spellings.',

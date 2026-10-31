@@ -42,7 +42,6 @@ export default defineConcept({
     drafted: ['keywords'],
     sources: [{ url: 'https://care4mind.org/jagat/', retrieved: '2026-10-27' }],
     edits: [
-      'Keywords drafted from the page’s own words, for search; a keyword never names a modern construct or a condition.',
       'The page has no headings: its two paragraphs are a section headed by its title, “Jagat”.',
       'External link added, labelled “DharmaWiki”: the Concept’s own DharmaWiki article, at the address the glossary card “Jagat (जगत्)” on https://care4mind.org/concepts/ links. The post itself has no links.',
     ],

@@ -157,7 +157,6 @@ export default defineConcept({
     drafted: ['keywords'],
     sources: [{ url: 'https://care4mind.org/triguna/', retrieved: '2026-10-27' }],
     edits: [
-      'Keywords drafted from the page’s own words, for search; a keyword never names a modern construct or a condition.',
       'IAST written for the headword, which the page spells “Triguna” and “Trigunas”: “triguṇa”, with “guṇa” as the page’s Bhagavad Gītā 14.5 writes it (“guṇāḥ”). The page prints no Devanagari for it, so none is stored.',
       'The sub-headings “Sattva Guna”, “Rajas Guna” and “Tamas Guna” are term blocks for sattva, rajas and tamas, as the page writes them. Their Devanagari is split out of the page’s verses, in dictionary forms: “सत्त्व” (from “सत्त्वं”, 14.5 and 14.6), “रजस्” (from “रजस्तम इति”, 14.5) and “तमस्” (from “तमस्त्वज्ञानजं”, 14.8). Each one’s gloss is what the section’s first paragraph says it represents.',
       'The paragraph after “Tamas Guna” that speaks of all three guṇas (“In Ayurveda, these three Gunas define the characteristics of the mind…”) follows the term blocks in the section “Trigunas”.',

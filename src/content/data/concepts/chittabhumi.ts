@@ -262,7 +262,6 @@ export default defineConcept({
     drafted: ['keywords'],
     sources: [{ url: 'https://care4mind.org/knowyourmind/', retrieved: '2026-10-27' }],
     edits: [
-      'Keywords drafted from the page’s own words, for search; a keyword never names a modern construct or a condition.',
       'IAST transliterated for the headword: “citta-bhūmi”, from the page’s plural “chittabhumis”, in the singular. The page prints no Devanagari for it or for the five states, so none is stored; the states’ IAST is the page’s own (“Mūḍha, Kṣipta, Vikṣipta, Ekāgra, and Niruddha”).',
       'Typo fixed: “Krishnappa el al.” → “Krishnappa et al.”.',
       'Verse headings dropped: “Yoga Sutra 1.2 Excerpt for States of Mind” and “Yoga Sutra 1.30 Excerpt”. Each verse shows its work and number. The page prints Yoga Sūtra 1.30 in a form of its own (one line, broken into words, with the anusvara written with a dot above, U+1E41); the verse shows the form stored on its passage, which lists this page’s.',

@@ -67,7 +67,6 @@ export default defineConcept({
     drafted: ['keywords'],
     sources: [{ url: 'https://care4mind.org/jiva/', retrieved: '2026-10-27' }],
     edits: [
-      'Keywords drafted from the page’s own words, for search; a keyword never names a modern construct or a condition.',
       'The page has no heading before its first paragraph: it is a section headed by its title, “Jiva”.',
       'DharmaWiki citation markers dropped, with their links into DharmaWiki’s Jiva article: “[2]” → “”, twice.',
       'The text stops mid-citation; its last character, a lone “[” linking into DharmaWiki’s Jiva article, dropped: “levels.[” → “levels.”.',

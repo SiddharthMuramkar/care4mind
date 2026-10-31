@@ -371,7 +371,6 @@ export default defineConcept({
       { url: 'https://care4mind.org/panchkleshavikaarprofiling/', retrieved: '2026-10-27' },
     ],
     edits: [
-      'Keywords drafted from the page’s own words, for search; a keyword never names a modern construct or a condition.',
       'IAST transliterated for the headword: “pañca kleśa”, from the page’s “Panch Klesha” and “Pancha Klesha”, with kleśa as its Yoga Sūtra 2.3 verse writes it (“kleśāḥ”). The page prints no Devanagari for the headword, so none is stored.',
       'The kleśas’ Devanagari split out of the compound in the page’s Yoga Sūtra 2.3 verse, in their dictionary forms: “अविद्या”, “अस्मिता”, “राग”, “द्वेष” and “अभिनिवेश”. Their IAST is the page’s own (“Avidyā”, “Asmitā”, “Rāga”, “Dveṣa”, “Abhiniveśa”), and the sub-headings’ spellings are kept as ASCII spellings.',
       'IAST transliterated for the sixth enemy of the peaceful mind: “mātsarya”, from the page’s “Matsarya”. The page prints no Devanagari for the six, so none is stored.',

@@ -180,7 +180,6 @@ export default defineConcept({
     drafted: ['keywords'],
     sources: [{ url: 'https://care4mind.org/brahmavihara/', retrieved: '2026-10-27' }],
     edits: [
-      'Keywords drafted from the page’s own words, for search; a keyword never names a modern construct or a condition.',
       'Headword IAST: “brahmavihāra”, the design notes’ form. The page prints no IAST or Devanagari for its headword, which it writes “Brahma Vihara” (flagged).',
       'The heading over the verse, “Shlokas from Patanjali’s Yoga Sutra (Chapter 1, Sutra 33)”, is left out: the verse is shown with its work and number, Yoga Sūtra 1.33.',
       'The components’ headings, “I. Maitra”, “II. Karuna”, “III. Mudita” and “IV. Upeksha”, are term blocks, without their numbers. Their IAST and Devanagari are split out of the compound in the page’s Yoga Sūtra 1.33, in their dictionary forms: “maitrī”, “karuṇā”, “muditā”, “upekṣā”, “मैत्री”, “करुणा”, “मुदिता” and “उपेक्षा”. Their glosses are the summative table’s “Synonymous Term” column.',

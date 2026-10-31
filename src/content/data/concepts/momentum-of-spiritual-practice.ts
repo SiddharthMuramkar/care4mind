@@ -192,7 +192,6 @@ export default defineConcept({
       { url: 'https://care4mind.org/momentumofspiritualpractice/', retrieved: '2026-10-27' },
     ],
     edits: [
-      'Keywords drafted from the page’s own words, for search; a keyword never names a modern construct or a condition.',
       'Named by its English title, the page title “Momentum of Spiritual Practice”. The page gives no Sanskrit headword; saṃvega, from its Yoga Sūtra 1.21, may be one (flagged).',
       'The heading over the verses, “Shloka for Momentum of Spiritual Practice from Chapter 1, Sutra 21,22”, is left out: each verse is shown with its work and number, Yoga Sūtra 1.21 and 1.22, which the heading doesn’t name (flagged). The transliterations the page prints as sub-headings are the passages’.',
       'Typo fixed: “ad ever living” → “and ever living”.',

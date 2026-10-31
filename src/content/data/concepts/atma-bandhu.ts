@@ -184,7 +184,6 @@ export default defineConcept({
     drafted: ['keywords'],
     sources: [{ url: 'https://care4mind.org/frienorfoeofself/', retrieved: '2026-10-27' }],
     edits: [
-      'Keywords drafted from the page’s own words, for search; a keyword never names a modern construct or a condition.',
       'IAST transliterated for the headword and its pair, which the page writes “Atma Bandhu” and “Aatmaripu”: “ātma-bandhu” and “ātma-ripu”. The page prints no Devanagari for either, so none is stored.',
       'The page’s first heading repeats its title, “Are you a Friend/Foe of Yourself?”, and heads no text of its own; it is left out here, and is its Questionnaire’s title.',
       'Verse headings dropped: “Bhagavad Gita Shloka (Chapter 6, Verse 5)” and “Buddhist Dhammapada Verse 160”. Each verse shows its work and number.',

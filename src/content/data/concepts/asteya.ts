@@ -102,7 +102,6 @@ export default defineConcept({
       },
     ],
     edits: [
-      'Keywords drafted from the page’s own words, for search; a keyword never names a modern construct or a condition.',
       'Headword split out of the compound in the page’s Yoga Sūtra 2.30 verse, “ahiṃsāsatyāsteyabrahmacaryāparigrahā” and “अहिंसासत्यास्तेयब्रह्मचर्यापरिग्रहा”, in its dictionary form: “asteya”, “अस्तेय”. The page’s own spelling, “Asteya”, is its ASCII spelling, and its English name is the gloss the page title gives, “Non-Stealing”.',
       'The page title, “Know Your Values: Asteya (Non-Stealing) Profiling”, is its Questionnaire’s title; the Concept is named by its headword and gloss.',
       'Verse headings dropped: “Shloka for Know Your Values – Yama from Chapter 2, Sutra 30” and “Shloka for Know Your Values – Niyama from Chapter 2, Sutra 32”. Each verse shows its work and number, the Yoga Sūtra the census assigned.',
