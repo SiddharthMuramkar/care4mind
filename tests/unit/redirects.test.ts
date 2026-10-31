@@ -6,6 +6,8 @@ import { hrefFor, site } from '@/content'
 import { CONTENT_KINDS, type ContentRecord, type RecordOf } from '@/content/schema'
 import { localSource } from '@/content/source'
 
+import nextConfig from '../../next.config'
+
 // Front-end-site ticket 14: every address the current site served leads to its new page in one
 // hop (FR-07, D11, D17). The expected rows are design B4's decisions, with the slugs content-v1
 // shipped (`chittabhumi`, not the design's `citta-bhumi`).
@@ -106,6 +108,13 @@ function sends(path: string) {
   const destinations = rowsCatching(path).map(({ destination }) => destination)
   return destinations.length === 1 ? destinations[0] : destinations
 }
+
+describe('the matcher these tests copy from Next', () => {
+  // buildCustomRoute passes `sensitive: caseSensitiveRoutes`; rowsCatching() leaves it out.
+  it('agrees with the server only while routes ignore case', () => {
+    expect(nextConfig.experimental?.caseSensitiveRoutes).toBeFalsy()
+  })
+})
 
 describe('the current site’s pages and posts (D11, design B4)', () => {
   it('sends each one to its new page, by one row', () => {
