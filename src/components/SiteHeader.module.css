@@ -79,14 +79,17 @@
 
 /*
  * The lotus, in vermilion. Its box runs 8 of its 72 units below the flower, room for the petals
- * to open, so it is lowered that far to set the flower's base on the wordmark's baseline. On a
- * layer of its own for the roundel's reason (Logo.module.css): the header looks the same live
- * and in a page turn's snapshot.
+ * to open. Drawn that much lower, the flower's base sits on the wordmark's baseline; taking that
+ * much less room above, it leaves the wordmark centred where it was. On a layer of its own for
+ * the roundel's reason (Logo.module.css): the header looks the same live and in a page turn's
+ * snapshot.
  */
 .mark {
   --mark-width: 2.25rem;
+  --below-flower: calc(var(--mark-width) * 8 / 72);
   position: relative;
-  top: calc(var(--mark-width) * 8 / 72);
+  top: var(--below-flower);
+  margin-block-start: calc(var(--below-flower) * -1);
   width: var(--mark-width);
   height: auto;
   color: var(--color-highlight);
