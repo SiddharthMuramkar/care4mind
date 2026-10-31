@@ -4,6 +4,7 @@ import { describe, expect, it } from 'vitest'
 import robots from '@/app/robots'
 import sitemap from '@/app/sitemap'
 import { redirects } from '@/config/redirects'
+import { site as config } from '@/config/site'
 import { site } from '@/content'
 import { metadataFor } from '@/lib/metadata'
 
@@ -11,13 +12,22 @@ import nextConfig from '../../next.config'
 
 // Front-end-site ticket 03: what every page tells the world about itself (D19, NFR-04).
 
+// Typed out rather than read from site.url, so a typo in the config fails.
+const ORIGIN = 'https://www.care4mind.xyz'
+
+describe('the canonical origin', () => {
+  it('is www.care4mind.xyz until launch, with no trailing slash', () => {
+    expect(config.url).toBe(ORIGIN)
+  })
+})
+
 describe('a page’s metadata (D19)', () => {
   it('names a Concept by its term and gloss, describes it by its summary and gives its address', async () => {
     expect(await metadataFor('/concepts/vikshepa/')).toEqual({
       title: { absolute: 'Vikṣepa (Distraction) · Care4Mind' },
       description:
         'The challenges a seeker encounters on the path to liberation. The Yoga Sūtra names nine obstacles, or diversions, on the yoga path.',
-      alternates: { canonical: 'https://care4mind.org/concepts/vikshepa/' },
+      alternates: { canonical: `${ORIGIN}/concepts/vikshepa/` },
     })
   })
 
@@ -26,7 +36,7 @@ describe('a page’s metadata (D19)', () => {
       title: { absolute: 'Mind: states and obstacles · Care4Mind' },
       description:
         '5 Concepts in the topic “Mind: states and obstacles”, and the verses they quote.',
-      alternates: { canonical: 'https://care4mind.org/topics/mind/' },
+      alternates: { canonical: `${ORIGIN}/topics/mind/` },
     })
   })
 
@@ -35,7 +45,7 @@ describe('a page’s metadata (D19)', () => {
       title: { absolute: 'Yoga Sūtra · Care4Mind' },
       description:
         'Every verse of the Yoga Sūtra that Care4Mind quotes, with its translations and the Concepts that quote it.',
-      alternates: { canonical: 'https://care4mind.org/texts/yoga-sutra/' },
+      alternates: { canonical: `${ORIGIN}/texts/yoga-sutra/` },
     })
   })
 
@@ -44,12 +54,12 @@ describe('a page’s metadata (D19)', () => {
       title: { absolute: 'Methods · Care4Mind' },
       description:
         'Psychotherapy, also known as talk therapy, involves various techniques to help individuals enhance their mental and emotional well-being.',
-      alternates: { canonical: 'https://care4mind.org/library/methods/' },
+      alternates: { canonical: `${ORIGIN}/library/methods/` },
     })
     expect(await metadataFor('/library/textbooks/')).toEqual({
       title: { absolute: 'Text Books · Care4Mind' },
       description: '20 entries on the Text Books list in the Care4Mind Library.',
-      alternates: { canonical: 'https://care4mind.org/library/textbooks/' },
+      alternates: { canonical: `${ORIGIN}/library/textbooks/` },
     })
   })
 
@@ -57,7 +67,7 @@ describe('a page’s metadata (D19)', () => {
     const search = {
       title: { absolute: 'Search · Care4Mind' },
       description: 'Search Care4Mind for a Concept, a term, a verse, a text or a Reference.',
-      alternates: { canonical: 'https://care4mind.org/search/' },
+      alternates: { canonical: `${ORIGIN}/search/` },
     }
     expect(await metadataFor('/search/')).toEqual(search)
     expect(await metadataFor('/search/?q=vikshepa')).toEqual(search)
@@ -67,14 +77,14 @@ describe('a page’s metadata (D19)', () => {
     expect(await metadataFor('/')).toEqual({
       title: { absolute: 'Care4Mind: Indian psychology' },
       description: 'Indic ways to invoke a perfect balanced mind',
-      alternates: { canonical: 'https://care4mind.org/' },
+      alternates: { canonical: `${ORIGIN}/` },
     })
   })
 
   it('names the flow after the Questionnaire it takes', async () => {
     expect(await metadataFor('/questionnaires/karmayoga-scale/take/')).toMatchObject({
       title: { absolute: 'Take the KarmaYoga Scale · Care4Mind' },
-      alternates: { canonical: 'https://care4mind.org/questionnaires/karmayoga-scale/take/' },
+      alternates: { canonical: `${ORIGIN}/questionnaires/karmayoga-scale/take/` },
     })
   })
 
@@ -84,7 +94,7 @@ describe('a page’s metadata (D19)', () => {
       const name = route.path === '/' ? 'Care4Mind: Indian psychology' : / · Care4Mind$/
       expect(title, route.path).toEqual({ absolute: expect.stringMatching(name) })
       expect(description, route.path).toMatch(/\S/)
-      expect(alternates?.canonical, route.path).toBe(`https://care4mind.org${route.path}`)
+      expect(alternates?.canonical, route.path).toBe(`${ORIGIN}${route.path}`)
     }
   })
 
@@ -98,15 +108,15 @@ describe('the sitemap and robots.txt (NFR-04)', () => {
   it('lists every route in the registry once, at its production address, with its slash', async () => {
     const urls = (await sitemap()).map(({ url }) => url)
     const paths = (await site.routes()).map(({ path }) => path)
-    expect(urls.map((url) => url.replace(/^https:\/\/care4mind\.org/, ''))).toEqual(paths)
+    expect(urls).toEqual(paths.map((path) => `${ORIGIN}${path}`))
     expect(new Set(urls).size).toBe(urls.length)
-    for (const url of urls) expect(url).toMatch(/^https:\/\/care4mind\.org\/(?:[a-z0-9-]+\/)*$/)
+    for (const url of urls) expect(url.slice(ORIGIN.length)).toMatch(/^\/(?:[a-z0-9-]+\/)*$/)
     expect(urls).toEqual(
       expect.arrayContaining([
-        'https://care4mind.org/',
-        'https://care4mind.org/concepts/vikshepa/',
-        'https://care4mind.org/texts/yoga-sutra/',
-        'https://care4mind.org/library/references/',
+        `${ORIGIN}/`,
+        `${ORIGIN}/concepts/vikshepa/`,
+        `${ORIGIN}/texts/yoga-sutra/`,
+        `${ORIGIN}/library/references/`,
       ]),
     )
   })
@@ -114,7 +124,7 @@ describe('the sitemap and robots.txt (NFR-04)', () => {
   it('names the sitemap in robots.txt and blocks nothing: noindex does the hiding', () => {
     expect(robots()).toEqual({
       rules: { userAgent: '*', allow: '/' },
-      sitemap: 'https://care4mind.org/sitemap.xml',
+      sitemap: `${ORIGIN}/sitemap.xml`,
     })
   })
 })
