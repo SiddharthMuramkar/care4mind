@@ -4,7 +4,7 @@ import { site as config } from '@/config/site'
 import { concepts, library, questionnaires, site, topics, works } from '@/content'
 
 import { expect, test } from './fixtures'
-import { ROUTES } from './routes'
+import { MISSING, PAGES, ROUTES } from './routes'
 
 // NFR-04: no internal link is broken, and no page is out of reach. The crawler starts at the
 // homepage and follows every same-origin <a href> in the HTML the server sends, running no
@@ -263,6 +263,36 @@ test.describe('the sitemap and robots.txt (NFR-04)', () => {
     expect(robots).toMatch(/^Allow: \/$/m)
     expect(robots).not.toMatch(/^Disallow:/m)
   })
+})
+
+/** How every page's head links the tab icon, the home-screen icon and the manifest, and the type each answers with. */
+const HEAD_LINKS = [
+  { selector: 'link[rel="icon"][type="image/svg+xml"]', type: 'image/svg+xml' },
+  { selector: 'link[rel="apple-touch-icon"]', type: 'image/png' },
+  { selector: 'link[rel="manifest"]', type: 'application/manifest+json' },
+] as const
+
+test('every kind of page names the tab icon, the home-screen icon and the manifest, each answering 200 directly', async ({
+  page,
+  request,
+}) => {
+  for (const path of [...PAGES.map((sample) => sample.path), MISSING]) {
+    const html = await (await request.get(path)).text()
+    const hrefs = await page.evaluate(
+      ({ html, selectors }) => {
+        const { head } = new DOMParser().parseFromString(html, 'text/html')
+        return selectors.map((selector) => head.querySelector(selector)?.getAttribute('href'))
+      },
+      { html, selectors: HEAD_LINKS.map(({ selector }) => selector) },
+    )
+    for (const [index, { selector, type }] of HEAD_LINKS.entries()) {
+      const href = hrefs[index] ?? ''
+      expect(href, `${selector} in the head of ${path}`).not.toBe('')
+      const response = await request.get(href, { maxRedirects: 0 })
+      expect(response.status(), `${href}, named on ${path}`).toBe(200)
+      expect(response.headers()['content-type'], `${href}, named on ${path}`).toContain(type)
+    }
+  }
 })
 
 test.describe('addresses (D02, D17)', () => {

@@ -1,6 +1,7 @@
 import { cx } from '@/lib/cx'
 
 import styles from './Fleuron.module.css'
+import { LOTUS } from './lotus'
 
 /**
  * A lotus-petal printer's ornament, drawn as line art. Decorative. Still by
@@ -19,13 +20,13 @@ export function Fleuron({ className, draw = false }: { className?: string; draw?
       focusable="false"
     >
       <g fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round">
-        <path pathLength={1} d="M80 4c7 9 7 21 0 32-7-11-7-23 0-32Z" />
-        <path pathLength={1} d="M80 36c-9-8-20-11-31-9 8-8 22-7 31 9Z" />
-        <path pathLength={1} d="M80 36c9-8 20-11 31-9-8-8-22-7-31 9Z" />
+        <path pathLength={1} d={LOTUS.petals.centre} />
+        <path pathLength={1} d={LOTUS.petals.left} />
+        <path pathLength={1} d={LOTUS.petals.right} />
         <path pathLength={1} d="M42 30H2" />
         <path pathLength={1} d="M118 30h40" />
       </g>
-      <circle cx="80" cy="18" r="2.2" fill="currentColor" />
+      <circle cx={LOTUS.dot.cx} cy={LOTUS.dot.cy} r={LOTUS.dot.r} fill="currentColor" />
     </svg>
   )
 }

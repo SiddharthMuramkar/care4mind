@@ -22,6 +22,7 @@
     "check:e2e": "playwright test",
     "lhci": "lhci autorun",
     "shots": "node scripts/shots.mjs",
+    "icons": "node scripts/icons.mjs",
     "content:new": "node scripts/content/new.mjs"
   },
   "dependencies": {

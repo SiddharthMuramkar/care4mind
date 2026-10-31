@@ -44,6 +44,7 @@ These are judgement calls, so review checks them against the diff, in the codeba
 | The registry is generated, not edited | the registry check in `pnpm check` |
 | No record stores scoring | types and the content-integrity test |
 | Press colour pairs meet contrast | contrast test, for the pairs it lists. Colours mixed inside modules are unchecked (Part 2) |
+| Icon and manifest colours equal their tokens | icons test |
 | A `styles.x` lookup names a class its CSS module defines | nothing yet (Part 2) |
 | IAST and Devanagari carry `lang` | components, for name fields and Devanagari runs. IAST inside running text is untagged (Part 2) |
 | Carried-over text changes only to fix a listed error | `verify.mjs`, which runs only on a machine with the captures; nothing in CI (Part 2) |
