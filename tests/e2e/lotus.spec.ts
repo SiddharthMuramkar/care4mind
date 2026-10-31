@@ -3,10 +3,10 @@ import { type Locator, type Page } from '@playwright/test'
 import { recordAnimationStarts, unfinishedDrawings } from './drawings'
 import { expect, gotoReady, test } from './fixtures'
 import {
-  BREATH,
   breathes,
   breathProperties,
   flashesPerSecond,
+  isBreath,
   logoLotus,
   lotuses,
   lotusStarts,
@@ -25,24 +25,22 @@ test('the hero lotus breathes once, after it draws in, and is still within 5 s o
   await gotoReady(page, '/')
   const hero = heroLotus(page)
   await expect.poll(() => breathes(hero)).toBe(true)
-  const timings = await hero.evaluate(
-    (svg, breath) =>
-      svg.getAnimations({ subtree: true }).map((animation) => {
-        const timing = animation.effect?.getComputedTiming()
-        return {
-          breath: breath.includes((animation as CSSAnimation).animationName),
-          iterations: timing?.iterations,
-          endTime: Number(timing?.endTime),
-        }
-      }),
-    BREATH,
+  const timings = await hero.evaluate((svg) =>
+    svg.getAnimations({ subtree: true }).map((animation) => {
+      const timing = animation.effect?.getComputedTiming()
+      return {
+        name: (animation as CSSAnimation).animationName,
+        iterations: timing?.iterations,
+        endTime: Number(timing?.endTime),
+      }
+    }),
   )
   for (const { iterations, endTime } of timings) {
     expect(iterations, 'it runs once').toBe(1)
     expect(endTime, 'it ends within 5 s').toBeLessThanOrEqual(STILL_BY)
   }
-  const drawnBy = Math.max(...timings.filter((t) => !t.breath).map((t) => t.endTime))
-  const breaths = (await lotusStarts(page)).filter(({ name }) => BREATH.includes(name))
+  const drawnBy = Math.max(...timings.filter((t) => !isBreath(t.name)).map((t) => t.endTime))
+  const breaths = (await lotusStarts(page)).filter(({ name }) => isBreath(name))
   expect(breaths.length, 'it breathes').toBeGreaterThan(0)
   for (const { delay } of breaths) {
     expect(delay, 'the breath sets off once the drawing is done').toBeGreaterThanOrEqual(drawnBy)
@@ -91,8 +89,10 @@ test('there is no pause control, on any route', async ({ page }) => {
 
 test('turning reduced motion on mid-visit stops the breath', async ({ page }) => {
   await gotoReady(page, '/')
+  const hero = heroLotus(page)
+  await expect.poll(() => breathes(hero)).toBe(true)
   await page.emulateMedia({ reducedMotion: 'reduce' })
-  await expect.poll(() => breathes(heroLotus(page))).toBe(false)
+  expect(await breathes(hero)).toBe(false)
 })
 
 const heroLotus = (page: Page) => page.getByRole('main').locator('svg[data-lotus]').first()

@@ -9,7 +9,7 @@ import {
   type Start,
 } from './drawings'
 import { expect, gotoReady, test } from './fixtures'
-import { BREATH } from './lotuses'
+import { isBreath } from './lotuses'
 import { placeOnScreen, scrollPath } from './scrolling'
 
 const section = (page: Page, name: string) => page.getByRole('region', { name, exact: true })
@@ -95,14 +95,13 @@ test.describe('the opening folio', () => {
     expect(new Set(delays.flat()).size).toBeGreaterThan(1)
 
     // Then it breathes once: the breath sets off as the drawing ends, never while it is still drawing.
-    const isBreath = ({ name }: { name: string }) => BREATH.includes(name)
     await expect
-      .poll(async () => (await startsIn(fleuron)).some(isBreath), 'it breathes')
+      .poll(async () => (await startsIn(fleuron)).some(({ name }) => isBreath(name)), 'it breathes')
       .toBe(true)
     const starts = await startsIn(fleuron)
-    const drawing = starts.filter((start) => !isBreath(start))
+    const drawing = starts.filter(({ name }) => !isBreath(name))
     const drawnBy = Math.max(...drawing.map(({ delay, duration }) => delay + (duration ?? 0)))
-    for (const { delay, loops } of starts.filter(isBreath)) {
+    for (const { delay, loops } of starts.filter(({ name }) => isBreath(name))) {
       expect(delay, 'the breath sets off once the drawing is done').toBeGreaterThanOrEqual(drawnBy)
       expect(loops, 'and breathes once').toBe(false)
     }

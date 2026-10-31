@@ -41,7 +41,7 @@
  * no dash ends exactly where the line starts: a round cap would show it there
  * as a dot. The dash is there only while it draws: a browser's dash can stop
  * just short of a closed petal's end, leaving a gap. The finished ornament is
- * the default, so reduced motion, and a visitor who paused the lotus, see it whole.
+ * the default, so reduced motion sees it whole.
  */
 @keyframes draw {
   from {

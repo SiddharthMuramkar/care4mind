@@ -15,14 +15,20 @@ export const logoLotus = (page: Page) =>
 /** The keyframes of the hero's one breath: its petals, its heart and the heart's glow. */
 export const BREATH = ['breathe-left', 'breathe-right', 'breathe-centre', 'heartbeat', 'glow']
 
+// CSS Modules prefix each keyframes name with the module's hash, as in `dAj9yG_breathe-left`.
+const BREATH_NAME = `(^|_)(${BREATH.join('|')})$`
+
+/** Whether an animation name is one of the breath's keyframes, under its module prefix. */
+export const isBreath = (name: string) => new RegExp(BREATH_NAME).test(name)
+
 /** Whether the lotus has a breath, running, finished or yet to start. */
 export const breathes = (lotus: Locator) =>
   lotus.evaluate(
     (svg, breath) =>
       svg
         .getAnimations({ subtree: true })
-        .some((animation) => breath.includes((animation as CSSAnimation).animationName)),
-    BREATH,
+        .some((animation) => new RegExp(breath).test((animation as CSSAnimation).animationName)),
+    BREATH_NAME,
   )
 
 /** Whether anything on the lotus is animating now. */
@@ -37,12 +43,12 @@ export const breathProperties = (lotus: Locator) =>
     const timing = new Set(['offset', 'computedOffset', 'easing', 'composite'])
     const properties = svg
       .getAnimations({ subtree: true })
-      .filter((animation) => breath.includes((animation as CSSAnimation).animationName))
+      .filter((animation) => new RegExp(breath).test((animation as CSSAnimation).animationName))
       .flatMap(({ effect }) => (effect instanceof KeyframeEffect ? effect.getKeyframes() : []))
       .flatMap((keyframe) => Object.keys(keyframe))
       .filter((key) => !timing.has(key))
     return [...new Set(properties)].sort()
-  }, BREATH)
+  }, BREATH_NAME)
 
 /**
  * What is animating on the clock now, anywhere on the page: running animations on the document
@@ -88,7 +94,7 @@ export const flashesPerSecond = (lotus: Locator) =>
         0,
         ...svg
           .getAnimations({ subtree: true })
-          .filter((animation) => breath.includes((animation as CSSAnimation).animationName))
+          .filter((animation) => new RegExp(breath).test((animation as CSSAnimation).animationName))
           .map(({ effect }) => effect)
           .filter((effect): effect is KeyframeEffect => effect instanceof KeyframeEffect)
           .map((effect) => {
@@ -104,5 +110,5 @@ export const flashesPerSecond = (lotus: Locator) =>
             return seconds > 0 ? peaks / seconds : 0
           }),
       ),
-    BREATH,
+    BREATH_NAME,
   )
