@@ -7,9 +7,9 @@ Latin and/or one Devanagari WOFF2 subset per style into src/fonts/.
 Google's own served subsets drop the combining marks ISO 15919 needs
 (ticket 07), which is why the site builds its own.
 
-Usage (from the repo root):
+Usage (from the repo root), with Python 3.12:
     python -m venv .venv-fonts && .venv-fonts/bin/pip install -r scripts/fonts/requirements.txt
-    .venv-fonts/bin/python scripts/fonts/subset.py [--cache DIR] [--update-lock]
+    .venv-fonts/bin/python scripts/fonts/subset.py [--cache DIR] [--update-lock] [--only SLUG ...]
 """
 
 from __future__ import annotations
@@ -140,13 +140,19 @@ def ranges_to_unicodes(ranges: list[tuple[int, int]]) -> list[int]:
 
 
 def build(source_path: Path, source: Source, script: str, out_path: Path) -> None:
-    font = TTFont(source_path, lazy=False)
+    # Keep the source's modified time. The default rewrite uses the clock, so a
+    # rerun with nothing changed would still rewrite every file.
+    font = TTFont(source_path, lazy=False, recalcTimestamp=False)
+    modified = font["head"].modified
     if source.axes:
         # Round-trip through bytes so the subsetter sees fully compiled tables.
         buffer = io.BytesIO()
-        instancer.instantiateVariableFont(font, source.axes).save(buffer)
+        instance = instancer.instantiateVariableFont(font, source.axes)
+        instance.recalcTimestamp = False
+        instance["head"].modified = modified
+        instance.save(buffer)
         buffer.seek(0)
-        font = TTFont(buffer, lazy=False)
+        font = TTFont(buffer, lazy=False, recalcTimestamp=False)
     options = subset.Options()
     options.flavor = "woff2"
     options.layout_features = source.features
@@ -160,6 +166,8 @@ def build(source_path: Path, source: Source, script: str, out_path: Path) -> Non
     subsetter.subset(font)
     out_path.parent.mkdir(parents=True, exist_ok=True)
     font.flavor = "woff2"
+    font.recalcTimestamp = False
+    font["head"].modified = modified
     font.save(out_path)
     print(f"wrote {out_path.relative_to(ROOT)} ({out_path.stat().st_size / 1000:.1f} kB)")
 
@@ -171,11 +179,13 @@ def main() -> None:
     parser.add_argument("--only", nargs="*", help="build only these family slugs")
     args = parser.parse_args()
 
-    # With --update-lock, start empty so the lock lists only the files this build uses.
-    lock: dict[str, str] = {} if args.update_lock or not LOCK_FILE.exists() else json.loads(LOCK_FILE.read_text())
-    for family in FAMILIES:
-        if args.only and family.slug not in args.only:
-            continue
+    # Start from the lock that exists. --update-lock replaces only the families this run rebuilds.
+    lock: dict[str, str] = {} if not LOCK_FILE.exists() else json.loads(LOCK_FILE.read_text())
+    selected = [family for family in FAMILIES if not args.only or family.slug in args.only]
+    if args.update_lock:
+        dirs = {source.dir for family in selected for source in family.sources}
+        lock = {key: digest for key, digest in lock.items() if key.split("/", 1)[0] not in dirs}
+    for family in selected:
         for source in family.sources:
             path = fetch(source.dir, source.file, args.cache, lock, args.update_lock)
             build(path, source, family.script, OUT_DIR / family.slug / f"{source.out}.woff2")
