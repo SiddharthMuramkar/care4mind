@@ -69,9 +69,7 @@ export default async function ConceptPage({ params }: PageProps<'/concepts/[slug
   if (!concept) notFound()
 
   const citations = citationLinks(concept.citations, concept.references)
-  const cards = new Map((await concepts.list()).map((card) => [card.slug, card]))
-  const previous = concept.previous && cards.get(concept.previous.slug)
-  const next = concept.next && cards.get(concept.next.slug)
+  const { previous, next } = concept
   const contents = contentsOf(concept)
   // A Concept card's title flies into the heading's IAST spelling, or its English title.
   const morph = `concept-title-${concept.slug}`

@@ -15,7 +15,6 @@ import { createContent } from './views'
 import { hrefFor as pathFor } from './views/href'
 
 export type * from './types'
-export { asciiSpellings, displayName } from './views/names'
 
 /**
  * The path of a page, or of an anchor on one, with its trailing slash: every internal link on
