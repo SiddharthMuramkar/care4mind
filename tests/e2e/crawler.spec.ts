@@ -261,7 +261,7 @@ test.describe('the sitemap and robots.txt (NFR-04)', () => {
     const robots = await (await request.get('/robots.txt')).text()
     expect(robots).toContain(`Sitemap: ${config.url}/sitemap.xml`)
     expect(robots).toMatch(/^Allow: \/$/m)
-    expect(robots).toMatch(/^Disallow:/m)
+    expect(robots).not.toMatch(/^Disallow:/m)
   })
 })
 
