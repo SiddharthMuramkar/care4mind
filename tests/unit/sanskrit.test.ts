@@ -30,6 +30,17 @@ describe('stripDiacritics', () => {
     expect(stripDiacritics('Ṣaḍdarśana')).toBe('Saddarsana')
     expect(stripDiacritics('sthitaprajña')).toBe('sthitaprajna')
   })
+
+  it('folds both anusvara spellings to m', () => {
+    expect(stripDiacritics('saṃśaya')).toBe('samsaya')
+    expect(stripDiacritics('saṁśaya')).toBe('samsaya')
+  })
+
+  it('leaves Devanagari intact, since its vowel signs and virama are letters', () => {
+    expect(stripDiacritics('कर्म')).toBe('कर्म')
+    expect(stripDiacritics('क्रम')).not.toBe(stripDiacritics('कर्म'))
+    expect(stripDiacritics('आत्मन्')).not.toContain(stripDiacritics('मान'))
+  })
 })
 
 describe('isNormalisedSanskrit', () => {

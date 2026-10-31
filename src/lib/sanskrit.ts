@@ -14,7 +14,11 @@ export function normaliseSanskrit(text: string): string {
 
 /** IAST with every diacritic removed, as NFR-03 requires (vikṣepa → viksepa). */
 export function stripDiacritics(text: string): string {
-  return text.normalize('NFD').replace(/\p{M}/gu, '').normalize('NFC')
+  // Only the Combining Diacritical Marks block: Devanagari's vowel signs and virama are marks too.
+  return text
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .normalize('NFC')
 }
 
 /** True when the text is already stored the way normaliseSanskrit would store it. */
