@@ -576,15 +576,6 @@
   gap: 1.5rem;
 }
 
-.visuallyHidden {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  clip-path: inset(50%);
-  white-space: nowrap;
-}
-
 /*
  * Printed, the end screen keeps the placeholder, the limits, the answers and the source. It is set
  * in block flow: where a page breaks, a grid's later items can print over its earlier ones. A
