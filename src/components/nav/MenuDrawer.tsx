@@ -21,6 +21,7 @@ export interface MenuDrawerProps {
   returnFocus: RefObject<HTMLElement | null>
   search?: ReactNode
   script?: ReactNode
+  lotus?: ReactNode
   mapNote?: ReactNode
 }
 
@@ -36,6 +37,7 @@ export function MenuDrawer({
   returnFocus,
   search,
   script,
+  lotus,
   mapNote,
 }: MenuDrawerProps) {
   const pathname = usePathname()
@@ -60,10 +62,11 @@ export function MenuDrawer({
                 </Drawer.Close>
               </div>
 
-              {search || script ? (
+              {search || script || lotus ? (
                 <div className={styles.tools}>
                   {search}
                   {script}
+                  {lotus}
                 </div>
               ) : null}
 

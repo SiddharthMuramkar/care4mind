@@ -166,7 +166,9 @@
   transform: rotate(45deg);
 }
 
-.script {
+/* The reader's settings: in the strip from 72rem, and in the Menu's Drawer below that. */
+.script,
+.lotus {
   display: none;
 }
 
@@ -201,7 +203,8 @@
     font-size: 1.1875rem;
   }
 
-  .script {
+  .script,
+  .lotus {
     display: contents;
   }
 }
