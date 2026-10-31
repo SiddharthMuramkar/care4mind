@@ -8,6 +8,7 @@
 import type { Features } from '@/config/features'
 
 import { azIndex } from '../derive/az-index'
+import { describe } from '../derive/describe'
 import { conceptGraph } from '../derive/graph-data'
 import { routes } from '../derive/routes'
 import { searchDocuments } from '../derive/search-documents'
@@ -22,6 +23,7 @@ import type {
   ConceptView,
   Crumb,
   HomepageView,
+  PageDescription,
   LibraryCard,
   PageView,
   QuestionnaireCard,
@@ -207,6 +209,10 @@ export function createContent(source: ContentSource, flags: Features) {
       /** A page's breadcrumbs (design B6), the page itself last; none for a path that isn't one. */
       async trail(path: string): Promise<Crumb[]> {
         return trail(await graph(), flags, path)
+      },
+      /** A page's name and description, read from its path as `trail` reads it; null for none. */
+      async describe(path: string): Promise<PageDescription | null> {
+        return describe(await graph(), flags, path)
       },
       /** The Concepts A–Z: every Concept, term and glossary entry, by letter. */
       async azIndex(): Promise<AzLetter[]> {

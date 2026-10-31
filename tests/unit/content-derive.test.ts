@@ -471,6 +471,102 @@ describe('site.trail', () => {
   })
 })
 
+describe('site.describe', () => {
+  const describePage = (path: string, flags: Features = ON) =>
+    createContent(sourceOf(...world), flags).site.describe(path)
+
+  it('names a Concept by its term and gloss, and describes it by its summary', async () => {
+    expect(await describePage('/concepts/obstacles/')).toEqual({
+      path: '/concepts/obstacles/',
+      kind: 'concept',
+      name: 'Vighna (Obstacle)',
+      description: 'A made-up summary.',
+    })
+    expect(await describePage('/concepts/calm/')).toMatchObject({ name: 'Śānti' })
+    expect(await describePage('/concepts/refuge/')).toMatchObject({ name: 'Refuge of the self' })
+  })
+
+  it('describes a topic, a text and the Library by what their pages hold', async () => {
+    expect(await describePage('/topics/mind/')).toEqual({
+      path: '/topics/mind/',
+      kind: 'topic',
+      name: 'Mind',
+      description: '2 Concepts in the topic “Mind”, and the verses they quote.',
+    })
+    expect(await describePage('/topics/self/')).toMatchObject({
+      description: '1 Concept in the topic “Self”, and the verses it quotes.',
+    })
+    expect(await describePage('/texts/yoga-sutra/')).toMatchObject({
+      name: 'Yoga Sūtra',
+      description:
+        'Every verse of the Yoga Sūtra that Care4Mind quotes, with its translations and the Concepts that quote it.',
+    })
+    expect(await describePage('/library/')).toMatchObject({
+      description: 'The Care4Mind Library: References, Reading List and Methods.',
+    })
+  })
+
+  it('describes a Library page by its summary, and a reading list by its size', async () => {
+    expect(await describePage('/library/methods/')).toMatchObject({
+      name: 'Methods',
+      description: 'A made-up summary of methods.',
+    })
+    expect(await describePage('/library/reading/')).toMatchObject({
+      name: 'Reading List',
+      description: '1 entry on the Reading List list in the Care4Mind Library.',
+    })
+  })
+
+  it('describes a Questionnaire with no summary by its purpose, and names its flow after it', async () => {
+    expect(await describePage('/questionnaires/work-scale/')).toMatchObject({
+      name: 'Work Scale',
+      description: 'What the Work Scale is for, and its limits.',
+    })
+    expect(await describePage('/questionnaires/work-scale/take/')).toEqual({
+      path: '/questionnaires/work-scale/take/',
+      kind: 'questionnaire-flow',
+      name: 'Take the Work Scale',
+      description: 'The Work Scale, one part at a time.',
+    })
+  })
+
+  it('leaves the description of a page with no content of its own to the site', async () => {
+    expect(await describePage('/')).toEqual({ path: '/', kind: 'home', name: 'Home' })
+    expect(await describePage('/search/')).toEqual({
+      path: '/search/',
+      kind: 'search',
+      name: 'Search',
+    })
+  })
+
+  it('reads a path as the trail does, and describes no page the trail doesn’t have', async () => {
+    const content = createContent(sourceOf(...world), ON)
+    expect(await describePage('/concepts/obstacles')).toEqual(
+      await describePage('/concepts/obstacles/'),
+    )
+    expect(await describePage('/search/?q=vighna')).toEqual(await describePage('/search/'))
+    expect(await describePage('concepts/obstacles#kinds')).toEqual(
+      await describePage('/concepts/obstacles/'),
+    )
+    for (const path of ['/nowhere/', '/topics/', '/questionnaires/later/']) {
+      expect(await describePage(path), path).toBeNull()
+      expect(await content.site.trail(path), path).toEqual([])
+    }
+    expect(await describePage('/concepts/map/', OFF)).toBeNull()
+    expect(await describePage('/questionnaires/work-scale/take/', OFF)).toBeNull()
+  })
+
+  it('describes every route under its own path and kind', async () => {
+    const content = createContent(sourceOf(...world), ON)
+    for (const route of await content.site.routes()) {
+      expect(await content.site.describe(route.path), route.path).toMatchObject({
+        path: route.path,
+        kind: route.kind,
+      })
+    }
+  })
+})
+
 describe('site.azIndex', () => {
   const withTerms = [
     defineConcept({

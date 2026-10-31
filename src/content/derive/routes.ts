@@ -25,6 +25,13 @@ function fixed(page: FixedPage, kind: RouteKind, title: string, proposal = false
   return { entry: { path, kind, pattern: path, title, ...(proposal ? { proposal: true } : {}) } }
 }
 
+/** A path as the route registry writes it: no query or fragment, with its trailing slash. */
+export function normalise(path: string): string {
+  const bare = path.replace(/[?#].*$/, '')
+  const rooted = bare.startsWith('/') ? bare : `/${bare}`
+  return rooted.endsWith('/') ? rooted : `${rooted}/`
+}
+
 const byPath = (a: PageRoute, b: PageRoute) => byName(a.entry.path, b.entry.path)
 
 /**

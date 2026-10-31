@@ -73,6 +73,12 @@ describe('a page’s metadata (D19)', () => {
     expect(await metadataFor('/search/?q=vikshepa')).toEqual(search)
   })
 
+  it('reads a path without its trailing slash as the breadcrumb trail does', async () => {
+    expect(await metadataFor('/concepts/vikshepa')).toEqual(
+      await metadataFor('/concepts/vikshepa/'),
+    )
+  })
+
   it('keeps the homepage’s own title, and describes it by the site’s tagline', async () => {
     expect(await metadataFor('/')).toEqual({
       title: { absolute: 'Care4Mind: Indian psychology' },
