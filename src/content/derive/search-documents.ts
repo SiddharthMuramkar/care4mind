@@ -6,18 +6,12 @@
 import { capitalise } from '@/lib/text'
 
 import type { ContentGraph } from '../graph'
+import { asciiSpellings, authorNames, displayName, passageLabel, referenceLabel } from '../names'
 import type { Block, ConceptRecord, PassageRecord, SanskritName, WorkRecord } from '../schema'
 import type { SearchDocument } from '../types'
 import { conceptQuotes, termsIn } from '../views/blocks'
 import { must } from '../views/common'
 import { hrefFor } from '../views/href'
-import {
-  asciiSpellings,
-  authorNames,
-  displayName,
-  passageLabel,
-  referenceLabel,
-} from '../views/names'
 import { questionnaireHref } from '../views/refs'
 
 const EXCERPT = 300

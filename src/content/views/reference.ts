@@ -1,9 +1,9 @@
 import type { Citation, ContentGraph } from '../graph'
 import type { ReferenceRecord } from '../schema'
 import type { NumberedReference, ReferenceView } from '../types'
+import { referenceLabel } from '../names'
 import { byName, carriedOver, must, present } from './common'
 import { hrefFor, referenceAnchor } from './href'
-import { referenceLabel } from './names'
 import { recordRef } from './refs'
 
 /** A Reference with every field, its anchor and every record that cites it. */

@@ -4,9 +4,9 @@
  * are the map's sectors. The map's layout is the front end's to add.
  */
 import type { ContentGraph } from '../graph'
+import { displayName } from '../names'
 import type { ConceptGraph, ConceptGraphEdge } from '../types'
 import { byName } from '../views/common'
-import { displayName } from '../views/names'
 import { conceptRef } from '../views/refs'
 
 const EDGE_KINDS: readonly ConceptGraphEdge['kind'][] = ['passage', 'work', 'reference']

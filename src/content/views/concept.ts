@@ -9,10 +9,10 @@ import type {
   RelatedConcept,
   RelationKind,
 } from '../types'
+import { asciiSpellings, displayName, passageLabel } from '../names'
 import { conceptQuotes, sectionViews, tocOf, topicRef, type Owner } from './blocks'
 import { byName, carriedOver, must, nameCopy, present } from './common'
 import { hrefFor } from './href'
-import { asciiSpellings, displayName, passageLabel } from './names'
 import { compareOrder, verseView, workRef } from './passage'
 import { questionnaireCard } from './questionnaire'
 import { citationMap, numberedReferences } from './reference'

@@ -16,11 +16,11 @@ import type {
   TermBlock,
   TopicRecord,
 } from '../schema'
+import { asciiSpellings, displayName } from '../names'
 import type { AzEntry, AzLetter } from '../types'
 import { conceptQuotes, termsIn } from '../views/blocks'
 import { byName, must, present } from '../views/common'
 import { hrefFor } from '../views/href'
-import { asciiSpellings, displayName } from '../views/names'
 import { conceptRef } from '../views/refs'
 
 const LETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'

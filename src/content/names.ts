@@ -1,10 +1,11 @@
 /**
- * How the site names things: pure helpers shared by the views, the derivations and the graph.
+ * How the site names things. It sits below the graph, so the graph can name a passage or a
+ * Reference without importing a view.
  */
 import { stripDiacritics } from '@/lib/sanskrit'
 import { capitalise } from '@/lib/text'
 
-import type { PassageRecord, ReferenceRecord, SanskritName, WorkRecord } from '../schema'
+import type { PassageRecord, ReferenceRecord, SanskritName, WorkRecord } from './schema'
 
 /**
  * The name a heading leads with (D07): the capitalised IAST term if there is one, otherwise the
