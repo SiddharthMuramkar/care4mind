@@ -1,15 +1,28 @@
 /**
  * The seam under the public interface: where records come from.
  *
- * A content source has one method, returning every record of a kind. The local source reads the
- * generated registry of record files. A CMS source implements the same method later and nothing
- * above it changes; tests supply made-up records the same way.
+ * An adapter owes ids unique within a kind, records in the schema's shape, and NFC text. The
+ * graph sorts each kind by id and does not check those duties again. Caching, and checking
+ * records at run time, wait on the back-end decision.
+ *
+ * `registrySource()` reads the generated registry of record files. `memorySource()` holds
+ * records in memory, which is how the tests fill the seam. A content back end implements the
+ * same method later, and nothing above it changes.
  */
 import type { ContentKind, ContentRecord, RecordOf } from './schema'
 
 export interface ContentSource {
-  /** Every record of one kind, in the source's own order. */
+  /** Every record of one kind, in whatever order the adapter has them. */
   records<K extends ContentKind>(kind: K): Promise<readonly RecordOf<K>[]>
+}
+
+/** Records held in memory: the seam's adapter for tests and any other made-up source. */
+export function memorySource(...records: ContentRecord[]): ContentSource {
+  return {
+    async records<K extends ContentKind>(kind: K) {
+      return records.filter((record): record is RecordOf<K> => record.kind === kind)
+    },
+  }
 }
 
 /** One record file as the generated registry lists it: its path under `data/`, and its record. */

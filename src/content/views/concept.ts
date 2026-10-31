@@ -82,7 +82,7 @@ function linkedWorks(record: ConceptRecord, graph: ContentGraph): LinkedWork[] {
   })
 }
 
-/** Its own Questionnaire first, then every other that lists the Concept, in source order. */
+/** Its own Questionnaire first, then every other that lists the Concept, in id order. */
 function linkedQuestionnaires(record: ConceptRecord, graph: ContentGraph): QuestionnaireCard[] {
   const own = record.questionnaire === undefined ? [] : [record.questionnaire]
   const listing = graph

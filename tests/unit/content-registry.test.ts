@@ -22,13 +22,11 @@ import {
   idOf,
   KIND_FOLDERS,
   type ConceptRecord,
-  type ContentKind,
   type ContentRecord,
   type QuestionnaireRecord,
-  type RecordOf,
   type ReferenceRecord,
 } from '@/content/schema'
-import { localSource, registrySource, type ContentSource } from '@/content/source'
+import { localSource, memorySource, registrySource } from '@/content/source'
 
 // The storage layers of the content module: the record schema, the generated registry, the
 // content source (the seam) and the graph that resolves every link once. The graph has no public
@@ -255,15 +253,6 @@ describe('the content source', () => {
   })
 })
 
-/** A made-up content source holding the given records. */
-function sourceOf(...records: ContentRecord[]): ContentSource {
-  return {
-    async records<K extends ContentKind>(kind: K) {
-      return records.filter((record): record is RecordOf<K> => record.kind === kind)
-    },
-  }
-}
-
 describe('the graph', () => {
   const mind = defineTopic({ kind: 'topic', slug: 'mind', name: { english: 'Mind' }, order: 1 })
   const self = defineTopic({ kind: 'topic', slug: 'self', name: { english: 'Self' }, order: 2 })
@@ -358,8 +347,13 @@ describe('the graph', () => {
     textbooks,
   ]
 
+  it('lists each kind by id, whatever order the source returns', async () => {
+    const graph = await buildGraph(memorySource(self, mind))
+    expect(graph.records('topic')).toEqual([mind, self])
+  })
+
   it('finds each record by its kind and id', async () => {
-    const graph = await buildGraph(sourceOf(...world))
+    const graph = await buildGraph(memorySource(...world))
     expect(graph.record('concept', 'obstacles')).toBe(obstacles)
     expect(graph.record('passage', 'yoga-sutra/1.30')).toBe(ys130)
     expect(graph.record('topic', 'obstacles')).toBeUndefined()
@@ -367,7 +361,7 @@ describe('the graph', () => {
   })
 
   it('lists the records that cite a Reference', async () => {
-    const graph = await buildGraph(sourceOf(...world))
+    const graph = await buildGraph(memorySource(...world))
     expect(graph.citedBy('tomar-2024')).toEqual([
       { kind: 'concept', id: 'obstacles' },
       { kind: 'concept', id: 'steadiness' },
@@ -380,7 +374,7 @@ describe('the graph', () => {
   })
 
   it('lists where a passage is quoted, with the translation each quote shows', async () => {
-    const graph = await buildGraph(sourceOf(...world))
+    const graph = await buildGraph(memorySource(...world))
     expect(graph.quotedIn('yoga-sutra/1.30')).toEqual([
       { record: { kind: 'concept', id: 'obstacles' }, translation: 'first' },
       { record: { kind: 'concept', id: 'steadiness' } },
@@ -388,14 +382,14 @@ describe('the graph', () => {
   })
 
   it('lists the Concepts in each topic and the Concepts quoting each work', async () => {
-    const graph = await buildGraph(sourceOf(...world))
+    const graph = await buildGraph(memorySource(...world))
     expect(graph.conceptsInTopic('mind')).toEqual({ primary: ['obstacles'], also: [] })
     expect(graph.conceptsInTopic('self')).toEqual({ primary: ['steadiness'], also: ['obstacles'] })
     expect(graph.conceptsQuotingWork('yoga-sutra')).toEqual(['obstacles', 'steadiness'])
   })
 
   it('resolves each in-text citation to one of the record’s own References', async () => {
-    const graph = await buildGraph(sourceOf(...world))
+    const graph = await buildGraph(memorySource(...world))
     expect(graph.citations('concept', 'obstacles')).toEqual([
       { text: 'Tomar, 2024', reference: 'tomar-2024' },
       { text: 'Schleim, 2025', reference: 'schleim-2025' },
@@ -413,7 +407,7 @@ describe('the graph', () => {
       references: ['tomar-2024', 'nobody-1999'],
     })
     const others = world.filter((record) => record !== obstacles)
-    const build = buildGraph(sourceOf(...others, broken))
+    const build = buildGraph(memorySource(...others, broken))
     await expect(build).rejects.toThrow(DanglingIdError)
     await expect(build).rejects.toThrow(
       'concept “obstacles”, field verses[0].passage: no passage “yoga-sutra/9.99”',
@@ -426,7 +420,7 @@ describe('the graph', () => {
   it('refuses an id of the wrong kind', async () => {
     const wrongKind = defineConcept({ ...steadiness, topics: { primary: 'obstacles' } })
     const others = world.filter((record) => record !== steadiness)
-    await expect(buildGraph(sourceOf(...others, wrongKind))).rejects.toThrow(
+    await expect(buildGraph(memorySource(...others, wrongKind))).rejects.toThrow(
       'concept “steadiness”, field topics.primary: no topic “obstacles”',
     )
   })
@@ -437,13 +431,13 @@ describe('the graph', () => {
       verses: [{ passage: 'yoga-sutra/1.30', translation: 'second' }],
     })
     const others = world.filter((record) => record !== obstacles)
-    await expect(buildGraph(sourceOf(...others, wrongTranslation))).rejects.toThrow(
+    await expect(buildGraph(memorySource(...others, wrongTranslation))).rejects.toThrow(
       'concept “obstacles”, field verses[0].translation: no translation “second” in passage “yoga-sutra/1.30”',
     )
   })
 
   it('is built once per source', async () => {
-    const source = sourceOf(...world)
+    const source = memorySource(...world)
     expect(await graphFor(source)).toBe(await graphFor(source))
     expect(await contentGraph()).toBe(await contentGraph())
   })
