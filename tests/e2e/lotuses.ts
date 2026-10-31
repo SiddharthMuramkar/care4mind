@@ -31,12 +31,6 @@ export const breathes = (lotus: Locator) =>
     BREATH_NAME,
   )
 
-/** Whether anything on the lotus is animating now. */
-export const moving = (lotus: Locator) =>
-  lotus.evaluate((svg) =>
-    svg.getAnimations({ subtree: true }).some((animation) => animation.playState === 'running'),
-  )
-
 /** The properties the lotus's breath changes, each once, in order: ['opacity', 'transform']. */
 export const breathProperties = (lotus: Locator) =>
   lotus.evaluate((svg, breath) => {

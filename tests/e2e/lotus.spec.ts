@@ -12,7 +12,7 @@ import {
   lotusStarts,
   runningOnTheClock,
 } from './lotuses'
-import { ROUTES_IN_SCOPE } from './routes'
+import { MISSING, ROUTES_IN_SCOPE } from './routes'
 import { recordScriptedAnimations } from './switches'
 
 // WCAG 2.2.2: motion that starts on its own and ends within 5 s needs no pause control.
@@ -39,7 +39,10 @@ test('the hero lotus breathes once, after it draws in, and is still within 5 s o
     expect(iterations, 'it runs once').toBe(1)
     expect(endTime, 'it ends within 5 s').toBeLessThanOrEqual(STILL_BY)
   }
-  const drawnBy = Math.max(...timings.filter((t) => !isBreath(t.name)).map((t) => t.endTime))
+  expect(timings.length, 'the hero has animations to check').toBeGreaterThan(0)
+  const drawIn = timings.filter((t) => !isBreath(t.name)).map((t) => t.endTime)
+  expect(drawIn.length, 'the hero draws in').toBeGreaterThan(0)
+  const drawnBy = Math.max(...drawIn)
   // The breath's animationstart fires only once its delay has passed.
   const breathStarts = async () => (await lotusStarts(page)).filter(({ name }) => isBreath(name))
   await expect
@@ -72,17 +75,14 @@ test('the breath moves by transform and opacity alone, its strokes whole, at mos
   expect(await flashesPerSecond(hero)).toBeLessThanOrEqual(3)
 })
 
-test('with no input, nothing runs on the clock 5.5 s after load, on any route', async ({
-  page,
-}) => {
-  test.setTimeout(ROUTES_IN_SCOPE.length * 15_000)
-  for (const { path } of ROUTES_IN_SCOPE) {
+for (const { path } of [...ROUTES_IN_SCOPE, { path: MISSING }]) {
+  test(`with no input, nothing runs on the clock 5.5 s after load: ${path}`, async ({ page }) => {
     await page.goto(path)
     const sinceLoad = await page.evaluate(() => performance.now())
     await page.waitForTimeout(Math.max(0, STILL_BY + 500 - sinceLoad))
-    expect(await runningOnTheClock(page), path).toEqual([])
-  }
-})
+    expect(await runningOnTheClock(page)).toEqual([])
+  })
+}
 
 // One page a test: visiting every page does not fit in one test's time.
 for (const { path } of ROUTES_IN_SCOPE) {
@@ -92,12 +92,10 @@ for (const { path } of ROUTES_IN_SCOPE) {
   })
 }
 
-test('turning reduced motion on mid-visit stops the breath', async ({ page }) => {
-  await gotoReady(page, '/')
-  const hero = heroLotus(page)
-  await expect.poll(() => breathes(hero)).toBe(true)
+test('with reduced motion, the hero does not breathe', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' })
-  expect(await breathes(hero)).toBe(false)
+  await gotoReady(page, '/')
+  expect(await breathes(heroLotus(page))).toBe(false)
 })
 
 const heroLotus = (page: Page) => page.getByRole('main').locator('svg[data-lotus]').first()

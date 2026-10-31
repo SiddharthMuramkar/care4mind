@@ -58,8 +58,8 @@ const moving = (page: Page) =>
   )
 
 /**
- * Wait until what opened has finished arriving, so checks see it as it rests. A lotus's breath
- * never finishes, so animations without an end are left out.
+ * Wait until what opened has finished arriving, so checks see it as it rests. Only the hero's
+ * breath ends on its own, so animations without an end are left out.
  */
 const settled = (page: Page) =>
   expect
