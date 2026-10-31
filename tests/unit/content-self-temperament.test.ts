@@ -254,7 +254,7 @@ describe('ātma-bandhu', () => {
 
 describe('kartā', () => {
   it('takes its English name from the page’s own gloss, “‘karta’ or doer”', async () => {
-    expect((await concepts.get('karta'))?.english).toBe('doer')
+    expect((await concepts.get('karta'))?.english).toBe('Doer')
   })
 
   it('holds the Sattvik, Rajasic and Tamasic Karta as term blocks, each with its verse', async () => {

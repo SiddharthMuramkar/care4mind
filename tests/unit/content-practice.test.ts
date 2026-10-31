@@ -272,10 +272,10 @@ describe('the practice Concepts', () => {
     expect(
       components.map(({ id, term, gloss }) => [id, term.iast, term.devanagari, gloss]),
     ).toEqual([
-      ['maitri', 'maitrī', 'मैत्री', 'Loving-kindness or Benevolence'],
+      ['maitri', 'maitrī', 'मैत्री', 'Loving-kindness or benevolence'],
       ['karuna', 'karuṇā', 'करुणा', 'Compassion'],
-      ['mudita', 'muditā', 'मुदिता', 'Altruistic Joy'],
-      ['upeksa', 'upekṣā', 'उपेक्षा', 'Equanimity or Inner Balance'],
+      ['mudita', 'muditā', 'मुदिता', 'Altruistic joy'],
+      ['upeksa', 'upekṣā', 'उपेक्षा', 'Equanimity or inner balance'],
     ])
     expect(components.map(({ term }) => term.ascii[0])).toEqual([
       'Maitra',
@@ -324,7 +324,7 @@ describe('the practice Concepts', () => {
     const concept = conceptOf(FIVE_STEPS.slug)
     const steps = termsIn(concept?.sections)
     expect(steps.map(({ id, term, gloss }) => [id, term.iast, gloss])).toEqual([
-      ['sraddha', 'śraddhā', 'Unconditional Faith'],
+      ['sraddha', 'śraddhā', 'Unconditional faith'],
       ['virya', 'vīrya', 'Strength'],
       ['smrti', 'smṛti', 'Memory'],
       ['samadhi', 'samādhi', 'Absorption'],
