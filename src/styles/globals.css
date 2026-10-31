@@ -157,6 +157,8 @@
   }
 
   body {
+    /* Containing block for an absolute backdrop, so a scrolled page still dims under the toolbars. */
+    position: relative;
     background: var(--color-ground);
     color: var(--color-ink);
     font-family: var(--font-text);
