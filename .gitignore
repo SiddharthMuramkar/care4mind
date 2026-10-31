@@ -18,8 +18,9 @@ next-env.d.ts
 .lighthouseci/
 /.shots/
 
-# local tooling
+# local tooling, including the flags pack from `node scripts/content/report.mjs --write`
 .venv-fonts/
+/.scratch/
 .vercel/
 .env*
 !.env.example

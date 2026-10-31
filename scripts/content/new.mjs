@@ -5,7 +5,8 @@
 //   node scripts/content/new.mjs <kind> <id> [--root <dir>]
 //
 // It refuses a file that exists and an id that breaks the id rules. It reads no saved page and
-// never touches the network. How to fill the template: docs/agents/content-migration.md.
+// never touches the network. Fill the template from the saved page: each string is the page's
+// own text, or an edit listed in provenance.
 
 import { spawnSync } from 'node:child_process'
 import { existsSync, mkdirSync, writeFileSync } from 'node:fs'
@@ -173,8 +174,9 @@ function template(kind, id) {
   const helper = body.slice(0, body.indexOf('('))
   return `import { ${helper} } from '@/content/schema'
 
-// Written by \`pnpm content:new ${kind} ${id}\`. Fill every field from the saved page, as
-// docs/agents/content-migration.md says; delete the commented fields the page doesn't give.
+// Written by \`pnpm content:new ${kind} ${id}\`. Fill every field from the saved page
+// (node scripts/content/extract.mjs <slug>). Each string is the page's own text, or an edit
+// in provenance; delete the commented fields the page doesn't give.
 // Then check it with \`node scripts/content/verify.mjs ${kind}/${id}\`.
 export default ${body}
 `

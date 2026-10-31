@@ -32,7 +32,7 @@ export interface Flag {
   ticket?: number
 }
 
-/** Where a record came from, and every change made on the way. */
+/** Where a record came from. Every content string is the page's own text, or a change listed in `edits`. */
 export interface Provenance {
   /** The current-site pages (or, for a record no page holds, the source) it was read from. */
   sources: readonly { url: string; retrieved: string }[]

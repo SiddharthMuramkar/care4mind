@@ -7,7 +7,8 @@
 //
 // It reads the saved copies only from $CARE4MIND_CAPTURES, never writes into the repo and never
 // touches the network. Exit code 0 when nothing is missing, 1 when a string is on none of its
-// pages, 2 when it can't run. What it checks and skips: docs/agents/content-migration.md.
+// pages, 2 when it can't run. What it checks and skips: the “verify” tests in
+// tests/unit/content-tools.test.ts.
 //
 // Plain Node, no new dependency: records are TypeScript, which it reads with the repo's own
 // TypeScript compiler. This file is also the records module report imports.

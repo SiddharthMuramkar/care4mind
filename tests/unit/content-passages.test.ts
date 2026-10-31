@@ -5,9 +5,9 @@ import type { PassageRecord } from '@/content/schema'
 import { localSource } from '@/content/source'
 
 // Ticket 04, the works and passages census: every verse the 16 description pages quote is one
-// passage under its work. The census itself is .scratch/content-v1/census/passages.md. These
-// tests read the real records through the public interface, and through the content source
-// where a rule is about what a record stores.
+// passage under its work. The list below is that census. These tests read the real records
+// through the public interface, and through the content source where a rule is about what a
+// record stores.
 
 /** The census: each work's passages, in reading order. */
 const CENSUS: Readonly<Record<string, readonly string[]>> = {

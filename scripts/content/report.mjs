@@ -3,10 +3,10 @@
 // drafted fields, each Questionnaire's held-back items and a map of the saved pages.
 //
 //   node scripts/content/report.mjs            prints the pack
-//   node scripts/content/report.mjs --write    saves it as .scratch/content-v1/flags.md
+//   node scripts/content/report.mjs --write    saves it under .scratch/, which git ignores
 //
 // It reads the saved copies only from $CARE4MIND_CAPTURES and never touches the network. It
-// writes nothing unless asked with --write. Only content-v1 ticket 12 commits the pack.
+// writes nothing unless asked with --write.
 
 import { mkdirSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'

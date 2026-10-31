@@ -100,6 +100,7 @@ describe('the captures rule', { timeout: 30_000 }, () => {
     const result = run(tool, ['example'], { CARE4MIND_CAPTURES: undefined })
     expect(result.status).toBe(2)
     expect(result.stderr).toContain('CARE4MIND_CAPTURES is not set')
+    expect(result.stderr).toContain('SiddharthMuramkar/care4mind-captures')
   })
 
   it.each(CAPTURE_READERS)('%s refuses a captures folder that is missing', (tool) => {
@@ -997,6 +998,7 @@ describe('new', { timeout: 30_000 }, () => {
       "'../data/passages/example-sutra/1.12'",
     )
     expect(result.stdout).toContain('src/content/data/passages/example-sutra/1.12.ts')
+    expect(template).not.toContain('docs/agents')
   })
 
   it('refuses a file that exists and an id that breaks the id rules', () => {

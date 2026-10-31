@@ -14,8 +14,7 @@ import { localSource } from '@/content/source'
 
 // Content-v1 ticket 09: the four "practice" description pages as Concepts, each with its
 // coming-later Questionnaire. Read through the content source and the public interface, as the
-// other content tests are. The verses and References expected are the census's
-// (.scratch/content-v1/census/), page by page.
+// other content tests are. The verses and References expected are listed below, page by page.
 
 interface Page {
   slug: string
