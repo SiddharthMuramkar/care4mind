@@ -94,15 +94,21 @@ for (const key of ['Space', 'Enter']) {
   test(`${key} presses it, with the focus ring visible and uncovered`, async ({ page }) => {
     await gotoReady(page, '/')
     const pause = await pauseButton(page)
+    // Chromium shows :focus-visible on a scripted focus only after a key press.
+    await page.keyboard.press('Shift')
     await pause.focus()
     await expect(pause).toBeFocused()
     expect(await pause.evaluate((button) => getComputedStyle(button).outlineStyle)).not.toBe('none')
-    const uncovered = await pause.evaluate((button) => {
-      const box = button.getBoundingClientRect()
-      const top = document.elementFromPoint(box.x + box.width / 2, box.y + box.height / 2)
-      return top !== null && button.contains(top)
-    })
-    expect(uncovered).toBe(true)
+    // The Menu may still be sliding in.
+    await expect
+      .poll(() =>
+        pause.evaluate((button) => {
+          const box = button.getBoundingClientRect()
+          const top = document.elementFromPoint(box.x + box.width / 2, box.y + box.height / 2)
+          return top !== null && button.contains(top)
+        }),
+      )
+      .toBe(true)
     await page.keyboard.press(key)
     await expect(pause).toHaveAttribute('aria-pressed', 'true')
     await expect.poll(() => noneMoving(page)).toBe(true)

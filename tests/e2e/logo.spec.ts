@@ -2,7 +2,6 @@ import type { Locator, Page } from '@playwright/test'
 
 import { recordAnimationStarts } from './drawings'
 import { expect, gotoReady, test } from './fixtures'
-import { lotusStarts } from './lotuses'
 import { MISSING, PAGES } from './routes'
 
 const homeLink = (page: Page) =>
@@ -182,14 +181,21 @@ test('pointing at or focusing the logo animates nothing beside its breathing lot
   await recordAnimationStarts(page)
   await gotoReady(page, '/')
   const logo = homeLink(page)
-  const before = (await lotusStarts(page)).length
+  const startsOnTheLogo = async () =>
+    await logo.evaluate(
+      (link) =>
+        (
+          window as unknown as { __animationStarts: { target: Element }[] }
+        ).__animationStarts.filter(({ target }) => link.contains(target)).length,
+    )
+  const before = await startsOnTheLogo()
   await logo.hover()
   await page.keyboard.press('Tab')
   await page.keyboard.press('Tab')
   await expect(logo).toBeFocused()
   await page.waitForTimeout(100)
   expect(await animationsBesideTheLotus(logo), 'nothing outside the lotus animates').toBe(0)
-  expect(await lotusStarts(page), 'focus starts nothing new on the lotus').toHaveLength(before)
+  expect(await startsOnTheLogo(), 'focus starts nothing new on the lotus').toBe(before)
 })
 
 test('the footer shows the same wordmark, and pointing at it draws nothing', async ({ page }) => {
