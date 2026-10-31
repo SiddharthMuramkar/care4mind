@@ -9,9 +9,11 @@ import { localSource } from '@/content/source'
 // with one Concept between them, so ticket 01 wrote each check below switched off. Ticket 12,
 // the fidelity sweep, switched them on once the migration was complete: from here on they hold.
 
-/** Modern constructs a Concept's keywords never name, as stems so 'stressed' or 'self esteem' are refused too: a construct reaches a Concept only through an explained link. */
+/** Modern constructs a Concept's keywords never name, as stems at the start of a word, so 'stressed' and 'self esteem' are refused but 'distress' is not: a construct reaches a Concept only through an explained link. */
 const namesModernConstruct = (keyword: string) =>
-  /anxi|depress|stress|trauma|burnout|resilien|self[- ]?(esteem|worth)|procrastinat/.test(keyword)
+  /\b(anxi|depress|stress|trauma|burnout|resilien|self[- ]?(esteem|worth)|procrastinat)/.test(
+    keyword,
+  )
 
 /** The number of glossary entries ticket 05 records in its Comments, confirmed by ticket 12. */
 const GLOSSARY_ENTRIES = 78
@@ -138,6 +140,9 @@ describe('content v1, complete', () => {
       ...concept.keywords
         .filter((keyword) => namesModernConstruct(keyword))
         .map((keyword) => `${concept.slug}: “${keyword}” names a modern construct or condition`),
+      ...concept.keywords
+        .filter((keyword, index) => concept.keywords.indexOf(keyword) !== index)
+        .map((keyword) => `${concept.slug}: “${keyword}” is listed twice`),
     ])
     expect(problems).toEqual([])
   })

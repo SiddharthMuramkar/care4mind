@@ -119,7 +119,7 @@ const concept: ConceptRecord = {
   slug: 'obstacles',
   name: { term: { iast: 'vighna', devanagari: 'विघ्न', ascii: ['Vigna'] }, english: 'Obstacle' },
   summary: 'A made-up summary.',
-  keywords: ['focus'],
+  keywords: ['focus', 'Obstacle', 'distraction', 'focus'],
   topics: { primary: 'mind' },
   verses: [{ passage: 'yoga-sutra/1.30', translation: 'obstacles' }],
   sections: [],
@@ -707,6 +707,7 @@ describe('site.searchDocuments', () => {
       keywords: [
         'Obstacle',
         'focus',
+        'distraction',
         'Mind',
         'Yoga Sūtra',
         'Yoga Sutra',
