@@ -13,11 +13,11 @@ const before = (index: number, count: number) =>
 const listed = (words: readonly string[]) =>
   words.map((word, index) => `${before(index, words.length)}${word}`).join('')
 
-/**
- * Where a record's text came from and whether anyone has reviewed it, as every content page
- * shows: the pages it was read from and when, what was drafted for the new site, and its review.
- */
-export function Provenance({ of, className }: { of: CarriedOver; className?: string }) {
+/** The address as the sentence prints it: no scheme. */
+const sourceLabel = (url: string) => url.replace(/^https?:\/\//, '')
+
+/** The sentence, split so each source can be a link and the words stay one string. */
+function provenanceReading(of: CarriedOver) {
   const { sources, drafted = [] } = of.provenance
   const fromCurrentSite = sources.every((source) => CURRENT_SITE.test(source.url))
   const dates = [...new Set(sources.map((source) => source.retrieved))].sort()
@@ -27,19 +27,39 @@ export function Provenance({ of, className }: { of: CarriedOver; className?: str
       : ''
   const review =
     of.reviewStatus === 'reviewed' ? 'Reviewed.' : 'Not yet reviewed by the Research editor.'
-  if (sources.length === 0) return <p className={cx(styles.provenance, className)}>{review}</p>
+  if (sources.length === 0) return { lead: review, sources: [], tail: '' }
+  return {
+    lead: fromCurrentSite
+      ? `Carried over from the current site’s ${sources.length === 1 ? 'page' : 'pages'} `
+      : 'Taken from ',
+    sources: sources.map((source) => ({ url: source.url, label: sourceLabel(source.url) })),
+    tail: `, read on ${listed(dates)}${draftedNote}. ${review}`,
+  }
+}
+
+/** Where a record's text came from, as one sentence. */
+export function provenanceSentence(of: CarriedOver): string {
+  const reading = provenanceReading(of)
+  if (reading.sources.length === 0) return reading.lead
+  return `${reading.lead}${listed(reading.sources.map((source) => source.label))}${reading.tail}`
+}
+
+/**
+ * Where a record's text came from and whether anyone has reviewed it, as every content page
+ * shows: the pages it was read from and when, what was drafted for the new site, and its review.
+ */
+export function Provenance({ of, className }: { of: CarriedOver; className?: string }) {
+  const reading = provenanceReading(of)
   return (
     <p className={cx(styles.provenance, className)}>
-      {fromCurrentSite
-        ? `Carried over from the current site’s ${sources.length === 1 ? 'page' : 'pages'} `
-        : 'Taken from '}
-      {sources.map((source, index) => (
+      {reading.lead}
+      {reading.sources.map((source, index) => (
         <span key={source.url}>
-          {before(index, sources.length)}
-          <a href={source.url}>{source.url.replace(/^https?:\/\//, '')}</a>
+          {before(index, reading.sources.length)}
+          <a href={source.url}>{source.label}</a>
         </span>
       ))}
-      {`, read on ${listed(dates)}${draftedNote}. ${review}`}
+      {reading.tail}
     </p>
   )
 }

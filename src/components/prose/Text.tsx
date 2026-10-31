@@ -48,7 +48,7 @@ const DEVANAGARI_RUN = new RegExp(
  * Each pair of parentheses, where in-text citations sit ("(Tomar, 2024; Rao, 2001)"): its text
  * and where that starts, outer pairs before those nested in them, as the content module reads them.
  */
-function parenthesised(text: string): { start: number; inside: string }[] {
+export function parenthesised(text: string): { start: number; inside: string }[] {
   const open: number[] = []
   const pairs: { start: number; inside: string }[] = []
   for (let at = 0; at < text.length; at++) {
@@ -62,7 +62,7 @@ function parenthesised(text: string): { start: number; inside: string }[] {
 }
 
 /** Where each citation the page can link sits in the text, in reading order, none overlapping. */
-function citedIn(text: string, citations: CitationLinks) {
+export function citedIn(text: string, citations: CitationLinks) {
   const found: { start: number; cited: string; entry: CitedEntry }[] = []
   for (const { start, inside } of parenthesised(text)) {
     let offset = start

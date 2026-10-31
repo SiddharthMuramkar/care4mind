@@ -183,10 +183,12 @@ export function Blocks({
  * introduction whose own section has the same id and heading (the values Concepts' yama–niyama
  * section). Drawn in the section's place, its heading shows once and its anchor stays unique.
  */
-function standingIn(section: SectionView) {
+export function standingIn(section: SectionView) {
   const [only, ...rest] = section.blocks
   if (only?.kind !== 'topic-intro' || rest.length > 0) return undefined
-  const own = only.sections.find((inner) => inner.id === section.id)
+  const own = only.sections.find(
+    (inner) => inner.id === section.id && inner.heading === section.heading,
+  )
   return own && { own, others: only.sections.filter((inner) => inner !== own), topic: only.topic }
 }
 
