@@ -79,6 +79,17 @@ test('lists the verses its Concepts quote, each leading to its passage', async (
     await expect(links.nth(index)).toHaveAttribute('href', verse.href)
 })
 
+test('opens a verse after its speaker’s line, even one joined by sandhi', async ({ page }) => {
+  await gotoReady(page, hrefFor({ kind: 'topic', id: 'mind' }))
+  const verse = mind.verses.find(({ id }) => id === 'bhagavad-gita/2.55')
+  if (!verse) throw new Error('The mind topic quotes Bhagavad Gītā 2.55.')
+  const link = page
+    .getByRole('region', { name: 'Verses its Concepts quote' })
+    .locator(`a[href="${verse.href}"]`)
+  await expect(link).toContainText('प्रजहाति यदा कामान्सर्वान्पार्थ मनोगतान्')
+  await expect(link).not.toContainText('उवाच')
+})
+
 test('focusing a card lights its row and inks in the row’s leader', async ({ page }) => {
   await gotoReady(page, hrefFor({ kind: 'topic', id: 'mind' }))
   const [first, second] = conceptsOf(mind)
