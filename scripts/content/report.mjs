@@ -11,8 +11,9 @@
 import { mkdirSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 
-import { openCaptures, runTool, ToolError } from './extract.mjs'
-import { idOf, loadRecords, rootFrom, sortRecords } from './verify.mjs'
+import { openCaptures } from './captures.mjs'
+import { rootFrom, runTool, ToolError } from './cli.mjs'
+import { idOf, loadRecords, sortRecords } from './records.mjs'
 
 const PACK = '.scratch/content-v1/flags.md'
 

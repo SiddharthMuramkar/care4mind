@@ -12,8 +12,8 @@ import { existsSync, mkdirSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
-import { runTool, ToolError } from './extract.mjs'
-import { KIND_FOLDERS, rootFrom } from './verify.mjs'
+import { rootFrom, runTool, ToolError } from './cli.mjs'
+import { KIND_FOLDERS } from './records.mjs'
 
 const USAGE = `Usage: pnpm content:new <kind> <id>
 Kinds: ${Object.keys(KIND_FOLDERS).join(', ')}.`
