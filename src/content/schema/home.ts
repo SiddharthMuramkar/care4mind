@@ -25,7 +25,7 @@ export interface HomepageRecord {
   areas: readonly { title: string; text: Inline; target?: Target }[]
   closing: Inline
   /** Where to call for help now, shown in every page's footer and on each Questionnaire page. */
-  helpLine?: Inline
+  helpLine: Inline
   provenance: Provenance
 }
 

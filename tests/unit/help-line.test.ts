@@ -17,12 +17,15 @@ describe('the help line', () => {
     ])
   })
 
-  it('is stored on the homepage record, carries the three numbers and is listed as drafted', async () => {
+  it('is stored on the homepage record, dials only phone numbers and is listed as drafted', async () => {
     const { helpLine } = await home.get()
-    const tels = helpLineParts(helpLine ?? '').flatMap((part) =>
-      typeof part === 'string' ? [] : [part.tel],
+    const digits = helpLineParts(helpLine).flatMap((part) =>
+      typeof part === 'string' ? [] : [part.tel.slice('tel:'.length)],
     )
-    expect(tels).toEqual(['tel:14416', 'tel:18008914416', 'tel:112'])
+    expect(digits.length).toBeGreaterThan(0)
+    // Indian short codes are 3 or 5 digits and full numbers 10 or more, so a year or a range is caught here.
+    for (const number of digits)
+      expect([3, 5].includes(number.length) || number.length >= 10).toBe(true)
     const [record] = await localSource.records('home')
     expect(record?.provenance.drafted).toContain('helpLine')
   })

@@ -135,6 +135,7 @@ describe('record schema', () => {
         intro: '',
         areas: [],
         closing: '',
+        helpLine: '',
         provenance,
       }),
     ]

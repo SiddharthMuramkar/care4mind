@@ -23,7 +23,7 @@ export function generateMetadata(): Promise<Metadata> {
 }
 
 /**
- * Start here (Proposal, D20): for a first-time reader, what Indian psychology is, how the site is
+ * Start here, behind a flag until the Project owner approves it: for a first-time reader, what Indian psychology is, how the site is
  * organised, how to read Sanskrit names, three Concepts to read first, and the help line.
  */
 export default async function StartHerePage() {

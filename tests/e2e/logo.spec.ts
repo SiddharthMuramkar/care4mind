@@ -2,7 +2,9 @@ import type { Locator, Page } from '@playwright/test'
 
 import { recordAnimationStarts } from './drawings'
 import { expect, gotoReady, test } from './fixtures'
-import { MISSING, PAGES } from './routes'
+import { MISSING, PAGES, ROUTES } from './routes'
+
+const PAGES_HAVE_START = ROUTES.some(({ path }) => path === '/start/')
 
 const homeLink = (page: Page) =>
   page.getByRole('banner').getByRole('link', { name: 'Care4Mind home', exact: true })
@@ -70,6 +72,12 @@ test('the mark adds no stop of its own to the tab order', async ({ page }) => {
   await page.keyboard.press('Tab')
   await expect(homeLink(page)).toBeFocused()
   await page.keyboard.press('Tab')
+  // Start here, while its route exists, follows the wordmark from 30rem (480 px).
+  const width = page.viewportSize()?.width ?? 0
+  if (width >= 480 && PAGES_HAVE_START) {
+    await expect(page.getByRole('banner').getByRole('link', { name: 'Start here' })).toBeFocused()
+    await page.keyboard.press('Tab')
+  }
   // The header's next control: Concepts where the sections fit (from 72rem), else Search.
   const next = (page.viewportSize()?.width ?? 0) >= 1152 ? 'Concepts' : 'Search'
   const main = page.getByRole('navigation', { name: 'Main' })

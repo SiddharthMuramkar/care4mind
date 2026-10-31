@@ -84,6 +84,8 @@
 
 .start {
   display: none;
+  flex: none;
+  white-space: nowrap;
   margin-inline: 0.75rem auto;
   color: var(--color-ink-muted);
   font-size: 0.875rem;

@@ -6,7 +6,7 @@ import { expectPageTurned, pageTurns, prefetched, recordPageTurns } from './page
 
 // The proposals page (front-end-site ticket 12): what the design suggests beyond the brief, for
 // the Project owner's sign-off. Local runs and CI build with both proposal flags on (D20), so
-// both built proposals are listed, with audio pronunciation, described only, and nothing else.
+// the three built proposals are listed, with audio pronunciation, described only, and nothing else.
 
 const PATH = hrefFor({ page: 'proposals' })
 const ENTRIES = [
@@ -97,7 +97,8 @@ test.describe('the proposals page', () => {
   })
 })
 
-// Start here (ticket 180): a proposal page for a first-time reader, linked from the header.
+// Start here: a proposal page for a first-time reader, linked from the header and the Menu.
+// CI builds with every flag on; the flag-off case (no route, no link) is held by the unit tests.
 const START = hrefFor({ page: 'start' })
 
 test.describe('Start here', () => {
@@ -122,6 +123,14 @@ test.describe('Start here', () => {
       await expect(main.locator(`a[href="/concepts/${slug}/"]`)).toHaveCount(1)
     await expect(main).toContainText('not treatment')
     await expect(main.locator('[data-help-line] a[href="tel:14416"]')).toHaveCount(1)
+  })
+
+  test('on a phone the Menu links to it', async ({ page }) => {
+    await page.setViewportSize({ width: 320, height: 640 })
+    await gotoReady(page, '/')
+    await page.getByRole('banner').getByRole('button', { name: 'Menu', exact: true }).click()
+    const drawer = page.getByRole('dialog', { name: 'Menu' })
+    await expect(drawer.getByRole('link', { name: 'Start here' })).toHaveAttribute('href', START)
   })
 
   test('passes axe', async ({ page }) => {
