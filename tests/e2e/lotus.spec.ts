@@ -84,12 +84,13 @@ test('with no input, nothing runs on the clock 5.5 s after load, on any route', 
   }
 })
 
-test('there is no pause control, on any route', async ({ page }) => {
-  for (const { path } of ROUTES_IN_SCOPE) {
+// One page a test: visiting every page does not fit in one test's time.
+for (const { path } of ROUTES_IN_SCOPE) {
+  test(`there is no pause control on ${path}`, async ({ page }) => {
     await gotoReady(page, path)
-    await expect(page.getByRole('button', { name: /pause/i }), path).toHaveCount(0)
-  }
-})
+    await expect(page.getByRole('button', { name: /pause/i })).toHaveCount(0)
+  })
+}
 
 test('turning reduced motion on mid-visit stops the breath', async ({ page }) => {
   await gotoReady(page, '/')
