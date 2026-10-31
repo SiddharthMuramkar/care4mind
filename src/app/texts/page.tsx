@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { Breadcrumbs } from '@/components/Breadcrumbs'
 import { Folio } from '@/components/Folio'
 import { PageTurn, turnForward } from '@/components/PageTurn'
+import { ScriptPair } from '@/components/script/ScriptPair'
 import { hrefFor, works } from '@/content'
 import { metadataFor } from '@/lib/metadata'
 
@@ -40,13 +41,18 @@ export default async function TextsPage() {
             {all.map((work) => (
               <li key={work.slug} className={listing.entry}>
                 <p className={listing.entryName}>
-                  <Link
-                    href={hrefFor({ kind: 'work', id: work.slug })}
-                    transitionTypes={turnForward}
-                  >
-                    <span lang={work.lang}>{work.title}</span>
-                  </Link>
-                  {work.term.devanagari ? <span lang="sa-Deva">{work.term.devanagari}</span> : null}
+                  <ScriptPair
+                    lang={work.lang}
+                    iast={
+                      <Link
+                        href={hrefFor({ kind: 'work', id: work.slug })}
+                        transitionTypes={turnForward}
+                      >
+                        {work.title}
+                      </Link>
+                    }
+                    devanagari={work.term.devanagari}
+                  />
                 </p>
                 <p className={listing.meta}>
                   {[work.english, work.attribution].filter(Boolean).join(' · ')}

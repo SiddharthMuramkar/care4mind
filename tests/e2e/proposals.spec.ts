@@ -27,7 +27,7 @@ test.describe('the proposals page', () => {
         'What it costs',
         'How it is switched off',
       ])
-    await expect(page.getByRole('main')).not.toContainText(/reading path|Devanagari first/i)
+    await expect(page.getByRole('main')).not.toContainText(/reading path/i)
   })
 
   test('sets each setting as code inside its sentence, not on a line of its own', async ({

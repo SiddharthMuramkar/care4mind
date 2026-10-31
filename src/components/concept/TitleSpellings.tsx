@@ -4,7 +4,7 @@ import { ScriptPair } from '../script/ScriptPair'
 import styles from './TitleSpellings.module.css'
 
 /**
- * A Concept heading's two spellings (D07): the capitalised IAST, the Devanagari beside it, set
+ * A Concept heading's two spellings: the capitalised IAST, the Devanagari beside it, set
  * through ScriptPair so each carries its language tag. A Concept card's title flies into the
  * IAST (`name`).
  */

@@ -49,9 +49,17 @@ test.describe('Concept page', () => {
     expect(await page.locator('main [lang="sa-Deva"]').count()).toBeGreaterThan(5)
   })
 
-  test('offers no "Devanagari first" switch, in the page or the header', async ({ page }) => {
-    await expect(page.getByRole('button', { name: /Devanagari first/i })).toHaveCount(0)
-    await expect(page.locator('body')).not.toContainText(/Devanagari first/i)
+  test("sets the title's IAST before its Devanagari, on screen and to a screen reader", async ({
+    page,
+  }) => {
+    const order = await page.getByRole('heading', { level: 1 }).evaluate((h) => {
+      const iast = h.querySelector('[lang="sa-Latn"]')
+      const deva = h.querySelector('[lang="sa-Deva"]')
+      return iast && deva
+        ? iast.compareDocumentPosition(deva) & Node.DOCUMENT_POSITION_FOLLOWING
+        : -1
+    })
+    expect(order).toBeGreaterThan(0)
   })
 
   test('shows the other spellings in a popover that keyboard users can close', async ({ page }) => {

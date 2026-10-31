@@ -5,7 +5,7 @@
   column-gap: 0.5em;
 }
 
-/* The pair's spellings sit in the term's own row, beside its gloss. */
+/* ScriptPair's wrapper must add no box, or the term's row would lay out one item, not two. */
 .pair {
   display: contents;
 }
