@@ -75,7 +75,7 @@
   font-size: 1.125rem;
   color: color-mix(
     in srgb,
-    var(--color-highlight) calc(var(--lit, 0) * 100%),
+    var(--color-surface-link) calc(var(--lit, 0) * 100%),
     var(--color-surface-muted)
   );
 }

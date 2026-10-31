@@ -25,6 +25,13 @@ describe('composite', () => {
   })
 })
 
+/** A #rrggbb colour at the given share of full strength, as `color-mix()` with transparent gives it. */
+function withAlpha(hex: string, share: number): string {
+  return `${hex}${Math.round(share * 255)
+    .toString(16)
+    .padStart(2, '0')}`
+}
+
 /** Every CSS block that declares a full palette, keyed by file and selector. */
 function palettes(): { name: string; colours: Record<string, string> }[] {
   const found: { name: string; colours: Record<string, string> }[] = []
@@ -59,9 +66,57 @@ describe('palettes meet WCAG 2.2 AA contrast', () => {
         if (!foreground || !background || ('over' in pair && !under)) {
           throw new Error(`a colour of ${pair.foreground} on ${on} is missing`)
         }
-        const seen = under ? composite(background, under) : background
+        const laid = 'mix' in pair ? withAlpha(background, pair.mix) : background
+        const seen = under ? composite(laid, under) : laid
         expect(contrastRatio(foreground, seen)).toBeGreaterThanOrEqual(pair.minimum)
       })
     }
   }
+})
+
+/** The declarations of one rule in a CSS module, comments stripped. */
+function rule(file: string, selector: string): string {
+  const css = readFileSync(file, 'utf8').replace(/\/\*[\s\S]*?\*\//g, '')
+  const escaped = selector.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+  const match = new RegExp(`(?:^|})\\s*${escaped}\\s*\\{([^{}]*)\\}`).exec(css)
+  if (!match) throw new Error(`${file} has no ${selector} rule`)
+  return match[1] ?? ''
+}
+
+describe('numerals and the paragraph anchor use the colours their pairs check', () => {
+  const text = [
+    { file: 'src/components/prose/Prose.module.css', selector: '.anchor', token: 'surface-muted' },
+    {
+      file: 'src/components/concept/Contents.module.css',
+      selector: '.numeral',
+      token: 'surface-muted',
+    },
+    { file: 'src/app/topics/[slug]/page.module.css', selector: '.order', token: 'surface-link' },
+    {
+      file: 'src/components/topics/ContentsPlate.module.css',
+      selector: '.numeral',
+      token: 'surface-link',
+    },
+  ]
+
+  for (const { file, selector, token } of text) {
+    it(`${file} ${selector} is written in ${token}, at full strength`, () => {
+      const declarations = rule(file, selector)
+      expect(declarations).toMatch(new RegExp(`(?:^|[;\\s])color:[^;]*var\\(--color-${token}\\)`))
+      expect(declarations).not.toMatch(/(?:^|[;\s])opacity:/)
+      expect(declarations).not.toMatch(/--color-highlight\b/)
+    })
+  }
+})
+
+describe('the rule colour is never text', () => {
+  it('no module sets a text colour from --color-surface-rule', () => {
+    const offenders = globSync('src/**/*.css').flatMap((file) => {
+      const css = readFileSync(file, 'utf8').replace(/\/\*[\s\S]*?\*\//g, '')
+      return [...css.matchAll(/(?:^|[;{\s])color:([^;}]*)/g)]
+        .filter(([, value]) => value?.includes('--color-surface-rule'))
+        .map(([declaration]) => `${file}: ${declaration.trim()}`)
+    })
+    expect(offenders).toEqual([])
+  })
 })

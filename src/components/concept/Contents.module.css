@@ -60,7 +60,7 @@
 .numeral {
   font-family: var(--font-deva);
   line-height: inherit;
-  color: var(--color-surface-rule);
+  color: var(--color-surface-muted);
 }
 
 .role {
