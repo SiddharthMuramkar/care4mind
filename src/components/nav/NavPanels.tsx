@@ -6,7 +6,6 @@ import { usePathname } from 'next/navigation'
 import {
   type CSSProperties,
   type ReactNode,
-  useCallback,
   useEffect,
   useLayoutEffect,
   useRef,
@@ -90,11 +89,8 @@ export function NavPanels({
     void document.fonts?.ready.then(() => window.dispatchEvent(new Event('resize')))
   }, [])
 
-  // A panel hangs from its whole item, label and toggle, not the toggle alone.
-  const anchor = useCallback(
-    () => (value ? (slots[value]?.closest('li') ?? null) : null),
-    [slots, value],
-  )
+  // Whole item, as an element: a function anchor is read only on mount, so a switch keeps the first pointer.
+  const anchor = value ? (slots[value]?.closest('li') ?? null) : null
 
   return (
     <NavigationMenu.Root
