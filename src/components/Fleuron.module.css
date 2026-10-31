@@ -24,6 +24,29 @@
   opacity: 0;
 }
 
+/* Pivots in the flower's frame (lotus.ts), from 0 0, where px means the same in every browser. */
+.breath {
+  transform-origin: 80px 36px;
+}
+
+.heart,
+.halo {
+  transform-origin: 80px 18px;
+}
+
+/* Finer than the rule above it, each ripple stretches out from its end by the flower. */
+.ripple {
+  stroke-width: 1;
+}
+
+.rippleLeft {
+  transform-origin: 40px 33.5px;
+}
+
+.rippleRight {
+  transform-origin: 120px 33.5px;
+}
+
 /*
  * The opening draw, as a pen would make it: the middle petal, then the two
  * beside it, then the rules running out from the flower, and last the dot set
@@ -32,7 +55,7 @@
  * no dash ends exactly where the line starts: a round cap would show it there
  * as a dot. The dash is there only while it draws: a browser's dash can stop
  * just short of a closed petal's end, leaving a gap. The finished ornament is
- * the default, so reduced motion sees it whole.
+ * the default, so reduced motion, and a visitor who paused the lotus, see it whole.
  */
 @keyframes draw {
   from {
@@ -51,26 +74,183 @@
   }
 }
 
+/* Without JavaScript it still draws in: it ends within 5 s, so needs no pause (WCAG 2.2.2). */
 @media (prefers-reduced-motion: no-preference) {
-  .draw .centre,
-  .draw .side,
-  .draw .rule {
+  :root:not([data-lotus-motion='still']) .draw .centre,
+  :root:not([data-lotus-motion='still']) .draw .side,
+  :root:not([data-lotus-motion='still']) .draw .rule {
     animation: draw var(--duration-stroke) var(--ease-in-out) backwards;
   }
 
-  .draw .side {
+  :root:not([data-lotus-motion='still']) .draw .side {
     animation-delay: calc(var(--duration-stroke) / 3);
   }
 
-  .draw .rule {
+  :root:not([data-lotus-motion='still']) .draw .rule {
     animation-delay: calc(var(--duration-stroke) * 2 / 3);
     animation-timing-function: var(--ease-out);
   }
 
-  .draw .dot {
+  :root:not([data-lotus-motion='still']) .draw .dot {
     transform-box: fill-box;
     transform-origin: center;
     animation: set-down var(--duration-quick) var(--ease-out) var(--duration-stroke) backwards;
+  }
+}
+
+/* The breath. Each part rests at 0% and 100%, so a lotus starts and stops without a jump. */
+@keyframes breathe-left {
+  0%,
+  100% {
+    transform: none;
+  }
+  45%,
+  55% {
+    transform: rotate(-6deg);
+  }
+}
+
+@keyframes breathe-right {
+  0%,
+  100% {
+    transform: none;
+  }
+  45%,
+  55% {
+    transform: rotate(6deg);
+  }
+}
+
+@keyframes breathe-centre {
+  0%,
+  100% {
+    transform: none;
+  }
+  45%,
+  55% {
+    transform: scale(1.04, 1.03);
+  }
+}
+
+@keyframes heartbeat {
+  0%,
+  45%,
+  62%,
+  100% {
+    transform: none;
+  }
+  48% {
+    transform: scale(1.3);
+  }
+  52% {
+    transform: scale(1.05);
+  }
+  56% {
+    transform: scale(1.18);
+  }
+}
+
+@keyframes glow {
+  0%,
+  45%,
+  100% {
+    opacity: 0;
+    transform: none;
+  }
+  48% {
+    opacity: 0.4;
+    transform: scale(1.8);
+  }
+  62% {
+    opacity: 0;
+    transform: scale(3);
+  }
+}
+
+/* A ripple runs two at once: this fade, and the drift out along its own side. */
+@keyframes ripple {
+  0%,
+  55%,
+  96%,
+  100% {
+    opacity: 0;
+  }
+  68% {
+    opacity: 0.6;
+  }
+}
+
+@keyframes ripple-left {
+  0%,
+  100% {
+    transform: none;
+  }
+  55% {
+    transform: translateX(0) scaleX(0.4);
+  }
+  96% {
+    transform: translateX(-14px) scaleX(1.2);
+  }
+}
+
+@keyframes ripple-right {
+  0%,
+  100% {
+    transform: none;
+  }
+  55% {
+    transform: translateX(0) scaleX(0.4);
+  }
+  96% {
+    transform: translateX(14px) scaleX(1.2);
+  }
+}
+
+/* Only on a page the head script marked breathing: without JavaScript, nothing could pause it. */
+@media (prefers-reduced-motion: no-preference) {
+  :root[data-lotus-motion='breathing'] .breath,
+  :root[data-lotus-motion='breathing'] .heart,
+  :root[data-lotus-motion='breathing'] .halo,
+  :root[data-lotus-motion='breathing'] .ripple {
+    animation-duration: var(--duration-breath);
+    animation-timing-function: var(--ease-breath);
+    animation-iteration-count: infinite;
+  }
+
+  :root[data-lotus-motion='breathing'] .breathLeft {
+    animation-name: breathe-left;
+  }
+
+  :root[data-lotus-motion='breathing'] .breathRight {
+    animation-name: breathe-right;
+  }
+
+  :root[data-lotus-motion='breathing'] .breathCentre {
+    animation-name: breathe-centre;
+  }
+
+  :root[data-lotus-motion='breathing'] .heart {
+    animation-name: heartbeat;
+  }
+
+  :root[data-lotus-motion='breathing'] .halo {
+    animation-name: glow;
+  }
+
+  :root[data-lotus-motion='breathing'] .rippleLeft {
+    animation-name: ripple, ripple-left;
+  }
+
+  :root[data-lotus-motion='breathing'] .rippleRight {
+    animation-name: ripple, ripple-right;
+  }
+
+  /* The hero breathes once it has drawn itself in: its rules finish at 5/3 of a stroke. */
+  :root[data-lotus-motion='breathing'] .draw .breath,
+  :root[data-lotus-motion='breathing'] .draw .heart,
+  :root[data-lotus-motion='breathing'] .draw .halo,
+  :root[data-lotus-motion='breathing'] .draw .ripple {
+    animation-delay: calc(var(--duration-stroke) * 5 / 3);
   }
 }
 

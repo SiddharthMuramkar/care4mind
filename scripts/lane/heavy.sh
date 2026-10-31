@@ -16,11 +16,22 @@ if [ $# -eq 0 ]; then
   exit 2
 fi
 
+# macOS has no flock(1), but its lockf takes the same flock(2) lock on descriptor 9.
+lock() {
+  if command -v flock >/dev/null; then
+    flock "$@" 9
+  elif [ "$1" = --nonblock ]; then
+    /usr/bin/lockf -s -t 0 9
+  else
+    /usr/bin/lockf 9
+  fi
+}
+
 exec 9>>"$LOCK"
-if ! flock --nonblock 9; then
+if ! lock --nonblock; then
   echo "heavy.sh: waiting for $LOCK, held by: $(cat "$LOCK" 2>/dev/null || echo 'another run')" >&2
   waited=$SECONDS
-  flock 9 || exit
+  lock || exit
   echo "heavy.sh: got the lock after $((SECONDS - waited)) s" >&2
 fi
 # Who holds it, for the next run that has to wait.

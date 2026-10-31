@@ -63,7 +63,8 @@ export const CONTRAST_PAIRS = [
         { foreground: `topic-${topic}`, background: 'drawer', minimum: 3 },
       ] as const,
   ),
-  // The lotus is a drawing too, in vermilion: on the indigo page and on the Drawer's paper.
+  // Drawings in vermilion on the indigo page and on the Drawer's paper: the lotus, and the roundel
+  // that shows "Pause the lotus" pressed.
   { foreground: 'highlight', background: 'ground', minimum: 3 },
   { foreground: 'highlight', background: 'drawer', minimum: 3 },
   // Badges: a Questionnaire's status and the Proposal label, each written on its own ground.

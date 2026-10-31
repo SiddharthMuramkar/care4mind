@@ -1,5 +1,6 @@
 import type { Locator, Page } from '@playwright/test'
 
+import { recordAnimationStarts } from './drawings'
 import { expect, gotoReady, test } from './fixtures'
 import { MISSING, PAGES } from './routes'
 
@@ -17,6 +18,16 @@ const LINE_ART = `:is(path, line, polyline, polygon, img, canvas):not(${LOTUS} *
 /** Animations on the element or anything inside it, running or finished, since the page began. */
 const animationsIn = (element: Locator) =>
   element.evaluate((node) => node.getAnimations({ subtree: true }).length)
+
+/** Animations on the element or anything inside it, leaving out the lotus and its parts. */
+const animationsBesideTheLotus = (element: Locator) =>
+  element.evaluate(
+    (node) =>
+      node.getAnimations({ subtree: true }).filter((animation) => {
+        const target = (animation.effect as KeyframeEffect | null)?.target
+        return !target?.closest('svg[data-lotus]')
+      }).length,
+  )
 
 for (const { path, name } of [...PAGES, { path: MISSING, name: '404 page' }]) {
   test(`${name} shows the lotus and the wordmark, named "Care4Mind home"`, async ({ page }) => {
@@ -164,15 +175,27 @@ test("the wordmark's 4 sits in a vermilion roundel, in the header and the footer
   expect(await roundel(footerWordmark(page))).toEqual(VERMILION_ROUNDEL)
 })
 
-test('pointing at or focusing the logo animates nothing in it', async ({ page }) => {
+test('pointing at or focusing the logo animates nothing beside its breathing lotus', async ({
+  page,
+}) => {
+  await recordAnimationStarts(page)
   await gotoReady(page, '/')
   const logo = homeLink(page)
+  const startsOnTheLogo = async () =>
+    await logo.evaluate(
+      (link) =>
+        (
+          window as unknown as { __animationStarts: { target: Element }[] }
+        ).__animationStarts.filter(({ target }) => link.contains(target)).length,
+    )
+  const before = await startsOnTheLogo()
   await logo.hover()
   await page.keyboard.press('Tab')
   await page.keyboard.press('Tab')
   await expect(logo).toBeFocused()
   await page.waitForTimeout(100)
-  expect(await animationsIn(logo)).toBe(0)
+  expect(await animationsBesideTheLotus(logo), 'nothing outside the lotus animates').toBe(0)
+  expect(await startsOnTheLogo(), 'focus starts nothing new on the lotus').toBe(before)
 })
 
 test('the footer shows the same wordmark, and pointing at it draws nothing', async ({ page }) => {
