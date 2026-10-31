@@ -89,11 +89,11 @@ The content registry is rewritten by `dev`, `build`, `typecheck`, `test`, `test:
 The planning map, issue #6, lists them. Until each is decided, the code leaves its seam empty:
 
 - the content back end, search, media storage and editor login (Architecture review)
-- what search finds
+- what search finds, beyond the fields, ranking, grouping and construct rule settled on #14
 - the Questionnaire record, its scoring sources and its results page
-- content types, topics, links between content, traditional texts, and References, people and journals
-- how Sanskrit terms are stored and displayed
-- the site map and navigation, URLs and redirects, and findability
+- content types, topics, links between content, traditional texts, and References, people and journals (the related set is settled on #10; the construct link's structure isn't)
+- how Sanskrit names are stored (their display is settled on #11)
+- URLs and redirects, findability, and the rest of the site map (the navigation proposed on #16 awaits the Project owner)
 
 ## Code that misleads
 
