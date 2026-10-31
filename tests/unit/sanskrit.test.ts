@@ -30,6 +30,19 @@ describe('stripDiacritics', () => {
     expect(stripDiacritics('Ṣaḍdarśana')).toBe('Saddarsana')
     expect(stripDiacritics('sthitaprajña')).toBe('sthitaprajna')
   })
+
+  it('leaves Devanagari intact and still strips both anusvara dots', () => {
+    expect(stripDiacritics('कर्म')).toBe('कर्म')
+    expect(stripDiacritics('vikṣepa')).toBe('viksepa')
+    expect(stripDiacritics('ṃ')).toBe('m')
+    expect(stripDiacritics('ṁ')).toBe('m')
+  })
+
+  it('folds क्रम and कर्म apart, so मान is not found inside आत्मन्', () => {
+    const fold = (text: string) => stripDiacritics(text.normalize('NFC')).toLowerCase()
+    expect(fold('क्रम')).not.toBe(fold('कर्म'))
+    expect(fold('आत्मन्').includes(fold('मान'))).toBe(false)
+  })
 })
 
 describe('isNormalisedSanskrit', () => {
