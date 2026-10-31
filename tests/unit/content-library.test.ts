@@ -1,8 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
 import { home, library, references, type ResourceListView } from '@/content'
-import { CONTENT_KINDS, type ContentRecord, type Provenance } from '@/content/schema'
-import { localSource } from '@/content/source'
+import { CONTENT_KINDS, type ContentRecord, type Provenance, localSource } from '@/content/testing'
 
 // Content-v1 ticket 07: the current site's scattered reading lists as three lists (Text Books,
 // Inspirational Books and Courses), the Methods page, and a real destination for each homepage

@@ -158,7 +158,10 @@ async function loadRoutes() {
   const { module } = await runnerImport(id, {
     root: ROOT,
     logLevel: 'silent',
-    resolve: { tsconfigPaths: true },
+    resolve: {
+      tsconfigPaths: true,
+      alias: { 'server-only': join(ROOT, 'tests/server-only.ts') },
+    },
     plugins: [
       {
         name: 'shots-routes',

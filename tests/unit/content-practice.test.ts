@@ -1,16 +1,16 @@
 import { beforeAll, describe, expect, it } from 'vitest'
 
 import { concepts, questionnaires, topics, works } from '@/content'
-import { contentGraph } from '@/content/graph'
-import type {
-  Block,
-  ConceptRecord,
-  QuestionnaireRecord,
-  Section,
-  TableBlock,
-  TermBlock,
-} from '@/content/schema'
-import { localSource } from '@/content/source'
+import {
+  contentGraph,
+  type Block,
+  type ConceptRecord,
+  type QuestionnaireRecord,
+  type Section,
+  type TableBlock,
+  type TermBlock,
+  localSource,
+} from '@/content/testing'
 
 // Content-v1 ticket 09: the four "practice" description pages as Concepts, each with its
 // coming-later Questionnaire. Read through the content source and the public interface, as the

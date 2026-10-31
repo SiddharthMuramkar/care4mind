@@ -15,8 +15,8 @@ import {
   type ConceptRecord,
   type PassageQuote,
   type QuestionnaireRecord,
-} from '@/content/schema'
-import { localSource } from '@/content/source'
+  localSource,
+} from '@/content/testing'
 
 // Content-v1 ticket 11: the self and temperament topics. The last three description pages, Are
 // you a Friend/Foe of Yourself?, Karta and Triguna, become Concepts, each with its coming-later

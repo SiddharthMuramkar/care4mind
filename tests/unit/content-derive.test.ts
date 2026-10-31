@@ -18,9 +18,10 @@ import {
   type ContentRecord,
   type QuestionnaireRecord,
   type RecordOf,
-} from '@/content/schema'
-import { localSource, type ContentSource } from '@/content/source'
-import { createContent } from '@/content/views'
+  localSource,
+  type ContentSource,
+  createContent,
+} from '@/content/testing'
 
 // The site derivations (content-v1 spec, "What the site derivations return"): the routes, the
 // breadcrumb trail, the A–Z, the search documents and the Concept-map data, each computed from

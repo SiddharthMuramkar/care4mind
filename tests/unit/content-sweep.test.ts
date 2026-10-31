@@ -8,9 +8,9 @@ import {
   type FlagRole,
   type Provenance,
   type RecordOf,
-} from '@/content/schema'
-import { localSource } from '@/content/source'
-import { createContent } from '@/content/views'
+  localSource,
+  createContent,
+} from '@/content/testing'
 
 // Content-v1 ticket 12, the fidelity sweep: content v1 is complete, so the site derivations give
 // real answers on the real content. Read through the public interface, built over the site's own

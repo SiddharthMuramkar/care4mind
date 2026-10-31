@@ -1,8 +1,7 @@
 import { beforeAll, describe, expect, it } from 'vitest'
 
 import { concepts, site } from '@/content'
-import type { ConceptRecord, GlossaryEntryRecord } from '@/content/schema'
-import { localSource } from '@/content/source'
+import { type ConceptRecord, type GlossaryEntryRecord, localSource } from '@/content/testing'
 
 // Content-v1 ticket 05: the current /concepts/ page's glossary cards as glossary entries, and the
 // three short posts, Atman, Jiva and Jagat, as Concepts in the self topic. Read through the

@@ -2,8 +2,7 @@ import { beforeAll, describe, expect, it } from 'vitest'
 
 import type { Features } from '@/config/features'
 import type { QuestionnaireFormView } from '@/content'
-import { localSource, type ContentSource } from '@/content/source'
-import { createContent } from '@/content/views'
+import { localSource, type ContentSource, createContent } from '@/content/testing'
 import {
   addressOf,
   flowReducer,

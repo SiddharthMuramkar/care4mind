@@ -1,9 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
 import type { Features } from '@/config/features'
-import type { QuestionnaireRecord } from '@/content/schema'
-import { localSource } from '@/content/source'
-import { createContent } from '@/content/views'
+import { type QuestionnaireRecord, localSource, createContent } from '@/content/testing'
 
 // Content-v1 ticket 06: the two instruments on the current site with real questions. The
 // KarmaYoga Scale's 45 statements in the four parts its quiz settings give, ready for the preview
