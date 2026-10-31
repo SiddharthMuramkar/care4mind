@@ -188,8 +188,10 @@ test('pointing at or focusing the logo animates nothing beside its breathing lot
           window as unknown as { __animationStarts: { target: Element }[] }
         ).__animationStarts.filter(({ target }) => link.contains(target)).length,
     )
-  const before = await startsOnTheLogo()
   await logo.hover()
+  // Pointing leans the lotus toward the pointer; only focus must start nothing more on it.
+  await page.waitForTimeout(100)
+  const before = await startsOnTheLogo()
   await page.keyboard.press('Tab')
   await page.keyboard.press('Tab')
   await expect(logo).toBeFocused()
