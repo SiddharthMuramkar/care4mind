@@ -13,6 +13,7 @@ for (const route of ROUTES_IN_SCOPE) {
 }
 
 // One page of each kind, at each width: a layout that fits 320 px can still overflow at 375 px.
+// Always the sampled set, whatever E2E_SCOPE says: widths cost tests per route.
 for (const route of ROUTES.filter((entry) => entry.sample)) {
   for (const width of WIDTHS) {
     test(`${route.path} reflows at ${width} px`, async ({ page }) => {
