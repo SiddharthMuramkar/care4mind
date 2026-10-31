@@ -1,0 +1,11 @@
+#!/bin/sh
+# care4mind-githook v1
+# Refuses a push that updates or deletes main (or master) on a remote: work reaches main only
+# through a pull request the developer merges. The first push of a new repo, whose remote has no
+# main yet, is let through.
+while read -r _ _ remote_ref remote_sha; do
+  case $remote_ref in refs/heads/main | refs/heads/master) ;; *) continue ;; esac
+  case $remote_sha in *[!0]*) ;; *) continue ;; esac
+  echo "Blocked: no direct pushes to ${remote_ref#refs/heads/}. Push a branch and open a pull request." >&2
+  exit 1
+done
