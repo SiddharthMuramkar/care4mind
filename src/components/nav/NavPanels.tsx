@@ -38,6 +38,8 @@ export interface NavPanelsProps {
 // How long a pointer rests on a toggle before its panel opens, and leaves before it closes.
 const OPEN_DELAY = 120
 const CLOSE_DELAY = 240
+// A press this soon after a hover switch is the same gesture finishing, not a request to close.
+const SWITCH_PRESS_WINDOW = 600
 
 export type Slots = Partial<Record<PanelId, HTMLElement>>
 
@@ -47,9 +49,6 @@ export type Slots = Partial<Record<PanelId, HTMLElement>>
  * closes a panel and gives focus back to its toggle; Tab runs through a panel and on, never
  * trapped; a new page closes it. The section links are the server's own and are never replaced.
  */
-// A press this soon after a hover switch is the same gesture finishing, not a request to close.
-const SWITCH_PRESS_WINDOW = 600
-
 export function NavPanels({
   nav: site,
   slots,
@@ -84,7 +83,7 @@ export function NavPanels({
   // Base UI drops a hover opening when hover switches panels, so the press right after must not toggle it shut.
   const hoverOpenedAt = useRef(0)
 
-  // Webfonts shift the toggles after load and no resize reports it.
+  // Webfonts shift the toggles after load and no resize reports it; Base UI's positioner listens for resize.
   useEffect(() => {
     void document.fonts?.ready.then(() => window.dispatchEvent(new Event('resize')))
   }, [])
@@ -109,6 +108,9 @@ export function NavPanels({
         if (
           next == null &&
           details.reason === 'trigger-press' &&
+          // A keyboard's Enter or Space clicks with detail 0, and always toggles.
+          details.event instanceof MouseEvent &&
+          details.event.detail > 0 &&
           performance.now() - hoverOpenedAt.current < SWITCH_PRESS_WINDOW
         ) {
           hoverOpenedAt.current = 0
