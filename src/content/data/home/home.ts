@@ -43,11 +43,13 @@ export default defineHome({
     },
   ],
   closing: 'Open the doors to your inner potential.',
-  // Tele-MANAS numbers checked against telemanas.mohfw.gov.in on 2026-11-01.
   helpLine:
     'Care4Mind is for learning and reflection, not treatment. To talk to someone now, call Tele-MANAS on 14416 or 1-800-891-4416 (free, 24×7, in about 20 languages). In an emergency, call 112. Outside India, call your local emergency number.',
   provenance: {
-    sources: [{ url: 'https://care4mind.org/', retrieved: '2026-10-27' }],
+    sources: [
+      { url: 'https://care4mind.org/', retrieved: '2026-10-27' },
+      { url: 'https://telemanas.mohfw.gov.in/', retrieved: '2026-11-01' },
+    ],
     edits: [
       // The front-end foundation's edits (planning ticket 21), kept as it wrote them.
       'Ellipsis and spacing tidied in the shloka’s English line and the area texts; “Ancient Indian Psychology” lower-cased mid-sentence; stray “,and” fixed.',

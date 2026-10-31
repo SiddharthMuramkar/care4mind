@@ -219,6 +219,7 @@ const home = defineHome({
   intro: 'Made up.',
   areas: [],
   closing: 'Made up.',
+  helpLine: 'Made up.',
   provenance,
 })
 
