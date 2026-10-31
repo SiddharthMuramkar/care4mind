@@ -2,7 +2,8 @@
 
 Downloads each family from Google's font repository at a pinned commit,
 checks it against fonts.lock.json, trims variable axes, and writes one
-Latin and/or one Devanagari WOFF2 subset per style into src/fonts/.
+Latin and/or one Devanagari subset per style into src/fonts/, as WOFF2 for
+browsers and WOFF for the share-card renderer.
 
 Google's own served subsets drop the combining marks ISO 15919 needs
 (ticket 07), which is why the site builds its own.
@@ -159,9 +160,12 @@ def build(source_path: Path, source: Source, script: str, out_path: Path) -> Non
     subsetter.populate(unicodes=ranges_to_unicodes(LATIN if script == "latin" else DEVANAGARI))
     subsetter.subset(font)
     out_path.parent.mkdir(parents=True, exist_ok=True)
-    font.flavor = "woff2"
-    font.save(out_path)
-    print(f"wrote {out_path.relative_to(ROOT)} ({out_path.stat().st_size / 1000:.1f} kB)")
+    # The share-card renderer (Satori) reads WOFF but not WOFF2, so each subset is written in both.
+    for flavor in ("woff2", "woff"):
+        font.flavor = flavor
+        path = out_path.with_suffix(f".{flavor}")
+        font.save(path)
+        print(f"wrote {path.relative_to(ROOT)} ({path.stat().st_size / 1000:.1f} kB)")
 
 
 def main() -> None:

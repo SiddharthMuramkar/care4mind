@@ -6,7 +6,7 @@ import sitemap from '@/app/sitemap'
 import { redirects } from '@/config/redirects'
 import { site as config } from '@/config/site'
 import { site } from '@/content'
-import { metadataFor } from '@/lib/metadata'
+import { metadataFor, shareCardText } from '@/lib/metadata'
 
 import nextConfig from '../../next.config'
 
@@ -21,64 +21,90 @@ describe('the canonical origin', () => {
   })
 })
 
+/** A page's metadata with the tags a link preview reads, which repeat its title and description. */
+function withShareTags(meta: {
+  title: { absolute: string }
+  description: string
+  alternates: { canonical: string }
+}) {
+  const share = { title: meta.title.absolute, description: meta.description }
+  return {
+    ...meta,
+    openGraph: { type: 'website', siteName: 'Care4Mind', url: meta.alternates.canonical, ...share },
+    twitter: { card: 'summary_large_image', ...share },
+  }
+}
+
 describe('a page’s metadata (D19)', () => {
   it('names a Concept by its term and gloss, describes it by its summary and gives its address', async () => {
-    expect(await metadataFor('/concepts/vikshepa/')).toEqual({
-      title: { absolute: 'Vikṣepa (Distraction) · Care4Mind' },
-      description:
-        'The challenges a seeker encounters on the path to liberation. The Yoga Sūtra names nine obstacles, or diversions, on the yoga path.',
-      alternates: { canonical: `${ORIGIN}/concepts/vikshepa/` },
-    })
+    expect(await metadataFor('/concepts/vikshepa/')).toEqual(
+      withShareTags({
+        title: { absolute: 'Vikṣepa (Distraction) · Care4Mind' },
+        description:
+          'The challenges a seeker encounters on the path to liberation. The Yoga Sūtra names nine obstacles, or diversions, on the yoga path.',
+        alternates: { canonical: `${ORIGIN}/concepts/vikshepa/` },
+      }),
+    )
   })
 
   it('describes a topic, which has no summary, by what its page holds', async () => {
-    expect(await metadataFor('/topics/mind/')).toEqual({
-      title: { absolute: 'Mind: states and obstacles · Care4Mind' },
-      description:
-        '5 Concepts in the topic “Mind: states and obstacles”, and the verses they quote.',
-      alternates: { canonical: `${ORIGIN}/topics/mind/` },
-    })
+    expect(await metadataFor('/topics/mind/')).toEqual(
+      withShareTags({
+        title: { absolute: 'Mind: states and obstacles · Care4Mind' },
+        description:
+          '5 Concepts in the topic “Mind: states and obstacles”, and the verses they quote.',
+        alternates: { canonical: `${ORIGIN}/topics/mind/` },
+      }),
+    )
   })
 
   it('describes a traditional text by what its page holds', async () => {
-    expect(await metadataFor('/texts/yoga-sutra/')).toEqual({
-      title: { absolute: 'Yoga Sūtra · Care4Mind' },
-      description:
-        'Every verse of the Yoga Sūtra that Care4Mind quotes, with its translations and the Concepts that quote it.',
-      alternates: { canonical: `${ORIGIN}/texts/yoga-sutra/` },
-    })
+    expect(await metadataFor('/texts/yoga-sutra/')).toEqual(
+      withShareTags({
+        title: { absolute: 'Yoga Sūtra · Care4Mind' },
+        description:
+          'Every verse of the Yoga Sūtra that Care4Mind quotes, with its translations and the Concepts that quote it.',
+        alternates: { canonical: `${ORIGIN}/texts/yoga-sutra/` },
+      }),
+    )
   })
 
   it('describes a Library page by its summary, and a reading list by its size', async () => {
-    expect(await metadataFor('/library/methods/')).toEqual({
-      title: { absolute: 'Methods · Care4Mind' },
-      description:
-        'Psychotherapy, also known as talk therapy, involves various techniques to help individuals enhance their mental and emotional well-being.',
-      alternates: { canonical: `${ORIGIN}/library/methods/` },
-    })
-    expect(await metadataFor('/library/textbooks/')).toEqual({
-      title: { absolute: 'Text Books · Care4Mind' },
-      description: '20 entries on the Text Books list in the Care4Mind Library.',
-      alternates: { canonical: `${ORIGIN}/library/textbooks/` },
-    })
+    expect(await metadataFor('/library/methods/')).toEqual(
+      withShareTags({
+        title: { absolute: 'Methods · Care4Mind' },
+        description:
+          'Psychotherapy, also known as talk therapy, involves various techniques to help individuals enhance their mental and emotional well-being.',
+        alternates: { canonical: `${ORIGIN}/library/methods/` },
+      }),
+    )
+    expect(await metadataFor('/library/textbooks/')).toEqual(
+      withShareTags({
+        title: { absolute: 'Text Books · Care4Mind' },
+        description: '20 entries on the Text Books list in the Care4Mind Library.',
+        alternates: { canonical: `${ORIGIN}/library/textbooks/` },
+      }),
+    )
   })
 
   it('gives /search/ its address without the query, whatever was searched', async () => {
-    const search = {
+    const search = withShareTags({
       title: { absolute: 'Search · Care4Mind' },
       description: 'Search Care4Mind for a Concept, a term, a verse, a text or a Reference.',
       alternates: { canonical: `${ORIGIN}/search/` },
-    }
+    })
     expect(await metadataFor('/search/')).toEqual(search)
     expect(await metadataFor('/search/?q=vikshepa')).toEqual(search)
   })
 
   it('keeps the homepage’s own title, and describes it by the site’s tagline', async () => {
-    expect(await metadataFor('/')).toEqual({
-      title: { absolute: 'Care4Mind: Indian psychology' },
-      description: 'Indic ways to invoke a perfect balanced mind',
-      alternates: { canonical: `${ORIGIN}/` },
-    })
+    expect(await metadataFor('/')).toEqual(
+      withShareTags({
+        title: { absolute: 'Care4Mind: Indian psychology' },
+        description: 'Indic ways to invoke a perfect balanced mind',
+        alternates: { canonical: `${ORIGIN}/` },
+      }),
+    )
   })
 
   it('names the flow after the Questionnaire it takes', async () => {
@@ -96,6 +122,27 @@ describe('a page’s metadata (D19)', () => {
       expect(description, route.path).toMatch(/\S/)
       expect(alternates?.canonical, route.path).toBe(`${ORIGIN}${route.path}`)
     }
+  })
+
+  it('gives every page in the registry share tags with no images: its opengraph-image file supplies them', async () => {
+    for (const route of await site.routes()) {
+      const { title, description, openGraph, twitter } = await metadataFor(route.path)
+      const absolute = (title as { absolute: string }).absolute
+      expect(openGraph, route.path).toMatchObject({ title: absolute, description })
+      expect(twitter, route.path).toMatchObject({ card: 'summary_large_image', title: absolute })
+      expect(openGraph, route.path).not.toHaveProperty('images')
+      expect(twitter, route.path).not.toHaveProperty('images')
+    }
+  })
+
+  it('names a Concept on its share card as it is named everywhere, and the homepage by the site', async () => {
+    expect(await shareCardText('/concepts/vikshepa/')).toMatchObject({
+      title: 'Vikṣepa · Distraction',
+    })
+    expect(await shareCardText('/')).toEqual({
+      title: 'Care4Mind',
+      description: 'Indic ways to invoke a perfect balanced mind',
+    })
   })
 
   it('answers 404 for a path that is no page in this build', async () => {

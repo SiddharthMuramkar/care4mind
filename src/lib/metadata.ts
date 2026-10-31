@@ -1,6 +1,6 @@
 /**
- * What every page tells browsers and search engines about itself (D19, NFR-04): its title, its
- * description and its canonical address. A page asks by its path, and the route registry and
+ * What every page tells browsers, search engines and link previews about itself (D19, NFR-04):
+ * its title, its description, its canonical address and the text of its share card. A page asks by its path, and the route registry and
  * the page's own content supply the rest, so no page writes its metadata by hand.
  */
 import type { Metadata } from 'next'
@@ -40,6 +40,11 @@ function slugOf(route: RouteEntry): string {
   return route.path.split('/')[at] ?? ''
 }
 
+/** A Concept as it is named everywhere: "Vikṣepa · Distraction". #179's function replaces this. */
+function conceptName(name: string, english: string | undefined): string {
+  return english ? `${name} · ${english}` : name
+}
+
 /** "1 entry", "20 entries". */
 function count(n: number, one: string, many: string): string {
   return `${n} ${n === 1 ? one : many}`
@@ -49,7 +54,9 @@ function count(n: number, one: string, many: string): string {
  * The name the page goes by in its title, and the sentence that describes it: its summary where
  * it has one, otherwise one plain sentence about what the page holds.
  */
-async function describe(route: RouteEntry): Promise<{ name: string; description: string }> {
+async function describe(
+  route: RouteEntry,
+): Promise<{ name: string; description: string; card?: string }> {
   const name = route.title
   switch (route.kind) {
     case 'home':
@@ -59,7 +66,8 @@ async function describe(route: RouteEntry): Promise<{ name: string; description:
       if (!concept) notFound()
       // A Sanskrit headword is named with its gloss, as the Concept page sets them.
       const named = concept.term && concept.english ? `${name} (${concept.english})` : name
-      return { name: named, description: concept.summary }
+      const card = concept.term ? conceptName(name, concept.english) : name
+      return { name: named, description: concept.summary, card }
     }
     case 'topic': {
       const topic = await topics.get(slugOf(route))
@@ -110,13 +118,32 @@ async function describe(route: RouteEntry): Promise<{ name: string; description:
  * found, so the page answers 404.
  */
 export async function metadataFor(path: string): Promise<Metadata> {
+  const route = await routeAt(path)
+  const { name, description } = await describe(route)
+  const title = route.kind === 'home' ? name : `${name} · ${config.name}`
+  const canonical = absoluteUrl(route.path)
+  // No `images` here: each route segment's opengraph-image file supplies them, and Next uses one or the other.
+  return {
+    title: { absolute: title },
+    description,
+    alternates: { canonical },
+    openGraph: { type: 'website', siteName: config.name, title, description, url: canonical },
+    twitter: { card: 'summary_large_image', title, description },
+  }
+}
+
+/** The text of the public page's share card: the site's name and tagline on the homepage. */
+export async function shareCardText(path: string): Promise<{ title: string; description: string }> {
+  const route = await routeAt(path)
+  if (route.kind === 'home') return { title: config.name, description: config.tagline }
+  const { name, description, card } = await describe(route)
+  return { title: card ?? name, description }
+}
+
+/** The public page at a path, or not found. */
+async function routeAt(path: string): Promise<RouteEntry> {
   const bare = path.replace(/[?#].*$/, '')
   const route = (await site.routes()).find((entry) => entry.path === bare)
   if (!route) notFound()
-  const { name, description } = await describe(route)
-  return {
-    title: { absolute: route.kind === 'home' ? name : `${name} · ${config.name}` },
-    description,
-    alternates: { canonical: absoluteUrl(route.path) },
-  }
+  return route
 }
