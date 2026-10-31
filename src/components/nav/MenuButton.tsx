@@ -22,9 +22,13 @@ const loadDrawer = () => (drawer ??= import('./MenuDrawer').then((module) => mod
 
 interface Props {
   nav: SiteNav
-  /** The slots the Drawer holds, rendered on the server: SearchTrigger and ScriptPreference. */
+  /**
+   * The slots the Drawer holds, rendered on the server: SearchTrigger, ScriptPreference and
+   * LotusPause.
+   */
   search?: ReactNode
   script?: ReactNode
+  lotus?: ReactNode
   /** The Proposal label beside the Concept map. */
   mapNote?: ReactNode
 }
@@ -34,7 +38,7 @@ interface Props {
  * footer; with it, a button that opens the Drawer. The Drawer's code loads when the browser is
  * idle or on the first press, never with the page.
  */
-export function MenuButton({ nav, search, script, mapNote }: Props) {
+export function MenuButton({ nav, search, script, lotus, mapNote }: Props) {
   const hydrated = useHydrated()
   const button = useRef<HTMLAnchorElement>(null)
   const [open, setOpen] = useState(false)
@@ -86,6 +90,7 @@ export function MenuButton({ nav, search, script, mapNote }: Props) {
           returnFocus={button}
           search={search}
           script={script}
+          lotus={lotus}
           mapNote={mapNote}
         />
       ) : null}
