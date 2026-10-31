@@ -9,20 +9,34 @@ const homeLink = (page: Page) =>
 const footerWordmark = (page: Page) =>
   page.getByRole('contentinfo').getByText('Care4Mind', { exact: true })
 
-/** Line art or pictures: anything drawn beyond the type and the 4's roundel. */
-const LINE_ART = 'path, line, polyline, polygon, img, canvas'
+const LOTUS = 'svg[data-lotus]'
+
+/** Line art or pictures: anything drawn beyond the lotus, the type and the 4's roundel. */
+const LINE_ART = `:is(path, line, polyline, polygon, img, canvas):not(${LOTUS} *)`
 
 /** Animations on the element or anything inside it, running or finished, since the page began. */
 const animationsIn = (element: Locator) =>
   element.evaluate((node) => node.getAnimations({ subtree: true }).length)
 
 for (const { path, name } of [...PAGES, { path: MISSING, name: '404 page' }]) {
-  test(`${name} shows the wordmark, still named "Care4Mind home"`, async ({ page }) => {
+  test(`${name} shows the lotus and the wordmark, named "Care4Mind home"`, async ({ page }) => {
     await gotoReady(page, path)
     const logo = homeLink(page)
     await expect(logo).toBeVisible()
+    const lotus = logo.locator(LOTUS)
+    await expect(lotus).toHaveCount(1)
+    await expect(lotus).toHaveAttribute('aria-hidden', 'true')
+    await expect(lotus).toHaveAttribute('focusable', 'false')
+    const [mark, wordmark] = await Promise.all([
+      lotus.boundingBox(),
+      logo.getByText('Care4Mind', { exact: true }).boundingBox(),
+    ])
+    expect(
+      (mark?.x ?? Infinity) + (mark?.width ?? 0),
+      'the lotus is left of the wordmark',
+    ).toBeLessThanOrEqual(wordmark?.x ?? -Infinity)
     await expect(logo).toHaveText('Care4Mind')
-    // Type and its roundel: no line drawing in it.
+    // The lotus, then type and its roundel: no other line drawing in it.
     await expect(logo.locator(LINE_ART)).toHaveCount(0)
     // WCAG 2.5.3: the visible "Care4Mind" is in the name, and the roundel adds nothing to what is announced.
     await expect(logo).toMatchAriaSnapshot(`
@@ -166,6 +180,10 @@ test('the footer shows the same wordmark, and pointing at it draws nothing', asy
   const wordmark = footerWordmark(page)
   await expect(wordmark).toBeVisible()
   await expect(wordmark.locator(LINE_ART)).toHaveCount(0)
+  await expect(
+    wordmark.locator('..').locator(LOTUS),
+    'the lotus is the header’s alone',
+  ).toHaveCount(0)
   await wordmark.hover()
   await page.waitForTimeout(100)
   expect(await animationsIn(wordmark)).toBe(0)

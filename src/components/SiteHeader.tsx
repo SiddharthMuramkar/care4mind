@@ -9,14 +9,15 @@ import { ScriptPreference } from '@/components/script/ScriptPreference'
 import { SearchTrigger } from '@/components/search/SearchTrigger'
 import { features } from '@/config/features'
 
+import { LotusMark } from './Fleuron'
 import { Logo } from './Logo'
 import styles from './SiteHeader.module.css'
 
 /**
- * The header every page shares (D01), stuck to the top of the screen: the logo, then
- * Concepts · Texts · Questionnaires · Library · Search, each a server-rendered link that works
- * without JavaScript. On a computer Concepts and Library open panels; on a narrow screen the
- * sections move into the Menu's Drawer, and Search stays.
+ * The header every page shares, stuck to the top of the screen: the lotus and the wordmark,
+ * leading home, then Concepts · Texts · Questionnaires · Library · Search, each a server-rendered
+ * link that works without JavaScript. On a computer Concepts and Library open panels; on a narrow
+ * screen the sections move into the Menu's Drawer, and Search stays.
  */
 export async function SiteHeader() {
   const nav = await siteNav()
@@ -26,6 +27,7 @@ export async function SiteHeader() {
     <header className={styles.header} style={{ viewTransitionName: 'site-header' }}>
       <div className={styles.strip}>
         <Link href={nav.home} className={styles.home} aria-label="Care4Mind home">
+          <LotusMark className={styles.mark} />
           <Logo />
         </Link>
         <nav aria-label="Main" className={styles.nav}>

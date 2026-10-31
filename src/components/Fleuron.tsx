@@ -30,3 +30,33 @@ export function Fleuron({ className, draw = false }: { className?: string; draw?
     </svg>
   )
 }
+
+/**
+ * The Fleuron's flower alone, without its rules: the lotus beside the wordmark. Decorative and
+ * still. Its box leaves the flower room to open, its side petals turned 23° out and its centre
+ * grown by about an eighth, without drawing outside it; its width and height reserve that
+ * box. The flower keeps a frame of its own from 0 0, where a pivot in px means the same in
+ * every browser (csswg-drafts issue 2443).
+ */
+export function LotusMark({ className }: { className?: string }) {
+  return (
+    <svg
+      data-lotus=""
+      className={cx(styles.mark, className)}
+      viewBox="44 -4 72 48"
+      width={72}
+      height={48}
+      aria-hidden="true"
+      focusable="false"
+    >
+      <svg viewBox="0 0 160 40" width={160} height={40}>
+        <g fill="none" stroke="currentColor" strokeLinecap="round">
+          <path d={LOTUS.petals.centre} />
+          <path d={LOTUS.petals.left} />
+          <path d={LOTUS.petals.right} />
+        </g>
+        <circle cx={LOTUS.dot.cx} cy={LOTUS.dot.cy} r={LOTUS.dot.r} fill="currentColor" />
+      </svg>
+    </svg>
+  )
+}
