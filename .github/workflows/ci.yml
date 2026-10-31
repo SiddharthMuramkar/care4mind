@@ -1,6 +1,6 @@
 # Checks every pull request and every push to main with the commands every builder finishes with:
-# pnpm check, then the browser tests, split across parallel shards, and Lighthouse on the build it
-# made. See README.md, "Checks".
+# pnpm check, then on its build the Chromium browser tests in shards, a latency job, Firefox and
+# WebKit, and Lighthouse; one job named ci waits for all of them. See README.md, "Checks".
 name: CI
 
 on:
@@ -189,7 +189,9 @@ jobs:
       - run: |
           mkdir blob-report
           for job in $(ls blobs | sed -E 's/-[0-9]+$//' | sort -u); do
-            cp blobs/"$(ls blobs | grep -E "^$job-[0-9]+$" | sort -V | tail -n 1)"/* blob-report/
+            latest="$(ls blobs | grep -E "^$job-[0-9]+$" | sort -V | tail -n 1)"
+            # Unsharded jobs can name their blobs alike, so each copy carries its job's name.
+            for f in blobs/"$latest"/*; do cp "$f" blob-report/"$job-$(basename "$f")"; done
           done
       - run: pnpm exec playwright merge-reports --reporter html blob-report/
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
