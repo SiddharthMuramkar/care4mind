@@ -168,6 +168,7 @@ export function NavPanels({
         >
           <NavigationMenu.Popup
             className={styles.popup}
+            data-paper
             aria-label={site.sections.find((section) => section.id === value)?.label}
           >
             <NavigationMenu.Arrow className={styles.arrow} />

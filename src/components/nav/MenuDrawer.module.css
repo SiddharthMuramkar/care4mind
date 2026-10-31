@@ -20,8 +20,6 @@
 }
 
 .sheet {
-  --color-focus: var(--color-surface-focus);
-  --color-link: var(--color-surface-link);
   position: relative;
   width: min(24rem, calc(100vw - 2.5rem));
   height: 100%;

@@ -20,7 +20,6 @@
   transition:
     transform var(--duration-instant) var(--ease-press),
     box-shadow var(--duration-instant) var(--ease-press);
-  --color-focus: var(--color-surface-focus);
 }
 
 /* Pressing the card presses it into the page, like type into paper. */
@@ -99,7 +98,7 @@
 
 /* Inside the inner rule, on the card's paper. Outside the card this indigo is the home page's ground. */
 .action :is(a, button):focus-visible::after {
-  outline: 3px solid var(--color-surface-focus);
+  outline: 3px solid var(--color-focus);
   outline-offset: -11px;
 }
 
