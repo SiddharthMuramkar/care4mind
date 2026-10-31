@@ -327,7 +327,7 @@
   cursor: pointer;
 }
 
-/* A hollow roundel; chosen, it fills with vermilion, as the wordmark's 4 sits in one. */
+/* A hollow roundel, like the ring round the wordmark's 4; chosen, it fills with vermilion. */
 .mark {
   position: relative;
   flex: none;

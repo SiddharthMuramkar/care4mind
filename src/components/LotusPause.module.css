@@ -22,7 +22,7 @@
   visibility: visible;
 }
 
-/* Its roundel is as wide as the one behind the wordmark's 4. */
+/* Its roundel is as wide as the ring round the wordmark's 4. */
 .glyph {
   flex: none;
   width: 30px;
