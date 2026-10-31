@@ -7,7 +7,7 @@ import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 
 import { site as config } from '@/config/site'
-import { concepts, library, questionnaires, site, topics, type RouteEntry } from '@/content'
+import { concepts, home, library, questionnaires, site, topics, type RouteEntry } from '@/content'
 
 /** The homepage keeps the site's own title. */
 const HOME_TITLE = `${config.name}: Indian psychology`
@@ -55,7 +55,7 @@ async function describe(route: RouteEntry): Promise<{ name: string; description:
   const name = route.title
   switch (route.kind) {
     case 'home':
-      return { name: HOME_TITLE, description: config.tagline }
+      return { name: HOME_TITLE, description: (await home.get()).tagline }
     case 'concept': {
       const concept = await concepts.get(slugOf(route))
       if (!concept) notFound()

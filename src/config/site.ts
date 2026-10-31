@@ -13,7 +13,6 @@
  */
 export const site = {
   name: 'Care4Mind',
-  tagline: 'Indic ways to invoke a perfect balanced mind',
   url: 'https://www.care4mind.xyz',
   indexable: false,
 } as const

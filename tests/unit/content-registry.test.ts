@@ -128,6 +128,9 @@ describe('record schema', () => {
       }),
       defineHome({
         kind: 'home',
+        tagline: '',
+        hero: { promise: '', subhead: '', startHere: '', browseConcepts: '', exploreConcepts: '' },
+        sectionIntros: { concepts: '', questionnaires: '' },
         shloka: { devanagari: 'यद्', iast: 'yad', translation: 'As' },
         intro: '',
         areas: [],

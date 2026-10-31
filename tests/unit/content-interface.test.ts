@@ -1478,6 +1478,15 @@ describe('the homepage', () => {
   })
   const home = defineHome({
     kind: 'home',
+    tagline: 'A made-up tagline.',
+    hero: {
+      promise: 'Made up.',
+      subhead: 'Made up.',
+      startHere: 'Start',
+      browseConcepts: 'Browse',
+      exploreConcepts: 'Explore',
+    },
+    sectionIntros: { concepts: 'Made up.', questionnaires: 'Made up.' },
     shloka: { devanagari: 'उदाहरणम्', iast: 'udāharaṇam', translation: 'A made-up line.' },
     intro: 'A made-up introduction.',
     areas: [
@@ -1496,6 +1505,15 @@ describe('the homepage', () => {
 
   it('turns every area’s target into a path, and leaves an area without one unlinked', async () => {
     expect(await createContent(sourceOf(later, methods, home), ON).home.get()).toEqual({
+      tagline: 'A made-up tagline.',
+      hero: {
+        promise: 'Made up.',
+        subhead: 'Made up.',
+        startHere: 'Start',
+        browseConcepts: 'Browse',
+        exploreConcepts: 'Explore',
+      },
+      sectionIntros: { concepts: 'Made up.', questionnaires: 'Made up.' },
       shloka: { devanagari: 'उदाहरणम्', iast: 'udāharaṇam', translation: 'A made-up line.' },
       intro: 'A made-up introduction.',
       areas: [
@@ -1625,6 +1643,15 @@ describe('every view', () => {
     }),
     defineHome({
       kind: 'home',
+      tagline: 'A made-up tagline.',
+      hero: {
+        promise: 'Made up.',
+        subhead: 'Made up.',
+        startHere: 'Start',
+        browseConcepts: 'Browse',
+        exploreConcepts: 'Explore',
+      },
+      sectionIntros: { concepts: 'Made up.', questionnaires: 'Made up.' },
       shloka: { devanagari: 'उदाहरणम्', iast: 'udāharaṇam', translation: 'Made up.' },
       intro: 'Made up.',
       areas: [{ title: 'Made up', text: 'Made up.', target: { kind: 'concept', id: 'obstacles' } }],

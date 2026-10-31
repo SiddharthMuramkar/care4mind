@@ -76,7 +76,7 @@ describe('a page’s metadata (D19)', () => {
   it('keeps the homepage’s own title, and describes it by the site’s tagline', async () => {
     expect(await metadataFor('/')).toEqual({
       title: { absolute: 'Care4Mind: Indian psychology' },
-      description: 'Indic ways to invoke a perfect balanced mind',
+      description: 'Indian ideas for a balanced mind, explained simply.',
       alternates: { canonical: `${ORIGIN}/` },
     })
   })

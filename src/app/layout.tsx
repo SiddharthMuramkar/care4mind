@@ -13,18 +13,21 @@ import { SiteHeader } from '@/components/SiteHeader'
 import { Toaster } from '@/components/toast/Toaster'
 import { features } from '@/config/features'
 import { site } from '@/config/site'
+import { home } from '@/content'
 import { playfairDisplay, playfairText, playfairTextStyles } from '@/fonts/playfair'
 import { tiroDevanagariSanskrit } from '@/fonts/tiro-devanagari-sanskrit'
 
 import '@/styles/globals.css'
 
 // The icons are the files beside this layout: an `icons` field would hide them (Next uses one or the other).
-export const metadata: Metadata = {
-  title: { default: `${site.name}: Indian psychology`, template: `%s · ${site.name}` },
-  description: site.tagline,
-  robots: site.indexable
-    ? undefined
-    : { index: false, follow: false, googleBot: { index: false, follow: false } },
+export async function generateMetadata(): Promise<Metadata> {
+  return {
+    title: { default: `${site.name}: Indian psychology`, template: `%s · ${site.name}` },
+    description: (await home.get()).tagline,
+    robots: site.indexable
+      ? undefined
+      : { index: false, follow: false, googleBot: { index: false, follow: false } },
+  }
 }
 
 export const viewport: Viewport = {

@@ -148,7 +148,7 @@ test.describe('without JavaScript', () => {
     )
     const footer = page.getByRole('contentinfo')
     await expect(footer.getByText('Care4Mind', { exact: true })).toBeVisible()
-    await expect(footer).toContainText('Indic ways to invoke a perfect balanced mind')
+    await expect(footer).toContainText('Indian ideas for a balanced mind, explained simply.')
     await expect(footer).toContainText('Powered by IIT Bombay-SJMSOM & HUA')
     await expect(footer).toContainText('A preview of the new site, not yet public.')
   })
