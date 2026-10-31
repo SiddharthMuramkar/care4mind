@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+// @ts-check
 // Serves the production build to Lighthouse over HTTP/2 with TLS, as Vercel serves visitors.
 //
 //   node scripts/lhci/h2-server.mjs <port>
@@ -68,6 +69,7 @@ function startNext() {
   const args = [bin, 'start', '-p', String(innerPort), '-H', '127.0.0.1']
   const next = spawn(process.execPath, args, { stdio: ['ignore', 'pipe', 'pipe'] })
   let output = ''
+  /** @type {Promise<void>} */
   const ready = new Promise((resolve, reject) => {
     const listen = (chunk) => {
       output += chunk
@@ -131,6 +133,7 @@ function proxy(server) {
   server.on('sessionError', () => {})
 }
 
+/** @type {{ key: Buffer, cert: Buffer }} */
 let certificate
 try {
   certificate = selfSignedCertificate()
@@ -155,7 +158,7 @@ try {
   proxy(server)
   await new Promise((resolve, reject) => {
     server.once('error', reject)
-    server.listen(port, resolve)
+    server.listen(port, () => resolve(undefined))
   })
   next.once('exit', (code, signal) => {
     console.error(`next start stopped (${signal ?? `exit ${code}`}), so this server stops too.`)

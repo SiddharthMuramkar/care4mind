@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+// @ts-check
 // Prints a clean outline of one saved page of the current site: headings, paragraphs, lists,
 // tables row by row, verse blocks, reference lines, and links with their targets.
 //
@@ -171,7 +172,7 @@ const IMPLIED_CLOSES = {
 }
 
 function parseHtml(html) {
-  const root = { name: '#root', attrs: {}, children: [] }
+  const root = { name: '#root', attrs: {}, children: /** @type {any[]} */ ([]) }
   const stack = [root]
   const lower = html.toLowerCase()
   const current = () => stack[stack.length - 1]
@@ -234,7 +235,7 @@ function parseHtml(html) {
     if (CLOSES_P.has(name)) closeOpen(['p'], ['button', ...SCOPE])
     const implied = IMPLIED_CLOSES[name]
     if (implied) closeOpen(implied.close, implied.stop)
-    const element = { name, attrs: parseAttributes(inside), children: [] }
+    const element = { name, attrs: parseAttributes(inside), children: /** @type {any[]} */ ([]) }
     current().children.push(element)
     if (VOID.has(name) || /\/\s*$/.test(inside)) continue
     stack.push(element)
@@ -473,13 +474,13 @@ function linkOf(element) {
 /** The blocks inside an element. */
 function blocksOf(element) {
   const blocks = []
-  let run = { lines: [''], links: [] }
+  let run = { lines: [''], links: /** @type {any[]} */ ([]) }
 
   const flush = () => {
     const lines = run.lines.map(clean).filter(Boolean)
     if (lines.length > 0 || run.links.length > 0)
       blocks.push({ type: 'paragraph', lines, ...linksOf(run.links) })
-    run = { lines: [''], links: [] }
+    run = { lines: [''], links: /** @type {any[]} */ ([]) }
   }
 
   const visit = (node) => {
@@ -607,6 +608,7 @@ function quizOf(container, { questions, settings }) {
   const items = new Map((questions.questions ?? []).map((q) => [String(q.id), q]))
 
   const optionSets = []
+  /** @type {{ step: string | null, title: string, instructions: string, items: { id: string, text: string, optionSet: number }[] }[]} */
   const parts = []
   const known = new Set()
   for (const id of String(settings.question_ids ?? '')
@@ -630,7 +632,7 @@ function quizOf(container, { questions, settings }) {
       if (optionSet === -1) optionSet = optionSets.push(options) - 1
       if (parts.length === 0) parts.push({ step: null, title: '', instructions: '', items: [] })
       const text = clean(decodeEntities(String(question.text ?? '')))
-      parts.at(-1).items.push({ id, text, optionSet })
+      parts[parts.length - 1].items.push({ id, text, optionSet })
       known.add(text)
       options.forEach((option) => known.add(option))
     }

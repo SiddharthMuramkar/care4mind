@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+// @ts-check
 // The no-invented-text check: every string in a record must be found on the saved page it came
 // from, after normalising both sides and applying the record's listed edits.
 //
@@ -267,7 +268,7 @@ function closestText(string, pages) {
         best = {
           distance,
           url: page.url,
-          text: page.text.slice(window[0].start, window.at(-1).end),
+          text: page.text.slice(window[0].start, window[window.length - 1].end),
         }
     }
   }

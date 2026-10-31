@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+// @ts-check
 // Installs the repo's git hooks (.githooks/) into the hooks folder that every checkout of the
 // repo shares, so each worktree is covered whichever branch it is on. pnpm runs it as `prepare`,
 // after an install that changed something.
@@ -33,7 +34,7 @@ export function plan(source, installed) {
   if (installed === source) return { write: false, warning: null }
   if (installed === null) return { write: true, warning: null }
   const was = versionOf(installed)
-  const is = versionOf(source)
+  const is = versionOf(source) ?? 0
   if (was === null)
     return { write: false, warning: 'it was not written by this script, so it is left alone' }
   if (was > is)

@@ -7,7 +7,7 @@ The new care4mind.org: a portal for Indian psychology that links Concepts, tradi
 
 ## Run it
 
-Node 22.12 or newer (CI and Vercel use 24) and the pnpm version pinned in `package.json`.
+Node 22.15 or newer (CI and Vercel use 24) and the pnpm version pinned in `package.json`.
 
 ```bash
 pnpm install
