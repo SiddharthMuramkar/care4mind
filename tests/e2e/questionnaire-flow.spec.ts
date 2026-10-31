@@ -463,6 +463,55 @@ test.describe('the KarmaYoga flow', () => {
     expect(dialogs, 'the end screen reached').toEqual(['beforeunload'])
   })
 
+  test('asks before a link leaves the flow with answers given: dismissing keeps them', async ({
+    page,
+  }) => {
+    const asked: string[] = []
+    let accept = false
+    page.on('dialog', (dialog) => {
+      asked.push(dialog.type())
+      void (accept ? dialog.accept() : dialog.dismiss())
+    })
+    await gotoReady(page, FLOW)
+    const first = statements(page).first().getByRole('radio').first()
+    await first.check()
+
+    const home = page.getByRole('banner').getByRole('link', { name: 'Care4Mind home', exact: true })
+    for (const link of [page.getByRole('link', { name: 'Back to its purpose and limits' }), home]) {
+      const before = asked.length
+      await link.click()
+      await expect.poll(() => asked.length).toBe(before + 1)
+      await page.waitForTimeout(300)
+      await expect(page).toHaveURL(FLOW)
+      await expect(partHeading(page, 1)).toBeVisible()
+      await expect(first).toBeChecked()
+    }
+    expect(asked).toEqual(['confirm', 'confirm'])
+
+    accept = true
+    await page.getByRole('link', { name: 'Back to its purpose and limits' }).click()
+    await expect(page).toHaveURL(INTRO)
+    expect(asked).toEqual(['confirm', 'confirm', 'confirm'])
+  })
+
+  test('leaves without asking on browser Back from part 1: a client-side traversal can’t be held', async ({
+    page,
+  }) => {
+    const asked: string[] = []
+    page.on('dialog', (dialog) => {
+      asked.push(dialog.type())
+      void dialog.accept()
+    })
+    await gotoReady(page, INTRO)
+    await page.getByRole('link', { name: 'Start the Questionnaire' }).click()
+    await expect(page.locator('html')).toHaveAttribute('data-hydrated')
+    await expect(partHeading(page, 1)).toBeVisible()
+    await statements(page).first().getByRole('radio').first().check()
+    await page.goBack()
+    await expect(page).toHaveURL(INTRO)
+    expect(asked).toEqual([])
+  })
+
   test('has no axe violations on any part', async ({ page }) => {
     await gotoReady(page, FLOW)
     for (let part = 1; part <= PARTS.length; part++) {
