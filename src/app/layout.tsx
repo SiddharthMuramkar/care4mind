@@ -16,6 +16,7 @@ import { tiroDevanagariSanskrit } from '@/fonts/tiro-devanagari-sanskrit'
 
 import '@/styles/globals.css'
 
+// The icons are the files beside this layout: an `icons` field would hide them (Next uses one or the other).
 export const metadata: Metadata = {
   title: { default: `${site.name}: Indian psychology`, template: `%s · ${site.name}` },
   description: site.tagline,
