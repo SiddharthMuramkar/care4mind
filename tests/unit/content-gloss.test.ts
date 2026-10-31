@@ -22,15 +22,13 @@ describe('glosses', () => {
     const records = (
       await Promise.all(CONTENT_KINDS.map((kind) => localSource.records(kind)))
     ).flat()
-    const fromBlocks = records.flatMap((record) => glossesOf(record, `${record.kind}`, []))
-    const concepts = await localSource.records('concept')
-    const glosses = concepts.flatMap((concept) => {
-      const out = glossesOf(concept, concept.slug, [])
-      if (concept.name.english)
-        out.push({ path: `${concept.slug}.name.english`, text: concept.name.english })
+    const glosses = records.flatMap((record) => {
+      const path = `${record.kind}/${'slug' in record ? record.slug : 'home'}`
+      const out = glossesOf(record, path, [])
+      if (record.kind === 'concept' && record.name.english)
+        out.push({ path: `${path}.name.english`, text: record.name.english })
       return out
     })
-    glosses.push(...fromBlocks.filter((g) => !g.path.startsWith('concept')))
     expect(glosses.length).toBeGreaterThan(0)
     const lower = glosses.filter(({ text }) => !/^\p{Lu}/u.test(text))
     expect(lower).toEqual([])
