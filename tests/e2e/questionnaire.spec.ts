@@ -24,6 +24,14 @@ test.describe('Questionnaire page (FR-05)', () => {
     await expect(page.getByText(/Psychology expert has not reviewed/)).toBeVisible()
   })
 
+  test('says where to call for help now, beside its limits', async ({ page }) => {
+    const help = page.locator('main [data-help-line]')
+    await expect(help).toContainText('not treatment')
+    for (const tel of ['tel:14416', 'tel:18008914416', 'tel:112']) {
+      await expect(help.locator(`a[href="${tel}"]`)).toHaveCount(1)
+    }
+  })
+
   test('says it is a preview, starts its flow, and asks no questions itself', async ({ page }) => {
     await expect(page.getByText('Preview', { exact: true })).toBeVisible()
     await expect(page.getByText(/^Your answers aren[’']t scored yet\.$/)).toBeVisible()
