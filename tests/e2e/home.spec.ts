@@ -9,7 +9,7 @@ import {
   type Start,
 } from './drawings'
 import { expect, gotoReady, test } from './fixtures'
-import { moving } from './lotuses'
+import { BREATH } from './lotuses'
 import { placeOnScreen, scrollPath } from './scrolling'
 
 const section = (page: Page, name: string) => page.getByRole('region', { name, exact: true })
@@ -19,14 +19,14 @@ const heroFleuron = (page: Page) => openingFolio(page).locator('svg')
 
 /**
  * What has started on a drawing or any part of it since the page began: how long after being
- * set going each began and how long it runs, in ms, and whether it loops. Call
+ * set going each began and how long it runs, in ms, its name and whether it loops. Call
  * recordAnimationStarts before loading the page.
  */
 const startsIn = (drawing: Locator) =>
   drawing.evaluate((svg) =>
     (window as unknown as { __animationStarts: Start[] }).__animationStarts
       .filter(({ target }) => svg.contains(target))
-      .map(({ delay, duration, loops }) => ({ delay, duration, loops })),
+      .map(({ name, delay, duration, loops }) => ({ name, delay, duration, loops })),
   )
 
 /** The one ornament in the gap between two sections: its outermost element hidden from assistive technology. */
@@ -63,7 +63,7 @@ function rulesOf(ornament: Locator) {
 }
 
 test.describe('the opening folio', () => {
-  test('its lotus Fleuron draws itself once on load, stroke by stroke, ends complete, then breathes', async ({
+  test('its lotus Fleuron draws itself once on load, stroke by stroke, ends complete, then breathes once', async ({
     page,
   }) => {
     await recordAnimationStarts(page)
@@ -94,17 +94,18 @@ test.describe('the opening folio', () => {
     const delays = await Promise.all(strokes.map((stroke) => delaysStartedOn(stroke)))
     expect(new Set(delays.flat()).size).toBeGreaterThan(1)
 
-    // Then it breathes: each loop sets off as the drawing ends, never while it is still drawing.
+    // Then it breathes once: the breath sets off as the drawing ends, never while it is still drawing.
+    const isBreath = ({ name }: { name: string }) => BREATH.includes(name)
     await expect
-      .poll(async () => (await startsIn(fleuron)).some(({ loops }) => loops), 'it breathes')
+      .poll(async () => (await startsIn(fleuron)).some(isBreath), 'it breathes')
       .toBe(true)
     const starts = await startsIn(fleuron)
-    const drawing = starts.filter(({ loops }) => !loops)
+    const drawing = starts.filter((start) => !isBreath(start))
     const drawnBy = Math.max(...drawing.map(({ delay, duration }) => delay + (duration ?? 0)))
-    for (const { delay } of starts.filter(({ loops }) => loops)) {
-      expect(delay, 'a loop sets off once the drawing is done').toBeGreaterThanOrEqual(drawnBy)
+    for (const { delay, loops } of starts.filter(isBreath)) {
+      expect(delay, 'the breath sets off once the drawing is done').toBeGreaterThanOrEqual(drawnBy)
+      expect(loops, 'and breathes once').toBe(false)
     }
-    expect(await moving(fleuron), 'and it breathes on').toBe(true)
   })
 
   test('never makes the verse wait: the heading and translation are never hidden or faded in', async ({

@@ -471,7 +471,7 @@
 /* The lotus keeps its own, slower clock: it is only looked at, never waited on. */
 @theme {
   --duration-stroke: 900ms;
-  --duration-breath: 8s;
+  --duration-breath: 3.2s;
   --duration-bloom: 1600ms;
   --ease-breath: cubic-bezier(0.37, 0, 0.63, 1);
 }

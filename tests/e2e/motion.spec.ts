@@ -134,18 +134,6 @@ for (const path of ['/', '/concepts/vikshepa/', MISSING]) {
   })
 }
 
-test('there is no "Pause the lotus" button to press, with reduced motion', async ({ page }) => {
-  await gotoReady(page, '/')
-  const pause = { name: 'Pause the lotus', exact: true }
-  await expect(page.getByRole('button', pause)).toHaveCount(0)
-  const menu = page.getByRole('banner').getByRole('button', { name: 'Menu', exact: true })
-  if (await menu.isVisible()) {
-    await menu.click()
-    await expect(page.getByRole('dialog', { name: 'Menu' })).toBeVisible()
-    await expect(page.getByRole('button', pause)).toHaveCount(0)
-  }
-})
-
 test('the References plus becomes a minus at once, with nothing moving, with reduced motion', async ({
   page,
 }) => {

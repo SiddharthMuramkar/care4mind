@@ -55,7 +55,7 @@ export interface Start {
   duration: number | null
   /** How long after it was set going it began, in ms. */
   delay: number
-  /** Whether it repeats without end, as a lotus's breath does. */
+  /** Whether it repeats without end. */
   loops: boolean
   byScroll: boolean
   /** The property a transition changes; empty for an animation. */

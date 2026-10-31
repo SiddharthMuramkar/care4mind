@@ -1,4 +1,4 @@
-import { expect, type Locator, type Page } from '@playwright/test'
+import { type Locator, type Page } from '@playwright/test'
 
 import type { Start } from './drawings'
 
@@ -12,38 +12,58 @@ export const logoLotus = (page: Page) =>
     .getByRole('link', { name: 'Care4Mind home', exact: true })
     .locator('svg[data-lotus]')
 
-/** Whether the lotus is breathing now: one of its endless animations is running. */
+/** The keyframes of the hero's one breath: its petals, its heart and the heart's glow. */
+export const BREATH = ['breathe-left', 'breathe-right', 'breathe-centre', 'heartbeat', 'glow']
+
+/** Whether the lotus has a breath, running, finished or yet to start. */
+export const breathes = (lotus: Locator) =>
+  lotus.evaluate(
+    (svg, breath) =>
+      svg
+        .getAnimations({ subtree: true })
+        .some((animation) => breath.includes((animation as CSSAnimation).animationName)),
+    BREATH,
+  )
+
+/** Whether anything on the lotus is animating now. */
 export const moving = (lotus: Locator) =>
   lotus.evaluate((svg) =>
-    svg
-      .getAnimations({ subtree: true })
-      .some(
-        (animation) =>
-          animation.playState === 'running' &&
-          animation.effect?.getComputedTiming().iterations === Infinity,
-      ),
+    svg.getAnimations({ subtree: true }).some((animation) => animation.playState === 'running'),
   )
 
-/** Whether the lotus has an endless animation, running, paused or yet to start. */
-export const breathes = (lotus: Locator) =>
-  lotus.evaluate((svg) =>
-    svg
-      .getAnimations({ subtree: true })
-      .some((animation) => animation.effect?.getComputedTiming().iterations === Infinity),
-  )
-
-/** The properties the lotus's endless animations change, each once, in order: ['opacity', 'transform']. */
-export const loopingProperties = (lotus: Locator) =>
-  lotus.evaluate((svg) => {
+/** The properties the lotus's breath changes, each once, in order: ['opacity', 'transform']. */
+export const breathProperties = (lotus: Locator) =>
+  lotus.evaluate((svg, breath) => {
     const timing = new Set(['offset', 'computedOffset', 'easing', 'composite'])
     const properties = svg
       .getAnimations({ subtree: true })
-      .filter((animation) => animation.effect?.getComputedTiming().iterations === Infinity)
+      .filter((animation) => breath.includes((animation as CSSAnimation).animationName))
       .flatMap(({ effect }) => (effect instanceof KeyframeEffect ? effect.getKeyframes() : []))
       .flatMap((keyframe) => Object.keys(keyframe))
       .filter((key) => !timing.has(key))
     return [...new Set(properties)].sort()
-  })
+  }, BREATH)
+
+/**
+ * What is animating on the clock now, anywhere on the page: running animations on the document
+ * timeline. Scroll-driven ones move only as the visitor scrolls, so they don't count.
+ */
+export const runningOnTheClock = (page: Page) =>
+  page.evaluate(() =>
+    document
+      .getAnimations()
+      .filter(
+        (animation) =>
+          animation.playState === 'running' && animation.timeline instanceof DocumentTimeline,
+      )
+      .map((animation) => {
+        const target = (animation.effect as KeyframeEffect | null)?.target
+        const name =
+          (animation as CSSAnimation).animationName ??
+          (animation as CSSTransition).transitionProperty
+        return `${name} on ${target ? [target.localName, ...target.classList].join('.') : '?'}`
+      }),
+  )
 
 /**
  * The animations and transitions that have started on any lotus or its parts
@@ -60,44 +80,29 @@ export const lotusStarts = (page: Page) =>
       })),
   )
 
-/**
- * The "Pause the lotus" button: in the header from 72rem (1152 px), and below
- * that in the Menu, which this opens first.
- */
-export async function pauseButton(page: Page) {
-  const pause = { name: 'Pause the lotus', exact: true }
-  if ((page.viewportSize()?.width ?? 0) >= 1152) {
-    return page.getByRole('banner').getByRole('button', pause)
-  }
-  const menu = page.getByRole('dialog', { name: 'Menu' })
-  if (!(await menu.isVisible())) {
-    await page.getByRole('banner').getByRole('button', { name: 'Menu', exact: true }).click()
-  }
-  await expect(menu).toBeVisible()
-  return menu.getByRole('button', pause)
-}
-
-/** The most flashes a second any lotus part's endless opacity animation makes: one per rise to a peak. */
+/** The most flashes a second any part of the lotus's breath makes: one per rise to a peak. */
 export const flashesPerSecond = (lotus: Locator) =>
-  lotus.evaluate((svg) =>
-    Math.max(
-      0,
-      ...svg
-        .getAnimations({ subtree: true })
-        .map(({ effect }) => effect)
-        .filter((effect): effect is KeyframeEffect => effect instanceof KeyframeEffect)
-        .filter((effect) => effect.getComputedTiming().iterations === Infinity)
-        .map((effect) => {
-          const opacities = effect
-            .getKeyframes()
-            .map((keyframe) => keyframe.opacity)
-            .filter((opacity) => opacity !== undefined)
-            .map(Number)
-          const peaks = opacities.filter(
-            (opacity, index) => index > 0 && opacity > (opacities[index - 1] ?? opacity),
-          ).length
-          const seconds = Number(effect.getComputedTiming().duration) / 1000
-          return seconds > 0 ? peaks / seconds : 0
-        }),
-    ),
+  lotus.evaluate(
+    (svg, breath) =>
+      Math.max(
+        0,
+        ...svg
+          .getAnimations({ subtree: true })
+          .filter((animation) => breath.includes((animation as CSSAnimation).animationName))
+          .map(({ effect }) => effect)
+          .filter((effect): effect is KeyframeEffect => effect instanceof KeyframeEffect)
+          .map((effect) => {
+            const opacities = effect
+              .getKeyframes()
+              .map((keyframe) => keyframe.opacity)
+              .filter((opacity) => opacity !== undefined)
+              .map(Number)
+            const peaks = opacities.filter(
+              (opacity, index) => index > 0 && opacity > (opacities[index - 1] ?? opacity),
+            ).length
+            const seconds = Number(effect.getComputedTiming().duration) / 1000
+            return seconds > 0 ? peaks / seconds : 0
+          }),
+      ),
+    BREATH,
   )
