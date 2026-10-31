@@ -1,0 +1,57 @@
+.folio {
+  display: grid;
+  justify-items: center;
+  gap: 1rem;
+  text-align: center;
+}
+
+.title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: clamp(2.25rem, 8vw, 4rem);
+  line-height: 1.05;
+  max-width: 16ch;
+}
+
+/* A failed page is still a page of the book. */
+.fleuron {
+  width: min(10rem, 50%);
+  color: var(--color-highlight);
+}
+
+.text {
+  margin: 0;
+  max-width: 44ch;
+  font-size: 1.125rem;
+}
+
+.retry {
+  margin-top: 1rem;
+  border: none;
+  border-radius: 2px;
+  min-height: 48px;
+  padding: 0 1.5rem;
+  background: var(--color-ground);
+  color: var(--color-ink);
+  font: inherit;
+  font-variant-caps: all-small-caps;
+  letter-spacing: 0.12em;
+  font-size: 1.1875rem;
+  box-shadow: 0 3px 0 var(--color-surface-ink);
+  cursor: pointer;
+}
+
+.retry:active {
+  transform: translateY(2px);
+  box-shadow: 0 1px 0 var(--color-surface-ink);
+}
+
+/* The root layout, which sets the text face, is what failed. Times is that face's stand-in. */
+.shell {
+  font-family: 'Times New Roman', serif;
+}
+
+.reload {
+  margin: 0;
+}
