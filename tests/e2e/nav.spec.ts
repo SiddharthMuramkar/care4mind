@@ -308,7 +308,7 @@ test.describe('panels, on a computer', () => {
     await expect(concepts).toBeHidden()
   })
 
-  for (const width of [1152, 1280, 1440]) {
+  for (const width of [WIDE, 1280, 1440]) {
     test(`at ${width} px one click switches panels, by click or by hover then click, and the pointer sits under its toggle`, async ({
       page,
     }) => {

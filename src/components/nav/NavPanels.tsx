@@ -48,6 +48,9 @@ export type Slots = Partial<Record<PanelId, HTMLElement>>
  * closes a panel and gives focus back to its toggle; Tab runs through a panel and on, never
  * trapped; a new page closes it. The section links are the server's own and are never replaced.
  */
+// A press this soon after a hover switch is the same gesture finishing, not a request to close.
+const SWITCH_PRESS_WINDOW = 600
+
 export function NavPanels({
   nav: site,
   slots,
@@ -79,12 +82,10 @@ export function NavPanels({
     return () => clearTimeout(timer)
   }, [initialHover, slots])
 
-  // Base UI drops a panel's hover opening when hover switches panels, so the click that follows
-  // would toggle it shut: a press closing a panel that hover opened keeps it open instead.
-  const openedByHover = useRef(false)
+  // Base UI drops a hover opening when hover switches panels, so the press right after must not toggle it shut.
+  const hoverOpenedAt = useRef(0)
 
-  // The webfonts move the toggles once they load, which no resize reports: the panel and its
-  // pointer measure again, as they do on a resize.
+  // Webfonts shift the toggles after load and no resize reports it.
   useEffect(() => {
     void document.fonts?.ready.then(() => window.dispatchEvent(new Event('resize')))
   }, [])
@@ -109,12 +110,17 @@ export function NavPanels({
             return
           }
         }
-        if (next == null && details.reason === 'trigger-press' && openedByHover.current) {
-          openedByHover.current = false
+        if (
+          next == null &&
+          details.reason === 'trigger-press' &&
+          performance.now() - hoverOpenedAt.current < SWITCH_PRESS_WINDOW
+        ) {
+          hoverOpenedAt.current = 0
           details.cancel()
           return
         }
-        openedByHover.current = next != null && details.reason === 'trigger-hover'
+        hoverOpenedAt.current =
+          next != null && details.reason === 'trigger-hover' ? performance.now() : 0
         setValue(panelOf(String(next)) ?? null)
       }}
       delay={OPEN_DELAY}
