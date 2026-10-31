@@ -7,11 +7,17 @@ import { shareCardText } from '@/lib/metadata'
 /** The size every share card is drawn at: the one WhatsApp, LinkedIn and X all crop well. */
 export const CARD_SIZE = { width: 1200, height: 630 }
 
-// Press, in paper: the same values as --color-surface, --color-surface-ink and --color-surface-rule.
-const PAPER = '#eadbb6'
-const INK = '#1d1a2e'
-const MUTED = '#5a4a2e'
-const RULE = '#8c7a55'
+/** Press, in paper. Satori cannot read CSS variables, so a unit test keeps these equal to the tokens. */
+export const CARD_COLOURS = {
+  '--color-surface': '#eadbb6',
+  '--color-surface-ink': '#1d1a2e',
+  '--color-surface-muted': '#5a4a2e',
+  '--color-surface-rule': '#8c7a55',
+}
+const PAPER = CARD_COLOURS['--color-surface']
+const INK = CARD_COLOURS['--color-surface-ink']
+const MUTED = CARD_COLOURS['--color-surface-muted']
+const RULE = CARD_COLOURS['--color-surface-rule']
 
 /**
  * The share card of the public page whose route pattern is `pattern` (with `slug` in its

@@ -3,8 +3,8 @@ import { ROUTES } from './routes'
 
 // A link shared on WhatsApp, LinkedIn or X shows the page's title, summary and card.
 
-/** One page of each kind: the first the registry lists. */
-const ONE_OF_EACH = [...new Map(ROUTES.map((route) => [route.kind, route])).values()].reverse()
+/** One page of each kind: the last the registry lists. */
+const ONE_OF_EACH = [...new Map(ROUTES.map((route) => [route.kind, route])).values()]
 
 /** A PNG's width and height, from its IHDR chunk. */
 function pngSize(bytes: Buffer): { width: number; height: number } {
@@ -21,9 +21,9 @@ for (const route of ONE_OF_EACH) {
     await expect(meta('og:title')).toHaveAttribute('content', /\S/)
     await expect(meta('og:description')).toHaveAttribute('content', /\S/)
     await expect(meta('twitter:card')).toHaveAttribute('content', 'summary_large_image')
-    await expect(meta('twitter:image')).toHaveAttribute('content', /opengraph-image/)
     const image = await meta('og:image').getAttribute('content')
     expect(image, 'og:image').toMatch(/opengraph-image/)
+    await expect(meta('twitter:image')).toHaveAttribute('content', image ?? '')
 
     // The tag names the production host; the card itself is fetched from the server under test.
     const { pathname, search } = new URL(image ?? '')

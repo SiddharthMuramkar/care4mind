@@ -1,7 +1,8 @@
 /**
  * What every page tells browsers, search engines and link previews about itself (D19, NFR-04):
- * its title, its description, its canonical address and the text of its share card. A page asks by its path, and the route registry and
- * the page's own content supply the rest, so no page writes its metadata by hand.
+ * its title, its description, its canonical address and the text of its share card. A page asks
+ * by its path, and the route registry and the page's own content supply the rest, so no page
+ * writes its metadata by hand.
  */
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
@@ -40,7 +41,7 @@ function slugOf(route: RouteEntry): string {
   return route.path.split('/')[at] ?? ''
 }
 
-/** A Concept as it is named everywhere: "Vikṣepa · Distraction". #179's function replaces this. */
+/** A Concept as it is named everywhere: "Vikṣepa · Distraction". Kept here until the shared naming function exists. */
 function conceptName(name: string, english: string | undefined): string {
   return english ? `${name} · ${english}` : name
 }
@@ -132,7 +133,7 @@ export async function metadataFor(path: string): Promise<Metadata> {
   }
 }
 
-/** The text of the public page's share card: the site's name and tagline on the homepage. */
+/** The text of the page's share card: the site's name and tagline on the homepage. */
 export async function shareCardText(path: string): Promise<{ title: string; description: string }> {
   const route = await routeAt(path)
   if (route.kind === 'home') return { title: config.name, description: config.tagline }

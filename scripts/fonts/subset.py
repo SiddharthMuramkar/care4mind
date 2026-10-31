@@ -3,7 +3,7 @@
 Downloads each family from Google's font repository at a pinned commit,
 checks it against fonts.lock.json, trims variable axes, and writes one
 Latin and/or one Devanagari subset per style into src/fonts/, as WOFF2 for
-browsers and WOFF for the share-card renderer.
+browsers, and also as WOFF for the faces the share-card renderer sets.
 
 Google's own served subsets drop the combining marks ISO 15919 needs
 (ticket 07), which is why the site builds its own.
@@ -81,6 +81,8 @@ class Source:
     axes: dict[str, float | tuple[float, float]] = field(default_factory=dict)
     # OpenType features to keep, with the glyphs they reach.
     features: list[str] = field(default_factory=lambda: ALL_FEATURES)
+    # Also written as WOFF, for the share-card renderer (src/fonts/card-faces.ts).
+    card: bool = False
 
 
 @dataclass
@@ -101,16 +103,16 @@ FAMILIES = [
         "playfair",
         "latin",
         [
-            Source("playfair", PLAYFAIR, "PlayfairText-Regular", {"wdth": 100, "opsz": 14, "wght": 400}, TEXT),
+            Source("playfair", PLAYFAIR, "PlayfairText-Regular", {"wdth": 100, "opsz": 14, "wght": 400}, TEXT, card=True),
             Source("playfair", PLAYFAIR_ITALIC, "PlayfairText-Italic", {"wdth": 100, "opsz": 14, "wght": 400}, TEXT),
             Source("playfair", PLAYFAIR, "PlayfairText-SemiBold", {"wdth": 100, "opsz": 14, "wght": 600}, TEXT),
-            Source("playfair", PLAYFAIR, "PlayfairDisplay-Medium", {"wdth": 100, "opsz": 64, "wght": 500}, LATIN_FEATURES),
+            Source("playfair", PLAYFAIR, "PlayfairDisplay-Medium", {"wdth": 100, "opsz": 64, "wght": 500}, LATIN_FEATURES, card=True),
         ],
     ),
     Family(
         "tiro-devanagari-sanskrit",
         "devanagari",
-        [Source("tirodevanagarisanskrit", "TiroDevanagariSanskrit-Regular.ttf", "TiroDevanagariSanskrit-Regular")],
+        [Source("tirodevanagarisanskrit", "TiroDevanagariSanskrit-Regular.ttf", "TiroDevanagariSanskrit-Regular", card=True)],
     ),
 ]
 
@@ -160,8 +162,8 @@ def build(source_path: Path, source: Source, script: str, out_path: Path) -> Non
     subsetter.populate(unicodes=ranges_to_unicodes(LATIN if script == "latin" else DEVANAGARI))
     subsetter.subset(font)
     out_path.parent.mkdir(parents=True, exist_ok=True)
-    # The share-card renderer (Satori) reads WOFF but not WOFF2, so each subset is written in both.
-    for flavor in ("woff2", "woff"):
+    # The share-card renderer (Satori) reads WOFF but not WOFF2.
+    for flavor in ("woff2", "woff") if source.card else ("woff2",):
         font.flavor = flavor
         path = out_path.with_suffix(f".{flavor}")
         font.save(path)

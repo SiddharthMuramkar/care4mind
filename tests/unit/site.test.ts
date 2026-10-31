@@ -1,3 +1,6 @@
+import { readFileSync } from 'node:fs'
+import { join } from 'node:path'
+
 import { ESLint } from 'eslint'
 import { describe, expect, it } from 'vitest'
 
@@ -5,8 +8,9 @@ import robots from '@/app/robots'
 import sitemap from '@/app/sitemap'
 import { redirects } from '@/config/redirects'
 import { site as config } from '@/config/site'
-import { site } from '@/content'
+import { concepts, site } from '@/content'
 import { metadataFor, shareCardText } from '@/lib/metadata'
+import { CARD_COLOURS } from '@/lib/share-card'
 
 import nextConfig from '../../next.config'
 
@@ -30,10 +34,19 @@ function withShareTags(meta: {
   const share = { title: meta.title.absolute, description: meta.description }
   return {
     ...meta,
-    openGraph: { type: 'website', siteName: 'Care4Mind', url: meta.alternates.canonical, ...share },
+    openGraph: { type: 'website', siteName: config.name, url: meta.alternates.canonical, ...share },
     twitter: { card: 'summary_large_image', ...share },
   }
 }
+
+describe('the share card', () => {
+  it('draws in the Press paper tokens', () => {
+    const css = readFileSync(join(process.cwd(), 'src/styles/globals.css'), 'utf8')
+    for (const [token, value] of Object.entries(CARD_COLOURS)) {
+      expect(css.match(new RegExp(`${token}:\\s*(#[0-9a-f]+);`))?.[1], token).toBe(value)
+    }
+  })
+})
 
 describe('a page’s metadata (D19)', () => {
   it('names a Concept by its term and gloss, describes it by its summary and gives its address', async () => {
@@ -136,13 +149,12 @@ describe('a page’s metadata (D19)', () => {
   })
 
   it('names a Concept on its share card as it is named everywhere, and the homepage by the site', async () => {
+    const concept = await concepts.get('vikshepa')
+    const route = (await site.routes()).find((entry) => entry.path === '/concepts/vikshepa/')
     expect(await shareCardText('/concepts/vikshepa/')).toMatchObject({
-      title: 'Vikṣepa · Distraction',
+      title: `${route?.title} · ${concept?.english}`,
     })
-    expect(await shareCardText('/')).toEqual({
-      title: 'Care4Mind',
-      description: 'Indic ways to invoke a perfect balanced mind',
-    })
+    expect(await shareCardText('/')).toEqual({ title: config.name, description: config.tagline })
   })
 
   it('answers 404 for a path that is no page in this build', async () => {
