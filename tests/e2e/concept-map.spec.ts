@@ -29,7 +29,7 @@ const plate = (page: Page) => page.getByRole('figure')
 const point = (page: Page, slug: string) =>
   plate(page).getByRole('link', { name: named(slug), exact: true })
 const list = (page: Page) => page.getByRole('region', { name: 'Connections' })
-const rows = (page: Page) => list(page).getByRole('listitem').filter({ visible: true })
+const rows = (page: Page) => list(page).locator('li[data-c]').filter({ visible: true })
 const announcement = (page: Page) => page.getByRole('main').locator('[aria-live="polite"]')
 const group = (page: Page, name: 'Lines' | 'Topics') => page.getByRole('group', { name })
 /** Base UI's two ToggleGroups, once their code has arrived (when the browser is idle). */
@@ -95,6 +95,19 @@ test.describe('the Concept map', () => {
       'href',
       hrefFor({ kind: 'concept', id: graph.edges[0]?.source ?? '' }),
     )
+  })
+
+  test('separates each of a connection’s reasons in its text', async ({ page }) => {
+    await gotoReady(page, PATH)
+    const shared = graph.edges.filter(
+      ({ kind, source, target }) =>
+        kind === 'passage' && [source, target].sort().join(' ') === 'brahmacharya sthitaprajna',
+    )
+    expect(shared.length).toBeGreaterThan(1)
+    const ends = `${shared[0]?.source} ${shared[0]?.target}`
+    const row = list(page).locator(`li[data-kind="passage"][data-ends="${ends}"]`)
+    await expect(row.getByRole('listitem')).toHaveCount(shared.length)
+    expect(await row.textContent()).toContain(shared.map(({ reason }) => reason).join(' · '))
   })
 
   test('draws the plate with its points as links in the topics’ order, hiding the lines from assistive technology', async ({
@@ -177,36 +190,38 @@ test.describe('the Concept map', () => {
     await lines.first().focus()
     await page.keyboard.press('ArrowRight')
     await expect(lines.nth(1)).toBeFocused()
-    await expect(lines.nth(1)).toHaveText('Rarely cited Reference')
+    await expect(lines.nth(1)).toHaveText('Shared text')
     await page.keyboard.press('Space')
     await expect(lines.nth(1)).toHaveAttribute('aria-pressed', 'true')
-    await expect(page).toHaveURL(/\?kind=reference$/)
-    const references = ofKind('reference').length
+    await expect(page).toHaveURL(/\?kind=work$/)
+    const works = ofKind('work').length
     await expect(announcement(page)).toHaveText(
-      `Showing ${references} of ${connections.length} connections`,
+      `Showing ${works} of ${connections.length} connections`,
     )
-    await expect(rows(page)).toHaveCount(references)
+    await expect(rows(page)).toHaveCount(works)
 
     // One kind at a time: the next takes its place.
     await page.keyboard.press('ArrowRight')
     await page.keyboard.press('Space')
     await expect(lines.nth(1)).toHaveAttribute('aria-pressed', 'false')
-    await expect(rows(page)).toHaveCount(ofKind('work').length)
+    await expect(rows(page)).toHaveCount(ofKind('reference').length)
 
     // Tab leaves the group for the topics, and Space there narrows by topic too.
     await page.keyboard.press('Tab')
     const topics = group(page, 'Topics').getByRole('button')
     await expect(topics.first()).toBeFocused()
     await page.keyboard.press('Space')
-    await expect(page).toHaveURL(/\?kind=work&topic=self$/)
+    await expect(page).toHaveURL(/\?kind=reference&topic=self$/)
     const self = new Set(
       graph.nodes.filter(({ topics }) => topics.includes('self')).map(({ slug }) => slug),
     )
-    const touching = ofKind('work').filter((key) => key.split(' ').some((slug) => self.has(slug)))
+    const touching = ofKind('reference').filter((key) =>
+      key.split(' ').some((slug) => self.has(slug)),
+    )
     await expect(rows(page)).toHaveCount(touching.length)
 
     await page.goBack()
-    await expect(rows(page)).toHaveCount(ofKind('work').length)
+    await expect(rows(page)).toHaveCount(ofKind('reference').length)
     await page.getByRole('button', { name: 'Clear filters' }).click()
     await expect(page).toHaveURL(new RegExp(`${PATH}$`))
     await expect(rows(page)).toHaveCount(connections.length)

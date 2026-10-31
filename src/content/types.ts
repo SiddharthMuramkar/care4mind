@@ -228,6 +228,9 @@ export interface ConceptCard extends ConceptRef {
 /** What relates two Concepts (D06): a shared passage, work, rarely cited Reference or topic. */
 export type RelationKind = 'passage' | 'work' | 'reference' | 'topic'
 
+/** The kinds of relation, strongest first: how related Concepts and the map's lines are ranked. */
+export const RELATION_STRENGTH: readonly RelationKind[] = ['passage', 'work', 'reference', 'topic']
+
 /** A related Concept, with each fact that relates it, strongest first. */
 export interface RelatedConcept extends ConceptCard {
   reasons: readonly { kind: RelationKind; text: string }[]

@@ -8,8 +8,9 @@ import {
   stands,
   writeSelection,
 } from '@/components/map/filter'
+import { KINDS } from '@/components/map/kinds'
 import { layoutMap, type MapLayout } from '@/components/map/layout'
-import type { ConceptGraph, ConceptGraphEdge } from '@/content'
+import { RELATION_STRENGTH, type ConceptGraph, type ConceptGraphEdge } from '@/content'
 
 // Front-end-site ticket 12: the Concept map's layout, worked out while the site builds (the
 // browser runs none). The seam is the pure layout module: a graph and its topics in, the plate's
@@ -114,14 +115,14 @@ describe('layoutMap', () => {
         kind: 'passage',
         reasons: ['Both quote Yoga Sūtra 2.30', 'Both quote Yoga Sūtra 2.32'],
       },
+      { source: 'atman', target: 'jiva', kind: 'work', reasons: ['Both quote the Gītā'] },
+      { source: 'jiva', target: 'satya', kind: 'work', reasons: ['Both quote the Gītā'] },
       {
         source: 'citta',
         target: 'vikshepa',
         kind: 'reference',
         reasons: ['Both cite Smith (2018)'],
       },
-      { source: 'atman', target: 'jiva', kind: 'work', reasons: ['Both quote the Gītā'] },
-      { source: 'jiva', target: 'satya', kind: 'work', reasons: ['Both quote the Gītā'] },
     ])
     expect(new Set(map.connections.map(({ id }) => id)).size).toBe(5)
   })
@@ -232,5 +233,11 @@ describe('the map’s filters', () => {
     expect(countText(8, 74)).toBe('Showing 8 of 74 connections')
     expect(countText(1, 74)).toBe('Showing 1 of 74 connections')
     expect(countText(0, 74)).toBe('No connection matches these filters')
+  })
+})
+
+describe('the kinds of connection', () => {
+  it('come in the content module’s order of strength, topics left out', () => {
+    expect(KINDS).toEqual(RELATION_STRENGTH.filter((kind) => kind !== 'topic'))
   })
 })
