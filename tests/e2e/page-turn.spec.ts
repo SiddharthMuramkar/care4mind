@@ -1,5 +1,8 @@
+import type { Page } from '@playwright/test'
+
 import { expectNoAxeViolations } from './axe'
 import { expect, gotoReady, test } from './fixtures'
+import { logoLotus, moving } from './lotuses'
 import {
   expectPageTurned,
   pageTurns,
@@ -51,7 +54,7 @@ test("a Concept card's title flies into the Concept page's heading as the page t
   expect(along, 'it flies between them').toBeLessThan(1)
 })
 
-test('the header stays put while the page turns', async ({ page }) => {
+test('the header stays put while the page turns, its lotus breathing on', async ({ page }) => {
   await recordPageTurns(page, { hold: true })
   await gotoReady(page, '/')
   const card = page.getByRole('link', { name: 'Read about Vikṣepa' })
@@ -60,15 +63,35 @@ test('the header stays put while the page turns', async ({ page }) => {
   // The page turns once the next page is ready: wait until it has started, held half-way.
   // (pageTurns alone would return at once, before anything has been recorded.)
   await expect.poll(async () => (await pageTurns(page)).length).toBe(1)
-  // Half-way through the turn: the header looks exactly as it does once the page is still.
+
+  // Half-way through the turn the lotus breathes on in the header's layer.
+  expect(await moving(logoLotus(page)), 'the lotus breathes through the turn').toBe(true)
+
+  // The header beside the lotus looks exactly as it does once the page is still.
   const header = page.getByRole('banner')
-  const box = (await header.boundingBox()) ?? undefined
-  const midTurn = await page.screenshot({ clip: box })
+  const clips = await headerBesideTheLotus(page)
+  const shoot = () => Promise.all(clips.map((clip) => page.screenshot({ clip })))
+  const midTurn = await shoot()
   await releasePageTurn(page)
   await expect(page.getByRole('heading', { level: 1 })).toContainText('Vikṣepa')
   await expect(header).toBeVisible()
-  expect(await page.screenshot({ clip: box })).toEqual(midTurn)
+  expect(await shoot()).toEqual(midTurn)
 })
+
+/**
+ * The header either side of its lotus, as screenshot clips. The lotus breathes, and a page turn's
+ * layer covers a screenshot's mask.
+ */
+async function headerBesideTheLotus(page: Page) {
+  const header = await page.getByRole('banner').boundingBox()
+  const lotus = await logoLotus(page).boundingBox()
+  if (!header || !lotus) throw new Error('the header and its lotus must be on screen')
+  const afterLotus = lotus.x + lotus.width
+  return [
+    { ...header, width: lotus.x - header.x },
+    { ...header, x: afterLotus, width: header.x + header.width - afterLotus },
+  ]
+}
 
 test('links in the header change page at once, without turning it', async ({ page }) => {
   await recordPageTurns(page)
