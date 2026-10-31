@@ -4,10 +4,9 @@ import { contentGraph, type ContentGraph } from '@/content/graph'
 import { CONTENT_KINDS, type ContentRecord, type RecordOf } from '@/content/schema'
 import { localSource } from '@/content/source'
 
-// Rules that can only pass once all of content v1 has arrived (settled rule 11). The census
-// tickets landed References before the Concepts that cite them, and ticket 01 landed five topics
-// with one Concept between them, so ticket 01 wrote each check below switched off. Ticket 12,
-// the fidelity sweep, switched them on once the migration was complete: from here on they hold.
+// The migration's counts and lists. They guard the carried-over content until the client signs
+// off, and verify runs them. They are not part of pnpm check: a new record must not have to
+// edit them.
 
 /** The number of glossary entries ticket 05 records in its Comments, confirmed by ticket 12. */
 const GLOSSARY_ENTRIES = 78
@@ -46,34 +45,6 @@ function ofKind<K extends ContentRecord['kind']>(kind: K): RecordOf<K>[] {
 }
 
 describe('content v1, complete', () => {
-  it('gives every topic a Concept', () => {
-    const empty = ofKind('topic')
-      .filter((topic) => graph.conceptsInTopic(topic.slug).primary.length === 0)
-      .map((topic) => topic.slug)
-    expect(empty).toEqual([])
-  })
-
-  it('has every Reference cited by a record', () => {
-    const uncited = ofKind('reference')
-      .filter((reference) => graph.citedBy(reference.id).length === 0)
-      .map((reference) => reference.id)
-    expect(uncited).toEqual([])
-  })
-
-  it('has every passage quoted', () => {
-    const unquoted = ofKind('passage')
-      .filter((passage) => graph.quotedIn(passage.id).length === 0)
-      .map((passage) => passage.id)
-    expect(unquoted).toEqual([])
-  })
-
-  it('gives every work a passage', () => {
-    const empty = ofKind('work')
-      .filter((work) => !ofKind('passage').some((passage) => passage.work === work.slug))
-      .map((work) => work.slug)
-    expect(empty).toEqual([])
-  })
-
   it('holds 19 Concepts', () => {
     expect(ofKind('concept')).toHaveLength(19)
   })

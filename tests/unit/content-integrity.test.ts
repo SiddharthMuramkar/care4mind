@@ -17,9 +17,9 @@ import {
 import { localSource } from '@/content/source'
 import { isNormalisedSanskrit } from '@/lib/sanskrit'
 
-// Every content rule of the content-v1 spec (Testing Decisions → Integrity), run over every real
-// record, read through the content source. They hold from ticket 01 on: a record that breaks one
-// fails CI. Rules that can only pass once all content has arrived are in content-completeness.
+// Every rule that holds for any content, run over every real record. A record that breaks one
+// fails CI. The migration's counts and per-record restatements are the fidelity suite, which
+// verify runs and CI does not.
 
 let records: ContentRecord[] = []
 let graph: ContentGraph
@@ -79,6 +79,53 @@ function provenancesOf(record: ContentRecord): Provenance[] {
   if (record.kind === 'topic') return record.intro ? [record.intro.provenance] : []
   return [record.provenance]
 }
+
+describe('records', () => {
+  it('asks the Psychology expert about every Questionnaire that has no purpose', () => {
+    const unasked = ofKind('questionnaire').filter(
+      ({ purpose, provenance }) =>
+        purpose === undefined &&
+        !provenance.flags.some(
+          (flag) => flag.for === 'psychology-expert' && /\bpurpose\b/.test(flag.note),
+        ),
+    )
+    expect(unasked.map(({ slug }) => slug)).toEqual([])
+  })
+
+  it('names each Concept by a spelling of its headword, or by its English title', () => {
+    const slugOf = (text: string) =>
+      text
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-|-$/g, '')
+    const unexplained = ofKind('concept').filter(({ slug, name }) => {
+      const spellings = name.term ? name.term.ascii : [name.english ?? '']
+      // The page writes only the plural; the slug is the singular.
+      const written = slug === 'chittabhumi' ? 'chittabhumis' : slug
+      return !spellings.map(slugOf).includes(written)
+    })
+    expect(unexplained.map(({ slug }) => slug)).toEqual([])
+  })
+
+  it('flags a record whose sources are not pages of the current site', () => {
+    const elsewhere = records.filter((record) =>
+      provenancesOf(record).some(({ sources }) =>
+        sources.every(({ url }) => !url.startsWith('https://care4mind.org/')),
+      ),
+    )
+    const unflagged = elsewhere.filter((record) =>
+      provenancesOf(record).some(
+        ({ flags }) =>
+          !flags.some(
+            (flag) =>
+              flag.for === 'research-editor' &&
+              /not from a page of the current site/.test(flag.note),
+          ),
+      ),
+    )
+    expect(unflagged.map(nameOf)).toEqual([])
+  })
+})
 
 describe('text', () => {
   it('is NFC everywhere, with anusvara written ṃ, never ṁ', () => {
@@ -236,6 +283,34 @@ describe('links', () => {
         : [`${concept.slug} has neither an IAST term nor an English name`]),
     ])
     expect(problems).toEqual([])
+  })
+
+  it('gives every topic a Concept', () => {
+    const empty = ofKind('topic')
+      .filter((topic) => graph.conceptsInTopic(topic.slug).primary.length === 0)
+      .map((topic) => topic.slug)
+    expect(empty).toEqual([])
+  })
+
+  it('has every Reference cited by a record', () => {
+    const uncited = ofKind('reference')
+      .filter((reference) => graph.citedBy(reference.id).length === 0)
+      .map((reference) => reference.id)
+    expect(uncited).toEqual([])
+  })
+
+  it('has every passage quoted', () => {
+    const unquoted = ofKind('passage')
+      .filter((passage) => graph.quotedIn(passage.id).length === 0)
+      .map((passage) => passage.id)
+    expect(unquoted).toEqual([])
+  })
+
+  it('gives every work a passage', () => {
+    const empty = ofKind('work')
+      .filter((work) => !ofKind('passage').some((passage) => passage.work === work.slug))
+      .map((work) => work.slug)
+    expect(empty).toEqual([])
   })
 
   it('make a Concept’s Questionnaire list that Concept among its concepts', () => {

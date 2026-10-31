@@ -515,8 +515,19 @@ function formatResults(results) {
 const USAGE = `Usage: node scripts/content/verify.mjs [kind | kind/id ...]
 
 Checks every string in the records named (all of them when none is) against the saved copies
-of their source pages, read from $CARE4MIND_CAPTURES. Exit code 0 when every string is found,
-1 when one is on none of its pages, 2 when it can't run. Kinds: ${Object.keys(KIND_FOLDERS).join(', ')}.`
+of their source pages, read from $CARE4MIND_CAPTURES, then runs the fidelity suite. Exit code 0
+when every string is found and the suite passes, 1 when a string is missing or the suite fails,
+2 when it can't run. Kinds: ${Object.keys(KIND_FOLDERS).join(', ')}.`
+
+/** The migration's counts and restatements. A fixture repo (--root) has none of that content. */
+function fidelityStatus(root) {
+  const result = spawnSync(
+    process.execPath,
+    [join(root, 'node_modules/.bin/vitest'), 'run', '--config', 'vitest.fidelity.config.ts'],
+    { cwd: root, stdio: 'inherit' },
+  )
+  return result.status === 0 ? 0 : (result.status ?? 2)
+}
 
 async function main(args) {
   if (args.includes('--help') || args.includes('-h')) {
@@ -528,7 +539,10 @@ async function main(args) {
   const records = sortRecords(selectRecords(await loadRecords(root), rest))
   const results = records.map((record) => checkRecord(record, captures))
   process.stdout.write(formatResults(results))
-  return results.some((result) => result.status === 'failed') ? 1 : 0
+  const textFailed = results.some((result) => result.status === 'failed') ? 1 : 0
+  if (args.includes('--root')) return textFailed
+  const fidelity = fidelityStatus(root)
+  return fidelity === 0 ? textFailed : fidelity
 }
 
 await runTool(import.meta, main)

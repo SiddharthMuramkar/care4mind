@@ -57,7 +57,7 @@ These are judgement calls, so review checks them against the diff, in the codeba
 
 ## Where a change goes
 
-- **A record of an existing kind:** `pnpm content:new <kind> <id>` writes a template that compiles. Fill it in, then run `pnpm check`. Today that check fails on tests that pin record counts (#45).
+- **A record of an existing kind:** `pnpm content:new <kind> <id>` writes a template that compiles. Fill it in, then run `pnpm check`. The migration's counts live in the fidelity suite, which `verify` runs.
 - **A link field:** the record schema, the graph's link check, then the view that shows it.
 - **A content kind:** the compiler finds only some of these places, so work through every step:
   1. The record schema: its type, its `define…` helper and its kind's folder.
@@ -102,7 +102,6 @@ The code still holds these patterns, and new code doesn't copy them. Each line n
 - Comments that cite ticket numbers, decision codes (D01–D21), design codes (such as B6) or spec names. The documents they point at were deleted in `bfdbff0`. State the reason instead (#38).
 - Scripts that send authors to `docs/agents/content-migration.md`, which no longer exists (#37).
 - `Flag.ticket` numbers on records. They come from a deleted local tracker and point at the wrong GitHub issues (#39).
-- Tests that pin how many records exist (#45).
 - The "Devanagari first" stubs, which render nothing, though the proposals page calls the feature built (#43).
 - Settings that look load-bearing but do nothing here: the root layout's `title.template`, since every page sets an absolute title (#64), and `typedRoutes`, which can't check paths that end in a slash (#55). The checks that do hold links true are the `hrefFor()` lint rule and the browser crawler.
 

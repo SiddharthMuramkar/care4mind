@@ -5,7 +5,7 @@ import robots from '@/app/robots'
 import sitemap from '@/app/sitemap'
 import { redirects } from '@/config/redirects'
 import { site as config } from '@/config/site'
-import { site } from '@/content'
+import { site, topics } from '@/content'
 import { metadataFor } from '@/lib/metadata'
 
 import nextConfig from '../../next.config'
@@ -32,10 +32,13 @@ describe('a page’s metadata (D19)', () => {
   })
 
   it('describes a topic, which has no summary, by what its page holds', async () => {
+    const topic = await topics.get('mind')
+    if (!topic) throw new Error('Mind has no page')
+    const concepts = `${topic.conceptCount} ${topic.conceptCount === 1 ? 'Concept' : 'Concepts'}`
+    const quote = topic.conceptCount === 1 ? 'it quotes' : 'they quote'
     expect(await metadataFor('/topics/mind/')).toEqual({
       title: { absolute: 'Mind: states and obstacles · Care4Mind' },
-      description:
-        '5 Concepts in the topic “Mind: states and obstacles”, and the verses they quote.',
+      description: `${concepts} in the topic “Mind: states and obstacles”, and the verses ${quote}.`,
       alternates: { canonical: `${ORIGIN}/topics/mind/` },
     })
   })
