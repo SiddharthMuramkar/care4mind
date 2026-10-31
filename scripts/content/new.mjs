@@ -21,7 +21,8 @@ const USAGE = `Usage: pnpm content:new <kind> <id>
 Kinds: ${Object.keys(KIND_FOLDERS).join(', ')}.`
 
 const SLUG = /^[a-z0-9]+(?:-[a-z0-9]+)*$/
-const LOCATOR = /^\d+(?:\.\d+)*$/
+// No leading zeros: the locator becomes the number literals of `order`, where 05 is not a number.
+const LOCATOR = /^(?:0|[1-9]\d*)(?:\.(?:0|[1-9]\d*))*$/
 
 /** Why an id breaks the id rules for its kind (D02, settled rule 15), or nothing if it doesn't. */
 function idProblem(kind, id) {
