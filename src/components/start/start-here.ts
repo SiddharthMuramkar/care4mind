@@ -1,5 +1,5 @@
 /**
- * The Start here page's own record (Proposal, D20): every word drafted for the new site, for the
+ * The Start here page's own record: every word drafted for the new site, for the
  * Research editor to check, as its provenance says. The help line is the homepage record's.
  */
 import type { ProvenanceView } from '@/content'

@@ -43,7 +43,7 @@ const START_HERE: Proposal = {
   name: 'Start here',
   built: true,
   adds: 'A page for a first-time reader, linked from the header: what Indian psychology is, how the site is organised, how to read Sanskrit names, three Concepts to read first, and where to call for help. Every word of it is drafted, for the Research editor to check.',
-  speed: 'One page of its own, with no script; the header gains one link.',
+  speed: 'One page of its own; the header and the Menu gain one small link.',
   upkeep:
     'Its three first reads and its pronunciation notes are written by hand, so a renamed Concept or a changed spelling means editing it.',
   off: 'One setting, FEATURE_START_HERE=0, with no code change: the page and its header link go. The live site leaves it off until you approve it.',
