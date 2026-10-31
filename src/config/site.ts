@@ -6,13 +6,14 @@
  * `X-Robots-Tag` header (next.config.ts). Flip it only as part of the launch
  * cutover, never for a preview.
  *
- * `url` is the production origin, which the brief keeps (D19). Canonical
- * addresses and the sitemap are built on it, so they name the real site even
- * on a preview. Nothing requests it.
+ * Canonical addresses and the sitemap are built on `url`, so they name one site
+ * even on a preview. Until launch it is www.care4mind.xyz, the host the bare
+ * domain redirects to; care4mind.org returns at launch, together with
+ * `indexable`. Nothing requests it.
  */
 export const site = {
   name: 'Care4Mind',
   tagline: 'Indic ways to invoke a perfect balanced mind',
-  url: 'https://care4mind.org',
+  url: 'https://www.care4mind.xyz',
   indexable: false,
 } as const
