@@ -3,12 +3,13 @@ import { site } from '@/config/site'
 import { expectNoAxeViolations } from './axe'
 import { unfinishedDrawings } from './drawings'
 import { expect, gotoReady, scrollsSideways, test } from './fixtures'
+import { breathes, lotuses, moving } from './lotuses'
 import { at, MISSING, ROUTES_IN_SCOPE } from './routes'
 
 // FR-06, NFR-01, NFR-04: every route in the registry, at 360, 768 and 1440 px. One visit runs
 // every check, each soft, so a run names every failure: the route, the width and the rule.
 for (const route of ROUTES_IN_SCOPE) {
-  test(`${route.path} loads with one h1, fits the screen, passes axe, stays out of search engines and names itself`, async ({
+  test(`${route.path} loads with one h1, fits the screen, passes axe, stays out of search engines, names itself and has its lotuses breathe`, async ({
     page,
   }) => {
     const where = at(page, route.path)
@@ -79,6 +80,16 @@ for (const route of ROUTES_IN_SCOPE) {
     })
     expect.soft(repeated, `${where}: ids used twice`).toEqual([])
 
+    // Every lotus is decoration, and breathes.
+    const onThisPage = await lotuses(page).all()
+    expect.soft(onThisPage.length, `${where}: a lotus`).toBeGreaterThan(0)
+    for (const lotus of onThisPage) {
+      await expect
+        .soft(lotus, `${where}: a lotus hidden from assistive technology`)
+        .toHaveAttribute('aria-hidden', 'true')
+      expect.soft(await breathes(lotus), `${where}: a lotus that breathes`).toBe(true)
+    }
+
     expect.soft(errors, `${where}: page errors`).toEqual([])
     await expectNoAxeViolations(page, `${where}: axe at WCAG 2.2 AA`)
   })
@@ -96,7 +107,9 @@ test.describe('404 page', () => {
     await expectNoAxeViolations(page)
   })
 
-  test('shows the Fleuron, still and hidden from assistive technology', async ({ page }) => {
+  test('shows the Fleuron, whole and breathing, hidden from assistive technology', async ({
+    page,
+  }) => {
     await gotoReady(page, MISSING)
     const main = page.getByRole('main')
     const fleuron = main.locator('svg')
@@ -104,11 +117,8 @@ test.describe('404 page', () => {
     await expect(fleuron).toBeVisible()
     await expect(fleuron).toHaveAttribute('aria-hidden', 'true')
     await expect(main.getByRole('img')).toHaveCount(0)
-    // Still: nothing draws it in, and every stroke is whole.
-    expect(
-      await fleuron.evaluate((element) => element.getAnimations({ subtree: true }).length),
-    ).toBe(0)
-    expect(await unfinishedDrawings(page)).toEqual([])
+    expect(await moving(fleuron), 'it breathes').toBe(true)
+    expect(await unfinishedDrawings(page), 'every stroke whole as it breathes').toEqual([])
   })
 })
 
