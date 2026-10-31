@@ -788,17 +788,29 @@ describe('the settings that wire it up', () => {
     return command
   }
 
-  const runHook = (tool: string, input: object, projectDir: string) =>
-    spawnSync('/bin/sh', ['-c', commandFor(tool)], {
+  const runHook = (
+    tool: string,
+    input: object,
+    projectDir: string | undefined,
+    envOverride: Record<string, string> = {},
+  ) => {
+    const cwd = (input as { cwd?: unknown }).cwd
+    const env: NodeJS.ProcessEnv = { ...process.env, ...envOverride }
+    if (projectDir === undefined) delete env.CLAUDE_PROJECT_DIR
+    else env.CLAUDE_PROJECT_DIR = projectDir
+    return spawnSync('/bin/sh', ['-c', commandFor(tool)], {
       input: JSON.stringify({ tool_name: tool, ...input }),
       encoding: 'utf8',
-      env: { ...process.env, CLAUDE_PROJECT_DIR: projectDir },
+      cwd: typeof cwd === 'string' ? cwd : resolve('.'),
+      env,
       timeout: 20_000,
     })
+  }
 
   it('runs the guard on Bash and on every editing tool', () => {
     for (const tool of ['Bash', 'Edit', 'Write', 'NotebookEdit'])
-      expect(commandFor(tool)).toContain('guard.mjs')
+      expect(commandFor(tool)).toContain('run-guard.sh')
+    expect(readFileSync('.claude/hooks/run-guard.sh', 'utf8')).toContain('guard.mjs')
   })
 
   it('denies a merge through the configured command', () => {
@@ -813,6 +825,37 @@ describe('the settings that wire it up', () => {
   it('asks when the guard file is missing, instead of letting the call through', () => {
     const result = runHook('Bash', { tool_input: { command: 'ls' }, cwd: '/' }, empty)
     expect(JSON.parse(result.stdout).hookSpecificOutput.permissionDecision).toBe('ask')
+  })
+
+  it('finds the guard from the checkout when CLAUDE_PROJECT_DIR is stale or unset', () => {
+    for (const projectDir of [empty, undefined]) {
+      const result = runHook(
+        'Bash',
+        { tool_input: { command: 'ls' }, cwd: resolve('.') },
+        projectDir,
+      )
+      expect(result.status).toBe(0)
+      expect(result.stdout).toBe('')
+    }
+  })
+
+  it('finds node when it is not on the hook PATH', () => {
+    const home = mkdtempSync(join(tmpdir(), 'guard-home-'))
+    try {
+      const bin = join(home, '.local', 'share', 'fnm', 'aliases', 'default', 'bin')
+      mkdirSync(bin, { recursive: true })
+      symlinkSync(process.execPath, join(bin, 'node'))
+      const result = runHook(
+        'Bash',
+        { tool_input: { command: 'ls' }, cwd: resolve('.') },
+        resolve('.'),
+        { PATH: '/usr/bin:/bin', HOME: home },
+      )
+      expect(result.status).toBe(0)
+      expect(result.stdout).toBe('')
+    } finally {
+      rmSync(home, { recursive: true, force: true })
+    }
   })
 
   it('also denies the plain forms through Claude Code permissions', () => {

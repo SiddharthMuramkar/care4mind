@@ -22,7 +22,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "test -f \"$CLAUDE_PROJECT_DIR/.claude/hooks/guard.mjs\" && node \"$CLAUDE_PROJECT_DIR/.claude/hooks/guard.mjs\" || printf '%s' '{\"hookSpecificOutput\":{\"hookEventName\":\"PreToolUse\",\"permissionDecision\":\"ask\",\"permissionDecisionReason\":\"The repo guard (.claude/hooks/guard.mjs) is missing or did not start, so this call needs the developer to approve it.\"}}'"
+            "command": "PATH=\"$PATH:/usr/bin:/bin:/usr/local/bin:/opt/homebrew/bin\"; r=; for d in \"$(git rev-parse --show-toplevel 2>/dev/null)\" \"$CLAUDE_PROJECT_DIR\" \"$(c=$(git rev-parse --path-format=absolute --git-common-dir 2>/dev/null) && dirname \"$c\")\"; do if [ -n \"$d\" ] && [ -f \"$d/.claude/hooks/run-guard.sh\" ]; then r=\"$d/.claude/hooks/run-guard.sh\"; break; fi; done; if [ -z \"$r\" ]; then r=$(git worktree list --porcelain 2>/dev/null | sed -n 's/^worktree //p' | while IFS= read -r w; do if [ -f \"$w/.claude/hooks/run-guard.sh\" ]; then printf '%s' \"$w/.claude/hooks/run-guard.sh\"; break; fi; done); fi; if [ -n \"$r\" ]; then exec sh \"$r\"; else printf '%s' '{\"hookSpecificOutput\":{\"hookEventName\":\"PreToolUse\",\"permissionDecision\":\"ask\",\"permissionDecisionReason\":\"The repo guard launcher (.claude/hooks/run-guard.sh) was not found in this checkout, CLAUDE_PROJECT_DIR, the main checkout or any worktree, so this call needs the developer to approve it.\"}}'; fi"
           }
         ]
       },
@@ -31,7 +31,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "test -f \"$CLAUDE_PROJECT_DIR/.claude/hooks/guard.mjs\" && node \"$CLAUDE_PROJECT_DIR/.claude/hooks/guard.mjs\" || printf '%s' '{\"hookSpecificOutput\":{\"hookEventName\":\"PreToolUse\",\"permissionDecision\":\"ask\",\"permissionDecisionReason\":\"The repo guard (.claude/hooks/guard.mjs) is missing or did not start, so this call needs the developer to approve it.\"}}'"
+            "command": "PATH=\"$PATH:/usr/bin:/bin:/usr/local/bin:/opt/homebrew/bin\"; r=; for d in \"$(git rev-parse --show-toplevel 2>/dev/null)\" \"$CLAUDE_PROJECT_DIR\" \"$(c=$(git rev-parse --path-format=absolute --git-common-dir 2>/dev/null) && dirname \"$c\")\"; do if [ -n \"$d\" ] && [ -f \"$d/.claude/hooks/run-guard.sh\" ]; then r=\"$d/.claude/hooks/run-guard.sh\"; break; fi; done; if [ -z \"$r\" ]; then r=$(git worktree list --porcelain 2>/dev/null | sed -n 's/^worktree //p' | while IFS= read -r w; do if [ -f \"$w/.claude/hooks/run-guard.sh\" ]; then printf '%s' \"$w/.claude/hooks/run-guard.sh\"; break; fi; done); fi; if [ -n \"$r\" ]; then exec sh \"$r\"; else printf '%s' '{\"hookSpecificOutput\":{\"hookEventName\":\"PreToolUse\",\"permissionDecision\":\"ask\",\"permissionDecisionReason\":\"The repo guard launcher (.claude/hooks/run-guard.sh) was not found in this checkout, CLAUDE_PROJECT_DIR, the main checkout or any worktree, so this call needs the developer to approve it.\"}}'; fi"
           }
         ]
       }
