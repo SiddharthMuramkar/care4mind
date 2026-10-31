@@ -26,22 +26,6 @@ test(`pressing "Explore Concepts" answers within ${BUDGET} ms on a slow phone`, 
   expect(quickest, `visits: ${visits.join(', ')} ms`).toBeLessThan(BUDGET)
 })
 
-test(`pressing the "Devanagari first" switch answers within ${BUDGET} ms on a slow phone, each way`, async ({
-  page,
-}) => {
-  const toggle = page.getByRole('button', { name: 'Devanagari first' })
-  const { quickest, visits } = await visitLatency(BUDGET, async () => {
-    await openOnSlowPhone(page, '/concepts/vikshepa/')
-    const latencies: number[] = []
-    for (const pressed of ['true', 'false']) {
-      latencies.push(await latencyOf(page, () => toggle.click()))
-      await expect(toggle).toHaveAttribute('aria-pressed', pressed)
-    }
-    return latencies
-  })
-  expect(quickest, `visits: ${visits.join(', ')} ms`).toBeLessThan(BUDGET)
-})
-
 test(`pressing the opening lotus answers within ${BUDGET} ms on a slow phone`, async ({ page }) => {
   const lotus = page.getByRole('main').locator('svg[data-lotus]').first()
   const { quickest, visits } = await visitLatency(BUDGET, async () => {

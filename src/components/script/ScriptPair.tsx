@@ -18,10 +18,8 @@ export interface ScriptPairProps {
 }
 
 /**
- * Slot, added by front-end-site ticket 04 and filled by ticket 13: a term's two spellings,
- * always IAST then Devanagari in the DOM, so what a screen reader hears never changes, each
- * with its language tag (WCAG 3.1.2). Ticket 13 orders them on screen from `html[data-script]`
- * with CSS alone; this stub shows them in DOM order.
+ * The one place a term's two spellings are drawn: IAST, then Devanagari, each with its language
+ * tag (WCAG 3.1.2), in the same order on screen and to a screen reader.
  */
 export function ScriptPair({
   iast,

@@ -12,14 +12,11 @@ export interface Features {
   questionnairePreview: boolean
   /** Proposal: the Concept map at /concepts/map/. */
   conceptMap: boolean
-  /** Proposal: the site-wide "Devanagari first" setting. */
-  devanagariFirst: boolean
 }
 
 const VARIABLES = {
   questionnairePreview: 'FEATURE_QUESTIONNAIRE_PREVIEW',
   conceptMap: 'FEATURE_CONCEPT_MAP',
-  devanagariFirst: 'FEATURE_DEVANAGARI_FIRST',
 } as const satisfies Record<keyof Features, string>
 
 type Environment = Readonly<Record<string, string | undefined>>
@@ -37,14 +34,13 @@ export function readFeatures(env: Environment): Features {
   return {
     questionnairePreview: flag(VARIABLES.questionnairePreview),
     conceptMap: flag(VARIABLES.conceptMap),
-    devanagariFirst: flag(VARIABLES.devanagariFirst),
   }
 }
 
 /** This build's flags. */
 export const features: Features = readFeatures(process.env)
 
-/** The proposals page is on while either proposal is: it has no flag of its own. */
+/** The proposals page is on while the Concept map is, its one built proposal: it has no flag of its own. */
 export function proposalsPageOn(flags: Features = features): boolean {
-  return flags.conceptMap || flags.devanagariFirst
+  return flags.conceptMap
 }

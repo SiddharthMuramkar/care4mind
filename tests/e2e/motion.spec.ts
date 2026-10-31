@@ -9,12 +9,11 @@ import {
 } from './drawings'
 import { expect, gotoReady, test } from './fixtures'
 import { breathes, lotuses, lotusStarts } from './lotuses'
-import { inPageTransitions, pageTurns, prefetched, recordPageTurns } from './page-turns'
+import { pageTurns, prefetched, recordPageTurns } from './page-turns'
 import { inkSpreadsOn, recordInkSpreads } from './presses'
 import { READING_PAGES, readingThread, readTo } from './reading'
 import { at, MISSING, ROUTES_IN_SCOPE } from './routes'
 import { scrollPath } from './scrolling'
-import { knobPath, recordScriptedAnimations } from './switches'
 
 /** Animations still moving: anything running longer than the 1 ms the reduced-motion rule allows. */
 async function movingAnimations(page: Page) {
@@ -230,27 +229,6 @@ for (const { from, link, to } of [
     expect(await movingAnimations(page)).toEqual([])
   })
 }
-
-test('the "Devanagari first" switch still swaps the scripts, at once, with reduced motion', async ({
-  page,
-}) => {
-  await recordPageTurns(page)
-  await recordScriptedAnimations(page)
-  await gotoReady(page, '/concepts/vikshepa/')
-  const toggle = page.getByRole('button', { name: 'Devanagari first' })
-  const spellings = page.getByRole('heading', { level: 1 }).locator('[lang]')
-  await expect(spellings.first()).toHaveAttribute('lang', 'sa-Latn')
-
-  const knob = await knobPath(toggle, () => toggle.click())
-  expect(knob, 'the knob jumps across, from one end of the track to the other').toHaveLength(2)
-  await expect(toggle).toHaveAttribute('aria-pressed', 'true')
-  await expect(spellings.first()).toHaveAttribute('lang', 'sa-Deva')
-  await expect(toggle).toBeFocused()
-  for (const swap of await inPageTransitions(page)) {
-    expect(swap.flights, 'the spellings swap without flying').toEqual([])
-  }
-  expect(await movingAnimations(page)).toEqual([])
-})
 
 for (const { path, name } of READING_PAGES) {
   test(`${name} has no reading thread, with reduced motion`, async ({ page }) => {

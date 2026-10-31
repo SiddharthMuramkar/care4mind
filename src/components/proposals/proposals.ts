@@ -1,12 +1,12 @@
 /**
- * What /proposals/ lists for the Project owner's sign-off (D20): the two built proposals, each
- * only while its flag is on, and one described but not built. Interface text: each entry says
+ * What /proposals/ lists for the Project owner's sign-off (D20): the built proposal, only while
+ * its flag is on, and one described but not built. Interface text: each entry says
  * what it adds, what it costs in speed and upkeep, and how it is switched off.
  */
 import type { Features } from '@/config/features'
 
 export interface Proposal {
-  key: 'concept-map' | 'devanagari-first' | 'audio-pronunciation'
+  key: 'concept-map' | 'audio-pronunciation'
   name: string
   built: boolean
   adds: string
@@ -26,18 +26,6 @@ const CONCEPT_MAP: Proposal = {
   off: 'One setting, FEATURE_CONCEPT_MAP=0, with no code change: the map and every link to it go. The live site leaves it off until you approve it.',
 }
 
-const DEVANAGARI_FIRST: Proposal = {
-  key: 'devanagari-first',
-  name: 'Devanagari first, on every page',
-  built: true,
-  adds: 'One choice puts Devanagari before the transliteration wherever a Sanskrit word shows in both scripts, on every page, and the browser remembers it. Screen readers hear the same words in the same order either way.',
-  speed:
-    'A script of about 200 bytes in each page’s head sets the order before the page first shows, so nothing flashes or moves.',
-  upkeep:
-    'Every page that shows a word in both scripts has to set it with the shared part that orders them, new pages included.',
-  off: 'One setting, FEATURE_DEVANAGARI_FIRST=0, with no code change: the header switch and the head script go, and the switch on a Concept page changes that page only, as before. The live site leaves it off until you approve it.',
-}
-
 const AUDIO: Proposal = {
   key: 'audio-pronunciation',
   name: 'Audio pronunciation',
@@ -46,14 +34,10 @@ const AUDIO: Proposal = {
   speed: 'Nothing until it is pressed: each recording would load only when played.',
   upkeep:
     'A recording of every Sanskrit word on the site, made and checked by someone who knows the pronunciation, and another for each word added later.',
-  off: 'Nothing to switch off: it is described, not built. Built, it would get a setting of its own, like the two above.',
+  off: 'Nothing to switch off: it is described, not built. Built, it would get a setting of its own, like the one above.',
 }
 
 /** The proposals this build lists, in order. */
 export function proposalsFor(flags: Features): Proposal[] {
-  return [
-    ...(flags.conceptMap ? [CONCEPT_MAP] : []),
-    ...(flags.devanagariFirst ? [DEVANAGARI_FIRST] : []),
-    AUDIO,
-  ]
+  return [...(flags.conceptMap ? [CONCEPT_MAP] : []), AUDIO]
 }

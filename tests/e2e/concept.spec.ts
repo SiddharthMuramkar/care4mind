@@ -49,6 +49,11 @@ test.describe('Concept page', () => {
     expect(await page.locator('main [lang="sa-Deva"]').count()).toBeGreaterThan(5)
   })
 
+  test('offers no "Devanagari first" switch, in the page or the header', async ({ page }) => {
+    await expect(page.getByRole('button', { name: /Devanagari first/i })).toHaveCount(0)
+    await expect(page.locator('body')).not.toContainText(/Devanagari first/i)
+  })
+
   test('shows the other spellings in a popover that keyboard users can close', async ({ page }) => {
     const trigger = page.getByRole('button', { name: 'Also spelled' })
     await trigger.click()
