@@ -108,6 +108,7 @@ export function pageRoutes(graph: ContentGraph, flags: Features): PageRoute[] {
 
   const routes: PageRoute[] = [
     fixed('home', 'home', 'Home'),
+    ...(flags.startHere ? [fixed('start', 'start', 'Start here', true)] : []),
     fixed('concepts', 'concepts', 'Concepts'),
     ...concepts.sort(byPath),
     ...(flags.conceptMap ? [fixed('concept-map', 'concept-map', 'Concept map', true)] : []),

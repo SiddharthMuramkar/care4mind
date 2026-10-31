@@ -1,12 +1,12 @@
 /**
- * What /proposals/ lists for the Project owner's sign-off (D20): the two built proposals, each
+ * What /proposals/ lists for the Project owner's sign-off (D20): the built proposals, each
  * only while its flag is on, and one described but not built. Interface text: each entry says
  * what it adds, what it costs in speed and upkeep, and how it is switched off.
  */
 import type { Features } from '@/config/features'
 
 export interface Proposal {
-  key: 'concept-map' | 'devanagari-first' | 'audio-pronunciation'
+  key: 'concept-map' | 'devanagari-first' | 'start-here' | 'audio-pronunciation'
   name: string
   built: boolean
   adds: string
@@ -38,6 +38,17 @@ const DEVANAGARI_FIRST: Proposal = {
   off: 'One setting, FEATURE_DEVANAGARI_FIRST=0, with no code change: the header switch and the head script go, and the switch on a Concept page changes that page only, as before. The live site leaves it off until you approve it.',
 }
 
+const START_HERE: Proposal = {
+  key: 'start-here',
+  name: 'Start here',
+  built: true,
+  adds: 'A page for a first-time reader, linked from the header: what Indian psychology is, how the site is organised, how to read Sanskrit names, three Concepts to read first, and where to call for help. Every word of it is drafted, for the Research editor to check.',
+  speed: 'One page of its own, with no script; the header gains one link.',
+  upkeep:
+    'Its three first reads and its pronunciation notes are written by hand, so a renamed Concept or a changed spelling means editing it.',
+  off: 'One setting, FEATURE_START_HERE=0, with no code change: the page and its header link go. The live site leaves it off until you approve it.',
+}
+
 const AUDIO: Proposal = {
   key: 'audio-pronunciation',
   name: 'Audio pronunciation',
@@ -54,6 +65,7 @@ export function proposalsFor(flags: Features): Proposal[] {
   return [
     ...(flags.conceptMap ? [CONCEPT_MAP] : []),
     ...(flags.devanagariFirst ? [DEVANAGARI_FIRST] : []),
+    ...(flags.startHere ? [START_HERE] : []),
     AUDIO,
   ]
 }

@@ -9,10 +9,15 @@ import { expectPageTurned, pageTurns, prefetched, recordPageTurns } from './page
 // both built proposals are listed, with audio pronunciation, described only, and nothing else.
 
 const PATH = hrefFor({ page: 'proposals' })
-const ENTRIES = ['Concept map', 'Devanagari first, on every page', 'Audio pronunciation']
+const ENTRIES = [
+  'Concept map',
+  'Devanagari first, on every page',
+  'Start here',
+  'Audio pronunciation',
+]
 
 test.describe('the proposals page', () => {
-  test('lists the three proposals and no others, each with its status, gains, costs and switch', async ({
+  test('lists the four proposals and no others, each with its status, gains, costs and switch', async ({
     page,
   }) => {
     await gotoReady(page, PATH)
@@ -20,7 +25,7 @@ test.describe('the proposals page', () => {
     await expect(entries.getByRole('heading', { level: 2 })).toHaveText(ENTRIES)
     await expect(
       entries.getByRole('paragraph').filter({ hasText: /^(Built|Described, not built)$/ }),
-    ).toHaveText(['Built', 'Built', 'Described, not built'])
+    ).toHaveText(['Built', 'Built', 'Built', 'Described, not built'])
     for (const entry of await entries.all())
       await expect(entry.getByRole('term')).toHaveText([
         'What it adds',
@@ -41,6 +46,7 @@ test.describe('the proposals page', () => {
     await expect(answers.getByRole('code')).toHaveText([
       'FEATURE_CONCEPT_MAP=0',
       'FEATURE_DEVANAGARI_FIRST=0',
+      'FEATURE_START_HERE=0',
     ])
     for (const answer of await answers.all()) {
       await expect(answer).toContainText(/One setting, FEATURE_\w+=0, with no code change/)
@@ -87,6 +93,39 @@ test.describe('the proposals page', () => {
 
   test('passes axe', async ({ page }) => {
     await gotoReady(page, PATH)
+    await expectNoAxeViolations(page)
+  })
+})
+
+// Start here (ticket 180): a proposal page for a first-time reader, linked from the header.
+const START = hrefFor({ page: 'start' })
+
+test.describe('Start here', () => {
+  test('the header links to it, and it explains the site, the sounds and where to begin', async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 1280, height: 800 })
+    await gotoReady(page, '/')
+    const link = page.getByRole('banner').getByRole('link', { name: 'Start here' })
+    await expect(link).toHaveAttribute('href', START)
+    await gotoReady(page, START)
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText('Start here')
+    const main = page.getByRole('main')
+    await expect(main.getByRole('heading', { level: 2 })).toHaveText([
+      'What Indian psychology is',
+      'How the site is organised',
+      'How to read Sanskrit names',
+      'Three first reads',
+      'If you need help',
+    ])
+    for (const slug of ['vikshepa', 'chittabhumi', 'sthitaprajna'])
+      await expect(main.locator(`a[href="/concepts/${slug}/"]`)).toHaveCount(1)
+    await expect(main).toContainText('not treatment')
+    await expect(main.locator('[data-help-line] a[href="tel:14416"]')).toHaveCount(1)
+  })
+
+  test('passes axe', async ({ page }) => {
+    await gotoReady(page, START)
     await expectNoAxeViolations(page)
   })
 })

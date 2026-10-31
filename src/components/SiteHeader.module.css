@@ -77,6 +77,26 @@
   text-decoration: none;
 }
 
+/* Start here, while its proposal is on: a quiet link beside the wordmark, from 30rem. */
+.home:has(+ .start) {
+  margin-inline-end: 0;
+}
+
+.start {
+  display: none;
+  margin-inline: 0.75rem auto;
+  color: var(--color-ink-muted);
+  font-size: 0.875rem;
+}
+
+@media (min-width: 30rem) {
+  .start {
+    display: inline-flex;
+    align-items: center;
+    min-height: 48px;
+  }
+}
+
 /*
  * The lotus, in vermilion. Its box runs 8 of its 72 units below the flower, room for the petals
  * to open. Drawn that much lower, the flower's base sits on the wordmark's baseline; taking that
