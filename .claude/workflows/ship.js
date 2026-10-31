@@ -1,7 +1,7 @@
 export const meta = {
   name: 'ship',
   description:
-    "Build a spec's tickets: one PR per ticket into main, each left open for the developer once its checks are green and every review thread is answered",
+    "Build a spec's tickets: one PR per ticket into main, each reviewed by a reviewer agent and left open for the developer once its checks are green and every review thread is answered",
   whenToUse:
     "After /to-tickets has published a spec's tickets as sub-issues of its spec issue. Rerun it after the developer merges, to build the tickets that were waiting. Args: { spec: <issue number>, builders?: 2, dryRun?: false }",
   phases: [
@@ -12,7 +12,8 @@ export const meta = {
     },
     {
       title: 'Build',
-      detail: 'one builder per ready ticket, each in its own worktree',
+      detail:
+        'one builder per ready ticket, each in its own worktree; a reviewer agent reviews each PR, and its builder answers the review',
       model: 'opus',
     },
     {
@@ -28,6 +29,8 @@ const REPO = 'SiddharthMuramkar/care4mind'
 const spec = Number(args?.spec)
 if (!Number.isInteger(spec) || spec < 1) throw new Error('Pass args: { spec: <spec issue number> }')
 const builders = Number(args?.builders ?? 2)
+if (!Number.isInteger(builders) || builders < 1)
+  throw new Error(`builders must be a whole number of at least 1, such as 2, not ${args?.builders}`)
 const startTag = `ship/spec-${spec}`
 
 // Workflow agents run light; the session that runs ship judges their results.
@@ -65,6 +68,15 @@ const OUTCOME = {
   },
   required: ['opened', 'ready', 'note'],
 }
+const REVIEW = {
+  type: 'object',
+  properties: {
+    posted: { type: 'boolean' },
+    comments: { type: 'integer' },
+    note: { type: 'string' },
+  },
+  required: ['posted', 'comments', 'note'],
+}
 const STARTED = {
   type: 'object',
   properties: { ok: { type: 'boolean' }, note: { type: 'string' } },
@@ -75,7 +87,7 @@ const frontier = (skip) =>
   agent(
     `Read-only: change nothing. Report the frontier of spec issue #${spec} in ${REPO}, using gh.
 - Its tickets are its sub-issues: gh api repos/${REPO}/issues/${spec}/sub_issues --paginate
-- A ticket is unblocked when every issue in gh api repos/${REPO}/issues/<number>/dependencies/blocked_by is closed. A blocker whose PR is open but not merged is not closed: the developer merges.
+- A ticket is unblocked when every issue in gh api repos/${REPO}/issues/<number>/dependencies/blocked_by is closed. A blocker closed as not planned counts as closed. A blocker whose PR is open but not merged is not closed: the developer merges.
 - A ticket's PR is an open PR whose body says it closes the ticket (gh pr list --state open --json number,body).
 - awaitingYou: open tickets whose PR has every check green (gh pr checks <pr>) and every review thread resolved or answered, each with its PR number.
 - ready: open, unblocked tickets labelled ready-for-agent and not needs-info, with no PR yet or with a PR that is red or has an unanswered thread${skip.length ? `, except #${skip.join(', #')}` : ''}.
@@ -84,21 +96,32 @@ const frontier = (skip) =>
     { label: 'frontier', phase: 'Build', schema: FRONTIER, ...LIGHT },
   )
 
+const LOST = 'the frontier agent ended twice without an answer'
+// An agent that dies answers null; one more try rides out a blip without looping on a real fault.
+const look = async (skip) => (await frontier(skip)) ?? (await frontier(skip))
+
+const ports = (slot) => `E2E_PORT=${3110 + 10 * slot} and SHOTS_PORT=${3111 + 10 * slot}`
+
+const HANDS_OFF =
+  "The developer reviews the PR, merges it and deletes its branch, so you never merge it, never turn on auto-merge, and never delete a branch. If only the developer can unblock you, comment on the ticket saying exactly what you need, add the needs-info label, and stop.\nNever push to main, force-push, skip hooks, weaken or skip a check, or change files the ticket doesn't need."
+
+const WATCH =
+  'gh pr checks --watch. On a red check, read gh run view <run id> --log-failed, fix, push, and watch again. If the PR is behind main, gh pr update-branch, then watch again.'
+
 const build = (ticket, slot) =>
   agent(
-    `You are a builder in ${REPO}. Build ticket #${ticket.number} ("${ticket.title}") of spec #${spec} as one PR into main, and leave it open for the developer, who reviews and merges every PR.
-You are in a worktree of your own. Your browser-test port is ${3110 + 10 * slot} (E2E_PORT); no other builder uses it. Run browser tests and Lighthouse through \`scripts/lane/heavy.sh\`, which queues them one at a time on this machine.
+    `You are a builder in ${REPO}. Build ticket #${ticket.number} ("${ticket.title}") of spec #${spec} as one PR into main. A reviewer agent reviews it once its checks are green, and then you answer that review.
+You are in a worktree of your own. Your ports are ${ports(slot)}; no other builder uses them, so set both whenever you run browser tests or pnpm shots. Run browser tests and Lighthouse through \`scripts/lane/heavy.sh\`, which queues them one at a time on this machine.
 
 1. git fetch origin. If an open PR already says it closes #${ticket.number}, check it out (gh pr checkout) and carry on where it stopped. Otherwise branch from origin/main: git switch -c ticket-${ticket.number}-<two or three words> --no-track origin/main.
 2. Read the ticket (gh issue view ${ticket.number} --comments) and the spec (gh issue view ${spec}). Follow CLAUDE.md, and read SPEC.md before you change a module, a seam, a content kind or a page.
 3. pnpm install --frozen-lockfile. Build the ticket test-first with the tdd skill. Look library APIs up with Context7, and the web with Octen, Firecrawl or Parallel, instead of guessing.
-4. pnpm check must pass, and so must the browser tests you added or touched. Commit in plain English, then git push -u origin <your branch>.
+4. pnpm check must pass, and so must the browser tests you added or touched. Read your own diff against the ticket, CLAUDE.md and SPEC.md: does it meet every acceptance criterion, and does it make any line in CLAUDE.md or SPEC.md untrue? Commit in plain English, then git push -u origin <your branch>.
 5. If the PR isn't open yet, gh pr create --base main: the title is the ticket's title, and the body starts "Closes #${ticket.number}", then follows the pr skill's template.
-6. gh pr checks --watch. On a red check, read gh run view <run id> --log-failed, fix, push, and watch again. If the PR is behind main, gh pr update-branch, then watch again.
-7. Review. Read every review comment (gh api repos/${REPO}/pulls/<pr>/comments, and the PR's reviews). Fix each, or reply with the reason you won't, then resolve its thread (GraphQL resolveReviewThread). Then read your own diff against the ticket, CLAUDE.md and SPEC.md: does it meet every acceptance criterion, and does it make any line in CLAUDE.md or SPEC.md untrue? After any push, the checks must go green again.
-8. Stop there, with the PR open. The developer reviews it, merges it and deletes its branch, so you never merge it, never turn on auto-merge, and never delete a branch. If only the developer can unblock you, comment on the ticket saying exactly what you need, add the needs-info label, and stop.
-Never push to main, force-push, skip hooks, weaken or skip a check, or change files the ticket doesn't need.
-Return opened, ready (every check green and every thread answered), the PR number and a one-line note.`,
+6. ${WATCH}
+7. Stop once the PR is open and every check is green, and return it.
+${HANDS_OFF}
+Return opened, ready (every check green), the PR number and a one-line note.`,
     {
       label: `#${ticket.number}`,
       phase: 'Build',
@@ -108,11 +131,62 @@ Return opened, ready (every check green and every thread answered), the PR numbe
     },
   )
 
+const review = (ticket, pr) =>
+  agent(
+    `You are the reviewer of PR #${pr} in ${REPO}, which builds ticket #${ticket.number} ("${ticket.title}") of spec #${spec}. Change no file, commit nothing and push nothing: your one write is the review.
+1. git fetch origin, then gh pr checkout ${pr} in your worktree.
+2. Review it with the code-review skill: the fixed point is where the PR leaves main (git merge-base origin/main HEAD), and you check it against ticket #${ticket.number}, CLAUDE.md and SPEC.md. Does it meet every acceptance criterion, keep the rules SPEC.md lists, and leave no line in CLAUDE.md or SPEC.md untrue?
+3. Post your findings as one PR review with inline comments: write {"event": "COMMENT", "body": <a summary>, "comments": [{"path", "line", "side": "RIGHT", "body"}, …]} to a file outside the repo, then gh api repos/${REPO}/pulls/${pr}/reviews --method POST --input <that file>. One comment per finding, on the line it concerns, saying what is wrong and what would fix it. Leave out style the linters already check. Post the review even when you find nothing, with a body that says so.
+Return posted (whether the PR now carries your review), comments (how many inline comments it has) and a one-line note.`,
+    {
+      label: `review #${ticket.number}`,
+      phase: 'Build',
+      isolation: 'worktree',
+      schema: REVIEW,
+      ...REVIEWER,
+    },
+  )
+
+const answer = (ticket, slot, pr) =>
+  agent(
+    `You are the builder of ticket #${ticket.number} ("${ticket.title}") of spec #${spec} in ${REPO}. Its PR #${pr} is open, and a reviewer agent has reviewed it. Answer that review.
+You are in a worktree of your own. Your ports are ${ports(slot)}; no other builder uses them. Run browser tests and Lighthouse through \`scripts/lane/heavy.sh\`.
+
+1. git fetch origin, gh pr checkout ${pr}, pnpm install --frozen-lockfile.
+2. Read every review comment (gh api repos/${REPO}/pulls/${pr}/comments, and the PR's reviews). Fix each, or reply with the reason you won't, then resolve its thread (GraphQL resolveReviewThread). Judge each against the ticket, CLAUDE.md and SPEC.md.
+3. pnpm check must pass, and so must the browser tests you touched. Commit in plain English and git push.
+4. ${WATCH}
+5. Stop once every thread is answered or resolved and every check is green, with the PR open.
+${HANDS_OFF}
+Return opened, ready (every check green and every thread answered or resolved), the PR number and a one-line note.`,
+    {
+      label: `#${ticket.number} answers`,
+      phase: 'Build',
+      isolation: 'worktree',
+      schema: OUTCOME,
+      ...BUILDER,
+    },
+  )
+
+/** Builds the ticket, has its PR reviewed, and has its builder answer the review. */
+const deliver = async (ticket, slot) => {
+  const built = await build(ticket, slot)
+  if (!built?.opened || !built.ready || !built.pr) return built
+  const reviewed = await review(ticket, built.pr)
+  if (!reviewed?.posted) {
+    const why = reviewed?.note ?? 'the reviewer ended without an answer'
+    return { opened: true, ready: false, pr: built.pr, note: `no review on the PR: ${why}` }
+  }
+  if (reviewed.comments === 0) return built
+  return answer(ticket, slot, built.pr)
+}
+
 const numbers = (tickets) => tickets.map((t) => `#${t.number}`).join(', ') || 'none'
 const prs = (tickets) => tickets.map((t) => `PR #${t.pr} (#${t.number})`).join(', ')
 
 if (args?.dryRun === true) {
-  const plan = await frontier([])
+  const plan = await look([])
+  if (!plan) throw new Error(`Cannot plan: ${LOST}`)
   log(
     `Ready: ${numbers(plan.ready)} · for your review: ${prs(plan.awaitingYou) || 'none'} · for you: ${numbers(plan.forDeveloper)} · open: ${plan.open}`,
   )
@@ -131,16 +205,18 @@ const running = new Map()
 const freeSlots = Array.from({ length: builders }, (_, slot) => slot)
 const readyForYou = new Map()
 const stopped = []
-let latest = await frontier([])
+let known = { ready: [], awaitingYou: [], forDeveloper: [], open: 0 }
+let latest = await look([])
 
-while (true) {
+while (latest) {
+  known = latest
   for (const ticket of latest.ready) {
     if (!freeSlots.length) break
     const slot = freeSlots.shift()
     log(`#${ticket.number} ${ticket.title}: building`)
     running.set(
       ticket.number,
-      build(ticket, slot).then((outcome) => ({ ticket, slot, outcome })),
+      deliver(ticket, slot).then((outcome) => ({ ticket, slot, outcome })),
     )
   }
   if (!running.size) break
@@ -154,22 +230,32 @@ while (true) {
     stopped.push(ticket.number)
     log(`#${ticket.number} stopped: ${outcome?.note ?? 'the builder ended without an answer'}`)
   }
-  latest = await frontier([...running.keys(), ...stopped, ...readyForYou.keys()])
+  latest = await look([...running.keys(), ...stopped, ...readyForYou.keys()])
 }
 
 const awaitingYou = [
-  ...latest.awaitingYou.filter((ticket) => !readyForYou.has(ticket.number)),
+  ...known.awaitingYou.filter((ticket) => !readyForYou.has(ticket.number)),
   ...[...readyForYou].map(([number, pr]) => ({ number, pr })),
 ]
+if (!latest) log(`Ship stopped: ${LOST}.`)
+if (running.size) log(`Still running: #${[...running.keys()].join(', #')}`)
 if (awaitingYou.length) log(`Ready for your review: ${prs(awaitingYou)}`)
-if (latest.forDeveloper.length) log(`Waiting on you: ${numbers(latest.forDeveloper)}`)
+if (known.forDeveloper.length) log(`Waiting on you: ${numbers(known.forDeveloper)}`)
 if (stopped.length) log(`Stopped: #${stopped.join(', #')}`)
+if (!latest)
+  return {
+    lost: LOST,
+    running: [...running.keys()],
+    awaitingYou,
+    stopped,
+    waitingOnYou: known.forDeveloper,
+  }
 if (latest.open > 0)
   return { awaitingYou, stopped, waitingOnYou: latest.forDeveloper, open: latest.open }
 
 phase('Finish')
-const review = await agent(
+const finalReview = await agent(
   `Every ticket of spec #${spec} in ${REPO} is closed: the developer has merged them all. Run git fetch origin --tags, then review everything built for it with the code-review skill. The fixed point is ${startTag}, the code is origin/main, the spec is issue #${spec}, and the standards are CLAUDE.md and SPEC.md: does anything built make a line in them untrue? Fix every finding worth fixing in one PR into main, by the builders' rules: branch from origin/main with --no-track, a body that starts "Part of #${spec}", checks green, every review thread answered, and then stop, because the developer reviews and merges it. Last, remove each worktree under .claude/worktrees whose PR has merged (git worktree remove <path>, then git worktree prune), and keep every branch: list the local branches whose PRs have merged, for the developer to delete. Return opened, ready, the PR number if there is one, and a one-line note on what the review found and which branches the developer can delete.`,
   { label: 'final review', phase: 'Finish', isolation: 'worktree', schema: OUTCOME, ...REVIEWER },
 )
-return { awaitingYou, stopped, review }
+return { awaitingYou, stopped, review: finalReview }
