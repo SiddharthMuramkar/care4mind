@@ -163,6 +163,7 @@ ${PROVENANCE}
   intro: '',
   areas: [], // { title, text, target? }
   closing: '',
+  helpLine: '',
 ${PROVENANCE}
 })`,
 }

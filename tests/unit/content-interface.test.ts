@@ -1482,6 +1482,7 @@ describe('the homepage', () => {
       { title: 'Nowhere', text: 'Made-up text.' },
     ],
     closing: 'A made-up closing.',
+    helpLine: 'A made-up help line.',
     provenance,
   })
 
@@ -1496,6 +1497,7 @@ describe('the homepage', () => {
         { title: 'Nowhere', text: 'Made-up text.' },
       ],
       closing: 'A made-up closing.',
+      helpLine: 'A made-up help line.',
       provenance,
       reviewStatus: 'carried-over-not-reviewed',
     })
@@ -1620,6 +1622,7 @@ describe('every view', () => {
       intro: 'Made up.',
       areas: [{ title: 'Made up', text: 'Made up.', target: { kind: 'concept', id: 'obstacles' } }],
       closing: 'Made up.',
+      helpLine: 'Made up.',
       provenance,
     }),
   ]

@@ -8,6 +8,8 @@ export interface HomepageRecord {
   /** Each area leads to a target; one with no real destination has none (and is flagged). */
   areas: readonly { title: string; text: Inline; target?: Target }[]
   closing: Inline
+  /** Where to call for help now, shown in every page's footer and on each Questionnaire page. */
+  helpLine: Inline
   provenance: Provenance
 }
 
