@@ -5,6 +5,6 @@ import { defineTopic } from '@/content/schema'
 export default defineTopic({
   kind: 'topic',
   slug: 'temperament',
-  name: { english: 'Guṇa and temperament' },
+  name: { english: 'Temperament (guṇa)' },
   order: 5,
 })

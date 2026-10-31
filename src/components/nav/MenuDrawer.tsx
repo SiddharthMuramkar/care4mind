@@ -113,20 +113,11 @@ interface ListProps {
   pathname: string
 }
 
-/** Under Concepts: the A–Z, each topic with its hue, a leader and its Concept count, and the map. */
+/** Under Concepts: each topic with its hue, a leader and its Concept count, then the A–Z and the map. */
 function ConceptsList({ nav, pathname, mapNote }: ListProps & { mapNote?: ReactNode }) {
   const { index, topics, map } = nav.concepts
   return (
     <ul className={styles.pages}>
-      <li>
-        <Link
-          href={index.href}
-          className={styles.page}
-          aria-current={currentFor(pathname, index.href)}
-        >
-          {index.label}
-        </Link>
-      </li>
       {topics.map((topic) => (
         <li key={topic.slug} data-topic={topic.slug}>
           <Link
@@ -146,6 +137,15 @@ function ConceptsList({ nav, pathname, mapNote }: ListProps & { mapNote?: ReactN
           </Link>
         </li>
       ))}
+      <li>
+        <Link
+          href={index.href}
+          className={styles.page}
+          aria-current={currentFor(pathname, index.href)}
+        >
+          {index.label}
+        </Link>
+      </li>
       {map ? (
         <li className={styles.proposal}>
           <Link
