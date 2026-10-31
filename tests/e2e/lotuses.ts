@@ -76,3 +76,28 @@ export async function pauseButton(page: Page) {
   await expect(menu).toBeVisible()
   return menu.getByRole('button', pause)
 }
+
+/** The most flashes a second any lotus part's endless opacity animation makes: one per rise to a peak. */
+export const flashesPerSecond = (lotus: Locator) =>
+  lotus.evaluate((svg) =>
+    Math.max(
+      0,
+      ...svg
+        .getAnimations({ subtree: true })
+        .map(({ effect }) => effect)
+        .filter((effect): effect is KeyframeEffect => effect instanceof KeyframeEffect)
+        .filter((effect) => effect.getComputedTiming().iterations === Infinity)
+        .map((effect) => {
+          const opacities = effect
+            .getKeyframes()
+            .map((keyframe) => keyframe.opacity)
+            .filter((opacity) => opacity !== undefined)
+            .map(Number)
+          const peaks = opacities.filter(
+            (opacity, index) => index > 0 && opacity > (opacities[index - 1] ?? opacity),
+          ).length
+          const seconds = Number(effect.getComputedTiming().duration) / 1000
+          return seconds > 0 ? peaks / seconds : 0
+        }),
+    ),
+  )
