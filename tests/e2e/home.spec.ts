@@ -9,6 +9,7 @@ import {
   type Start,
 } from './drawings'
 import { expect, gotoReady, test } from './fixtures'
+import { focusRingContrast } from './focus-ring'
 import { moving } from './lotuses'
 import { placeOnScreen, scrollPath } from './scrolling'
 
@@ -327,4 +328,10 @@ test('the homepage leads on to every Concept and every Questionnaire', async ({ 
   await main.getByRole('link', { name: /more Questionnaires from the current site/ }).click()
   await expect(page).toHaveURL('/questionnaires/')
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('Questionnaires')
+})
+
+test("a card's focus ring contrasts with the colour behind it", async ({ page }) => {
+  await gotoReady(page, '/')
+  const link = page.getByRole('link', { name: 'Read about Vikṣepa' })
+  expect(await focusRingContrast(page, link)).toBeGreaterThanOrEqual(3)
 })
