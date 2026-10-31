@@ -134,7 +134,7 @@ export default defineConcept({
             {
               head: { term: mudita },
               cells: [
-                'Altruistic Joy',
+                'Altruistic joy',
                 'Rejoicing in the success and well-being of others, without envy.',
                 'Antidote to envy and jealousy; cultivated joy independent of self-benefit.',
               ],
@@ -142,7 +142,7 @@ export default defineConcept({
             {
               head: { term: upeksa },
               cells: [
-                'Equanimity or Inner Balance',
+                'Equanimity or inner balance',
                 'Mental calmness, impartiality, even-mindedness amidst ups and downs.',
                 'Balances other three virtues; neither apathy nor cold detachment.',
               ],
@@ -189,6 +189,7 @@ export default defineConcept({
       'Gloss in sentence case: “Loving-kindness or Benevolence” → “Loving-kindness or benevolence”.',
       'Gloss in sentence case: “Altruistic Joy” → “Altruistic joy”.',
       'Gloss in sentence case: “Equanimity or Inner Balance” → “Equanimity or inner balance”.',
+      'Comparison table cells in sentence case, to match the glosses: “Altruistic Joy” → “Altruistic joy”, “Equanimity or Inner Balance” → “Equanimity or inner balance”.',
     ],
     flags: [
       {

@@ -12,7 +12,7 @@ const prajna: SanskritName = { iast: 'prajñā', devanagari: 'प्रज्ञ
 export default defineConcept({
   kind: 'concept',
   slug: 'five-steps-of-perfection',
-  name: { english: 'Five Steps of Perfection' },
+  name: { english: 'Five steps of perfection' },
   summary:
     'Many individuals may find it challenging to complete the journey to attain Samadhi. They may opt for the five steps towards Self-realisation, which are Faith, Strength, Memory, Absorption, and Wisdom (Tomar, 2024).',
   topics: { primary: 'practice' },
@@ -202,6 +202,7 @@ export default defineConcept({
       { url: 'https://care4mind.org/fivestepsofperfectionprofiling/', retrieved: '2026-10-27' },
     ],
     edits: [
+      'English name in sentence case: “Five Steps of Perfection” → “Five steps of perfection”.',
       'Named by its English title: the page title, “Five Steps of Perfection Profiling”, without “Profiling”, the word for its questionnaire. The page gives no Sanskrit headword (flagged).',
       'The heading over the verse, “Shlokas of Perfection from Chapter 1, Sutra 20”, is left out: the verse is shown with its work and number, Yoga Sūtra 1.20, which the heading doesn’t name (flagged).',
       'The sub-heading under “What is the definition of Perfection?”, “(Faith, Strength, Memory, Absorption, Clarity)”, is the first paragraph of its section.',

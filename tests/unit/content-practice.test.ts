@@ -309,8 +309,8 @@ describe('the practice Concepts', () => {
   })
 
   it.each([
-    { slug: FIVE_STEPS.slug, english: 'Five Steps of Perfection' },
-    { slug: SPIRITUAL.slug, english: 'Spiritual Practitioner' },
+    { slug: FIVE_STEPS.slug, english: 'Five steps of perfection' },
+    { slug: SPIRITUAL.slug, english: 'Spiritual practitioner' },
   ])(
     'name $slug by its English title, flagged as having no Sanskrit headword',
     ({ slug, english }) => {
@@ -344,7 +344,7 @@ describe('the practice Concepts', () => {
 
   it('name Momentum of Spiritual Practice by its English title, flagging saṃvega as a possible headword', () => {
     const concept = conceptOf(MOMENTUM.slug)
-    expect(concept?.name).toEqual({ english: 'Momentum of Spiritual Practice' })
+    expect(concept?.name).toEqual({ english: 'Momentum of spiritual practice' })
     const [note] = notesFor(concept, 'research-editor').filter((text) => text.includes('saṃvega'))
     expect(note).toMatch(/no Sanskrit headword/)
     expect(note).toContain('Yoga Sūtra 1.21')
