@@ -1,7 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
 import {
-  asciiSpellings,
   concepts,
   home,
   questionnaires,
@@ -9,6 +8,7 @@ import {
   type ConceptView,
   type QuestionnaireView,
 } from '@/content'
+import { asciiSpellings } from '@/content/views/names'
 import { isNormalisedSanskrit } from '@/lib/sanskrit'
 
 /** Every string anywhere inside a value. */
