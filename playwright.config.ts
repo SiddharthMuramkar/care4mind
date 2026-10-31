@@ -79,9 +79,9 @@ const projects: Project[] = [
   widthProject(360, 800),
   widthProject(768, 1024),
   widthProject(1440, 900),
-  // WCAG 1.4.10 Reflow tests at 320 px, narrower than FR-06.
+  // WCAG 1.4.10 Reflow: every route at 320 px, narrower than FR-06; the spec sets its other widths.
   {
-    name: 'reflow-320',
+    name: 'reflow',
     use: { ...chrome, viewport: { width: 320, height: 640 } },
     testMatch: /reflow\.spec\.ts/,
   },

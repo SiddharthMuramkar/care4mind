@@ -57,6 +57,7 @@
 }
 
 .group {
+  min-width: 0;
   break-inside: avoid;
   margin-bottom: 1.25rem;
 }
@@ -71,6 +72,7 @@
   font-variant-caps: all-small-caps;
   letter-spacing: 0.12em;
   font-size: 1.1875rem;
+  overflow-wrap: anywhere;
   text-decoration: none;
 }
 
