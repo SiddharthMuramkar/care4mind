@@ -258,7 +258,8 @@ test.describe('the opening folio says what the site is', () => {
       for (const part of [
         page.getByRole('heading', { level: 1 }),
         folio.getByText(/^Ideas about the mind from India’s traditional texts/),
-        folio.getByRole('link', { name: 'Start here' }),
+        // The primary button, whichever the Start here flag makes it.
+        folio.getByRole('link').first(),
       ]) {
         await expect(part).toBeInViewport({ ratio: 1 })
       }

@@ -71,6 +71,7 @@ export default defineHome({
       'Left out: the four placeholder “Questionaire” cards, which repeat one text, and the survey placeholders.',
       // Listed when the record was re-homed into content v1.
       'Shloka translation: “thoughts…so” → “thoughts, so”.',
+      'sectionIntros: the two section intros the homepage had hard-coded, moved here word for word.',
       'Concepts area: “unique concepts of Ancient Indian Psychology” → “unique concepts of ancient Indian psychology.”.',
       'Resources area: “to mentor the mind” → “to mentor the mind.”.',
       'Research area: “create ,and host” → “create and host”.',
@@ -99,6 +100,6 @@ export default defineHome({
         ticket: 20,
       },
     ],
-    drafted: ['tagline', 'hero', 'sectionIntros', 'helpLine'],
+    drafted: ['tagline', 'hero', 'helpLine'],
   },
 })

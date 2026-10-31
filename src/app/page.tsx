@@ -10,6 +10,7 @@ import { Text } from '@/components/prose'
 import { QuestionnaireCard } from '@/components/QuestionnaireCard'
 import { features } from '@/config/features'
 import { concepts, home, hrefFor, questionnaires, site } from '@/content'
+import { heroLinks } from '@/lib/hero-links'
 import { metadataFor } from '@/lib/metadata'
 import { toDevanagariDigits } from '@/lib/text'
 
@@ -65,19 +66,16 @@ export default async function HomePage() {
             </h1>
             <p className={styles.subhead}>{page.hero.subhead}</p>
             <p className={styles.ctas}>
-              {features.startHere ? (
-                <>
-                  <Link href={hrefFor({ page: 'start' })} className={cta.primary} data-ink>
-                    {page.hero.startHere}
+              {heroLinks(page.hero, features.startHere).map((link, i) =>
+                i === 0 ? (
+                  <Link key={link.href} href={link.href as Route} className={cta.primary} data-ink>
+                    {link.label}
                   </Link>
-                  <Link href={hrefFor({ page: 'concepts' })} className={styles.textLink}>
-                    {page.hero.browseConcepts}
+                ) : (
+                  <Link key={link.href} href={link.href as Route} className={styles.textLink}>
+                    {link.label}
                   </Link>
-                </>
-              ) : (
-                <Link href={hrefFor({ page: 'concepts' })} className={cta.primary} data-ink>
-                  {page.hero.exploreConcepts}
-                </Link>
+                ),
               )}
             </p>
             <Fleuron draw className={styles.heroFleuron} />
