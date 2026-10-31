@@ -226,3 +226,27 @@ for (const { path, name } of READING_PAGES) {
     expect(await readingThread(page)).toBeNull()
   })
 }
+
+test("pointing at and pressing a lotus moves nothing, with reduced motion, and the logo's still leads home", async ({
+  page,
+}) => {
+  await gotoReady(page, '/')
+  const main = page.getByRole('main').locator('svg[data-lotus]')
+  const logo = page
+    .getByRole('banner')
+    .getByRole('link', { name: 'Care4Mind home', exact: true })
+    .locator('svg[data-lotus]')
+  for (const lotus of [main.first(), main.last(), logo]) {
+    const box = await lotus.boundingBox()
+    if (!box) continue
+    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2)
+    await lotus.click({ force: true })
+    await expect(lotus).not.toHaveAttribute('data-lotus-bloom')
+    expect(await lotus.evaluate((svg) => svg.style.getPropertyValue('--lotus-near'))).toBe('')
+    expect(await movingAnimations(page)).toEqual([])
+  }
+  await expect(page).toHaveURL('/')
+  await gotoReady(page, '/concepts/')
+  await logo.click()
+  await expect(page).toHaveURL('/')
+})
