@@ -6,7 +6,12 @@
 //   node scripts/content/extract.mjs <slug> --json        the same outline, as JSON
 //
 // It reads the saved copies only from $CARE4MIND_CAPTURES, never writes into the repo and never
-// touches the network. The rules for using it are in docs/agents/content-migration.md.
+// touches the network. The copies stay outside the repo: never commit them, copy them in, or
+// paste their markup into a record, test or doc (tool tests use made-up fixtures). The current
+// site stays untouched until launch: send it no request, and look nothing up to fill a gap; a
+// gap is flagged. Text is printed NFC with entities decoded and whitespace collapsed, and
+// otherwise as the page has it (ṁ stays ṁ). Verse lines are grouped by script, so check each
+// verse's edges against the page: a short English line can read as transliteration.
 //
 // Plain Node, no dependencies. This file is also the captures module the other tools import:
 // `openCaptures()` is the one place any tool reads a saved page.
@@ -29,8 +34,9 @@ export class ToolError extends Error {}
 export function openCaptures(dir = process.env.CARE4MIND_CAPTURES) {
   if (!dir)
     throw new ToolError(
-      'CARE4MIND_CAPTURES is not set. Point it at the folder of saved copies of the current site ' +
-        '(see docs/agents/content-migration.md, "The captures").',
+      'CARE4MIND_CAPTURES is not set. The saved copies of the current site are in the private ' +
+        'repo SiddharthMuramkar/care4mind-captures: clone it, then set CARE4MIND_CAPTURES to the ' +
+        'clone’s folder, such as export CARE4MIND_CAPTURES=~/care4mind-captures.',
     )
   if (!existsSync(dir)) throw new ToolError(`CARE4MIND_CAPTURES is ${dir}, which doesn't exist.`)
   const itemsFile = join(dir, 'items.json')
