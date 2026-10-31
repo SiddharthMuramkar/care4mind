@@ -11,6 +11,8 @@ export function scoreQuestionnaire(
   form: Pick<QuestionnaireFormView, 'parts'>,
   answers: Readonly<Record<string, string>>,
 ): Score {
-  const complete = form.parts.every(({ items }) => items.every(({ id }) => id in answers))
+  const complete = form.parts.every(({ items }) =>
+    items.every(({ id }) => Object.hasOwn(answers, id)),
+  )
   return complete ? { status: 'pending' } : { status: 'incomplete' }
 }
