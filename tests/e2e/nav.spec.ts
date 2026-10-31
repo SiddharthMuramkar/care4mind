@@ -442,13 +442,70 @@ test.describe('the Drawer, on a phone', () => {
     await menu(page).click()
     // A swipe begins on the sheet as it rests, not while it is still sliding in.
     await settled(page)
-    const box = await drawer(page).getByText('Menu', { exact: true }).boundingBox()
+    const title = drawer(page).getByText('Menu', { exact: true })
+    const box = await title.boundingBox()
     if (!box) throw new Error('the Drawer has its title')
-    await page.mouse.move(box.x + 4, box.y + box.height / 2)
-    await page.mouse.down()
-    await page.mouse.move(box.x + 300, box.y + box.height / 2, { steps: 12 })
-    await page.mouse.up()
+    // A finger swipes; a mouse dragged over the Drawer's text selects it instead.
+    const y = box.y + box.height / 2
+    const finger = (x: number) => [{ identifier: 1, clientX: x, clientY: y }]
+    const start = finger(box.x + 4)
+    await title.dispatchEvent('touchstart', {
+      touches: start,
+      targetTouches: start,
+      changedTouches: start,
+    })
+    for (let step = 1; step <= 12; step += 1) {
+      const at = finger(box.x + 4 + step * 25)
+      await title.dispatchEvent('touchmove', { touches: at, targetTouches: at, changedTouches: at })
+    }
+    await title.dispatchEvent('touchend', {
+      touches: [],
+      targetTouches: [],
+      changedTouches: finger(box.x + 304),
+    })
     await expect(drawer(page)).toBeHidden()
+  })
+
+  test('a mouse dragged across its text selects the text and leaves the sheet where it was', async ({
+    page,
+  }) => {
+    await gotoReady(page, '/')
+    await menu(page).click()
+    await settled(page)
+    const sheet = await drawer(page).boundingBox()
+    const box = await drawer(page).getByText('Menu', { exact: true }).boundingBox()
+    if (!sheet || !box) throw new Error('the Drawer has its title')
+    await page.mouse.move(box.x + 1, box.y + box.height / 2)
+    await page.mouse.down()
+    await page.mouse.move(box.x + box.width - 1, box.y + box.height / 2, { steps: 12 })
+    expect(await drawer(page).boundingBox()).toEqual(sheet)
+    await page.mouse.up()
+    expect(await page.evaluate(() => getSelection()?.toString())).toMatch(/Men/)
+    await expect(drawer(page)).toBeVisible()
+    expect(await drawer(page).boundingBox()).toEqual(sheet)
+  })
+
+  test('closes when the header widens, leaving the page scrollable and focus on something visible', async ({
+    page,
+  }) => {
+    await gotoReady(page, '/concepts/vikshepa/')
+    await menu(page).click()
+    await expect(drawer(page)).toBeVisible()
+    await page.setViewportSize({ width: 1280, height: 800 })
+    await expect(drawer(page)).toBeHidden()
+    await expect
+      .poll(() =>
+        page.evaluate(() => {
+          const focused = document.activeElement
+          return (
+            focused instanceof HTMLElement && focused !== document.body && focused.checkVisibility()
+          )
+        }),
+      )
+      .toBe(true)
+    await page.mouse.move(640, 600)
+    await page.mouse.wheel(0, 600)
+    await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(0)
   })
 
   test('following a link closes it and opens the page', async ({ page }) => {
