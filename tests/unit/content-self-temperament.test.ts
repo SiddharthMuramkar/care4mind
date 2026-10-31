@@ -175,13 +175,13 @@ const tablesIn = (blocks: readonly BlockView[]): TableView[] =>
 
 describe('the self and temperament Concepts', () => {
   it.each(PAGES)(
-    'names $slug by its headword, in the topic $topic, carried over unreviewed',
+    'names $slug by its headword, in the topic $topic, its keywords drafted, unreviewed',
     async ({ slug, name, page, topic, also }) => {
       const concept = await concepts.get(slug)
       expect(concept).toMatchObject({
         name,
         topic: { slug: topic },
-        reviewStatus: 'carried-over-not-reviewed',
+        reviewStatus: 'drafted-not-reviewed',
       })
       expect(concept?.secondaryTopics.map((ref) => ref.slug)).toEqual(also)
       expect(concept?.provenance.sources.map(({ url }) => url)).toEqual([page])

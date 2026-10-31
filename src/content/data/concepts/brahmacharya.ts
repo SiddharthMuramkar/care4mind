@@ -13,6 +13,7 @@ export default defineConcept({
   },
   summary:
     'Brahmacharya entails living life in a manner aligned with the principles of Brahman, the ultimate reality, embodying spiritually-oriented behaviour.',
+  keywords: ['self-control', 'restraint', 'senses', 'energy', 'celibacy', 'discipline', 'values'],
   topics: { primary: 'values' },
   verses: [
     {
@@ -205,8 +206,9 @@ export default defineConcept({
     'tomar-2024',
   ],
   questionnaire: 'brahmacharya',
-  reviewStatus: 'carried-over-not-reviewed',
+  reviewStatus: 'drafted-not-reviewed',
   provenance: {
+    drafted: ['keywords'],
     sources: [
       {
         url: 'https://care4mind.org/knowyourvaluesbrahmacharya-profiling/',
@@ -214,6 +216,7 @@ export default defineConcept({
       },
     ],
     edits: [
+      'Keywords drafted from the page’s own words, for search; a keyword never names a modern construct or a condition.',
       'Headword split out of the compound in the page’s Yoga Sūtra 2.30 verse, “ahiṃsāsatyāsteyabrahmacaryāparigrahā” and “अहिंसासत्यास्तेयब्रह्मचर्यापरिग्रहा”, in its dictionary form: “brahmacarya”, “ब्रह्मचर्य”. The page’s own spelling, “Brahmacharya”, is its ASCII spelling. The page title gives no gloss, so the Concept has no English name (flagged).',
       'The page title, “Know Your Values: Brahmacharya Profiling”, is its Questionnaire’s title; the Concept is named by its headword.',
       'Verse headings dropped: “Shloka for Know Your Values – Yama from Chapter 2, Sutra 30”, “Shloka for Know Your Values – Niyama from Chapter 2, Sutra 32”, “Shloka for Know Your Values – Brahmacharya: Chapter 6, Verse 17”, and “Shloka for Know Your Values – Brahmacharya: Chapter 2, Verse 54” and its like for verses 55, 56, 57, 58 and 68. Each verse shows its work and number, as the census assigned them: the Yoga Sūtra for the first two, the Bhagavad Gītā for the rest.',

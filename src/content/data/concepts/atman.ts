@@ -12,6 +12,7 @@ export default defineConcept({
   },
   summary:
     'Atman (Samskrit: आत्मा) is one of the primary teachings of the Upanishads along with Brahman, Maya, and Karma.',
+  keywords: ['self', 'soul', 'consciousness', 'brahman', 'reality'],
   topics: { primary: 'self' },
   verses: [],
   sections: [
@@ -79,10 +80,12 @@ export default defineConcept({
       url: 'https://dharmawiki.org/index.php/Atman_(%E0%A4%86%E0%A4%A4%E0%A5%8D%E0%A4%AE%E0%A4%A8%E0%A5%8D)',
     },
   ],
-  reviewStatus: 'carried-over-not-reviewed',
+  reviewStatus: 'drafted-not-reviewed',
   provenance: {
+    drafted: ['keywords'],
     sources: [{ url: 'https://care4mind.org/atman/', retrieved: '2026-10-27' }],
     edits: [
+      'Keywords drafted from the page’s own words, for search; a keyword never names a modern construct or a condition.',
       'The page has no heading before its first two paragraphs: they are a section headed by its title, “Atman”.',
       'The bilingual headings, each written as the first line of a paragraph, are section headings, kept as written: “परिचयः ॥ Introduction” and “आत्मतत्वम् ॥ Nature of Atma”.',
       'The eight lines after “Different upanishads portray different aspects of the Atma that” are a list.',

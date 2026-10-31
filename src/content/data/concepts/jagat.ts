@@ -11,6 +11,7 @@ export default defineConcept({
   },
   summary:
     'The Cosmos is dynamic in nature. Hindu scriptures call it जगत || jagat where गत || gat indicates the ever changing – सदैव गच्छति || sadaiv gachati (ever changing) nature of cosmos.',
+  keywords: ['world', 'universe', 'cosmos', 'nature', 'changing'],
   topics: { primary: 'self' },
   verses: [],
   sections: [
@@ -36,10 +37,12 @@ export default defineConcept({
       url: 'https://dharmawiki.org/index.php/Jagat_(%E0%A4%9C%E0%A4%97%E0%A4%A4%E0%A5%8D)',
     },
   ],
-  reviewStatus: 'carried-over-not-reviewed',
+  reviewStatus: 'drafted-not-reviewed',
   provenance: {
+    drafted: ['keywords'],
     sources: [{ url: 'https://care4mind.org/jagat/', retrieved: '2026-10-27' }],
     edits: [
+      'Keywords drafted from the page’s own words, for search; a keyword never names a modern construct or a condition.',
       'The page has no headings: its two paragraphs are a section headed by its title, “Jagat”.',
       'External link added, labelled “DharmaWiki”: the Concept’s own DharmaWiki article, at the address the glossary card “Jagat (जगत्)” on https://care4mind.org/concepts/ links. The post itself has no links.',
     ],

@@ -13,6 +13,7 @@ export default defineConcept({
   },
   summary:
     'The previously mentioned term “Vikshepa” (distractions) includes both primary and secondary distractions, sometimes known as byproducts. The Patanjali Yoga Sutra 1.31 outlines these byproducts.',
+  keywords: ['distractions', 'sorrow', 'sadness', 'restlessness', 'breathing', 'breath'],
   topics: { primary: 'mind' },
   verses: [
     {
@@ -248,10 +249,12 @@ export default defineConcept({
     'yogapedia-2023-shvasa-prashvasa',
   ],
   questionnaire: 'upa-vikshepa',
-  reviewStatus: 'carried-over-not-reviewed',
+  reviewStatus: 'drafted-not-reviewed',
   provenance: {
+    drafted: ['keywords'],
     sources: [{ url: 'https://care4mind.org/upavikshepaprofiling/', retrieved: '2026-10-27' }],
     edits: [
+      'Keywords drafted from the page’s own words, for search; a keyword never names a modern construct or a condition.',
       'IAST transliterated for the headword: “upa-vikṣepa”, from the page’s “Upa-Vikshepa” and “Upa Vikshepa”, with vikṣepa as the Vikshepa page writes it. The page prints “Upa Vikṣepa” only in its held-back score section. It prints no Devanagari for the headword, so none is stored.',
       'Sub-term forms split out of compounds, in their dictionary forms: “aṅgamejayatva”, “śvāsa” and “praśvāsa” from the page’s “śvāsapraśvāsa” and the Yoga Sūtra 1.31 verse’s “duḥkhadaurmanasyāṅgamejayatvaśvāsapraśvāsā”, and the Devanagari “दुःख”, “दौर्मनस्य”, “अङ्गमेजयत्व”, “श्वास” and “प्रश्वास” from its “दुःखदौर्मनस्याङ्गमेजयत्वश्वासप्रश्वासा”. “duḥkha” and “daurmanasya” are printed on the page. The sub-headings’ spellings (“Duhkha”, “Daurmanasya”, “Anggamejayatva”, “Shvasa”, “Prashvasa”) are kept as ASCII spellings.',
       'Verse heading dropped: “Shloka from Chapter 1, Sutra 31”. The verse shows its work and number, Yoga Sūtra 1.31, the work the census assigned it.',

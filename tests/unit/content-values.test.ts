@@ -281,7 +281,7 @@ describe.each(VALUES)('the Concept $slug', (expected) => {
         : { term: expected.term, english: expected.english },
     )
     expect(concept?.provenance.sources.map(({ url }) => url)).toEqual([expected.page])
-    expect(concept?.reviewStatus).toBe('carried-over-not-reviewed')
+    expect(concept?.reviewStatus).toBe('drafted-not-reviewed')
   })
 
   it('quotes Yoga Sūtra 2.30 and 2.32 first, then its own verses, each one resolving', async () => {

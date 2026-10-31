@@ -14,6 +14,7 @@ export default defineConcept({
   },
   summary:
     'The Bhagavad Gita, emphasizes that we are our biggest enemy as well as the best capable to uplift our mind, hence underscoring the potential for growth in oneself through an individualistic journey guided by the right mentor or guru (Tomar, 2024).',
+  keywords: ['friend', 'enemy', 'self', 'identity', 'desires', 'conflict'],
   topics: { primary: 'self' },
   verses: [
     {
@@ -178,10 +179,12 @@ export default defineConcept({
     'vivekavani-2015',
   ],
   questionnaire: 'atma-bandhu',
-  reviewStatus: 'carried-over-not-reviewed',
+  reviewStatus: 'drafted-not-reviewed',
   provenance: {
+    drafted: ['keywords'],
     sources: [{ url: 'https://care4mind.org/frienorfoeofself/', retrieved: '2026-10-27' }],
     edits: [
+      'Keywords drafted from the page’s own words, for search; a keyword never names a modern construct or a condition.',
       'IAST transliterated for the headword and its pair, which the page writes “Atma Bandhu” and “Aatmaripu”: “ātma-bandhu” and “ātma-ripu”. The page prints no Devanagari for either, so none is stored.',
       'The page’s first heading repeats its title, “Are you a Friend/Foe of Yourself?”, and heads no text of its own; it is left out here, and is its Questionnaire’s title.',
       'Verse headings dropped: “Bhagavad Gita Shloka (Chapter 6, Verse 5)” and “Buddhist Dhammapada Verse 160”. Each verse shows its work and number.',

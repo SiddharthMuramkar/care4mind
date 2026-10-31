@@ -13,6 +13,7 @@ export default defineConcept({
     english: 'Truthfulness',
   },
   summary: 'Truth should be upheld in both thought, speech, and action.',
+  keywords: ['truth', 'truthfulness', 'honesty', 'speech', 'values'],
   topics: { primary: 'values' },
   verses: [
     {
@@ -191,8 +192,9 @@ export default defineConcept({
     'zahedi-2011',
   ],
   questionnaire: 'satya',
-  reviewStatus: 'carried-over-not-reviewed',
+  reviewStatus: 'drafted-not-reviewed',
   provenance: {
+    drafted: ['keywords'],
     sources: [
       {
         url: 'https://care4mind.org/knowyourvaluessatyatruthfulnessprofiling/',
@@ -200,6 +202,7 @@ export default defineConcept({
       },
     ],
     edits: [
+      'Keywords drafted from the page’s own words, for search; a keyword never names a modern construct or a condition.',
       'Headword split out of the compound in the page’s Yoga Sūtra 2.30 verse, “ahiṃsāsatyāsteyabrahmacaryāparigrahā” and “अहिंसासत्यास्तेयब्रह्मचर्यापरिग्रहा”, in its dictionary form: “satya”, “सत्य”. The page’s own spelling, “Satya”, is its ASCII spelling, and its English name is the gloss the page title gives, “Truthfulness”.',
       'The page title, “Know Your Values: Satya (Truthfulness) Profiling”, is its Questionnaire’s title; the Concept is named by its headword and gloss.',
       'Verse headings dropped: “Shloka for Know Your Values – Yama from Chapter 2, Sutra 30”, “Shloka for Know Your Values – Niyama from Chapter 2, Sutra 32”, “Shloka for Know Your Values – Satya from Chapter 2, Sutra 36” and “Shloka for Know Your Values – Satya from Chapter 17, Verse 15”. Each verse shows its work and number, as the census assigned them: the Yoga Sūtra for the first three, the Bhagavad Gītā for the last.',

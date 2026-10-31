@@ -9,6 +9,19 @@ import { localSource } from '@/content/source'
 // with one Concept between them, so ticket 01 wrote each check below switched off. Ticket 12,
 // the fidelity sweep, switched them on once the migration was complete: from here on they hold.
 
+/** Words a Concept's keywords never use: a construct reaches a Concept only through an explained link. */
+const MODERN_CONSTRUCTS = [
+  'anxiety',
+  'depression',
+  'stress',
+  'trauma',
+  'burnout',
+  'resilience',
+  'self-esteem',
+  'self-worth',
+  'procrastination',
+]
+
 /** The number of glossary entries ticket 05 records in its Comments, confirmed by ticket 12. */
 const GLOSSARY_ENTRIES = 78
 
@@ -119,6 +132,21 @@ describe('content v1, complete', () => {
       if (entry.concept === undefined) return [`“${name}” links to no Concept`]
       return graph.record('concept', entry.concept) ? [] : [`“${name}” links to a missing Concept`]
     })
+    expect(problems).toEqual([])
+  })
+  it('gives every Concept drafted keywords that name no modern construct or condition', () => {
+    const problems = ofKind('concept').flatMap((concept) => [
+      ...(concept.keywords.length === 0 ? [`${concept.slug} has no keywords`] : []),
+      ...(concept.provenance.drafted?.includes('keywords')
+        ? []
+        : [`${concept.slug} doesn’t name keywords as drafted`]),
+      ...concept.keywords
+        .filter((keyword) => keyword !== keyword.toLowerCase().trim() || keyword === '')
+        .map((keyword) => `${concept.slug}: “${keyword}” isn’t a plain lowercase word`),
+      ...concept.keywords
+        .filter((keyword) => MODERN_CONSTRUCTS.includes(keyword))
+        .map((keyword) => `${concept.slug}: “${keyword}” names a modern construct or condition`),
+    ])
     expect(problems).toEqual([])
   })
 })

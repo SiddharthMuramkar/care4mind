@@ -15,6 +15,7 @@ export default defineConcept({
   name: { term: { iast: 'brahmavihāra', ascii: ['Brahma Vihara', 'Brahmavihara'] } },
   summary:
     'Brahma Vihara as a construct is directly implicated to social and emotional intelligence that is vital for moral uprightness in society, emotional cultivation for well being of others thus setting a strong foundation for spiritual practice and attitudes towards life in general (Sarkar, 2019).',
+  keywords: ['kindness', 'compassion', 'joy', 'equanimity', 'love', 'meditation'],
   topics: { primary: 'practice' },
   verses: [
     {
@@ -174,10 +175,12 @@ export default defineConcept({
     'zeng-2015',
   ],
   questionnaire: 'brahma-vihara',
-  reviewStatus: 'carried-over-not-reviewed',
+  reviewStatus: 'drafted-not-reviewed',
   provenance: {
+    drafted: ['keywords'],
     sources: [{ url: 'https://care4mind.org/brahmavihara/', retrieved: '2026-10-27' }],
     edits: [
+      'Keywords drafted from the page’s own words, for search; a keyword never names a modern construct or a condition.',
       'Headword IAST: “brahmavihāra”, the design notes’ form. The page prints no IAST or Devanagari for its headword, which it writes “Brahma Vihara” (flagged).',
       'The heading over the verse, “Shlokas from Patanjali’s Yoga Sutra (Chapter 1, Sutra 33)”, is left out: the verse is shown with its work and number, Yoga Sūtra 1.33.',
       'The components’ headings, “I. Maitra”, “II. Karuna”, “III. Mudita” and “IV. Upeksha”, are term blocks, without their numbers. Their IAST and Devanagari are split out of the compound in the page’s Yoga Sūtra 1.33, in their dictionary forms: “maitrī”, “karuṇā”, “muditā”, “upekṣā”, “मैत्री”, “करुणा”, “मुदिता” and “उपेक्षा”. Their glosses are the summative table’s “Synonymous Term” column.',

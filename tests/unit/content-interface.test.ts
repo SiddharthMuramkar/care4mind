@@ -151,6 +151,7 @@ const concept: ConceptRecord = {
   slug: 'obstacles',
   name: { term: { iast: 'vighna', devanagari: 'विघ्न', ascii: ['Vigna'] }, english: 'Obstacle' },
   summary: 'A made-up summary.',
+  keywords: [],
   topics: { primary: 'mind' },
   verses: [],
   sections: [],

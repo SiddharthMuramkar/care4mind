@@ -14,6 +14,16 @@ export default defineConcept({
   },
   summary:
     'Non-violence entails refraining from causing harm to any living being through one’s thoughts, words, or actions.',
+  keywords: [
+    'non-violence',
+    'violence',
+    'harm',
+    'compassion',
+    'kindness',
+    'calm',
+    'values',
+    'ethics',
+  ],
   topics: { primary: 'values' },
   verses: [
     {
@@ -154,8 +164,9 @@ export default defineConcept({
     'tomar-2024',
   ],
   questionnaire: 'ahimsa',
-  reviewStatus: 'carried-over-not-reviewed',
+  reviewStatus: 'drafted-not-reviewed',
   provenance: {
+    drafted: ['keywords'],
     sources: [
       {
         url: 'https://care4mind.org/knowyourvaluesahimsanon-violenceprofiling/',
@@ -163,6 +174,7 @@ export default defineConcept({
       },
     ],
     edits: [
+      'Keywords drafted from the page’s own words, for search; a keyword never names a modern construct or a condition.',
       'Headword split out of the compound in the page’s Yoga Sūtra 2.30 verse, “ahiṃsāsatyāsteyabrahmacaryāparigrahā” and “अहिंसासत्यास्तेयब्रह्मचर्यापरिग्रहा”, in its dictionary form: “ahiṃsā”, “अहिंसा”. The page’s own spelling, “Ahimsa”, is its ASCII spelling, and its English name is the gloss the page title gives, “Non-Violence”.',
       'The page title, “Know Your Values: Ahimsa (Non-Violence) Profiling”, is its Questionnaire’s title; the Concept is named by its headword and gloss.',
       'Verse headings dropped: “Shloka for Know Your Values – Yama from Chapter 2, Sutra 30”, “Shloka for Know Your Values – Niyama from Chapter 2, Sutra 32” and “Shloka for Know Your Values – Ahimsa from Chapter 2, Sutra 35”. Each verse shows its work and number, the Yoga Sūtra the census assigned.',

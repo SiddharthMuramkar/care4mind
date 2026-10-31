@@ -37,6 +37,16 @@ export default defineConcept({
   },
   summary:
     'The challenges a seeker encounters on the path to liberation. The Yoga Sūtra names nine obstacles, or diversions, on the yoga path.',
+  keywords: [
+    'distraction',
+    'obstacles',
+    'doubt',
+    'laziness',
+    'illness',
+    'focus',
+    'concentration',
+    'attachment',
+  ],
   topics: { primary: 'mind' },
   verses: [
     {
@@ -348,6 +358,7 @@ export default defineConcept({
   provenance: {
     sources: [{ url: 'https://care4mind.org/vikshepa/', retrieved: '2026-10-27' }],
     edits: [
+      'Keywords drafted from the page’s own words, for search; a keyword never names a modern construct or a condition.',
       // The front-end foundation's edits (planning ticket 21), kept as it wrote them.
       'The first shloka was headed “Bhagavad Gita (Chapter 1, Sutra 30)”; its text and verse number are Yoga Sūtra 1.30, as the page’s own body says. Relabelled; the Research editor should confirm.',
       'Obstacle names in IAST and Devanagari are taken from the page’s Yoga Sūtra 1.30 shloka. The page’s headings used other forms (for example “Steyan- Steya”, “Alabdhi- Alābdhi”, “Anvastitva- Anavasthitva”); those are kept as ASCII spellings.',
@@ -384,6 +395,6 @@ export default defineConcept({
         ticket: 17,
       },
     ],
-    drafted: ['summary'],
+    drafted: ['summary', 'keywords'],
   },
 })

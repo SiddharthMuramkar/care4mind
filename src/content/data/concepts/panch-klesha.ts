@@ -31,6 +31,7 @@ export default defineConcept({
   },
   summary:
     'In the Yoga Sutra of Patanjali 2.3, the concept of five kleshas (fivefold miseries) is presented as the foundational causes of human suffering. These kleshas act as formidable obstacles on the path to spiritual liberation (moksha).',
+  keywords: ['afflictions', 'ignorance', 'attachment', 'aversion', 'anger', 'greed', 'suffering'],
   topics: { primary: 'mind' },
   verses: [
     {
@@ -363,12 +364,14 @@ export default defineConcept({
       url: 'https://dharmawiki.org/index.php/Kleshas_(%E0%A4%95%E0%A5%8D%E0%A4%B2%E0%A5%87%E0%A4%B6%E0%A4%BE%E0%A4%83)',
     },
   ],
-  reviewStatus: 'carried-over-not-reviewed',
+  reviewStatus: 'drafted-not-reviewed',
   provenance: {
+    drafted: ['keywords'],
     sources: [
       { url: 'https://care4mind.org/panchkleshavikaarprofiling/', retrieved: '2026-10-27' },
     ],
     edits: [
+      'Keywords drafted from the page’s own words, for search; a keyword never names a modern construct or a condition.',
       'IAST transliterated for the headword: “pañca kleśa”, from the page’s “Panch Klesha” and “Pancha Klesha”, with kleśa as its Yoga Sūtra 2.3 verse writes it (“kleśāḥ”). The page prints no Devanagari for the headword, so none is stored.',
       'The kleśas’ Devanagari split out of the compound in the page’s Yoga Sūtra 2.3 verse, in their dictionary forms: “अविद्या”, “अस्मिता”, “राग”, “द्वेष” and “अभिनिवेश”. Their IAST is the page’s own (“Avidyā”, “Asmitā”, “Rāga”, “Dveṣa”, “Abhiniveśa”), and the sub-headings’ spellings are kept as ASCII spellings.',
       'IAST transliterated for the sixth enemy of the peaceful mind: “mātsarya”, from the page’s “Matsarya”. The page prints no Devanagari for the six, so none is stored.',
