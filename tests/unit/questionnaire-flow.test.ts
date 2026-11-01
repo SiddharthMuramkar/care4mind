@@ -5,7 +5,9 @@ import type { QuestionnaireFormView } from '@/content'
 import { localSource, type ContentSource, createContent } from '@/content/testing'
 import {
   addressOf,
+  entryAt,
   flowReducer,
+  placeOf,
   progressOf,
   progressText,
   startFlow,
@@ -65,6 +67,16 @@ describe('the flow', () => {
     expect(state.step).toBe('part-1')
     expect(state.answers).toEqual({})
     expect(progressText(progressOf(state))).toBe('Part 1 of 4 · 0 of 45 answered')
+  })
+
+  it('starts a statement named like an object property unanswered', () => {
+    const item = { ...nth(itemsOf(1), 0), id: 'constructor' }
+    const named = { parts: [{ ...nth(form.parts, 0), items: [item] }] }
+    const state = flowReducer(startFlow(named), { type: 'next' })
+    expect(state.step).toBe('part-1')
+    expect(state.missing).toEqual(['constructor'])
+    expect(progressOf(state).answered).toBe(0)
+    expect(scoreQuestionnaire(named, {})).toEqual({ status: 'incomplete' })
   })
 
   it('counts each statement answered, once however often it changes', () => {
@@ -174,6 +186,18 @@ describe('the address', () => {
     expect(stepFromAddress('')).toBe('part-1')
     expect(stepFromAddress('?step=part-0')).toBe('part-1')
     expect(stepFromAddress('?step=elsewhere')).toBe('part-1')
+  })
+
+  it('numbers its history entries, so a traversal tells Back from Forward', () => {
+    expect(placeOf(entryAt(0))).toBe(0)
+    expect(placeOf(entryAt(3))).toBe(3)
+    expect(placeOf({ ...entryAt(2), __NA: true })).toBe(2)
+  })
+
+  it('reads no place from an entry that is not the flow’s', () => {
+    expect(placeOf(null)).toBeNull()
+    expect(placeOf({ __NA: true })).toBeNull()
+    expect(placeOf({ flowPlace: 'two' })).toBeNull()
   })
 
   it('never carries an answer', () => {

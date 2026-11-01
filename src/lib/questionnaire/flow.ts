@@ -54,7 +54,7 @@ export function partOf(step: StepId): number | null {
 }
 
 const unanswered = (state: FlowState, part: number) =>
-  (state.parts[part - 1] ?? []).filter((id) => !(id in state.answers))
+  (state.parts[part - 1] ?? []).filter((id) => !Object.hasOwn(state.answers, id))
 
 /** The furthest step open now: the first part with a statement left, else the end screen. */
 function furthest(state: FlowState): number {
@@ -110,7 +110,7 @@ export function progressOf(state: FlowState): Progress {
   return {
     part: partOf(state.step),
     parts: state.parts.length,
-    answered: ids.filter((id) => id in state.answers).length,
+    answered: ids.filter((id) => Object.hasOwn(state.answers, id)).length,
     total: ids.length,
   }
 }
@@ -124,6 +124,15 @@ export function progressText({ part, parts, answered, total }: Progress): string
 /** The address of a step: its query string, naming the step and nothing else. */
 export function addressOf(step: StepId): string {
   return `?step=${step}`
+}
+
+/** A history entry of the flow's own, numbered by its place among them. */
+export const entryAt = (place: number) => ({ flowPlace: place })
+
+/** The place of a flow entry; null for an entry the flow didn't make. */
+export function placeOf(entry: unknown): number | null {
+  if (typeof entry !== 'object' || entry === null || !('flowPlace' in entry)) return null
+  return typeof entry.flowPlace === 'number' ? entry.flowPlace : null
 }
 
 /** The step an address names; part 1 when it names none. */
