@@ -31,6 +31,9 @@ import {
   localSource,
   memorySource,
   registrySource,
+  type ContentSource,
+  type ContentKind,
+  type RecordOf,
 } from '@/content/testing'
 
 // The storage layers of the content module: the record schema, the generated registry, the

@@ -5,8 +5,7 @@ import type { ConceptCard as Card } from '@/content'
 import { cx } from '@/lib/cx'
 
 import styles from './ConceptCard.module.css'
-import { titleMorphName } from '@/components/page-turn/PageTurn'
-import { Text } from '@/components/prose'
+import { titleMorphName } from '@/components/page-turn'
 
 interface Props {
   concept: Pick<Card, 'slug' | 'name' | 'lang' | 'term' | 'english' | 'summary'>

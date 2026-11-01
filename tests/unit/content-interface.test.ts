@@ -1028,7 +1028,7 @@ describe('topics', () => {
       verse('dhammapada', 160),
       verse('yoga-sutra', 1, 30),
     ]
-    const source = sourceOf(
+    const source = memorySource(
       ...[mind, yogaSutra, dhammapada, ...quoted],
       defineConcept({
         ...concept,

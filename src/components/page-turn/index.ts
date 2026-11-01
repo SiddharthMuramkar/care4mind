@@ -1,1 +1,1 @@
-export { PageTurn, turnBack, turnForward } from './PageTurn'
+export { PageTurn, titleMorphName, turnBack, turnForward } from './PageTurn'

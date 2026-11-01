@@ -2,15 +2,12 @@ import type { Route } from 'next'
 import Link from 'next/link'
 import { ViewTransition, type CSSProperties, type ReactNode } from 'react'
 
-import { turnForward } from '@/components/page-turn'
+import { titleMorphName, turnForward } from '@/components/page-turn'
 import { LinkPreview } from '@/components/preview'
 import { Text } from '@/components/prose'
 import { hrefFor, type ConceptView, type VerseView } from '@/content'
 
-import { titleMorphName, turnForward } from '@/components/page-turn/PageTurn'
-import { LinkPreview } from '../preview/LinkPreview'
-import { statusWords } from '../StatusBadge'
-import { Text } from '../prose'
+import { statusWords } from '@/components/StatusBadge'
 import { conceptPreview, passagePreview } from './previews'
 import styles from './LinkedKnowledge.module.css'
 

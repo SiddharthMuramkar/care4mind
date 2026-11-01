@@ -8,7 +8,7 @@ import robots from '@/app/robots'
 import sitemap from '@/app/sitemap'
 import { redirects } from '@/config/redirects'
 import { siteConfig } from '@/config/site'
-import { concepts, site, topics } from '@/content'
+import { concepts, home, site, topics } from '@/content'
 import { metadataFor, shareCardText } from '@/lib/metadata'
 import { CARD_COLOURS } from '@/lib/share-card'
 
@@ -158,7 +158,10 @@ describe('a page’s metadata', () => {
     expect(await shareCardText('/concepts/vikshepa/')).toMatchObject({
       title: `${route?.title} · ${concept?.english}`,
     })
-    expect(await shareCardText('/')).toEqual({ title: siteConfig.name, description: siteConfig.tagline })
+    expect(await shareCardText('/')).toEqual({
+      title: siteConfig.name,
+      description: (await home.get()).tagline,
+    })
   })
 
   it('answers 404 for a path that is no page in this build', async () => {

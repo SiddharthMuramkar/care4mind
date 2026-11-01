@@ -13,6 +13,7 @@ import { pageTurns, prefetched, recordPageTurns } from './page-turns'
 import { inkSpreadsOn, recordInkSpreads } from './presses'
 import { READING_PAGES, readingThread, readTo } from './reading'
 import { at, MISSING, ROUTES_IN_SCOPE } from './routes'
+import { scrollPath } from './scrolling'
 
 /** Animations still moving: anything running longer than the 1 ms the reduced-motion rule allows. */
 async function movingAnimations(page: Page) {

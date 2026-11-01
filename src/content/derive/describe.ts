@@ -16,9 +16,9 @@ function count(n: number, one: string, many: string): string {
   return `${n} ${n === 1 ? one : many}`
 }
 
-function described(graph: ContentGraph, { entry, record }: PageRoute): PageDescription {
+function described(graph: ContentGraph, { entry }: PageRoute): PageDescription {
   const page = { path: entry.path, kind: entry.kind, name: entry.title }
-  const id = record?.id ?? ''
+  const id = entry.record?.id ?? ''
   switch (entry.kind) {
     case 'concept': {
       const concept = graph.record('concept', id)

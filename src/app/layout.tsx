@@ -21,7 +21,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     // Share-card URLs are absolute and name the production host, even on a preview.
     metadataBase: new URL(siteConfig.url),
-    title: { default: `${siteConfig.name}: Indian psychology` },
+    title: `${siteConfig.name}: Indian psychology`,
     description: (await home.get()).tagline,
     robots: siteConfig.indexable
       ? undefined

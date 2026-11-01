@@ -24,7 +24,6 @@ import {
 } from '@/content'
 import { capitalise } from '@/lib/text'
 import { metadataFor } from '@/lib/metadata'
-import { capitalise } from '@/lib/text'
 
 import reading from '../../reading.module.css'
 import styles from './page.module.css'

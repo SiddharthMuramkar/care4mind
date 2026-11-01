@@ -16,6 +16,7 @@ import {
   site,
   topics,
   type RouteEntry,
+  type RouteKind,
 } from '@/content'
 import { count, listed } from '@/lib/text'
 
@@ -36,7 +37,7 @@ const ABOUT = {
   start:
     'A proposal: what Indian psychology is, how Care4Mind is organised, how to read Sanskrit names and where to begin.',
   proposals: 'Features proposed beyond the brief, for the Project owner to accept or refuse.',
-} as const satisfies Partial<Record<RouteEntry['kind'], string>>
+} as const satisfies Partial<Record<RouteKind, string>>
 
 /** The 404 page's metadata: a title, and no canonical address, as it is no page of the site. */
 export const notFoundMetadata: Metadata = {
@@ -115,6 +116,7 @@ async function describe(
     case 'questionnaires':
     case 'references':
     case 'search':
+    case 'start':
     case 'proposals':
       return { name, description: ABOUT[route.kind] }
     default: {
@@ -148,7 +150,7 @@ export async function metadataFor(path: string): Promise<Metadata> {
 /** The text of the page's share card: the site's name and tagline on the homepage. */
 export async function shareCardText(path: string): Promise<{ title: string; description: string }> {
   const route = await routeAt(path)
-  if (route.kind === 'home') return { title: siteConfig.name, description: siteConfig.tagline }
+  if (route.kind === 'home') return { title: siteConfig.name, description: (await home.get()).tagline }
   const { name, description, card } = await describe(route)
   return { title: card ?? name, description }
 }

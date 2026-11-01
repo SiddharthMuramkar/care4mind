@@ -10,8 +10,8 @@ import { createContent } from '@/content/views'
 // today's content, so they run apart from `pnpm check`: a new record must not need a test edit.
 // Until the client signs off the migration, they are what guards it.
 
-const ON: Features = { questionnairePreview: true, conceptMap: true, devanagariFirst: true }
-const OFF: Features = { questionnairePreview: false, conceptMap: false, devanagariFirst: false }
+const ON: Features = { questionnairePreview: true, conceptMap: true, startHere: true }
+const OFF: Features = { questionnairePreview: false, conceptMap: false, startHere: false }
 
 const site = createContent(localSource, ON)
 
