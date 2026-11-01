@@ -5,7 +5,7 @@ import { Breadcrumbs } from '@/components/Breadcrumbs'
 import { Folio } from '@/components/Folio'
 import { PageTurn } from '@/components/PageTurn'
 import { Provenance, RecordLink, Text } from '@/components/prose'
-import { hrefFor, works, type PassageView, type RecordRef } from '@/content'
+import { hrefFor, site, works, type PassageView, type RecordRef } from '@/content'
 import { cx } from '@/lib/cx'
 import { metadataFor } from '@/lib/metadata'
 import { toDevanagariDigits } from '@/lib/text'
@@ -16,12 +16,12 @@ import styles from './page.module.css'
 
 export const dynamicParams = false
 
-export async function generateStaticParams() {
-  return (await works.list()).map(({ slug }) => ({ slug }))
-}
+const PATTERN = '/texts/[slug]/' as const
+
+export const generateStaticParams = () => site.params(PATTERN)
 
 export async function generateMetadata({ params }: PageProps<'/texts/[slug]'>): Promise<Metadata> {
-  return metadataFor(hrefFor({ kind: 'work', id: (await params).slug }))
+  return metadataFor(PATTERN.replace('[slug]', (await params).slug))
 }
 
 function Records({ records }: { records: readonly RecordRef[] }) {

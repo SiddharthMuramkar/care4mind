@@ -115,8 +115,18 @@ function conceptDocuments(concept: ConceptRecord, graph: ContentGraph): SearchDo
   return [own, ...terms]
 }
 
-/** The search corpus: every document the site's search can find, built from the content. */
+const documentsByGraph = new WeakMap<ContentGraph, SearchDocument[]>()
+
+/** The search corpus, built once per graph: every document the site's search can find. */
 export function searchDocuments(graph: ContentGraph): SearchDocument[] {
+  const cached = documentsByGraph.get(graph)
+  if (cached) return cached
+  const documents = documentsOf(graph)
+  documentsByGraph.set(graph, documents)
+  return documents
+}
+
+function documentsOf(graph: ContentGraph): SearchDocument[] {
   const concepts = graph.records('concept').flatMap((concept) => conceptDocuments(concept, graph))
 
   const glossary = graph.records('glossary').map((entry): SearchDocument => ({
