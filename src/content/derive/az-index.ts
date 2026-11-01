@@ -20,7 +20,7 @@ import type { AzEntry, AzLetter } from '../types'
 import { conceptQuotes, termsIn } from '../views/blocks'
 import { byName, must, present } from '../views/common'
 import { hrefFor } from '../views/href'
-import { asciiSpellings, displayName } from '../views/names'
+import { asciiSpellings, displayName } from '../names'
 import { conceptRef } from '../views/refs'
 
 const LETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'

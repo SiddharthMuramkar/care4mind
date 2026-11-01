@@ -36,7 +36,12 @@ export interface Flag {
 export interface Provenance {
   /** The current-site pages (or, for a record no page holds, the source) it was read from. */
   sources: readonly { url: string; retrieved: string }[]
-  /** One change each. A replacement quotes old and new text: “Negliegence” → “Negligence”. */
+  /**
+   * One change each, in plain words. A replacement quotes the old text as the page writes it and
+   * the new, in curly quotes joined by an arrow: “Negliegence” → “Negligence”; a deletion has
+   * empty new text: “[2]” → “”. Text a change adds is quoted in full. verify applies only this
+   * form, and ignores case, quote marks, dashes and spacing, which need no edit.
+   */
   edits: readonly string[]
   flags: readonly Flag[]
   /** Field paths written for the new site rather than carried over, such as `summary`. */
