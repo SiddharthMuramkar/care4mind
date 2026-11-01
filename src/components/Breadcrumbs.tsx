@@ -1,5 +1,6 @@
 import type { Route } from 'next'
 import Link from 'next/link'
+import { notFound } from 'next/navigation'
 
 import { site, type Crumb } from '@/content'
 
@@ -12,12 +13,14 @@ const langOf = (crumb: Crumb) => (crumb.lang ? { lang: crumb.lang } : {})
 /**
  * FR-01: every page below the homepage shows where it sits, as design B6 lays out (D15). The
  * trail is the route registry's, so it follows the site map; the last crumb is the page itself.
- * Going back up turns the page back.
+ * Going back up turns the page back. A path the registry doesn't list, such as a switched-off
+ * feature's, has no trail, so its page answers 404.
  */
 export async function Breadcrumbs({ path }: { path: string }) {
   const trail = await site.trail(path)
   const here = trail.at(-1)
-  if (!here || trail.length < 2) throw new Error(`No page below the homepage is at ${path}.`)
+  if (!here) notFound()
+  if (trail.length < 2) throw new Error(`No page below the homepage is at ${path}.`)
   return (
     <nav aria-label="Breadcrumb" className={styles.breadcrumbs}>
       <ol>
