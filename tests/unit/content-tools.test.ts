@@ -1012,6 +1012,8 @@ describe('new', { timeout: 30_000 }, () => {
       ['reference', 'tomar 2024'],
       ['passage', 'yoga-sutra'],
       ['passage', 'Yoga-Sutra/1.30'],
+      ['passage', 'x/1.05'],
+      ['passage', 'x/01.2'],
       ['home', 'homepage'],
       ['colour', 'red'],
     ] as const) {
