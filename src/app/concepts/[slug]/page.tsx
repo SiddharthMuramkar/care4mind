@@ -2,24 +2,26 @@ import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { ViewTransition, type CSSProperties } from 'react'
 
-import { Breadcrumbs } from '@/components/Breadcrumbs'
-import { Contents, type ContentsEntry } from '@/components/concept/Contents'
-import { LinkedKnowledge } from '@/components/concept/LinkedKnowledge'
-import { TitleSpellings } from '@/components/concept/TitleSpellings'
-import { TopicPager } from '@/components/concept/TopicPager'
-import { Folio } from '@/components/Folio'
-import { OrnamentRule } from '@/components/OrnamentRule'
-import { PageTurn } from '@/components/PageTurn'
-import { citationLinks, Provenance, Sections, Text } from '@/components/prose'
-import { VerseCard } from '@/components/prose/VerseCard'
-import { ReadingThread } from '@/components/ReadingThread'
-import { ReferenceList } from '@/components/ReferenceList'
-import { ScriptChoice, ScriptSwitch } from '@/components/ScriptChoice'
-import { SpellingsPopover } from '@/components/SpellingsPopover'
+import { Breadcrumbs } from '@/components/breadcrumbs'
+import {
+  Contents,
+  type ContentsEntry,
+  LinkedKnowledge,
+  TitleSpellings,
+  TopicPager,
+} from '@/components/concept'
+import { Folio } from '@/components/folio'
+import { OrnamentRule } from '@/components/ornaments'
+import { PageTurn } from '@/components/page-turn'
+import { citationLinks, Provenance, Sections, Text, VerseCard } from '@/components/prose'
+import { ReadingThread } from '@/components/reading-thread'
+import { ReferenceList } from '@/components/references'
+import { ScriptChoice, ScriptSwitch } from '@/components/script'
+import { SpellingsPopover } from '@/components/spellings-popover'
 import { concepts, hrefFor, type BlockView, type ConceptView, type VerseView } from '@/content'
-import { capitalise } from '@/lib/text'
 import { cx } from '@/lib/cx'
 import { metadataFor } from '@/lib/metadata'
+import { capitalise } from '@/lib/text'
 
 import reading from '../../reading.module.css'
 import styles from './page.module.css'

@@ -6,7 +6,7 @@
 import { capitalise } from '@/lib/text'
 
 import type { ContentGraph } from '../graph'
-import type { Block, ConceptRecord, PassageRecord, SanskritName, WorkRecord } from '../schema'
+import type { Block, ConceptRecord, PassageRecord, SanskritName, WorkRecord } from '../schema/index'
 import type { SearchDocument } from '../types'
 import { conceptQuotes, termsIn } from '../views/blocks'
 import { must } from '../views/common'

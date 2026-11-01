@@ -7,7 +7,7 @@ import type {
   TableRowHead,
   TermBlock,
   TopicRecord,
-} from '../schema'
+} from '../schema/index'
 import type { BlockView, SectionView, TableRowView, TocEntry, TopicRef } from '../types'
 import { must, nameCopy, present } from './common'
 import { hrefFor } from './href'

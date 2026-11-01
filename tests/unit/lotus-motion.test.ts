@@ -2,8 +2,8 @@ import { runInNewContext } from 'node:vm'
 
 import { describe, expect, it } from 'vitest'
 
-import { LotusHeadScript } from '@/components/LotusHeadScript'
-import { lotusMotionFrom } from '@/components/lotus-motion'
+import { lotusMotionFrom } from '@/components/lotus/lotus-motion'
+import { LotusHeadScript } from '@/components/lotus/LotusHeadScript'
 
 describe('lotusMotionFrom', () => {
   it('keeps the lotuses still once a pause is stored', () => {

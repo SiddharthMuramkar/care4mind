@@ -1,5 +1,5 @@
 import type { ContentGraph } from '../graph'
-import type { HomepageRecord, Target } from '../schema'
+import type { HomepageRecord, Target } from '../schema/index'
 import type { HomepageView } from '../types'
 import { carriedOver, must } from './common'
 import { hrefFor } from './href'

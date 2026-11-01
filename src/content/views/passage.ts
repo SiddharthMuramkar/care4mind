@@ -1,5 +1,5 @@
 import type { ContentGraph } from '../graph'
-import type { PassageQuote, PassageRecord, WorkRecord } from '../schema'
+import type { PassageQuote, PassageRecord, WorkRecord } from '../schema/index'
 import type { LatinScript, PassageView, VerseView, WorkRef } from '../types'
 import { byName, carriedOver, must, present } from './common'
 import { hrefFor, passageAnchor } from './href'

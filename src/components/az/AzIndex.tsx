@@ -13,7 +13,7 @@ import {
 } from 'react'
 import { flushSync } from 'react-dom'
 
-import { whenIdle } from '@/components/nav/current'
+import { whenIdle } from '@/components/hydration'
 import { cx } from '@/lib/cx'
 
 import styles from './AzIndex.module.css'

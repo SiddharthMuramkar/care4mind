@@ -1,7 +1,7 @@
 import type { Features } from '@/config/features'
 
 import type { ContentGraph } from '../graph'
-import type { QuestionnaireRecord, QuestionnaireStatus } from '../schema'
+import type { QuestionnaireRecord, QuestionnaireStatus } from '../schema/index'
 import type {
   QuestionnaireCard,
   QuestionnaireFormView,

@@ -4,7 +4,7 @@ import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
 
 import manifest from '@/app/manifest'
-import { LOTUS } from '@/components/lotus'
+import { LOTUS } from '@/components/lotus/lotus'
 
 const iconSvg = () => readFileSync('src/app/icon.svg', 'utf8')
 

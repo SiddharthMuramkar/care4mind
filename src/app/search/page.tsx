@@ -1,9 +1,9 @@
 import type { Metadata, Route } from 'next'
 import Link from 'next/link'
 
-import { Breadcrumbs } from '@/components/Breadcrumbs'
-import { Folio } from '@/components/Folio'
-import { PageTurn, turnForward } from '@/components/PageTurn'
+import { Breadcrumbs } from '@/components/breadcrumbs'
+import { Folio } from '@/components/folio'
+import { PageTurn, turnForward } from '@/components/page-turn'
 import { hrefFor, site, type SearchDocument, type SearchKind } from '@/content'
 import { metadataFor } from '@/lib/metadata'
 import { stripDiacritics } from '@/lib/sanskrit'

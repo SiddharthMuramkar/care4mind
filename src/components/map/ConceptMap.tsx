@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import { type CSSProperties, ViewTransition } from 'react'
 
-import { turnForward } from '@/components/PageTurn'
+import { turnForward } from '@/components/page-turn'
 import { hrefFor } from '@/content'
 import { toDevanagariDigits } from '@/lib/text'
 

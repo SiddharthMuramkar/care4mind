@@ -4,7 +4,7 @@
 import { stripDiacritics } from '@/lib/sanskrit'
 import { capitalise } from '@/lib/text'
 
-import type { PassageRecord, ReferenceRecord, SanskritName, WorkRecord } from '../schema'
+import type { PassageRecord, ReferenceRecord, SanskritName, WorkRecord } from '../schema/index'
 
 /**
  * The name a heading leads with (D07): the capitalised IAST term if there is one, otherwise the

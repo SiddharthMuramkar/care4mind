@@ -17,7 +17,7 @@ async function boundaryProblems(path: string, code: string): Promise<string[]> {
 }
 
 const PAGE = 'src/app/fixture/page.tsx'
-const COMPONENT = 'src/components/Fixture.tsx'
+const COMPONENT = 'src/components/fixture/Fixture.tsx'
 
 describe('the content boundary', { timeout: 30_000 }, () => {
   it('lets a page import the public interface', async () => {
@@ -35,8 +35,10 @@ describe('the content boundary', { timeout: 30_000 }, () => {
     const internal =
       "import { contentGraph } from '../content/graph'\nexport const g = contentGraph\n"
     const index = "import { getConcept } from '../content'\nexport const load = getConcept\n"
-    expect(await boundaryProblems(COMPONENT, internal)).toHaveLength(1)
-    expect(await boundaryProblems(COMPONENT, index)).toHaveLength(1)
+    // The components boundary also refuses a component's `../`, so look for the content message.
+    const relative = expect.stringContaining('Reach the content module through @/content')
+    expect(await boundaryProblems(COMPONENT, internal)).toContainEqual(relative)
+    expect(await boundaryProblems(COMPONENT, index)).toContainEqual(relative)
   })
 
   it('stops a page importing a record file or the schema', async () => {

@@ -5,7 +5,7 @@
  * generated registry of record files. A CMS source implements the same method later and nothing
  * above it changes; tests supply made-up records the same way.
  */
-import type { ContentKind, ContentRecord, RecordOf } from './schema'
+import type { ContentKind, ContentRecord, RecordOf } from './schema/index'
 
 export interface ContentSource {
   /** Every record of one kind, in the source's own order. */

@@ -1,7 +1,7 @@
 import type { VerseView } from '@/content'
 import { cx } from '@/lib/cx'
 
-import { Shloka } from '../Shloka'
+import { Shloka } from './Shloka'
 import { CopyVerse } from './CopyVerse'
 import styles from './Prose.module.css'
 

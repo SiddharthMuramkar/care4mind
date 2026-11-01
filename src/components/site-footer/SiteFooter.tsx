@@ -1,11 +1,11 @@
 import Link from 'next/link'
 
-import { siteNav } from '@/components/nav/site-nav'
-import { ProposalNote } from '@/components/proposals/ProposalNote'
+import { Logo } from '@/components/logo'
+import { siteNav } from '@/components/nav'
+import { Fleuron } from '@/components/ornaments'
+import { ProposalNote } from '@/components/proposals'
 import { site } from '@/config/site'
 
-import { Fleuron } from './Fleuron'
-import { Logo } from './Logo'
 import styles from './SiteFooter.module.css'
 
 /**

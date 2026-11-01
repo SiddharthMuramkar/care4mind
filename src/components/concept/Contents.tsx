@@ -1,9 +1,9 @@
 import type { CSSProperties } from 'react'
 
+import { Text } from '@/components/prose'
 import type { Inline } from '@/content'
 import { toDevanagariDigits } from '@/lib/text'
 
-import { Text } from '../prose'
 import styles from './Contents.module.css'
 
 /** A line of the contents: a section of the page, and the terms set inside it. */

@@ -1,5 +1,5 @@
 import type { ContentGraph, Relation } from '../graph'
-import type { Block, ConceptRecord, Slug } from '../schema'
+import type { Block, ConceptRecord, Slug } from '../schema/index'
 import type {
   ConceptCard,
   ConceptRef,

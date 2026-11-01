@@ -1,10 +1,10 @@
 import type { Metadata } from 'next'
 
-import { Breadcrumbs } from '@/components/Breadcrumbs'
-import { Citation } from '@/components/Citation'
-import { Folio } from '@/components/Folio'
-import { PageTurn } from '@/components/PageTurn'
+import { Breadcrumbs } from '@/components/breadcrumbs'
+import { Folio } from '@/components/folio'
+import { PageTurn } from '@/components/page-turn'
 import { RecordLink } from '@/components/prose'
+import { Citation } from '@/components/references'
 import { hrefFor, references } from '@/content'
 import { metadataFor } from '@/lib/metadata'
 

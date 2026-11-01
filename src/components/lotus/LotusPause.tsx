@@ -2,12 +2,12 @@
 
 import { useSyncExternalStore } from 'react'
 
+import { PauseGlyph } from '@/components/glyphs'
+import { useHydrated } from '@/components/hydration'
 import { cx } from '@/lib/cx'
 
 import { keepLotusesStill, lotusesAreStill, onLotusMotionChange } from './lotus-motion'
 import styles from './LotusPause.module.css'
-import { useHydrated } from './nav/current'
-import { PauseGlyph } from './nav/glyphs'
 
 /**
  * "Pause the lotus" (WCAG 2.2.2, Pause, Stop, Hide): stills every lotus, or sets them breathing

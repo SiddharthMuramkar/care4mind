@@ -1,6 +1,6 @@
 import { type Locator, type Page } from '@playwright/test'
 
-import { LOTUS_MOTION_KEY } from '@/components/lotus-motion'
+import { LOTUS_MOTION_KEY } from '@/components/lotus/lotus-motion'
 
 import { recordAnimationStarts, unfinishedDrawings } from './drawings'
 import { expect, gotoReady, test } from './fixtures'

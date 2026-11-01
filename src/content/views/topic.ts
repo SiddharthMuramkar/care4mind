@@ -1,5 +1,5 @@
 import type { ContentGraph } from '../graph'
-import type { TopicRecord } from '../schema'
+import type { TopicRecord } from '../schema/index'
 import type { TopicCard, TopicView, WorkRef } from '../types'
 import { conceptQuotes, sectionViews, tocOf, topicRef, type Owner } from './blocks'
 import { byName, carriedOver, must, nameCopy, present } from './common'

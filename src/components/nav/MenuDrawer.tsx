@@ -5,11 +5,11 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import type { CSSProperties, MouseEvent, ReactNode, RefObject } from 'react'
 
-import { Fleuron } from '@/components/Fleuron'
+import { CloseGlyph } from '@/components/glyphs'
+import { Fleuron } from '@/components/ornaments'
 import { toDevanagariDigits } from '@/lib/text'
 
 import { currentFor, panelOf } from './current'
-import { CloseGlyph } from './glyphs'
 import styles from './MenuDrawer.module.css'
 import type { SiteNav } from './types'
 

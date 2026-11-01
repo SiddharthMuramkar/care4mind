@@ -1,0 +1,1 @@
+export { SpellingsPopover } from './SpellingsPopover'

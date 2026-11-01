@@ -1,10 +1,10 @@
 import Link from 'next/link'
 import type { CSSProperties } from 'react'
 
+import { turnForward } from '@/components/page-turn'
 import { hrefFor, type BlockView, type SectionView, type TopicRef } from '@/content'
 
-import { turnForward } from '../PageTurn'
-import { SanskritTerm } from '../SanskritTerm'
+import { SanskritTerm } from './SanskritTerm'
 import styles from './Prose.module.css'
 import { Text, type CitationLinks } from './Text'
 import { VerseCard } from './VerseCard'

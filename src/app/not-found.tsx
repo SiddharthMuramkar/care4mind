@@ -1,13 +1,13 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 
-import { Fleuron } from '@/components/Fleuron'
-import { Folio } from '@/components/Folio'
-import { PageTurn, turnForward } from '@/components/PageTurn'
+import { cta } from '@/components/cta'
+import { Folio } from '@/components/folio'
+import { Fleuron } from '@/components/ornaments'
+import { PageTurn, turnForward } from '@/components/page-turn'
 import { concepts, hrefFor } from '@/content'
 import { notFoundMetadata } from '@/lib/metadata'
 
-import cta from './cta.module.css'
 import reading from './reading.module.css'
 import styles from './not-found.module.css'
 

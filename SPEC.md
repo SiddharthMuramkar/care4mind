@@ -15,6 +15,7 @@ Each module is named by its capability, and outside code reaches it only through
 - **Records**: one file per record. Each is default-exported through its kind's `define…` helper from `@/content/schema`, and points at other records by id only. The registry that lists them is generated. _Types, the graph's dangling-id check, the content tests, and the registry that `pnpm check` and every test run write afresh._
 - **Addresses**: every internal link comes from `hrefFor()`. _Lint: `care4mind/href-from-hreffor`._
 - **Pages**: App Router routes that read content only through `@/content`. `site.routes()` is the one list of public pages, and the sitemap, page metadata, the navigation and the link crawler read it. _Tests: content-derive, routes; browser: crawler._
+- **Components**: one folder per module in `src/components/`, named for it, whose `index.ts` is its interface. Other code imports `@/components/<module>`, never a file inside it, and a component reaches beyond its own folder only that way. An index exports only what other modules use, so an island loaded lazily stays out of it, and a module that a client file imports holds nothing that reads content. Only the app imports from `src/app`. _Lint: the components boundary, with its own test (components-boundary)._
 - **Feature flags**: `features`, read once at build, on the server. A client component gets a flag as a prop. A feature that's built but not yet approved for launch is on in previews and off in production. _Tests: features. Review for the server-only reading._
 - **Redirects**: one table, each entry served as a 301. _Tests: redirects (unit and browser)._
 - **Questionnaire flow**: one reducer holds a person's answers, and nothing else does (no storage, cookies, address or request). No record stores scoring until the Psychology expert's rules arrive. _Types (`scoring.status` is `'pending'`), the content-integrity "held back" test, review._
@@ -37,6 +38,7 @@ These are judgement calls, so review checks them against the diff, in the codeba
 | --- | --- |
 | Pages read content only through `@/content`; a client file imports it for types only | lint (content boundary) and its test |
 | Internal links come from `hrefFor()` | lint (`care4mind/href-from-hreffor`) |
+| A component module is reached only through its `index.ts`; only the app imports from `src/app` | lint (components boundary) and its test, which also checks every component sits in a module folder with an index |
 | Every link between records resolves | the graph, at build and in every content test |
 | Sanskrit is NFC with ṃ; each name field holds one script, in characters the fonts cover | content-integrity test |
 | The registry is generated, not edited | git ignores it, `pnpm check` and every test run write it afresh, and the guard refuses edits under `src/content/generated/` |
@@ -69,6 +71,7 @@ These are judgement calls, so review checks them against the diff, in the codeba
   7. The tools behind `content:new` and `verify`.
   8. GLOSSARY.md.
 - **A page:** a route that reads `@/content`. Its address is an `hrefFor()` target, and its entry in `site.routes()` puts it in the sitemap, breadcrumbs and crawler.
+- **A component:** a file in its module's folder, exported from that folder's `index.ts` once another module uses it. A new module is a new folder with its own `index.ts`.
 - **A topic:** its record, plus its colour token, its `[data-topic]` rule and its contrast pair. Nothing checks the last three yet (#81).
 - **A colour, duration or easing:** a token in the global stylesheet. A colour pair that carries text joins the contrast list.
 - **A feature awaiting the Project owner's approval:** a flag in `features`.

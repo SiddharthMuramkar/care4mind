@@ -1,13 +1,13 @@
 import Link from 'next/link'
 import { ViewTransition } from 'react'
 
+import { turnForward } from '@/components/page-turn'
+import { Text } from '@/components/prose'
 import { hrefFor, type QuestionnaireCard as Card, type QuestionnaireStatus } from '@/content'
 import { cx } from '@/lib/cx'
 import { shownStatus, statusWords } from '@/lib/questionnaire/gate'
 
 import styles from './ConceptCard.module.css'
-import { turnForward } from './PageTurn'
-import { Text } from './prose/Text'
 import own from './QuestionnaireCard.module.css'
 
 /**

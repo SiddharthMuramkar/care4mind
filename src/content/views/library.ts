@@ -1,5 +1,5 @@
 import type { ContentGraph } from '../graph'
-import type { PageRecord, ResourceListRecord } from '../schema'
+import type { PageRecord, ResourceListRecord } from '../schema/index'
 import type { LibraryCard, PageView, ResourceListView } from '../types'
 import { sectionViews, tocOf, type Owner } from './blocks'
 import { carriedOver, must, present } from './common'

@@ -1,8 +1,8 @@
 import Link from 'next/link'
 import { ViewTransition } from 'react'
 
-import { turnForward } from '@/components/PageTurn'
-import { ScriptPair } from '@/components/script/ScriptPair'
+import { turnForward } from '@/components/page-turn'
+import { ScriptPair } from '@/components/script'
 import { hrefFor, type TopicCard as Topic } from '@/content'
 import { cx } from '@/lib/cx'
 import { toDevanagariDigits } from '@/lib/text'

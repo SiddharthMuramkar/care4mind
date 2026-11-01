@@ -1,9 +1,9 @@
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 
-import { Breadcrumbs } from '@/components/Breadcrumbs'
-import { Folio } from '@/components/Folio'
-import { PageTurn } from '@/components/PageTurn'
+import { Breadcrumbs } from '@/components/breadcrumbs'
+import { Folio } from '@/components/folio'
+import { PageTurn } from '@/components/page-turn'
 import { Provenance, RecordLink, Text } from '@/components/prose'
 import { hrefFor, works, type PassageView, type RecordRef } from '@/content'
 import { cx } from '@/lib/cx'

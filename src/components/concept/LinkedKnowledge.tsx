@@ -2,12 +2,12 @@ import type { Route } from 'next'
 import Link from 'next/link'
 import { ViewTransition, type CSSProperties, type ReactNode } from 'react'
 
+import { turnForward } from '@/components/page-turn'
+import { LinkPreview } from '@/components/preview'
+import { Text } from '@/components/prose'
 import { hrefFor, type ConceptView, type VerseView } from '@/content'
 import { statusWords } from '@/lib/questionnaire/gate'
 
-import { turnForward } from '../PageTurn'
-import { LinkPreview } from '../preview/LinkPreview'
-import { Text } from '../prose'
 import { conceptPreview, passagePreview } from './previews'
 import styles from './LinkedKnowledge.module.css'
 

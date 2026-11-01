@@ -22,7 +22,7 @@ import {
   type Section,
   type Slug,
   type Target,
-} from './schema'
+} from './schema/index'
 import { localSource, type ContentSource } from './source'
 import type { RelationKind } from './types'
 import { displayName, passageLabel, referenceLabel } from './views/names'

@@ -1,11 +1,11 @@
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 
-import { Breadcrumbs } from '@/components/Breadcrumbs'
-import { Citation } from '@/components/Citation'
-import { Folio } from '@/components/Folio'
-import { PageTurn } from '@/components/PageTurn'
+import { Breadcrumbs } from '@/components/breadcrumbs'
+import { Folio } from '@/components/folio'
+import { PageTurn } from '@/components/page-turn'
 import { Provenance, Sections, Text } from '@/components/prose'
+import { Citation } from '@/components/references'
 import { library, type ResourceItemView } from '@/content'
 import { metadataFor } from '@/lib/metadata'
 
