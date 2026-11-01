@@ -17,8 +17,8 @@
 }
 
 .passage:target {
-  background: color-mix(in srgb, var(--color-highlight) 8%, transparent);
-  box-shadow: 0 0 0 0.75rem color-mix(in srgb, var(--color-highlight) 8%, transparent);
+  background: var(--color-highlight-wash-8);
+  box-shadow: 0 0 0 0.75rem var(--color-highlight-wash-8);
 }
 
 .locator {
