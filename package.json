@@ -24,6 +24,7 @@
     "shots": "node scripts/shots.mjs",
     "icons": "node scripts/icons.mjs",
     "content:new": "node scripts/content/new.mjs",
+    "content:fidelity": "vitest run --config vitest.fidelity.config.ts",
     "ruleset:check": "node scripts/github/ruleset.mjs",
     "ruleset:apply": "node scripts/github/apply-ruleset.mjs",
     "prepare": "node scripts/githooks/install.mjs"

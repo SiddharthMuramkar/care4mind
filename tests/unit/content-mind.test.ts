@@ -193,17 +193,6 @@ const tablesIn = (blocks: readonly BlockView[]): TableView[] =>
   )
 
 describe('the mind topic', () => {
-  it('holds the five mind Concepts as its own, vikṣepa’s among them', async () => {
-    const mind = await topics.get('mind')
-    expect(mind?.concepts.map(({ slug }) => slug).sort()).toEqual([
-      'chittabhumi',
-      'panch-klesha',
-      'sthitaprajna',
-      'upa-vikshepa',
-      'vikshepa',
-    ])
-  })
-
   it('puts Sthitaprajña in the self topic too', async () => {
     const sthitaprajna = await concepts.get('sthitaprajna')
     expect(sthitaprajna?.secondaryTopics.map(({ slug }) => slug)).toEqual(['self'])

@@ -817,6 +817,44 @@ describe('the verify command', { timeout: 30_000 }, () => {
     expect(result.status).toBe(2)
     expect(result.stderr).toContain('node scripts/content/registry.mjs')
   })
+
+  describe('with a fidelity suite', () => {
+    /** A repo whose one record passes, and whose fidelity suite pins `pinned` Concepts. */
+    const pinning = (name: string, pinned: number) => {
+      const pinnedRoot = repo(name, {
+        'concepts/udaharana.ts': recordFile(concept(paragraphs('Every rule needs an example.'))),
+      })
+      writeFileSync(join(pinnedRoot, 'package.json'), '{ "type": "module" }\n')
+      writeFileSync(
+        join(pinnedRoot, 'vitest.fidelity.config.ts'),
+        "export default { test: { include: ['tests/fidelity/**/*.test.ts'], globals: true } }\n",
+      )
+      mkdirSync(join(pinnedRoot, 'tests/fidelity'), { recursive: true })
+      writeFileSync(
+        join(pinnedRoot, 'tests/fidelity/pins.test.ts'),
+        `it('pins the Concepts', () => expect(1).toBe(${pinned}))\n`,
+      )
+      return pinnedRoot
+    }
+
+    it('runs it after checking every record, and exits 1 when a pin fails', () => {
+      const env = { CARE4MIND_CAPTURES: site }
+      const held = run('verify', ['--root', pinning('fidelity-held', 1)], env)
+      expect(held.stdout).toContain('fidelity: the migration’s pins hold')
+      expect(held.status).toBe(0)
+
+      const broken = run('verify', ['--root', pinning('fidelity-broken', 2)], env)
+      expect(broken.stdout).toContain('fidelity: a migration pin fails')
+      expect(broken.status).toBe(1)
+    })
+
+    it('leaves it out when only some records are named', () => {
+      const env = { CARE4MIND_CAPTURES: site }
+      const result = run('verify', ['--root', pinning('fidelity-named', 2), 'concept'], env)
+      expect(result.stdout).not.toContain('fidelity:')
+      expect(result.status).toBe(0)
+    })
+  })
 })
 
 describe('report', () => {

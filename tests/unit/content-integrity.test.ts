@@ -19,8 +19,8 @@ import {
 import { isNormalisedSanskrit } from '@/lib/sanskrit'
 
 // Every content rule of the content-v1 spec (Testing Decisions → Integrity), run over every real
-// record, read through the content source. They hold from ticket 01 on: a record that breaks one
-// fails CI. Rules that can only pass once all content has arrived are in content-completeness.
+// record, read through the content source. They hold for any amount of content: a record that
+// breaks one fails CI. What the migration carried over is pinned apart, in tests/fidelity.
 
 let records: ContentRecord[] = []
 let graph: ContentGraph
@@ -28,7 +28,7 @@ let graph: ContentGraph
 beforeAll(async () => {
   records = (await Promise.all(CONTENT_KINDS.map((kind) => localSource.records(kind)))).flat()
   graph = await contentGraph()
-})
+}, 60_000)
 
 function ofKind<K extends ContentRecord['kind']>(kind: K): RecordOf<K>[] {
   return records.filter((record): record is RecordOf<K> => record.kind === kind)
@@ -517,3 +517,60 @@ function characterMap(file: string): Set<number> {
   }
   return points
 }
+
+describe('links between records', () => {
+  it('gives every topic a Concept', () => {
+    const empty = ofKind('topic')
+      .filter((topic) => graph.conceptsInTopic(topic.slug).primary.length === 0)
+      .map((topic) => topic.slug)
+    expect(empty).toEqual([])
+  })
+
+  it('has every Reference cited by a record', () => {
+    const uncited = ofKind('reference')
+      .filter((reference) => graph.citedBy(reference.id).length === 0)
+      .map((reference) => reference.id)
+    expect(uncited).toEqual([])
+  })
+
+  it('has every passage quoted', () => {
+    const unquoted = ofKind('passage')
+      .filter((passage) => graph.quotedIn(passage.id).length === 0)
+      .map((passage) => passage.id)
+    expect(unquoted).toEqual([])
+  })
+
+  it('gives every work a passage', () => {
+    const empty = ofKind('work')
+      .filter((work) => !ofKind('passage').some((passage) => passage.work === work.slug))
+      .map((work) => work.slug)
+    expect(empty).toEqual([])
+  })
+})
+
+/** Modern constructs a Concept's keywords never name, as stems at the start of a word, so 'stressed' and 'self esteem' are refused but 'distress' is not: a construct reaches a Concept only through an explained link. */
+const namesModernConstruct = (keyword: string) =>
+  /\b(anxi|depress|stress|trauma|burnout|resilien|self[- ]?(esteem|worth)|procrastinat)/.test(
+    keyword,
+  )
+
+describe('keywords', () => {
+  it('gives every Concept drafted keywords that name no modern construct or condition', () => {
+    const problems = ofKind('concept').flatMap((concept) => [
+      ...(concept.keywords.length === 0 ? [`${concept.slug} has no keywords`] : []),
+      ...(concept.provenance.drafted?.includes('keywords')
+        ? []
+        : [`${concept.slug} doesn’t name keywords as drafted`]),
+      ...concept.keywords
+        .filter((keyword) => keyword !== keyword.toLowerCase().trim() || keyword === '')
+        .map((keyword) => `${concept.slug}: “${keyword}” isn’t a plain lowercase word`),
+      ...concept.keywords
+        .filter((keyword) => namesModernConstruct(keyword))
+        .map((keyword) => `${concept.slug}: “${keyword}” names a modern construct or condition`),
+      ...concept.keywords
+        .filter((keyword, index) => concept.keywords.indexOf(keyword) !== index)
+        .map((keyword) => `${concept.slug}: “${keyword}” is listed twice`),
+    ])
+    expect(problems).toEqual([])
+  })
+})
