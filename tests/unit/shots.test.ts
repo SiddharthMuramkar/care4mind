@@ -1,7 +1,9 @@
+import { createServer, type Server } from 'node:http'
+import type { AddressInfo } from 'node:net'
 import { resolve } from 'node:path'
 import { pathToFileURL } from 'node:url'
 
-import { beforeAll, describe, expect, it } from 'vitest'
+import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
 import { site, type RouteEntry } from '@/content'
 
@@ -26,6 +28,7 @@ interface Shot {
 const shots = (await import(pathToFileURL(resolve('scripts/shots.mjs')).href)) as {
   parseArgs(argv: readonly string[]): Options
   planShots(options: Options, routes: readonly RouteEntry[]): Shot[]
+  describeServer(port: number, buildId: string | null): Promise<string>
 }
 
 const route = (path: string, kind: RouteEntry['kind'], sample?: true): RouteEntry => ({
@@ -183,5 +186,35 @@ describe('pnpm shots over the route registry', () => {
     const names = shots.planShots(shots.parseArgs(['--only', everyPath, '--widths', '360']), routes)
     expect(names).toHaveLength(routes.length)
     expect(new Set(names.map((shot) => shot.file)).size).toBe(routes.length)
+  })
+})
+
+describe('pnpm shots on a server already running', () => {
+  let server: Server
+  let port: number
+
+  beforeAll(async () => {
+    // A stand-in for `pnpm start`: it serves the build manifest of build "ours" only.
+    server = createServer((request, response) => {
+      response.statusCode = request.url === '/_next/static/ours/_buildManifest.js' ? 200 : 404
+      response.end()
+    })
+    await new Promise<void>((done) => server.listen(0, 'localhost', done))
+    port = (server.address() as AddressInfo).port
+  })
+  afterAll(() => new Promise<void>((done) => server.close(() => done())))
+
+  it('says when it is this checkout’s build', async () => {
+    const said = await shots.describeServer(port, 'ours')
+    expect(said).toContain(`port ${port}`)
+    expect(said).toMatch(/this checkout’s build \(ours\)/)
+  })
+
+  it('warns when it is another build', async () => {
+    expect(await shots.describeServer(port, 'theirs')).toMatch(/not this checkout’s build/)
+  })
+
+  it('warns when this checkout has no build', async () => {
+    expect(await shots.describeServer(port, null)).toMatch(/not this checkout’s build/)
   })
 })

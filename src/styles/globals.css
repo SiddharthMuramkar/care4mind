@@ -1,33 +1,82 @@
 @import 'tailwindcss';
 
 /*
+ * Press: a scholar's edition. Indigo ink grounds, paper folios, turmeric and vermilion.
+ * The primitive palette: each colour written once. Outside @theme, so Tailwind makes no
+ * utilities of them; components read the colour tokens below, which name each one's role.
+ */
+:root {
+  --press-indigo: #151a3d;
+  --press-indigo-wash: #232a5c;
+  --press-indigo-rule: #3b4178;
+  --press-night: #0b0d1f;
+  --press-cream: #f3ecdc;
+  --press-lilac: #c9c2d8;
+  --press-turmeric: #f0b429;
+  --press-turmeric-light: #f6c453;
+  --press-paper: #eadbb6;
+  --press-paper-light: #f1e6c8;
+  --press-paper-fresh: #f6eedb;
+  --press-paper-ink: #1d1a2e;
+  --press-umber: #5a4a2e;
+  --press-rule: #8c7a55;
+  --press-vermilion: #c8342a;
+  --press-vermilion-dark: #9c2a1f;
+  --press-white: #ffffff;
+  --press-rose: #b44d6b;
+  --press-blue: #2f7fa3;
+  --press-ochre: #b8661f;
+  --press-green: #3f8a4a;
+  --press-violet: #7d5fb8;
+  --press-mint: #79c795;
+  --press-sky: #8fd0f5;
+  --press-night-deep: #05061a;
+  --press-turmeric-deep: #8a5b00;
+}
+
+/*
  * Design tokens. Every colour, type step, duration and easing is declared once
  * here; components use the generated utilities (bg-ground, text-ink, …) or the
  * variables directly. Colour tokens are semantic, so each text/background pair
- * in tests/unit/contrast.test.ts is checked for WCAG AA contrast.
+ * in src/lib/contrast.ts is checked for WCAG AA contrast, mixed colours included.
  */
 @theme {
-  /* Press: a scholar's edition. Indigo ink grounds, paper folios, turmeric and vermilion. */
-  --color-ground: #151a3d;
-  --color-ink: #f3ecdc;
-  --color-ink-muted: #c9c2d8;
-  --color-link: #f6c453;
-  --color-surface: #eadbb6;
-  --color-surface-ink: #1d1a2e;
-  --color-surface-muted: #5a4a2e;
-  --color-surface-link: #9c2a1f;
-  --color-surface-focus: #151a3d;
-  --color-accent: #f0b429;
-  --color-accent-ink: #151a3d;
-  --color-highlight: #c8342a;
-  --color-highlight-ink: #ffffff;
-  --color-focus: #f6c453;
-  --color-line: #3b4178;
+  --color-ground: var(--press-indigo);
+  --color-ink: var(--press-cream);
+  --color-ink-muted: var(--press-lilac);
+  --color-link: var(--press-turmeric-light);
+  --color-surface: var(--press-paper);
+  --color-surface-ink: var(--press-paper-ink);
+  --color-surface-muted: var(--press-umber);
+  --color-surface-link: var(--press-vermilion-dark);
+  --color-surface-focus: var(--press-indigo);
+  --color-accent: var(--press-turmeric);
+  --color-accent-ink: var(--press-indigo);
+  --color-highlight: var(--press-vermilion);
+  --color-highlight-ink: var(--press-white);
+  --color-focus: var(--press-turmeric-light);
+  --color-line: var(--press-indigo-rule);
   /* Decorative only, never behind or as text: */
-  --color-ink-wash: #232a5c;
-  --color-surface-rule: #8c7a55;
+  --color-ink-wash: var(--press-indigo-wash);
+  --color-surface-rule: var(--press-rule);
+  /* The hard shadow a raised button stands on: the accent's, and the ground-coloured button's. */
+  --color-accent-shadow: var(--press-turmeric-deep);
+  --color-ground-shadow: var(--press-night-deep);
   /* The ink a pressed control spreads under its label: vermilion at 70%, translucent over the control. */
-  --color-ink-spread: #c8342ab3;
+  --color-ink-spread: color-mix(in srgb, var(--color-highlight) 70%, transparent);
+
+  /* An A–Z letter with nothing under it: greyed on the paper, still legible. */
+  --color-surface-blank: color-mix(in srgb, var(--color-surface-muted) 90%, var(--color-surface));
+  /* Paper lightened toward the cream, by the share of cream, for slips and plates that carry text. */
+  --color-surface-pale-18: color-mix(in srgb, var(--color-ink) 18%, var(--color-surface));
+  --color-surface-pale-30: color-mix(in srgb, var(--color-ink) 30%, var(--color-surface));
+  --color-surface-pale-40: color-mix(in srgb, var(--color-ink) 40%, var(--color-surface));
+  --color-surface-pale-45: color-mix(in srgb, var(--color-ink) 45%, var(--color-surface));
+  --color-surface-pale-50: color-mix(in srgb, var(--color-ink) 50%, var(--color-surface));
+  /* A vermilion wash behind text on the paper: the entry a link leads to, a lit row. Translucent. */
+  --color-highlight-wash-8: color-mix(in srgb, var(--color-highlight) 8%, transparent);
+  --color-highlight-wash-9: color-mix(in srgb, var(--color-highlight) 9%, transparent);
+  --color-highlight-wash-10: color-mix(in srgb, var(--color-highlight) 10%, transparent);
 
   /* Added once the page is painted (LateFonts). Until then headings are set in Text Regular, and Devanagari in a system font. */
   --font-playfair-display: playfairDisplay;
@@ -55,51 +104,51 @@
    * Topic hues (design B3), for drawings only: lozenges, rules, leaders and swatches. Never text:
    * a topic is always named in words. Each keeps 3:1 against the indigo ground and the paper alike.
    */
-  --color-topic-self: #b44d6b;
-  --color-topic-mind: #2f7fa3;
-  --color-topic-practice: #b8661f;
-  --color-topic-values: #3f8a4a;
-  --color-topic-temperament: #7d5fb8;
+  --color-topic-self: var(--press-rose);
+  --color-topic-mind: var(--press-blue);
+  --color-topic-practice: var(--press-ochre);
+  --color-topic-values: var(--press-green);
+  --color-topic-temperament: var(--press-violet);
 
   /* A Questionnaire's status (D16) as a badge, its text on its ground. Always written in words. */
-  --color-status-live: #79c795;
-  --color-status-live-ink: #151a3d;
-  --color-status-preview: #f0b429;
-  --color-status-preview-ink: #151a3d;
-  --color-status-soon: #c9c2d8;
-  --color-status-soon-ink: #151a3d;
-  --color-status-later: #3b4178;
-  --color-status-later-ink: #f3ecdc;
+  --color-status-live: var(--press-mint);
+  --color-status-live-ink: var(--press-indigo);
+  --color-status-preview: var(--press-turmeric);
+  --color-status-preview-ink: var(--press-indigo);
+  --color-status-soon: var(--press-lilac);
+  --color-status-soon-ink: var(--press-indigo);
+  --color-status-later: var(--press-indigo-rule);
+  --color-status-later-ink: var(--press-cream);
 
   /* The Proposal label (D20): an editor's blue pencil, on any ground. */
-  --color-proposal: #8fd0f5;
-  --color-proposal-ink: #151a3d;
+  --color-proposal: var(--press-sky);
+  --color-proposal-ink: var(--press-indigo);
 
   /* Surfaces that rise over the page. Paper ones take surface-link and surface-focus for links and focus. */
   /* Navigation panels: index cards hung from the header. */
-  --color-panel: #f1e6c8;
-  --color-panel-ink: #1d1a2e;
-  --color-panel-muted: #5a4a2e;
-  --color-panel-line: #8c7a55;
+  --color-panel: var(--press-paper-light);
+  --color-panel-ink: var(--press-paper-ink);
+  --color-panel-muted: var(--press-umber);
+  --color-panel-line: var(--press-rule);
   /* The Drawer: a fresh page slid over the site. */
-  --color-drawer: #f6eedb;
-  --color-drawer-ink: #1d1a2e;
-  --color-drawer-muted: #5a4a2e;
-  --color-drawer-line: #8c7a55;
+  --color-drawer: var(--press-paper-fresh);
+  --color-drawer-ink: var(--press-paper-ink);
+  --color-drawer-muted: var(--press-umber);
+  --color-drawer-line: var(--press-rule);
   /* Link previews: a slip of paper, ruled off from the page it lies on. */
-  --color-preview: #f6eedb;
-  --color-preview-ink: #1d1a2e;
-  --color-preview-muted: #5a4a2e;
-  --color-preview-line: #8c7a55;
+  --color-preview: var(--press-paper-fresh);
+  --color-preview-ink: var(--press-paper-ink);
+  --color-preview-muted: var(--press-umber);
+  --color-preview-line: var(--press-rule);
   /* Toasts: a dark slip edged in turmeric, clear on indigo and on paper. */
-  --color-toast: #232a5c;
-  --color-toast-ink: #f3ecdc;
-  --color-toast-muted: #c9c2d8;
-  --color-toast-line: #f0b429;
+  --color-toast: var(--press-indigo-wash);
+  --color-toast-ink: var(--press-cream);
+  --color-toast-muted: var(--press-lilac);
+  --color-toast-line: var(--press-turmeric);
 
   /* Behind a modal Drawer; and the shadow at a scrolling table's edge. Translucent. */
-  --color-backdrop: #0b0d1fb3;
-  --color-scroll-shadow: #0b0d1f59;
+  --color-backdrop: color-mix(in srgb, var(--press-night) 70%, transparent);
+  --color-scroll-shadow: color-mix(in srgb, var(--press-night) 35%, transparent);
 
   /*
    * The header sticks to the top of the screen. Sticky parts (tables of contents, letter and

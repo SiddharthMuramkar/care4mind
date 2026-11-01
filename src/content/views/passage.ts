@@ -3,7 +3,7 @@ import type { PassageQuote, PassageRecord, WorkRecord } from '../schema'
 import type { LatinScript, PassageView, VerseView, WorkRef } from '../types'
 import { byName, carriedOver, must, present } from './common'
 import { hrefFor, passageAnchor } from './href'
-import { displayName, passageLabel } from './names'
+import { displayName, passageLabel } from '../names'
 import { recordRef } from './refs'
 
 /** Reading order of two locators as numbers: 1.2 before 1.20 before 2.3. */

@@ -5,16 +5,17 @@ import { describe, expect, it } from 'vitest'
 
 import manifest from '@/app/manifest'
 import { LOTUS } from '@/components/lotus'
+import { customProperties, resolveColour } from '@/lib/contrast'
 
 const iconSvg = () => readFileSync('src/app/icon.svg', 'utf8')
 
-/** Every colour token in the global stylesheet, by name: ground → #151a3d. */
+/** Every colour token in the global stylesheet, by name, resolved: ground → #151a3d. */
 function colourTokens(): Map<string, string> {
-  const css = readFileSync('src/styles/globals.css', 'utf8')
+  const declarations = customProperties(readFileSync('src/styles/globals.css', 'utf8'))
   return new Map(
-    [...css.matchAll(/--color-([a-z-]+):\s*(#[0-9a-f]{3,8})\s*;/gi)].map(
-      ([, name = '', hex = '']) => [name, hex.toLowerCase()],
-    ),
+    Object.entries(declarations)
+      .filter(([name]) => name.startsWith('--color-'))
+      .map(([name, value]) => [name.slice('--color-'.length), resolveColour(value, declarations)]),
   )
 }
 

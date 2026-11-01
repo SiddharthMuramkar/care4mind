@@ -6,6 +6,7 @@ import { hrefFor, type BlockView, type SectionView, type TopicRef } from '@/cont
 import { turnForward } from '../PageTurn'
 import { SanskritTerm } from '../SanskritTerm'
 import styles from './Prose.module.css'
+import { standingIn } from './standing-in'
 import { Text, type CitationLinks } from './Text'
 import { VerseCard } from './VerseCard'
 
@@ -176,18 +177,6 @@ export function Blocks({
   return blocks.map((block, index) => (
     <Block key={index} block={block} citations={citations} level={level} />
   ))
-}
-
-/**
- * The topic introduction a section stands in for: a section holding nothing but a shared topic
- * introduction whose own section has the same id and heading (the values Concepts' yama–niyama
- * section). Drawn in the section's place, its heading shows once and its anchor stays unique.
- */
-function standingIn(section: SectionView) {
-  const [only, ...rest] = section.blocks
-  if (only?.kind !== 'topic-intro' || rest.length > 0) return undefined
-  const own = only.sections.find((inner) => inner.id === section.id)
-  return own && { own, others: only.sections.filter((inner) => inner !== own), topic: only.topic }
 }
 
 /** How a section's role is named above its heading (D05). */
