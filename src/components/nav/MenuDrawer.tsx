@@ -17,7 +17,7 @@ export interface MenuDrawerProps {
   nav: SiteNav
   open: boolean
   onOpenChange: (open: boolean) => void
-  /** The Menu control, where focus goes back to as the Drawer closes. */
+  /** The Menu control, where focus goes back to as the Drawer closes, if it can still be seen. */
   returnFocus: RefObject<HTMLElement | null>
   search?: ReactNode
   mapNote?: ReactNode
@@ -40,16 +40,22 @@ export function MenuDrawer({
   const closeOnLink = (event: MouseEvent) => {
     if (event.target instanceof Element && event.target.closest('a[href]')) onOpenChange(false)
   }
+  const focusOnClose = () => {
+    const menu = returnFocus.current
+    if (!menu || menu.checkVisibility()) return menu
+    // From 72rem the Menu is hidden and can't take focus, so the first header section takes it.
+    return menu.closest('header')?.querySelector<HTMLElement>('nav a[href]') ?? null
+  }
 
   return (
     <Drawer.Root open={open} onOpenChange={(next) => onOpenChange(next)} swipeDirection="right">
       <Drawer.Portal>
         <Drawer.Backdrop className={styles.backdrop} />
         <Drawer.Viewport className={styles.viewport}>
-          <Drawer.Popup className={styles.sheet} finalFocus={returnFocus}>
-            {/* A link's click closes the Drawer; the link itself is the keyboard's way in. */}
-            {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */}
-            <div className={styles.body} onClick={closeOnLink}>
+          <Drawer.Popup className={styles.sheet} finalFocus={focusOnClose}>
+            {/* Content lets a mouse select text instead of swiping. A link's click closes the
+                Drawer; the link itself is the keyboard's way in. */}
+            <Drawer.Content className={styles.body} onClick={closeOnLink}>
               <div className={styles.head}>
                 <Drawer.Title className={styles.title}>Menu</Drawer.Title>
                 <Drawer.Close className={styles.close}>
@@ -103,7 +109,7 @@ export function MenuDrawer({
                 </ol>
               </nav>
               <Fleuron className={styles.fleuron} />
-            </div>
+            </Drawer.Content>
           </Drawer.Popup>
         </Drawer.Viewport>
       </Drawer.Portal>

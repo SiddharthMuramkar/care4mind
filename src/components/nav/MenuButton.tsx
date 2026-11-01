@@ -52,6 +52,17 @@ export function MenuButton({ nav, search, mapNote }: Props) {
     return whenIdle(() => void load())
   }, [load])
 
+  // A tablet turned to landscape, or a window widened, shows the full header: the Drawer goes.
+  useEffect(() => {
+    if (!open) return
+    const wide = matchMedia(WIDE)
+    const close = () => {
+      if (wide.matches) setOpen(false)
+    }
+    wide.addEventListener('change', close)
+    return () => wide.removeEventListener('change', close)
+  }, [open])
+
   const press = (event: MouseEvent | KeyboardEvent) => {
     event.preventDefault()
     void load().then(() => setOpen(true))

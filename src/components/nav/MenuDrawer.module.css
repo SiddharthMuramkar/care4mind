@@ -6,9 +6,17 @@
 .backdrop {
   position: fixed;
   inset: 0;
+  min-height: 100dvh;
   z-index: var(--layer-drawer);
   background: var(--color-backdrop);
   opacity: calc(1 - var(--drawer-swipe-progress, 0));
+}
+
+/* iOS 26 Safari draws the page under its toolbars, where only an absolute backdrop reaches. */
+@supports (-webkit-touch-callout: none) {
+  .backdrop {
+    position: absolute;
+  }
 }
 
 .viewport {

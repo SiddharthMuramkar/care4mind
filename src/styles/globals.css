@@ -164,7 +164,9 @@
     }
   }
 
+  /* The containing block for the dialogs' absolute backdrops on iOS 26 Safari, however far the page is scrolled. */
   body {
+    position: relative;
     background: var(--color-ground);
     color: var(--color-ink);
     font-family: var(--font-text);
