@@ -17,12 +17,12 @@ describe('the help line', () => {
     ])
   })
 
-  it('is stored on the homepage record, dials only phone numbers and is listed as drafted', async () => {
+  it('is stored on the homepage record, dials Tele-MANAS and emergency, and is listed as drafted', async () => {
     const { helpLine } = await home.get()
     const digits = helpLineParts(helpLine).flatMap((part) =>
       typeof part === 'string' ? [] : [part.tel.slice('tel:'.length)],
     )
-    expect(digits.length).toBeGreaterThan(0)
+    expect(new Set(digits)).toEqual(new Set(['14416', '18008914416', '112']))
     // Indian short codes are 3 or 5 digits and full numbers 10 or more, so a year or a range is caught here.
     for (const number of digits)
       expect([3, 5].includes(number.length) || number.length >= 10).toBe(true)

@@ -61,10 +61,15 @@ for (const route of ROUTES_IN_SCOPE) {
 
     // Every footer says where to call for help now, each number dialable.
     const help = page.locator('footer [data-help-line]')
-    for (const tel of ['tel:14416', 'tel:18008914416', 'tel:112']) {
-      await expect
-        .soft(help.locator(`a[href="${tel}"]`), `${where}: the footer's help line links ${tel}`)
-        .toHaveCount(1)
+    await expect.soft(help, `${where}: the footer's help line`).toContainText('not treatment')
+    for (const [name, tel] of [
+      ['14416', 'tel:14416'],
+      ['1-800-891-4416', 'tel:18008914416'],
+      ['112', 'tel:112'],
+    ] as const) {
+      const link = help.getByRole('link', { name, exact: true })
+      await expect.soft(link, `${where}: the footer's help line shows ${name}`).toBeVisible()
+      await expect.soft(link, `${where}: ${name} dials ${tel}`).toHaveAttribute('href', tel)
     }
 
     // D02: internal links point at slashed addresses, as rendered here too, after hydration.

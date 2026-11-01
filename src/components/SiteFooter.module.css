@@ -152,6 +152,11 @@
   color: var(--color-ink);
 }
 
+/* A number split across two lines is hard to read and to press. */
+.help a {
+  white-space: nowrap;
+}
+
 /* A printed page is its content alone: the footer stays off paper. */
 @media print {
   .footer {
