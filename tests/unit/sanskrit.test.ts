@@ -1,12 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
-import {
-  isNormalisedSanskrit,
-  isSpeakerLine,
-  normaliseSanskrit,
-  openingLine,
-  stripDiacritics,
-} from '@/lib/sanskrit'
+import { isNormalisedSanskrit, normaliseSanskrit } from '@/content/testing'
+import { isSpeakerLine, openingLine, stripDiacritics } from '@/lib/sanskrit'
 
 describe('normaliseSanskrit', () => {
   it('composes decomposed IAST into one character per letter', () => {

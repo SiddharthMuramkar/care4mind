@@ -15,13 +15,13 @@ import { existsSync, mkdirSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
-import { runTool, ToolError } from './extract.mjs'
-import { KIND_FOLDERS, rootFrom } from './verify.mjs'
+import { rootFrom, runTool, ToolError } from './cli.mjs'
+import { KIND_FOLDERS, schema } from './records.mjs'
 
 const USAGE = `Usage: pnpm content:new <kind> <id>
 Kinds: ${Object.keys(KIND_FOLDERS).join(', ')}.`
 
-const SLUG = /^[a-z0-9]+(?:-[a-z0-9]+)*$/
+const { SLUG } = schema
 // No leading zeros: the locator becomes the number literals of `order`, where 05 is not a number.
 const LOCATOR = /^(?:0|[1-9]\d*)(?:\.(?:0|[1-9]\d*))*$/
 

@@ -62,7 +62,7 @@ interface Captures {
   page(ref: string): SavedPage | undefined
 }
 
-const extract = (await import(pathToFileURL(join(TOOLS, 'extract.mjs')).href)) as {
+const capturesModule = (await import(pathToFileURL(join(TOOLS, 'captures.mjs')).href)) as {
   openCaptures(dir: string): Captures
 }
 
@@ -78,7 +78,6 @@ interface Check {
 
 const verify = (await import(pathToFileURL(join(TOOLS, 'verify.mjs')).href)) as {
   checkRecord(record: ContentRecord, captures: Captures): Check
-  KIND_FOLDERS: Record<string, string>
 }
 
 const report = (await import(pathToFileURL(join(TOOLS, 'report.mjs')).href)) as {
@@ -280,7 +279,7 @@ describe('extract', () => {
   let site: Captures
 
   beforeAll(() => {
-    site = extract.openCaptures(
+    site = capturesModule.openCaptures(
       captures('site', [EXAMPLE_PAGE, EXAMPLE_SURVEY, EXAMPLE_QUIZ_PAGE], QUIZ_FILES),
     )
   })
@@ -510,7 +509,7 @@ describe('verify', () => {
   let site: Captures
 
   beforeAll(() => {
-    site = extract.openCaptures(captures('verify-site', [EXAMPLE_PAGE]))
+    site = capturesModule.openCaptures(captures('verify-site', [EXAMPLE_PAGE]))
   })
 
   it('finds each string on its page after normalising both sides', () => {
@@ -913,7 +912,7 @@ describe('report', () => {
   ]
 
   beforeAll(() => {
-    site = extract.openCaptures(captures('report-site', [EXAMPLE_PAGE, OLD_PAGE]))
+    site = capturesModule.openCaptures(captures('report-site', [EXAMPLE_PAGE, OLD_PAGE]))
   })
 
   it('groups every flag by role, collapsing identical notes into one line with a count', () => {
@@ -1031,9 +1030,26 @@ describe('the network rule', () => {
   })
 })
 
-describe('the kinds of record', () => {
-  it('are the schema’s, with the same folders', () => {
-    expect(verify.KIND_FOLDERS).toEqual(KIND_FOLDERS)
+describe('the shared modules', () => {
+  const SHARED = ['cli.mjs', 'records.mjs', 'captures.mjs']
+  const LOCAL_IMPORT = /^\s*import\b[^'"]*?\bfrom\s*['"]\.\/([^'"]+)['"]/gm
+
+  it('are the only tool files a tool imports', () => {
+    const tools = readdirSync(TOOLS).filter((file) => file.endsWith('.mjs'))
+    expect(tools).toEqual(expect.arrayContaining(SHARED))
+    for (const tool of tools) {
+      const source = readFileSync(join(TOOLS, tool), 'utf8')
+      const imported = [...source.matchAll(LOCAL_IMPORT)].map((match) => match[1] ?? '')
+      expect(
+        imported.filter((file) => !SHARED.includes(file)),
+        tool,
+      ).toEqual([])
+    }
+  })
+
+  it('are libraries, not commands', () => {
+    for (const file of SHARED)
+      expect(readFileSync(join(TOOLS, file), 'utf8'), file).not.toMatch(/\brunTool\(import\.meta/)
   })
 })
 

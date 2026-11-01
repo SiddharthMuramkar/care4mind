@@ -23,6 +23,7 @@ import {
   defineWork,
   idOf,
   KIND_FOLDERS,
+  SLUG,
   type ConceptRecord,
   type ContentRecord,
   type QuestionnaireRecord,
@@ -472,7 +473,6 @@ describe('the graph', () => {
 
 describe('the record files', () => {
   const DATA = 'src/content/data'
-  const SLUG = /^[a-z0-9]+(?:-[a-z0-9]+)*$/
 
   async function recordFiles() {
     const paths = globSync(`${DATA}/**/*.ts`).map((file) =>

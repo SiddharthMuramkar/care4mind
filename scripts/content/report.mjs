@@ -13,8 +13,9 @@
 import { mkdirSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 
-import { openCaptures, runTool, ToolError } from './extract.mjs'
-import { idOf, loadRecords, rootFrom, sortRecords } from './verify.mjs'
+import { openCaptures } from './captures.mjs'
+import { rootFrom, runTool, ToolError } from './cli.mjs'
+import { idOf, loadRecords, sortRecords } from './records.mjs'
 
 /** Where --write saves the pack, relative to the repo root: a path git ignores. */
 export const FLAGS_PACK = '.scratch/content-flags.md'

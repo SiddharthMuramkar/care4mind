@@ -8,6 +8,8 @@ import {
   type ContentGraph,
   CONTENT_KINDS,
   idOf,
+  isNormalisedSanskrit,
+  SLUG,
   type Block,
   type ContentRecord,
   type Provenance,
@@ -16,7 +18,6 @@ import {
   type Section,
   localSource,
 } from '@/content/testing'
-import { isNormalisedSanskrit } from '@/lib/sanskrit'
 
 // Every content rule of the content-v1 spec (Testing Decisions → Integrity), run over every real
 // record, read through the content source. They hold for any amount of content: a record that
@@ -280,7 +281,6 @@ describe('links', () => {
   })
 
   it('give every anchor in a record a slug of its own', () => {
-    const SLUG = /^[a-z0-9]+(?:-[a-z0-9]+)*$/
     const anchorsIn = (blocks: readonly Block[]): string[] =>
       blocks.flatMap((block) =>
         block.kind === 'term'

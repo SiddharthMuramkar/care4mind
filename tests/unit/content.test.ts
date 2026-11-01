@@ -8,8 +8,8 @@ import {
   type ConceptView,
   type QuestionnaireView,
 } from '@/content'
-import { asciiSpellings } from '@/content/views/names'
-import { isNormalisedSanskrit } from '@/lib/sanskrit'
+import { asciiSpellings } from '@/content'
+import { isNormalisedSanskrit } from '@/content/testing'
 
 /** Every string anywhere inside a value. */
 function strings(value: unknown): string[] {
