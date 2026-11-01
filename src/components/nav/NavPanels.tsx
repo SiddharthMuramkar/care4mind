@@ -6,9 +6,9 @@ import { usePathname } from 'next/navigation'
 import {
   type CSSProperties,
   type ReactNode,
-  useCallback,
   useEffect,
   useLayoutEffect,
+  useRef,
   useState,
 } from 'react'
 import { createPortal } from 'react-dom'
@@ -38,6 +38,8 @@ export interface NavPanelsProps {
 // How long a pointer rests on a toggle before its panel opens, and leaves before it closes.
 const OPEN_DELAY = 120
 const CLOSE_DELAY = 240
+// A press this soon after a hover switch is the same gesture finishing, not a request to close.
+const SWITCH_PRESS_WINDOW = 600
 
 export type Slots = Partial<Record<PanelId, HTMLElement>>
 
@@ -78,11 +80,20 @@ export function NavPanels({
     return () => clearTimeout(timer)
   }, [initialHover, slots])
 
-  // A panel hangs from its whole item, label and toggle, not the toggle alone.
-  const anchor = useCallback(
-    () => (value ? (slots[value]?.closest('li') ?? null) : null),
-    [slots, value],
-  )
+  // Base UI drops a hover opening when hover switches panels, so the press right after must not toggle it shut.
+  const hoverOpenedAt = useRef(0)
+
+  // Webfonts shift the toggles after load and no resize reports it; Base UI's positioner listens for resize.
+  useEffect(() => {
+    void document.fonts?.ready.then(() => window.dispatchEvent(new Event('resize')))
+  }, [])
+
+  // Whole item, as an element: a function anchor is read only on mount, so a switch keeps the first pointer.
+  const anchor = value ? (slots[value]?.closest('li') ?? null) : null
+  // The positioner keeps the floating store of the trigger it mounted with, so a switch would leave
+  // the pointer under the first item: a fresh positioner per panel measures the new one.
+  const [placedFor, setPlacedFor] = useState(value)
+  if (value && value !== placedFor) setPlacedFor(value)
 
   return (
     <NavigationMenu.Root
@@ -98,6 +109,20 @@ export function NavPanels({
             return
           }
         }
+        if (
+          next == null &&
+          details.reason === 'trigger-press' &&
+          // A keyboard's Enter or Space clicks with detail 0, and always toggles.
+          details.event instanceof MouseEvent &&
+          details.event.detail > 0 &&
+          performance.now() - hoverOpenedAt.current < SWITCH_PRESS_WINDOW
+        ) {
+          hoverOpenedAt.current = 0
+          details.cancel()
+          return
+        }
+        hoverOpenedAt.current =
+          next != null && details.reason === 'trigger-hover' ? performance.now() : 0
         setValue(panelOf(String(next)) ?? null)
       }}
       delay={OPEN_DELAY}
@@ -134,6 +159,7 @@ export function NavPanels({
 
       <NavigationMenu.Portal>
         <NavigationMenu.Positioner
+          key={placedFor ?? 'none'}
           className={styles.positioner}
           anchor={anchor}
           align="start"
