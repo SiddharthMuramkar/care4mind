@@ -54,7 +54,7 @@ export function partOf(step: StepId): number | null {
 }
 
 const unanswered = (state: FlowState, part: number) =>
-  (state.parts[part - 1] ?? []).filter((id) => !(id in state.answers))
+  (state.parts[part - 1] ?? []).filter((id) => !Object.hasOwn(state.answers, id))
 
 /** The furthest step open now: the first part with a statement left, else the end screen. */
 function furthest(state: FlowState): number {
@@ -110,7 +110,7 @@ export function progressOf(state: FlowState): Progress {
   return {
     part: partOf(state.step),
     parts: state.parts.length,
-    answered: ids.filter((id) => id in state.answers).length,
+    answered: ids.filter((id) => Object.hasOwn(state.answers, id)).length,
     total: ids.length,
   }
 }

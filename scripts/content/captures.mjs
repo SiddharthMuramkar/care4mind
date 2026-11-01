@@ -24,9 +24,15 @@ export function openCaptures(dir = process.env.CARE4MIND_CAPTURES) {
   if (!existsSync(dir)) throw new ToolError(`CARE4MIND_CAPTURES is ${dir}, which doesn't exist.`)
   const itemsFile = join(dir, 'items.json')
   if (!existsSync(itemsFile)) throw new ToolError(`No items.json in ${dir}.`)
-  const items = JSON.parse(readFileSync(itemsFile, 'utf8'))
+  let items
+  try {
+    items = JSON.parse(readFileSync(itemsFile, 'utf8'))
+  } catch (error) {
+    const detail = error instanceof SyntaxError ? `: ${error.message}` : ''
+    throw new ToolError(`${itemsFile} isn't valid JSON${detail}.`)
+  }
   if (!Array.isArray(items)) throw new ToolError(`${itemsFile} doesn't hold a list of pages.`)
-  const pages = items.map((item) => savedPage(item, quizFiles(dir, item.slug)))
+  const pages = items.map((item) => savedPage(item, quizFiles(dir, item.slug), itemsFile))
   return {
     dir,
     pages,
@@ -67,15 +73,27 @@ function quizFiles(dir, slug) {
   }
 }
 
-function savedPage(item, quiz) {
+/** The item's address, or a ToolError naming the items file when it has none. */
+function itemAddress(item, itemsFile) {
+  const which = typeof item.slug === 'string' && item.slug ? `“${item.slug}”` : 'an item'
+  try {
+    if (typeof item.link !== 'string') throw new TypeError('no link')
+    return new URL(item.link)
+  } catch {
+    throw new ToolError(`${itemsFile}: ${which} has no link.`)
+  }
+}
+
+function savedPage(item, quiz, itemsFile) {
   let tree
   let outline
   let text
+  const address = itemAddress(item, itemsFile)
   const parsed = () => (tree ??= parseHtml(String(item.content ?? '')))
   return {
     slug: item.slug,
     url: item.link,
-    path: new URL(item.link).pathname,
+    path: address.pathname,
     kind: item.kind,
     title: clean(decodeEntities(String(item.title ?? ''))),
     outline: () => (outline ??= outlineOf(parsed(), quiz)),

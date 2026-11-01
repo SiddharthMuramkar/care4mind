@@ -212,6 +212,41 @@ test.describe('the Concept map', () => {
     await expect(rows(page)).toHaveCount(connections.length)
   })
 
+  test('keeps the filtered count after a Concept and Back', async ({ page }) => {
+    // Back remounts the island. The plate is around it, so a count read during render
+    // still says every connection is showing, over curves the filter has hidden.
+    await gotoReady(page, PATH)
+    const topic = group(page, 'Topics').getByRole('button').first()
+    await topic.click()
+    await expect(topic).toHaveAttribute('aria-pressed', 'true')
+    await expect(announcement(page)).not.toHaveText(`Showing all ${connections.length} connections`)
+    const filtered = (await announcement(page).textContent()) ?? ''
+    const visible = await rows(page).count()
+    await rows(page).getByRole('link').first().click()
+    await expect(page).not.toHaveURL(new RegExp(`${PATH}`))
+    await page.goBack()
+    await expect(page).toHaveURL(/\?topic=/)
+    await expect(topic).toHaveAttribute('aria-pressed', 'true')
+    await expect(announcement(page)).toHaveText(filtered)
+    await expect(rows(page)).toHaveCount(visible)
+    if (wide(page))
+      await expect(
+        page.locator('[data-map] svg path[data-c]').filter({ visible: true }),
+      ).toHaveCount(visible)
+  })
+
+  test('Clear filters from the keyboard leaves focus on the first chip', async ({ page }) => {
+    await gotoReady(page, PATH)
+    await keyboardReady(page)
+    await group(page, 'Lines').getByRole('button').first().click()
+    await page.getByRole('button', { name: 'Clear filters' }).focus()
+    await page.keyboard.press('Enter')
+    await expect(page).toHaveURL(new RegExp(`${PATH}$`))
+    await expect(announcement(page)).toHaveText(`Showing all ${connections.length} connections`)
+    await expect(group(page, 'Lines').getByRole('button').first()).toBeFocused()
+    await expect(page.locator('body')).not.toBeFocused()
+  })
+
   test('an address with a topic opens filtered, the Concepts outside it in a lighter ink', async ({
     page,
   }) => {

@@ -11,8 +11,9 @@ const HERE = dirname(fileURLToPath(import.meta.url))
 export class ToolError extends Error {}
 
 /**
- * Runs a tool's main function when its file is the one Node was asked to run (never on import),
- * printing a ToolError's message with exit code 2 instead of a stack trace.
+ * Runs a tool's main function when its file is the one Node was asked to run (never on import).
+ * Any failure exits 2: a ToolError as its message, anything else with its stack, so a crash
+ * isn't mistaken for a string missing from a page.
  */
 export async function runTool(meta, main) {
   const script = process.argv[1]
@@ -21,8 +22,13 @@ export async function runTool(meta, main) {
   try {
     process.exitCode = (await main(process.argv.slice(2))) ?? 0
   } catch (error) {
-    if (!(error instanceof ToolError)) throw error
-    process.stderr.write(`${error.message}\n`)
+    const text =
+      error instanceof ToolError
+        ? error.message
+        : error instanceof Error
+          ? (error.stack ?? error.message)
+          : String(error)
+    process.stderr.write(`${text}\n`)
     process.exitCode = 2
   }
 }

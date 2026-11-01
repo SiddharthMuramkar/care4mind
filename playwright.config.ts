@@ -71,7 +71,13 @@ const chrome = devices['Desktop Chrome']
 const widthProject = (width: number, height: number): Project => ({
   name: `chromium-${width}`,
   use: { ...chrome, viewport: { width, height } },
-  testIgnore: [/motion\.spec\.ts/, /smoke\.spec\.ts/, /reflow\.spec\.ts/, /crawler\.spec\.ts/],
+  testIgnore: [
+    /motion\.spec\.ts/,
+    /smoke\.spec\.ts/,
+    /reflow\.spec\.ts/,
+    /crawler\.spec\.ts/,
+    /latency\.spec\.ts/,
+  ],
 })
 
 const projects: Project[] = [
@@ -100,6 +106,12 @@ const projects: Project[] = [
     name: 'crawler',
     use: { ...chrome },
     testMatch: /crawler\.spec\.ts/,
+  },
+  // The CPU is slowed four times, so a second worker beside it would skew the timings.
+  {
+    name: 'latency',
+    use: { ...chrome, viewport: { width: 360, height: 800 } },
+    testMatch: /latency\.spec\.ts/,
   },
   // Firefox lacks scroll-driven animations and WebKit renders Devanagari with its own engine.
   {
