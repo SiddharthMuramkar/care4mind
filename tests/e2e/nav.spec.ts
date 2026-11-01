@@ -334,6 +334,99 @@ test.describe('panels, on a computer', () => {
     await expect(concepts).toBeHidden()
   })
 
+  for (const width of [WIDE, 1280, 1440]) {
+    test(`at ${width} px one click switches panels, by click or by hover then click, and the pointer sits under its toggle`, async ({
+      page,
+    }) => {
+      await page.setViewportSize({ width, height: 900 })
+      await gotoReady(page, '/')
+      await page.reload()
+      await expect(toggle(page, 'Library')).toHaveAttribute('data-ready')
+      const arrow = page.locator('[class*="arrow"][data-side]')
+      const opened = async (section: string, other: string) => {
+        await expect(panel(page, section)).toBeVisible()
+        await expect(panel(page, other)).toBeHidden()
+        await expect(toggle(page, section)).toHaveAttribute('aria-expanded', 'true')
+        await expect(toggle(page, other)).toHaveAttribute('aria-expanded', 'false')
+        const item = await toggle(page, section).locator('xpath=ancestor::li[1]').boundingBox()
+        if (!item) throw new Error('a toggle stands in its item')
+        await expect(async () => {
+          const box = await arrow.boundingBox()
+          if (!box) throw new Error('the open panel has its pointer')
+          const middle = box.x + box.width / 2
+          expect(middle).toBeGreaterThanOrEqual(item.x)
+          expect(middle).toBeLessThanOrEqual(item.x + item.width)
+        }).toPass()
+      }
+      for (const hoverFirst of [false, true]) {
+        for (let round = 0; round < 5; round += 1) {
+          for (const [section, other] of [
+            ['Concepts', 'Library'],
+            ['Library', 'Concepts'],
+          ] as const) {
+            if (hoverFirst) {
+              await toggle(page, section).hover()
+              await expect(toggle(page, section)).toHaveAttribute('aria-expanded', 'true')
+            }
+            await toggle(page, section).click()
+            await opened(section, other)
+          }
+        }
+        await page.keyboard.press('Escape')
+        await expect(panel(page, 'Library')).toBeHidden()
+      }
+    })
+  }
+
+  test('Enter and Space on the other toggle switch panels in one press, and focus stays on the pressed toggle', async ({
+    page,
+  }) => {
+    await gotoReady(page, '/')
+    await expect(toggle(page, 'Library')).toHaveAttribute('data-ready')
+    await toggle(page, 'Concepts').focus()
+    await page.keyboard.press('Enter')
+    await expect(panel(page, 'Concepts')).toBeVisible()
+    for (const [section, other, key] of [
+      ['Library', 'Concepts', 'Space'],
+      ['Concepts', 'Library', 'Enter'],
+    ] as const) {
+      await toggle(page, section).focus()
+      await page.keyboard.press(key)
+      await expect(toggle(page, section)).toBeFocused()
+      await expect(panel(page, section)).toBeVisible()
+      await expect(panel(page, other)).toBeHidden()
+      await expect(toggle(page, section)).toHaveAttribute('aria-expanded', 'true')
+      await expect(toggle(page, other)).toHaveAttribute('aria-expanded', 'false')
+    }
+    await page.keyboard.press('Escape')
+    await expect(panel(page, 'Concepts')).toBeHidden()
+    await expect(toggle(page, 'Concepts')).toBeFocused()
+  })
+
+  test('Enter on a toggle just after hover switched panels opens that toggle’s panel', async ({
+    page,
+  }) => {
+    await gotoReady(page, '/')
+    await expect(toggle(page, 'Library')).toHaveAttribute('data-ready')
+    await toggle(page, 'Library').hover()
+    await expect(panel(page, 'Library')).toBeVisible()
+    await toggle(page, 'Concepts').focus()
+    await page.keyboard.press('Enter')
+    await expect(panel(page, 'Concepts')).toBeVisible()
+    await expect(panel(page, 'Library')).toBeHidden()
+  })
+
+  test('a click well after hover opened a panel closes it', async ({ page }) => {
+    await gotoReady(page, '/')
+    await expect(toggle(page, 'Concepts')).toHaveAttribute('data-ready')
+    await toggle(page, 'Concepts').hover()
+    await expect(panel(page, 'Concepts')).toBeVisible()
+    // Past the window in which a press finishes the hover's gesture.
+    await page.waitForTimeout(800)
+    await toggle(page, 'Concepts').click()
+    await expect(panel(page, 'Concepts')).toBeHidden()
+  })
+
   test('a panel link closes the panel and opens its page', async ({ page }) => {
     await gotoReady(page, '/')
     await toggle(page, 'Concepts').focus()
