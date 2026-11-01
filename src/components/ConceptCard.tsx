@@ -19,7 +19,7 @@ interface Props {
  */
 export function ConceptCard({ concept, action, className }: Props) {
   return (
-    <article className={cx(styles.card, className)}>
+    <article className={cx(styles.card, className)} data-paper>
       <ViewTransition name={`concept-title-${concept.slug}`} share="morph" default="none">
         <h3 className={styles.title}>
           <span lang={concept.lang}>{concept.name}</span>

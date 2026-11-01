@@ -9,8 +9,6 @@
     inset 0 0 0 15px var(--color-surface),
     inset 0 0 0 16px rgb(29 26 46 / 0.35),
     0 30px 60px -20px rgb(0 0 0 / 0.55);
-  --color-focus: var(--color-surface-focus);
-  --color-link: var(--color-surface-link);
   --rule-colour: var(--color-highlight);
 }
 

@@ -50,7 +50,7 @@ export function MenuDrawer({
       <Drawer.Portal>
         <Drawer.Backdrop className={styles.backdrop} />
         <Drawer.Viewport className={styles.viewport}>
-          <Drawer.Popup className={styles.sheet} finalFocus={returnFocus}>
+          <Drawer.Popup className={styles.sheet} data-paper finalFocus={returnFocus}>
             {/* A link's click closes the Drawer; the link itself is the keyboard's way in. */}
             {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */}
             <div className={styles.body} onClick={closeOnLink}>
