@@ -656,6 +656,7 @@ test.describe('Concept page v2: verse cards', () => {
     await expect(notifications).toHaveAttribute('aria-live', 'polite')
     const status = notifications.getByText('Verse copied')
     await expect(status).toBeVisible()
+    await expect(notifications.getByText('Yoga Sūtra 1.30')).toHaveAttribute('lang', 'sa-Latn')
     await expect(copy).toBeFocused()
     await expectNoAxeViolations(page)
 

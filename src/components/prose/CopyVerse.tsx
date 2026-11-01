@@ -19,7 +19,7 @@ export function CopyVerse({
   async function copy() {
     try {
       await navigator.clipboard.writeText(text)
-      toast({ title: 'Verse copied', description: source })
+      toast({ title: 'Verse copied', description: source, lang })
     } catch {
       toast({
         title: 'The verse wasn’t copied',
