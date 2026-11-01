@@ -166,11 +166,6 @@
   transform: rotate(45deg);
 }
 
-/* The reader's settings: in the strip from 72rem, and in the Menu's Drawer below that. */
-.lotus {
-  display: none;
-}
-
 @media (min-width: 72rem) {
   .strip {
     gap: 1.5rem;
@@ -200,10 +195,6 @@
     font-variant-caps: all-small-caps;
     letter-spacing: 0.12em;
     font-size: 1.1875rem;
-  }
-
-  .lotus {
-    display: contents;
   }
 }
 

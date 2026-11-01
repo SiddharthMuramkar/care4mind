@@ -9,15 +9,13 @@ import { SearchTrigger } from '@/components/search/SearchTrigger'
 
 import { LotusMark } from './Fleuron'
 import { Logo } from './Logo'
-import { LotusPause } from './LotusPause'
 import styles from './SiteHeader.module.css'
 
 /**
  * The header every page shares, stuck to the top of the screen: the lotus and the wordmark,
  * leading home, then the section links and Search, each a server-rendered
- * link that works without JavaScript. On a computer Concepts and Library open panels, and "Pause
- * the lotus" ends the strip; on a narrow screen the sections and the pause move into the Menu's
- * Drawer, and Search stays.
+ * link that works without JavaScript. On a computer Concepts and Library open panels; on a
+ * narrow screen the sections move into the Menu's Drawer, and Search stays.
  */
 export async function SiteHeader() {
   const nav = await siteNav()
@@ -37,9 +35,6 @@ export async function SiteHeader() {
             <span className={styles.searchLabel}>Search</span>
           </SearchTrigger>
         </nav>
-        <div className={styles.lotus}>
-          <LotusPause placement="header" />
-        </div>
         <MenuButton
           nav={nav}
           search={
@@ -48,7 +43,6 @@ export async function SiteHeader() {
               Search
             </SearchTrigger>
           }
-          lotus={<LotusPause placement="drawer" />}
           mapNote={mapNote}
         />
       </div>

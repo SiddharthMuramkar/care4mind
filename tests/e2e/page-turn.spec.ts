@@ -2,7 +2,7 @@ import type { Page } from '@playwright/test'
 
 import { expectNoAxeViolations } from './axe'
 import { expect, gotoReady, test } from './fixtures'
-import { logoLotus, moving } from './lotuses'
+import { logoLotus } from './lotuses'
 import {
   expectPageTurned,
   pageTurns,
@@ -54,7 +54,7 @@ test("a Concept card's title flies into the Concept page's heading as the page t
   expect(along, 'it flies between them').toBeLessThan(1)
 })
 
-test('the header stays put while the page turns, its lotus breathing on', async ({ page }) => {
+test('the header stays put while the page turns', async ({ page }) => {
   await recordPageTurns(page, { hold: true })
   await gotoReady(page, '/')
   const card = page.getByRole('link', { name: 'Read about Vikṣepa' })
@@ -63,9 +63,6 @@ test('the header stays put while the page turns, its lotus breathing on', async 
   // The page turns once the next page is ready: wait until it has started, held half-way.
   // (pageTurns alone would return at once, before anything has been recorded.)
   await expect.poll(async () => (await pageTurns(page)).length).toBe(1)
-
-  // Half-way through the turn the lotus breathes on in the header's layer.
-  expect(await moving(logoLotus(page)), 'the lotus breathes through the turn').toBe(true)
 
   // The header beside the lotus looks exactly as it does once the page is still.
   const header = page.getByRole('banner')
@@ -79,7 +76,7 @@ test('the header stays put while the page turns, its lotus breathing on', async 
 })
 
 /**
- * The header either side of its lotus, as screenshot clips. The lotus breathes, and a page turn's
+ * The header either side of its lotus, as screenshot clips. The lotus answers the pointer, and a page turn's
  * layer covers a screenshot's mask.
  */
 async function headerBesideTheLotus(page: Page) {
