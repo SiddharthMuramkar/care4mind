@@ -216,9 +216,9 @@ a.letter:focus-visible {
   outline-offset: -3px;
 }
 
-/* A letter with nothing under it is set in grey, and is no link. */
+/* A letter with nothing under it is set in the muted ink, and is no link. */
 .blank {
-  color: color-mix(in srgb, var(--color-surface-muted) 55%, var(--color-surface));
+  color: var(--color-surface-muted);
 }
 
 /* The current letter: vermilion, with a lozenge under it. */
