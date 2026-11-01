@@ -3,6 +3,7 @@ import type { Locator, Page } from '@playwright/test'
 import { hrefFor, topics } from '@/content'
 
 import { expectNoAxeViolations } from './axe'
+import { focusRingContrast } from './focus-ring'
 import { expect, gotoReady, scrollsSideways, test } from './fixtures'
 import { expectPageTurned, pageTurns, prefetched, recordPageTurns } from './page-turns'
 
@@ -79,6 +80,17 @@ test('lists the verses its Concepts quote, each leading to its passage', async (
   await expect(links).toHaveCount(quoted.length)
   for (const [index, verse] of quoted.entries())
     await expect(links.nth(index)).toHaveAttribute('href', verse.href)
+})
+
+test('opens a verse after its speaker’s line, even one joined by sandhi', async ({ page }) => {
+  await gotoReady(page, hrefFor({ kind: 'topic', id: 'mind' }))
+  const verse = quoted.find(({ id }) => id === 'bhagavad-gita/2.55')
+  if (!verse) throw new Error('The mind topic quotes Bhagavad Gītā 2.55.')
+  const link = page
+    .getByRole('region', { name: 'Verses its Concepts quote' })
+    .locator(`a[href="${verse.href}"]`)
+  await expect(link).toContainText('प्रजहाति यदा कामान्सर्वान्पार्थ मनोगतान्')
+  await expect(link).not.toContainText('उवाच')
 })
 
 test('focusing a card lights its row and inks in the row’s leader', async ({ page }) => {
@@ -171,4 +183,11 @@ test('has no accessibility violations, with a row lit', async ({ page }) => {
     })
     await expectNoAxeViolations(page, id)
   }
+})
+
+test("a card's focus ring contrasts with the colour behind it", async ({ page }) => {
+  await gotoReady(page, hrefFor({ kind: 'topic', id: 'mind' }))
+  const [first] = conceptsOf(mind)
+  if (!first) throw new Error('The mind topic has a Concept.')
+  expect(await focusRingContrast(page, card(page, first.name))).toBeGreaterThanOrEqual(3)
 })

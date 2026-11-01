@@ -97,9 +97,10 @@
   outline: none;
 }
 
+/* Inside the inner rule, on the card's paper. Outside the card this indigo is the home page's ground. */
 .action :is(a, button):focus-visible::after {
   outline: 3px solid var(--color-surface-focus);
-  outline-offset: 3px;
+  outline-offset: -11px;
 }
 
 @media (max-width: 30rem) {

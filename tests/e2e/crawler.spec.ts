@@ -315,8 +315,21 @@ test.describe('addresses (D02, D17)', () => {
     expect(response.headers().location).toBe('/concepts/')
   })
 
-  test('an unknown slug answers 404', async ({ request }) => {
-    for (const path of ['/concepts/no-such-concept/', '/texts/no-such-text/', '/library/nothing/'])
+  test('an unknown slug answers 404, and so does a Questionnaire that has no page', async ({
+    request,
+  }) => {
+    const later = (await questionnaires.list()).find(({ status }) => status === 'coming-later')
+    if (!later) throw new Error('no Questionnaire is coming later')
+    for (const path of [
+      '/concepts/no-such-concept/',
+      '/texts/no-such-text/',
+      '/library/nothing/',
+      '/topics/no-such-topic/',
+      '/questionnaires/no-such/',
+      '/questionnaires/no-such/take/',
+      `/questionnaires/${later.slug}/`,
+      `/questionnaires/${later.slug}/take/`,
+    ])
       expect((await request.get(path)).status(), path).toBe(404)
   })
 })

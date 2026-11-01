@@ -58,6 +58,14 @@ function subscribe(listener: () => void) {
 const search = () => window.location.search
 const noSearch = () => ''
 
+/** The clear button unmounts with the filter, which would drop focus on the page. */
+function focusBeforeClear(root: ParentNode | null) {
+  const next =
+    root?.querySelector<HTMLElement>('[data-chip]') ??
+    root?.querySelector<HTMLElement>('[aria-live="polite"]')
+  next?.focus()
+}
+
 /** Move to a new address, keeping its fragment (#plate on a phone), and let the filters read it. */
 function go(selection: Selection) {
   const { pathname, hash } = window.location
@@ -189,7 +197,7 @@ export function MapFilters({ topics, total }: Props) {
   const known = useMemo(() => new Set(topics.map(({ slug }) => slug)), [topics])
   const address = useSyncExternalStore(subscribe, search, noSearch)
   const selection = useMemo(() => readSelection(address, known), [address, known])
-  const shown = useMemo(() => countShown(selection) ?? total, [selection, total])
+  const [shown, setShown] = useState<number | null>(null)
   const [parts, setParts] = useState<KeyboardParts>()
   const controls = useRef<HTMLDivElement>(null)
   const handoff = useRef<string | undefined>(undefined)
@@ -228,9 +236,11 @@ export function MapFilters({ topics, total }: Props) {
 
   useLayoutEffect(() => {
     // The server's page is the unfiltered map: nothing to do until a filter is chosen.
+    // The plate is around this island, so a client mount can't count its curves during render.
     if (!filtered.current && selection.kind === null && selection.topic.length === 0) return
     filtered.current = true
     applySelection(selection)
+    setShown(countShown(selection))
   }, [selection])
 
   useEffect(() => {
@@ -259,11 +269,19 @@ export function MapFilters({ topics, total }: Props) {
         <Buttons topics={topics} selection={selection} onChange={go} />
       </div>
       <div className={styles.tally}>
-        <p className={styles.count} aria-live="polite" aria-atomic="true">
-          {countText(shown, total)}
+        <p tabIndex={-1} className={styles.count} aria-live="polite" aria-atomic="true">
+          {countText(shown ?? total, total)}
         </p>
         {empty ? null : (
-          <button type="button" className={styles.clear} data-ink onClick={() => go(NOTHING)}>
+          <button
+            type="button"
+            className={styles.clear}
+            data-ink
+            onClick={() => {
+              focusBeforeClear(controls.current)
+              go(NOTHING)
+            }}
+          >
             Clear filters
           </button>
         )}

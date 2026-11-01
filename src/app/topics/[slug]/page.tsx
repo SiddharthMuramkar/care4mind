@@ -14,6 +14,7 @@ import { ContentsPlate, plateCard, plateScope, type PlateRow } from '@/component
 import { hrefFor, topics, type ConceptCard as Concept, type PassageView } from '@/content'
 import { cx } from '@/lib/cx'
 import { metadataFor } from '@/lib/metadata'
+import { openingLine } from '@/lib/sanskrit'
 import { toDevanagariDigits } from '@/lib/text'
 
 import reading from '../../reading.module.css'
@@ -54,19 +55,14 @@ const rowOf = (concept: Concept): PlateRow => ({
     : {}),
 })
 
-/** Who speaks a verse ("अर्जुन उवाच ।"): a line before the verse, not its opening. */
-const SPEAKER = /(उवाच|uvāca)\s*[।|]?$/
-
 /**
  * A verse's opening, as a manuscript's index gives it: its first line after any speaker's, in
  * Devanagari where there is some, else in transliteration.
  */
 function Opening({ verse }: { verse: PassageView }) {
-  const first = (lines: readonly string[]) =>
-    lines.find((line) => !SPEAKER.test(line.trim())) ?? lines[0]
-  const deva = first(verse.devanagari)
+  const deva = openingLine(verse.devanagari)
   if (deva) return <span lang="sa-Deva">{deva}</span>
-  const line = first(verse.transliteration?.lines ?? [])
+  const line = openingLine(verse.transliteration?.lines ?? [])
   return line ? <span lang={verse.work.lang}>{line}</span> : <>{verse.label}</>
 }
 
