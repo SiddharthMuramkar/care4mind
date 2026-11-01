@@ -33,7 +33,11 @@ const Tally = memo(function Tally({ parts, answers, current }: TallyProps) {
           data-current={index + 1 === current || undefined}
         >
           {ids.map((id) => (
-            <span key={id} className={styles.rule} data-inked={id in answers || undefined} />
+            <span
+              key={id}
+              className={styles.rule}
+              data-inked={Object.hasOwn(answers, id) || undefined}
+            />
           ))}
         </span>
       ))}
