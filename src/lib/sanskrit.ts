@@ -12,9 +12,13 @@ export function normaliseSanskrit(text: string): string {
   return text.normalize('NFC').replaceAll('ṁ', 'ṃ').replaceAll('Ṁ', 'Ṃ')
 }
 
-/** IAST with every diacritic removed, as NFR-03 requires (vikṣepa → viksepa). */
+/** IAST with every diacritic removed, as NFR-03 requires (vikṣepa → viksepa). Devanagari is unchanged. */
 export function stripDiacritics(text: string): string {
-  return text.normalize('NFD').replace(/\p{M}/gu, '').normalize('NFC')
+  // Vowel signs, virama, anusvara and visarga are marks too, but they sit outside this block.
+  return text
+    .normalize('NFD')
+    .replace(/[\u0300-\u036F]/g, '')
+    .normalize('NFC')
 }
 
 /** True when the text is already stored the way normaliseSanskrit would store it. */
