@@ -55,8 +55,16 @@ describe('the global error page', () => {
     expect(html).toMatch(/<html lang="en" class="playfair-text-variable"/)
   })
 
-  it('offers a button to reload', () => {
-    expect(html).toMatch(/<button type="button"[^>]*>Reload the page<\/button>/)
+  it('offers a submit button that reloads even when scripts never start', () => {
+    expect(html).toMatch(/<form><button type="submit"[^>]*>Reload the page<\/button><\/form>/)
+  })
+
+  it('keeps the page out of search before launch, as the root layout does', () => {
+    expect(html).toContain('<meta name="robots" content="noindex, nofollow"/>')
+  })
+
+  it('lets a keyboard skip to the main text', () => {
+    expect(html).toContain('<a href="#main" class="skip-link">')
   })
 
   it('asks Next to render the site again when the button is pressed', () => {

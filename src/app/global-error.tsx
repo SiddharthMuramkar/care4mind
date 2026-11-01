@@ -20,8 +20,15 @@ export default function GlobalError({
 }) {
   return (
     <html lang="en" className={playfairText.variable}>
-      <body>
+      <head>
         <title>{`Page not shown · ${site.name}`}</title>
+        {/* The root layout's robots meta fails with it. */}
+        {site.indexable ? null : <meta name="robots" content="noindex, nofollow" />}
+      </head>
+      <body>
+        <a href="#main" className="skip-link">
+          Skip to content
+        </a>
         <main id="main" className={reading.page}>
           <Folio className={styles.folio}>
             <p className={reading.kicker}>Error · Page not shown</p>
@@ -30,13 +37,16 @@ export default function GlobalError({
               Something went wrong while putting the site together. Reloading the page usually
               brings it back.
             </p>
-            <button
-              type="button"
-              className={cx(cta.primary, styles.action)}
-              onClick={() => retry()}
-            >
-              Reload the page
-            </button>
+            {/* A submit reloads the document even when its scripts never start. */}
+            <form>
+              <button
+                type="submit"
+                className={cx(cta.primary, styles.action)}
+                onClick={() => retry()}
+              >
+                Reload the page
+              </button>
+            </form>
           </Folio>
         </main>
       </body>
