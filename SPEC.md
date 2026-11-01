@@ -46,7 +46,7 @@ These are judgement calls, so review checks them against the diff, in the codeba
 | Lotus motion is CSS only, transform and opacity, still under reduced motion and when paused | lotus and motion specs |
 | A `styles.x` lookup names a class its CSS module defines | nothing yet (#67) |
 | IAST and Devanagari carry `lang` | components, for name fields and Devanagari runs. IAST inside running text is untagged (#76) |
-| The migration's records, counts and derived pages stay as carried over, until the client signs it off | the fidelity suite in `tests/fidelity` (`pnpm content:fidelity`), run by hand beside `verify.mjs`; not in `pnpm check`, so new content needs no test edit |
+| The migration's records, counts and derived pages stay as carried over, until the client signs it off | the fidelity suite in `tests/fidelity`, which `verify.mjs` runs after checking every record (or `pnpm content:fidelity` alone); not in `pnpm check`, so new content needs no test edit |
 | Carried-over text changes only to fix a listed error | `verify.mjs`, which runs only on a machine with the captures; nothing in CI (#48) |
 | Comments state reasons, not ticket numbers or decision codes | nothing yet (#38) |
 | Agents never merge a PR, turn on auto-merge, push to `main` or delete a branch | the guard and its test (guard). It reads commands, not intent: a script it can't read makes it ask, and review covers the rest |
@@ -58,7 +58,7 @@ These are judgement calls, so review checks them against the diff, in the codeba
 
 ## Where a change goes
 
-- **A record of an existing kind:** `pnpm content:new <kind> <id>` writes a template that compiles. Fill it in, then run `pnpm check`: no test needs an edit. `pnpm content:fidelity` will then fail, since it pins what the migration carried over; update it only for a change to that migration.
+- **A record of an existing kind:** `pnpm content:new <kind> <id>` writes a template that compiles. Fill it in, then run `pnpm check`: no test needs an edit. `pnpm content:fidelity`, and so `verify.mjs`, will then fail, since it pins what the migration carried over; update it only for a change to that migration.
 - **A link field:** the record schema, the graph's link check, then the view that shows it.
 - **A content kind:** the compiler finds only some of these places, so work through every step:
   1. The record schema: its type, its `define…` helper and its kind's folder.

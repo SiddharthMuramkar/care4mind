@@ -2,19 +2,19 @@
 // The no-invented-text check: every string in a record must be found on the saved page it came
 // from, after normalising both sides and applying the record's listed edits.
 //
-//   node scripts/content/verify.mjs                      every record
+//   node scripts/content/verify.mjs                      every record, then the fidelity suite
 //   node scripts/content/verify.mjs concept work/...    records of a kind, or one by kind/id
 //
 // It reads the saved copies only from $CARE4MIND_CAPTURES, never writes into the repo and never
 // touches the network. Exit code 0 when nothing is missing, 1 when a string is on none of its
-// pages, 2 when it can't run. What it checks and skips: docs/agents/content-migration.md.
+// pages or a fidelity pin fails, 2 when it can't run. What it checks and skips: docs/agents/content-migration.md.
 //
 // Plain Node, no new dependency: records are TypeScript, which it reads with the repo's own
 // TypeScript compiler. This file is also the records module report imports.
 
 import { spawnSync } from 'node:child_process'
 import { existsSync, readFileSync, statSync } from 'node:fs'
-import { registerHooks } from 'node:module'
+import { createRequire, registerHooks } from 'node:module'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 
@@ -23,6 +23,7 @@ import { openCaptures, runTool, ToolError } from './extract.mjs'
 const HERE = dirname(fileURLToPath(import.meta.url))
 const REGISTRY_SCRIPT = join(HERE, 'registry.mjs')
 const REGISTRY = 'src/content/generated/registry.ts'
+const FIDELITY_CONFIG = 'vitest.fidelity.config.ts'
 
 /** The kinds of record, in the order tools list them, and each kind's folder (as the schema). */
 export const KIND_FOLDERS = {
@@ -512,11 +513,34 @@ function formatResults(results) {
   return `${out.join('\n')}\n`
 }
 
+/**
+ * Runs the fidelity suite under `root`, which pins what the migration carried over, and prints
+ * whether its pins hold. A repo without one has nothing pinned. Returns the exit code to add.
+ */
+function runFidelity(root) {
+  const config = join(root, FIDELITY_CONFIG)
+  if (!existsSync(config)) return 0
+  const manifest = createRequire(import.meta.url).resolve('vitest/package.json')
+  const vitest = join(dirname(manifest), JSON.parse(readFileSync(manifest, 'utf8')).bin.vitest)
+  const run = spawnSync(process.execPath, [vitest, 'run', '--root', root, '--config', config], {
+    encoding: 'utf8',
+  })
+  if (run.error) throw new ToolError(`The fidelity suite could not run: ${run.error.message}`)
+  process.stdout.write(`\n${run.stdout}${run.stderr}`)
+  const held = run.status === 0
+  process.stdout.write(
+    held ? 'fidelity: the migration’s pins hold\n' : 'fidelity: a migration pin fails\n',
+  )
+  return held ? 0 : 1
+}
+
 const USAGE = `Usage: node scripts/content/verify.mjs [kind | kind/id ...]
 
 Checks every string in the records named (all of them when none is) against the saved copies
-of their source pages, read from $CARE4MIND_CAPTURES. Exit code 0 when every string is found,
-1 when one is on none of its pages, 2 when it can't run. Kinds: ${Object.keys(KIND_FOLDERS).join(', ')}.`
+of their source pages, read from $CARE4MIND_CAPTURES. With no record named, it then runs the
+fidelity suite (${FIDELITY_CONFIG}), which pins what the migration carried over. Exit code 0
+when every string is found and every pin holds, 1 when a string is on none of its pages or a
+pin fails, 2 when it can't run. Kinds: ${Object.keys(KIND_FOLDERS).join(', ')}.`
 
 async function main(args) {
   if (args.includes('--help') || args.includes('-h')) {
@@ -528,7 +552,9 @@ async function main(args) {
   const records = sortRecords(selectRecords(await loadRecords(root), rest))
   const results = records.map((record) => checkRecord(record, captures))
   process.stdout.write(formatResults(results))
-  return results.some((result) => result.status === 'failed') ? 1 : 0
+  const missing = results.some((result) => result.status === 'failed') ? 1 : 0
+  // A partial check leaves the counts unchecked, so only a full one asks the pins.
+  return rest.length === 0 ? Math.max(missing, runFidelity(root)) : missing
 }
 
 await runTool(import.meta, main)
