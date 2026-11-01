@@ -59,22 +59,24 @@ const moving = (page: Page) =>
 
 /**
  * Wait until what opened has finished arriving, so checks see it as it rests. Only the hero's
- * breath ends on its own, so animations without an end are left out.
+ * breath ends on its own, so animations without an end are left out, and the poll outlasts it.
  */
 const settled = (page: Page) =>
   expect
-    .poll(() =>
-      page.evaluate(
-        () =>
-          document
-            .getAnimations()
-            .filter(
-              (animation) =>
-                animation.timeline instanceof DocumentTimeline &&
-                animation.playState === 'running' &&
-                Number.isFinite(animation.effect?.getComputedTiming().endTime ?? Infinity),
-            ).length,
-      ),
+    .poll(
+      () =>
+        page.evaluate(
+          () =>
+            document
+              .getAnimations()
+              .filter(
+                (animation) =>
+                  animation.timeline instanceof DocumentTimeline &&
+                  animation.playState === 'running' &&
+                  Number.isFinite(animation.effect?.getComputedTiming().endTime ?? Infinity),
+              ).length,
+        ),
+      { timeout: 10_000 },
     )
     .toBe(0)
 
