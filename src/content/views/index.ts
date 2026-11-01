@@ -204,6 +204,17 @@ export function createContent(source: ContentSource, flags: Features) {
       async routes(): Promise<RouteEntry[]> {
         return routes(await graph(), flags)
       },
+      /** The entry for a path, or null when this build has no such page. */
+      async route(path: string): Promise<RouteEntry | null> {
+        const found = (await routes(await graph(), flags)).find((entry) => entry.path === path)
+        return found ?? null
+      },
+      /** The `[slug]` params of one pattern, in registry order: the records those pages show. */
+      async params(pattern: string): Promise<{ slug: string }[]> {
+        return (await routes(await graph(), flags)).flatMap((entry) =>
+          entry.pattern === pattern && entry.record ? [{ slug: entry.record.id }] : [],
+        )
+      },
       /** A page's breadcrumbs (design B6), the page itself last; none for a path that isn't one. */
       async trail(path: string): Promise<Crumb[]> {
         return trail(await graph(), flags, path)

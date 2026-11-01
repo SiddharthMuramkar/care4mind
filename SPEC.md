@@ -14,7 +14,7 @@ Each module is named by its capability, and outside code reaches it only through
 - **Content source**, the seam under Content: `ContentSource.records(kind)`. Two adapters satisfy it, the generated registry of record files and the made-up sources the tests build, so the seam is real. A content back end becomes one more adapter, and nothing above it changes. _Tests: content-registry, content-interface, content-derive._
 - **Records**: one file per record. Each is default-exported through its kind's `define…` helper from `@/content/schema`, and points at other records by id only. The registry that lists them is generated. _Types, the graph's dangling-id check, the content tests, and the registry that `pnpm check` and every test run write afresh._
 - **Addresses**: every internal link comes from `hrefFor()`. _Lint: `care4mind/href-from-hreffor`._
-- **Pages**: App Router routes that read content only through `@/content`. `site.routes()` is the one list of public pages, and the sitemap, page metadata, the navigation and the link crawler read it. _Tests: content-derive, routes; browser: crawler._
+- **Pages**: App Router routes that read content only through `@/content`. `site.routes()` is the one list of public pages, and `site.route(path)` and `site.params(pattern)` read it. A dynamic page's `generateStaticParams` is `site.params` of its pattern. The sitemap, page metadata, the navigation and the link crawler read the list. _Tests: content-derive, routes; browser: crawler._
 - **Page metadata and share cards**: `metadataFor(path)` in `@/lib/metadata` gives every page its title, description, canonical address and Open Graph and Twitter text. Images never go in metadata: each page's route segment has an `opengraph-image.tsx` that calls `shareCard()` (`@/lib/share-card`), which reads the WOFF twins of the font subsets through `@/fonts/card-faces`. _Tests: site; browser: share-card._
 - **Feature flags**: `features`, read once at build, on the server. A client component gets a flag as a prop. A feature that's built but not yet approved for launch is on in previews and off in production. _Tests: features. Review for the server-only reading._
 - **Redirects**: one table, each entry served as a 301. _Tests: redirects (unit and browser)._
@@ -37,13 +37,14 @@ These are judgement calls, so review checks them against the diff, in the codeba
 | Rule | Kept true by |
 | --- | --- |
 | Pages read content only through `@/content`; a client file imports it for types only | lint (content boundary) and its test |
+| A dynamic page's params are the registry entries of its pattern | routes test |
 | The graph imports neither the views nor the derivations above it | lint (content boundary) and its test |
 | Internal links come from `hrefFor()` | lint (`care4mind/href-from-hreffor`) |
 | Every link between records resolves | the graph, at build and in every content test |
 | Sanskrit is NFC with ṃ; each name field holds one script, in characters the fonts cover | content-integrity test |
 | The registry is generated, not edited | git ignores it, `pnpm check` and every test run write it afresh, and the guard refuses edits under `src/content/generated/` |
 | No record stores scoring | types and the content-integrity test |
-| Press colour pairs meet contrast | contrast test, for the pairs it lists. Colours mixed inside modules are unchecked (#79) |
+| Press colour pairs meet contrast, each primitive colour is written once, and colour tokens alias or mix the primitives | contrast test, for the pairs it lists, resolving `var()` and `color-mix()`. A mix that carries text is a token, so it can be listed; review keeps modules from mixing their own |
 | `--color-surface-rule` is a rule, never text | contrast test |
 | Icon and manifest colours equal their tokens | icons test |
 | Lotus motion is CSS only, transform and opacity, still under reduced motion and when paused | lotus and motion specs |
@@ -54,7 +55,7 @@ These are judgement calls, so review checks them against the diff, in the codeba
 | Agents never merge a PR, turn on auto-merge, push to `main` or delete a branch | the guard and its test (guard). It reads commands, not intent: a script it can't read makes it ask, and review covers the rest |
 | `main` changes only through a squashed PR whose required check passed on an up-to-date branch | the ruleset on GitHub, whose file the ruleset test checks; `pnpm ruleset:check` compares the two |
 | Nobody commits to `main` or pushes to it, the developer included | the git hooks in `.githooks/`, installed by `prepare` (githooks test). `--no-verify` skips them, and the guard refuses that to agents |
-| `ship` opens PRs and stops, and its agents run light | ship test |
+| `ship` opens PRs, has a reviewer agent review each and its builder answer the review, then stops; its agents run light | ship test |
 | Each "Code that misleads" line names an open ticket | review |
 | Names use glossary terms; comments say why; Press only; depth; tests at the seam | review |
 
@@ -73,7 +74,7 @@ These are judgement calls, so review checks them against the diff, in the codeba
   8. GLOSSARY.md.
 - **A page:** a route that reads `@/content`. Its address is an `hrefFor()` target, and its entry in `site.routes()` puts it in the sitemap, breadcrumbs and crawler.
 - **A topic:** its record, plus its colour token, its `[data-topic]` rule and its contrast pair. Nothing checks the last three yet (#81).
-- **A colour, duration or easing:** a token in the global stylesheet. A colour pair that carries text joins the contrast list.
+- **A colour, duration or easing:** a token in the global stylesheet. A new colour value is a `--press-*` primitive, and the `--color-*` token that names its role aliases or mixes it. A colour pair that carries text, mixed ones included, joins the contrast list.
 - **A feature awaiting the Project owner's approval:** a flag in `features`.
 - **A moved address:** a row in the redirect table. Its destination is written as `hrefFor()` would make it, and it answers in one hop.
 - **Something agents may or may not do:** a rule in the guard's `decide()` with a row in its test, and a line in CLAUDE.md's Delivery section when it changes what agents are told.
@@ -83,7 +84,7 @@ These are judgement calls, so review checks them against the diff, in the codeba
 
 `pnpm check` is the one local signal that a change is done. CI runs it on every PR and every push to `main`, then the browser tests in parallel shards and Lighthouse on the build it made. The job named `ci`, which `.github/rulesets/main.json` requires, waits for all of them, and GitHub won't merge a PR until it passes on a branch that's up to date with `main`. Also run the browser tests you touched, against the build `pnpm check` made: `E2E_ONLY=<spec names> pnpm check:e2e`, where the names are file names in `tests/e2e` without `.spec.ts`.
 
-An agent's PR is done when it's open, green and every review thread is answered. `ship` stops there, and the developer reviews, merges and deletes the branch.
+An agent's PR is done when it's open, green and every review thread is answered. In `ship`, a reviewer agent posts that review and the PR's builder answers it. `ship` stops there, and the developer reviews, merges and deletes the branch.
 
 The content registry is rewritten by `dev`, `build`, `typecheck`, `test`, `test:e2e`, `check` and every Vitest run. A running `next dev` sees a new record file only once the registry is rewritten: rerun the registry script, or restart.
 
@@ -105,13 +106,10 @@ The planning map, issue #6, lists them. Until each is decided, the code leaves i
 The code still holds these patterns, and new code doesn't copy them. Each line names the ticket that removes the pattern, and the PR that closes that ticket deletes the line.
 
 - Comments that cite ticket numbers, decision codes (D01–D21), design codes (such as B6) or spec names. The documents they point at were deleted in `bfdbff0`. State the reason instead (#38).
-- Scripts that send authors to `docs/agents/content-migration.md`, which no longer exists (#37).
 - `Flag.ticket` numbers on records. They come from a deleted local tracker and point at the wrong GitHub issues (#39).
 - Tests that pin how many records exist (#45).
 - The "Devanagari first" stubs, which render nothing, though the proposals page calls the feature built (#43).
 - Settings that look load-bearing but do nothing here: the root layout's `title.template`, since every page sets an absolute title (#64), and `typedRoutes`, which can't check paths that end in a slash (#55). The checks that do hold links true are the `hrefFor()` lint rule and the browser crawler.
-
-"Lane", in `scripts/lane/` and the `archive/lane-*` tags, is the old name for the parallel builders `ship` runs. New code says builder.
 
 ## Changing this file
 

@@ -22,8 +22,12 @@ const DRAWN = 144
 /** --color-ground, from the stylesheet that declares every colour. */
 function ground() {
   const css = readFileSync(join(ROOT, 'src/styles/globals.css'), 'utf8')
-  const colour = /--color-ground:\s*(#[0-9a-f]{6})\s*;/i.exec(css)?.[1]
-  if (!colour) throw new Error('src/styles/globals.css declares no --color-ground.')
+  const declared = (name) => new RegExp(`${name}:\\s*([^;]+);`).exec(css)?.[1]?.trim()
+  let colour = declared('--color-ground')
+  // The token names a primitive colour with var(); follow it there.
+  for (let alias; (alias = /^var\((--[\w-]+)\)$/.exec(colour ?? ''));) colour = declared(alias[1])
+  if (!colour?.startsWith('#'))
+    throw new Error('src/styles/globals.css declares no --color-ground.')
   return colour
 }
 

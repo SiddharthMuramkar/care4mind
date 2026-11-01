@@ -93,6 +93,24 @@ describe('page files and the route registry', () => {
     expect(unregistered, 'page files with no route in site.routes()').toEqual([])
   })
 
+  it('gives each pattern params equal to its registry entries', async () => {
+    for (const [flags, registry] of [
+      [EVERY_FLAG_ON, everyFlagOn],
+      [features, thisBuild],
+    ] as const) {
+      const content = createContent(localSource, flags)
+      for (const pattern of patternsOf(registry)) {
+        expect(await content.site.params(pattern)).toEqual(
+          registry.flatMap((entry) =>
+            entry.pattern === pattern && pattern.includes('[slug]')
+              ? [{ slug: entry.path.split('/')[pattern.split('/').indexOf('[slug]')] }]
+              : [],
+          ),
+        )
+      }
+    }
+  })
+
   it('gives every entry’s pattern a page file, every flag on and in this build', () => {
     const pages = pagePatterns()
     for (const [build, routes] of [
