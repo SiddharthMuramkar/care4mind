@@ -79,7 +79,7 @@ jobs:
       # Every Chromium project; Firefox and WebKit run in the engines job.
       - run: >-
           pnpm check:e2e --shard=${{ matrix.shard }}/${{ strategy.job-total }}
-          --project='chromium-*' --project=reflow-320 --project=reduced-motion
+          --project='chromium-*' --project=reflow --project=reduced-motion
           --project=crawler
         env:
           E2E_SCOPE: full
