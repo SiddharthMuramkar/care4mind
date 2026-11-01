@@ -14,12 +14,9 @@ import {
   defineTopic,
   defineWork,
   type ConceptRecord,
-  type ContentKind,
-  type ContentRecord,
   type QuestionnaireRecord,
-  type RecordOf,
   localSource,
-  type ContentSource,
+  memorySource,
   createContent,
 } from '@/content/testing'
 
@@ -34,15 +31,6 @@ const provenance = {
   sources: [{ url: 'https://example.org/page/', retrieved: '2026-10-27' }],
   edits: [],
   flags: [],
-}
-
-/** A made-up content source holding the given records. */
-function sourceOf(...records: ContentRecord[]): ContentSource {
-  return {
-    async records<K extends ContentKind>(kind: K) {
-      return records.filter((record): record is RecordOf<K> => record.kind === kind)
-    },
-  }
 }
 
 const mind = defineTopic({
@@ -219,7 +207,7 @@ const world = [
 
 describe('site.routes', () => {
   it('lists one entry per public page, with one sample per kind', async () => {
-    expect(await createContent(sourceOf(...world), ON).site.routes()).toEqual([
+    expect(await createContent(memorySource(...world), ON).site.routes()).toEqual([
       { path: '/', kind: 'home', pattern: '/', title: 'Home', sample: true },
       {
         path: '/concepts/',
@@ -347,7 +335,7 @@ describe('site.routes', () => {
 
   it('leaves out every route whose flag is off, and no more', async () => {
     const paths = async (flags: Features) =>
-      (await createContent(sourceOf(...world), flags).site.routes()).map(({ path }) => path)
+      (await createContent(memorySource(...world), flags).site.routes()).map(({ path }) => path)
     const all = await paths(ON)
     const without = (...gone: string[]) => all.filter((path) => !gone.includes(path))
 
@@ -364,7 +352,7 @@ describe('site.routes', () => {
   })
 
   it('gives a Questionnaire coming later no route, one that can’t be taken no flow, and /topics/ none', async () => {
-    const paths = (await createContent(sourceOf(...world), ON).site.routes()).map(
+    const paths = (await createContent(memorySource(...world), ON).site.routes()).map(
       ({ path }) => path,
     )
     expect(paths.filter((path) => path.includes('later'))).toEqual([])
@@ -377,7 +365,7 @@ describe('site.routes', () => {
 
 describe('site.trail', () => {
   const trail = (path: string, flags: Features = ON) =>
-    createContent(sourceOf(...world), flags).site.trail(path)
+    createContent(memorySource(...world), flags).site.trail(path)
   const homeCrumb = { label: 'Home', href: '/' }
   const concepts = { label: 'Concepts', href: '/concepts/' }
   const questionnaires = { label: 'Questionnaires', href: '/questionnaires/' }
@@ -453,7 +441,7 @@ describe('site.trail', () => {
   })
 
   it('ends every route’s trail with the page itself', async () => {
-    const content = createContent(sourceOf(...world), ON)
+    const content = createContent(memorySource(...world), ON)
     for (const route of await content.site.routes()) {
       const crumbs = await content.site.trail(route.path)
       expect(crumbs.at(-1)).toMatchObject({ label: route.title, href: route.path })
@@ -472,7 +460,7 @@ describe('site.trail', () => {
 
 describe('site.describe', () => {
   const describePage = (path: string, flags: Features = ON) =>
-    createContent(sourceOf(...world), flags).site.describe(path)
+    createContent(memorySource(...world), flags).site.describe(path)
 
   it('names a Concept by its term and gloss, and describes it by its summary', async () => {
     expect(await describePage('/concepts/obstacles/')).toEqual({
@@ -539,7 +527,7 @@ describe('site.describe', () => {
   })
 
   it('reads a path as the trail does, and describes no page the trail doesn’t have', async () => {
-    const content = createContent(sourceOf(...world), ON)
+    const content = createContent(memorySource(...world), ON)
     expect(await describePage('/concepts/obstacles')).toEqual(
       await describePage('/concepts/obstacles/'),
     )
@@ -556,7 +544,7 @@ describe('site.describe', () => {
   })
 
   it('describes every route under its own path and kind', async () => {
-    const content = createContent(sourceOf(...world), ON)
+    const content = createContent(memorySource(...world), ON)
     for (const route of await content.site.routes()) {
       expect(await content.site.describe(route.path), route.path).toMatchObject({
         path: route.path,
@@ -627,7 +615,7 @@ describe('site.azIndex', () => {
     ...withTerms,
     ...glossary,
   ]
-  const az = () => createContent(sourceOf(...records), ON).site.azIndex()
+  const az = () => createContent(memorySource(...records), ON).site.azIndex()
 
   it('gives every letter from A to Z, each with its entries', async () => {
     const letters = await az()
@@ -768,7 +756,7 @@ describe('site.searchDocuments', () => {
       provenance,
     }),
   ]
-  const documents = () => createContent(sourceOf(...records), ON).site.searchDocuments()
+  const documents = () => createContent(memorySource(...records), ON).site.searchDocuments()
   const find = async (id: string) => (await documents()).find((document) => document.id === id)
 
   it('gives one document per Concept, term, glossary entry, work, passage, Reference, library item, Questionnaire, topic and page', async () => {
@@ -924,7 +912,7 @@ describe('site.searchDocuments', () => {
 
 describe('site.graph', () => {
   it('gives the Concepts as nodes with their topics, and an edge per shared passage or rare Reference', async () => {
-    expect(await createContent(sourceOf(...world), ON).site.graph()).toEqual({
+    expect(await createContent(memorySource(...world), ON).site.graph()).toEqual({
       nodes: [
         {
           slug: 'calm',
@@ -982,7 +970,7 @@ describe('site.graph', () => {
       references: [],
     })
     const records = [...world.filter((record) => record !== calm), ys230, apart]
-    const { edges } = await createContent(sourceOf(...records), ON).site.graph()
+    const { edges } = await createContent(memorySource(...records), ON).site.graph()
     expect(edges.filter(({ kind }) => kind === 'work')).toEqual([
       {
         source: 'calm',
@@ -1010,7 +998,7 @@ describe('site.graph', () => {
       citing('three', 'yoga-sutra/1.30', ['popular-2010']),
       citing('four', 'dhammapada/160', ['popular-2010']),
     ]
-    const { edges } = await createContent(sourceOf(...records), ON).site.graph()
+    const { edges } = await createContent(memorySource(...records), ON).site.graph()
     expect(edges.filter(({ kind }) => kind === 'reference')).toEqual([])
     expect(edges.map(({ via }) => via).sort()).toEqual(['dhammapada/160', 'yoga-sutra/1.30'])
   })
@@ -1047,7 +1035,7 @@ async function internalLinks(site: ReturnType<typeof createContent>) {
 
 describe('the derivations together', () => {
   it('link only to pages in the route registry (made-up content)', async () => {
-    const site = createContent(sourceOf(...world), ON)
+    const site = createContent(memorySource(...world), ON)
     const paths = new Set((await site.site.routes()).map(({ path }) => path))
     const outside = (await internalLinks(site)).filter(
       (href) => !paths.has(href.replace(/#.*$/, '')),

@@ -59,7 +59,7 @@ export interface Relation {
 }
 
 export interface ContentGraph {
-  /** Every record of a kind, in the source's order. */
+  /** Every record of a kind, in id order. */
   records<K extends ContentKind>(kind: K): readonly RecordOf<K>[]
   record<K extends ContentKind>(kind: K, id: string): RecordOf<K> | undefined
   /** The records that cite a Reference: Concepts, topic introductions, Questionnaires, lists. */
@@ -440,11 +440,19 @@ function relationsOf(
   return related
 }
 
-/** Builds the graph from a source, refusing duplicate and dangling ids. */
+/** The records sorted by id, by code unit as the registry sorts its paths, so its order stands. */
+function byId(records: readonly ContentRecord[]): readonly ContentRecord[] {
+  return records
+    .map((record) => [idOf(record), record] as const)
+    .sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0))
+    .map(([, record]) => record)
+}
+
+/** Builds the graph from a source, sorting each kind by id and refusing duplicate and dangling ids. */
 export async function buildGraph(source: ContentSource): Promise<ContentGraph> {
   const byKind = new Map<ContentKind, readonly ContentRecord[]>(
     await Promise.all(
-      CONTENT_KINDS.map(async (kind) => [kind, await source.records(kind)] as const),
+      CONTENT_KINDS.map(async (kind) => [kind, byId(await source.records(kind))] as const),
     ),
   )
 
