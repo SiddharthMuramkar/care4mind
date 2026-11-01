@@ -96,9 +96,10 @@
   outline: none;
 }
 
+/* Inside the card's inner rule, on its own paper: outside it, the ring could match the ground. */
 .action :is(a, button):focus-visible::after {
   outline: 3px solid var(--color-focus);
-  outline-offset: 3px;
+  outline-offset: -11px;
 }
 
 @media (max-width: 30rem) {

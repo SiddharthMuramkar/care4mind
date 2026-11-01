@@ -25,7 +25,7 @@ export function statusOf(status: QuestionnaireStatus): string {
 export function QuestionnaireCard({ questionnaire }: { questionnaire: Card }) {
   const { slug, title, status, summary } = questionnaire
   return (
-    <article className={cx(styles.card, own.card)}>
+    <article className={cx(styles.card, own.card)} data-paper>
       <ViewTransition name={`questionnaire-title-${slug}`} share="morph" default="none">
         <h3 className={styles.title}>{title}</h3>
       </ViewTransition>
