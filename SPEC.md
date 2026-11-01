@@ -43,7 +43,8 @@ These are judgement calls, so review checks them against the diff, in the codeba
 | Sanskrit is NFC with ṃ; each name field holds one script, in characters the fonts cover | content-integrity test |
 | The registry is generated, not edited | git ignores it, `pnpm check` and every test run write it afresh, and the guard refuses edits under `src/content/generated/` |
 | No record stores scoring | types and the content-integrity test |
-| Press colour pairs meet contrast | contrast test, for the pairs it lists. Colours mixed inside modules are unchecked (#79) |
+| Press colour pairs meet contrast; the rule colour is never text | contrast test, for the pairs it lists and every module's text `color`. Colours mixed inside modules are unchecked (#79) |
+| Pages pass axe at WCAG 2.2 AA and its structural best-practice rules; text whose contrast axe can't settle passes only with a reviewed reason | `expectNoAxeViolations` in `tests/e2e/axe.ts`, run by the page specs; the axe spec checks the helper itself |
 | Icon and manifest colours equal their tokens | icons test |
 | Lotus motion is CSS only, transform and opacity: only the hero moves on its own, once, ending within 5 s of load; every lotus answers the pointer; nothing moves under reduced motion; no pause control | lotus and motion specs |
 | A `styles.x` lookup names a class its CSS module defines | nothing yet (#67) |

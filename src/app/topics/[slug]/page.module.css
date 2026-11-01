@@ -3,7 +3,7 @@
   font-family: var(--font-deva);
   font-variant-caps: normal;
   letter-spacing: 0;
-  color: var(--color-highlight);
+  color: var(--color-surface-link);
 }
 
 /* The topic's own Sanskrit word, in italic as transliteration always is, beside its Devanagari. */

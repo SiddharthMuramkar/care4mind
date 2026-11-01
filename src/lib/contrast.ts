@@ -87,6 +87,13 @@ export const CONTRAST_PAIRS = [
   { foreground: 'toast-muted', background: 'toast', minimum: 4.5 },
   { foreground: 'focus', background: 'toast', minimum: 3 },
   { foreground: 'toast-line', background: 'ground', minimum: 3 },
+  // Text that numbers or marks, though screen readers skip it: a term's ¶ at rest, the concept
+  // contents' numerals, the topic kicker's numeral, and the contents plate's numeral on its lit row,
+  // whose 9% vermilion wash is laid over the paper.
+  { foreground: 'surface-muted', background: 'surface', minimum: 4.5 },
+  { foreground: 'surface-muted', background: 'surface', minimum: 4.5 },
+  { foreground: 'surface-link', background: 'surface', minimum: 4.5 },
+  { foreground: 'surface-link', background: 'highlight', mix: 0.09, over: 'surface', minimum: 4.5 },
 ] as const
 
 export type ColourToken = (typeof CONTRAST_PAIRS)[number]['foreground' | 'background']
