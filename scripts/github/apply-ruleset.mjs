@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+// @ts-check
 // Makes the ruleset GitHub enforces on main match .github/rulesets/main.json.
 //
 //   pnpm ruleset:apply --commit <sha>

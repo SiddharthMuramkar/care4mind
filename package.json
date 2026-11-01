@@ -5,7 +5,7 @@
   "type": "module",
   "packageManager": "pnpm@12.15.0",
   "engines": {
-    "node": ">=22.12.0"
+    "node": ">=22.15.0"
   },
   "scripts": {
     "dev": "node scripts/content/registry.mjs && next dev",
@@ -14,7 +14,7 @@
     "lint": "eslint --cache --cache-location node_modules/.cache/eslint/ .",
     "format": "prettier --write .",
     "format:check": "prettier --check --cache .",
-    "typecheck": "node scripts/content/registry.mjs && next typegen && tsc --noEmit",
+    "typecheck": "node scripts/content/registry.mjs && next typegen && tsc --noEmit && tsc -p scripts",
     "test": "node scripts/content/registry.mjs && vitest run",
     "test:watch": "vitest",
     "test:e2e": "node scripts/content/registry.mjs && playwright test",
