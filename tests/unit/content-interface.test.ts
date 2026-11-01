@@ -1251,6 +1251,15 @@ describe('questionnaires', () => {
         { slug: 'obstacles', name: 'Vighna', lang: 'sa-Latn', href: '/concepts/obstacles/' },
       ],
       topics: [{ slug: 'mind', name: 'Mind', href: '/topics/mind/' }],
+      relatedConcepts: [
+        expect.objectContaining({
+          slug: 'obstacles',
+          name: 'Vighna',
+          lang: 'sa-Latn',
+          english: 'Obstacle',
+          href: '/concepts/obstacles/',
+        }),
+      ],
       purpose: ['A made-up purpose.'],
       format: ['A made-up format.'],
       limitations: { items: ['A made-up limitation.'], status: 'draft-pending-psychology-expert' },

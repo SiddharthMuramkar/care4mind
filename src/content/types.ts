@@ -388,6 +388,8 @@ export interface QuestionnaireCard {
  * and its sources. Nothing held back and no scoring reach a view.
  */
 export interface QuestionnaireView extends QuestionnaireCard, CarriedOver {
+  /** Its Concepts in brief, in the record's order, for its Related Concepts list. */
+  relatedConcepts: readonly ConceptCard[]
   purpose?: readonly Inline[]
   format?: readonly Inline[]
   limitations?: {

@@ -1,15 +1,14 @@
 import type { Metadata } from 'next'
-import Link from 'next/link'
 import { notFound } from 'next/navigation'
 
 import { Breadcrumbs } from '@/components/Breadcrumbs'
-import { Citation } from '@/components/Citation'
 import { Folio } from '@/components/Folio'
-import { PageTurn, turnForward } from '@/components/PageTurn'
+import { PageTurn } from '@/components/PageTurn'
 import { Text } from '@/components/prose'
 import { StatusBadge } from '@/components/StatusBadge'
 import { Flow } from '@/components/questionnaire/Flow'
-import { concepts, hrefFor, questionnaires } from '@/content'
+import { Limitations, RelatedConcepts, Source } from '@/components/questionnaire/Sections'
+import { hrefFor, questionnaires } from '@/content'
 import { cx } from '@/lib/cx'
 import { metadataFor } from '@/lib/metadata'
 
@@ -48,64 +47,36 @@ export default async function TakeQuestionnairePage({
     questionnaires.form(slug),
   ])
   if (!questionnaire || !form) notFound()
-  const { title, status, shownStatus, limitations, source } = questionnaire
+  const { title, status, shownStatus, limitations, source, relatedConcepts } = questionnaire
   const intro = hrefFor({ kind: 'questionnaire', id: slug, status })
-  const related = (await concepts.list()).filter((concept) =>
-    questionnaire.concepts.some((ref) => ref.slug === concept.slug),
-  )
 
-  const limits = limitations ? (
-    <section className={styles.limits} aria-labelledby="end-limits">
-      <h3 id="end-limits" className={styles.title}>
-        What this is not
-      </h3>
-      {limitations.status === 'draft-pending-psychology-expert' ? (
-        <p className={styles.draft}>
-          Draft wording. The Psychology expert has not reviewed these limitations yet.
-        </p>
-      ) : null}
-      <ul className={styles.list}>
-        {limitations.items.map((item) => (
-          <li key={item}>
-            <Text text={item} />
-          </li>
-        ))}
-      </ul>
-    </section>
-  ) : null
+  const limits = (
+    <Limitations
+      limitations={limitations}
+      title="What this is not"
+      id="end-limits"
+      level={3}
+      className={styles.limits}
+      headingClassName={styles.title}
+    />
+  )
 
   const sources = (
     <>
-      {source ? (
-        <section className={styles.section} aria-labelledby="end-source">
-          <h3 id="end-source" className={styles.title}>
-            Source
-          </h3>
-          <p>
-            <Citation reference={source} />
-          </p>
-        </section>
-      ) : null}
-      {related.length > 0 ? (
-        <section className={styles.section} aria-labelledby="end-related">
-          <h3 id="end-related" className={styles.title}>
-            Related Concepts
-          </h3>
-          <ul className={styles.list}>
-            {related.map((concept) => (
-              <li key={concept.slug}>
-                <Link
-                  href={hrefFor({ kind: 'concept', id: concept.slug })}
-                  transitionTypes={turnForward}
-                >
-                  <span lang={concept.lang}>{concept.name}</span>
-                  {concept.term && concept.english ? ` (${concept.english})` : null}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </section>
-      ) : null}
+      <Source
+        reference={source}
+        id="end-source"
+        level={3}
+        className={styles.section}
+        headingClassName={styles.title}
+      />
+      <RelatedConcepts
+        concepts={relatedConcepts}
+        id="end-related"
+        level={3}
+        className={styles.section}
+        headingClassName={styles.title}
+      />
     </>
   )
 
