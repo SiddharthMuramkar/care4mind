@@ -454,7 +454,9 @@ describe('the graph', () => {
       },
     })
     const others = world.filter((record) => record !== profile)
-    await expect(buildGraph(sourceOf(...others, repeated))).rejects.toThrow(
+    const build = buildGraph(sourceOf(...others, repeated))
+    await expect(build).rejects.toThrow(DanglingIdError)
+    await expect(build).rejects.toThrow(
       'questionnaire “example”, field form.parts[1].id: repeated part id “same”',
     )
   })
@@ -481,7 +483,9 @@ describe('the graph', () => {
       },
     })
     const others = world.filter((record) => record !== profile)
-    await expect(buildGraph(sourceOf(...others, repeated))).rejects.toThrow(
+    const build = buildGraph(sourceOf(...others, repeated))
+    await expect(build).rejects.toThrow(DanglingIdError)
+    await expect(build).rejects.toThrow(
       'questionnaire “example”, field form.parts[1].items[0].id: repeated item id “q1”',
     )
   })
