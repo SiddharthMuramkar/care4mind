@@ -10,7 +10,7 @@ export default defineConcept({
   name: {
     // Split out of the page's Yoga Sūtra 2.30 compound (see the flags); the title glosses it.
     term: { iast: 'ahiṃsā', devanagari: 'अहिंसा', ascii: ['Ahimsa'] },
-    english: 'Non-Violence',
+    english: 'Non-violence',
   },
   summary:
     'Non-violence entails refraining from causing harm to any living being through one’s thoughts, words, or actions.',
@@ -183,6 +183,7 @@ export default defineConcept({
       'The page gives its table no caption of its own; it takes the heading set just above it: “Comparative table summarizing the Indian vs Western concept of Ahimsa (Non-Violence) Bharadwaj et al. (2024); Mandal Pal (2023).”. The table’s first row (“Conceptual Dimension”, “Indian Concept of Ahimsa”, “Western Concept of Non-Violence”) gives its columns.',
       'Interface text dropped: the “Introduction” and “References” labels, and the “Translation:” and “Meaning:” labels before the verses’ translations and readings.',
       'Left out: the page’s “Overall Score indicator” section, which belongs to its Questionnaire and is listed there as held back.',
+      'Name gloss in sentence case: “Non-Violence” → “Non-violence”.',
     ],
     flags: [
       {

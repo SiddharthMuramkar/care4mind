@@ -14,7 +14,7 @@ export default defineConcept({
   name: {
     term: { iast: 'kartā', ascii: ['Karta'] },
     // The page's own gloss: “The Bhagavad Gita describes ‘karta’ or doer…”.
-    english: 'doer',
+    english: 'Doer',
   },
   summary:
     'The Bhagavad Gita describes ‘karta’ or doer as one of the five factors of action and a person is called a ‘karta’ when he or she is the agent of activity influenced by the gunas namely sattva, rajas and tamas (Bhagavad Gita 18.13-18).',
@@ -181,6 +181,7 @@ export default defineConcept({
       'Inline DharmaWiki links dropped, their words kept: “Karma” and “chitta”.',
       'Interface text dropped: the “Introduction” and “References” labels.',
       'Left out: the page’s “Karta Score-Based Indicators” section, which belongs to its Questionnaire and is listed there as held back.',
+      'Name gloss in sentence case: “doer” → “Doer”.',
     ],
     flags: [
       {

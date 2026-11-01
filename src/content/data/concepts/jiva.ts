@@ -9,7 +9,7 @@ export default defineConcept({
   name: {
     // The headword is “Jiva (Samskrit: जीवः)”; the IAST is the page's own (“the term jīva”).
     term: { iast: 'jīva', devanagari: 'जीवः', ascii: ['Jiva'] },
-    english: 'living being',
+    english: 'Living being',
   },
   summary:
     'Jiva (Samskrit: जीवः), literally means a living being, in Indian philosophical thought it is a technical term closest to what is called “person” in contemporary psychology.',
@@ -72,6 +72,7 @@ export default defineConcept({
       'The text stops mid-citation; its last character, a lone “[” linking into DharmaWiki’s Jiva article, dropped: “levels.[” → “levels.”.',
       'Inline DharmaWiki links dropped, their words kept: “Indian concept self” (to its Indian Concept of Self article) and “purusha” (to its Purusha article).',
       'External link kept, labelled “DharmaWiki”: the Concept’s own DharmaWiki article, which the post’s citation markers link into, at the address the glossary card “Jiva (जीवः)” on https://care4mind.org/concepts/ links.',
+      'Name gloss in sentence case: “living being” → “Living being”.',
     ],
     flags: [
       {

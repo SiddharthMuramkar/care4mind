@@ -27,7 +27,7 @@ export default defineConcept({
   name: {
     // The page writes “Panch Klesha” in its title and headings, “Pancha Klesha” over three verses.
     term: { iast: 'pañca kleśa', ascii: ['Panch Klesha', 'Pancha Klesha', 'Panchklesha'] },
-    english: 'fivefold miseries',
+    english: 'Fivefold miseries',
   },
   summary:
     'In the Yoga Sutra of Patanjali 2.3, the concept of five kleshas (fivefold miseries) is presented as the foundational causes of human suffering. These kleshas act as formidable obstacles on the path to spiritual liberation (moksha).',
@@ -124,7 +124,7 @@ export default defineConcept({
           kind: 'term',
           id: 'abhinivesa',
           term: abhinivesa,
-          gloss: 'Fear of Death',
+          gloss: 'Fear of death',
           blocks: [
             {
               kind: 'paragraph',
@@ -146,7 +146,7 @@ export default defineConcept({
           kind: 'term',
           id: 'kama',
           term: kama,
-          gloss: 'lust',
+          gloss: 'Lust',
           blocks: [
             {
               kind: 'paragraph',
@@ -158,7 +158,7 @@ export default defineConcept({
           kind: 'term',
           id: 'krodha',
           term: krodha,
-          gloss: 'anger',
+          gloss: 'Anger',
           blocks: [
             {
               kind: 'paragraph',
@@ -170,7 +170,7 @@ export default defineConcept({
           kind: 'term',
           id: 'lobha',
           term: lobha,
-          gloss: 'greed',
+          gloss: 'Greed',
           blocks: [
             {
               kind: 'paragraph',
@@ -182,7 +182,7 @@ export default defineConcept({
           kind: 'term',
           id: 'moha',
           term: moha,
-          gloss: 'delusion',
+          gloss: 'Delusion',
           blocks: [
             {
               kind: 'paragraph',
@@ -194,7 +194,7 @@ export default defineConcept({
           kind: 'term',
           id: 'mada',
           term: mada,
-          gloss: 'pride',
+          gloss: 'Pride',
           blocks: [
             {
               kind: 'paragraph',
@@ -206,7 +206,7 @@ export default defineConcept({
           kind: 'term',
           id: 'matsarya',
           term: matsarya,
-          gloss: 'envy',
+          gloss: 'Envy',
           blocks: [
             {
               kind: 'paragraph',
@@ -274,7 +274,7 @@ export default defineConcept({
               ],
             },
             {
-              head: { term: abhinivesa, gloss: 'Fear of Death' },
+              head: { term: abhinivesa, gloss: 'Fear of death' },
               cells: [
                 'Clinging to life; deep-rooted fear of losing existence, even in the wise.',
                 'Existentialism: Fear of the meaningless and transient nature of life',
@@ -290,7 +290,7 @@ export default defineConcept({
           columns: ['Concept', 'Indian Perspective', 'Western Psychological', 'Key Differences'],
           rows: [
             {
-              head: { term: kama, gloss: 'Lust/Desire' },
+              head: { term: kama, gloss: 'Lust/desire' },
               cells: [
                 'Fundamental drive for pleasure and sensory enjoyment; broader than just sexual impulse; can be a legitimate life pursuit (Purushartha) but becomes problematic when unchecked.',
                 'Freudian libido—primarily seen as sexual energy driving behavior; also covers motivation and pleasure seeking.',
@@ -385,6 +385,15 @@ export default defineConcept({
       'External link kept, labelled “DharmaWiki”: the Concept’s own DharmaWiki article, on the kleshas, which the page links from “kleshas” in its first paragraph.',
       'Interface text dropped: the “Introduction” and “References” labels, and the “Meaning:” labels before the verses’ readings.',
       'Left out: the page’s “Score indicator” section, which belongs to its Questionnaire and is listed there as held back.',
+      'Name gloss in sentence case: “fivefold miseries” → “Fivefold miseries”.',
+      'Gloss in sentence case: “Fear of Death” → “Fear of death”.',
+      'Gloss in sentence case: “Lust/Desire” → “Lust/desire”.',
+      'Gloss in sentence case: “lust” → “Lust”.',
+      'Gloss in sentence case: “anger” → “Anger”.',
+      'Gloss in sentence case: “greed” → “Greed”.',
+      'Gloss in sentence case: “delusion” → “Delusion”.',
+      'Gloss in sentence case: “pride” → “Pride”.',
+      'Gloss in sentence case: “envy” → “Envy”.',
     ],
     flags: [
       {

@@ -12,7 +12,7 @@ const prajna: SanskritName = { iast: 'prajñā', devanagari: 'प्रज्ञ
 export default defineConcept({
   kind: 'concept',
   slug: 'five-steps-of-perfection',
-  name: { english: 'Five Steps of Perfection' },
+  name: { english: 'Five steps of perfection' },
   summary:
     'Many individuals may find it challenging to complete the journey to attain Samadhi. They may opt for the five steps towards Self-realisation, which are Faith, Strength, Memory, Absorption, and Wisdom (Tomar, 2024).',
   keywords: ['faith', 'strength', 'memory', 'absorption', 'wisdom', 'perfection', 'effort'],
@@ -39,7 +39,7 @@ export default defineConcept({
           kind: 'term',
           id: 'sraddha',
           term: sraddha,
-          gloss: 'Unconditional Faith',
+          gloss: 'Unconditional faith',
           blocks: [
             {
               kind: 'paragraph',
@@ -158,7 +158,7 @@ export default defineConcept({
               ],
             },
             {
-              head: { term: sraddha, gloss: 'Unconditional Faith' },
+              head: { term: sraddha, gloss: 'Unconditional faith' },
               cells: [
                 'Foundation for spiritual growth, epistemology, blends faith and rational inquiry (tarka).',
                 'Faith largely separated from rational inquiry; more compartmentalized in philosophical debates.',
@@ -204,6 +204,7 @@ export default defineConcept({
       { url: 'https://care4mind.org/fivestepsofperfectionprofiling/', retrieved: '2026-10-27' },
     ],
     edits: [
+      'English name in sentence case: “Five Steps of Perfection” → “Five steps of perfection”.',
       'Named by its English title: the page title, “Five Steps of Perfection Profiling”, without “Profiling”, the word for its questionnaire. The page gives no Sanskrit headword (flagged).',
       'The heading over the verse, “Shlokas of Perfection from Chapter 1, Sutra 20”, is left out: the verse is shown with its work and number, Yoga Sūtra 1.20, which the heading doesn’t name (flagged).',
       'The sub-heading under “What is the definition of Perfection?”, “(Faith, Strength, Memory, Absorption, Clarity)”, is the first paragraph of its section.',
@@ -212,6 +213,7 @@ export default defineConcept({
       'The comparison table’s caption is the paragraph above it (“Comparative table of Indian vs Western concepts for …”); its first row is its column headings, and its row heads (“Prajna / Wisdom” and the others) are the steps’ terms with their glosses.',
       'Held back in the Questionnaire five-steps-of-perfection, described and never quoted: the page’s “Score indicator” section, with a High, Moderate and Low “Score Wise Category Description” for each step, and its note on the sources they were referred from.',
       'Interface text dropped: the “Introduction” and “References” labels, and the “Meaning:” label before the verse’s reading.',
+      'Gloss in sentence case: “Unconditional Faith” → “Unconditional faith”.',
     ],
     flags: [
       {

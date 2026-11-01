@@ -8,7 +8,7 @@ export default defineConcept({
   name: {
     // The headword is “Atman (Samskrit: आत्मा)”; the page prints no IAST (see the flags).
     term: { iast: 'ātman', devanagari: 'आत्मा', ascii: ['Atman', 'Atma'] },
-    english: 'Soul or Self',
+    english: 'Soul or self',
   },
   summary:
     'Atman (Samskrit: आत्मा) is one of the primary teachings of the Upanishads along with Brahman, Maya, and Karma.',
@@ -92,6 +92,7 @@ export default defineConcept({
       'Typos fixed: “ominipotent” → “omnipotent”, “onmipresent” → “omnipresent”.',
       'IAST transliterated from the page’s Devanagari: “ātman”, from “आत्मन्”. The page prints no IAST.',
       'External link added, labelled “DharmaWiki”: the Concept’s own DharmaWiki article, at the address the glossary card “Atman (आत्मन्)” on https://care4mind.org/concepts/ links. The post itself has no links.',
+      'Name gloss in sentence case: “Soul or Self” → “Soul or self”.',
     ],
     flags: [
       {

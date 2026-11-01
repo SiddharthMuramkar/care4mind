@@ -16,7 +16,7 @@ export default defineConcept({
   name: {
     // The page writes only the plural, “chittabhumis”, glossed “states of mind” (see the flags).
     term: { iast: 'citta-bhūmi', ascii: ['Chittabhumis'] },
-    english: 'state of mind',
+    english: 'State of mind',
   },
   summary:
     'Maharishi Patanjali outlines five progressive states of mind, known as chittabhumis, which chart the path toward a yogic and spiritually awakened consciousness.',
@@ -273,6 +273,7 @@ export default defineConcept({
       'The reference list names Krishnappa et al. (2020) twice, as 2020a and 2020b. The Reference krishnappa-2020 keeps both lines as cited, and is listed once, where it first appears.',
       'Interface text dropped: the “Introduction” and “References” labels, and the “Meaning:” labels before the verses’ readings.',
       'Left out: the page’s “Score- Based Indicators” section, which belongs to its Questionnaire and is listed there as held back.',
+      'Name gloss in sentence case: “state of mind” → “State of mind”.',
     ],
     flags: [
       {

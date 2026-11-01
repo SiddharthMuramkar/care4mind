@@ -33,7 +33,7 @@ export default defineConcept({
           kind: 'term',
           id: 'sattva',
           term: sattva,
-          gloss: 'purity',
+          gloss: 'Purity',
           blocks: [
             {
               kind: 'paragraph',
@@ -45,7 +45,7 @@ export default defineConcept({
           kind: 'term',
           id: 'rajas',
           term: rajas,
-          gloss: 'passion or hyperactivity',
+          gloss: 'Passion or hyperactivity',
           blocks: [
             {
               kind: 'paragraph',
@@ -57,7 +57,7 @@ export default defineConcept({
           kind: 'term',
           id: 'tamas',
           term: tamas,
-          gloss: 'passivity and inertia',
+          gloss: 'Passivity and inertia',
           blocks: [
             {
               kind: 'paragraph',
@@ -166,6 +166,9 @@ export default defineConcept({
       'The quotation marks around the Meaning of Bhagavad Gītā 14.5 are left out, as they are around the translations of 14.9 to 14.13.',
       'Interface text dropped: the “References” heading, the “Online Resources:” label in the reference list and the “Meaning:” label before 14.5’s reading; the horizontal rules under four headings are left out.',
       'Left out: the leftover test shortcode at the end of the page, after its reference list, which called a PHP snippet named “Mind”, and the test message it showed on the live page.',
+      'Gloss in sentence case: “purity” → “Purity”.',
+      'Gloss in sentence case: “passion or hyperactivity” → “Passion or hyperactivity”.',
+      'Gloss in sentence case: “passivity and inertia” → “Passivity and inertia”.',
     ],
     flags: [
       {

@@ -275,10 +275,10 @@ describe('the practice Concepts', () => {
     expect(
       components.map(({ id, term, gloss }) => [id, term.iast, term.devanagari, gloss]),
     ).toEqual([
-      ['maitri', 'maitrī', 'मैत्री', 'Loving-kindness or Benevolence'],
+      ['maitri', 'maitrī', 'मैत्री', 'Loving-kindness or benevolence'],
       ['karuna', 'karuṇā', 'करुणा', 'Compassion'],
-      ['mudita', 'muditā', 'मुदिता', 'Altruistic Joy'],
-      ['upeksa', 'upekṣā', 'उपेक्षा', 'Equanimity or Inner Balance'],
+      ['mudita', 'muditā', 'मुदिता', 'Altruistic joy'],
+      ['upeksa', 'upekṣā', 'उपेक्षा', 'Equanimity or inner balance'],
     ])
     expect(components.map(({ term }) => term.ascii[0])).toEqual([
       'Maitra',
@@ -312,8 +312,8 @@ describe('the practice Concepts', () => {
   })
 
   it.each([
-    { slug: FIVE_STEPS.slug, english: 'Five Steps of Perfection' },
-    { slug: SPIRITUAL.slug, english: 'Spiritual Practitioner' },
+    { slug: FIVE_STEPS.slug, english: 'Five steps of perfection' },
+    { slug: SPIRITUAL.slug, english: 'Spiritual practitioner' },
   ])(
     'name $slug by its English title, flagged as having no Sanskrit headword',
     ({ slug, english }) => {
@@ -327,7 +327,7 @@ describe('the practice Concepts', () => {
     const concept = conceptOf(FIVE_STEPS.slug)
     const steps = termsIn(concept?.sections)
     expect(steps.map(({ id, term, gloss }) => [id, term.iast, gloss])).toEqual([
-      ['sraddha', 'śraddhā', 'Unconditional Faith'],
+      ['sraddha', 'śraddhā', 'Unconditional faith'],
       ['virya', 'vīrya', 'Strength'],
       ['smrti', 'smṛti', 'Memory'],
       ['samadhi', 'samādhi', 'Absorption'],
@@ -347,7 +347,7 @@ describe('the practice Concepts', () => {
 
   it('name Momentum of Spiritual Practice by its English title, flagging saṃvega as a possible headword', () => {
     const concept = conceptOf(MOMENTUM.slug)
-    expect(concept?.name).toEqual({ english: 'Momentum of Spiritual Practice' })
+    expect(concept?.name).toEqual({ english: 'Momentum of spiritual practice' })
     const [note] = notesFor(concept, 'research-editor').filter((text) => text.includes('saṃvega'))
     expect(note).toMatch(/no Sanskrit headword/)
     expect(note).toContain('Yoga Sūtra 1.21')
