@@ -16,7 +16,14 @@ import { ReadingThread } from '@/components/ReadingThread'
 import { ReferenceList } from '@/components/ReferenceList'
 import { ScriptChoice, ScriptSwitch } from '@/components/ScriptChoice'
 import { SpellingsPopover } from '@/components/SpellingsPopover'
-import { concepts, hrefFor, type BlockView, type ConceptView, type VerseView } from '@/content'
+import {
+  concepts,
+  hrefFor,
+  site,
+  type BlockView,
+  type ConceptView,
+  type VerseView,
+} from '@/content'
 import { capitalise } from '@/lib/text'
 import { cx } from '@/lib/cx'
 import { metadataFor } from '@/lib/metadata'
@@ -26,14 +33,14 @@ import styles from './page.module.css'
 
 export const dynamicParams = false
 
-export async function generateStaticParams() {
-  return (await concepts.list()).map(({ slug }) => ({ slug }))
-}
+const PATTERN = '/concepts/[slug]/' as const
+
+export const generateStaticParams = () => site.params(PATTERN)
 
 export async function generateMetadata({
   params,
 }: PageProps<'/concepts/[slug]'>): Promise<Metadata> {
-  return metadataFor(hrefFor({ kind: 'concept', id: (await params).slug }))
+  return metadataFor(PATTERN.replace('[slug]', (await params).slug))
 }
 
 /** Every verse the page sets, at its head and inside its sections, by passage. */

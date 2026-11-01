@@ -13,6 +13,7 @@ import { ScriptPair } from '@/components/script/ScriptPair'
 import { ContentsPlate, plateCard, plateScope, type PlateRow } from '@/components/topics'
 import {
   hrefFor,
+  site,
   topics,
   type ConceptCard as Concept,
   type PassageView,
@@ -20,6 +21,7 @@ import {
 } from '@/content'
 import { cx } from '@/lib/cx'
 import { metadataFor } from '@/lib/metadata'
+import { openingLine } from '@/lib/sanskrit'
 import { toDevanagariDigits } from '@/lib/text'
 
 import reading from '../../reading.module.css'
@@ -27,12 +29,12 @@ import styles from './page.module.css'
 
 export const dynamicParams = false
 
-export async function generateStaticParams() {
-  return (await topics.list()).map(({ slug }) => ({ slug }))
-}
+const PATTERN = '/topics/[slug]/' as const
+
+export const generateStaticParams = () => site.params(PATTERN)
 
 export async function generateMetadata({ params }: PageProps<'/topics/[slug]'>): Promise<Metadata> {
-  return metadataFor(hrefFor({ kind: 'topic', id: (await params).slug }))
+  return metadataFor(PATTERN.replace('[slug]', (await params).slug))
 }
 
 /** A `lang` attribute only where there is one: an undefined prop still travels with the page. */
@@ -71,19 +73,11 @@ function byWork(verses: readonly PassageView[]) {
   return [...works.values()]
 }
 
-/** Who speaks a verse ("अर्जुन उवाच ।"): a line before the verse, not its opening. */
-const SPEAKER = /(उवाच|uvāca)\s*[।|]?$/
-
-/**
- * A verse's opening, as a manuscript's index gives it: its first line after any speaker's, in
- * Devanagari where there is some, else in transliteration.
- */
+/** A verse's opening line, in Devanagari where there is some, else in transliteration. */
 function Opening({ verse }: { verse: PassageView }) {
-  const first = (lines: readonly string[]) =>
-    lines.find((line) => !SPEAKER.test(line.trim())) ?? lines[0]
-  const deva = first(verse.devanagari)
+  const deva = openingLine(verse.devanagari)
   if (deva) return <span lang="sa-Deva">{deva}</span>
-  const line = first(verse.transliteration?.lines ?? [])
+  const line = openingLine(verse.transliteration?.lines ?? [])
   return line ? <span lang={verse.work.lang}>{line}</span> : <>{verse.label}</>
 }
 
