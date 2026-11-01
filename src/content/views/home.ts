@@ -39,6 +39,7 @@ export function homepageView(record: HomepageRecord, graph: ContentGraph): Homep
       ...(area.target === undefined ? {} : { href: targetHref(area.target, graph) }),
     })),
     closing: record.closing,
+    helpLine: record.helpLine,
     ...carriedOver(record),
   }
 }
