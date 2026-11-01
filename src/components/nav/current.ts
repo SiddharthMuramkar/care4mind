@@ -15,7 +15,8 @@ const slashed = (path: string) => (path.endsWith('/') ? path : `${path}/`)
 
 /**
  * Where a page sits against a link (`aria-current`): `page` on the link's own page, `true` on a
- * page within the paths it heads, and nothing elsewhere.
+ * page within the paths it heads (each read as a folder, so /concepts doesn't head /concepts-map/),
+ * and nothing elsewhere.
  */
 export function currentFor(
   pathname: string,
@@ -24,7 +25,7 @@ export function currentFor(
 ): 'page' | 'true' | undefined {
   const path = slashed(pathname)
   if (path === href) return 'page'
-  return within.some((prefix) => path.startsWith(prefix)) ? 'true' : undefined
+  return within.some((prefix) => path.startsWith(slashed(prefix))) ? 'true' : undefined
 }
 
 const never = () => () => {}
