@@ -2,7 +2,11 @@ import type { ConceptGraphEdge } from '@/content'
 
 export type ConnectionKind = ConceptGraphEdge['kind']
 
-/** Strongest first, as the content module ranks them: the list's order, and the plate's top layer. */
+/**
+ * The kinds of connection, strongest first: the list's order, and the plate's top layer first.
+ * Written out rather than read from `@/content`, which client code may import only for types; a
+ * unit test holds it to the content module's `RELATION_STRENGTH`.
+ */
 export const KINDS: readonly ConnectionKind[] = ['passage', 'work', 'reference']
 
 /** How each kind is named: on its filter button, in the legend, and over its part of the list. */
