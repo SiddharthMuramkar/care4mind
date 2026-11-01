@@ -1,4 +1,6 @@
-@import 'tailwindcss';
+/* Tailwind scans no files, so words in records never become utilities; the site's @theme blocks are static, since CSS modules read tokens Tailwind cannot see. */
+@import 'tailwindcss' source(none);
+@source inline('sr-only');
 
 /*
  * Design tokens. Every colour, duration, easing and layer is declared once here,
@@ -8,7 +10,7 @@
  * Colour tokens are semantic, so each text/background pair in
  * tests/unit/contrast.test.ts is checked for WCAG AA contrast.
  */
-@theme {
+@theme static {
   /* Press is the only palette: Tailwind's default colours are dropped. */
   --color-*: initial;
 
@@ -474,7 +476,7 @@
 }
 
 /* The lotus keeps its own, slower clock: it is only looked at, never waited on. */
-@theme {
+@theme static {
   --duration-stroke: 900ms;
   --duration-breath: 8s;
   --duration-bloom: 1600ms;
