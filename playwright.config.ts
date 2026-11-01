@@ -81,13 +81,13 @@ const widthProject = (width: number, height: number): Project => ({
 })
 
 const projects: Project[] = [
-  // FR-06: every width from 360 to 1440 px, sampled at the three the site is designed for.
+  // Every width from 360 to 1440 px, sampled at the three the site is designed for.
   widthProject(360, 800),
   widthProject(768, 1024),
   widthProject(1440, 900),
-  // WCAG 1.4.10 Reflow tests at 320 px, narrower than FR-06.
+  // WCAG 1.4.10 Reflow: every route at 320 px, narrower than the narrowest width project; the spec sets its other widths.
   {
-    name: 'reflow-320',
+    name: 'reflow',
     use: { ...chrome, viewport: { width: 320, height: 640 } },
     testMatch: /reflow\.spec\.ts/,
   },

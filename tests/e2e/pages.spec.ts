@@ -59,6 +59,14 @@ for (const route of ROUTES_IN_SCOPE) {
         .toHaveText(route.title)
     }
 
+    // Every footer says where to call for help now, each number dialable.
+    const help = page.locator('footer [data-help-line]')
+    for (const tel of ['tel:14416', 'tel:18008914416', 'tel:112']) {
+      await expect
+        .soft(help.locator(`a[href="${tel}"]`), `${where}: the footer's help line links ${tel}`)
+        .toHaveCount(1)
+    }
+
     // D02: internal links point at slashed addresses, as rendered here too, after hydration.
     const unslashed = await page
       .locator('a[href^="/"]:not([href^="//"])')
