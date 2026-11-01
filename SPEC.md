@@ -57,7 +57,7 @@ These are judgement calls, so review checks them against the diff, in the codeba
 | Agents never merge a PR, turn on auto-merge, push to `main` or delete a branch | the guard and its test (guard). It reads commands, not intent: a script it can't read makes it ask, and review covers the rest |
 | `main` changes only through a squashed PR whose required check passed on an up-to-date branch | the ruleset on GitHub, whose file the ruleset test checks; `pnpm ruleset:check` compares the two |
 | Nobody commits to `main` or pushes to it, the developer included | the git hooks in `.githooks/`, installed by `prepare` (githooks test). `--no-verify` skips them, and the guard refuses that to agents |
-| `ship` opens PRs and stops, and its agents run light | ship test |
+| `ship` opens PRs, has a reviewer agent review each and its builder answer the review, then stops; its agents run light | ship test |
 | Each "Code that misleads" line names an open ticket | review |
 | Names use glossary terms; comments say why; Press only; depth; tests at the seam | review |
 
@@ -86,7 +86,7 @@ These are judgement calls, so review checks them against the diff, in the codeba
 
 `pnpm check` is the one local signal that a change is done. CI runs it on every PR and every push to `main`, then the browser tests in parallel shards and Lighthouse on the build it made. Beside them, one job builds with every `FEATURE_*` variable at `0`, as production has, and runs the crawler and the pages spec on that build. The job named `ci`, which `.github/rulesets/main.json` requires, waits for all of them, and GitHub won't merge a PR until it passes on a branch that's up to date with `main`. Also run the browser tests you touched, against the build `pnpm check` made: `E2E_ONLY=<spec names> pnpm check:e2e`, where the names are file names in `tests/e2e` without `.spec.ts`.
 
-An agent's PR is done when it's open, green and every review thread is answered. `ship` stops there, and the developer reviews, merges and deletes the branch.
+An agent's PR is done when it's open, green and every review thread is answered. In `ship`, a reviewer agent posts that review and the PR's builder answers it. `ship` stops there, and the developer reviews, merges and deletes the branch.
 
 The content registry is rewritten by `dev`, `build`, `typecheck`, `test`, `test:e2e`, `check` and every Vitest run. A running `next dev` sees a new record file only once the registry is rewritten: rerun the registry script, or restart.
 

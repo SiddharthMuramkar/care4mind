@@ -2,7 +2,7 @@
 // @ts-check
 // Screenshots of the built site, one page of each kind, so every builder,
 // review and finish looks at the site the same way. It prints each file it wrote, and nothing
-// else, so an agent can open exactly those.
+// else, on stdout, so an agent can open exactly those.
 //
 //   pnpm shots [--only <paths or kinds>] [--widths <px,…>] [--full] [--reduced | --both]
 //   SHOTS_PORT=3120 pnpm shots --only /,concept
@@ -11,7 +11,7 @@
 // tested in tests/unit/shots.test.ts, and Playwright, which the repo has, takes the pictures.
 
 import { spawn } from 'node:child_process'
-import { existsSync, mkdirSync } from 'node:fs'
+import { existsSync, mkdirSync, readFileSync } from 'node:fs'
 import { connect } from 'node:net'
 import { dirname, join, resolve } from 'node:path'
 import { setTimeout as delay } from 'node:timers/promises'
@@ -37,8 +37,9 @@ of each file it wrote, one per line.
   --both                   each page with motion and with reduced motion
   --help                   this
 
-SHOTS_PORT (default 3100): it shoots the server listening there; if none is, it starts the build
-there (pnpm start) and stops it afterwards.`
+SHOTS_PORT (default 3100): it shoots the server listening there, and says on stderr whether that
+server serves this checkout's build; if none is, it starts the build there (pnpm start) and stops
+it afterwards.`
 
 /** A mistake on the command line: the command says what it takes and stops. */
 export class UsageError extends Error {}
@@ -189,9 +190,27 @@ function listening(port) {
   })
 }
 
-/** Whether there is a production build to start. */
-function built() {
-  return existsSync(join(ROOT, '.next', 'BUILD_ID'))
+/** This checkout's production build, by its ID, or null when there is none. */
+function buildId() {
+  const file = join(ROOT, '.next', 'BUILD_ID')
+  return existsSync(file) ? readFileSync(file, 'utf8').trim() : null
+}
+
+/**
+ * Which build the server on the port serves, said in a line: a build serves its manifest under its
+ * own ID, so another checkout's server, or an older build, answers 404 for this one's.
+ */
+export async function describeServer(port, id) {
+  const ours =
+    id !== null &&
+    (await fetch(`http://localhost:${port}/_next/static/${id}/_buildManifest.js`).then(
+      (response) => response.ok,
+      () => false,
+    ))
+  return ours
+    ? `Shooting the server already on port ${port}: this checkout’s build (${id}).`
+    : `Shooting the server already on port ${port}, which is not this checkout’s build: ` +
+        'another checkout’s, or an older one. Stop it, or pick another SHOTS_PORT.'
 }
 
 /**
@@ -344,7 +363,8 @@ async function main(argv) {
   const options = parseArgs(argv)
   const port = shotsPort(process.env.SHOTS_PORT || undefined)
   const serving = await listening(port)
-  if (!serving && !built()) {
+  if (serving) console.error(`pnpm shots: ${await describeServer(port, buildId())}`)
+  if (!serving && buildId() === null) {
     throw new Error(
       `Nothing listens on port ${port}, and there is no build to start there (.next/ holds none). ` +
         'Run pnpm build first.',
