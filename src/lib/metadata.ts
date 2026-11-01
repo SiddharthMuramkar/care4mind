@@ -13,7 +13,7 @@ import { concepts, library, questionnaires, site, topics, type RouteEntry } from
 const HOME_TITLE = `${config.name}: Indian psychology`
 
 /** One sentence each for the pages with no summary of their own. */
-const ABOUT: Partial<Record<RouteEntry['kind'], string>> = {
+const ABOUT = {
   concepts:
     'Every Concept on Care4Mind, every term explained inside one and every glossary entry, from A to Z.',
   'concept-map':
@@ -24,7 +24,7 @@ const ABOUT: Partial<Record<RouteEntry['kind'], string>> = {
   references: 'Every Reference Care4Mind cites, in one style, with the pages that cite it.',
   search: 'Search Care4Mind for a Concept, a term, a verse, a text or a Reference.',
   proposals: 'Features proposed beyond the brief, for the Project owner to accept or refuse.',
-}
+} as const satisfies Partial<Record<RouteEntry['kind'], string>>
 
 /** The 404 page's metadata: a title, and no canonical address, as it is no page of the site. */
 export const notFoundMetadata: Metadata = { title: { absolute: `Page not found · ${config.name}` } }
@@ -98,8 +98,18 @@ async function describe(route: RouteEntry): Promise<{ name: string; description:
         description: `${count(entries, 'entry', 'entries')} on the ${name} list in the Care4Mind Library.`,
       }
     }
-    default:
-      return { name, description: ABOUT[route.kind] ?? '' }
+    case 'concepts':
+    case 'concept-map':
+    case 'texts':
+    case 'questionnaires':
+    case 'references':
+    case 'search':
+    case 'proposals':
+      return { name, description: ABOUT[route.kind] }
+    default: {
+      const undescribed: never = route.kind
+      throw new Error(`No description for a ${String(undescribed)} page.`)
+    }
   }
 }
 

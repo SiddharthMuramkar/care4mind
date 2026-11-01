@@ -155,6 +155,10 @@ export function danglingLinks(record: ContentRecord, index: Index): string[] {
     case 'work':
     case 'reference':
       break
+    default: {
+      const unchecked: never = record
+      throw new Error(`The graph has no link check for a ${(unchecked as ContentRecord).kind}.`)
+    }
   }
   return problems
 }
@@ -169,10 +173,26 @@ function quotesIn(list: readonly Block[]): PassageQuote[] {
 /** The passages a record quotes, in reading order. */
 export function quotesOf(record: ContentRecord): PassageQuote[] {
   const inSections = (sections: readonly Section[]) => sections.flatMap((s) => quotesIn(s.blocks))
-  if (record.kind === 'concept') return [...record.verses, ...inSections(record.sections)]
-  if (record.kind === 'topic') return inSections(record.intro?.sections ?? [])
-  if (record.kind === 'page') return inSections(record.sections)
-  return []
+  switch (record.kind) {
+    case 'concept':
+      return [...record.verses, ...inSections(record.sections)]
+    case 'topic':
+      return inSections(record.intro?.sections ?? [])
+    case 'page':
+      return inSections(record.sections)
+    case 'work':
+    case 'passage':
+    case 'reference':
+    case 'questionnaire':
+    case 'glossary':
+    case 'resource-list':
+    case 'home':
+      return []
+    default: {
+      const unchecked: never = record
+      throw new Error(`The graph can't tell what a ${(unchecked as ContentRecord).kind} quotes.`)
+    }
+  }
 }
 
 /** The References a record cites, in its own order. */
@@ -188,7 +208,16 @@ export function referencesOf(record: ContentRecord): string[] {
       return record.groups.flatMap((group) =>
         group.items.flatMap((item) => (item.type === 'reference' ? [item.reference] : [])),
       )
-    default:
+    case 'work':
+    case 'passage':
+    case 'reference':
+    case 'glossary':
+    case 'page':
+    case 'home':
       return []
+    default: {
+      const unchecked: never = record
+      throw new Error(`The graph can't tell what a ${(unchecked as ContentRecord).kind} cites.`)
+    }
   }
 }

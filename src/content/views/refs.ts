@@ -42,7 +42,15 @@ export function recordRef({ kind, id }: RecordKey, graph: ContentGraph): RecordR
       return { kind, id, title: must(graph, kind, id).title, href: hrefFor({ kind, id }) }
     case 'page':
       return { kind, id, title: must(graph, kind, id).title, href: hrefFor({ kind, id }) }
-    default:
+    case 'work':
+    case 'passage':
+    case 'reference':
+    case 'glossary':
+    case 'home':
       throw new Error(`A ${kind} neither cites a Reference nor quotes a passage.`)
+    default: {
+      const unnamed: never = kind
+      throw new Error(`A ${String(unnamed)} has no link to name it by.`)
+    }
   }
 }

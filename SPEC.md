@@ -59,12 +59,12 @@ These are judgement calls, so review checks them against the diff, in the codeba
 
 - **A record of an existing kind:** `pnpm content:new <kind> <id>` writes a template that compiles. Fill it in, then run `pnpm check`. Today that check fails on tests that pin record counts (#45).
 - **A link field:** the record schema, the graph's link check, then the view that shows it.
-- **A content kind:** the compiler finds only some of these places, so work through every step:
+- **A content kind:** the compiler finds some of these places, so work through every step:
   1. The record schema: its type, its `define…` helper and its kind's folder.
-  2. The graph: the link check and the reverse indexes. Nothing fails if you miss these (#49).
+  2. The graph: the link check and the reverse indexes. Each switches on the kind with a `never` default, so a missed kind fails to compile.
   3. The view types and views: Ref, Card and View, plus `hrefFor()`'s target.
   4. Its namespace on `@/content`.
-  5. The derivations: routes, and search documents. Nothing fails if you miss search (#49).
+  5. The derivations: routes, and search documents. Search documents are a table typed `satisfies Record<ContentKind, …>`, so it fails to compile without the kind.
   6. The pages, the navigation, Linked knowledge and the search page's headings.
   7. The tools behind `content:new` and `verify`.
   8. GLOSSARY.md.
