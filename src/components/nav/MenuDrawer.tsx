@@ -20,7 +20,6 @@ export interface MenuDrawerProps {
   /** The Menu control, where focus goes back to as the Drawer closes. */
   returnFocus: RefObject<HTMLElement | null>
   search?: ReactNode
-  script?: ReactNode
   lotus?: ReactNode
   mapNote?: ReactNode
 }
@@ -36,7 +35,6 @@ export function MenuDrawer({
   onOpenChange,
   returnFocus,
   search,
-  script,
   lotus,
   mapNote,
 }: MenuDrawerProps) {
@@ -62,10 +60,9 @@ export function MenuDrawer({
                 </Drawer.Close>
               </div>
 
-              {search || script || lotus ? (
+              {search || lotus ? (
                 <div className={styles.tools}>
                   {search}
-                  {script}
                   {lotus}
                 </div>
               ) : null}

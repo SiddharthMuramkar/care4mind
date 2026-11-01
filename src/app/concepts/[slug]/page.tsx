@@ -14,7 +14,6 @@ import { citationLinks, Provenance, Sections, Text } from '@/components/prose'
 import { VerseCard } from '@/components/prose/VerseCard'
 import { ReadingThread } from '@/components/ReadingThread'
 import { ReferenceList } from '@/components/ReferenceList'
-import { ScriptChoice, ScriptSwitch } from '@/components/ScriptChoice'
 import { SpellingsPopover } from '@/components/SpellingsPopover'
 import { concepts, hrefFor, type BlockView, type ConceptView, type VerseView } from '@/content'
 import { capitalise } from '@/lib/text'
@@ -86,41 +85,38 @@ export default async function ConceptPage({ params }: PageProps<'/concepts/[slug
           className={cx(reading.article, styles.article)}
           aria-labelledby="concept-title"
         >
-          <ScriptChoice>
-            <header className={reading.titlePage}>
-              <p className={reading.kicker}>Concept</p>
-              <h1
-                id="concept-title"
-                className={concept.term ? reading.title : cx(reading.title, reading.titleLong)}
-              >
-                {concept.term?.devanagari ? (
-                  <TitleSpellings
-                    iast={capitalise(concept.term.iast)}
-                    devanagari={concept.term.devanagari}
-                    name={morph}
-                  />
-                ) : (
-                  <ViewTransition name={morph} share="morph" default="none">
-                    <span {...(concept.term ? { lang: 'sa-Latn' } : {})}>
-                      {concept.term ? capitalise(concept.term.iast) : concept.name}
-                    </span>
-                  </ViewTransition>
-                )}
-              </h1>
-              {concept.term && concept.english ? (
-                <p className={reading.gloss}>{concept.english}</p>
-              ) : null}
-              {concept.term ? (
-                <div className={styles.spellingTools}>
-                  <SpellingsPopover iast={concept.term.iast} spellings={concept.spellings} />
-                  {concept.term.devanagari ? <ScriptSwitch /> : null}
-                </div>
-              ) : null}
-              <p className={reading.summary}>
-                <Text text={concept.summary} citations={citations} />
-              </p>
-            </header>
-          </ScriptChoice>
+          <header className={reading.titlePage}>
+            <p className={reading.kicker}>Concept</p>
+            <h1
+              id="concept-title"
+              className={concept.term ? reading.title : cx(reading.title, reading.titleLong)}
+            >
+              {concept.term?.devanagari ? (
+                <TitleSpellings
+                  iast={capitalise(concept.term.iast)}
+                  devanagari={concept.term.devanagari}
+                  name={morph}
+                />
+              ) : (
+                <ViewTransition name={morph} share="morph" default="none">
+                  <span {...(concept.term ? { lang: 'sa-Latn' } : {})}>
+                    {concept.term ? capitalise(concept.term.iast) : concept.name}
+                  </span>
+                </ViewTransition>
+              )}
+            </h1>
+            {concept.term && concept.english ? (
+              <p className={reading.gloss}>{concept.english}</p>
+            ) : null}
+            {concept.term ? (
+              <div className={styles.spellingTools}>
+                <SpellingsPopover iast={concept.term.iast} spellings={concept.spellings} />
+              </div>
+            ) : null}
+            <p className={reading.summary}>
+              <Text text={concept.summary} citations={citations} />
+            </p>
+          </header>
 
           {/* The verses it opens with stand across the page, like an epigraph. */}
           {concept.verses.length > 0 ? (

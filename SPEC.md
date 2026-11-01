@@ -18,6 +18,7 @@ Each module is named by its capability, and outside code reaches it only through
 - **Feature flags**: `features`, read once at build, on the server. A client component gets a flag as a prop. A feature that's built but not yet approved for launch is on in previews and off in production. _Tests: features. Review for the server-only reading._
 - **Redirects**: one table, each entry served as a 301. _Tests: redirects (unit and browser)._
 - **Questionnaire flow**: one reducer holds a person's answers, and nothing else does (no storage, cookies, address or request). No record stores scoring until the Psychology expert's rules arrive. _Types (`scoring.status` is `'pending'`), the content-integrity "held back" test, review._
+- **Script pair**: `script/ScriptPair` is the one drawer of a name's IAST and Devanagari set together, IAST first. A heading whose Devanagari sits on its own line below (a Concept card, a text's title page), verses, numerals and the hero keep their own markup. _Browser: concept._
 - **Press**, the one design language. Colours, durations, easings and layers are tokens in the global stylesheet. Each component styles itself through its own CSS module, reading those tokens with `var()`. Tailwind supplies only the tokens and Preflight: the one global class markup uses from it is `sr-only`, and the site adds `skip-link` of its own. A colour chosen by content (a topic, a Questionnaire status) is mapped from a data attribute in the global stylesheet. Every lotus breathes by CSS alone, moving transform and opacity; it is still under reduced motion and once the visitor pauses it. _Browser: lotus, motion._ _The contrast test checks the listed colour pairs; review checks the rest._
 - **The agent guard**: `.claude/hooks/guard.mjs`, which Claude Code runs before every Bash, Edit and Write call in this repo, subagents included (`.claude/settings.json`). One pure `decide()` reads the command the way the shell would and answers deny, ask or nothing. _Tests: guard._
 - **The ruleset as code**: `.github/rulesets/main.json`, compared with GitHub by `pnpm ruleset:check` and applied by `pnpm ruleset:apply --commit <sha>`. _Tests: ruleset._
@@ -103,7 +104,6 @@ The code still holds these patterns, and new code doesn't copy them. Each line n
 - Scripts that send authors to `docs/agents/content-migration.md`, which no longer exists (#37).
 - `Flag.ticket` numbers on records. They come from a deleted local tracker and point at the wrong GitHub issues (#39).
 - Tests that pin how many records exist (#45).
-- The "Devanagari first" stubs, which render nothing, though the proposals page calls the feature built (#43).
 - Settings that look load-bearing but do nothing here: the root layout's `title.template`, since every page sets an absolute title (#64), and `typedRoutes`, which can't check paths that end in a slash (#55). The checks that do hold links true are the `hrefFor()` lint rule and the browser crawler.
 
 "Lane", in `scripts/lane/` and the `archive/lane-*` tags, is the old name for the parallel builders `ship` runs. New code says builder.

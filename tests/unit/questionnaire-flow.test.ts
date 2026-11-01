@@ -23,7 +23,7 @@ import { scoreQuestionnaire } from '@/lib/questionnaire/score'
 // public content interface built with explicit flags (whether the flow exists at all). Expected
 // values come from the ticket and the spec: four parts of 12, 6, 9 and 18 statements, 45 in all.
 
-const ON: Features = { questionnairePreview: true, conceptMap: true, devanagariFirst: true }
+const ON: Features = { questionnairePreview: true, conceptMap: true }
 const OFF: Features = { ...ON, questionnairePreview: false }
 
 let form: QuestionnaireFormView

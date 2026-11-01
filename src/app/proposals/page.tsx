@@ -61,17 +61,6 @@ async function TryIt({ proposal }: { proposal: Proposal }) {
       </div>
     )
   }
-  if (proposal.key === 'devanagari-first')
-    return (
-      <p className={styles.try}>
-        <span className={styles.tryLabel}>Try it:</span> press “Devanagari first” in the header (in
-        the Menu on a narrower screen), or beside the name on any Concept page, then open the{' '}
-        <Link href={hrefFor({ page: 'concepts' })} transitionTypes={turnForward}>
-          Concepts A–Z
-        </Link>
-        : every entry leads with its Devanagari. Press it again to go back.
-      </p>
-    )
   return null
 }
 

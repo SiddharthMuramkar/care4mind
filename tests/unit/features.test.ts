@@ -6,7 +6,6 @@ import { type Features, proposalsPageOn, readFeatures } from '@/config/features'
 const FLAGS = [
   { flag: 'questionnairePreview', variable: 'FEATURE_QUESTIONNAIRE_PREVIEW' },
   { flag: 'conceptMap', variable: 'FEATURE_CONCEPT_MAP' },
-  { flag: 'devanagariFirst', variable: 'FEATURE_DEVANAGARI_FIRST' },
 ] as const satisfies readonly { flag: keyof Features; variable: string }[]
 
 // The three environments a build runs in, as Vercel names them in VERCEL_ENV.
@@ -70,7 +69,6 @@ describe('feature flags (D16, D20)', () => {
     expect(readFeatures({ VERCEL_ENV: 'development' })).toEqual({
       questionnairePreview: true,
       conceptMap: true,
-      devanagariFirst: true,
     })
   })
 
@@ -78,15 +76,13 @@ describe('feature flags (D16, D20)', () => {
     expect(readFeatures({ VERCEL_ENV: 'production' })).toEqual({
       questionnairePreview: false,
       conceptMap: false,
-      devanagariFirst: false,
     })
   })
 
-  it('shows the proposals page while either proposal is on, and the preview flag has no say', () => {
-    const off = { questionnairePreview: false, conceptMap: false, devanagariFirst: false }
+  it('shows the proposals page while the Concept map is on, and the preview flag has no say', () => {
+    const off = { questionnairePreview: false, conceptMap: false }
     expect(proposalsPageOn(off)).toBe(false)
     expect(proposalsPageOn({ ...off, questionnairePreview: true })).toBe(false)
     expect(proposalsPageOn({ ...off, conceptMap: true })).toBe(true)
-    expect(proposalsPageOn({ ...off, devanagariFirst: true })).toBe(true)
   })
 })

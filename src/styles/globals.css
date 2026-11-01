@@ -286,32 +286,6 @@
   animation-timing-function: var(--ease-out);
 }
 
-/*
- * The "Devanagari first" switch: a term's two spellings trade places and sizes
- * (TermSpellings). They pass side by side, the one coming to lead on the left.
- */
-::view-transition-group(.script-swap) {
-  animation-duration: var(--duration-move);
-  animation-timing-function: var(--ease-in-out);
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  ::view-transition-image-pair(.script-lead),
-  ::view-transition-image-pair(.script-follow) {
-    animation: pass-by var(--duration-move) var(--ease-in-out);
-  }
-
-  ::view-transition-image-pair(.script-follow) {
-    --pass: 1;
-  }
-}
-
-@keyframes pass-by {
-  50% {
-    transform: translateX(calc(var(--pass, -1) * 55%));
-  }
-}
-
 /* The header and footer keep their own names, so they stay put, above the turning page and any flying title. */
 ::view-transition-group(site-header),
 ::view-transition-group(site-footer) {

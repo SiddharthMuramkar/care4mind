@@ -17,8 +17,8 @@ import { createContent } from '@/content/views'
 // content source with the feature flags each test needs, and through the content source itself
 // for what a record stores (its links, flags and listed edits).
 
-const ON: Features = { questionnairePreview: true, conceptMap: true, devanagariFirst: true }
-const OFF: Features = { questionnairePreview: false, conceptMap: false, devanagariFirst: false }
+const ON: Features = { questionnairePreview: true, conceptMap: true }
+const OFF: Features = { questionnairePreview: false, conceptMap: false }
 
 const site = createContent(localSource, ON)
 
