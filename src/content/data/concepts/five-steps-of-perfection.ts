@@ -15,6 +15,7 @@ export default defineConcept({
   name: { english: 'Five steps of perfection' },
   summary:
     'Many individuals may find it challenging to complete the journey to attain Samadhi. They may opt for the five steps towards Self-realisation, which are Faith, Strength, Memory, Absorption, and Wisdom (Tomar, 2024).',
+  keywords: ['faith', 'strength', 'memory', 'absorption', 'wisdom', 'perfection', 'effort'],
   topics: { primary: 'practice' },
   verses: [
     {
@@ -196,8 +197,9 @@ export default defineConcept({
     'wisdomlib-2025-prajna',
   ],
   questionnaire: 'five-steps-of-perfection',
-  reviewStatus: 'carried-over-not-reviewed',
+  reviewStatus: 'drafted-not-reviewed',
   provenance: {
+    drafted: ['keywords'],
     sources: [
       { url: 'https://care4mind.org/fivestepsofperfectionprofiling/', retrieved: '2026-10-27' },
     ],

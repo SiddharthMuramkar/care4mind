@@ -13,6 +13,7 @@ export default defineConcept({
   },
   summary:
     'Jiva (Samskrit: जीवः), literally means a living being, in Indian philosophical thought it is a technical term closest to what is called “person” in contemporary psychology.',
+  keywords: ['self', 'living', 'body', 'mind'],
   topics: { primary: 'self' },
   verses: [],
   sections: [
@@ -61,8 +62,9 @@ export default defineConcept({
       url: 'https://dharmawiki.org/index.php/Jiva_(%E0%A4%9C%E0%A5%80%E0%A4%B5%E0%A4%83)',
     },
   ],
-  reviewStatus: 'carried-over-not-reviewed',
+  reviewStatus: 'drafted-not-reviewed',
   provenance: {
+    drafted: ['keywords'],
     sources: [{ url: 'https://care4mind.org/jiva/', retrieved: '2026-10-27' }],
     edits: [
       'The page has no heading before its first paragraph: it is a section headed by its title, “Jiva”.',

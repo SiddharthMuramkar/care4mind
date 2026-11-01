@@ -13,6 +13,7 @@ export default defineConcept({
   },
   summary:
     'The previously mentioned term “Vikshepa” (distractions) includes both primary and secondary distractions, sometimes known as byproducts. The Patanjali Yoga Sutra 1.31 outlines these byproducts.',
+  keywords: ['distractions', 'sorrow', 'sadness', 'restlessness', 'breathing', 'breath'],
   topics: { primary: 'mind' },
   verses: [
     {
@@ -248,8 +249,9 @@ export default defineConcept({
     'yogapedia-2023-shvasa-prashvasa',
   ],
   questionnaire: 'upa-vikshepa',
-  reviewStatus: 'carried-over-not-reviewed',
+  reviewStatus: 'drafted-not-reviewed',
   provenance: {
+    drafted: ['keywords'],
     sources: [{ url: 'https://care4mind.org/upavikshepaprofiling/', retrieved: '2026-10-27' }],
     edits: [
       'IAST transliterated for the headword: “upa-vikṣepa”, from the page’s “Upa-Vikshepa” and “Upa Vikshepa”, with vikṣepa as the Vikshepa page writes it. The page prints “Upa Vikṣepa” only in its held-back score section. It prints no Devanagari for the headword, so none is stored.',

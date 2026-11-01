@@ -14,6 +14,16 @@ export default defineConcept({
   },
   summary:
     'Non-violence entails refraining from causing harm to any living being through one’s thoughts, words, or actions.',
+  keywords: [
+    'non-violence',
+    'violence',
+    'harm',
+    'compassion',
+    'kindness',
+    'calm',
+    'values',
+    'ethics',
+  ],
   topics: { primary: 'values' },
   verses: [
     {
@@ -154,8 +164,9 @@ export default defineConcept({
     'tomar-2024',
   ],
   questionnaire: 'ahimsa',
-  reviewStatus: 'carried-over-not-reviewed',
+  reviewStatus: 'drafted-not-reviewed',
   provenance: {
+    drafted: ['keywords'],
     sources: [
       {
         url: 'https://care4mind.org/knowyourvaluesahimsanon-violenceprofiling/',

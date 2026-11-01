@@ -9,6 +9,7 @@ export default defineConcept({
   name: { english: 'Spiritual practitioner' },
   summary:
     'Mastery in any endeavour is attained through consistent practice. By repeatedly engaging in a specific practice, it gradually transitions from conscious effort to becoming ingrained in the unconscious mind.',
+  keywords: ['spirituality', 'practice', 'sadhana', 'growth', 'wellbeing', 'community'],
   topics: { primary: 'practice' },
   verses: [
     {
@@ -113,8 +114,9 @@ export default defineConcept({
     'warber-2015',
   ],
   questionnaire: 'spiritual-practitioner',
-  reviewStatus: 'carried-over-not-reviewed',
+  reviewStatus: 'drafted-not-reviewed',
   provenance: {
+    drafted: ['keywords'],
     sources: [
       { url: 'https://care4mind.org/spiritualpractitionerprofiling/', retrieved: '2026-10-27' },
     ],
