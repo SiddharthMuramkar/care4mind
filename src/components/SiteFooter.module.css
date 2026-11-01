@@ -41,7 +41,8 @@
   list-style: none;
   margin: 0;
   padding: 0;
-  columns: 2 9.5rem;
+  /* A column holds 'Questionnaires' whole, so phones under about 26rem get one column. */
+  columns: 2 11rem;
   column-gap: 2rem;
 }
 
