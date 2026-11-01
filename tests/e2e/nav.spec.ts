@@ -472,6 +472,14 @@ test.describe('panels, on a computer', () => {
       }).observe({ type: 'layout-shift', buffered: true })
     })
     await gotoReady(page, '/concepts/vikshepa/')
+    // Shifts as the page's fonts arrive are not the panels' doing; count from a settled page.
+    await page.evaluate(async () => {
+      await document.fonts.ready
+      await new Promise<void>((resolve) =>
+        requestAnimationFrame(() => requestAnimationFrame(() => resolve())),
+      )
+      ;(window as unknown as { __shifts: number[] }).__shifts.length = 0
+    })
     // The panels arrive when the browser is idle, or as a pointer comes near.
     await header(page).hover()
     await toggle(page, 'Library').hover()
