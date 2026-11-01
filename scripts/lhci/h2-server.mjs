@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+// @ts-check
 // Serves the production build to Lighthouse over HTTP/2 with TLS, as Vercel serves visitors.
 //
 //   node scripts/lhci/h2-server.mjs <port>
@@ -54,8 +55,10 @@ function selfSignedCertificate() {
     ], { stdio: 'pipe' })
     return { key: readFileSync(join(dir, 'key.pem')), cert: readFileSync(join(dir, 'cert.pem')) }
   } catch (error) {
-    const reason =
-      error.code === 'ENOENT' ? 'openssl is not installed' : String(error.stderr ?? error)
+    const failed = typeof error === 'object' && error !== null ? error : {}
+    const code = 'code' in failed ? failed.code : undefined
+    const stderr = 'stderr' in failed ? failed.stderr : undefined
+    const reason = code === 'ENOENT' ? 'openssl is not installed' : String(stderr ?? error)
     throw new Error(`Couldn't make a certificate with openssl: ${reason}`)
   } finally {
     rmSync(dir, { recursive: true, force: true })
@@ -68,6 +71,7 @@ function startNext() {
   const args = [bin, 'start', '-p', String(innerPort), '-H', '127.0.0.1']
   const next = spawn(process.execPath, args, { stdio: ['ignore', 'pipe', 'pipe'] })
   let output = ''
+  /** @type {Promise<void>} */
   const ready = new Promise((resolve, reject) => {
     const listen = (chunk) => {
       output += chunk
@@ -135,7 +139,7 @@ let certificate
 try {
   certificate = selfSignedCertificate()
 } catch (error) {
-  console.error(error.message)
+  console.error(error instanceof Error ? error.message : String(error))
   process.exit(1)
 }
 
@@ -155,7 +159,7 @@ try {
   proxy(server)
   await new Promise((resolve, reject) => {
     server.once('error', reject)
-    server.listen(port, resolve)
+    server.listen(port, () => resolve(undefined))
   })
   next.once('exit', (code, signal) => {
     console.error(`next start stopped (${signal ?? `exit ${code}`}), so this server stops too.`)
@@ -166,7 +170,7 @@ try {
     `✓ Ready in ${ms}ms: https://localhost:${port} (HTTP/2, TLS) → next start on http://127.0.0.1:${innerPort}`,
   )
 } catch (error) {
-  console.error(error.message)
+  console.error(error instanceof Error ? error.message : String(error))
   next.kill('SIGTERM')
   process.exit(1)
 }

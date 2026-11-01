@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+// @ts-check
 // The home-screen icon, src/app/apple-icon.png: the tab icon, src/app/icon.svg, drawn 144 px
 // across on a 180 px square of the page's ground. iOS shows a transparent pixel as black, so the
 // ground runs to every edge. Run it after changing either; it prints the file it wrote.
@@ -43,7 +44,9 @@ try {
     `<!doctype html><body style="margin:0;height:100vh;display:grid;place-items:center;background:${ground()}">` +
       `<img src="${icon}" width="${DRAWN}" height="${DRAWN}" alt=""></body>`,
   )
-  await page.locator('img').evaluate((image) => image.decode())
+  await page.locator('img').evaluate((image) => {
+    if (image instanceof HTMLImageElement) return image.decode()
+  })
   await page.screenshot({ path: OUT })
 } finally {
   await browser.close()

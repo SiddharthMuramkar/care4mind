@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+// @ts-check
 // Screenshots of the built site, one page of each kind, so every builder,
 // review and finish looks at the site the same way. It prints each file it wrote, and nothing
 // else, on stdout, so an agent can open exactly those.
@@ -228,7 +229,7 @@ function startServer(port) {
   const running = () => failed === null && server.exitCode === null && server.signalCode === null
   const signal = (name) => {
     try {
-      process.kill(-server.pid, name)
+      if (server.pid !== undefined) process.kill(-server.pid, name)
     } catch {
       // Already gone.
     }

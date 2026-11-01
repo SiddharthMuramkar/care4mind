@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+// @ts-check
 // Prints a clean outline of one saved page of the current site: headings, paragraphs, lists,
 // tables row by row, verse blocks, reference lines, and links with their targets.
 //
@@ -80,9 +81,8 @@ const QUIZZES = { 'karmayoga-scale': 'karmayoga' }
 function quizFiles(dir, slug) {
   const prefix = QUIZZES[slug]
   if (!prefix) return undefined
-  const [questions, settings] = ['questions', 'settings'].map((part) =>
-    join(dir, `${prefix}-${part}.json`),
-  )
+  const questions = join(dir, `${prefix}-questions.json`)
+  const settings = join(dir, `${prefix}-settings.json`)
   if (!existsSync(questions) || !existsSync(settings)) return undefined
   return {
     questions: JSON.parse(readFileSync(questions, 'utf8')),
@@ -194,16 +194,36 @@ const IMPLIED_CLOSES = {
   option: { close: ['option'], stop: ['select', 'datalist'] },
 }
 
+/**
+ * One node of the small HTML tree: an element, or a text node.
+ * @typedef {{
+ *   name: string,
+ *   attrs: Record<string, string>,
+ *   children: HtmlNode[],
+ *   quiz?: object,
+ *   wrapper?: boolean,
+ * }} ElementNode
+ * @typedef {{ text: string, raw?: boolean }} TextNode
+ * @typedef {ElementNode | TextNode} HtmlNode
+ */
+
 function parseHtml(html) {
+  /** @type {ElementNode} */
   const root = { name: '#root', attrs: {}, children: [] }
+  /** @type {ElementNode[]} */
   const stack = [root]
   const lower = html.toLowerCase()
-  const current = () => stack[stack.length - 1]
+  const current = () => {
+    const node = stack.at(-1)
+    if (!node) throw new Error('the HTML parser has no open element')
+    return node
+  }
 
   /** Pops up to and including the nearest open element named in `names`, unless a stop comes first. */
   const closeOpen = (names, stops = []) => {
     for (let depth = stack.length - 1; depth > 0; depth -= 1) {
-      const name = stack[depth].name
+      const name = stack[depth]?.name
+      if (!name) continue
       if (names.includes(name)) {
         stack.length = depth
         return
@@ -248,7 +268,12 @@ function parseHtml(html) {
       else if (char === '>') break
       if (!/\s/.test(char)) afterEquals = char === '='
     }
-    const name = tag[2].toLowerCase()
+    const rawName = tag[2]
+    if (!rawName) {
+      at = open + 1
+      continue
+    }
+    const name = rawName.toLowerCase()
     const inside = html.slice(open + tag[0].length, end)
     at = end + 1
     if (tag[1]) {
@@ -258,6 +283,7 @@ function parseHtml(html) {
     if (CLOSES_P.has(name)) closeOpen(['p'], ['button', ...SCOPE])
     const implied = IMPLIED_CLOSES[name]
     if (implied) closeOpen(implied.close, implied.stop)
+    /** @type {ElementNode} */
     const element = { name, attrs: parseAttributes(inside), children: [] }
     current().children.push(element)
     if (VOID.has(name) || /\/\s*$/.test(inside)) continue
@@ -273,6 +299,7 @@ function parseHtml(html) {
 }
 
 function parseAttributes(inside) {
+  /** @type {Record<string, string>} */
   const attrs = {}
   const pattern = /([^\s"'<>/=]+)(?:\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s"'=<>`]+)))?/g
   for (const [, name, double, single, bare] of inside.matchAll(pattern))
@@ -496,7 +523,9 @@ function linkOf(element) {
 
 /** The blocks inside an element. */
 function blocksOf(element) {
+  /** @type {{ type: string, lines?: string[], text?: string, [key: string]: unknown }[]} */
   const blocks = []
+  /** @type {{ lines: string[], links: { mark?: string, text: string, href: string }[] }} */
   let run = { lines: [''], links: [] }
 
   const flush = () => {
@@ -631,6 +660,7 @@ function quizOf(container, { questions, settings }) {
   const items = new Map((questions.questions ?? []).map((q) => [String(q.id), q]))
 
   const optionSets = []
+  /** @type {{ step: string | null, title: string, instructions: string, items: { id: string, text: string, optionSet: number }[] }[]} */
   const parts = []
   const known = new Set()
   for (const id of String(settings.question_ids ?? '')
@@ -654,7 +684,9 @@ function quizOf(container, { questions, settings }) {
       if (optionSet === -1) optionSet = optionSets.push(options) - 1
       if (parts.length === 0) parts.push({ step: null, title: '', instructions: '', items: [] })
       const text = clean(decodeEntities(String(question.text ?? '')))
-      parts.at(-1).items.push({ id, text, optionSet })
+      const part = parts.at(-1)
+      if (!part) throw new Error('a quiz question has no part')
+      part.items.push({ id, text, optionSet })
       known.add(text)
       options.forEach((option) => known.add(option))
     }
@@ -709,9 +741,9 @@ function itemsOf(list) {
   for (const child of list.children) {
     const blocks = blocksOf({ children: [child] })
     if (blocks.length === 0) continue
-    const [only] = blocks
-    if (blocks.length === 1 && only.type === 'paragraph')
-      items.push({ lines: only.lines, ...linksOf(only.links ?? []) })
+    const only = blocks[0]
+    if (blocks.length === 1 && only?.type === 'paragraph')
+      items.push({ lines: only.lines ?? [], ...linksOf(only.links ?? []) })
     else items.push({ blocks })
   }
   return items

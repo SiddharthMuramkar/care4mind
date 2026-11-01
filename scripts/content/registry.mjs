@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+// @ts-check
 // Writes the content registry: src/content/generated/registry.ts, which imports every record
 // file under src/content/data (one record per file, as its default export), in sorted path order.
 //
