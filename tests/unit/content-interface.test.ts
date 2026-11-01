@@ -23,7 +23,7 @@ import {
 } from '@/content/schema'
 import type { ContentSource } from '@/content/source'
 import { createContent } from '@/content/views'
-import { asciiSpellings, displayName } from '@/content/views/names'
+import { asciiSpellings, displayName } from '@/content/names'
 
 // The content module's public interface (content-v1 spec, "Public interface"), tested at its one
 // seam: each test builds a small made-up content source and reads it through the same
