@@ -13,6 +13,7 @@ import { ScriptPair } from '@/components/script/ScriptPair'
 import { ContentsPlate, plateCard, plateScope, type PlateRow } from '@/components/topics'
 import {
   hrefFor,
+  site,
   topics,
   type ConceptCard as Concept,
   type PassageView,
@@ -28,12 +29,12 @@ import styles from './page.module.css'
 
 export const dynamicParams = false
 
-export async function generateStaticParams() {
-  return (await topics.list()).map(({ slug }) => ({ slug }))
-}
+const PATTERN = '/topics/[slug]/' as const
+
+export const generateStaticParams = () => site.params(PATTERN)
 
 export async function generateMetadata({ params }: PageProps<'/topics/[slug]'>): Promise<Metadata> {
-  return metadataFor(hrefFor({ kind: 'topic', id: (await params).slug }))
+  return metadataFor(PATTERN.replace('[slug]', (await params).slug))
 }
 
 /** A `lang` attribute only where there is one: an undefined prop still travels with the page. */

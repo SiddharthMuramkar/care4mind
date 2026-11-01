@@ -131,7 +131,29 @@ export function pageRoutes(graph: ContentGraph, flags: Features): PageRoute[] {
   })
 }
 
-/** The route registry: every public page's path, kind, page-file pattern and title. */
+const routesByGraph = new WeakMap<ContentGraph, Map<string, RouteEntry[]>>()
+
+/** Flags are part of the key: the same graph with the Concept map off is a different list. */
+function flagsKey(flags: Features): string {
+  return (Object.keys(flags) as (keyof Features)[])
+    .sort()
+    .map((key) => `${key}:${flags[key] ? 1 : 0}`)
+    .join(',')
+}
+
+/** The route registry, built once per graph and flags: every public page, its record kept. */
 export function routes(graph: ContentGraph, flags: Features): RouteEntry[] {
-  return pageRoutes(graph, flags).map(({ entry }) => entry)
+  let byFlags = routesByGraph.get(graph)
+  if (!byFlags) {
+    byFlags = new Map()
+    routesByGraph.set(graph, byFlags)
+  }
+  const key = flagsKey(flags)
+  const cached = byFlags.get(key)
+  if (cached) return cached
+  const built = pageRoutes(graph, flags).map(({ entry, record }) =>
+    record ? { ...entry, record } : entry,
+  )
+  byFlags.set(key, built)
+  return built
 }
