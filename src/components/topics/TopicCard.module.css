@@ -9,7 +9,7 @@
   align-content: start;
   gap: 0.5rem;
   padding: 1.25rem 1.25rem 1rem;
-  background: color-mix(in srgb, var(--color-surface) 70%, var(--color-ink));
+  background: var(--color-surface-pale-30);
   color: var(--color-surface-ink);
   border-radius: 2px;
   box-shadow:

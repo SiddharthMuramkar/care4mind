@@ -2,7 +2,13 @@ import { globSync, readFileSync } from 'node:fs'
 
 import { describe, expect, it } from 'vitest'
 
-import { composite, CONTRAST_PAIRS, contrastRatio } from '@/lib/contrast'
+import {
+  composite,
+  CONTRAST_PAIRS,
+  contrastRatio,
+  customProperties,
+  resolveColour,
+} from '@/lib/contrast'
 
 describe('contrastRatio', () => {
   it('matches the WCAG reference values', () => {
@@ -25,29 +31,81 @@ describe('composite', () => {
   })
 })
 
-/** A #rrggbb colour at the given share of full strength, as `color-mix()` with transparent gives it. */
-function withAlpha(hex: string, share: number): string {
-  return `${hex}${Math.round(share * 255)
-    .toString(16)
-    .padStart(2, '0')}`
-}
+describe('resolveColour', () => {
+  const declarations = {
+    '--press-indigo': '#151A3D',
+    '--color-ground': 'var(--press-indigo)',
+    '--color-ink': '#ffffff',
+  }
 
-/** Every CSS block that declares a full palette, keyed by file and selector. */
+  it('follows var() to the colour it names', () => {
+    expect(resolveColour('var(--color-ground)', declarations)).toBe('#151a3d')
+    expect(() => resolveColour('var(--color-missing)', declarations)).toThrow()
+  })
+
+  it('blends a color-mix() in sRGB as the browser does', () => {
+    expect(resolveColour('color-mix(in srgb, #000000 50%, #ffffff)', {})).toBe('#808080')
+    expect(resolveColour('color-mix(in srgb, #ff0000, #0000ff 25%)', {})).toBe('#bf0040')
+    expect(
+      resolveColour('color-mix(in srgb, var(--color-ink) 70%, transparent)', declarations),
+    ).toBe('#ffffffb3')
+    expect(
+      resolveColour(
+        'color-mix(in srgb, color-mix(in srgb, #ffffff 50%, transparent) 50%, #000000)',
+        {},
+      ),
+    ).toBe('#555555c0')
+  })
+
+  it('refuses what it can’t compute', () => {
+    expect(() => resolveColour('color-mix(in oklch, #000000, #ffffff)', {})).toThrow()
+    expect(() => resolveColour('rgb(0 0 0)', {})).toThrow()
+  })
+})
+
+/** Every CSS block that declares a full palette, keyed by file and selector, each colour resolved. */
 function palettes(): { name: string; colours: Record<string, string> }[] {
   const found: { name: string; colours: Record<string, string> }[] = []
   for (const file of globSync('src/**/*.css')) {
-    const css = readFileSync(file, 'utf8').replace(/\/\*[\s\S]*?\*\//g, '')
-    for (const [, selector, body] of css.matchAll(/([^{}]+)\{([^{}]*--color-ground:[^{}]*)\}/g)) {
+    const css = readFileSync(file, 'utf8')
+    for (const [, selector, body = ''] of css
+      .replace(/\/\*[\s\S]*?\*\//g, '')
+      .matchAll(/([^{}]+)\{([^{}]*--color-ground:[^{}]*)\}/g)) {
+      const declarations = { ...customProperties(css), ...customProperties(body) }
       const colours = Object.fromEntries(
-        [...(body ?? '').matchAll(/--color-([a-z-]+):\s*(#[0-9a-f]{6}(?:[0-9a-f]{2})?)\s*;/gi)].map(
-          ([, name, value]) => [name, value],
-        ),
+        Object.entries(customProperties(body))
+          .filter(([name]) => name.startsWith('--color-'))
+          .map(([name, value]) => [
+            name.slice('--color-'.length),
+            resolveColour(value, declarations),
+          ]),
       )
       found.push({ name: `${file} ${selector?.trim()}`, colours })
     }
   }
   return found
 }
+
+describe('the site palette', () => {
+  const declarations = Object.entries(
+    customProperties(readFileSync('src/styles/globals.css', 'utf8')),
+  )
+
+  it('writes each primitive colour once', () => {
+    const primitives = declarations.filter(([name]) => name.startsWith('--press-'))
+    expect(primitives).not.toEqual([])
+    for (const [name, value] of primitives) expect(value, name).toMatch(/^#[0-9a-f]{6}$/)
+    const values = primitives.map(([, value]) => value)
+    expect(values).toEqual([...new Set(values)])
+  })
+
+  it('names each colour token by its role, as an alias or a mix of the primitives', () => {
+    const tokens = declarations.filter(([name]) => name.startsWith('--color-'))
+    expect(tokens).not.toEqual([])
+    for (const [name, value] of tokens)
+      expect(value, name).not.toMatch(/#|\b(?:rgba?|hsla?|oklch|lab)\(/i)
+  })
+})
 
 describe('palettes meet WCAG 2.2 AA contrast', () => {
   const all = palettes()
@@ -66,8 +124,7 @@ describe('palettes meet WCAG 2.2 AA contrast', () => {
         if (!foreground || !background || ('over' in pair && !under)) {
           throw new Error(`a colour of ${pair.foreground} on ${on} is missing`)
         }
-        const laid = 'mix' in pair ? withAlpha(background, pair.mix) : background
-        const seen = under ? composite(laid, under) : laid
+        const seen = under ? composite(background, under) : background
         expect(contrastRatio(foreground, seen)).toBeGreaterThanOrEqual(pair.minimum)
       })
     }

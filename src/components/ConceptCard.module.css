@@ -14,9 +14,9 @@
   color: var(--color-surface-ink);
   border-radius: 2px;
   box-shadow:
-    0 0 0 1px rgb(29 26 46 / 0.35),
+    0 0 0 1px color-mix(in srgb, var(--color-surface-ink) 35%, transparent),
     inset 0 0 0 6px var(--color-surface),
-    inset 0 0 0 7px rgb(29 26 46 / 0.55);
+    inset 0 0 0 7px color-mix(in srgb, var(--color-surface-ink) 55%, transparent);
   transition:
     transform var(--duration-instant) var(--ease-press),
     box-shadow var(--duration-instant) var(--ease-press);
@@ -26,9 +26,9 @@
 .card:has(.action :is(a, button):active) {
   transform: translateY(2px);
   box-shadow:
-    0 0 0 1px rgb(29 26 46 / 0.35),
+    0 0 0 1px color-mix(in srgb, var(--color-surface-ink) 35%, transparent),
     inset 0 0 0 6px var(--color-surface),
-    inset 0 0 0 7px rgb(29 26 46 / 0.55),
+    inset 0 0 0 7px color-mix(in srgb, var(--color-surface-ink) 55%, transparent),
     inset 0 3px 8px rgb(0 0 0 / 0.18);
 }
 

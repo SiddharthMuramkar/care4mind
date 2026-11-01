@@ -49,7 +49,11 @@
   padding: 0.45rem 0.5rem;
   margin-inline: -0.5rem;
   border-radius: 2px;
-  background: color-mix(in srgb, var(--color-highlight) calc(var(--lit, 0) * 9%), transparent);
+  background: color-mix(
+    in srgb,
+    var(--color-highlight-wash-9) calc(var(--lit, 0) * 100%),
+    transparent
+  );
 }
 
 /* The row is lit while it, or the card that stands for it, is pointed at or focused. */

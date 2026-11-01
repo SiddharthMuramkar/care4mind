@@ -43,8 +43,9 @@ These are judgement calls, so review checks them against the diff, in the codeba
 | Sanskrit is NFC with ṃ; each name field holds one script, in characters the fonts cover | content-integrity test |
 | The registry is generated, not edited | git ignores it, `pnpm check` and every test run write it afresh, and the guard refuses edits under `src/content/generated/` |
 | No record stores scoring | types and the content-integrity test |
-| Press colour pairs meet contrast; the rule colour is never text | contrast test, for the pairs it lists and every module's text `color`. Colours mixed inside modules are unchecked (#79) |
+| Press colour pairs meet contrast, the rule colour is never text, each primitive colour is written once, and colour tokens alias or mix the primitives | contrast test, for the pairs it lists and every module's text `color`, resolving `var()` and `color-mix()`. A mix that carries text is a token, so it can be listed; review keeps modules from mixing their own |
 | Pages pass axe at WCAG 2.2 AA and its structural best-practice rules; text whose contrast axe can't settle passes only with a reviewed reason | `expectNoAxeViolations` in `tests/e2e/axe.ts`, run by the page specs; the axe spec checks the helper itself |
+| Every topic and Questionnaire status has its colour tokens, its `[data-topic]` or `[data-status]` rule and its contrast pairs | content-colours test |
 | Icon and manifest colours equal their tokens | icons test |
 | Lotus motion is CSS only, transform and opacity: only the hero moves on its own, once, ending within 5 s of load; every lotus answers the pointer; nothing moves under reduced motion; no pause control | lotus and motion specs |
 | A `styles.x` lookup names a class its CSS module defines | nothing yet (#67) |
@@ -74,8 +75,8 @@ These are judgement calls, so review checks them against the diff, in the codeba
   7. The tools behind `content:new` and `verify`.
   8. GLOSSARY.md.
 - **A page:** a route that reads `@/content`. Its address is an `hrefFor()` target, and its entry in `site.routes()` puts it in the sitemap, breadcrumbs and crawler. A page with a `[slug]` builds the params `site.params(pattern)` gives it, so it has exactly the routes the registry lists. Below the homepage it renders `ReadingPage` itself (never from a layout, so the page turn takes the whole page), with `TitlePage` and `PageTitle`, and picks a named width. _Tests: page-shell; browser: pages._
-- **A topic:** its record, plus its colour token, its `[data-topic]` rule and its contrast pair. Nothing checks the last three yet (#81).
-- **A colour, duration or easing:** a token in the global stylesheet. A colour pair that carries text joins the contrast list.
+- **A topic:** its record, plus its colour token, its `[data-topic]` rule and its contrast pairs, which the content-colours test checks.
+- **A colour, duration or easing:** a token in the global stylesheet. A new colour value is a `--press-*` primitive, and the `--color-*` token that names its role aliases or mixes it. A colour pair that carries text, mixed ones included, joins the contrast list.
 - **A feature awaiting the Project owner's approval:** a flag in `features`.
 - **A moved address:** a row in the redirect table. Its destination is written as `hrefFor()` would make it, and it answers in one hop.
 - **Something agents may or may not do:** a rule in the guard's `decide()` with a row in its test, and a line in CLAUDE.md's Delivery section when it changes what agents are told.

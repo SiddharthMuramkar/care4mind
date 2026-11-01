@@ -232,7 +232,7 @@ a.letter:focus-visible {
 
 /* A letter with nothing under it is set in the muted ink, and is no link. */
 .blank {
-  color: var(--color-surface-muted);
+  color: var(--color-surface-blank);
 }
 
 /* The current letter: vermilion, with a lozenge under it. */

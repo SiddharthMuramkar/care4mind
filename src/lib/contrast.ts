@@ -20,6 +20,83 @@ export function composite(over: string, under: string): string {
   return `#${channels.join('')}`
 }
 
+/** Every custom property a stylesheet declares, by its full name (`--color-ground`), comments ignored. */
+export function customProperties(css: string): Record<string, string> {
+  const uncommented = css.replace(/\/\*[\s\S]*?\*\//g, '')
+  return Object.fromEntries(
+    [...uncommented.matchAll(/(--[\w-]+):\s*([^;{}]+);/g)].map(([, name = '', value = '']) => [
+      name,
+      value.trim(),
+    ]),
+  )
+}
+
+/**
+ * A colour value resolved to #rrggbb, or #rrggbbaa when translucent: hex as written, `var()` followed
+ * through `declarations`, and `color-mix(in srgb, …)` blended as the browser blends it.
+ */
+export function resolveColour(value: string, declarations: Record<string, string>): string {
+  const written = value.trim()
+  if (/^#[0-9a-f]{6}(?:[0-9a-f]{2})?$/i.test(written)) return written.toLowerCase()
+  if (written === 'transparent') return '#00000000'
+  const alias = /^var\((--[\w-]+)\)$/.exec(written)
+  if (alias) {
+    const declared = declarations[alias[1] ?? '']
+    if (declared === undefined) throw new Error(`${written} is not declared`)
+    return resolveColour(declared, declarations)
+  }
+  const mixed = /^color-mix\(\s*in srgb\s*,(.*)\)$/s.exec(written)
+  if (mixed) return mix(mixed[1] ?? '', declarations)
+  throw new Error(`can't resolve the colour ${written}`)
+}
+
+/** The two colours of a color-mix() in sRGB, each with an optional percentage, blended as CSS Color 5 says. */
+function mix(operands: string, declarations: Record<string, string>): string {
+  const parts = splitTopLevel(operands).map((part) => {
+    const weighted = /^(.*\S)\s+(\d+(?:\.\d+)?)%$/s.exec(part.trim())
+    const colour = resolveColour(weighted?.[1] ?? part, declarations)
+    return { rgba: channels(colour), weight: weighted ? Number(weighted[2]) / 100 : undefined }
+  })
+  const [first, second] = parts
+  if (parts.length !== 2 || !first || !second)
+    throw new Error(`expected two colours in ${operands}`)
+  const w1 = first.weight ?? 1 - (second.weight ?? 0.5)
+  const w2 = second.weight ?? 1 - w1
+  const total = w1 + w2
+  // Weights summing under 100% leave the mix that much more transparent.
+  const scale = Math.min(total, 1)
+  const [p, q] = [w1 / total, w2 / total]
+  const alpha = first.rgba[3] * p + second.rgba[3] * q
+  const blended = ([0, 1, 2] as const).map((index) =>
+    alpha === 0
+      ? 0
+      : (first.rgba[index] * first.rgba[3] * p + second.rgba[index] * second.rgba[3] * q) / alpha,
+  )
+  const hex = (n: number) => Math.round(n).toString(16).padStart(2, '0')
+  const opacity = Math.round(alpha * scale * 255)
+  return `#${blended.map(hex).join('')}${opacity === 255 ? '' : hex(opacity)}`
+}
+
+function channels(hex: string): [number, number, number, number] {
+  const [r = 0, g = 0, b = 0, a = 255] = (hex.slice(1).match(/../g) ?? []).map((pair) =>
+    parseInt(pair, 16),
+  )
+  return [r, g, b, a / 255]
+}
+
+/** A list split at its commas, leaving the commas inside parentheses alone. */
+function splitTopLevel(list: string): string[] {
+  const parts = ['']
+  let depth = 0
+  for (const character of list) {
+    if (character === '(') depth += 1
+    if (character === ')') depth -= 1
+    if (character === ',' && depth === 0) parts.push('')
+    else parts[parts.length - 1] += character
+  }
+  return parts
+}
+
 function luminance(hex: string): number {
   const match = /^#([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i.exec(hex)
   if (!match) throw new Error(`expected a #rrggbb colour, got ${hex}`)
@@ -72,7 +149,7 @@ export const CONTRAST_PAIRS = [
   { foreground: 'status-later-ink', background: 'status-later', minimum: 4.5 },
   { foreground: 'proposal-ink', background: 'proposal', minimum: 4.5 },
   // The paper surfaces that rise over the page: text, links and focus rings on each.
-  ...(['panel', 'drawer', 'palette', 'preview'] as const).flatMap(
+  ...(['panel', 'drawer', 'preview'] as const).flatMap(
     (surface) =>
       [
         { foreground: `${surface}-ink`, background: surface, minimum: 4.5 },
@@ -81,7 +158,6 @@ export const CONTRAST_PAIRS = [
         { foreground: 'surface-focus', background: surface, minimum: 3 },
       ] as const,
   ),
-  { foreground: 'palette-highlight-ink', background: 'palette-highlight', minimum: 4.5 },
   // The toast: its text and focus ring on its dark slip, and its turmeric edge on the indigo page.
   { foreground: 'toast-ink', background: 'toast', minimum: 4.5 },
   { foreground: 'toast-muted', background: 'toast', minimum: 4.5 },
@@ -89,11 +165,41 @@ export const CONTRAST_PAIRS = [
   { foreground: 'toast-line', background: 'ground', minimum: 3 },
   // Text that numbers or marks, though screen readers skip it: a term's ¶ at rest, the concept
   // contents' numerals, the topic kicker's numeral, and the contents plate's numeral on its lit row,
-  // whose 9% vermilion wash is laid over the paper.
-  { foreground: 'surface-muted', background: 'surface', minimum: 4.5 },
+  // whose 9% vermilion wash is the highlight-wash-9 token below, laid over the paper.
   { foreground: 'surface-muted', background: 'surface', minimum: 4.5 },
   { foreground: 'surface-link', background: 'surface', minimum: 4.5 },
-  { foreground: 'surface-link', background: 'highlight', mix: 0.09, over: 'surface', minimum: 4.5 },
+  // Mixed colours that carry text: the A–Z's blank letter, and the paler papers and washes text sits on.
+  { foreground: 'surface-blank', background: 'surface', minimum: 4.5 },
+  ...(['18', '30', '40', '45', '50'] as const).flatMap(
+    (share) =>
+      [
+        { foreground: 'surface-ink', background: `surface-pale-${share}`, minimum: 4.5 },
+        { foreground: 'surface-muted', background: `surface-pale-${share}`, minimum: 4.5 },
+        { foreground: 'surface-link', background: `surface-pale-${share}`, minimum: 4.5 },
+        { foreground: 'surface-focus', background: `surface-pale-${share}`, minimum: 3 },
+      ] as const,
+  ),
+  ...(['8', '9', '10'] as const).flatMap(
+    (share) =>
+      [
+        {
+          foreground: 'surface-ink',
+          background: `highlight-wash-${share}`,
+          over: 'surface',
+          minimum: 4.5,
+        },
+        {
+          foreground: 'surface-muted',
+          background: `highlight-wash-${share}`,
+          over: 'surface',
+          minimum: 4.5,
+        },
+        {
+          foreground: 'surface-link',
+          background: `highlight-wash-${share}`,
+          over: 'surface',
+          minimum: 4.5,
+        },
+      ] as const,
+  ),
 ] as const
-
-export type ColourToken = (typeof CONTRAST_PAIRS)[number]['foreground' | 'background']
