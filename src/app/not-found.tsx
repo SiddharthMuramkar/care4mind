@@ -8,6 +8,7 @@ import { concepts, hrefFor } from '@/content'
 import { notFoundMetadata } from '@/lib/metadata'
 
 import cta from './cta.module.css'
+import page from './error-page.module.css'
 import reading from './reading.module.css'
 import styles from './not-found.module.css'
 
@@ -19,11 +20,11 @@ export default async function NotFound() {
   return (
     <PageTurn>
       <main id="main" className={reading.page}>
-        <Folio className={styles.folio}>
+        <Folio className={page.folio}>
           <p className={reading.kicker}>Error 404 · Page not found</p>
-          <h1 className={styles.title}>This page isn’t in the book</h1>
+          <h1 className={page.title}>This page isn’t in the book</h1>
           <Fleuron className={styles.fleuron} />
-          <p className={styles.text}>
+          <p className={page.text}>
             The address may be mistyped, or the page may not have moved across yet: the new site is
             still being built from the current one.
           </p>
