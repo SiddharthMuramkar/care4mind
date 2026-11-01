@@ -12,7 +12,13 @@ export async function HelpLine({ className }: { className?: string }) {
         typeof part === 'string' ? (
           part
         ) : (
-          <a key={index} href={part.tel} className={styles.number}>
+          <a
+            key={index}
+            href={part.tel}
+            className={styles.number}
+            // Screen readers say 112 as a quantity; the description reads it digit by digit and keeps the visible name.
+            title={`Phone number ${part.tel.slice('tel:'.length).split('').join(' ')}`}
+          >
             {part.number}
           </a>
         ),

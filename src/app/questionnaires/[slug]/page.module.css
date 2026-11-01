@@ -64,10 +64,15 @@
   font-size: 1.0625rem;
 }
 
-/* Where to call for help now: set apart from the limits above by a rule, in ink. */
+/* Where to call for help now: set apart from the limits above by a rule. */
 .help {
   margin: 0;
   padding-top: 1rem;
   border-top: 1px solid var(--color-line);
   font-size: 0.9375rem;
+}
+
+/* A number split across two lines is hard to read and to press. */
+.help a {
+  white-space: nowrap;
 }
