@@ -103,6 +103,16 @@
   color: var(--color-ink);
 }
 
+/* Windows' contrast themes repaint the pressed chip's ground: draw it in the theme's selection colours. */
+@media (forced-colors: active) {
+  .chip[aria-pressed='true'] {
+    forced-color-adjust: none;
+    background: Highlight;
+    border-color: Highlight;
+    color: HighlightText;
+  }
+}
+
 /* A topic's button carries its hue as a rule along its foot. */
 .chip[data-topic] {
   box-shadow: inset 0 -3px 0 var(--topic);

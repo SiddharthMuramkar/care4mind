@@ -304,6 +304,14 @@
   transform: none;
 }
 
+/* Windows' contrast themes repaint the chosen pill's ink: ring it instead (focus, below, still wins). */
+@media (forced-colors: active) {
+  .option:has(.radio:checked) {
+    outline: 2px solid CanvasText;
+    outline-offset: -4px;
+  }
+}
+
 .option:has(.radio:focus-visible) {
   outline: 3px solid var(--color-focus);
   outline-offset: 3px;
