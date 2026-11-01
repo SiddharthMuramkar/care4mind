@@ -14,7 +14,7 @@ export type ResourceItem =
       url?: string
     }
 
-/** A reading list in the Library (D13), such as Textbooks. */
+/** A reading list in the Library, such as Textbooks. */
 export interface ResourceListRecord {
   kind: 'resource-list'
   slug: Slug

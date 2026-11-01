@@ -432,7 +432,7 @@ export type ResourceItemView =
       url?: string
     }
 
-/** A reading list in the Library (D13), grouped under the pages' own headings. */
+/** A reading list in the Library, grouped under the pages' own headings. */
 export interface ResourceListView extends CarriedOver {
   kind: 'resource-list'
   slug: Slug
