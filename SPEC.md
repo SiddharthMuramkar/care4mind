@@ -21,6 +21,7 @@ Each module is named by its capability, and outside code reaches it only through
 - **Questionnaire flow**: one reducer holds a person's answers, and nothing else does (no storage, cookies, address or request). No record stores scoring until the Psychology expert's rules arrive. _Types (`scoring.status` is `'pending'`), the content-integrity "held back" test, review._
 - **Script pair**: `script/ScriptPair` is the one drawer of a name's IAST and Devanagari set together, IAST first. A heading whose Devanagari sits on its own line below (a Concept card, a text's title page), verses, numerals and the hero keep their own markup. _Browser: concept._
 - **Press**, the one design language. Colours, durations, easings and layers are tokens in the global stylesheet. Each component styles itself through its own CSS module, reading those tokens with `var()`. Tailwind supplies only the tokens and Preflight: the one global class markup uses from it is `sr-only`, and the site adds `skip-link` of its own. A colour chosen by content (a topic, a Questionnaire status) is mapped from a data attribute in the global stylesheet. Only the hero lotus moves on its own: it draws in and breathes once, by CSS alone, moving transform and opacity, and ends within 5 s of load, so there is no pause control. Every lotus leans toward the pointer and blooms when pressed, and nothing moves under reduced motion. _Browser: lotus, motion._ _The class-name test keeps markup to those two global classes; the Tailwind-output test keeps the compiled stylesheet to Preflight, the tokens and `sr-only`; the contrast test checks the listed colour pairs; review checks the rest._
+- **Shared helpers**, in `src/lib`: pure functions with no domain knowledge, used by two or more areas: `cx`, `text` and `sanskrit`. Code that one area uses lives beside it, as the Questionnaire flow's reducer sits with the flow's components and the contrast check with the tokens in `src/styles`. One exception stays: `metadata.ts`, the thin Next adapter that turns a page's path into its metadata. _Review._
 - **The agent guard**: `.claude/hooks/guard.mjs`, which Claude Code runs before every Bash, Edit and Write call in this repo, subagents included (`.claude/settings.json`). One pure `decide()` reads the command the way the shell would and answers deny, ask or nothing. _Tests: guard._
 - **The ruleset as code**: `.github/rulesets/main.json`, compared with GitHub by `pnpm ruleset:check` and applied by `pnpm ruleset:apply --commit <sha>`. _Tests: ruleset._
 
@@ -59,6 +60,7 @@ These are judgement calls, so review checks them against the diff, in the codeba
 | Nobody commits to `main` or pushes to it, the developer included | the git hooks in `.githooks/`, installed by `prepare` (githooks test). `--no-verify` skips them, and the guard refuses that to agents |
 | `ship` opens PRs, has a reviewer agent review each and its builder answer the review, then stops; its agents run light | ship test |
 | Each "Code that misleads" line names an open ticket | review |
+| `src/lib` holds only pure helpers with no domain knowledge that two or more areas use, and the metadata adapter | review |
 | Names use glossary terms; comments say why; Press only; depth; tests at the seam | review |
 
 ## Where a change goes
@@ -108,6 +110,7 @@ The code still holds these patterns, and new code doesn't copy them. Each line n
 - Comments that cite ticket numbers, decision codes (D01–D21), design codes (such as B6) or spec names. The documents they point at were deleted in `bfdbff0`. State the reason instead (#38).
 - `Flag.ticket` numbers on records. They come from a deleted local tracker and point at the wrong GitHub issues (#39).
 - A setting that looks load-bearing but does nothing here: `typedRoutes`, which can't check paths that end in a slash (#55). The checks that do hold links true are the `hrefFor()` lint rule and the browser crawler.
+- Domain logic in `src/lib`: the title and description rules in `metadata.ts`, which move into `site.describe()` (#85).
 
 ## Changing this file
 
