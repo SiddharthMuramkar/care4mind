@@ -59,7 +59,7 @@ export default defineConcept({
           kind: 'term',
           id: 'maitri',
           term: maitri,
-          gloss: 'Loving-kindness or Benevolence',
+          gloss: 'Loving-kindness or benevolence',
           blocks: [
             {
               kind: 'paragraph',
@@ -83,7 +83,7 @@ export default defineConcept({
           kind: 'term',
           id: 'mudita',
           term: mudita,
-          gloss: 'Altruistic Joy',
+          gloss: 'Altruistic joy',
           blocks: [
             {
               kind: 'paragraph',
@@ -95,7 +95,7 @@ export default defineConcept({
           kind: 'term',
           id: 'upeksa',
           term: upeksa,
-          gloss: 'Equanimity or Inner Balance',
+          gloss: 'Equanimity or inner balance',
           blocks: [
             {
               kind: 'paragraph',
@@ -134,7 +134,7 @@ export default defineConcept({
             {
               head: { term: mudita },
               cells: [
-                'Altruistic Joy',
+                'Altruistic joy',
                 'Rejoicing in the success and well-being of others, without envy.',
                 'Antidote to envy and jealousy; cultivated joy independent of self-benefit.',
               ],
@@ -142,7 +142,7 @@ export default defineConcept({
             {
               head: { term: upeksa },
               cells: [
-                'Equanimity or Inner Balance',
+                'Equanimity or inner balance',
                 'Mental calmness, impartiality, even-mindedness amidst ups and downs.',
                 'Balances other three virtues; neither apathy nor cold detachment.',
               ],
@@ -186,6 +186,10 @@ export default defineConcept({
       'Inline DharmaWiki links dropped, their words kept: “Brahman”, “Vedanta”, “kilesas” and “maya”. The page’s other DharmaWiki links are on “Chitta”, in the verse’s translation, which the passage holds, and on “Moksha”, in the held-back score text.',
       'Held back in the Questionnaire brahma-vihara, described and never quoted: the page’s “Score- Based Indicators” section, with its High, Moderate and Low indicators, its line about section-wise scores, and its note on the source they were referred from.',
       'Interface text dropped: the “Introduction” and “References” labels, and the “Meaning:” label before the verse’s reading.',
+      'Gloss in sentence case: “Loving-kindness or Benevolence” → “Loving-kindness or benevolence”.',
+      'Gloss in sentence case: “Altruistic Joy” → “Altruistic joy”.',
+      'Gloss in sentence case: “Equanimity or Inner Balance” → “Equanimity or inner balance”.',
+      'Comparison table cells in sentence case, to match the glosses: “Altruistic Joy” → “Altruistic joy”, “Equanimity or Inner Balance” → “Equanimity or inner balance”.',
     ],
     flags: [
       {

@@ -50,7 +50,7 @@ const VALUES: {
     title: 'Know Your Values: Ahimsa (Non-Violence) Profiling',
     name: 'Ahiṃsā',
     term: { iast: 'ahiṃsā', devanagari: 'अहिंसा', ascii: ['Ahimsa'] },
-    english: 'Non-Violence',
+    english: 'Non-violence',
     verses: [
       ['yoga-sutra/2.30', SHARED_TRANSLATION],
       ['yoga-sutra/2.32', SHARED_TRANSLATION],
@@ -112,7 +112,7 @@ const VALUES: {
     title: 'Know Your Values: Asteya (Non-Stealing) Profiling',
     name: 'Asteya',
     term: { iast: 'asteya', devanagari: 'अस्तेय', ascii: ['Asteya'] },
-    english: 'Non-Stealing',
+    english: 'Non-stealing',
     verses: [
       ['yoga-sutra/2.30', SHARED_TRANSLATION],
       ['yoga-sutra/2.32', SHARED_TRANSLATION],
