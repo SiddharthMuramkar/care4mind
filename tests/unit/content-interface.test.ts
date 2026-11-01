@@ -15,13 +15,10 @@ import {
   defineTopic,
   defineWork,
   type ConceptRecord,
-  type ContentKind,
-  type ContentRecord,
   type QuestionnaireForm,
   type QuestionnaireRecord,
-  type RecordOf,
 } from '@/content/schema'
-import type { ContentSource } from '@/content/source'
+import { memorySource } from '@/content/source'
 import { createContent } from '@/content/views'
 
 // The content module's public interface (content-v1 spec, "Public interface"), tested at its one
@@ -35,15 +32,6 @@ const provenance = {
   sources: [{ url: 'https://example.org/page/', retrieved: '2026-10-27' }],
   edits: [],
   flags: [],
-}
-
-/** A made-up content source holding the given records. */
-function sourceOf(...records: ContentRecord[]): ContentSource {
-  return {
-    async records<K extends ContentKind>(kind: K) {
-      return records.filter((record): record is RecordOf<K> => record.kind === kind)
-    },
-  }
 }
 
 const mind = defineTopic({
@@ -162,14 +150,14 @@ const concept: ConceptRecord = {
 
 describe('concepts.get', () => {
   it('returns null for an unknown slug and a view for a known one', async () => {
-    const content = createContent(sourceOf(mind, defineConcept(concept)), ON)
+    const content = createContent(memorySource(mind, defineConcept(concept)), ON)
     expect(await content.concepts.get('nothing-here')).toBeNull()
     expect((await content.concepts.get('obstacles'))?.name).toBe('Vighna')
   })
 
   it('fails on a dangling id, naming the record, the field and the missing id', async () => {
     const broken = defineConcept({ ...concept, references: ['nobody-1999'] })
-    const content = createContent(sourceOf(mind, broken), ON)
+    const content = createContent(memorySource(mind, broken), ON)
     await expect(content.concepts.get('obstacles')).rejects.toThrow(DanglingIdError)
     await expect(content.concepts.get('obstacles')).rejects.toThrow(
       'concept “obstacles”, field references[0]: no reference “nobody-1999”',
@@ -254,7 +242,7 @@ describe('a Concept’s verses', () => {
   const records = [mind, yogaSutra, dhammapada, ys130, dp160, quoting]
 
   it('resolves each verse with its work, its translation and a link to its passage', async () => {
-    const view = await createContent(sourceOf(...records), ON).concepts.get('obstacles')
+    const view = await createContent(memorySource(...records), ON).concepts.get('obstacles')
     expect(view?.verses[0]).toEqual({
       source: 'Yoga Sūtra 1.30',
       verse: '1.30',
@@ -276,7 +264,7 @@ describe('a Concept’s verses', () => {
   })
 
   it('shows no translation where the quote names none, and tags a Pali work as Pali', async () => {
-    const view = await createContent(sourceOf(...records), ON).concepts.get('obstacles')
+    const view = await createContent(memorySource(...records), ON).concepts.get('obstacles')
     expect(view?.verses[1]).toEqual({
       source: 'Dhammapada 160',
       verse: '160',
@@ -348,7 +336,7 @@ describe('a Concept’s sections', () => {
   const records = [mind, values, rao, yogaSutra, ys130, sectioned]
 
   it('resolves every block kind, giving each term its anchor', async () => {
-    const view = await createContent(sourceOf(...records), ON).concepts.get('obstacles')
+    const view = await createContent(memorySource(...records), ON).concepts.get('obstacles')
     expect(view?.sections.slice(0, 3)).toEqual([
       {
         id: 'what-it-is',
@@ -412,7 +400,7 @@ describe('a Concept’s sections', () => {
   })
 
   it('resolves a topic-intro block to the topic’s introduction, stored once', async () => {
-    const view = await createContent(sourceOf(...records), ON).concepts.get('obstacles')
+    const view = await createContent(memorySource(...records), ON).concepts.get('obstacles')
     expect(view?.sections[3]).toEqual({
       id: 'shared',
       heading: 'Shared',
@@ -435,7 +423,7 @@ describe('a Concept’s sections', () => {
   })
 
   it('gives a table of contents: the sections, with the terms inside each', async () => {
-    const view = await createContent(sourceOf(...records), ON).concepts.get('obstacles')
+    const view = await createContent(memorySource(...records), ON).concepts.get('obstacles')
     expect(view?.toc).toEqual([
       {
         id: 'what-it-is',
@@ -485,7 +473,7 @@ describe('a Concept’s References', () => {
   const records = [mind, values, rao, jainDiwakar, citing, other]
 
   it('numbers them in the page’s order, each with its anchor and every record citing it', async () => {
-    const view = await createContent(sourceOf(...records), ON).concepts.get('obstacles')
+    const view = await createContent(memorySource(...records), ON).concepts.get('obstacles')
     expect(view?.references).toEqual([
       {
         number: 1,
@@ -529,6 +517,7 @@ describe('a Concept’s References', () => {
         anchor: 'ref-rao-2001',
         href: '/library/references/#ref-rao-2001',
         citedIn: [
+          { kind: 'concept', id: 'calm', title: 'Calm', href: '/concepts/calm/' },
           {
             kind: 'concept',
             id: 'obstacles',
@@ -536,7 +525,6 @@ describe('a Concept’s References', () => {
             lang: 'sa-Latn',
             href: '/concepts/obstacles/',
           },
-          { kind: 'concept', id: 'calm', title: 'Calm', href: '/concepts/calm/' },
           { kind: 'topic', id: 'values', title: 'Values', href: '/topics/values/' },
         ],
         provenance,
@@ -546,7 +534,7 @@ describe('a Concept’s References', () => {
   })
 
   it('maps each in-text citation it can resolve, the shared introduction’s included, to its Reference', async () => {
-    const view = await createContent(sourceOf(...records), ON).concepts.get('obstacles')
+    const view = await createContent(memorySource(...records), ON).concepts.get('obstacles')
     expect(view?.citations).toEqual({
       'Jain & Diwakar, 2019': 'jain-diwakar-2019',
       'Rao, 2001': 'rao-2001',
@@ -608,7 +596,7 @@ describe('a Concept’s related Concepts (D06)', () => {
     ...[tomar, jainDiwakar, popular, trio, thapliyal, obstacles, calm, restraint, refuge],
   ]
   const related = async (slug: string) =>
-    (await createContent(sourceOf(...records), ON).concepts.get(slug))?.linked.related.map(
+    (await createContent(memorySource(...records), ON).concepts.get(slug))?.linked.related.map(
       ({ slug, reasons }) => ({ slug, reasons }),
     )
 
@@ -723,7 +711,7 @@ describe('the rest of a Concept’s page', () => {
     ...[mind, self, yogaSutra, dhammapada, ys130, ys230, dp160],
     ...[obstacles, calm, first, elsewhere, ownQuestionnaire, preview],
   ]
-  const view = () => createContent(sourceOf(...records), ON).concepts.get('obstacles')
+  const view = () => createContent(memorySource(...records), ON).concepts.get('obstacles')
 
   it('links the works it quotes, each with its passages in order', async () => {
     expect((await view())?.linked.works).toEqual([
@@ -813,7 +801,7 @@ describe('the rest of a Concept’s page', () => {
   })
 
   it('gives previous and next within its primary topic, in alphabetical order', async () => {
-    const content = createContent(sourceOf(...records), ON)
+    const content = createContent(memorySource(...records), ON)
     const around = async (slug: string) => {
       const found = await content.concepts.get(slug)
       return [found?.previous?.slug, found?.next?.slug]
@@ -875,11 +863,11 @@ describe('concepts.list', () => {
     }),
   ]
   const slugs = async (q?: Parameters<ReturnType<typeof createContent>['concepts']['list']>[0]) =>
-    (await createContent(sourceOf(...records), ON).concepts.list(q)).map(({ slug }) => slug)
+    (await createContent(memorySource(...records), ON).concepts.list(q)).map(({ slug }) => slug)
 
   it('lists every Concept as a card, by name with diacritics ignored', async () => {
     expect(await slugs()).toEqual(['restraint', 'calm', 'obstacles'])
-    const [first] = await createContent(sourceOf(...records), ON).concepts.list()
+    const [first] = await createContent(memorySource(...records), ON).concepts.list()
     expect(first).toEqual({
       slug: 'restraint',
       name: 'Ahiṃsā',
@@ -930,7 +918,7 @@ describe('topics', () => {
       references: ['rao-2001'],
     }),
   ]
-  const content = () => createContent(sourceOf(...records), ON)
+  const content = () => createContent(memorySource(...records), ON)
 
   it('returns null for an unknown topic and lists every topic in its order, with counts', async () => {
     expect(await content().topics.get('nowhere')).toBeNull()
@@ -1004,6 +992,7 @@ describe('topics', () => {
         },
       ],
       quotedIn: [
+        { kind: 'concept', id: 'calm', title: 'Śānti', lang: 'sa-Latn', href: '/concepts/calm/' },
         {
           kind: 'concept',
           id: 'obstacles',
@@ -1011,7 +1000,6 @@ describe('topics', () => {
           lang: 'sa-Latn',
           href: '/concepts/obstacles/',
         },
-        { kind: 'concept', id: 'calm', title: 'Śānti', lang: 'sa-Latn', href: '/concepts/calm/' },
       ],
       provenance,
       reviewStatus: 'carried-over-not-reviewed',
@@ -1068,7 +1056,7 @@ describe('works', () => {
       verses: [{ passage: 'yoga-sutra/1.30', translation: 'obstacles' }],
     }),
   ]
-  const content = () => createContent(sourceOf(...records), ON)
+  const content = () => createContent(memorySource(...records), ON)
 
   it('lists every work by title, each with how many of its verses the site quotes', async () => {
     expect(await content().works.list()).toEqual([
@@ -1138,7 +1126,7 @@ describe('references.list', () => {
     defineConcept({ ...concept, references: ['tomar-2024', 'rao-2001'] }),
   ]
   const ids = async (q?: Parameters<ReturnType<typeof createContent>['references']['list']>[0]) =>
-    (await createContent(sourceOf(...records), ON).references.list(q)).map(({ id }) => id)
+    (await createContent(memorySource(...records), ON).references.list(q)).map(({ id }) => id)
 
   it('lists every Reference once, by author or title with diacritics ignored', async () => {
     expect(await ids()).toEqual(['shared-verses', 'jain-diwakar-2019', 'rao-2001', 'tomar-2024'])
@@ -1231,7 +1219,7 @@ describe('questionnaires', () => {
     ...[mind, rao, jainDiwakar, defineConcept(concept)],
     ...[later, bare, soon, live, preview],
   ]
-  const content = (flags: Features) => createContent(sourceOf(...records), flags)
+  const content = (flags: Features) => createContent(memorySource(...records), flags)
 
   it('gives a Questionnaire’s page, with nothing held back and no scoring', async () => {
     expect(await content(ON).questionnaires.get('nothing-here')).toBeNull()
@@ -1359,7 +1347,7 @@ describe('the Library', () => {
     ],
     provenance,
   })
-  const content = () => createContent(sourceOf(rao, jainDiwakar, reading, methods), ON)
+  const content = () => createContent(memorySource(rao, jainDiwakar, reading, methods), ON)
 
   it('lists its reading lists, then its pages', async () => {
     expect(await content().library.list()).toEqual([
@@ -1487,7 +1475,7 @@ describe('the homepage', () => {
   })
 
   it('turns every area’s target into a path, and leaves an area without one unlinked', async () => {
-    expect(await createContent(sourceOf(later, methods, home), ON).home.get()).toEqual({
+    expect(await createContent(memorySource(later, methods, home), ON).home.get()).toEqual({
       shloka: { devanagari: 'उदाहरणम्', iast: 'udāharaṇam', translation: 'A made-up line.' },
       intro: 'A made-up introduction.',
       areas: [
@@ -1504,7 +1492,7 @@ describe('the homepage', () => {
   })
 
   it('fails, naming what is missing, when there is no homepage record', async () => {
-    await expect(createContent(sourceOf(methods), ON).home.get()).rejects.toThrow('homepage')
+    await expect(createContent(memorySource(methods), ON).home.get()).rejects.toThrow('homepage')
   })
 })
 
@@ -1628,7 +1616,7 @@ describe('every view', () => {
   ]
 
   it('survives a JSON round trip unchanged, on made-up content', async () => {
-    const views = await everyView(createContent(sourceOf(...world), ON))
+    const views = await everyView(createContent(memorySource(...world), ON))
     expect(views.length).toBeGreaterThan(10)
     for (const view of views) expect(JSON.parse(JSON.stringify(view))).toStrictEqual(view)
   })
@@ -1672,7 +1660,7 @@ describe('the feature flags, from the environment to the interface (D16, D20)', 
   ]
   /** What a build in this environment offers: the preview's form, and the flagged routes. */
   const offered = async (env: Record<string, string>) => {
-    const content = createContent(sourceOf(...records), readFeatures(env))
+    const content = createContent(memorySource(...records), readFeatures(env))
     const paths = (await content.site.routes()).map(({ path }) => path)
     return {
       form: (await content.questionnaires.form('work-scale')) !== null,
