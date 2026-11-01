@@ -168,6 +168,16 @@ describe('the search documents, on the real content', () => {
     )
   })
 
+  it('find yama and niyama, from the values topic’s introduction, at their anchors there', async () => {
+    const hrefs = (await site.site.searchDocuments())
+      .filter(({ id }) => id.startsWith('term:topic/values#'))
+      .map(({ href, names }) => [href, names[1]])
+    expect(hrefs).toEqual([
+      ['/topics/values/#yama', 'यम'],
+      ['/topics/values/#niyama', 'नियम'],
+    ])
+  })
+
   it('give every Concept that cites Tomar (2024) the person Tomar', async () => {
     const citing = (await site.concepts.list({ reference: 'tomar-2024' })).map(({ slug }) => slug)
     expect(citing.length).toBeGreaterThan(0)

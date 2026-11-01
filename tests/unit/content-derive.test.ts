@@ -804,7 +804,29 @@ describe('site.azIndex', () => {
 describe('site.searchDocuments', () => {
   const long = `${'A made-up sentence that runs on. '.repeat(12)}The end.`
   const records = [
-    ...world.filter((record) => record !== obstacles && record !== reading),
+    ...world.filter((record) => record !== obstacles && record !== reading && record !== self),
+    defineTopic({
+      ...self,
+      intro: {
+        sections: [
+          {
+            id: 'restraints',
+            heading: 'Restraints',
+            blocks: [
+              {
+                kind: 'term',
+                id: 'yama',
+                term: { iast: 'yama', devanagari: 'यम', ascii: [] },
+                gloss: 'Restraint',
+                blocks: [{ kind: 'paragraph', text: 'Made-up text about restraint.' }],
+              },
+            ],
+          },
+        ],
+        references: [],
+        provenance,
+      },
+    }),
     defineConcept({
       ...obstacles,
       summary: long,
@@ -854,7 +876,7 @@ describe('site.searchDocuments', () => {
     for (const { kind } of await documents()) count[kind] = (count[kind] ?? 0) + 1
     expect(count).toEqual({
       concept: 3,
-      term: 1,
+      term: 2,
       glossary: 1,
       work: 2,
       passage: 2,
@@ -874,6 +896,7 @@ describe('site.searchDocuments', () => {
       id: 'concept:obstacles',
       kind: 'concept',
       title: 'Vighna',
+      lang: 'sa-Latn',
       href: '/concepts/obstacles/',
       names: ['vighna', 'विघ्न', 'Vigna'],
       keywords: [
@@ -900,6 +923,7 @@ describe('site.searchDocuments', () => {
       id: 'term:obstacles#samsaya',
       kind: 'term',
       title: 'Saṃśaya',
+      lang: 'sa-Latn',
       href: '/concepts/obstacles/#samsaya',
       parent: 'Vighna',
       names: ['saṃśaya', 'संशय', 'samsaya', 'Sanshay'],
@@ -909,11 +933,27 @@ describe('site.searchDocuments', () => {
     })
   })
 
+  it('gives a term in a topic’s introduction the topic as its parent, at its anchor there', async () => {
+    expect(await find('term:topic/self#yama')).toEqual({
+      id: 'term:topic/self#yama',
+      kind: 'term',
+      title: 'Yama',
+      lang: 'sa-Latn',
+      href: '/topics/self/#yama',
+      parent: 'Self',
+      names: ['yama', 'यम'],
+      keywords: ['Restraint'],
+      people: [],
+      excerpt: 'Made-up text about restraint.',
+    })
+  })
+
   it('finds a passage by its work and locator, and a work by its names', async () => {
     expect(await find('passage:yoga-sutra/1.30')).toEqual({
       id: 'passage:yoga-sutra/1.30',
       kind: 'passage',
       title: 'Yoga Sūtra 1.30',
+      lang: 'sa-Latn',
       href: '/texts/yoga-sutra/#1-30',
       parent: 'Yoga Sūtra',
       names: [],
@@ -925,6 +965,7 @@ describe('site.searchDocuments', () => {
       id: 'work:yoga-sutra',
       kind: 'work',
       title: 'Yoga Sūtra',
+      lang: 'sa-Latn',
       href: '/texts/yoga-sutra/',
       names: ['Yoga Sūtra', 'योगसूत्र', 'Yoga Sutra'],
       keywords: ['YS'],
@@ -948,6 +989,7 @@ describe('site.searchDocuments', () => {
       id: 'glossary:avarana',
       kind: 'glossary',
       title: 'Āvaraṇa',
+      lang: 'sa-Latn',
       href: '/concepts/#avarana',
       names: ['āvaraṇa', 'आवरण', 'Avarana'],
       keywords: [],
@@ -999,6 +1041,12 @@ describe('site.searchDocuments', () => {
       href: '/library/methods/',
       excerpt: 'A made-up summary of methods.',
     })
+  })
+
+  it('tags a transliterated title with its language, Pali for a Pali work, and an English one not at all', async () => {
+    expect(await find('work:dhammapada')).toMatchObject({ title: 'Dhammapada', lang: 'pi-Latn' })
+    expect(await find('topic:mind')).not.toHaveProperty('lang')
+    expect(await find('reference:rao-2001')).not.toHaveProperty('lang')
   })
 })
 

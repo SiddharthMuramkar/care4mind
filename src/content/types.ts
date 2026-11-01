@@ -601,6 +601,8 @@ export interface SearchDocument {
   id: string
   kind: SearchKind
   title: string
+  /** Set when the title is a transliteration. */
+  lang?: LatinScript
   href: string
   /** What it sits in: a term's Concept, a passage's work, a library item's list. */
   parent?: string

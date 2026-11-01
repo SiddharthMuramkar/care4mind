@@ -12,6 +12,8 @@ import type {
   ContentKind,
   PassageRecord,
   SanskritName,
+  TermBlock,
+  TopicRecord,
   WorkRecord,
 } from '../schema'
 import type { SearchDocument } from '../types'
@@ -19,6 +21,7 @@ import { conceptQuotes, termsIn } from '../views/blocks'
 import { must } from '../views/common'
 import { hrefFor } from '../views/href'
 import { asciiSpellings, authorNames, displayName, passageLabel, referenceLabel } from '../names'
+import { latinScript } from '../views/passage'
 import { questionnaireHref } from '../views/refs'
 
 const EXCERPT = 300
@@ -87,6 +90,7 @@ function conceptDocuments(concept: ConceptRecord, graph: ContentGraph): SearchDo
     id: `concept:${concept.slug}`,
     kind: 'concept',
     title,
+    ...(term ? { lang: 'sa-Latn' as const } : {}),
     href: hrefFor({ kind: 'concept', id: concept.slug }),
     names: term ? spellingsOf(term) : unique([english]),
     keywords: unique([
@@ -105,18 +109,45 @@ function conceptDocuments(concept: ConceptRecord, graph: ContentGraph): SearchDo
 
   const terms = concept.sections
     .flatMap((section) => termsIn(section.blocks))
-    .map((block): SearchDocument => ({
-      id: `term:${concept.slug}#${block.id}`,
-      kind: 'term',
-      title: displayName(block),
-      href: hrefFor({ kind: 'concept', id: concept.slug, anchor: block.id }),
-      parent: title,
-      names: spellingsOf(block.term),
-      keywords: unique([block.gloss]),
-      people: [],
-      excerpt: excerpt(firstText(block.blocks)),
-    }))
+    .map((block) =>
+      termDocument(
+        block,
+        `term:${concept.slug}#${block.id}`,
+        hrefFor({ kind: 'concept', id: concept.slug, anchor: block.id }),
+        title,
+      ),
+    )
   return [own, ...terms]
+}
+
+/** A term's document, found under every spelling and linking to its anchor on its parent's page. */
+function termDocument(block: TermBlock, id: string, href: string, parent: string): SearchDocument {
+  return {
+    id,
+    kind: 'term',
+    title: displayName(block),
+    lang: 'sa-Latn',
+    href,
+    parent,
+    names: spellingsOf(block.term),
+    keywords: unique([block.gloss]),
+    people: [],
+    excerpt: excerpt(firstText(block.blocks)),
+  }
+}
+
+/** The terms a topic's introduction explains (the values topic's yama and niyama). */
+function topicTermDocuments(topic: TopicRecord): SearchDocument[] {
+  return (topic.intro?.sections ?? [])
+    .flatMap((section) => termsIn(section.blocks))
+    .map((block) =>
+      termDocument(
+        block,
+        `term:topic/${topic.slug}#${block.id}`,
+        hrefFor({ kind: 'topic', id: topic.slug, anchor: block.id }),
+        topic.name.english,
+      ),
+    )
 }
 
 /** The search corpus: every document the site's search can find, built from the content. */
@@ -127,6 +158,7 @@ export function searchDocuments(graph: ContentGraph): SearchDocument[] {
     id: `glossary:${entry.slug}`,
     kind: 'glossary',
     title: entry.name.iast ? capitalise(entry.name.iast) : entry.name.ascii,
+    ...(entry.name.iast ? { lang: 'sa-Latn' as const } : {}),
     href: hrefFor({ kind: 'glossary', id: entry.slug }),
     names: unique([entry.name.iast, entry.name.devanagari, entry.name.ascii]),
     keywords: [],
@@ -138,6 +170,7 @@ export function searchDocuments(graph: ContentGraph): SearchDocument[] {
     id: `work:${work.slug}`,
     kind: 'work',
     title: displayName({ term: work.title }),
+    lang: latinScript(work),
     href: hrefFor({ kind: 'work', id: work.slug }),
     names: unique([work.title.iast, work.title.devanagari, ...work.title.ascii]),
     keywords: unique([abbreviation(work), work.title.english]),
@@ -151,6 +184,7 @@ export function searchDocuments(graph: ContentGraph): SearchDocument[] {
       id: `passage:${passage.id}`,
       kind: 'passage',
       title: passageLabel(passage, work),
+      lang: latinScript(work),
       href: hrefFor({ kind: 'passage', id: passage.id }),
       parent: displayName({ term: work.title }),
       names: [],
@@ -235,6 +269,8 @@ export function searchDocuments(graph: ContentGraph): SearchDocument[] {
     ),
   }))
 
+  const topicTerms = graph.records('topic').flatMap(topicTermDocuments)
+
   const pages = [
     ...graph.records('page').map((page): SearchDocument => ({
       id: `page:${page.slug}`,
@@ -267,7 +303,7 @@ export function searchDocuments(graph: ContentGraph): SearchDocument[] {
     reference: references,
     'resource-list': libraryItems,
     questionnaire: questionnaires,
-    topic: topics,
+    topic: [...topics, ...topicTerms],
     page: pages,
     home: [],
   } satisfies Record<ContentKind, SearchDocument[]>
