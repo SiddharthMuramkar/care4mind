@@ -21,7 +21,7 @@ export default defineReference({
       {
         for: 'research-editor',
         note: 'The page cites Yogapedia as a whole and links its home page, not a particular entry. Kept as given; confirm which entry was meant. Nothing was looked up.',
-        ticket: 17,
+        decidedBy: 'references',
       },
     ],
   },

@@ -226,8 +226,11 @@ export interface ConceptCard extends ConceptRef {
   topic: TopicRef
 }
 
-/** What relates two Concepts (D06): a shared passage, work, rarely cited Reference or topic. */
-export type RelationKind = 'passage' | 'work' | 'reference' | 'topic'
+/** Strongest first. The map uses every kind but topic: a topic is a sector, not an edge. */
+export const RELATION_STRENGTH = ['passage', 'work', 'reference', 'topic'] as const
+
+/** What relates two Concepts: a shared passage, work, rarely cited Reference or topic. */
+export type RelationKind = (typeof RELATION_STRENGTH)[number]
 
 /** A related Concept, with each fact that relates it, strongest first. */
 export interface RelatedConcept extends ConceptCard {
@@ -590,7 +593,7 @@ export interface ConceptGraphEdge {
   source: Slug
   target: Slug
   /** A shared passage, a shared work, or a rarely cited shared Reference. */
-  kind: 'passage' | 'work' | 'reference'
+  kind: Exclude<RelationKind, 'topic'>
   /** The shared passage, work or Reference, by its id. */
   via: string
   /** "Both quote Yoga Sūtra 2.30". */

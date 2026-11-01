@@ -114,15 +114,6 @@
   color: var(--color-surface-muted);
 }
 
-.visuallyHidden {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  clip-path: inset(50%);
-  white-space: nowrap;
-}
-
 /*
  * The title is one long word: on a phone it is set to fit the folio rather than break, and with
  * room it is as large as the other indexes' titles (reading.module.css).

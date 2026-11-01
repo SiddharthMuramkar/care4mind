@@ -24,7 +24,7 @@ export default defineReference({
       {
         for: 'research-editor',
         note: 'No DOI or link is given on the current site; not looked up. Add a stable link if the work has one (FR-03).',
-        ticket: 17,
+        decidedBy: 'references',
       },
     ],
   },

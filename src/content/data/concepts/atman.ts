@@ -98,12 +98,12 @@ export default defineConcept({
       {
         for: 'research-editor',
         note: 'The page prints no IAST for its headword, “Atman (Samskrit: आत्मा)”. The record’s IAST, “ātman”, is transliterated from the page’s “आत्मन्”, the form its spelling “Atman” follows; its Devanagari is the headword’s “आत्मा”. Confirm both. Nothing was looked up.',
-        ticket: 15,
+        decidedBy: 'sanskrit-terms',
       },
       {
         for: 'research-editor',
         note: 'The post’s text may be adapted from DharmaWiki: it carries DharmaWiki’s citation markers, which are dropped here. Decide how to credit DharmaWiki. Nothing was looked up.',
-        ticket: 17,
+        decidedBy: 'references',
       },
       {
         for: 'project-owner',

@@ -15,6 +15,7 @@ import { createContent } from './views'
 import { hrefFor as pathFor } from './views/href'
 
 export type * from './types'
+export { RELATION_STRENGTH } from './types'
 export { asciiSpellings, displayName } from './names'
 
 /**

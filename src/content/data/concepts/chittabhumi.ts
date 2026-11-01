@@ -279,17 +279,17 @@ export default defineConcept({
       {
         for: 'research-editor',
         note: 'The page prints no IAST and no Devanagari for its headword: it writes only the plural, “chittabhumis” and “Chittabhumis”. The record’s IAST, “citta-bhūmi”, is transliterated from it in the singular, as is the slug, chittabhumi; its English name, “state of mind”, is the page’s gloss (“five progressive states of mind, known as chittabhumis”) in the singular. No Devanagari is stored for it, nor for the five states, which the page prints only in Latin letters. Confirm the forms; nothing was looked up.',
-        ticket: 15,
+        decidedBy: 'sanskrit-terms',
       },
       {
         for: 'research-editor',
         note: 'The text cites “(Sharma et al., 2024)”, which matches nothing on the page’s reference list. Kept as written; nothing was looked up.',
-        ticket: 17,
+        decidedBy: 'references',
       },
       {
         for: 'research-editor',
         note: 'The text names works its reference list doesn’t include: Prabhavananda (1977), Vivekananda (1950) and Vivekananda (1976). Kept as written; nothing was looked up.',
-        ticket: 17,
+        decidedBy: 'references',
       },
       {
         for: 'research-editor',

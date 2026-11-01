@@ -29,7 +29,7 @@ export default defineReference({
       {
         for: 'research-editor',
         note: 'Two pages cite this Shlokam page (https://shlokam.org/yogasutra/, 2020, November 22) under two titles: “Yogasutra Verses in Sanskrit, English with Commentary” on Momentum of Spiritual Practice and “Yogasutra Verses – Patanjali’s Yogasutra” on Karta. Stored as one Reference with both lines kept as cited and the first title. Confirm the title; nothing was looked up.',
-        ticket: 17,
+        decidedBy: 'references',
       },
     ],
   },

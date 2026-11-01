@@ -60,3 +60,10 @@
     inset 0 0 0 1px currentColor,
     inset 0 2px 4px rgb(0 0 0 / 0.2);
 }
+
+/* Windows' contrast themes drop box-shadows, the secondary call's only outline: give it a border they paint. */
+@media (forced-colors: active) {
+  .secondary {
+    border: 1px solid CanvasText;
+  }
+}

@@ -27,7 +27,7 @@ export default defineReference({
       {
         for: 'research-editor',
         note: 'Its link goes to the journal’s home page (https://www.jetir.org), not to the paper; kept as its URL. Give the paper’s own link; nothing was looked up.',
-        ticket: 17,
+        decidedBy: 'references',
       },
     ],
   },

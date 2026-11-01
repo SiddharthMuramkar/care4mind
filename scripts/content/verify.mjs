@@ -61,8 +61,6 @@ export async function loadRecords(root) {
     encoding: 'utf8',
   })
   if (check.status !== 0) throw new ToolError(check.stderr.trim() || 'The registry check failed.')
-  if (typeof registerHooks !== 'function')
-    throw new ToolError('Reading records needs Node 22.15 or newer (module.registerHooks).')
   if (!hooked) {
     const ts = (await import('typescript')).default
     registerHooks(typeScriptHooks(root, ts))

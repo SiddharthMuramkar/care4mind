@@ -335,3 +335,10 @@
   align-items: center;
   gap: 0.6rem;
 }
+
+/* Windows' contrast themes drop box-shadows, the popup's only edge: give it a border they paint. */
+@media (forced-colors: active) {
+  .popup {
+    border: 1px solid CanvasText;
+  }
+}

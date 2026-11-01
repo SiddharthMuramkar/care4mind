@@ -2,14 +2,14 @@ import type { Features } from '@/config/features'
 
 import type { ContentGraph, Relation } from '../graph'
 import type { Block, ConceptRecord, Slug } from '../schema'
-import type {
-  ConceptCard,
-  ConceptRef,
-  ConceptView,
-  LinkedWork,
-  QuestionnaireCard,
-  RelatedConcept,
-  RelationKind,
+import {
+  RELATION_STRENGTH,
+  type ConceptCard,
+  type ConceptRef,
+  type ConceptView,
+  type LinkedWork,
+  type QuestionnaireCard,
+  type RelatedConcept,
 } from '../types'
 import { conceptQuotes, sectionViews, tocOf, topicRef, type Owner } from './blocks'
 import { byName, carriedOver, must, nameCopy, present } from './common'
@@ -33,9 +33,7 @@ export function conceptCard(record: ConceptRecord, graph: ContentGraph): Concept
   }
 }
 
-const STRENGTH: readonly RelationKind[] = ['passage', 'work', 'reference', 'topic']
-
-/** The Concepts related to this one (D06), strongest relation first, then by name. */
+/** The Concepts related to this one, strongest relation first, then by name. */
 function relatedConcepts(record: ConceptRecord, graph: ContentGraph): RelatedConcept[] {
   const byConcept = new Map<Slug, Relation[]>()
   for (const relation of graph.related(record.slug)) {
@@ -44,7 +42,7 @@ function relatedConcepts(record: ConceptRecord, graph: ContentGraph): RelatedCon
     else byConcept.set(relation.concept, [relation])
   }
   const strongest = (relations: readonly Relation[]) =>
-    Math.min(...relations.map((relation) => STRENGTH.indexOf(relation.kind)))
+    Math.min(...relations.map((relation) => RELATION_STRENGTH.indexOf(relation.kind)))
   return [...byConcept]
     .map(([slug, relations]) => ({
       card: conceptCard(must(graph, 'concept', slug), graph),

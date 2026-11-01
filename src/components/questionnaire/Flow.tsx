@@ -25,8 +25,10 @@ import { turnBack } from '@/components/PageTurn'
 import type { QuestionnaireFormView } from '@/content'
 import {
   addressOf,
+  entryAt,
   flowReducer,
   partOf,
+  placeOf,
   startFlow,
   stepFromAddress,
   unsaved,
@@ -79,6 +81,13 @@ function focusStatement(item: string, behavior?: ScrollBehavior) {
   option?.focus({ preventScroll: true })
 }
 
+/** Whether this page was loaded by a browser Back; the Navigation API alone can tell. */
+function arrivedByBack() {
+  const activation = window.navigation?.activation
+  if (activation?.navigationType !== 'traverse' || !activation.from) return false
+  return activation.from.index > activation.entry.index
+}
+
 /** A plain press of a link: the flow answers it itself or asks before leaving; others open the link as usual. */
 const plainPress = (
   event: Pick<MouseEvent, 'button' | 'metaKey' | 'ctrlKey' | 'shiftKey' | 'altKey'>,
@@ -95,13 +104,18 @@ export function Flow({ form, instructions, intro, limits, sources }: Props) {
   const [retaking, setRetaking] = useState(false)
   const [retakeAsked, setRetakeAsked] = useState(false)
   const focus = useRef<Focus | null>(null)
+  /** This entry's place among the flow's history entries, so a traversal tells Back from Forward. */
+  const place = useRef(0)
 
   /** Run a press: note the new step in history, and turn the page if the step changes. */
   function press(action: FlowAction, then: Focus | null, turn?: 'turn-forward' | 'turn-back') {
     const next = flowReducer(state, action)
     const moves = next.step !== state.step
     focus.current = next.refusals > state.refusals ? { to: 'summary' } : then
-    if (moves) window.history.pushState(null, '', addressOf(next.step))
+    if (moves) {
+      place.current += 1
+      window.history.pushState(entryAt(place.current), '', addressOf(next.step))
+    }
     if (moves && turn) {
       startTransition(() => {
         addTransitionType(turn)
@@ -131,9 +145,18 @@ export function Flow({ form, instructions, intro, limits, sources }: Props) {
 
   // Browser Back and Forward: go to the step the address names, or the furthest one open.
   const onPopState = useEffectEvent(() => {
+    const entry = placeOf(window.history.state)
+    // Not the flow's entry: Back has left it, for the intro or another page.
+    if (entry === null) return
+    const back = entry < place.current
+    place.current = entry
     const wanted = stepFromAddress(window.location.search)
     const next = flowReducer(state, { type: 'go', step: wanted })
-    if (next.step !== wanted) window.history.replaceState(null, '', addressOf(next.step))
+    // A Retake empties the steps it leaves; Back passes over them rather than doing nothing.
+    if (back && next.step === state.step) return window.history.back()
+    if (next.step !== wanted) {
+      window.history.replaceState(entryAt(entry), '', addressOf(next.step))
+    }
     if (next.step !== state.step) focus.current = { to: 'step' }
     dispatch({ type: 'go', step: wanted })
   })
@@ -142,9 +165,13 @@ export function Flow({ form, instructions, intro, limits, sources }: Props) {
     const listener = () => onPopState()
     window.addEventListener('popstate', listener)
     // Nothing is in memory on arrival, so an address naming a later step starts at part 1.
-    if (stepFromAddress(window.location.search) !== 'part-1') {
-      window.history.replaceState(null, '', addressOf('part-1'))
-    }
+    const later = stepFromAddress(window.location.search) !== 'part-1'
+    place.current = placeOf(window.history.state) ?? 0
+    // Next patches history only after this effect, so its own state is kept by hand.
+    const entry = { ...window.history.state, ...entryAt(place.current) }
+    window.history.replaceState(entry, '', later ? addressOf('part-1') : undefined)
+    // Back onto an entry a reload left behind shows part 1 again, as the page it left did.
+    if (place.current > 0 && arrivedByBack()) window.history.back()
     return () => window.removeEventListener('popstate', listener)
   }, [])
 
@@ -404,7 +431,7 @@ function Answers({ form, answers, level, onChange }: AnswersProps) {
                     }}
                   >
                     Change
-                    <span className={styles.visuallyHidden}> your answer to “{item.text}”</span>
+                    <span className="sr-only"> your answer to “{item.text}”</span>
                   </a>
                 </dd>
               ) : null}

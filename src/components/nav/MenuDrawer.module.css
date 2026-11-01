@@ -6,9 +6,18 @@
 .backdrop {
   position: fixed;
   inset: 0;
+  /* Tall enough for the strips under iOS 26's translucent toolbars. */
+  min-height: 100dvh;
   z-index: var(--layer-drawer);
   background: var(--color-backdrop);
   opacity: calc(1 - var(--drawer-swipe-progress, 0));
+}
+
+/* Fixed stops short of those strips; absolute covers them once the body is positioned. */
+@supports (-webkit-touch-callout: none) {
+  .backdrop {
+    position: absolute;
+  }
 }
 
 .viewport {
@@ -305,4 +314,11 @@
   margin: auto auto 0;
   padding-top: 1rem;
   color: var(--color-highlight);
+}
+
+/* Windows' contrast themes drop box-shadows, the sheet's only edge: give it a border they paint. */
+@media (forced-colors: active) {
+  .sheet {
+    border: 1px solid CanvasText;
+  }
 }

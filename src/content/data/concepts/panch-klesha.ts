@@ -399,17 +399,17 @@ export default defineConcept({
       {
         for: 'research-editor',
         note: 'The page prints no IAST and no Devanagari for its headword: it writes “Panch Klesha” (its title and headings), “Pancha Klesha” (three verse headings) and “panchklesha”. The record’s IAST, “pañca kleśa”, is transliterated from those, and the slug follows the page’s “Panch Klesha”. No Devanagari is stored for it, nor for the six enemies of the peaceful mind, which the page prints only in Latin letters. Confirm the form; nothing was looked up.',
-        ticket: 15,
+        decidedBy: 'sanskrit-terms',
       },
       {
         for: 'research-editor',
         note: 'Sub-term forms the page doesn’t print as words of their own: the five kleśas’ Devanagari, split out of the Yoga Sūtra 2.3 verse’s compound (“अविद्या”, “अस्मिता”, “राग”, “द्वेष”, “अभिनिवेश”), and the IAST “mātsarya”, transliterated from the page’s “Matsarya”. Confirm them; nothing was looked up.',
-        ticket: 15,
+        decidedBy: 'sanskrit-terms',
       },
       {
         for: 'research-editor',
         note: 'The Panch Klesha page heads this verse with its chapter and sutra only, naming no work; it is stored under the Yoga Sūtra, which its text is. Confirm the attribution.',
-        ticket: 16,
+        decidedBy: 'traditional-texts',
       },
       {
         for: 'research-editor',
@@ -418,12 +418,12 @@ export default defineConcept({
       {
         for: 'research-editor',
         note: 'The paragraph on stress, which cites the Praxis International Journal of Social Science and Literature (2022b) as a whole, carried the bare numbers “1-3” and “3”, apparently reference numbers from the paper it was taken from. They are dropped (listed). Identify the paper and how to credit it; nothing was looked up.',
-        ticket: 17,
+        decidedBy: 'references',
       },
       {
         for: 'research-editor',
         note: 'The reference list cites Shlokam’s page on Yoga Sūtra 1.31, a verse this page doesn’t quote; its verses are Yoga Sūtra 2.3, 2.5, 2.7 and 2.9. Kept as listed; nothing was looked up.',
-        ticket: 17,
+        decidedBy: 'references',
       },
     ],
   },

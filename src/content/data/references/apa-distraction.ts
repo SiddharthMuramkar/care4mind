@@ -20,7 +20,7 @@ export default defineReference({
       {
         for: 'research-editor',
         note: 'The page’s reference line gives no title; “Distraction” is taken from the entry’s address. Confirm it.',
-        ticket: 17,
+        decidedBy: 'references',
       },
     ],
   },

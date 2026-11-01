@@ -62,6 +62,17 @@ export function MenuButton({ nav, search, script, lotus, mapNote }: Props) {
     void load().then(() => setOpen(true))
   }
 
+  // Once the header is wide the Menu link is display:none and can't take focus back.
+  useEffect(() => {
+    if (!open) return
+    const wide = matchMedia(WIDE)
+    const close = () => {
+      if (wide.matches) setOpen(false)
+    }
+    wide.addEventListener('change', close)
+    return () => wide.removeEventListener('change', close)
+  }, [open])
+
   return (
     <>
       <a

@@ -33,7 +33,7 @@ export default defineReference({
       {
         for: 'project-owner',
         note: 'Its only link on the current site goes to a retailer (Amazon), kept as its URL. Decide whether the site links to retailers, or to another page for the book.',
-        ticket: 17,
+        decidedBy: 'references',
       },
     ],
   },

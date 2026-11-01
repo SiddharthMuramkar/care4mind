@@ -44,16 +44,22 @@ export function MenuDrawer({
   const closeOnLink = (event: MouseEvent) => {
     if (event.target instanceof Element && event.target.closest('a[href]')) onOpenChange(false)
   }
+  // The Menu link is display:none on a wide header, and a hidden link can't take focus.
+  const focusOnClose = () => {
+    const menu = returnFocus.current
+    if (menu?.checkVisibility()) return menu
+    const link = menu?.closest('header')?.querySelector('nav a')
+    return link instanceof HTMLElement ? link : null
+  }
 
   return (
     <Drawer.Root open={open} onOpenChange={(next) => onOpenChange(next)} swipeDirection="right">
       <Drawer.Portal>
         <Drawer.Backdrop className={styles.backdrop} />
         <Drawer.Viewport className={styles.viewport}>
-          <Drawer.Popup className={styles.sheet} finalFocus={returnFocus}>
-            {/* A link's click closes the Drawer; the link itself is the keyboard's way in. */}
-            {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */}
-            <div className={styles.body} onClick={closeOnLink}>
+          <Drawer.Popup className={styles.sheet} finalFocus={focusOnClose}>
+            {/* A link click closes the Drawer; a mouse drag selects text here instead of swiping the sheet. */}
+            <Drawer.Content className={styles.body} onClick={closeOnLink}>
               <div className={styles.head}>
                 <Drawer.Title className={styles.title}>Menu</Drawer.Title>
                 <Drawer.Close className={styles.close}>
@@ -100,7 +106,7 @@ export function MenuDrawer({
                 </ol>
               </nav>
               <Fleuron className={styles.fleuron} />
-            </div>
+            </Drawer.Content>
           </Drawer.Popup>
         </Drawer.Viewport>
       </Drawer.Portal>

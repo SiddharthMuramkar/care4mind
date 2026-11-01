@@ -30,7 +30,7 @@ export default defineReference({
       {
         for: 'research-editor',
         note: 'After the journal the page gives “8/63(2278–8808), SJIF 2019 = 6.380, www.srjis.com”. The record keeps volume 8/63 and issue 2278–8808 as written; 2278–8808 reads like the journal’s ISSN, and the rest like an impact-factor note. The author is written “Chakraborty, Asst. P.”, where “Asst.” may be a title. Nothing was changed or looked up.',
-        ticket: 17,
+        decidedBy: 'references',
       },
     ],
   },

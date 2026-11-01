@@ -42,7 +42,7 @@ export default defineQuestionnaire({
       {
         for: 'psychology-expert',
         note: 'The page says nothing about what its questionnaire measures outside its held-back score section, so no purpose is stored, and none was written. Write one, or approve leaving it out.',
-        ticket: 26,
+        decidedBy: 'questionnaire-record',
       },
     ],
   },

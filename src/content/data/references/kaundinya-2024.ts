@@ -32,7 +32,7 @@ export default defineReference({
       {
         for: 'research-editor',
         note: 'The page runs the title into the journal’s name after a colon (“HARMONIZING DHARMA AND DEMOCRACY: Prayagraj Law Review.”), so part of the title may be missing. Split there; nothing was looked up.',
-        ticket: 17,
+        decidedBy: 'references',
       },
     ],
   },

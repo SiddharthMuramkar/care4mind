@@ -28,7 +28,7 @@ export default definePassage({
       {
         for: 'research-editor',
         note: 'The Upa-Vikshepa Profiling page heads this verse “Shloka from Chapter 1, Sutra 31” and names no work there; it is stored as Yoga Sūtra 1.31, which its text is and which the page’s body names. Confirm the attribution.',
-        ticket: 16,
+        decidedBy: 'traditional-texts',
       },
     ],
   },

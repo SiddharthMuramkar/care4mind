@@ -16,7 +16,7 @@ export default defineWork({
       {
         for: 'research-editor',
         note: 'The title is written in IAST as “Suśruta Saṃhitā”; the page writes “Sushruta Samhita” and “Sush Samh”. Confirm the form.',
-        ticket: 16,
+        decidedBy: 'traditional-texts',
       },
     ],
   },

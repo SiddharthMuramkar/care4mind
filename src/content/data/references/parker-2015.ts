@@ -21,7 +21,7 @@ export default defineReference({
       {
         for: 'research-editor',
         note: 'No publisher is given on the current site; not looked up.',
-        ticket: 17,
+        decidedBy: 'references',
       },
     ],
   },

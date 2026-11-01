@@ -267,22 +267,22 @@ export default defineConcept({
       {
         for: 'research-editor',
         note: 'The page prints no IAST and no Devanagari for its headword: it writes “Upa-Vikshepa” and “Upa Vikshepa”, and “Upa Vikṣepa” only in its held-back score section. The record’s IAST, “upa-vikṣepa”, is transliterated from those; no Devanagari is stored. Confirm the form; nothing was looked up.',
-        ticket: 15,
+        decidedBy: 'sanskrit-terms',
       },
       {
         for: 'research-editor',
         note: 'The page gives no English gloss for upa-vikṣepa: its text speaks of “secondary distractions”, “byproducts” and “sub-distractions”, but gives none of them as the term’s meaning, so the Concept has no English name. Its five sub-headings give no gloss either, so the term blocks have none; the text and the comparison table pair some of the terms with English (“duḥkha (suffering)”, “tremors of the limbs (angamejayatva)”, “Daurmanasya (Dejection/Frustration)”), which stay where the page has them. Supply glosses or confirm none; nothing was written for them.',
-        ticket: 15,
+        decidedBy: 'sanskrit-terms',
       },
       {
         for: 'research-editor',
         note: 'Sub-term forms the page doesn’t print as words of their own: “aṅgamejayatva”, “śvāsa” and “praśvāsa”, split out of “śvāsapraśvāsa” and the Yoga Sūtra 1.31 compound, and all five Devanagari forms, split out of that verse’s compound. Confirm them; nothing was looked up.',
-        ticket: 15,
+        decidedBy: 'sanskrit-terms',
       },
       {
         for: 'research-editor',
         note: 'The Upa-Vikshepa Profiling page heads this verse “Shloka from Chapter 1, Sutra 31” and names no work there; it is stored as Yoga Sūtra 1.31, which its text is and which the page’s body names. Confirm the attribution.',
-        ticket: 16,
+        decidedBy: 'traditional-texts',
       },
       {
         for: 'research-editor',
@@ -291,7 +291,7 @@ export default defineConcept({
       {
         for: 'research-editor',
         note: 'The text mentions “a study by Vyas et al.” with no year, and the page’s reference list has no Vyas; the paragraph ends citing Paikaray et al. (2018). Kept as written; nothing was looked up.',
-        ticket: 17,
+        decidedBy: 'references',
       },
     ],
   },

@@ -29,12 +29,12 @@ export default defineReference({
       {
         for: 'research-editor',
         note: 'The title is spelled “The Upanisads” on Inspirational Books and “The Upanishads” on Text Books; the record keeps the first, from the fuller line, and both lines as cited. Nothing was looked up.',
-        ticket: 17,
+        decidedBy: 'references',
       },
       {
         for: 'project-owner',
         note: 'Its only link on the current site goes to a retailer (Amazon), kept as its URL. Decide whether the site links to retailers, or to another page for the book.',
-        ticket: 17,
+        decidedBy: 'references',
       },
     ],
   },

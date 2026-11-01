@@ -88,7 +88,7 @@ export default async function QuestionnairesPage() {
 
           {featured.length > 0 ? (
             <section className={reading.section} aria-labelledby="featured-title">
-              <h2 id="featured-title" className={styles.visuallyHidden}>
+              <h2 id="featured-title" className="sr-only">
                 With a page of {featured.length === 1 ? 'its' : 'their'} own
               </h2>
               <ul className={styles.featured}>

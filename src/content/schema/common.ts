@@ -24,12 +24,29 @@ export type Inline = string
 /** Who must answer a flag. */
 export type FlagRole = 'research-editor' | 'psychology-expert' | 'project-owner'
 
+/** The planning issues on GitHub that decide flags, by key. */
+export const PLANNING_ISSUES = {
+  'client-questions': { issue: 7, title: 'Send the client the question list' },
+  'content-types': { issue: 9, title: 'Content types, topics and shared fields' },
+  'content-links': { issue: 10, title: 'Links between content, and links to modern constructs' },
+  'sanskrit-terms': { issue: 11, title: 'Sanskrit terms: storage and display' },
+  'traditional-texts': { issue: 12, title: 'Traditional texts and passages' },
+  references: { issue: 13, title: 'References, people and journals' },
+  'current-pages': { issue: 15, title: 'Keep, merge or drop each current page' },
+  'site-map': { issue: 16, title: 'Site map and navigation' },
+  'questionnaire-record': { issue: 22, title: 'Questionnaire record and test rule' },
+  'questionnaire-scope': { issue: 24, title: 'Questionnaire launch scope and scoring sources' },
+} as const satisfies Record<string, { issue: number; title: string }>
+
+/** A key of `PLANNING_ISSUES`. */
+export type PlanningIssue = keyof typeof PLANNING_ISSUES
+
 /** A question for a person, raised by an agent that noticed something it may not decide. */
 export interface Flag {
   for: FlagRole
   note: string
-  /** The planning ticket that decides it. */
-  ticket?: number
+  /** The planning issue that decides it. */
+  decidedBy?: PlanningIssue
 }
 
 /** Where a record came from, and every change made on the way. */
