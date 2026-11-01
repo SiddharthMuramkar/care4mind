@@ -9,7 +9,7 @@ import { PageTurn, turnForward } from '@/components/PageTurn'
 import { Text } from '@/components/prose'
 import { StatusBadge } from '@/components/StatusBadge'
 import { Flow } from '@/components/questionnaire/Flow'
-import { concepts, hrefFor, questionnaires } from '@/content'
+import { concepts, hrefFor, questionnaires, site } from '@/content'
 import { cx } from '@/lib/cx'
 import { metadataFor } from '@/lib/metadata'
 
@@ -18,20 +18,15 @@ import styles from './page.module.css'
 
 export const dynamicParams = false
 
+const PATTERN = '/questionnaires/[slug]/take/' as const
+
 /** A flow exists only for a Questionnaire that can be taken in this build (D16). */
-export async function generateStaticParams() {
-  const all = await questionnaires.list()
-  const open = await Promise.all(all.map(({ slug }) => questionnaires.form(slug)))
-  return open.flatMap((form) => (form ? [{ slug: form.slug }] : []))
-}
+export const generateStaticParams = () => site.params(PATTERN)
 
 export async function generateMetadata({
   params,
 }: PageProps<'/questionnaires/[slug]/take'>): Promise<Metadata> {
-  const questionnaire = await questionnaires.get((await params).slug)
-  if (!questionnaire) notFound()
-  const { slug, status } = questionnaire
-  return metadataFor(hrefFor({ kind: 'questionnaire', id: slug, status, flow: true }))
+  return metadataFor(PATTERN.replace('[slug]', (await params).slug))
 }
 
 /**

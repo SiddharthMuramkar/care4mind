@@ -65,7 +65,7 @@
   align-content: start;
   gap: 0.5rem;
   padding: 1.1rem 1.25rem 1.25rem;
-  background: color-mix(in srgb, var(--color-ink) 40%, var(--color-surface));
+  background: var(--color-surface-pale-40);
   box-shadow:
     0 0 0 1px color-mix(in srgb, var(--color-surface-ink) 30%, transparent),
     inset 0 3px 0 var(--topic, var(--color-surface-rule));

@@ -35,10 +35,10 @@ export function absoluteUrl(path: string): string {
   return new URL(path, config.url).href
 }
 
-/** The path's segment where its route's pattern has `[slug]`. */
-function slugOf(route: RouteEntry): string {
-  const at = route.pattern.split('/').indexOf('[slug]')
-  return route.path.split('/')[at] ?? ''
+/** The id of the record a route shows. A page of that kind always has one. */
+function recordId(route: RouteEntry): string {
+  if (!route.record) notFound()
+  return route.record.id
 }
 
 /** A Concept as it is named everywhere: "Vikṣepa · Distraction". Kept here until the shared naming function exists. */
@@ -63,7 +63,7 @@ async function describe(
     case 'home':
       return { name: HOME_TITLE, description: config.tagline }
     case 'concept': {
-      const concept = await concepts.get(slugOf(route))
+      const concept = await concepts.get(recordId(route))
       if (!concept) notFound()
       // A Sanskrit headword is named with its gloss, as the Concept page sets them.
       const named = concept.term && concept.english ? `${name} (${concept.english})` : name
@@ -71,7 +71,7 @@ async function describe(
       return { name: named, description: concept.summary, card }
     }
     case 'topic': {
-      const topic = await topics.get(slugOf(route))
+      const topic = await topics.get(recordId(route))
       if (!topic) notFound()
       const concepts = count(topic.conceptCount, 'Concept', 'Concepts')
       const quote = topic.conceptCount === 1 ? 'it quotes' : 'they quote'
@@ -84,7 +84,7 @@ async function describe(
       }
     case 'questionnaire':
     case 'questionnaire-flow': {
-      const questionnaire = await questionnaires.get(slugOf(route))
+      const questionnaire = await questionnaires.get(recordId(route))
       if (!questionnaire) notFound()
       const { title, summary } = questionnaire
       return route.kind === 'questionnaire'
@@ -98,7 +98,7 @@ async function describe(
     }
     case 'resource-list':
     case 'page': {
-      const page = await library.get(slugOf(route))
+      const page = await library.get(recordId(route))
       if (!page) notFound()
       if (page.kind === 'page') return { name, description: page.summary }
       const entries = page.groups.reduce((sum, group) => sum + group.items.length, 0)
@@ -144,7 +144,7 @@ export async function shareCardText(path: string): Promise<{ title: string; desc
 /** The public page at a path, or not found. */
 async function routeAt(path: string): Promise<RouteEntry> {
   const bare = path.replace(/[?#].*$/, '')
-  const route = (await site.routes()).find((entry) => entry.path === bare)
+  const route = await site.route(bare)
   if (!route) notFound()
   return route
 }
