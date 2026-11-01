@@ -2,8 +2,8 @@ import { describe, expect, it } from 'vitest'
 
 import { concepts } from '@/content'
 
-// Front-end-site ticket 05: the in-text citation reader (`graph.ts`), read through the public
-// interface. A citation is whatever sits in a pair of parentheses, even one whose author names
+// Front-end-site ticket 05: the in-text citation reader (`graph/citations.ts`), read through the
+// public interface. A citation is whatever sits in a pair of parentheses, even one whose author names
 // its own parentheses, as Ahimsa's EPRA citation does.
 
 describe('in-text citations', () => {

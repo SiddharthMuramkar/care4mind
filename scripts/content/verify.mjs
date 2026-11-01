@@ -7,7 +7,9 @@
 //
 // It reads the saved copies only from $CARE4MIND_CAPTURES, never writes into the repo and never
 // touches the network. Exit code 0 when nothing is missing, 1 when a string is on none of its
-// pages, 2 when it can't run. What it checks and skips: docs/agents/content-migration.md.
+// pages, 2 when it can't run. What it checks and skips is the "verify" block of
+// tests/unit/content-tools.test.ts. A miss is fixed by matching the page's text, or by listing
+// the edit that explains it.
 //
 // Plain Node, no new dependency: records are TypeScript, which it reads with the repo's own
 // TypeScript compiler. This file is also the records module report imports.
@@ -290,7 +292,6 @@ const NOT_TEXT = new Set([
   'topics',
   'references',
   'passage',
-  'translation',
   'questionnaire',
   'concepts',
   'candidateSource',
@@ -339,7 +340,8 @@ function stringsOf(value, skip, path = '', iast = undefined) {
   if (!value || typeof value !== 'object') return []
   const termIast = typeof value.iast === 'string' ? value.iast : undefined
   return Object.entries(value).flatMap(([key, inner]) =>
-    skip.has(key)
+    // A PassageQuote's translation is an id; the homepage shloka's is the English line.
+    skip.has(key) || (key === 'translation' && Object.hasOwn(value, 'passage'))
       ? []
       : stringsOf(
           inner,

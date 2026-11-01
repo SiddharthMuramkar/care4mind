@@ -5,10 +5,10 @@ import { useEffect } from 'react'
 
 import { CloseGlyph, SealGlyph } from '@/components/nav/glyphs'
 
-import { connectToasts } from './toast'
+import { connectToasts, type ToastMessage } from './toast'
 import styles from './ToastViewport.module.css'
 
-const manager = Toast.createToastManager()
+const manager = Toast.createToastManager<Pick<ToastMessage, 'lang'>>()
 
 /**
  * Base UI's Toast, loaded with the first toast(): one polite live region in the corner, each
@@ -21,8 +21,8 @@ export function ToastViewport() {
     let disconnect = () => {}
     let frame = requestAnimationFrame(() => {
       frame = requestAnimationFrame(() => {
-        disconnect = connectToasts(({ title, description }) => {
-          manager.add({ title, description, priority: 'low' })
+        disconnect = connectToasts(({ title, description, lang }) => {
+          manager.add({ title, description, data: { lang }, priority: 'low' })
         })
       })
     })
@@ -44,7 +44,7 @@ export function ToastViewport() {
 }
 
 function Toasts() {
-  const { toasts } = Toast.useToastManager()
+  const { toasts } = Toast.useToastManager<Pick<ToastMessage, 'lang'>>()
   return toasts.map((toast) => (
     <Toast.Root key={toast.id} toast={toast} className={styles.toast}>
       <Toast.Content className={styles.content}>
@@ -53,7 +53,10 @@ function Toasts() {
           {/* Paragraphs, not headings: a toast is a passing note, not part of the page's outline. */}
           <Toast.Title className={styles.title} render={<p />} />
           {toast.description ? (
-            <Toast.Description className={styles.description} render={<p />} />
+            <Toast.Description
+              className={styles.description}
+              render={<p lang={toast.data?.lang} />}
+            />
           ) : null}
         </div>
         <Toast.Close className={styles.close} aria-label="Dismiss">

@@ -150,13 +150,13 @@ describe('comparing the file with GitHub', () => {
             ...rule,
             parameters: {
               ...rule.parameters,
-              required_status_checks: [{ context: 'ci', integration_id: ACTIONS }],
+              required_status_checks: [{ context: 'Checks', integration_id: ACTIONS }],
             },
           }
         : rule,
     )
     expect(differences(wanted, renamed)).toHaveLength(1)
-    expect(differences(wanted, renamed)[0]).toMatch(/GitHub requires \["ci \(app 15368\)"\]/)
+    expect(differences(wanted, renamed)[0]).toMatch(/GitHub requires \["Checks \(app 15368\)"\]/)
   })
 
   it('notices a bypass actor', () => {

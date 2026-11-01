@@ -10,7 +10,7 @@ import {
 } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join, resolve } from 'node:path'
-import { pathToFileURL } from 'node:url'
+import { fileURLToPath, pathToFileURL } from 'node:url'
 
 import ts from 'typescript'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
@@ -22,6 +22,7 @@ import {
   type ConceptRecord,
   type ContentRecord,
   type GlossaryEntryRecord,
+  type HomepageRecord,
   type PassageRecord,
   type QuestionnaireRecord,
   type ReferenceRecord,
@@ -33,7 +34,8 @@ import {
 // $CARE4MIND_CAPTURES, which CI doesn't have, so every test here builds a made-up captures
 // folder and made-up records in a temporary folder. No captured text appears in this file.
 
-const TOOLS = resolve('scripts/content')
+const REPO = fileURLToPath(new URL('../..', import.meta.url))
+const TOOLS = resolve(REPO, 'scripts/content')
 
 /** Runs a tool as the command line would, with the given environment changes (undefined unsets). */
 function run(tool: string, args: readonly string[], env: Record<string, string | undefined> = {}) {
@@ -83,6 +85,7 @@ const verify = (await import(pathToFileURL(join(TOOLS, 'verify.mjs')).href)) as 
 
 const report = (await import(pathToFileURL(join(TOOLS, 'report.mjs')).href)) as {
   buildReport(records: readonly ContentRecord[], captures: Captures): string
+  FLAGS_PACK: string
 }
 
 let scratch = ''
@@ -100,6 +103,7 @@ describe('the captures rule', { timeout: 30_000 }, () => {
     const result = run(tool, ['example'], { CARE4MIND_CAPTURES: undefined })
     expect(result.status).toBe(2)
     expect(result.stderr).toContain('CARE4MIND_CAPTURES is not set')
+    expect(result.stderr).toContain('private repo SiddharthMuramkar/care4mind-captures')
   })
 
   it.each(CAPTURE_READERS)('%s refuses a captures folder that is missing', (tool) => {
@@ -577,6 +581,25 @@ describe('verify', () => {
     expect(verify.checkRecord(record, site).misses.map((miss) => miss.text)).toEqual(['Udaharnam'])
   })
 
+  it('checks the homepage shloka’s translation, which is the English line', () => {
+    const record: HomepageRecord = {
+      kind: 'home',
+      shloka: {
+        devanagari: 'उदाहरणम् इदम् ।',
+        iast: 'udāharaṇam idam |',
+        translation: 'A line no page has.',
+      },
+      intro: 'Every rule needs an example.',
+      areas: [{ title: 'Introduction', text: 'Every rule needs an example.' }],
+      closing: 'Every rule needs an example.',
+      helpLine: 'Every rule needs an example.',
+      provenance: { sources: [{ url: PAGE, retrieved: '2026-10-27' }], edits: [], flags: [] },
+    }
+    expect(verify.checkRecord(record, site).misses.map((miss) => miss.path)).toEqual([
+      'shloka.translation',
+    ])
+  })
+
   it('skips ids, links between records, URLs and meta fields, and lists drafted fields', () => {
     const record = concept(
       [{ kind: 'verse', quote: { passage: 'nowhere/1.1', translation: 'x' } }],
@@ -803,6 +826,22 @@ describe('the verify command', { timeout: 30_000 }, () => {
     )
   })
 
+  it('exits 2 when items.json is not valid JSON', () => {
+    const dir = join(scratch, 'broken-items')
+    mkdirSync(dir, { recursive: true })
+    writeFileSync(join(dir, 'items.json'), '{')
+    const result = run('verify', [], { CARE4MIND_CAPTURES: dir })
+    expect(result.status).toBe(2)
+    expect(result.stderr).toContain(`${join(dir, 'items.json')} isn't valid JSON`)
+  })
+
+  it('exits 2 when a saved page has no link', () => {
+    const dir = captures('no-link', [{ kind: 'page', slug: 'bare', title: 'Bare' }])
+    const result = run('verify', [], { CARE4MIND_CAPTURES: dir })
+    expect(result.status).toBe(2)
+    expect(result.stderr).toContain(`${join(dir, 'items.json')}: “bare” has no link.`)
+  })
+
   it('refuses a kind or an id it has no record for', () => {
     expect(verifyIn('concept/nothing').stderr).toContain('No record concept/nothing.')
     expect(verifyIn('glossary').stderr).toContain('No glossary records.')
@@ -932,10 +971,30 @@ describe('the tools write nothing', { timeout: 30_000 }, () => {
     expect({ repo: snapshot(root), captures: snapshot(site) }).toEqual(before)
 
     expect(run('report', ['--root', root, '--write'], env).status).toBe(0)
-    const pack = join(root, '.scratch/content-v1/flags.md')
+    const pack = join(root, report.FLAGS_PACK)
     expect(existsSync(pack)).toBe(true)
     expect(readFileSync(pack, 'utf8')).toBe(printed.stdout)
     expect(snapshot(root)).toEqual({ ...before.repo, [pack]: printed.stdout })
+  })
+})
+
+describe('the flags pack', () => {
+  it('is written where git ignores it', () => {
+    const ignored = spawnSync('git', ['check-ignore', '-q', report.FLAGS_PACK], { cwd: REPO })
+    expect(ignored.status).toBe(0)
+  })
+})
+
+describe('the tools’ own words', () => {
+  it('name no file or folder of this repo that doesn’t exist', () => {
+    const tools = readdirSync(TOOLS).filter((file) => file.endsWith('.mjs'))
+    const missing = tools.flatMap((file) =>
+      [...readFileSync(join(TOOLS, file), 'utf8').matchAll(/\b(?:docs|tests|src)\/[\w./-]*\w/g)]
+        .map(([path]) => path)
+        .filter((path) => !path.includes('${') && !existsSync(join(REPO, path)))
+        .map((path) => `${file}: ${path}`),
+    )
+    expect(missing).toEqual([])
   })
 })
 
@@ -1012,6 +1071,8 @@ describe('new', { timeout: 30_000 }, () => {
       ['reference', 'tomar 2024'],
       ['passage', 'yoga-sutra'],
       ['passage', 'Yoga-Sutra/1.30'],
+      ['passage', 'x/1.05'],
+      ['passage', 'x/01.2'],
       ['home', 'homepage'],
       ['colour', 'red'],
     ] as const) {
