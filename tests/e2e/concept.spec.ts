@@ -1,5 +1,7 @@
 import type { Locator, Page } from '@playwright/test'
 
+import { CLOSE_DELAY, OPEN_DELAY } from '@/components/preview/delays'
+
 import { expectNoAxeViolations } from './axe'
 import { recordAnimationStarts, transitionedOn } from './drawings'
 import { expect, gotoReady, scrollsSideways, test } from './fixtures'
@@ -571,7 +573,7 @@ test.describe('Concept page v2: previews', () => {
       .poll(async () => overlap(await card.boundingBox(), await link.boundingBox()))
       .toBe(0)
     await card.hover()
-    await page.waitForTimeout(600)
+    await page.waitForTimeout(3 * CLOSE_DELAY)
     await expect(card).toBeVisible()
     await expectNoAxeViolations(page)
   })
@@ -624,7 +626,7 @@ test.describe('Concept page v2: previews', () => {
     const link = page.locator('section a[href^="#ref-"]').first()
     await link.scrollIntoViewIfNeeded()
     await link.tap()
-    await page.waitForTimeout(900)
+    await page.waitForTimeout(2 * OPEN_DELAY)
     await expect(page.locator('[data-open][data-side]')).toHaveCount(0)
     await context.close()
   })
@@ -636,6 +638,7 @@ test.describe('Concept page v2: verse cards', () => {
     context,
   }) => {
     await context.grantPermissions(['clipboard-read', 'clipboard-write'])
+    await page.clock.install()
     await gotoReady(page, '/concepts/vikshepa/')
     const card = page.locator('figure', { hasText: 'Yoga Sūtra 1.30' }).first().locator('..')
     await expect(card.getByRole('link', { name: 'Yoga Sūtra 1.30' })).toHaveAttribute(
@@ -661,11 +664,13 @@ test.describe('Concept page v2: verse cards', () => {
     await expect(copy).toBeFocused()
     await expectNoAxeViolations(page)
 
-    // Space copies too; its toast stays at least 5 seconds, and focus never moves.
+    // Space copies too; its toast stays until just short of 6 seconds, then goes, and focus never moves.
     await page.keyboard.press(' ')
     await expect(status).toHaveCount(2)
-    await page.waitForTimeout(5000)
+    await page.clock.fastForward(5500)
     await expect(status.last()).toBeVisible()
+    await page.clock.fastForward(1000)
+    await expect(status).toHaveCount(0)
     await expect(copy).toBeFocused()
   })
 })
@@ -674,18 +679,21 @@ test.describe('Concept page v2: tables', () => {
   test('a wide table scrolls in its own named region, its first column staying in view', async ({
     page,
   }) => {
+    test.skip(page.viewportSize()?.width !== 360, 'the table is wider than its frame at 360 px')
     await gotoReady(page, '/concepts/vikshepa/')
     const frame = page.getByRole('region', { name: /Comparison between Indian and Western/ })
     await expect(frame).toHaveAttribute('tabindex', '0')
+    expect(await frame.evaluate((element) => element.scrollWidth > element.clientWidth)).toBe(true)
     const first = frame.getByRole('row').nth(1).locator('th, td').first()
     const second = frame.getByRole('row').nth(1).locator('th, td').nth(1)
     const [before, beside] = [await first.boundingBox(), await second.boundingBox()]
-    await frame.evaluate((element) => element.scrollBy({ left: 400, behavior: 'instant' }))
-    const scrolled = await frame.evaluate((element) => element.scrollLeft)
-    if (scrolled > 0) {
-      expect((await first.boundingBox())?.x).toBeCloseTo(before?.x ?? 0, 0)
-      expect((await second.boundingBox())?.x ?? 0).toBeLessThan(beside?.x ?? 0)
-    }
+    // A wheel, not scrollBy: a script can scroll a frame that hides its overflow, a reader can't.
+    await frame.evaluate((element) => { (element as HTMLElement).style.overflowX = 'hidden' })
+    await frame.hover()
+    await page.mouse.wheel(400, 0)
+    await expect.poll(() => frame.evaluate((element) => element.scrollLeft)).toBeGreaterThan(0)
+    await expect.poll(async () => (await second.boundingBox())?.x ?? 0).toBeLessThan(beside?.x ?? 0)
+    expect((await first.boundingBox())?.x).toBeCloseTo(before?.x ?? 0, 0)
     // Scroll shadows in CSS: shades fixed to the frame, and paper that scrolls with the table.
     const attachment = await frame.evaluate(
       (element) => getComputedStyle(element).backgroundAttachment,
