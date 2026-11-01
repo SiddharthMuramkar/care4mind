@@ -8,7 +8,7 @@ import type { ContentGraph, RecordKey } from '../graph'
 import type { FixedPage, LatinScript, RouteEntry, RouteKind } from '../types'
 import { byName } from '../views/common'
 import { hrefFor } from '../views/href'
-import { displayName } from '../views/names'
+import { displayName } from '../names'
 import { latinScript } from '../views/passage'
 import { canTake } from '../views/questionnaire'
 

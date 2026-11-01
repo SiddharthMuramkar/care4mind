@@ -67,6 +67,15 @@ describe('the content boundary', { timeout: 30_000 }, () => {
     expect(await boundaryProblems(COMPONENT, code)).toHaveLength(1)
   })
 
+  it('stops the graph importing from the views or the derivations above it', async () => {
+    const views = "import { displayName } from '../views/names'\nexport const name = displayName\n"
+    const derive = "import { siteRoutes } from '../derive/routes'\nexport const r = siteRoutes\n"
+    const names = "import { displayName } from '../names'\nexport const name = displayName\n"
+    expect(await boundaryProblems('src/content/graph/fixture.ts', views)).toHaveLength(1)
+    expect(await boundaryProblems('src/content/graph/fixture.ts', derive)).toHaveLength(1)
+    expect(await boundaryProblems('src/content/graph/fixture.ts', names)).toEqual([])
+  })
+
   it('lets files inside the content module import its internals', async () => {
     const code =
       "import { localSource } from '@/content/source'\nexport const source = localSource\n"
