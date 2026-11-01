@@ -34,7 +34,7 @@
 }
 
 .passage:target {
-  background: color-mix(in srgb, var(--color-highlight) 8%, transparent);
+  background: var(--color-highlight-wash-8);
 }
 
 .passage:target::before {

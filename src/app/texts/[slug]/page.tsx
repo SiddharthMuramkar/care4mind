@@ -10,7 +10,7 @@ import { PageTurn } from '@/components/PageTurn'
 import { Provenance } from '@/components/prose'
 import { ReadingThread } from '@/components/ReadingThread'
 import { Passage, VerseRail, VerseTally, WorkTitle } from '@/components/texts'
-import { hrefFor, works } from '@/content'
+import { hrefFor, site, works } from '@/content'
 import { cx } from '@/lib/cx'
 import { metadataFor } from '@/lib/metadata'
 
@@ -19,12 +19,12 @@ import styles from './page.module.css'
 
 export const dynamicParams = false
 
-export async function generateStaticParams() {
-  return (await works.list()).map(({ slug }) => ({ slug }))
-}
+const PATTERN = '/texts/[slug]/' as const
+
+export const generateStaticParams = () => site.params(PATTERN)
 
 export async function generateMetadata({ params }: PageProps<'/texts/[slug]'>): Promise<Metadata> {
-  return metadataFor(hrefFor({ kind: 'work', id: (await params).slug }))
+  return metadataFor(PATTERN.replace('[slug]', (await params).slug))
 }
 
 /**
