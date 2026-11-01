@@ -273,3 +273,28 @@ a.letter:focus-visible {
   font-style: italic;
   color: var(--color-surface-muted);
 }
+
+/* The search box: a ruled line to write on, as on a library's catalogue slip. */
+.search {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.searchBox {
+  inline-size: 100%;
+  max-inline-size: 32rem;
+  min-block-size: 2.75rem;
+  padding: 0.25rem 0;
+  border: 0;
+  border-block-end: 1px solid var(--color-surface-ink);
+  border-radius: 0;
+  background: transparent;
+  color: var(--color-surface-ink);
+  font: inherit;
+  font-size: 1.125rem;
+}
+
+.searchBox:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 2px;
+}

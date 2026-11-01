@@ -1,0 +1,279 @@
+/*
+ * The References page: a bibliography on the folio's paper, filed by author under the A–Z's rail
+ * and chips. Each entry hangs its citation from a margin, then names what it is, what cites it,
+ * and copies it.
+ */
+
+/* A letter's section: its capital, then its entries. */
+.letter {
+  display: grid;
+  gap: 0.5rem;
+  scroll-margin-top: calc(var(--sticky-top) + 3.5rem);
+}
+
+.letter > * {
+  min-width: 0;
+}
+
+.letter + .letter {
+  margin-top: 1.75rem;
+}
+
+.letterTitle {
+  margin: 0;
+  padding-bottom: 0.25rem;
+  border-bottom: 1px solid var(--color-surface-rule);
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: 2.75rem;
+  line-height: 1;
+  color: var(--color-highlight);
+}
+
+/* Wide: the capital stands in the margin and stays beside its entries as they pass. */
+@media (min-width: 48rem) {
+  .letter {
+    grid-template-columns: 3.5rem minmax(0, 1fr);
+    gap: 0 1.25rem;
+  }
+
+  .letterTitle {
+    position: sticky;
+    top: calc(var(--sticky-top) + 4.25rem);
+    align-self: start;
+    padding: 0.6rem 0 0;
+    border: 0;
+    font-size: 3.25rem;
+    text-align: center;
+  }
+
+  /* A hairline under the capital, as a printer's guide letter has. */
+  .letterTitle::after {
+    content: '';
+    display: block;
+    width: 1.75rem;
+    margin: 0.4rem auto 0;
+    border-top: 3px double var(--color-surface-rule);
+  }
+}
+
+.entries {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.entry {
+  position: relative;
+  display: grid;
+  gap: 0.45rem;
+  padding: 0.85rem 0 0.95rem;
+  scroll-margin-top: calc(var(--sticky-top) + 3.75rem);
+  overflow-wrap: anywhere;
+  /* A long list: the browser skips drawing entries far off screen, keeping their space. */
+  content-visibility: auto;
+  contain-intrinsic-block-size: auto 8.5rem;
+}
+
+.entry + .entry {
+  border-top: 1px solid color-mix(in srgb, var(--color-surface-rule) 40%, transparent);
+}
+
+.entry > * {
+  min-width: 0;
+  margin: 0;
+}
+
+/* The citation hangs from the margin, as a bibliography sets it. */
+.citation {
+  padding-inline-start: 1.75rem;
+  text-indent: -1.75rem;
+  font-size: 1.0625rem;
+  line-height: 1.6;
+}
+
+/* What it is, what cites it, and "Copy citation", under the citation's hanging lines. */
+.foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem 1rem;
+  padding-inline-start: 1.75rem;
+}
+
+.type {
+  font-variant-caps: all-small-caps;
+  letter-spacing: 0.1em;
+  font-size: 1rem;
+  color: var(--color-surface-muted);
+}
+
+.cited {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem 0.5rem;
+  min-width: 0;
+}
+
+.citedLabel {
+  font-style: italic;
+  font-size: 0.9375rem;
+  color: var(--color-surface-muted);
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 0.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* A slip of type for each record citing it, marked with its topic's lozenge where it has one. */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  min-height: 2rem;
+  padding: 0.05rem 0.65rem;
+  border: 1px solid color-mix(in srgb, var(--color-surface-ink) 35%, transparent);
+  border-radius: 2px;
+  color: var(--color-surface-ink);
+  font-size: 0.9375rem;
+  line-height: 1.3;
+  text-decoration: none;
+  overflow-wrap: normal;
+}
+
+.chip::before {
+  content: '';
+  flex: none;
+  width: 0.45em;
+  height: 0.45em;
+  border: 1px solid var(--topic, var(--color-surface-rule));
+  background: var(--topic, transparent);
+  transform: rotate(45deg);
+}
+
+.chip :lang(sa-Latn) {
+  font-style: italic;
+}
+
+.chip:hover {
+  border-color: var(--color-surface-ink);
+  color: var(--color-link);
+}
+
+/* "Copy citation": a quiet line of small capitals, pressed into the paper. */
+.copy {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-height: 2rem;
+  margin-inline-start: auto;
+  padding: 0 0.5rem;
+  border: 0;
+  border-radius: 2px;
+  background: none;
+  color: var(--color-link);
+  font: inherit;
+  font-variant-caps: all-small-caps;
+  letter-spacing: 0.1em;
+  font-size: 1.0625rem;
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.copy:hover {
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+
+/* Two sheets, one over the other: drawn in CSS, so 188 buttons carry no drawing of their own. */
+.copyIcon {
+  position: relative;
+  flex: none;
+  width: 0.62em;
+  height: 0.72em;
+  margin-top: 0.2em;
+  border: 1.5px solid currentColor;
+  border-radius: 1px;
+}
+
+.copyIcon::after {
+  content: '';
+  position: absolute;
+  top: -0.27em;
+  left: 0.15em;
+  width: 0.62em;
+  height: 0.72em;
+  border-top: 1.5px solid currentColor;
+  border-right: 1.5px solid currentColor;
+  border-top-right-radius: 1px;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .copy,
+  .chip {
+    transition: transform var(--duration-instant) var(--ease-press);
+  }
+
+  .copy:active,
+  .chip:active {
+    transform: translateY(1px);
+  }
+}
+
+/* Without JavaScript nothing can copy: the button goes, the citation stays to select. */
+@media (scripting: none) {
+  .copy {
+    display: none;
+  }
+}
+
+/*
+ * The entry a citation leads to: a vermilion rule in its margin, and a wash for a moment's
+ * reading. The rule draws down from the top where motion is welcome.
+ */
+.entry:target {
+  background: color-mix(in srgb, var(--color-highlight) 8%, transparent);
+  box-shadow: 0 0 0 0.5rem color-mix(in srgb, var(--color-highlight) 8%, transparent);
+}
+
+.entry:target::after {
+  content: '';
+  position: absolute;
+  inset-block: 0.85rem;
+  inset-inline-start: -0.6rem;
+  width: 3px;
+  background: var(--color-highlight);
+  transform-origin: top;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .entry:target::after {
+    animation: rule-down var(--duration-stroke) var(--ease-out) both;
+  }
+}
+
+@keyframes rule-down {
+  from {
+    transform: scaleY(0);
+  }
+}
+
+@media print {
+  .copy {
+    display: none;
+  }
+
+  .letterTitle {
+    position: static;
+  }
+
+  .entry {
+    content-visibility: visible;
+  }
+}

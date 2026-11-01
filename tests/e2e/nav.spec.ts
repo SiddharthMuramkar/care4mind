@@ -29,10 +29,10 @@ const TOPICS = [
 // In the Library page's order, each with what it holds, counted as the Library page counts it.
 const LIBRARY = [
   { name: /^References/, path: '/library/references/', holds: '188 References' },
-  { name: /^Courses/, path: '/library/courses/', holds: '8 entries' },
-  { name: /^Inspirational Books/, path: '/library/inspirational-books/', holds: '13 entries' },
-  { name: /^Text Books/, path: '/library/textbooks/', holds: '20 entries' },
-  { name: /^Methods/, path: '/library/methods/', holds: '5 sections' },
+  { name: /^Courses in India/, path: '/library/courses/', holds: '8 entries' },
+  { name: /^Inspirational books/, path: '/library/inspirational-books/', holds: '13 entries' },
+  { name: /^Textbooks/, path: '/library/textbooks/', holds: '20 entries' },
+  { name: /^Therapy approaches/, path: '/library/methods/', holds: '5 sections' },
 ] as const
 
 /** Start here follows the wordmark from 30rem (480 px), while its proposal's route exists. */

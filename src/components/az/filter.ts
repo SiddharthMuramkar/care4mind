@@ -1,23 +1,24 @@
 /**
  * The A–Z's filters: which chips are pressed, as the address keeps them (`?topic=mind,self`) and
  * as a CSS selector picks out the entries they leave showing. The page's entries carry their facets as
- * attributes (`data-topics`, `data-works`, `data-kind`), so a filter needs no data of its own.
+ * attributes (`data-topics`, `data-works`, `data-kind`, `data-concepts`), so a filter needs no data of its own.
  * Values are slugs, which need no escaping in a selector.
  */
 
-export type FilterGroup = 'topic' | 'text' | 'kind'
+export type FilterGroup = 'topic' | 'text' | 'kind' | 'concept'
 
-export const GROUPS: readonly FilterGroup[] = ['topic', 'text', 'kind']
+export const GROUPS: readonly FilterGroup[] = ['topic', 'text', 'kind', 'concept']
 
 /** The values pressed in each group: an entry shows if it has one of each group's, or the group has none. */
 export type Selection = Readonly<Record<FilterGroup, readonly string[]>>
 
-export const NOTHING: Selection = { topic: [], text: [], kind: [] }
+export const NOTHING: Selection = { topic: [], text: [], kind: [], concept: [] }
 
 const ATTRIBUTE: Readonly<Record<FilterGroup, string>> = {
   topic: 'data-topics',
   text: 'data-works',
   kind: 'data-kind',
+  concept: 'data-concepts',
 }
 
 /** A chip's value in the ToggleGroup, which holds every group's: `topic:mind`. */
@@ -39,7 +40,7 @@ export function readSelection(
         .filter((value) => value !== '' && known[group].has(value)),
     ),
   ]
-  return { topic: read('topic'), text: read('text'), kind: read('kind') }
+  return { topic: read('topic'), text: read('text'), kind: read('kind'), concept: read('concept') }
 }
 
 /** The query string that keeps a selection: `?topic=mind,self&kind=concept`, or none. */
@@ -52,7 +53,12 @@ export function writeSelection(selection: Selection): string {
 
 /** The selection a ToggleGroup's pressed values make. */
 export function fromChips(values: readonly string[]): Selection {
-  const selection = { topic: [] as string[], text: [] as string[], kind: [] as string[] }
+  const selection = {
+    topic: [] as string[],
+    text: [] as string[],
+    kind: [] as string[],
+    concept: [] as string[],
+  }
   for (const value of values) {
     const at = value.indexOf(':')
     const group = value.slice(0, at) as FilterGroup

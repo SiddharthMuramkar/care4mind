@@ -21,7 +21,7 @@ export function generateMetadata(): Promise<Metadata> {
   return metadataFor(hrefFor({ page: 'home' }))
 }
 
-/** Where an area's link leads, as the site map names it: "Library › Methods". */
+/** Where an area's link leads, as the site map names it: "Library › Therapy approaches". */
 async function placeOf(href: string): Promise<string> {
   return (await site.trail(href))
     .slice(1)

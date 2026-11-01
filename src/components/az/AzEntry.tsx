@@ -60,7 +60,7 @@ export function AzEntry({
 }: {
   entry: Entry
   topicNames: ReadonlyMap<string, string>
-  /** The preview a Concept's link shows (ticket 05's LinkPreview). */
+  /** The preview a Concept's link shows (a LinkPreview). */
   preview?: PreviewPayload
 }) {
   const [anchor, ...more] = entry.anchors

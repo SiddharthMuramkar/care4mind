@@ -1,0 +1,265 @@
+/*
+ * A verse set like a manuscript leaf: a running head over the verse, the Devanagari centred above
+ * its transliteration with the verse number rubricated, then the translations and the Concepts
+ * that quote it. The verse an address lands on is washed in vermilion and ruled in the margin.
+ */
+.passage {
+  /* The wash reaches a little past the text, never over the folio's double rule. */
+  --bleed: min(1.25rem, max(1.25rem, 6vw) - 1.125rem);
+  position: relative;
+  display: grid;
+  gap: 1.25rem;
+  padding: 1.75rem var(--bleed) 2rem;
+  margin-inline: calc(-1 * var(--bleed));
+  border-top: 1px solid color-mix(in srgb, var(--color-surface-rule) 55%, transparent);
+  border-radius: 2px;
+  /* An addressed verse lands with its running head clear of the header. */
+  scroll-margin-top: 1.5rem;
+}
+
+.passage > * {
+  min-width: 0;
+}
+
+/* The margin rule, inked down the verse's edge when an address lands on it. */
+.passage::before {
+  content: '';
+  position: absolute;
+  inset-block: 0.75rem;
+  inset-inline-start: 0;
+  width: 3px;
+  background: var(--color-highlight);
+  transform: scaleY(0);
+  transform-origin: top;
+}
+
+.passage:target {
+  background: color-mix(in srgb, var(--color-highlight) 8%, transparent);
+}
+
+.passage:target::before {
+  transform: scaleY(1);
+}
+
+/* The view timeline the verse rail follows where it lacks :target-current. */
+@supports (timeline-scope: none) and (not (scroll-target-group: auto)) {
+  .passage {
+    view-timeline-name: var(--timeline);
+    view-timeline-inset: 30% 69%;
+  }
+}
+
+/* The running head: the locator in small capitals, its Devanagari numeral at the far side. */
+.head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.locator {
+  margin: 0;
+  font-family: var(--font-text);
+  font-weight: 600;
+  font-variant-caps: all-small-caps;
+  letter-spacing: 0.14em;
+  font-size: 1.125rem;
+  line-height: 1.3;
+  color: var(--color-surface-muted);
+}
+
+.numeral {
+  font-size: 1.25rem;
+  line-height: 1;
+  color: var(--color-surface-link);
+}
+
+.passage:target .locator {
+  color: var(--color-surface-ink);
+}
+
+/* The verse, centred: the Devanagari first, as a manuscript has it, then its transliteration. */
+.verse {
+  display: grid;
+  justify-items: center;
+  gap: 0.9rem;
+  text-align: center;
+}
+
+.verse > * {
+  max-width: 100%;
+}
+
+/*
+ * The Devanagari keeps the page's line height, so nothing moves when its face arrives; a long
+ * compound wraps between letters rather than leave the page, and nothing clips its marks.
+ */
+.deva {
+  order: -1;
+  font-size: clamp(1.125rem, 5.5vw, 1.625rem);
+  line-height: 1.7;
+  overflow-wrap: anywhere;
+}
+
+.transliteration {
+  display: grid;
+  justify-items: center;
+  font-style: italic;
+  font-size: 1.0625rem;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+
+.line {
+  display: block;
+}
+
+/* The verse number, rubricated: set in red as a scribe sets it. */
+.end {
+  white-space: nowrap;
+  font-style: normal;
+  color: var(--color-surface-link);
+}
+
+.scheme {
+  margin-top: 0.35rem;
+  font-style: normal;
+  font-variant-caps: all-small-caps;
+  letter-spacing: 0.14em;
+  font-size: 0.9375rem;
+  color: var(--color-surface-muted);
+}
+
+/* The translations and the Concepts that quote it: prose, set to the left in a reading column. */
+.notes {
+  display: grid;
+  gap: 1rem;
+  justify-self: center;
+  width: min(100%, 62ch);
+}
+
+.translation {
+  margin: 0;
+  display: grid;
+  gap: 0.4rem;
+}
+
+.quote {
+  margin: 0;
+  padding-inline-start: 1rem;
+  border-inline-start: 2px solid var(--color-highlight);
+}
+
+.credit,
+.none,
+.quotedLabel {
+  font-variant-caps: all-small-caps;
+  letter-spacing: 0.08em;
+  font-size: 1.0625rem;
+  color: var(--color-surface-muted);
+}
+
+.credit {
+  padding-inline-start: 1rem;
+}
+
+.credit :lang(sa-Latn) {
+  font-style: italic;
+  font-variant-caps: normal;
+  letter-spacing: normal;
+}
+
+.none {
+  margin: 0;
+}
+
+.quoted {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem 0.75rem;
+}
+
+.chips {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+/* A chip: the Concept's name stamped on a slip, a vermilion lozenge before it. */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5em;
+  min-height: 2.25rem;
+  padding: 0.1rem 0.8rem;
+  border: 1px solid color-mix(in srgb, var(--color-surface-rule) 80%, transparent);
+  border-radius: 2px;
+  background: color-mix(in srgb, var(--color-surface) 70%, var(--color-ink));
+  color: var(--color-surface-ink);
+  text-decoration: none;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+
+.chip::before {
+  content: '';
+  flex: none;
+  width: 0.38em;
+  height: 0.38em;
+  background: var(--color-highlight);
+  transform: rotate(45deg);
+}
+
+.chip :lang(sa-Latn) {
+  font-style: italic;
+}
+
+.chip:hover {
+  border-color: var(--color-surface-ink);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .passage::before {
+    transition: transform var(--duration-slow) var(--ease-out);
+  }
+
+  .chip {
+    transition: transform var(--duration-instant) var(--ease-press);
+  }
+
+  .chip::before {
+    transition: transform var(--duration-quick) var(--ease-out);
+  }
+
+  .chip:hover::before {
+    transform: rotate(225deg);
+  }
+
+  .chip:active {
+    transform: translateY(1px);
+  }
+}
+
+@media print {
+  .passage {
+    break-inside: avoid;
+    padding-inline: 0;
+    margin-inline: 0;
+    background: none;
+  }
+
+  .passage::before {
+    display: none;
+  }
+
+  .chip {
+    min-height: 0;
+    padding: 0;
+    border: 0;
+    background: none;
+  }
+}

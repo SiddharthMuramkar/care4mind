@@ -6,7 +6,7 @@ import { defineResourceList } from '@/content/schema'
 export default defineResourceList({
   kind: 'resource-list',
   slug: 'inspirational-books',
-  title: 'Inspirational Books',
+  title: 'Inspirational books',
   groups: [
     {
       id: 'inspirational-books',
@@ -99,8 +99,9 @@ export default defineResourceList({
       { url: 'https://care4mind.org/text-books/', retrieved: '2026-10-27' },
     ],
     edits: [
+      'Renamed: the list is titled “Inspirational books”, in sentence case, not “Inspirational Books”. Its address is unchanged.',
       'Merged (D11): /text-books/’s “Inspirational Books” tab lists eight of this page’s thirteen books (Gupta, both Mascaro books, Nisargadatta, Yogananda, Gandhi, Frankl and Khalil), more briefly. Each book is kept once, in this page’s order.',
-      'The page has no heading, so its one group is headed by the page’s title, which is also the title of /text-books/’s tab.',
+      'The page has no heading, so its one group is headed by the page’s title, which is also the title of /text-books/’s tab. The page shows no heading for it: it would repeat the title.',
       'Each book’s first line on the page is its Reference; the line under it is its annotation.',
       'Typos fixed in the annotations: “long-time students.]” → “long-time students.”, “This books places” → “This book places”.',
       'Interface text dropped: the “Buy Now” link labels on /text-books/. Each book’s link is on its Reference.',

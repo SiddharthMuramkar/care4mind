@@ -5,7 +5,7 @@ import { definePage } from '@/content/schema'
 export default definePage({
   kind: 'page',
   slug: 'methods',
-  title: 'Methods',
+  title: 'Therapy approaches',
   summary:
     'Psychotherapy, also known as talk therapy, involves various techniques to help individuals enhance their mental and emotional well-being.',
   sections: [
@@ -15,7 +15,7 @@ export default definePage({
       blocks: [
         {
           kind: 'paragraph',
-          text: 'Psychotherapy, also known as talk therapy, involves various techniques to help individuals enhance their mental and emotional well-being. It focuses on addressing thought patterns, emotions, and behaviors that may cause distress or disrupt daily life.',
+          text: 'Psychotherapy focuses on addressing thought patterns, emotions, and behaviors that may cause distress or disrupt daily life.',
         },
       ],
     },
@@ -26,7 +26,7 @@ export default definePage({
         {
           kind: 'table',
           id: 'approaches',
-          caption: 'Psychoanalysis / Psychodynamic Therapy',
+          caption: 'Five approaches to psychotherapy',
           columns: ['Approach', 'Description'],
           rows: [
             {
@@ -163,8 +163,11 @@ export default definePage({
   provenance: {
     sources: [{ url: 'https://care4mind.org/methods/', retrieved: '2026-10-27' }],
     edits: [
+      'Renamed: the page is titled “Therapy approaches”, not “Methods”. Its address is unchanged.',
+      'Fixed: the first section’s paragraph opened with the page’s first paragraph again, word for word (“Psychotherapy, also known as talk therapy, involves various techniques to help individuals enhance their mental and emotional well-being.”). The repeat is dropped, and the next sentence’s “It focuses on” reads “Psychotherapy focuses on”.',
+      'Fixed: the first table’s caption, taken from its section’s heading, named only the first of the five approaches it lists. It reads “Five approaches to psychotherapy”.',
       'Each of the page’s four tabs is a section, headed by the tab’s title.',
-      'The two tables have no caption on the page, so each takes the heading above it, its tab’s title: “Psychoanalysis / Psychodynamic Therapy” and “Specific Types of Psychotherapy”.',
+      'The two tables have no caption on the page, so the second takes the heading above it, its tab’s title: “Specific Types of Psychotherapy”.',
       'Left out: the emoji after each delivery format’s name (U+1F464, U+1F491, the family sequence U+1F468 U+200D U+1F469 U+200D U+1F467, U+1F465 and U+1F310), which the site’s fonts don’t cover. The items read: “Individual Therapy: Working one-on-one with a therapist.”, “Couples Therapy: Addressing relationship issues with a therapist.”, “Family Therapy: Addressing family dynamics with a therapist.”, “Group Therapy: Working with a group of individuals who share similar issues.” and “Teletherapy: Utilizing technology for online or phone-based therapy.”',
       'Each delivery format and key element is one list item, its name and its description joined: the page sets them on two lines.',
       'The list of key elements, which the page nests inside an otherwise empty list item, is one list.',
@@ -172,7 +175,7 @@ export default definePage({
     flags: [
       {
         for: 'research-editor',
-        note: 'The first tab on /methods/ is titled “Psychoanalysis / Psychodynamic Therapy”, but its table lists five approaches, of which that is only the first. The heading, and the table caption taken from it, are kept as the page has them; confirm or correct the heading. Nothing was changed.',
+        note: 'The first tab on /methods/ is titled “Psychoanalysis / Psychodynamic Therapy”, but its table lists five approaches, of which that is only the first. The heading is kept as the page has it; confirm or correct it. The table’s caption no longer repeats it.',
       },
     ],
   },

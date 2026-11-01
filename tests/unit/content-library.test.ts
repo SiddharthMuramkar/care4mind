@@ -23,10 +23,10 @@ const booksOf = (group: ResourceListView['groups'][number]) =>
 const provenanceOf = (record: ContentRecord): Pick<Provenance, 'sources'> =>
   record.kind === 'topic' ? (record.intro?.provenance ?? { sources: [] }) : record.provenance
 
-describe('Text Books', () => {
+describe('Textbooks', () => {
   it('merges both Text Books pages, Indian Philosophy and Positive Psychology under the pages’ own headings', async () => {
     const list = await readingList('textbooks')
-    expect(list.title).toBe('Text Books')
+    expect(list.title).toBe('Textbooks')
     expect(
       list.groups.map(({ id, heading, items }) => ({ id, heading, books: items.length })),
     ).toEqual([
@@ -78,10 +78,10 @@ describe('Text Books', () => {
   })
 })
 
-describe('Inspirational Books', () => {
+describe('Inspirational books', () => {
   it('lists the page’s books, each with its description, and /text-books/’s inspirational section once', async () => {
     const list = await readingList('inspirational-books')
-    expect(list.title).toBe('Inspirational Books')
+    expect(list.title).toBe('Inspirational books')
     const items = list.groups.flatMap(({ items }) => items)
     expect(items).toHaveLength(13)
     expect(items.filter((item) => item.type !== 'reference' || !item.annotation)).toEqual([])
@@ -102,7 +102,7 @@ describe('Inspirational Books', () => {
   })
 })
 
-describe('Courses', () => {
+describe('Courses in India', () => {
   /** The courses on the list, in its order. */
   const coursesOf = (list: ResourceListView) =>
     list.groups.flatMap(({ items }) =>
@@ -111,17 +111,27 @@ describe('Courses', () => {
 
   it('lists the five institutes and the IGNOU and NIOS courses, each with its provider, name, description and link', async () => {
     const list = await readingList('courses')
-    expect(list.title).toBe('Courses')
+    expect(list.title).toBe('Courses in India')
     const courses = coursesOf(list)
     expect(courses.map(({ provider }) => provider)).toEqual([
-      'MIT School of Vedic Sciences, Pune, Maharashtra',
-      'Fatima Mata National College, Kollam, Kerala',
+      'MIT School of Vedic Sciences',
+      'Fatima Mata National College',
       'Delhi University',
       'Banaras Hindu University',
-      'KIIT University, Bhubaneshwar',
+      'KIIT University',
       'IGNOU',
       'IGNOU',
       'NIOS',
+    ])
+    expect(courses.map(({ city }) => city)).toEqual([
+      'Pune, Maharashtra',
+      'Kollam, Kerala',
+      undefined,
+      undefined,
+      'Bhubaneshwar',
+      undefined,
+      undefined,
+      undefined,
     ])
     expect(courses.slice(5).map(({ name }) => name)).toEqual([
       'B.A. in Psychology (UG)',
@@ -157,11 +167,11 @@ describe('Courses', () => {
   })
 })
 
-describe('Methods', () => {
+describe('Therapy approaches', () => {
   it('stays a page, with the page’s title, summary and sections, and its two tables as table blocks', async () => {
     const page = await library.get('methods')
     if (page?.kind !== 'page') throw new Error('No page “methods”.')
-    expect(page.title).toBe('Methods')
+    expect(page.title).toBe('Therapy approaches')
     expect(page.summary).toMatch(/^Psychotherapy, also known as talk therapy, /)
     expect(page.sections.map(({ heading }) => heading)).toEqual([
       'Therapeutic Methods in Mental Treatment',
@@ -178,10 +188,23 @@ describe('Methods', () => {
       { columns: ['Therapy Type', 'Description'], rows: 8 },
     ])
   })
+
+  it('opens its first section without repeating the summary, and captions the five approaches as five', async () => {
+    const page = await library.get('methods')
+    if (page?.kind !== 'page') throw new Error('No page “methods”.')
+    const [first] = page.sections.flatMap(({ blocks }) =>
+      blocks.flatMap((block) => (block.kind === 'paragraph' ? [block] : [])),
+    )
+    expect(JSON.stringify(first)).not.toContain(page.summary)
+    const [approaches] = page.sections.flatMap(({ blocks }) =>
+      blocks.flatMap((block) => (block.kind === 'table' ? [block] : [])),
+    )
+    expect(approaches?.caption).toBe('Five approaches to psychotherapy')
+  })
 })
 
 describe('the Library', () => {
-  it('holds the three reading lists and the Methods page', async () => {
+  it('holds the three reading lists and the Therapy approaches page', async () => {
     expect((await library.list()).map(({ kind, slug }) => `${kind}/${slug}`).sort()).toEqual([
       'page/methods',
       'resource-list/courses',

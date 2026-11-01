@@ -6,7 +6,7 @@ import { defineResourceList } from '@/content/schema'
 export default defineResourceList({
   kind: 'resource-list',
   slug: 'courses',
-  title: 'Courses',
+  title: 'Courses in India',
   groups: [
     {
       id: 'top-universities-for-psychology',
@@ -14,7 +14,8 @@ export default defineResourceList({
       items: [
         {
           type: 'course',
-          provider: 'MIT School of Vedic Sciences, Pune, Maharashtra',
+          provider: 'MIT School of Vedic Sciences',
+          city: 'Pune, Maharashtra',
           name: 'B.Sc in Integral Psychology',
           description:
             'This 3-year course offers contemporary education in Psychology with additional proficiency in Vedic/Yoga psychology.',
@@ -22,7 +23,8 @@ export default defineResourceList({
         },
         {
           type: 'course',
-          provider: 'Fatima Mata National College, Kollam, Kerala',
+          provider: 'Fatima Mata National College',
+          city: 'Kollam, Kerala',
           name: 'B.Sc in Psychology',
           description:
             'This college offers Indian Psychology as an elective paper at the undergraduate level.',
@@ -46,7 +48,8 @@ export default defineResourceList({
         },
         {
           type: 'course',
-          provider: 'KIIT University, Bhubaneshwar',
+          provider: 'KIIT University',
+          city: 'Bhubaneshwar',
           name: 'Department of Psychology',
           description:
             'With state-of-the-art facilities and experienced faculty, KIIT University’s Department of Psychology provides a comprehensive learning experience.',
@@ -92,6 +95,8 @@ export default defineResourceList({
       { url: 'https://care4mind.org/text-books-2-2/', retrieved: '2026-10-27' },
     ],
     edits: [
+      'Renamed: the list is titled “Courses in India”, not “Courses”. Its address is unchanged.',
+      'Each provider the page names with its city is split at its first comma into institution and city: “MIT School of Vedic Sciences” in “Pune, Maharashtra”, “Fatima Mata National College” in “Kollam, Kerala” and “KIIT University” in “Bhubaneshwar”.',
       'Merged (D11): IGNOU’s two courses and NIOS’s one, which both Text Books pages list under “Psychology Courses”, each kept once, with the name and description /text-books/ gives it and the link both pages give.',
       'Each course heading on /text-books/ is split at its dash into provider and name: “IGNOU – B.A. in Psychology (UG)”, “IGNOU – M.A. in Psychology (PG)” and “NIOS – Secondary Level Psychology”.',
       'Delhi University, Banaras Hindu University and KIIT University name no course on /institutes/, so each one’s name is taken from its own description: “Department of Psychology”, “MA Psychology” and “Department of Psychology”.',
