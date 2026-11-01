@@ -3,8 +3,9 @@ import { brotliDecompressSync } from 'node:zlib'
 
 import { beforeAll, describe, expect, it } from 'vitest'
 
-import { contentGraph, type ContentGraph } from '@/content/graph'
 import {
+  contentGraph,
+  type ContentGraph,
   CONTENT_KINDS,
   idOf,
   type Block,
@@ -13,8 +14,8 @@ import {
   type RecordOf,
   type SanskritName,
   type Section,
-} from '@/content/schema'
-import { localSource } from '@/content/source'
+  localSource,
+} from '@/content/testing'
 import { isNormalisedSanskrit } from '@/lib/sanskrit'
 
 // Every content rule of the content-v1 spec (Testing Decisions → Integrity), run over every real

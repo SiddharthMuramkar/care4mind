@@ -14,43 +14,23 @@ import {
   defineTopic,
   defineWork,
   type ConceptRecord,
-  type ContentKind,
-  type ContentRecord,
   type QuestionnaireRecord,
-  type RecordOf,
-} from '@/content/schema'
-import { localSource, type ContentSource } from '@/content/source'
-import { createContent } from '@/content/views'
+  localSource,
+  memorySource,
+  createContent,
+} from '@/content/testing'
+
+import { OFF, ON } from './flags'
 
 // The site derivations (content-v1 spec, "What the site derivations return"): the routes, the
 // breadcrumb trail, the A–Z, the search documents and the Concept-map data, each computed from
 // whatever records a source holds. Each test builds a made-up source and reads `site` through
 // the same interface the pages use. Every record and string here is made up for the test.
 
-const ON: Features = {
-  questionnairePreview: true,
-  conceptMap: true,
-  startHere: true,
-}
-const OFF: Features = {
-  questionnairePreview: false,
-  conceptMap: false,
-  startHere: false,
-}
-
 const provenance = {
   sources: [{ url: 'https://example.org/page/', retrieved: '2026-10-27' }],
   edits: [],
   flags: [],
-}
-
-/** A made-up content source holding the given records. */
-function sourceOf(...records: ContentRecord[]): ContentSource {
-  return {
-    async records<K extends ContentKind>(kind: K) {
-      return records.filter((record): record is RecordOf<K> => record.kind === kind)
-    },
-  }
 }
 
 const mind = defineTopic({
@@ -238,7 +218,7 @@ const world = [
 
 describe('site.routes', () => {
   it('lists one entry per public page, with one sample per kind', async () => {
-    expect(await createContent(sourceOf(...world), ON).site.routes()).toEqual([
+    expect(await createContent(memorySource(...world), ON).site.routes()).toEqual([
       { path: '/', kind: 'home', pattern: '/', title: 'Home', sample: true },
       {
         path: '/start/',
@@ -403,7 +383,7 @@ describe('site.routes', () => {
   })
 
   it('finds a route by its path, with the record its page shows', async () => {
-    const { site } = createContent(sourceOf(...world), ON)
+    const { site } = createContent(memorySource(...world), ON)
     expect(await site.route('/texts/yoga-sutra/')).toEqual({
       path: '/texts/yoga-sutra/',
       kind: 'work',
@@ -416,7 +396,7 @@ describe('site.routes', () => {
 
   it('gives each pattern the params of its entries in the registry, and only those', async () => {
     for (const flags of [ON, OFF]) {
-      const { site } = createContent(sourceOf(...world), flags)
+      const { site } = createContent(memorySource(...world), flags)
       const routes = await site.routes()
       for (const pattern of new Set(routes.map((route) => route.pattern))) {
         const at = pattern.split('/').indexOf('[slug]')
@@ -425,7 +405,7 @@ describe('site.routes', () => {
         expect(await site.params(pattern), pattern).toEqual(expected)
       }
     }
-    const { site } = createContent(sourceOf(...world), OFF)
+    const { site } = createContent(memorySource(...world), OFF)
     expect(await site.params('/questionnaires/[slug]/take/')).toEqual([{ slug: 'live-one' }])
     expect(await site.params('/questionnaires/[slug]/')).toEqual([
       { slug: 'live-one' },
@@ -435,14 +415,14 @@ describe('site.routes', () => {
   })
 
   it('builds the registry and the search corpus once per graph', async () => {
-    const { site } = createContent(sourceOf(...world), ON)
+    const { site } = createContent(memorySource(...world), ON)
     expect(await site.routes()).toBe(await site.routes())
     expect(await site.searchDocuments()).toBe(await site.searchDocuments())
   })
 
   it('leaves out every route whose flag is off, and no more', async () => {
     const paths = async (flags: Features) =>
-      (await createContent(sourceOf(...world), flags).site.routes()).map(({ path }) => path)
+      (await createContent(memorySource(...world), flags).site.routes()).map(({ path }) => path)
     const all = await paths(ON)
     const without = (...gone: string[]) => all.filter((path) => !gone.includes(path))
 
@@ -459,7 +439,7 @@ describe('site.routes', () => {
   })
 
   it('gives a Questionnaire coming later no route, one that can’t be taken no flow, and /topics/ none', async () => {
-    const paths = (await createContent(sourceOf(...world), ON).site.routes()).map(
+    const paths = (await createContent(memorySource(...world), ON).site.routes()).map(
       ({ path }) => path,
     )
     expect(paths.filter((path) => path.includes('later'))).toEqual([])
@@ -472,7 +452,7 @@ describe('site.routes', () => {
 
 describe('site.trail', () => {
   const trail = (path: string, flags: Features = ON) =>
-    createContent(sourceOf(...world), flags).site.trail(path)
+    createContent(memorySource(...world), flags).site.trail(path)
   const homeCrumb = { label: 'Home', href: '/' }
   const concepts = { label: 'Concepts', href: '/concepts/' }
   const questionnaires = { label: 'Questionnaires', href: '/questionnaires/' }
@@ -551,7 +531,7 @@ describe('site.trail', () => {
   })
 
   it('ends every route’s trail with the page itself', async () => {
-    const content = createContent(sourceOf(...world), ON)
+    const content = createContent(memorySource(...world), ON)
     for (const route of await content.site.routes()) {
       const crumbs = await content.site.trail(route.path)
       expect(crumbs.at(-1)).toMatchObject({ label: route.title, href: route.path })
@@ -565,6 +545,102 @@ describe('site.trail', () => {
     expect(await trail('/nowhere/')).toEqual([])
     expect(await trail('/topics/')).toEqual([])
     expect(await trail('/concepts/map/', OFF)).toEqual([])
+  })
+})
+
+describe('site.describe', () => {
+  const describePage = (path: string, flags: Features = ON) =>
+    createContent(memorySource(...world), flags).site.describe(path)
+
+  it('names a Concept by its term and gloss, and describes it by its summary', async () => {
+    expect(await describePage('/concepts/obstacles/')).toEqual({
+      path: '/concepts/obstacles/',
+      kind: 'concept',
+      name: 'Vighna (Obstacle)',
+      description: 'A made-up summary.',
+    })
+    expect(await describePage('/concepts/calm/')).toMatchObject({ name: 'Śānti' })
+    expect(await describePage('/concepts/refuge/')).toMatchObject({ name: 'Refuge of the self' })
+  })
+
+  it('describes a topic, a text and the Library by what their pages hold', async () => {
+    expect(await describePage('/topics/mind/')).toEqual({
+      path: '/topics/mind/',
+      kind: 'topic',
+      name: 'Mind',
+      description: '2 Concepts in the topic “Mind”, and the verses they quote.',
+    })
+    expect(await describePage('/topics/self/')).toMatchObject({
+      description: '1 Concept in the topic “Self”, and the verses it quotes.',
+    })
+    expect(await describePage('/texts/yoga-sutra/')).toMatchObject({
+      name: 'Yoga Sūtra',
+      description:
+        'Every verse of the Yoga Sūtra that Care4Mind quotes, with its translations and the Concepts that quote it.',
+    })
+    expect(await describePage('/library/')).toMatchObject({
+      description: 'The Care4Mind Library: References, Reading List and Methods.',
+    })
+  })
+
+  it('describes a Library page by its summary, and a reading list by its size', async () => {
+    expect(await describePage('/library/methods/')).toMatchObject({
+      name: 'Methods',
+      description: 'A made-up summary of methods.',
+    })
+    expect(await describePage('/library/reading/')).toMatchObject({
+      name: 'Reading List',
+      description: '1 entry on the Reading List list in the Care4Mind Library.',
+    })
+  })
+
+  it('describes a Questionnaire with no summary by its purpose, and names its flow after it', async () => {
+    expect(await describePage('/questionnaires/work-scale/')).toMatchObject({
+      name: 'Work Scale',
+      description: 'What the Work Scale is for, and its limits.',
+    })
+    expect(await describePage('/questionnaires/work-scale/take/')).toEqual({
+      path: '/questionnaires/work-scale/take/',
+      kind: 'questionnaire-flow',
+      name: 'Take the Work Scale',
+      description: 'The Work Scale, one part at a time.',
+    })
+  })
+
+  it('leaves the description of a page with no content of its own to the site', async () => {
+    expect(await describePage('/')).toEqual({ path: '/', kind: 'home', name: 'Home' })
+    expect(await describePage('/search/')).toEqual({
+      path: '/search/',
+      kind: 'search',
+      name: 'Search',
+    })
+  })
+
+  it('reads a path as the trail does, and describes no page the trail doesn’t have', async () => {
+    const content = createContent(memorySource(...world), ON)
+    expect(await describePage('/concepts/obstacles')).toEqual(
+      await describePage('/concepts/obstacles/'),
+    )
+    expect(await describePage('/search/?q=vighna')).toEqual(await describePage('/search/'))
+    expect(await describePage('concepts/obstacles#kinds')).toEqual(
+      await describePage('/concepts/obstacles/'),
+    )
+    for (const path of ['/nowhere/', '/topics/', '/questionnaires/later/']) {
+      expect(await describePage(path), path).toBeNull()
+      expect(await content.site.trail(path), path).toEqual([])
+    }
+    expect(await describePage('/concepts/map/', OFF)).toBeNull()
+    expect(await describePage('/questionnaires/work-scale/take/', OFF)).toBeNull()
+  })
+
+  it('describes every route under its own path and kind', async () => {
+    const content = createContent(memorySource(...world), ON)
+    for (const route of await content.site.routes()) {
+      expect(await content.site.describe(route.path), route.path).toMatchObject({
+        path: route.path,
+        kind: route.kind,
+      })
+    }
   })
 })
 
@@ -629,7 +705,7 @@ describe('site.azIndex', () => {
     ...withTerms,
     ...glossary,
   ]
-  const az = () => createContent(sourceOf(...records), ON).site.azIndex()
+  const az = () => createContent(memorySource(...records), ON).site.azIndex()
 
   it('gives every letter from A to Z, each with its entries', async () => {
     const letters = await az()
@@ -770,7 +846,7 @@ describe('site.searchDocuments', () => {
       provenance,
     }),
   ]
-  const documents = () => createContent(sourceOf(...records), ON).site.searchDocuments()
+  const documents = () => createContent(memorySource(...records), ON).site.searchDocuments()
   const find = async (id: string) => (await documents()).find((document) => document.id === id)
 
   it('gives one document per Concept, term, glossary entry, work, passage, Reference, library item, Questionnaire, topic and page', async () => {
@@ -928,7 +1004,7 @@ describe('site.searchDocuments', () => {
 
 describe('site.graph', () => {
   it('gives the Concepts as nodes with their topics, and an edge per shared passage or rare Reference', async () => {
-    expect(await createContent(sourceOf(...world), ON).site.graph()).toEqual({
+    expect(await createContent(memorySource(...world), ON).site.graph()).toEqual({
       nodes: [
         {
           slug: 'calm',
@@ -986,7 +1062,7 @@ describe('site.graph', () => {
       references: [],
     })
     const records = [...world.filter((record) => record !== calm), ys230, apart]
-    const { edges } = await createContent(sourceOf(...records), ON).site.graph()
+    const { edges } = await createContent(memorySource(...records), ON).site.graph()
     expect(edges.filter(({ kind }) => kind === 'work')).toEqual([
       {
         source: 'calm',
@@ -1014,7 +1090,7 @@ describe('site.graph', () => {
       citing('three', 'yoga-sutra/1.30', ['popular-2010']),
       citing('four', 'dhammapada/160', ['popular-2010']),
     ]
-    const { edges } = await createContent(sourceOf(...records), ON).site.graph()
+    const { edges } = await createContent(memorySource(...records), ON).site.graph()
     expect(edges.filter(({ kind }) => kind === 'reference')).toEqual([])
     expect(edges.map(({ via }) => via).sort()).toEqual(['dhammapada/160', 'yoga-sutra/1.30'])
   })
@@ -1051,7 +1127,7 @@ async function internalLinks(site: ReturnType<typeof createContent>) {
 
 describe('the derivations together', () => {
   it('link only to pages in the route registry (made-up content)', async () => {
-    const site = createContent(sourceOf(...world), ON)
+    const site = createContent(memorySource(...world), ON)
     const paths = new Set((await site.site.routes()).map(({ path }) => path))
     const outside = (await internalLinks(site)).filter(
       (href) => !paths.has(href.replace(/#.*$/, '')),

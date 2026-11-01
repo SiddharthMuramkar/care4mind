@@ -508,6 +508,20 @@ export interface RouteEntry {
   proposal?: true
 }
 
+/** What a public page says about itself, for its title and its description. */
+export interface PageDescription {
+  /** Its address in the route registry, with its trailing slash: its canonical path. */
+  path: string
+  kind: RouteKind
+  /** The name the page goes by in its title. */
+  name: string
+  /**
+   * Its summary, or a sentence about what its page holds. Absent for a page that holds no
+   * content of its own (the homepage and the fixed lists), whose sentence the site supplies.
+   */
+  description?: string
+}
+
 /** One step of a page's breadcrumb trail (D15). The last is the page itself. */
 export interface Crumb {
   label: string

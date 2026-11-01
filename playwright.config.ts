@@ -133,6 +133,8 @@ const projects: Project[] = [
 
 export default defineConfig({
   testDir: 'tests/e2e',
+  // For every file a spec loads, src included, so `server-only` resolves to its stand-in.
+  tsconfig: './tests/tsconfig.json',
   fullyParallel: true,
   forbidOnly: Boolean(process.env.CI),
   workers: workers(),

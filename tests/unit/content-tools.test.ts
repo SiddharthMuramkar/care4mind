@@ -26,7 +26,7 @@ import {
   type QuestionnaireRecord,
   type ReferenceRecord,
   type TopicRecord,
-} from '@/content/schema'
+} from '@/content/testing'
 
 // The migration tools (content-v1 ticket 02): extract, verify, new and report, in
 // scripts/content. They read the saved copies of the current site only from

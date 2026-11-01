@@ -1,14 +1,14 @@
 import { beforeAll, describe, expect, it } from 'vitest'
 
 import { concepts, questionnaires, topics, type BlockView } from '@/content'
-import type {
-  Block,
-  ConceptRecord,
-  QuestionnaireRecord,
-  SanskritName,
-  TopicRecord,
-} from '@/content/schema'
-import { localSource } from '@/content/source'
+import {
+  type Block,
+  type ConceptRecord,
+  type QuestionnaireRecord,
+  type SanskritName,
+  type TopicRecord,
+  localSource,
+} from '@/content/testing'
 
 // Content-v1 ticket 10: the values topic. The four "Know Your Values" pages become Concepts, each
 // with its coming-later Questionnaire, and the yama–niyama section all four repeat is stored once,

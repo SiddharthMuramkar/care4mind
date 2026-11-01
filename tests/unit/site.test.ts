@@ -14,8 +14,6 @@ import { CARD_COLOURS } from '@/lib/share-card'
 
 import nextConfig from '../../next.config'
 
-// Front-end-site ticket 03: what every page tells the world about itself (D19, NFR-04).
-
 // Typed out rather than read from site.url, so a typo in the config fails.
 const ORIGIN = 'https://www.care4mind.xyz'
 
@@ -48,7 +46,7 @@ describe('the share card', () => {
   })
 })
 
-describe('a page’s metadata (D19)', () => {
+describe('a page’s metadata', () => {
   it('names a Concept by its term and gloss, describes it by its summary and gives its address', async () => {
     expect(await metadataFor('/concepts/vikshepa/')).toEqual(
       withShareTags({
@@ -110,6 +108,12 @@ describe('a page’s metadata (D19)', () => {
     expect(await metadataFor('/search/?q=vikshepa')).toEqual(search)
   })
 
+  it('reads a path without its trailing slash as the breadcrumb trail does', async () => {
+    expect(await metadataFor('/concepts/vikshepa')).toEqual(
+      await metadataFor('/concepts/vikshepa/'),
+    )
+  })
+
   it('keeps the homepage’s own title, and describes it by the site’s tagline', async () => {
     expect(await metadataFor('/')).toEqual(
       withShareTags({
@@ -163,7 +167,7 @@ describe('a page’s metadata (D19)', () => {
   })
 })
 
-describe('the sitemap and robots.txt (NFR-04)', () => {
+describe('the sitemap and robots.txt', () => {
   it('lists every route in the registry once, at its production address, with its slash', async () => {
     const urls = (await sitemap()).map(({ url }) => url)
     const paths = (await site.routes()).map(({ path }) => path)

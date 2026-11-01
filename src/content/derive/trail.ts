@@ -6,14 +6,7 @@ import type { Features } from '@/config/features'
 import type { ContentGraph } from '../graph'
 import type { Crumb } from '../types'
 import { hrefFor } from '../views/href'
-import { pageRoutes, type PageRoute } from './routes'
-
-/** A path as the route registry writes it: no query or fragment, with its trailing slash. */
-function normalise(path: string): string {
-  const bare = path.replace(/[?#].*$/, '')
-  const rooted = bare.startsWith('/') ? bare : `/${bare}`
-  return rooted.endsWith('/') ? rooted : `${rooted}/`
-}
+import { normalise, pageRoutes, type PageRoute } from './routes'
 
 /** The paths above a path, shortest first: `/a/b/` → `/`, `/a/`. */
 function pathsAbove(path: string): string[] {

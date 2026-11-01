@@ -1,8 +1,7 @@
 import { beforeAll, describe, expect, it } from 'vitest'
 
 import { works, type PassageView } from '@/content'
-import type { PassageRecord } from '@/content/schema'
-import { localSource } from '@/content/source'
+import { type PassageRecord, localSource } from '@/content/testing'
 
 // Ticket 04, the works and passages census: every verse the 16 description pages quote is one
 // passage under its work. The census itself is .scratch/content-v1/census/passages.md. These

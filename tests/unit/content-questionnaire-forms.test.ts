@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vitest'
 
 import type { Features } from '@/config/features'
-import type { QuestionnaireRecord } from '@/content/schema'
-import { localSource } from '@/content/source'
-import { createContent } from '@/content/views'
+import { type QuestionnaireRecord, localSource, createContent } from '@/content/testing'
+
+import { ON } from './flags'
 
 // Content-v1 ticket 06: the two instruments on the current site with real questions. The
 // KarmaYoga Scale's 45 statements in the four parts its quiz settings give, ready for the preview
@@ -14,11 +14,6 @@ import { createContent } from '@/content/views'
 // come from the ticket, the spec and the quiz's settings as the extract tool prints them, never
 // from the records themselves.
 
-const ON: Features = {
-  questionnairePreview: true,
-  conceptMap: true,
-  startHere: true,
-}
 const OFF: Features = { ...ON, questionnairePreview: false }
 
 const FREQUENCY = ['Always', 'Often', 'Sometimes', 'Rarely', 'Never']

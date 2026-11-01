@@ -1,5 +1,5 @@
 /**
- * What every page tells browsers, search engines and link previews about itself (D19, NFR-04):
+ * What every page tells browsers, search engines and link previews about itself:
  * its title, its description, its canonical address and the text of its share card. A page asks
  * by its path, and the route registry and the page's own content supply the rest, so no page
  * writes its metadata by hand.
@@ -8,13 +8,22 @@ import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 
 import { site as config } from '@/config/site'
-import { concepts, home, library, questionnaires, site, topics, type RouteEntry } from '@/content'
+import {
+  concepts,
+  home,
+  library,
+  questionnaires,
+  site,
+  topics,
+  type RouteEntry,
+  type RouteKind,
+} from '@/content'
 
 /** The homepage keeps the site's own title. */
 const HOME_TITLE = `${config.name}: Indian psychology`
 
 /** One sentence each for the pages with no summary of their own. */
-const ABOUT: Partial<Record<RouteEntry['kind'], string>> = {
+const ABOUT: Partial<Record<RouteKind, string>> = {
   concepts:
     'Every Concept on Care4Mind, every term explained inside one and every glossary entry, from A to Z.',
   'concept-map':

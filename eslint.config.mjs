@@ -5,15 +5,41 @@ import prettier from 'eslint-config-prettier/flat'
 import jsxA11y from 'eslint-plugin-jsx-a11y'
 import tseslint from 'typescript-eslint'
 
-// The content module's boundary (content-v1 spec, "The boundary rule"). Outside src/content, code
-// reads content only through its public interface, `@/content`: never an internal, and never
-// the module by a relative path. A 'use client' file may import the interface for types only,
-// with `import type`, so no content reaches the browser bundle. Tests are outside src and may
-// also use the seam and the record schema to build made-up sources.
-const inClientFile = (node) => ({
-  selector: `Program:has(> ExpressionStatement[directive="use client"]) ${node}[source.value="@/content"]`,
-  message: "A 'use client' file may import @/content for types only: use `import type`.",
+// The content module's boundary. Outside src/content, code reads content only through its
+// public interface, `@/content`: never an internal, and never the module by a relative path,
+// whether imported or loaded with import(). A 'use client' file may import the interface for
+// types only, with `import type`, so no content reaches the browser bundle; the same holds for
+// the feature flags, since a browser bundle has no VERCEL_ENV and would switch every flag on.
+// Tests build made-up sources, so they get one more entry, `@/content/testing`.
+const CONTENT_INTERNAL = '^@/content/'
+const CONTENT_BY_PATH = '^\\.{1,2}/(?:.+/)?content(?:/|$)'
+
+// esquery's regex literals can't hold a slash, so each one is written \x2F.
+const esqueryRegex = (source) => `/${source.replaceAll('/', '\\x2F')}/`
+
+const clientOnlyTypes = (node, module, message) => ({
+  selector: `Program:has(> ExpressionStatement[directive="use client"]) ${node}[source.value="${module}"]`,
+  message,
 })
+
+const CLIENT_TYPES_ONLY = {
+  '@/content': "A 'use client' file may import @/content for types only: use `import type`.",
+  '@/config/features':
+    "A 'use client' file may import @/config/features for types only: the browser has no VERCEL_ENV, so every flag would read on. Take the flag as a prop.",
+}
+
+const inClientFile = (node) =>
+  Object.entries(CLIENT_TYPES_ONLY).map(([module, message]) =>
+    clientOnlyTypes(node, module, message),
+  )
+
+const loadedWithImport = (pattern, message) => ({
+  selector: `ImportExpression[source.value=${esqueryRegex(pattern)}]`,
+  message,
+})
+
+const INTERNAL_MESSAGE = 'Content internals are private: import the public interface, @/content.'
+const BY_PATH_MESSAGE = 'Reach the content module through @/content, never by a relative path.'
 
 const contentBoundary = {
   files: ['src/**/*.{ts,tsx}'],
@@ -23,25 +49,44 @@ const contentBoundary = {
       'error',
       {
         patterns: [
-          {
-            regex: '^@/content/',
-            caseSensitive: true,
-            message: 'Content internals are private: import the public interface, @/content.',
-          },
-          {
-            regex: '^\\.{1,2}/(?:.+/)?content(?:/|$)',
-            caseSensitive: true,
-            message: 'Reach the content module through @/content, never by a relative path.',
-          },
+          { regex: CONTENT_INTERNAL, caseSensitive: true, message: INTERNAL_MESSAGE },
+          { regex: CONTENT_BY_PATH, caseSensitive: true, message: BY_PATH_MESSAGE },
         ],
       },
     ],
     'no-restricted-syntax': [
       'error',
-      inClientFile('ImportDeclaration[importKind!="type"]'),
-      inClientFile('ExportNamedDeclaration[exportKind!="type"]'),
-      inClientFile('ExportAllDeclaration[exportKind!="type"]'),
-      inClientFile('ImportExpression'),
+      loadedWithImport(CONTENT_INTERNAL, INTERNAL_MESSAGE),
+      loadedWithImport(CONTENT_BY_PATH, BY_PATH_MESSAGE),
+      ...inClientFile('ImportDeclaration[importKind!="type"]'),
+      ...inClientFile('ExportNamedDeclaration[exportKind!="type"]'),
+      ...inClientFile('ExportAllDeclaration[exportKind!="type"]'),
+      ...inClientFile('ImportExpression'),
+    ],
+  },
+}
+
+const TESTING_ENTRY_MESSAGE =
+  'Tests reach content internals through @/content/testing, or read @/content as pages do.'
+const TEST_INTERNAL = '^@/content/(?!testing$)'
+const TEST_BY_PATH = '^(?:\\.{1,2}/)+(?:src/)?content(?:/|$)'
+
+const testsContentBoundary = {
+  files: ['tests/**/*.ts'],
+  rules: {
+    'no-restricted-imports': [
+      'error',
+      {
+        patterns: [
+          { regex: TEST_INTERNAL, caseSensitive: true, message: TESTING_ENTRY_MESSAGE },
+          { regex: TEST_BY_PATH, caseSensitive: true, message: TESTING_ENTRY_MESSAGE },
+        ],
+      },
+    ],
+    'no-restricted-syntax': [
+      'error',
+      loadedWithImport(TEST_INTERNAL, TESTING_ENTRY_MESSAGE),
+      loadedWithImport(TEST_BY_PATH, TESTING_ENTRY_MESSAGE),
     ],
   },
 }
@@ -127,6 +172,7 @@ export default defineConfig([
   },
   ...tseslint.configs.strict.map((config) => ({ ...config, files: ['**/*.{ts,tsx}'] })),
   contentBoundary,
+  testsContentBoundary,
   internalLinks,
   prettier,
   globalIgnores([

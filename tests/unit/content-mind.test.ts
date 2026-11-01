@@ -1,8 +1,7 @@
 import { beforeAll, describe, expect, it } from 'vitest'
 
 import { concepts, questionnaires, topics, type BlockView } from '@/content'
-import type { ConceptRecord, QuestionnaireRecord } from '@/content/schema'
-import { localSource } from '@/content/source'
+import { type ConceptRecord, type QuestionnaireRecord, localSource } from '@/content/testing'
 
 // Content-v1 ticket 08: the mind topic. The four remaining "mind" description pages become
 // Concepts, each with its coming-later Questionnaire, and vikṣepa (ticket 01) gets its own.

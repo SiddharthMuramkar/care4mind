@@ -5,6 +5,9 @@
  * `data/`; later a CMS) and the graph resolves every link between them once. Pages get views:
  * plain, serialisable data shaped for a page.
  */
+// A browser-only helper without 'use client' slips past the lint; this fails its build instead.
+import 'server-only'
+
 import type { Route } from 'next'
 
 import { features } from '@/config/features'
@@ -42,6 +45,7 @@ export const library = content.library
 export const home = content.home
 /**
  * What the site derives from its content, one derivation file each: the route registry, the
- * breadcrumb trail, the A–Z, the search documents and the Concept map's data.
+ * breadcrumb trail, each page's name and description, the A–Z, the search documents and the
+ * Concept map's data.
  */
 export const site = content.site
