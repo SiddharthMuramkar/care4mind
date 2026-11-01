@@ -13,6 +13,7 @@ export default defineConcept({
   },
   summary:
     'Brahmacharya entails living life in a manner aligned with the principles of Brahman, the ultimate reality, embodying spiritually-oriented behaviour.',
+  keywords: ['self-control', 'restraint', 'senses', 'energy', 'celibacy', 'discipline', 'values'],
   topics: { primary: 'values' },
   verses: [
     {
@@ -205,8 +206,9 @@ export default defineConcept({
     'tomar-2024',
   ],
   questionnaire: 'brahmacharya',
-  reviewStatus: 'carried-over-not-reviewed',
+  reviewStatus: 'drafted-not-reviewed',
   provenance: {
+    drafted: ['keywords'],
     sources: [
       {
         url: 'https://care4mind.org/knowyourvaluesbrahmacharya-profiling/',

@@ -10,10 +10,11 @@ export default defineConcept({
   name: {
     // Split out of the page's Yoga Sūtra 2.30 compound (see the flags); the title glosses it.
     term: { iast: 'asteya', devanagari: 'अस्तेय', ascii: ['Asteya'] },
-    english: 'Non-Stealing',
+    english: 'Non-stealing',
   },
   summary:
     'In broader terms, the principle of refraining from taking or appropriating anything without permission, whether through thoughts, words, or actions, is known as ‘Asteya’ in the ethical framework.',
+  keywords: ['non-stealing', 'stealing', 'greed', 'contentment', 'values', 'ethics'],
   topics: { primary: 'values' },
   verses: [
     {
@@ -91,8 +92,9 @@ export default defineConcept({
     'tomar-2024',
   ],
   questionnaire: 'asteya',
-  reviewStatus: 'carried-over-not-reviewed',
+  reviewStatus: 'drafted-not-reviewed',
   provenance: {
+    drafted: ['keywords'],
     sources: [
       {
         url: 'https://care4mind.org/knowyourvaluesasteyanonstealingprofiling/',
@@ -108,6 +110,7 @@ export default defineConcept({
       'Typo fixed: the page closes ‘Asteya with a double quote, written " here, where a single one is meant: “‘Asteya" in the” → “‘Asteya’ in the”.',
       'Interface text dropped: the “Introduction” and “References” labels, and the “Translation:” and “Meaning:” labels before the verses’ translations and readings.',
       'Left out: the page’s “Overall Score Indicator” sub-section, the last under “Asteya (Non-Stealing) Profiling”, which belongs to its Questionnaire and is listed there as held back.',
+      'Name gloss in sentence case: “Non-Stealing” → “Non-stealing”.',
     ],
     flags: [
       {

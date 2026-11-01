@@ -485,6 +485,7 @@ function concept(
     slug: 'udaharana',
     name: { english: 'Example' },
     summary: 'Every rule needs an example.',
+    keywords: [],
     topics: { primary: 'mind' },
     verses: [],
     sections: [{ id: 'what-is-an-example', heading: 'What is an example?', blocks }],

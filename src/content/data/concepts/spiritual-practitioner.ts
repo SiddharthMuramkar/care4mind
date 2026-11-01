@@ -6,9 +6,10 @@ import { defineConcept } from '@/content/schema'
 export default defineConcept({
   kind: 'concept',
   slug: 'spiritual-practitioner',
-  name: { english: 'Spiritual Practitioner' },
+  name: { english: 'Spiritual practitioner' },
   summary:
     'Mastery in any endeavour is attained through consistent practice. By repeatedly engaging in a specific practice, it gradually transitions from conscious effort to becoming ingrained in the unconscious mind.',
+  keywords: ['spirituality', 'practice', 'sadhana', 'growth', 'wellbeing', 'community'],
   topics: { primary: 'practice' },
   verses: [
     {
@@ -113,12 +114,14 @@ export default defineConcept({
     'warber-2015',
   ],
   questionnaire: 'spiritual-practitioner',
-  reviewStatus: 'carried-over-not-reviewed',
+  reviewStatus: 'drafted-not-reviewed',
   provenance: {
+    drafted: ['keywords'],
     sources: [
       { url: 'https://care4mind.org/spiritualpractitionerprofiling/', retrieved: '2026-10-27' },
     ],
     edits: [
+      'English name in sentence case: “Spiritual Practitioner” → “Spiritual practitioner”.',
       'Named by its English title: the page title, “Spiritual Practitioner Profiling”, without “Profiling”, the word for its questionnaire. The page gives no Sanskrit headword (flagged).',
       'The heading over the verses, “Shlokas from Adi Sankaracharya’ Sadhana Panchakam”, is left out: each verse is shown with its work and number, and the Sādhana Pañcakam’s record keeps the page’s attribution to Adi Sankaracharya.',
       'Typo fixed: “Absence of Spirituality Practitioner Profiling” → “Absence of Spiritual Practitioner Profiling”.',

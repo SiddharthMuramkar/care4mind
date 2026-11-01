@@ -52,6 +52,7 @@ const TEMPLATES = {
   // The headword from the page's own text; \`english\` only as a gloss the page gives.
   name: { term: { iast: '', devanagari: '', ascii: [] }, english: '' },
   summary: '', // sentences from the page, never newly written
+  keywords: [], // plain lowercase words from its own text; name 'keywords' in provenance.drafted
   topics: { primary: '' }, // also: []
   verses: [], // { passage: 'work/locator', translation: '', meaning: '' }, in the page's order
   sections: [], // { id, heading, role?, blocks }

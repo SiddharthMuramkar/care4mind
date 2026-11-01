@@ -7,9 +7,10 @@ import { defineConcept } from '@/content/schema'
 export default defineConcept({
   kind: 'concept',
   slug: 'momentum-of-spiritual-practice',
-  name: { english: 'Momentum of Spiritual Practice' },
+  name: { english: 'Momentum of spiritual practice' },
   summary:
     'In short, the outcome of yoga is directly related to how deeply and earnestly a person engages with the path.',
+  keywords: ['practice', 'prayer', 'faith', 'effort', 'rituals', 'spirituality', 'meditation'],
   topics: { primary: 'practice' },
   verses: [
     {
@@ -184,12 +185,14 @@ export default defineConcept({
     'tomar-2024',
   ],
   questionnaire: 'momentum-of-spiritual-practice',
-  reviewStatus: 'carried-over-not-reviewed',
+  reviewStatus: 'drafted-not-reviewed',
   provenance: {
+    drafted: ['keywords'],
     sources: [
       { url: 'https://care4mind.org/momentumofspiritualpractice/', retrieved: '2026-10-27' },
     ],
     edits: [
+      'English name in sentence case: “Momentum of Spiritual Practice” → “Momentum of spiritual practice”.',
       'Named by its English title, the page title “Momentum of Spiritual Practice”. The page gives no Sanskrit headword; saṃvega, from its Yoga Sūtra 1.21, may be one (flagged).',
       'The heading over the verses, “Shloka for Momentum of Spiritual Practice from Chapter 1, Sutra 21,22”, is left out: each verse is shown with its work and number, Yoga Sūtra 1.21 and 1.22, which the heading doesn’t name (flagged). The transliterations the page prints as sub-headings are the passages’.',
       'Typo fixed: “ad ever living” → “and ever living”.',

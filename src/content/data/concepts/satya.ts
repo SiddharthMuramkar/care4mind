@@ -13,6 +13,7 @@ export default defineConcept({
     english: 'Truthfulness',
   },
   summary: 'Truth should be upheld in both thought, speech, and action.',
+  keywords: ['truth', 'truthfulness', 'honesty', 'speech', 'values'],
   topics: { primary: 'values' },
   verses: [
     {
@@ -191,8 +192,9 @@ export default defineConcept({
     'zahedi-2011',
   ],
   questionnaire: 'satya',
-  reviewStatus: 'carried-over-not-reviewed',
+  reviewStatus: 'drafted-not-reviewed',
   provenance: {
+    drafted: ['keywords'],
     sources: [
       {
         url: 'https://care4mind.org/knowyourvaluessatyatruthfulnessprofiling/',

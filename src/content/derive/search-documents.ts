@@ -90,6 +90,7 @@ function conceptDocuments(concept: ConceptRecord, graph: ContentGraph): SearchDo
     names: term ? spellingsOf(term) : unique([english]),
     keywords: unique([
       term ? english : undefined,
+      ...concept.keywords,
       ...topics,
       ...works.flatMap((work) => [work.title.iast, ...work.title.ascii, work.title.english]),
       ...passages.flatMap((passage) => locatorForms(passage, must(graph, 'work', passage.work))),
