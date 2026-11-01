@@ -6,7 +6,7 @@
 import type { ContentGraph } from '../graph'
 import { RELATION_STRENGTH, type ConceptGraph, type ConceptGraphEdge } from '../types'
 import { byName } from '../views/common'
-import { displayName } from '../views/names'
+import { displayName } from '../names'
 import { conceptRef } from '../views/refs'
 
 const EDGE_KINDS = RELATION_STRENGTH.filter((kind) => kind !== 'topic')

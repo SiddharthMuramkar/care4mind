@@ -1,29 +1,7 @@
-.folio {
-  display: grid;
-  justify-items: center;
-  gap: 1rem;
-  text-align: center;
-}
-
-.title {
-  margin: 0;
-  font-family: var(--font-display);
-  font-weight: 500;
-  font-size: clamp(2.25rem, 8vw, 4rem);
-  line-height: 1.05;
-  max-width: 16ch;
-}
-
 /* The lotus Fleuron, breathing as on every page: a wrong turn is still a page of the book. */
 .fleuron {
   width: min(10rem, 50%);
   color: var(--color-highlight);
-}
-
-.text {
-  margin: 0;
-  max-width: 44ch;
-  font-size: 1.125rem;
 }
 
 .links {

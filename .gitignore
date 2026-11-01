@@ -18,6 +18,9 @@ next-env.d.ts
 .lighthouseci/
 /.shots/
 
+# local notes and tool output, such as the content flags pack (scripts/content/report.mjs)
+/.scratch/
+
 # local tooling
 .venv-fonts/
 .vercel/
