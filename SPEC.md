@@ -109,8 +109,6 @@ The code still holds these patterns, and new code doesn't copy them. Each line n
 - `Flag.ticket` numbers on records. They come from a deleted local tracker and point at the wrong GitHub issues (#39).
 - A setting that looks load-bearing but does nothing here: `typedRoutes`, which can't check paths that end in a slash (#55). The checks that do hold links true are the `hrefFor()` lint rule and the browser crawler.
 
-"Lane", in `scripts/lane/` and the `archive/lane-*` tags, is the old name for the parallel builders `ship` runs. New code says builder.
-
 ## Changing this file
 
 - A rule comes in together with what keeps it true: a check, or "review".
