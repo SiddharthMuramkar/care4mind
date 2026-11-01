@@ -155,7 +155,7 @@
   .references li:not(:last-child)::after {
     content: '·' / '';
     margin-inline: 0.6rem;
-    color: var(--color-surface-rule);
+    color: var(--color-surface-muted);
   }
 }
 
