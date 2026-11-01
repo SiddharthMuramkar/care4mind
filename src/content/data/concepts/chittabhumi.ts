@@ -20,6 +20,15 @@ export default defineConcept({
   },
   summary:
     'Maharishi Patanjali outlines five progressive states of mind, known as chittabhumis, which chart the path toward a yogic and spiritually awakened consciousness.',
+  keywords: [
+    'mind',
+    'states',
+    'focus',
+    'concentration',
+    'awareness',
+    'discipline',
+    'consciousness',
+  ],
   topics: { primary: 'mind' },
   verses: [
     {
@@ -248,8 +257,9 @@ export default defineConcept({
       url: 'https://dharmawiki.org/index.php/Chitta_Bhumis_(%E0%A4%9A%E0%A4%BF%E0%A4%A4%E0%A5%8D%E0%A4%A4%E0%A4%AD%E0%A5%82%E0%A4%AE%E0%A4%AF%E0%A4%83)',
     },
   ],
-  reviewStatus: 'carried-over-not-reviewed',
+  reviewStatus: 'drafted-not-reviewed',
   provenance: {
+    drafted: ['keywords'],
     sources: [{ url: 'https://care4mind.org/knowyourmind/', retrieved: '2026-10-27' }],
     edits: [
       'IAST transliterated for the headword: “citta-bhūmi”, from the page’s plural “chittabhumis”, in the singular. The page prints no Devanagari for it or for the five states, so none is stored; the states’ IAST is the page’s own (“Mūḍha, Kṣipta, Vikṣipta, Ekāgra, and Niruddha”).',

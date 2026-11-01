@@ -188,13 +188,16 @@ const contentStrings = (value: unknown): string[] =>
         : []
 
 describe('the practice Concepts', () => {
-  it.each(PAGES)('make $url a Concept in the practice topic, carried over', ({ slug, url }) => {
-    const concept = conceptOf(slug)
-    expect(concept?.topics).toEqual({ primary: 'practice' })
-    expect(concept?.reviewStatus).toBe('carried-over-not-reviewed')
-    expect(concept?.provenance.sources.map((source) => source.url)).toEqual([url])
-    expect(concept?.provenance.drafted).toBeUndefined()
-  })
+  it.each(PAGES)(
+    'make $url a Concept in the practice topic, its keywords drafted',
+    ({ slug, url }) => {
+      const concept = conceptOf(slug)
+      expect(concept?.topics).toEqual({ primary: 'practice' })
+      expect(concept?.reviewStatus).toBe('drafted-not-reviewed')
+      expect(concept?.provenance.sources.map((source) => source.url)).toEqual([url])
+      expect(concept?.provenance.drafted).toEqual(['keywords'])
+    },
+  )
 
   it.each(PAGES)(
     'quote the verses at the top of $url in its order, each with its translation and Meaning',

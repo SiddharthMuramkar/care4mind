@@ -31,6 +31,7 @@ export default defineConcept({
   },
   summary:
     'In the Yoga Sutra of Patanjali 2.3, the concept of five kleshas (fivefold miseries) is presented as the foundational causes of human suffering. These kleshas act as formidable obstacles on the path to spiritual liberation (moksha).',
+  keywords: ['afflictions', 'ignorance', 'attachment', 'aversion', 'anger', 'greed', 'suffering'],
   topics: { primary: 'mind' },
   verses: [
     {
@@ -363,8 +364,9 @@ export default defineConcept({
       url: 'https://dharmawiki.org/index.php/Kleshas_(%E0%A4%95%E0%A5%8D%E0%A4%B2%E0%A5%87%E0%A4%B6%E0%A4%BE%E0%A4%83)',
     },
   ],
-  reviewStatus: 'carried-over-not-reviewed',
+  reviewStatus: 'drafted-not-reviewed',
   provenance: {
+    drafted: ['keywords'],
     sources: [
       { url: 'https://care4mind.org/panchkleshavikaarprofiling/', retrieved: '2026-10-27' },
     ],

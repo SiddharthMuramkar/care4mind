@@ -47,6 +47,7 @@ const concept: ConceptRecord = {
   slug: 'example',
   name: { term: { iast: 'udāharaṇa', ascii: ['Udaharana'] }, english: 'Example' },
   summary: 'A sentence from the page.',
+  keywords: [],
   topics: { primary: 'mind' },
   verses: [],
   sections: [],

@@ -17,6 +17,7 @@ export default defineConcept({
   },
   summary:
     'Deriving the concept of Trigunas from ancient Indian texts, each represents a personality trait or characteristic in humans. The threefold characteristics—Sattva, Rajas, and Tamas—described in the Bhagavad Gita form the core of human nature and bind the Atman to the Sarira.',
+  keywords: ['characteristics', 'purity', 'inertia', 'personality', 'nature'],
   topics: { primary: 'temperament' },
   verses: [],
   sections: [
@@ -151,8 +152,9 @@ export default defineConcept({
     'esushruta',
   ],
   questionnaire: 'triguna',
-  reviewStatus: 'carried-over-not-reviewed',
+  reviewStatus: 'drafted-not-reviewed',
   provenance: {
+    drafted: ['keywords'],
     sources: [{ url: 'https://care4mind.org/triguna/', retrieved: '2026-10-27' }],
     edits: [
       'IAST written for the headword, which the page spells “Triguna” and “Trigunas”: “triguṇa”, with “guṇa” as the page’s Bhagavad Gītā 14.5 writes it (“guṇāḥ”). The page prints no Devanagari for it, so none is stored.',

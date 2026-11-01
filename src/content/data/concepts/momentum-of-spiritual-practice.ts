@@ -10,6 +10,7 @@ export default defineConcept({
   name: { english: 'Momentum of spiritual practice' },
   summary:
     'In short, the outcome of yoga is directly related to how deeply and earnestly a person engages with the path.',
+  keywords: ['practice', 'prayer', 'faith', 'effort', 'rituals', 'spirituality', 'meditation'],
   topics: { primary: 'practice' },
   verses: [
     {
@@ -184,8 +185,9 @@ export default defineConcept({
     'tomar-2024',
   ],
   questionnaire: 'momentum-of-spiritual-practice',
-  reviewStatus: 'carried-over-not-reviewed',
+  reviewStatus: 'drafted-not-reviewed',
   provenance: {
+    drafted: ['keywords'],
     sources: [
       { url: 'https://care4mind.org/momentumofspiritualpractice/', retrieved: '2026-10-27' },
     ],

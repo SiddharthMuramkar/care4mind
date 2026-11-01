@@ -14,6 +14,7 @@ export default defineConcept({
   },
   summary:
     'In broader terms, the principle of refraining from taking or appropriating anything without permission, whether through thoughts, words, or actions, is known as ‘Asteya’ in the ethical framework.',
+  keywords: ['non-stealing', 'stealing', 'greed', 'contentment', 'values', 'ethics'],
   topics: { primary: 'values' },
   verses: [
     {
@@ -91,8 +92,9 @@ export default defineConcept({
     'tomar-2024',
   ],
   questionnaire: 'asteya',
-  reviewStatus: 'carried-over-not-reviewed',
+  reviewStatus: 'drafted-not-reviewed',
   provenance: {
+    drafted: ['keywords'],
     sources: [
       {
         url: 'https://care4mind.org/knowyourvaluesasteyanonstealingprofiling/',
