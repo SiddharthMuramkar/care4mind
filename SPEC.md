@@ -51,6 +51,7 @@ These are judgement calls, so review checks them against the diff, in the codeba
 | IAST and Devanagari carry `lang` | components, for name fields, the verse-copied toast and Devanagari runs. IAST inside running text is untagged (#76) |
 | Carried-over text changes only to fix a listed error | `verify.mjs`, which runs only on a machine with the captures; nothing in CI (#48) |
 | Comments state reasons, not ticket numbers or decision codes | nothing yet (#38) |
+| A backticked repo path, a `pnpm` script or a section of a doc named in a doc or a comment exists | pointers test |
 | Agents never merge a PR, turn on auto-merge, push to `main` or delete a branch | the guard and its test (guard). It reads commands, not intent: a script it can't read makes it ask, and review covers the rest |
 | `main` changes only through a squashed PR whose required check passed on an up-to-date branch | the ruleset on GitHub, whose file the ruleset test checks; `pnpm ruleset:check` compares the two |
 | Nobody commits to `main` or pushes to it, the developer included | the git hooks in `.githooks/`, installed by `prepare` (githooks test). `--no-verify` skips them, and the guard refuses that to agents |
