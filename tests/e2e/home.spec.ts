@@ -330,8 +330,14 @@ test('the homepage leads on to every Concept and every Questionnaire', async ({ 
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('Questionnaires')
 })
 
-test("a card's focus ring contrasts with the colour behind it", async ({ page }) => {
+test("a Concept or Questionnaire card's focus ring contrasts with the colour behind it", async ({
+  page,
+}) => {
   await gotoReady(page, '/')
-  const link = page.getByRole('link', { name: 'Read about Vikṣepa' })
-  expect(await focusRingContrast(page, link)).toBeGreaterThanOrEqual(3)
+  const concept = page.getByRole('link', { name: 'Read about Vikṣepa' })
+  expect(await focusRingContrast(page, concept)).toBeGreaterThanOrEqual(3)
+  const questionnaire = section(page, 'Questionnaires')
+    .getByRole('link', { name: /^About the/ })
+    .first()
+  expect(await focusRingContrast(page, questionnaire)).toBeGreaterThanOrEqual(3)
 })
