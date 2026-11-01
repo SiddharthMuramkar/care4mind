@@ -66,6 +66,77 @@ const contentBoundary = {
   },
 }
 
+// Every component lives in a folder named for its module, and that folder's index.ts is its
+// interface: other code imports @/components/<module>, never a file inside it.
+const componentImports = {
+  alias: {
+    regex: '^@/components/[^/]+/',
+    caseSensitive: true,
+    message: "A component module's files are private: import its interface, @/components/<module>.",
+  },
+  relative: {
+    regex: '^\\.{1,2}/(?:.+/)?components(?:/|$)',
+    caseSensitive: true,
+    message: 'Reach a component module through @/components/<module>, never by a relative path.',
+  },
+  // Each module is one folder deep, so a component's `../` always leaves its own folder.
+  outOfFolder: {
+    regex: '^\\.\\./',
+    caseSensitive: true,
+    message:
+      "A component imports only its own folder's files: reach another module through @/components/<module>.",
+  },
+}
+
+// Pages, layouts and their files are the app's own: what other code needs lives outside src/app.
+const appImports = [
+  {
+    regex: '^@/app(?:/|$)',
+    caseSensitive: true,
+    message: 'Only the app imports from src/app: move what is shared out of it.',
+  },
+  {
+    regex: '^\\.{1,2}/(?:.+/)?app(?:/|$)',
+    caseSensitive: true,
+    message: 'Only the app imports from src/app: move what is shared out of it.',
+  },
+]
+
+const contentImports = [
+  { regex: CONTENT_INTERNAL, caseSensitive: true, message: INTERNAL_MESSAGE },
+  { regex: CONTENT_BY_PATH, caseSensitive: true, message: BY_PATH_MESSAGE },
+]
+
+// One entry per part of src, because a later no-restricted-imports replaces an earlier one.
+const restrictImports = (files, ignores, patterns) => ({
+  files,
+  ignores,
+  rules: { 'no-restricted-imports': ['error', { patterns }] },
+})
+
+const importBoundaries = [
+  restrictImports(
+    ['src/**/*.{ts,tsx}'],
+    ['src/app/**', 'src/components/**', 'src/content/**'],
+    [...contentImports, componentImports.alias, componentImports.relative, ...appImports],
+  ),
+  restrictImports(
+    ['src/app/**/*.{ts,tsx}'],
+    [],
+    [...contentImports, componentImports.alias, componentImports.relative],
+  ),
+  restrictImports(
+    ['src/components/**/*.{ts,tsx}'],
+    [],
+    [...contentImports, componentImports.alias, componentImports.outOfFolder, ...appImports],
+  ),
+  restrictImports(
+    ['src/content/**/*.{ts,tsx}'],
+    [],
+    [componentImports.alias, componentImports.relative, ...appImports],
+  ),
+]
+
 const TESTING_ENTRY_MESSAGE =
   'Tests reach content internals through @/content/testing, or read @/content as pages do.'
 const TEST_INTERNAL = '^@/content/(?!testing$)'
@@ -193,6 +264,7 @@ export default defineConfig([
   ...tseslint.configs.strict.map((config) => ({ ...config, files: ['**/*.{ts,tsx}'] })),
   ...importBoundaries,
   contentBoundary,
+  ...importBoundaries,
   testsContentBoundary,
   graphBelowViews,
   internalLinks,
