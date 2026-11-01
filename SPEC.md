@@ -15,6 +15,7 @@ Each module is named by its capability, and outside code reaches it only through
 - **Records**: one file per record. Each is default-exported through its kind's `define…` helper from `@/content/schema`, and points at other records by id only. The registry that lists them is generated. _Types, the graph's dangling-id check, the content tests, and the registry that `pnpm check` and every test run write afresh._
 - **Addresses**: every internal link comes from `hrefFor()`. _Lint: `care4mind/href-from-hreffor`._
 - **Pages**: App Router routes that read content only through `@/content`. `site.routes()` is the one list of public pages, and the sitemap, page metadata, the navigation and the link crawler read it. _Tests: content-derive, routes; browser: crawler._
+- **Search**, through `@/lib/search`: the `SearchEngine` seam, whose one adapter today is `substringSearch`, and `resultGroups()`, which groups what it finds by kind and shows 25 of each. The ranking engine fills the seam once what search finds and the Architecture review are decided. A search document carries its title's `lang`. _Tests: search, content-derive._
 - **Feature flags**: `features`, read once at build, on the server. A client component gets a flag as a prop. A feature that's built but not yet approved for launch is on in previews and off in production. _Tests: features. Review for the server-only reading._
 - **Redirects**: one table, each entry served as a 301. _Tests: redirects (unit and browser)._
 - **Questionnaire flow**: one reducer holds a person's answers, and nothing else does (no storage, cookies, address or request). No record stores scoring until the Psychology expert's rules arrive. _Types (`scoring.status` is `'pending'`), the content-integrity "held back" test, review._
@@ -65,7 +66,7 @@ These are judgement calls, so review checks them against the diff, in the codeba
   3. The view types and views: Ref, Card and View, plus `hrefFor()`'s target.
   4. Its namespace on `@/content`.
   5. The derivations: routes, and search documents. Nothing fails if you miss search (#49).
-  6. The pages, the navigation, Linked knowledge and the search page's headings.
+  6. The pages, the navigation, Linked knowledge and the search's headings in `@/lib/search`.
   7. The tools behind `content:new` and `verify`.
   8. GLOSSARY.md.
 - **A page:** a route that reads `@/content`. Its address is an `hrefFor()` target, and its entry in `site.routes()` puts it in the sitemap, breadcrumbs and crawler.
