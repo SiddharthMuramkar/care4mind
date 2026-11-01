@@ -138,8 +138,7 @@ export async function metadataFor(path: string): Promise<Metadata> {
 /** The text of the page's share card: the site's name and tagline on the homepage. */
 export async function shareCardText(path: string): Promise<{ title: string; description: string }> {
   const route = await routeAt(path)
-  if (route.kind === 'home')
-    return { title: config.name, description: (await home.get()).tagline }
+  if (route.kind === 'home') return { title: config.name, description: (await home.get()).tagline }
   const { name, description, card } = await describe(route)
   return { title: card ?? name, description }
 }
