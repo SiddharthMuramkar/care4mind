@@ -12,6 +12,7 @@ import { conceptQuotes, termsIn } from '../views/blocks'
 import { must } from '../views/common'
 import { hrefFor } from '../views/href'
 import { asciiSpellings, authorNames, displayName, passageLabel, referenceLabel } from '../names'
+import { latinScript } from '../views/passage'
 import { questionnaireHref } from '../views/refs'
 
 const EXCERPT = 300
@@ -80,6 +81,7 @@ function conceptDocuments(concept: ConceptRecord, graph: ContentGraph): SearchDo
     id: `concept:${concept.slug}`,
     kind: 'concept',
     title,
+    ...(term ? { lang: 'sa-Latn' as const } : {}),
     href: hrefFor({ kind: 'concept', id: concept.slug }),
     names: term ? spellingsOf(term) : unique([english]),
     keywords: unique([
@@ -102,6 +104,7 @@ function conceptDocuments(concept: ConceptRecord, graph: ContentGraph): SearchDo
       id: `term:${concept.slug}#${block.id}`,
       kind: 'term',
       title: displayName(block),
+      lang: 'sa-Latn',
       href: hrefFor({ kind: 'concept', id: concept.slug, anchor: block.id }),
       parent: title,
       names: spellingsOf(block.term),
@@ -130,6 +133,7 @@ function documentsOf(graph: ContentGraph): SearchDocument[] {
     id: `glossary:${entry.slug}`,
     kind: 'glossary',
     title: entry.name.iast ? capitalise(entry.name.iast) : entry.name.ascii,
+    ...(entry.name.iast ? { lang: 'sa-Latn' as const } : {}),
     href: hrefFor({ kind: 'glossary', id: entry.slug }),
     names: unique([entry.name.iast, entry.name.devanagari, entry.name.ascii]),
     keywords: [],
@@ -141,6 +145,7 @@ function documentsOf(graph: ContentGraph): SearchDocument[] {
     id: `work:${work.slug}`,
     kind: 'work',
     title: displayName({ term: work.title }),
+    lang: latinScript(work),
     href: hrefFor({ kind: 'work', id: work.slug }),
     names: unique([work.title.iast, work.title.devanagari, ...work.title.ascii]),
     keywords: unique([abbreviation(work), work.title.english]),
@@ -154,6 +159,7 @@ function documentsOf(graph: ContentGraph): SearchDocument[] {
       id: `passage:${passage.id}`,
       kind: 'passage',
       title: passageLabel(passage, work),
+      lang: latinScript(work),
       href: hrefFor({ kind: 'passage', id: passage.id }),
       parent: displayName({ term: work.title }),
       names: [],

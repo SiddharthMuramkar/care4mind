@@ -763,6 +763,7 @@ describe('site.searchDocuments', () => {
       id: 'concept:obstacles',
       kind: 'concept',
       title: 'Vighna',
+      lang: 'sa-Latn',
       href: '/concepts/obstacles/',
       names: ['vighna', 'विघ्न', 'Vigna'],
       keywords: [
@@ -789,6 +790,7 @@ describe('site.searchDocuments', () => {
       id: 'term:obstacles#samsaya',
       kind: 'term',
       title: 'Saṃśaya',
+      lang: 'sa-Latn',
       href: '/concepts/obstacles/#samsaya',
       parent: 'Vighna',
       names: ['saṃśaya', 'संशय', 'samsaya', 'Sanshay'],
@@ -803,6 +805,7 @@ describe('site.searchDocuments', () => {
       id: 'passage:yoga-sutra/1.30',
       kind: 'passage',
       title: 'Yoga Sūtra 1.30',
+      lang: 'sa-Latn',
       href: '/texts/yoga-sutra/#1-30',
       parent: 'Yoga Sūtra',
       names: [],
@@ -814,12 +817,15 @@ describe('site.searchDocuments', () => {
       id: 'work:yoga-sutra',
       kind: 'work',
       title: 'Yoga Sūtra',
+      lang: 'sa-Latn',
       href: '/texts/yoga-sutra/',
       names: ['Yoga Sūtra', 'योगसूत्र', 'Yoga Sutra'],
       keywords: ['YS'],
       people: [],
       excerpt: '',
     })
+    // Dhammapada's title has no marked letter, and it is Pali: the language is stored, not guessed.
+    expect((await find('work:dhammapada'))?.lang).toBe('pi-Latn')
   })
 
   it('finds a Reference by its authors, and a glossary entry by every spelling', async () => {
@@ -837,6 +843,7 @@ describe('site.searchDocuments', () => {
       id: 'glossary:avarana',
       kind: 'glossary',
       title: 'Āvaraṇa',
+      lang: 'sa-Latn',
       href: '/concepts/#avarana',
       names: ['āvaraṇa', 'आवरण', 'Avarana'],
       keywords: [],
