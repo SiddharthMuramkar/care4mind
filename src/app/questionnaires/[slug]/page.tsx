@@ -10,7 +10,7 @@ import { HelpLine } from '@/components/HelpLine'
 import { PageTurn, turnForward } from '@/components/PageTurn'
 import { Provenance, Text } from '@/components/prose'
 import { ReadingThread } from '@/components/ReadingThread'
-import { concepts, hrefFor, questionnaires } from '@/content'
+import { concepts, hrefFor, questionnaires, site } from '@/content'
 import { metadataFor } from '@/lib/metadata'
 import { shownStatus, startOf, statusWords } from '@/lib/questionnaire/gate'
 
@@ -20,21 +20,15 @@ import styles from './page.module.css'
 
 export const dynamicParams = false
 
+const PATTERN = '/questionnaires/[slug]/' as const
+
 /** A Questionnaire coming later has no page: it is an entry on the Questionnaires page. */
-export async function generateStaticParams() {
-  return (await questionnaires.list())
-    .filter(({ status }) => status !== 'coming-later')
-    .map(({ slug }) => ({ slug }))
-}
+export const generateStaticParams = () => site.params(PATTERN)
 
 export async function generateMetadata({
   params,
 }: PageProps<'/questionnaires/[slug]'>): Promise<Metadata> {
-  const questionnaire = await questionnaires.get((await params).slug)
-  if (!questionnaire) notFound()
-  return metadataFor(
-    hrefFor({ kind: 'questionnaire', id: questionnaire.slug, status: questionnaire.status }),
-  )
+  return metadataFor(PATTERN.replace('[slug]', (await params).slug))
 }
 
 /**
