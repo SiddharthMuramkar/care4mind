@@ -261,18 +261,21 @@ describe('site.routes', () => {
         pattern: '/concepts/[slug]/',
         title: 'Śānti',
         sample: true,
+        record: { kind: 'concept', id: 'calm' },
       },
       {
         path: '/concepts/obstacles/',
         kind: 'concept',
         pattern: '/concepts/[slug]/',
         title: 'Vighna',
+        record: { kind: 'concept', id: 'obstacles' },
       },
       {
         path: '/concepts/refuge/',
         kind: 'concept',
         pattern: '/concepts/[slug]/',
         title: 'Refuge of the self',
+        record: { kind: 'concept', id: 'refuge' },
       },
       {
         path: '/concepts/map/',
@@ -288,8 +291,15 @@ describe('site.routes', () => {
         pattern: '/topics/[slug]/',
         title: 'Mind',
         sample: true,
+        record: { kind: 'topic', id: 'mind' },
       },
-      { path: '/topics/self/', kind: 'topic', pattern: '/topics/[slug]/', title: 'Self' },
+      {
+        path: '/topics/self/',
+        kind: 'topic',
+        pattern: '/topics/[slug]/',
+        title: 'Self',
+        record: { kind: 'topic', id: 'self' },
+      },
       {
         path: '/texts/',
         kind: 'texts',
@@ -303,8 +313,15 @@ describe('site.routes', () => {
         pattern: '/texts/[slug]/',
         title: 'Dhammapada',
         sample: true,
+        record: { kind: 'work', id: 'dhammapada' },
       },
-      { path: '/texts/yoga-sutra/', kind: 'work', pattern: '/texts/[slug]/', title: 'Yoga Sūtra' },
+      {
+        path: '/texts/yoga-sutra/',
+        kind: 'work',
+        pattern: '/texts/[slug]/',
+        title: 'Yoga Sūtra',
+        record: { kind: 'work', id: 'yoga-sutra' },
+      },
       {
         path: '/questionnaires/',
         kind: 'questionnaires',
@@ -318,6 +335,7 @@ describe('site.routes', () => {
         pattern: '/questionnaires/[slug]/',
         title: 'Live One',
         sample: true,
+        record: { kind: 'questionnaire', id: 'live-one' },
       },
       {
         path: '/questionnaires/live-one/take/',
@@ -325,24 +343,28 @@ describe('site.routes', () => {
         pattern: '/questionnaires/[slug]/take/',
         title: 'Take it',
         sample: true,
+        record: { kind: 'questionnaire', id: 'live-one' },
       },
       {
         path: '/questionnaires/soon/',
         kind: 'questionnaire',
         pattern: '/questionnaires/[slug]/',
         title: 'Soon',
+        record: { kind: 'questionnaire', id: 'soon' },
       },
       {
         path: '/questionnaires/work-scale/',
         kind: 'questionnaire',
         pattern: '/questionnaires/[slug]/',
         title: 'Work Scale',
+        record: { kind: 'questionnaire', id: 'work-scale' },
       },
       {
         path: '/questionnaires/work-scale/take/',
         kind: 'questionnaire-flow',
         pattern: '/questionnaires/[slug]/take/',
         title: 'Take it',
+        record: { kind: 'questionnaire', id: 'work-scale' },
       },
       { path: '/library/', kind: 'library', pattern: '/library/', title: 'Library', sample: true },
       {
@@ -358,6 +380,7 @@ describe('site.routes', () => {
         pattern: '/library/[slug]/',
         title: 'Methods',
         sample: true,
+        record: { kind: 'page', id: 'methods' },
       },
       {
         path: '/library/reading/',
@@ -365,6 +388,7 @@ describe('site.routes', () => {
         pattern: '/library/[slug]/',
         title: 'Reading List',
         sample: true,
+        record: { kind: 'resource-list', id: 'reading' },
       },
       { path: '/search/', kind: 'search', pattern: '/search/', title: 'Search', sample: true },
       {
@@ -376,6 +400,44 @@ describe('site.routes', () => {
         proposal: true,
       },
     ])
+  })
+
+  it('finds a route by its path, with the record its page shows', async () => {
+    const { site } = createContent(sourceOf(...world), ON)
+    expect(await site.route('/texts/yoga-sutra/')).toEqual({
+      path: '/texts/yoga-sutra/',
+      kind: 'work',
+      pattern: '/texts/[slug]/',
+      title: 'Yoga Sūtra',
+      record: { kind: 'work', id: 'yoga-sutra' },
+    })
+    expect(await site.route('/texts/unknown/')).toBeNull()
+  })
+
+  it('gives each pattern the params of its entries in the registry, and only those', async () => {
+    for (const flags of [ON, OFF]) {
+      const { site } = createContent(sourceOf(...world), flags)
+      const routes = await site.routes()
+      for (const pattern of new Set(routes.map((route) => route.pattern))) {
+        const at = pattern.split('/').indexOf('[slug]')
+        const entries = routes.filter((route) => route.pattern === pattern)
+        const expected = at < 0 ? [] : entries.map(({ path }) => ({ slug: path.split('/')[at] }))
+        expect(await site.params(pattern), pattern).toEqual(expected)
+      }
+    }
+    const { site } = createContent(sourceOf(...world), OFF)
+    expect(await site.params('/questionnaires/[slug]/take/')).toEqual([{ slug: 'live-one' }])
+    expect(await site.params('/questionnaires/[slug]/')).toEqual([
+      { slug: 'live-one' },
+      { slug: 'soon' },
+      { slug: 'work-scale' },
+    ])
+  })
+
+  it('builds the registry and the search corpus once per graph', async () => {
+    const { site } = createContent(sourceOf(...world), ON)
+    expect(await site.routes()).toBe(await site.routes())
+    expect(await site.searchDocuments()).toBe(await site.searchDocuments())
   })
 
   it('leaves out every route whose flag is off, and no more', async () => {

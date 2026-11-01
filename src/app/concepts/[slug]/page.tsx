@@ -15,7 +15,14 @@ import { VerseCard } from '@/components/prose/VerseCard'
 import { ReadingThread } from '@/components/ReadingThread'
 import { ReferenceList } from '@/components/ReferenceList'
 import { SpellingsPopover } from '@/components/SpellingsPopover'
-import { concepts, hrefFor, type BlockView, type ConceptView, type VerseView } from '@/content'
+import {
+  concepts,
+  hrefFor,
+  site,
+  type BlockView,
+  type ConceptView,
+  type VerseView,
+} from '@/content'
 import { capitalise } from '@/lib/text'
 import { cx } from '@/lib/cx'
 import { metadataFor } from '@/lib/metadata'
@@ -25,9 +32,7 @@ import styles from './page.module.css'
 
 export const dynamicParams = false
 
-export async function generateStaticParams() {
-  return (await concepts.list()).map(({ slug }) => ({ slug }))
-}
+export const generateStaticParams = () => site.params('/concepts/[slug]/')
 
 export async function generateMetadata({
   params,
@@ -68,9 +73,7 @@ export default async function ConceptPage({ params }: PageProps<'/concepts/[slug
   if (!concept) notFound()
 
   const citations = citationLinks(concept.citations, concept.references)
-  const cards = new Map((await concepts.list()).map((card) => [card.slug, card]))
-  const previous = concept.previous && cards.get(concept.previous.slug)
-  const next = concept.next && cards.get(concept.next.slug)
+  const { previous, next } = concept
   const contents = contentsOf(concept)
   // A Concept card's title flies into the heading's IAST spelling, or its English title.
   const morph = `concept-title-${concept.slug}`

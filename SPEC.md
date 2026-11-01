@@ -10,7 +10,7 @@ Every fact has one home. For most facts that home is the code: its names, types,
 
 Each module is named by its capability, and outside code reaches it only through its entry. What guards each seam is in italics.
 
-- **Content**, through `@/content`. Its namespaces are `concepts`, `topics`, `works`, `references`, `questionnaires`, `library`, `home` and `site`, plus `hrefFor()`, `displayName()`, `asciiSpellings()` and the view types. A page gets a view: plain, serialisable data shaped for that page. Behind the entry sit the record schema, the graph and the derivations. The graph resolves every link once and refuses a dangling id. The derivations are the route registry, breadcrumbs, the A–Z, search documents and the Concept map. _Lint: the content boundary, with its own test (content-boundary)._
+- **Content**, through `@/content`. Its namespaces are `concepts`, `topics`, `works`, `references`, `questionnaires`, `library`, `home` and `site`, plus `hrefFor()` and the view types. A page gets a view: plain, serialisable data shaped for that page. Behind the entry sit the record schema, the graph and the derivations. The graph resolves every link once and refuses a dangling id. The derivations are the route registry, breadcrumbs, the A–Z, search documents and the Concept map. _Lint: the content boundary, with its own test (content-boundary)._
 - **Content source**, the seam under Content: `ContentSource.records(kind)`. Two adapters satisfy it, the generated registry of record files and the made-up sources the tests build, so the seam is real. A content back end becomes one more adapter, and nothing above it changes. _Tests: content-registry, content-interface, content-derive._
 - **Records**: one file per record. Each is default-exported through its kind's `define…` helper from `@/content/schema`, and points at other records by id only. The registry that lists them is generated. _Types, the graph's dangling-id check, the content tests, and the registry that `pnpm check` and every test run write afresh._
 - **Addresses**: every internal link comes from `hrefFor()`. _Lint: `care4mind/href-from-hreffor`._
@@ -70,7 +70,7 @@ These are judgement calls, so review checks them against the diff, in the codeba
   6. The pages, the navigation, Linked knowledge and the search page's headings.
   7. The tools behind `content:new` and `verify`.
   8. GLOSSARY.md.
-- **A page:** a route that reads `@/content`. Its address is an `hrefFor()` target, and its entry in `site.routes()` puts it in the sitemap, breadcrumbs and crawler.
+- **A page:** a route that reads `@/content`. Its address is an `hrefFor()` target, and its entry in `site.routes()` puts it in the sitemap, breadcrumbs and crawler. A page with a `[slug]` builds the params `site.params(pattern)` gives it, so it has exactly the routes the registry lists.
 - **A topic:** its record, plus its colour token, its `[data-topic]` rule and its contrast pair. Nothing checks the last three yet (#81).
 - **A colour, duration or easing:** a token in the global stylesheet. A colour pair that carries text joins the contrast list.
 - **A feature awaiting the Project owner's approval:** a flag in `features`.

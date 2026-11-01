@@ -8,7 +8,7 @@ import { Folio } from '@/components/Folio'
 import { PageTurn, turnForward } from '@/components/PageTurn'
 import { Text } from '@/components/prose'
 import { Flow } from '@/components/questionnaire/Flow'
-import { concepts, hrefFor, questionnaires } from '@/content'
+import { hrefFor, questionnaires, site } from '@/content'
 import { cx } from '@/lib/cx'
 import { metadataFor } from '@/lib/metadata'
 import { shownStatus, statusWords } from '@/lib/questionnaire/gate'
@@ -18,12 +18,7 @@ import styles from './page.module.css'
 
 export const dynamicParams = false
 
-/** A flow exists only for a Questionnaire that can be taken in this build (D16). */
-export async function generateStaticParams() {
-  const all = await questionnaires.list()
-  const open = await Promise.all(all.map(({ slug }) => questionnaires.form(slug)))
-  return open.flatMap((form) => (form ? [{ slug: form.slug }] : []))
-}
+export const generateStaticParams = () => site.params('/questionnaires/[slug]/take/')
 
 export async function generateMetadata({
   params,
@@ -50,9 +45,6 @@ export default async function TakeQuestionnairePage({
   if (!questionnaire || !form) notFound()
   const { title, status, limitations, source } = questionnaire
   const intro = hrefFor({ kind: 'questionnaire', id: slug, status })
-  const related = (await concepts.list()).filter((concept) =>
-    questionnaire.concepts.some((ref) => ref.slug === concept.slug),
-  )
 
   const limits = limitations ? (
     <section className={styles.limits} aria-labelledby="end-limits">
@@ -86,13 +78,13 @@ export default async function TakeQuestionnairePage({
           </p>
         </section>
       ) : null}
-      {related.length > 0 ? (
+      {questionnaire.concepts.length > 0 ? (
         <section className={styles.section} aria-labelledby="end-related">
           <h3 id="end-related" className={styles.title}>
             Related Concepts
           </h3>
           <ul className={styles.list}>
-            {related.map((concept) => (
+            {questionnaire.concepts.map((concept) => (
               <li key={concept.slug}>
                 <Link
                   href={hrefFor({ kind: 'concept', id: concept.slug })}

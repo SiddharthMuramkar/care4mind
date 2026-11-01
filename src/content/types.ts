@@ -6,6 +6,7 @@
  * JSON round trip unchanged and a server component can hand it to a client island as it is.
  */
 import type {
+  ContentKind,
   HomepageHero,
   Inline,
   Provenance,
@@ -274,8 +275,8 @@ export interface ConceptView extends ConceptCard, CarriedOver {
     }[]
   }
   /** The Concepts before and after it in its primary topic, alphabetically for now. */
-  previous?: ConceptRef
-  next?: ConceptRef
+  previous?: ConceptCard
+  next?: ConceptCard
   /** Links that leave the site, such as its own DharmaWiki article. */
   external: readonly { label: string; url: string }[]
 }
@@ -304,11 +305,14 @@ export interface TopicView extends TopicCard {
   concepts: readonly ConceptCard[]
   /** The Concepts that are also in it, by name. */
   secondaryConcepts: readonly ConceptCard[]
-  /** The works its Concepts quote. */
-  works: readonly WorkRef[]
-  /** The verses its Concepts quote, by work, then in each work's order. */
-  verses: readonly PassageView[]
+  /** The works its Concepts quote, each with the verses quoted from it, in the work's order. */
+  works: readonly QuotedWork[]
   intro?: TopicIntroView
+}
+
+/** A work, with the verses a page's Concepts quote from it. */
+export interface QuotedWork extends WorkRef {
+  verses: readonly PassageView[]
 }
 
 // Traditional texts
@@ -386,6 +390,8 @@ export interface QuestionnaireCard {
  * and its sources. Nothing held back and no scoring reach a view.
  */
 export interface QuestionnaireView extends QuestionnaireCard, CarriedOver {
+  /** Its Concepts as cards, by name. */
+  concepts: readonly ConceptCard[]
   purpose?: readonly Inline[]
   format?: readonly Inline[]
   limitations?: {
@@ -494,6 +500,8 @@ export interface RouteEntry {
   pattern: string
   /** The page's name, as the last crumb of its trail shows it. */
   title: string
+  /** The record the page shows, on a route whose pattern has `[slug]`: its id is the slug. */
+  record?: { kind: ContentKind; id: Slug }
   /** One representative route per kind, for sampled end-to-end runs. */
   sample?: true
   /** A Proposal awaiting the Project owner's decision (D20): the Concept map and `/proposals/`. */

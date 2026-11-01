@@ -11,13 +11,7 @@ import { citationLinks, Provenance, Sections } from '@/components/prose'
 import { ReferenceList } from '@/components/ReferenceList'
 import { ScriptPair } from '@/components/script/ScriptPair'
 import { ContentsPlate, plateCard, plateScope, type PlateRow } from '@/components/topics'
-import {
-  hrefFor,
-  topics,
-  type ConceptCard as Concept,
-  type PassageView,
-  type WorkRef,
-} from '@/content'
+import { hrefFor, site, topics, type ConceptCard as Concept, type PassageView } from '@/content'
 import { cx } from '@/lib/cx'
 import { metadataFor } from '@/lib/metadata'
 import { toDevanagariDigits } from '@/lib/text'
@@ -27,9 +21,7 @@ import styles from './page.module.css'
 
 export const dynamicParams = false
 
-export async function generateStaticParams() {
-  return (await topics.list()).map(({ slug }) => ({ slug }))
-}
+export const generateStaticParams = () => site.params('/topics/[slug]/')
 
 export async function generateMetadata({ params }: PageProps<'/topics/[slug]'>): Promise<Metadata> {
   return metadataFor(hrefFor({ kind: 'topic', id: (await params).slug }))
@@ -60,17 +52,6 @@ const rowOf = (concept: Concept): PlateRow => ({
     : {}),
 })
 
-/** The verses, by the work they come from, in each work's order. */
-function byWork(verses: readonly PassageView[]) {
-  const works = new Map<string, { work: WorkRef; verses: PassageView[] }>()
-  for (const verse of verses) {
-    const entry = works.get(verse.work.slug) ?? { work: verse.work, verses: [] }
-    entry.verses.push(verse)
-    works.set(verse.work.slug, entry)
-  }
-  return [...works.values()]
-}
-
 /** Who speaks a verse ("अर्जुन उवाच ।"): a line before the verse, not its opening. */
 const SPEAKER = /(उवाच|uvāca)\s*[।|]?$/
 
@@ -96,7 +77,8 @@ export default async function TopicPage({ params }: PageProps<'/topics/[slug]'>)
   const topic = await topics.get((await params).slug)
   if (!topic) notFound()
   const citations = topic.intro ? citationLinks(topic.intro.citations, topic.intro.references) : {}
-  const works = byWork(topic.verses)
+  const { works } = topic
+  const verseCount = works.reduce((count, work) => count + work.verses.length, 0)
   const all = [...topic.concepts, ...topic.secondaryConcepts]
   const card = (concept: Concept) => (
     <li key={concept.slug} {...plateCard(all.indexOf(concept) + 1)}>
@@ -149,12 +131,12 @@ export default async function TopicPage({ params }: PageProps<'/topics/[slug]'>)
               {topic.secondaryConcepts.length > 0
                 ? ` · ${topic.secondaryConcepts.length} more also here`
                 : null}{' '}
-              · {plural(topic.verses.length, 'verse')} quoted
-              {topic.works.length > 0 ? (
+              · {plural(verseCount, 'verse')} quoted
+              {works.length > 0 ? (
                 <>
                   , from{' '}
                   {inWords(
-                    topic.works.map((work) => (
+                    works.map((work) => (
                       <cite key={work.slug} lang={work.lang} className={styles.workName}>
                         {work.title}
                       </cite>
@@ -203,7 +185,7 @@ export default async function TopicPage({ params }: PageProps<'/topics/[slug]'>)
               <h2 id="verses-title" className={reading.sectionTitle}>
                 Verses its Concepts quote
               </h2>
-              {works.map(({ work, verses }) => (
+              {works.map((work) => (
                 <div key={work.slug} className={styles.work}>
                   <h3 className={styles.workTitle}>
                     <Link
@@ -214,7 +196,7 @@ export default async function TopicPage({ params }: PageProps<'/topics/[slug]'>)
                     </Link>
                   </h3>
                   <ol className={styles.verses}>
-                    {verses.map((verse) => (
+                    {work.verses.map((verse) => (
                       <li key={verse.id} className={styles.verseItem}>
                         {/* A passage's anchor on its work's page, made by hrefFor() in the content module. */}
                         <Link
