@@ -11,7 +11,7 @@ import type {
 import type { BlockView, SectionView, TableRowView, TocEntry, TopicRef } from '../types'
 import { must, nameCopy, present } from './common'
 import { hrefFor } from './href'
-import { asciiSpellings, displayName } from './names'
+import { asciiSpellings, displayName } from '../names'
 import { verseView } from './passage'
 
 /** The page a record's sections are shown on, whose anchors their links point at. */

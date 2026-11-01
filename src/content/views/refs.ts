@@ -3,7 +3,7 @@ import type { ConceptRecord, QuestionnaireRecord } from '../schema'
 import type { ConceptRef, RecordRef } from '../types'
 import { must, present } from './common'
 import { hrefFor } from './href'
-import { displayName } from './names'
+import { displayName } from '../names'
 
 /** A link to a Concept's page, with its name's language where the name is IAST. */
 export function conceptRef(concept: ConceptRecord): ConceptRef {

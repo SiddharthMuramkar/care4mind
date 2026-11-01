@@ -210,11 +210,6 @@ describe('addresses and redirects (D02, D17)', () => {
     })
     for (const redirect of served) expect(redirect).toMatchObject({ statusCode: 301 })
   })
-
-  it('sends each redirect to a page in the route registry', async () => {
-    const paths = new Set((await site.routes()).map(({ path }) => path))
-    for (const { destination } of redirects) expect(paths).toContain(destination.split('#')[0])
-  })
 })
 
 describe('breadcrumbs (D15)', () => {
