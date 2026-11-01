@@ -451,8 +451,16 @@ describe('the graph', () => {
 })
 
 describe('feature flags (D16, D20)', () => {
-  const allOn = { questionnairePreview: true, conceptMap: true }
-  const allOff = { questionnairePreview: false, conceptMap: false }
+  const allOn = {
+    questionnairePreview: true,
+    conceptMap: true,
+    startHere: true,
+  }
+  const allOff = {
+    questionnairePreview: false,
+    conceptMap: false,
+    startHere: false,
+  }
 
   it('switches every flag on in local runs and Vercel previews, and off in production', () => {
     expect(readFeatures({})).toEqual(allOn)
@@ -471,6 +479,10 @@ describe('feature flags (D16, D20)', () => {
       ...allOff,
       conceptMap: true,
     })
+    expect(readFeatures({ ...production, FEATURE_START_HERE: '1' })).toEqual({
+      ...allOff,
+      startHere: true,
+    })
   })
 
   it('lets each flag’s own variable force it off anywhere else', () => {
@@ -482,6 +494,7 @@ describe('feature flags (D16, D20)', () => {
       ...allOn,
       conceptMap: false,
     })
+    expect(readFeatures({ FEATURE_START_HERE: '0' })).toEqual({ ...allOn, startHere: false })
   })
 
   it('refuses an override that is neither 1 nor 0', () => {
@@ -491,7 +504,8 @@ describe('feature flags (D16, D20)', () => {
   it('shows the proposals page while the Concept map is on, with no flag of its own', () => {
     expect(proposalsPageOn(allOn)).toBe(true)
     expect(proposalsPageOn({ ...allOff, conceptMap: true })).toBe(true)
-    expect(proposalsPageOn({ ...allOn, conceptMap: false })).toBe(false)
+    expect(proposalsPageOn({ ...allOff, startHere: true })).toBe(true)
+    expect(proposalsPageOn(allOff)).toBe(false)
   })
 
   it('reads the flags once, from this process’s environment', () => {

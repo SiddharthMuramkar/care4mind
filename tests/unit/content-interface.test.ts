@@ -28,8 +28,16 @@ import { createContent } from '@/content/views'
 // seam: each test builds a small made-up content source and reads it through the same
 // namespaces the pages use. Every record and string here is made up for the test.
 
-const ON: Features = { questionnairePreview: true, conceptMap: true }
-const OFF: Features = { questionnairePreview: false, conceptMap: false }
+const ON: Features = {
+  questionnairePreview: true,
+  conceptMap: true,
+  startHere: true,
+}
+const OFF: Features = {
+  questionnairePreview: false,
+  conceptMap: false,
+  startHere: false,
+}
 
 const provenance = {
   sources: [{ url: 'https://example.org/page/', retrieved: '2026-10-27' }],
@@ -1679,10 +1687,11 @@ describe('the feature flags, from the environment to the interface (D16, D20)', 
       flow: paths.includes('/questionnaires/work-scale/take/'),
       map: paths.includes('/concepts/map/'),
       proposals: paths.includes('/proposals/'),
+      start: paths.includes('/start/'),
     }
   }
-  const everything = { form: true, flow: true, map: true, proposals: true }
-  const nothing = { form: false, flow: false, map: false, proposals: false }
+  const everything = { form: true, flow: true, map: true, proposals: true, start: true }
+  const nothing = { form: false, flow: false, map: false, proposals: false, start: false }
 
   it('offers everything in local runs and Vercel previews, and none of it in production', async () => {
     expect(await offered({})).toEqual(everything)
@@ -1702,6 +1711,11 @@ describe('the feature flags, from the environment to the interface (D16, D20)', 
       map: true,
       proposals: true,
     })
+    expect(await offered({ ...production, FEATURE_START_HERE: '1' })).toEqual({
+      ...nothing,
+      proposals: true,
+      start: true,
+    })
     expect(await offered({ FEATURE_QUESTIONNAIRE_PREVIEW: '0' })).toEqual({
       ...everything,
       form: false,
@@ -1710,7 +1724,12 @@ describe('the feature flags, from the environment to the interface (D16, D20)', 
     expect(await offered({ FEATURE_CONCEPT_MAP: '0' })).toEqual({
       ...everything,
       map: false,
-      proposals: false,
     })
+    expect(
+      await offered({
+        FEATURE_CONCEPT_MAP: '0',
+        FEATURE_START_HERE: '0',
+      }),
+    ).toEqual({ ...everything, map: false, proposals: false, start: false })
   })
 })

@@ -23,6 +23,8 @@ const ABOUT: Partial<Record<RouteEntry['kind'], string>> = {
     'Every Questionnaire on Care4Mind: what each one is for, and whether you can take it yet.',
   references: 'Every Reference Care4Mind cites, in one style, with the pages that cite it.',
   search: 'Search Care4Mind for a Concept, a term, a verse, a text or a Reference.',
+  start:
+    'A proposal: what Indian psychology is, how Care4Mind is organised, how to read Sanskrit names and where to begin.',
   proposals: 'Features proposed beyond the brief, for the Project owner to accept or refuse.',
 }
 

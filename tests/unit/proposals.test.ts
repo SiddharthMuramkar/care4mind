@@ -7,7 +7,11 @@ import { proposalsFor } from '@/components/proposals/proposals'
 // built proposal shows only while its flag is on; audio pronunciation is described, not
 // built; the reading-path idea was dropped with D21. Expected names come from the ticket.
 
-const ON: Features = { questionnairePreview: true, conceptMap: true }
+const ON: Features = {
+  questionnairePreview: true,
+  conceptMap: true,
+  startHere: true,
+}
 
 const listed = (flags: Features) => proposalsFor(flags).map(({ name, built }) => ({ name, built }))
 
@@ -15,12 +19,18 @@ describe('proposalsFor', () => {
   it('lists the map and audio pronunciation, and nothing else', () => {
     expect(listed(ON)).toEqual([
       { name: 'Concept map', built: true },
+      { name: 'Start here', built: true },
       { name: 'Audio pronunciation', built: false },
     ])
   })
 
   it('leaves out a built proposal whose flag is off', () => {
     expect(listed({ ...ON, conceptMap: false })).toEqual([
+      { name: 'Start here', built: true },
+      { name: 'Audio pronunciation', built: false },
+    ])
+    expect(listed({ ...ON, startHere: false })).toEqual([
+      { name: 'Concept map', built: true },
       { name: 'Audio pronunciation', built: false },
     ])
   })

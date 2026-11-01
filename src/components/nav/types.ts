@@ -52,4 +52,6 @@ export interface SiteNav {
   library: { index: NavLink; pages: readonly LibraryLink[] }
   search: NavLink
   proposals?: NavLink
+  /** Start here, while its proposal is on: the header shows it after the wordmark. */
+  start?: NavLink
 }

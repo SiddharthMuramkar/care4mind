@@ -17,8 +17,16 @@ import { createContent } from '@/content/views'
 // content source with the feature flags each test needs, and through the content source itself
 // for what a record stores (its links, flags and listed edits).
 
-const ON: Features = { questionnairePreview: true, conceptMap: true }
-const OFF: Features = { questionnairePreview: false, conceptMap: false }
+const ON: Features = {
+  questionnairePreview: true,
+  conceptMap: true,
+  startHere: true,
+}
+const OFF: Features = {
+  questionnairePreview: false,
+  conceptMap: false,
+  startHere: false,
+}
 
 const site = createContent(localSource, ON)
 
@@ -46,11 +54,17 @@ const CONCEPTS = [
 ]
 
 /** The pages that only exist while their feature flag is on (settled rule 17). */
-const FLAGGED_PAGES = ['/questionnaires/karmayoga-scale/take/', '/concepts/map/', '/proposals/']
+const FLAGGED_PAGES = [
+  '/questionnaires/karmayoga-scale/take/',
+  '/concepts/map/',
+  '/proposals/',
+  '/start/',
+]
 
 /** Every public page of design B2, with the slugs content v1 has (D01, D02). */
 const PAGES = [
   '/',
+  '/start/',
   '/concepts/',
   ...CONCEPTS.map((slug) => `/concepts/${slug}/`),
   '/concepts/map/',
@@ -111,7 +125,7 @@ function fail(message: string): never {
 describe('the route registry, on the real content', () => {
   it('lists every page of design B2 with the content’s slugs, every flag on', async () => {
     const paths = (await site.site.routes()).map(({ path }) => path)
-    expect(paths).toHaveLength(45)
+    expect(paths).toHaveLength(46)
     expect(paths.toSorted()).toEqual(PAGES.toSorted())
   })
 
@@ -131,15 +145,20 @@ describe('the route registry, on the real content', () => {
       'references',
       'resource-list',
       'search',
+      'start',
       'texts',
       'topic',
       'work',
     ])
   })
 
-  it('marks the Concept map and /proposals/ as proposals', async () => {
+  it('marks the Concept map, /proposals/ and /start/ as proposals', async () => {
     const proposals = (await site.site.routes()).filter(({ proposal }) => proposal)
-    expect(proposals.map(({ path }) => path).toSorted()).toEqual(['/concepts/map/', '/proposals/'])
+    expect(proposals.map(({ path }) => path).toSorted()).toEqual([
+      '/concepts/map/',
+      '/proposals/',
+      '/start/',
+    ])
   })
 
   it('leaves out the KarmaYoga flow, the Concept map and /proposals/ with their flags off', async () => {

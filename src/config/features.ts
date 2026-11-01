@@ -12,11 +12,14 @@ export interface Features {
   questionnairePreview: boolean
   /** Proposal: the Concept map at /concepts/map/. */
   conceptMap: boolean
+  /** Proposal: the Start here page at /start/. */
+  startHere: boolean
 }
 
 const VARIABLES = {
   questionnairePreview: 'FEATURE_QUESTIONNAIRE_PREVIEW',
   conceptMap: 'FEATURE_CONCEPT_MAP',
+  startHere: 'FEATURE_START_HERE',
 } as const satisfies Record<keyof Features, string>
 
 type Environment = Readonly<Record<string, string | undefined>>
@@ -34,13 +37,14 @@ export function readFeatures(env: Environment): Features {
   return {
     questionnairePreview: flag(VARIABLES.questionnairePreview),
     conceptMap: flag(VARIABLES.conceptMap),
+    startHere: flag(VARIABLES.startHere),
   }
 }
 
 /** This build's flags. */
 export const features: Features = readFeatures(process.env)
 
-/** The proposals page is on while the Concept map is, its one built proposal: it has no flag of its own. */
+/** The proposals page is on while any proposal is: it has no flag of its own. */
 export function proposalsPageOn(flags: Features = features): boolean {
-  return flags.conceptMap
+  return flags.conceptMap || flags.startHere
 }

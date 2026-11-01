@@ -65,6 +65,15 @@ export function MenuDrawer({
               ) : null}
 
               <nav aria-label="Main" className={styles.contents}>
+                {nav.start ? (
+                  <Link
+                    href={nav.start.href}
+                    className={styles.sectionLink}
+                    aria-current={currentFor(pathname, nav.start.href)}
+                  >
+                    {nav.start.label}
+                  </Link>
+                ) : null}
                 <ol className={styles.sections}>
                   {nav.sections.map((section, index) => {
                     const panel = panelOf(section.id)
