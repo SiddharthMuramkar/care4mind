@@ -30,9 +30,8 @@ export async function generateMetadata({ params }: PageProps<'/topics/[slug]'>):
 const plural = (count: number, one: string) => `${count} ${count === 1 ? one : `${one}s`}`
 
 /**
- * A topic (D03): its Concepts as cards beside a contents plate, set like a book's, whose rows
- * light as their cards are pointed at; the introduction it shares where it has one (the values
- * topic's yama–niyama text, stored once); and the verses its Concepts quote. No JavaScript.
+ * A topic: its Concepts beside a contents plate, the introduction it shares where it has one and
+ * the verses its Concepts quote, by work. It ships no JavaScript: CSS :has() lights the plate.
  */
 export default async function TopicPage({ params }: PageProps<'/topics/[slug]'>) {
   const topic = await topics.get((await params).slug)

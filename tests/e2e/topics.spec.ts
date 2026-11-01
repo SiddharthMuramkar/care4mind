@@ -84,7 +84,9 @@ test('lists the verses its Concepts quote, each leading to its passage', async (
 
 test('opens a verse after its speaker’s line, even one joined by sandhi', async ({ page }) => {
   await gotoReady(page, hrefFor({ kind: 'topic', id: 'mind' }))
-  const verse = mindVerses.find(({ id }) => id === 'bhagavad-gita/2.55')
+  const verse = mind.works
+    .find(({ slug }) => slug === 'bhagavad-gita')
+    ?.verses.find(({ id }) => id === 'bhagavad-gita/2.55')
   if (!verse) throw new Error('The mind topic quotes Bhagavad Gītā 2.55.')
   const link = page
     .getByRole('region', { name: 'Verses its Concepts quote' })
