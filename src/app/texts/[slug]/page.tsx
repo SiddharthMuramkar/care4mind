@@ -1,16 +1,19 @@
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
+import type { CSSProperties } from 'react'
 
 import { Breadcrumbs } from '@/components/Breadcrumbs'
+import { Fleuron } from '@/components/Fleuron'
 import { Folio } from '@/components/Folio'
+import { OrnamentRule } from '@/components/OrnamentRule'
 import { PageTurn } from '@/components/PageTurn'
-import { Provenance, RecordLink, Text } from '@/components/prose'
-import { hrefFor, site, works, type PassageView, type RecordRef } from '@/content'
+import { Provenance } from '@/components/prose'
+import { ReadingThread } from '@/components/ReadingThread'
+import { Passage, VerseRail, VerseTally, WorkTitle } from '@/components/texts'
+import { hrefFor, site, works } from '@/content'
 import { cx } from '@/lib/cx'
 import { metadataFor } from '@/lib/metadata'
-import { toDevanagariDigits } from '@/lib/text'
 
-import listing from '../../listing.module.css'
 import reading from '../../reading.module.css'
 import styles from './page.module.css'
 
@@ -24,107 +27,66 @@ export async function generateMetadata({ params }: PageProps<'/texts/[slug]'>): 
   return metadataFor(PATTERN.replace('[slug]', (await params).slug))
 }
 
-function Records({ records }: { records: readonly RecordRef[] }) {
-  return (
-    <ul className={listing.inline}>
-      {records.map((record) => (
-        <li key={`${record.kind}/${record.id}`}>
-          <RecordLink record={record} />
-        </li>
-      ))}
-    </ul>
-  )
-}
-
-/** One verse the site quotes, anchored at its locator (`#1-30`), as its work's page shows it. */
-function Passage({ passage, unit }: { passage: PassageView; unit: string }) {
-  const { devanagari, transliteration, translations } = passage
-  return (
-    <section id={passage.anchor} className={styles.passage}>
-      <h2 className={styles.locator}>
-        {unit} {passage.locator}
-      </h2>
-      {devanagari.length > 0 ? (
-        <p lang="sa-Deva" className={styles.deva}>
-          {devanagari.map((line, index) => (
-            <span key={index} className={styles.line}>
-              {line}
-              {index === devanagari.length - 1 ? (
-                <span className={styles.number}> ॥ {toDevanagariDigits(passage.locator)} ॥</span>
-              ) : null}
-            </span>
-          ))}
-        </p>
-      ) : null}
-      {transliteration ? (
-        <p lang={passage.work.lang} className={styles.transliteration}>
-          {transliteration.lines.map((line, index) => (
-            <span key={index} className={styles.line}>
-              {line}
-            </span>
-          ))}
-        </p>
-      ) : null}
-      {transliteration?.scheme === 'informal' ? (
-        <p className={listing.meta}>Transliteration as on the current site</p>
-      ) : null}
-      {translations.map((translation) => (
-        <div key={translation.id} className={styles.translation}>
-          <p>
-            <span className={styles.label}>Translation</span> <Text text={translation.text} />
-            {translation.source ? <> ({translation.source})</> : null}
-          </p>
-          {translations.length > 1 && translation.quotedIn.length > 0 ? (
-            <div className={listing.cited}>
-              As quoted on <Records records={translation.quotedIn} />
-            </div>
-          ) : null}
-        </div>
-      ))}
-      {passage.quotedIn.length > 0 ? (
-        <div className={listing.cited}>
-          Quoted in <Records records={passage.quotedIn} />
-        </div>
-      ) : null}
-    </section>
-  )
-}
-
 /**
- * A traditional text (D08): every verse the site quotes from it, in the work's own order, each
- * at its own address.
+ * A traditional text, set like a manuscript: every verse the site quotes from it, in the
+ * work's own order, each at its own address (`#1-30`), with a rail of verse numbers beside it.
+ * Only the verses and their translations: no commentary. No JavaScript of its own.
  */
 export default async function WorkPage({ params }: PageProps<'/texts/[slug]'>) {
   const work = await works.get((await params).slug)
   if (!work) notFound()
+  const path = hrefFor({ kind: 'work', id: work.slug })
 
   return (
     <PageTurn>
-      <main id="main" className={reading.page}>
-        <Breadcrumbs path={hrefFor({ kind: 'work', id: work.slug })} />
-        <Folio as="article" className={reading.article} aria-labelledby="work-title">
+      <main id="main" className={cx(reading.page, styles.page)}>
+        <ReadingThread />
+        <Breadcrumbs path={path} />
+        <Folio
+          as="article"
+          className={cx(reading.article, styles.article)}
+          aria-labelledby="work-title"
+        >
           <header className={reading.titlePage}>
             <p className={reading.kicker}>Traditional text</p>
-            <h1 id="work-title" className={cx(reading.title, reading.titleLong)}>
-              <span lang={work.lang}>{work.title}</span>
+            <h1 id="work-title" className={cx(reading.title, styles.title)}>
+              <WorkTitle
+                work={work}
+                className={styles.titlePair}
+                devanagariClassName={styles.titleDeva}
+              />
             </h1>
-            {work.term.devanagari ? (
-              <p lang="sa-Deva" className={styles.titleDeva}>
-                {work.term.devanagari}
-              </p>
-            ) : null}
             {work.english ? <p className={reading.gloss}>{work.english}</p> : null}
-            <p className={listing.facts}>
-              {work.attribution ? <>{work.attribution} · </> : null}
-              {work.passageCount} {work.passageCount === 1 ? 'verse' : 'verses'} quoted
+            {work.attribution ? <p className={styles.attribution}>{work.attribution}</p> : null}
+            <p className={styles.count}>
+              <VerseTally locators={work.passages.map(({ locator }) => locator)} ink />
+              <span>
+                {work.passageCount} {work.passageCount === 1 ? 'verse' : 'verses'} quoted
+              </span>
             </p>
           </header>
 
-          {work.passages.map((passage) => (
-            <Passage key={passage.id} passage={passage} unit={work.locatorLabel} />
-          ))}
+          <OrnamentRule className={styles.rule} />
 
-          <Provenance of={work} />
+          <div
+            className={styles.body}
+            // The verses' view timelines, for the rail to follow (see VerseRail).
+            style={
+              {
+                timelineScope: work.passages.map(({ anchor }) => `--verse-${anchor}`).join(', '),
+              } as CSSProperties
+            }
+          >
+            <VerseRail passages={work.passages} />
+
+            <div className={styles.verses}>
+              {work.passages.map((passage) => (
+                <Passage key={passage.id} passage={passage} unit={work.locatorLabel} />
+              ))}
+              <Fleuron className={styles.tailpiece} />
+              <Provenance of={work} />
+            </div>
+          </div>
         </Folio>
       </main>
     </PageTurn>
