@@ -1,15 +1,13 @@
 import type { Metadata } from 'next'
-import Link from 'next/link'
 import { notFound } from 'next/navigation'
 
-import { Citation } from '@/components/Citation'
-import { turnForward } from '@/components/PageTurn'
-import { PageTitle, ReadingPage, TitlePage } from '@/components/ReadingPage'
 import { Text } from '@/components/prose'
+import { StatusBadge } from '@/components/StatusBadge'
 import { Flow } from '@/components/questionnaire/Flow'
+import { Limitations, RelatedConcepts, Source } from '@/components/questionnaire/Sections'
+import { PageTitle, ReadingPage, TitlePage } from '@/components/ReadingPage'
 import { hrefFor, questionnaires, site } from '@/content'
 import { metadataFor } from '@/lib/metadata'
-import { shownStatus, statusWords } from '@/lib/questionnaire/gate'
 
 import reading from '../../../reading.module.css'
 import styles from './page.module.css'
@@ -41,61 +39,36 @@ export default async function TakeQuestionnairePage({
     questionnaires.form(slug),
   ])
   if (!questionnaire || !form) notFound()
-  const { title, status, limitations, source } = questionnaire
+  const { title, status, shownStatus, limitations, source, concepts } = questionnaire
   const intro = hrefFor({ kind: 'questionnaire', id: slug, status })
 
-  const limits = limitations ? (
-    <section className={styles.limits} aria-labelledby="end-limits">
-      <h3 id="end-limits" className={styles.title}>
-        What this is not
-      </h3>
-      {limitations.status === 'draft-pending-psychology-expert' ? (
-        <p className={styles.draft}>
-          Draft wording. The Psychology expert has not reviewed these limitations yet.
-        </p>
-      ) : null}
-      <ul className={styles.list}>
-        {limitations.items.map((item) => (
-          <li key={item}>
-            <Text text={item} />
-          </li>
-        ))}
-      </ul>
-    </section>
-  ) : null
+  const limits = (
+    <Limitations
+      limitations={limitations}
+      title="What this is not"
+      id="end-limits"
+      level={3}
+      className={styles.limits}
+      headingClassName={styles.title}
+    />
+  )
 
   const sources = (
     <>
-      {source ? (
-        <section className={styles.section} aria-labelledby="end-source">
-          <h3 id="end-source" className={styles.title}>
-            Source
-          </h3>
-          <p>
-            <Citation reference={source} />
-          </p>
-        </section>
-      ) : null}
-      {questionnaire.concepts.length > 0 ? (
-        <section className={styles.section} aria-labelledby="end-related">
-          <h3 id="end-related" className={styles.title}>
-            Related Concepts
-          </h3>
-          <ul className={styles.list}>
-            {questionnaire.concepts.map((concept) => (
-              <li key={concept.slug}>
-                <Link
-                  href={hrefFor({ kind: 'concept', id: concept.slug })}
-                  transitionTypes={turnForward}
-                >
-                  <span lang={concept.lang}>{concept.name}</span>
-                  {concept.term && concept.english ? ` (${concept.english})` : null}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </section>
-      ) : null}
+      <Source
+        reference={source}
+        id="end-source"
+        level={3}
+        className={styles.section}
+        headingClassName={styles.title}
+      />
+      <RelatedConcepts
+        concepts={concepts}
+        id="end-related"
+        level={3}
+        className={styles.section}
+        headingClassName={styles.title}
+      />
     </>
   )
 
@@ -104,9 +77,7 @@ export default async function TakeQuestionnairePage({
       <TitlePage className={styles.head}>
         <p className={reading.kicker}>Take the Questionnaire</p>
         <PageTitle long>{title}</PageTitle>
-        <p className={styles.status} data-status={shownStatus(status)}>
-          {statusWords(status)}
-        </p>
+        <StatusBadge status={shownStatus} />
         <p className={styles.promise}>
           Your answers aren’t scored yet. They stay on this page while it is open: nothing you
           answer is saved or sent anywhere.
@@ -119,9 +90,9 @@ export default async function TakeQuestionnairePage({
             This Questionnaire needs JavaScript
           </h2>
           <p>
-            Your answers may go neither into the address nor to a server, so they can only be kept
-            in this page while it is open, and that takes JavaScript. Switch it on to take the{' '}
-            {title}.
+            Your answers may go neither into the address nor to a server, so they can only be
+            kept in this page while it is open, and that takes JavaScript. Switch it on to take
+            the {title}.
           </p>
           <p>
             <a href={intro}>Back to what the {title} is for, and its limits</a>

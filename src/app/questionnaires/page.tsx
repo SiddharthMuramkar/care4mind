@@ -5,9 +5,9 @@ import { OrnamentRule } from '@/components/OrnamentRule'
 import { turnForward } from '@/components/PageTurn'
 import { QuestionnaireCard } from '@/components/QuestionnaireCard'
 import { PageTitle, ReadingPage, TitlePage } from '@/components/ReadingPage'
+import { StatusBadge } from '@/components/StatusBadge'
 import { hrefFor, questionnaires, topics, type QuestionnaireCard as Card } from '@/content'
 import { metadataFor } from '@/lib/metadata'
-import { statusWords } from '@/lib/questionnaire/gate'
 
 import listing from '../listing.module.css'
 import reading from '../reading.module.css'
@@ -25,13 +25,11 @@ export function generateMetadata(): Promise<Metadata> {
  * in words, and links to its Concept.
  */
 function Later({ questionnaire }: { questionnaire: Card }) {
-  const { anchor, sourceTitle, status, concepts } = questionnaire
+  const { anchor, sourceTitle, shownStatus, concepts } = questionnaire
   return (
     <li id={anchor} className={styles.slip}>
       <h4 className={styles.slipTitle}>{sourceTitle}</h4>
-      <p className={styles.slipStatus} data-status={status}>
-        {statusWords(status)}
-      </p>
+      <StatusBadge status={shownStatus} small className={styles.slipStatus} />
       {concepts.length > 0 ? (
         <p className={styles.slipConcepts}>
           <span className={styles.slipLabel}>{concepts.length === 1 ? 'Concept' : 'Concepts'}</span>{' '}

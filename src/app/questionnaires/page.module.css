@@ -99,16 +99,8 @@
   text-wrap: balance;
 }
 
-/* "Coming later", in words and on its status's colour. */
 .slipStatus {
   justify-self: start;
-  margin: 0;
-  padding: 0.05rem 0.55rem;
-  background: var(--status);
-  color: var(--status-ink);
-  font-variant-caps: all-small-caps;
-  letter-spacing: 0.1em;
-  font-size: 0.9375rem;
 }
 
 .slipConcepts {

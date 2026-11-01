@@ -3,10 +3,10 @@ import Link from 'next/link'
 import { ViewTransition, type CSSProperties, type ReactNode } from 'react'
 
 import { hrefFor, type ConceptView, type VerseView } from '@/content'
-import { statusWords } from '@/lib/questionnaire/gate'
 
 import { titleMorphName, turnForward } from '../PageTurn'
 import { LinkPreview } from '../preview/LinkPreview'
+import { statusWords } from '../StatusBadge'
 import { Text } from '../prose'
 import { conceptPreview, passagePreview } from './previews'
 import styles from './LinkedKnowledge.module.css'
@@ -162,7 +162,7 @@ export function LinkedKnowledge({
           count={questionnaires.length}
         >
           <ul className={styles.rows}>
-            {questionnaires.map(({ slug, title, status }) => (
+            {questionnaires.map(({ slug, title, status, shownStatus }) => (
               <li key={slug} className={styles.row}>
                 <Link
                   href={hrefFor({ kind: 'questionnaire', id: slug, status })}
@@ -177,7 +177,7 @@ export function LinkedKnowledge({
                   </ViewTransition>
                 </Link>
                 <Leader />
-                <span className={styles.note}>{statusWords(status)}</span>
+                <span className={styles.note}>{statusWords(shownStatus)}</span>
               </li>
             ))}
           </ul>

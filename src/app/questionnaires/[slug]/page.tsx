@@ -1,17 +1,17 @@
-import type { Metadata } from 'next'
+import type { Metadata, Route } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { ViewTransition } from 'react'
 
-import { Citation } from '@/components/Citation'
+import { turnForward } from '@/components/PageTurn'
 import { HelpLine } from '@/components/HelpLine'
-import { titleMorphName, turnForward } from '@/components/PageTurn'
-import { PageTitle, ReadingPage, TitlePage } from '@/components/ReadingPage'
 import { Provenance, Text } from '@/components/prose'
+import { PageTitle, ReadingPage, TitlePage } from '@/components/ReadingPage'
 import { ReadingThread } from '@/components/ReadingThread'
+import { Limitations, RelatedConcepts, Source } from '@/components/questionnaire/Sections'
+import { StatusBadge } from '@/components/StatusBadge'
 import { hrefFor, questionnaires, site } from '@/content'
 import { metadataFor } from '@/lib/metadata'
-import { shownStatus, startOf, statusWords } from '@/lib/questionnaire/gate'
 
 import cta from '../../cta.module.css'
 import reading from '../../reading.module.css'
@@ -40,25 +40,17 @@ export default async function QuestionnairePage({ params }: PageProps<'/question
   const questionnaire = await questionnaires.get((await params).slug)
   if (!questionnaire || questionnaire.status === 'coming-later') notFound()
 
-  const { slug, status } = questionnaire
-  const start = startOf(questionnaire, await questionnaires.form(slug))
+  const { slug, status, shownStatus, takeHref } = questionnaire
 
   return (
-    <ReadingPage
-      path={hrefFor({ kind: 'questionnaire', id: slug, status })}
-      lead={<ReadingThread />}
-    >
+    <ReadingPage path={hrefFor({ kind: 'questionnaire', id: slug, status })} lead={<ReadingThread />}>
       <TitlePage>
         <p className={reading.kicker}>Questionnaire</p>
-        <PageTitle>
-          {/* The Questionnaires page's card flies into this heading. */}
-          <ViewTransition name={titleMorphName('questionnaire', slug)} share="morph" default="none">
+        <PageTitle>{/* The Questionnaires page's card flies into this heading. */}
+          <ViewTransition name={`questionnaire-title-${slug}`} share="morph" default="none">
             <span>{questionnaire.title}</span>
-          </ViewTransition>
-        </PageTitle>
-        <p className={styles.status} data-status={shownStatus(status)}>
-          {statusWords(status)}
-        </p>
+          </ViewTransition></PageTitle>
+        <StatusBadge status={shownStatus} />
         {questionnaire.summary ? (
           <p className={reading.summary}>
             <Text text={questionnaire.summary} />
@@ -94,48 +86,29 @@ export default async function QuestionnairePage({ params }: PageProps<'/question
         </section>
       ) : null}
 
-      {questionnaire.limitations ? (
-        <section
-          className={`${reading.section} ${styles.limitations}`}
-          aria-labelledby="limitations-title"
-        >
-          <h2 id="limitations-title" className={reading.sectionTitle}>
-            Before you start: its limits
-          </h2>
-          {questionnaire.limitations.status === 'draft-pending-psychology-expert' ? (
-            <p className={styles.draft}>
-              Draft wording. The Psychology expert has not reviewed these limitations yet.
-            </p>
-          ) : null}
-          <ul className={styles.list}>
-            {questionnaire.limitations.items.map((item) => (
-              <li key={item}>
-                <Text text={item} />
-              </li>
-            ))}
-          </ul>
-          <HelpLine className={styles.help} />
-        </section>
-      ) : (
-        <HelpLine className={`${reading.section} ${styles.help}`} />
-      )}
+      <Limitations
+        limitations={questionnaire.limitations}
+        title="Before you start: its limits"
+        id="limitations-title"
+        level={2}
+        className={`${reading.section} ${styles.limitations}`}
+        headingClassName={reading.sectionTitle}
+      />
+      <HelpLine className={`${reading.section} ${styles.help}`} />
 
-      {questionnaire.source ? (
-        <section className={reading.section} aria-labelledby="source-title">
-          <h2 id="source-title" className={reading.sectionTitle}>
-            Source
-          </h2>
-          <p>
-            <Citation reference={questionnaire.source} />
-          </p>
-        </section>
-      ) : null}
+      <Source
+        reference={questionnaire.source}
+        id="source-title"
+        level={2}
+        className={reading.section}
+        headingClassName={reading.sectionTitle}
+      />
 
       <div className={styles.start}>
-        {start.open ? (
+        {takeHref ? (
           <>
             <Link
-              href={start.href}
+              href={takeHref as Route}
               className={cta.primary}
               transitionTypes={turnForward}
               data-ink
@@ -166,26 +139,13 @@ export default async function QuestionnairePage({ params }: PageProps<'/question
         )}
       </div>
 
-      {questionnaire.concepts.length > 0 ? (
-        <section className={reading.section} aria-labelledby="related-title">
-          <h2 id="related-title" className={reading.sectionTitle}>
-            Related Concepts
-          </h2>
-          <ul className={styles.list}>
-            {questionnaire.concepts.map((concept) => (
-              <li key={concept.slug}>
-                <Link
-                  href={hrefFor({ kind: 'concept', id: concept.slug })}
-                  transitionTypes={turnForward}
-                >
-                  <span lang={concept.lang}>{concept.name}</span>
-                  {concept.term && concept.english ? ` (${concept.english})` : null}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </section>
-      ) : null}
+      <RelatedConcepts
+        concepts={questionnaire.concepts}
+        id="related-title"
+        level={2}
+        className={reading.section}
+        headingClassName={reading.sectionTitle}
+      />
 
       <Provenance of={questionnaire} />
     </ReadingPage>

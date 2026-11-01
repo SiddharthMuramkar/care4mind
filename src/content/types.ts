@@ -376,8 +376,12 @@ export interface QuestionnaireCard {
   title: string
   /** The page title as the current site published it. */
   sourceTitle: string
-  /** Live and preview can be taken (preview only where its flag is on); the others can't (D16). */
+  /** As its record has it: live, preview, coming soon or coming later. */
   status: QuestionnaireStatus
+  /** The status a visitor sees in this build: a preview is coming soon while its flag is off. */
+  shownStatus: QuestionnaireStatus
+  /** Its flow, present only where it can be taken in this build. */
+  takeHref?: string
   summary?: Inline
   /** Its anchor on the Questionnaires page, which lists the coming-later ones. */
   anchor: string

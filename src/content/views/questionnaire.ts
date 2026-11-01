@@ -11,6 +11,7 @@ import type {
 import { topicRef } from './blocks'
 import { byName, carriedOver, must, present } from './common'
 import { conceptCard } from './concept'
+import { hrefFor } from './href'
 import { referenceView } from './reference'
 import { conceptRef, questionnaireHref } from './refs'
 
@@ -19,8 +20,13 @@ import { conceptRef, questionnaireHref } from './refs'
  * while `questionnairePreview` is on, and only if it has a form. Coming soon or later, never.
  */
 export function canTake(record: QuestionnaireRecord, flags: Features): boolean {
-  if (!record.form) return false
-  return record.status === 'live' || (record.status === 'preview' && flags.questionnairePreview)
+  const shown = shownStatus(record.status, flags)
+  return record.form !== undefined && (shown === 'live' || shown === 'preview')
+}
+
+/** The status a visitor sees: a preview is coming soon while `questionnairePreview` is off. */
+export function shownStatus(status: QuestionnaireStatus, flags: Features): QuestionnaireStatus {
+  return status === 'preview' && !flags.questionnairePreview ? 'coming-soon' : status
 }
 
 /** Those that can be taken first, then coming soon, then coming later. */
@@ -35,6 +41,7 @@ export const STATUS_ORDER: readonly QuestionnaireStatus[] = [
 export function questionnaireCard(
   record: QuestionnaireRecord,
   graph: ContentGraph,
+  flags: Features,
 ): QuestionnaireCard {
   const concepts = record.concepts.map((slug) => must(graph, 'concept', slug))
   const topics = new Map<string, TopicRef>()
@@ -47,7 +54,13 @@ export function questionnaireCard(
     title: record.title,
     sourceTitle: record.sourceTitle,
     status: record.status,
-    ...present({ summary: record.summary }),
+    shownStatus: shownStatus(record.status, flags),
+    ...present({
+      summary: record.summary,
+      takeHref: canTake(record, flags)
+        ? hrefFor({ kind: 'questionnaire', id: record.slug, status: record.status, flow: true })
+        : undefined,
+    }),
     anchor: record.slug,
     href: questionnaireHref(record),
     concepts: concepts.map(conceptRef),
@@ -62,11 +75,12 @@ export function questionnaireCard(
 export function questionnaireView(
   record: QuestionnaireRecord,
   graph: ContentGraph,
+  flags: Features,
 ): QuestionnaireView {
   const reference = (id: string | undefined) =>
     id === undefined ? undefined : referenceView(must(graph, 'reference', id), graph)
   return {
-    ...questionnaireCard(record, graph),
+    ...questionnaireCard(record, graph, flags),
     concepts: record.concepts
       .map((slug) => conceptCard(must(graph, 'concept', slug), graph))
       .sort((a, b) => byName(a.name, b.name)),

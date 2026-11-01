@@ -77,7 +77,7 @@ export function createContent(source: ContentSource, flags: Features) {
       async get(slug: Slug): Promise<ConceptView | null> {
         const read = await graph()
         const record = read.record('concept', slug)
-        return record ? conceptView(record, read) : null
+        return record ? conceptView(record, read, flags) : null
       },
       /**
        * Every Concept as a card, by name with diacritics ignored: only those in a topic (as
@@ -161,7 +161,7 @@ export function createContent(source: ContentSource, flags: Features) {
       async get(slug: Slug): Promise<QuestionnaireView | null> {
         const read = await graph()
         const record = read.record('questionnaire', slug)
-        return record ? questionnaireView(record, read) : null
+        return record ? questionnaireView(record, read, flags) : null
       },
       /** Every Questionnaire: live, then preview, coming soon and coming later, each by title. */
       async list(): Promise<QuestionnaireCard[]> {
@@ -172,7 +172,7 @@ export function createContent(source: ContentSource, flags: Features) {
               STATUS_ORDER.indexOf(a.status) - STATUS_ORDER.indexOf(b.status) ||
               byName(a.title, b.title),
           )
-          .map((questionnaire) => questionnaireCard(questionnaire, read))
+          .map((questionnaire) => questionnaireCard(questionnaire, read, flags))
       },
       /**
        * Its form, or null unless it can be taken in this build: live, or preview while

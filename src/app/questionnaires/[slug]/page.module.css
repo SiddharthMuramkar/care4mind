@@ -15,16 +15,6 @@
   background: rgb(255 255 255 / 0.25);
 }
 
-.draft {
-  justify-self: start;
-  padding: 0.35rem 0.75rem;
-  border-inline-start: 4px solid var(--color-highlight);
-  background: var(--color-surface);
-  color: var(--color-surface-ink);
-  font-style: italic;
-  font-size: 1rem;
-}
-
 .start {
   display: grid;
   justify-items: center;
@@ -51,17 +41,6 @@
 
 .startNote {
   max-width: 40ch;
-}
-
-/* The status badge: its words, on its status's colour (globals.css). */
-.status {
-  margin: 0;
-  padding: 0.2rem 0.75rem;
-  background: var(--status);
-  color: var(--status-ink);
-  font-variant-caps: all-small-caps;
-  letter-spacing: 0.1em;
-  font-size: 1.0625rem;
 }
 
 /* Where to call for help now: set apart from the limits above by a rule. */
