@@ -35,10 +35,12 @@
 }
 
 /*
- * Design tokens. Every colour, type step, duration and easing is declared once
- * here; components use the generated utilities (bg-ground, text-ink, …) or the
- * variables directly. Colour tokens are semantic, so each text/background pair
- * in src/lib/contrast.ts is checked for WCAG AA contrast, mixed colours included.
+ * Design tokens. Every colour, duration, easing and layer is declared once here,
+ * and components read them with var() in their own CSS modules. Tailwind
+ * supplies these tokens and Preflight, nothing more: markup names no utility
+ * but sr-only, beside the site's own skip-link (tests/unit/class-names.test.ts).
+ * Colour tokens are semantic, so each text/background pair in src/lib/contrast.ts
+ * is checked for WCAG AA contrast, mixed colours included.
  */
 @theme {
   --color-ground: var(--press-indigo);
