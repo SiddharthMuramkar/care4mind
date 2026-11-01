@@ -5,6 +5,7 @@ import { turnForward } from '@/components/PageTurn'
 import { PageTitle, ReadingPage, TitlePage } from '@/components/ReadingPage'
 import { hrefFor, library, references } from '@/content'
 import { metadataFor } from '@/lib/metadata'
+import { count } from '@/lib/text'
 
 import listing from '../listing.module.css'
 import reading from '../reading.module.css'
@@ -20,7 +21,6 @@ export function generateMetadata(): Promise<Metadata> {
  */
 export default async function LibraryPage() {
   const [pages, all] = await Promise.all([library.list(), references.list()])
-  const count = (n: number, one: string, many: string) => `${n} ${n === 1 ? one : many}`
   // What each holds: a reading list its entries, a page its sections.
   const holds = await Promise.all(
     pages.map(async (page) => {

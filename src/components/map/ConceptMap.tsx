@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import { type CSSProperties, ViewTransition } from 'react'
 
-import { turnForward } from '@/components/PageTurn'
+import { titleMorphName, turnForward } from '@/components/PageTurn'
 import { hrefFor } from '@/content'
 import { toDevanagariDigits } from '@/lib/text'
 
@@ -129,7 +129,7 @@ export function ConceptMap({ layout }: { layout: MapLayout }) {
                         >
                           <span className={styles.mark} aria-hidden />
                           <ViewTransition
-                            name={`concept-title-${point.slug}`}
+                            name={titleMorphName('concept', point.slug)}
                             share="morph"
                             default="none"
                           >

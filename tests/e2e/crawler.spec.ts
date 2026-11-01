@@ -1,6 +1,6 @@
 import type { APIRequestContext, Page } from '@playwright/test'
 
-import { site as config } from '@/config/site'
+import { siteConfig } from '@/config/site'
 import { concepts, library, questionnaires, site, topics, works } from '@/content'
 
 import { expect, test } from './fixtures'
@@ -247,11 +247,11 @@ test.describe('the sitemap and robots.txt (NFR-04)', () => {
   }) => {
     const sitemap = await (await request.get('/sitemap.xml')).text()
     const urls = [...sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)].map(([, url = '']) => url)
-    const elsewhere = urls.filter((url) => !url.startsWith(`${config.url}/`))
-    expect(elsewhere, `sitemap URLs not on ${config.url}`).toEqual([])
+    const elsewhere = urls.filter((url) => !url.startsWith(`${siteConfig.url}/`))
+    expect(elsewhere, `sitemap URLs not on ${siteConfig.url}`).toEqual([])
     expect(
-      urls.map((url) => url.slice(config.url.length)),
-      `the sitemap’s URLs, minus ${config.url}, against the registry’s paths`,
+      urls.map((url) => url.slice(siteConfig.url.length)),
+      `the sitemap’s URLs, minus ${siteConfig.url}, against the registry’s paths`,
     ).toEqual(ROUTES.map(({ path }) => path))
   })
 
@@ -259,7 +259,7 @@ test.describe('the sitemap and robots.txt (NFR-04)', () => {
     request,
   }) => {
     const robots = await (await request.get('/robots.txt')).text()
-    expect(robots).toContain(`Sitemap: ${config.url}/sitemap.xml`)
+    expect(robots).toContain(`Sitemap: ${siteConfig.url}/sitemap.xml`)
     expect(robots).toMatch(/^Allow: \/$/m)
     expect(robots).not.toMatch(/^Disallow:/m)
   })

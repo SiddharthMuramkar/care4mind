@@ -6,7 +6,7 @@ import { cx } from '@/lib/cx'
 import { shownStatus, statusWords } from '@/lib/questionnaire/gate'
 
 import styles from './ConceptCard.module.css'
-import { turnForward } from './PageTurn'
+import { titleMorphName, turnForward } from './PageTurn'
 import { Text } from './prose/Text'
 import own from './QuestionnaireCard.module.css'
 
@@ -26,7 +26,7 @@ export function QuestionnaireCard({ questionnaire }: { questionnaire: Card }) {
   const { slug, title, status, summary } = questionnaire
   return (
     <article className={cx(styles.card, own.card)}>
-      <ViewTransition name={`questionnaire-title-${slug}`} share="morph" default="none">
+      <ViewTransition name={titleMorphName('questionnaire', slug)} share="morph" default="none">
         <h3 className={styles.title}>{title}</h3>
       </ViewTransition>
       <p className={own.badge} data-status={shownStatus(status)}>

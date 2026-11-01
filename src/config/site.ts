@@ -11,7 +11,7 @@
  * domain redirects to; care4mind.org returns at launch, together with
  * `indexable`. Nothing requests it.
  */
-export const site = {
+export const siteConfig = {
   name: 'Care4Mind',
   tagline: 'Indic ways to invoke a perfect balanced mind',
   url: 'https://www.care4mind.xyz',

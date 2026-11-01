@@ -2,7 +2,7 @@ import Link from 'next/link'
 
 import { siteNav } from '@/components/nav/site-nav'
 import { ProposalNote } from '@/components/proposals/ProposalNote'
-import { site } from '@/config/site'
+import { siteConfig } from '@/config/site'
 
 import { Fleuron } from './Fleuron'
 import { Logo } from './Logo'
@@ -23,7 +23,7 @@ export async function SiteFooter() {
       <div className={styles.inner}>
         <div className={styles.colophon}>
           <Logo />
-          <p className={styles.tagline}>{site.tagline}</p>
+          <p className={styles.tagline}>{siteConfig.tagline}</p>
         </div>
         <nav id="site-nav" aria-label="All sections" className={styles.index}>
           <ul className={styles.groups}>

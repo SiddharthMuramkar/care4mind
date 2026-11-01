@@ -1,7 +1,7 @@
 import type { NextConfig } from 'next'
 
 import { redirects } from './src/config/redirects'
-import { site } from './src/config/site'
+import { siteConfig } from './src/config/site'
 
 const nextConfig: NextConfig = {
   poweredByHeader: false,
@@ -9,7 +9,7 @@ const nextConfig: NextConfig = {
   // Every address ends with a slash (D02), as the current site's do; the bare one redirects to it.
   trailingSlash: true,
   async headers() {
-    if (site.indexable) return []
+    if (siteConfig.indexable) return []
     return [
       {
         source: '/:path*',

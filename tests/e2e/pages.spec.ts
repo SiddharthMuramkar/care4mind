@@ -1,4 +1,4 @@
-import { site } from '@/config/site'
+import { siteConfig } from '@/config/site'
 
 import { expectNoAxeViolations } from './axe'
 import { unfinishedDrawings } from './drawings'
@@ -21,7 +21,7 @@ for (const route of ROUTES_IN_SCOPE) {
     await expect.soft(page.locator('h1'), `${where}: exactly one h1`).toHaveCount(1)
     expect.soft(await scrollsSideways(page), `${where}: no sideways scroll`).toEqual([])
 
-    // Until launch, search engines are told twice (site.indexable).
+    // Until launch, search engines are told twice (siteConfig.indexable).
     expect
       .soft(response?.headers()['x-robots-tag'], `${where}: noindex in the X-Robots-Tag header`)
       .toContain('noindex')
@@ -40,7 +40,7 @@ for (const route of ROUTES_IN_SCOPE) {
     await expect.soft(canonical, `${where}: exactly one canonical link`).toHaveCount(1)
     await expect
       .soft(canonical.first(), `${where}: canonical address`)
-      .toHaveAttribute('href', `${site.url}${route.path}`)
+      .toHaveAttribute('href', `${siteConfig.url}${route.path}`)
     await expect
       .soft(canonical.first(), `${where}: canonical address ends in /`)
       .toHaveAttribute('href', /\/$/)

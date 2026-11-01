@@ -6,11 +6,12 @@
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 
-import { site as config } from '@/config/site'
+import { siteConfig } from '@/config/site'
 import { concepts, library, questionnaires, site, topics, type RouteEntry } from '@/content'
+import { count, listed } from '@/lib/text'
 
 /** The homepage keeps the site's own title. */
-const HOME_TITLE = `${config.name}: Indian psychology`
+const HOME_TITLE = `${siteConfig.name}: Indian psychology`
 
 /** One sentence each for the pages with no summary of their own. */
 const ABOUT: Partial<Record<RouteEntry['kind'], string>> = {
@@ -27,22 +28,19 @@ const ABOUT: Partial<Record<RouteEntry['kind'], string>> = {
 }
 
 /** The 404 page's metadata: a title, and no canonical address, as it is no page of the site. */
-export const notFoundMetadata: Metadata = { title: { absolute: `Page not found · ${config.name}` } }
+export const notFoundMetadata: Metadata = {
+  title: { absolute: `Page not found · ${siteConfig.name}` },
+}
 
 /** A path on the production site, as an absolute URL: canonical addresses and the sitemap. */
 export function absoluteUrl(path: string): string {
-  return new URL(path, config.url).href
+  return new URL(path, siteConfig.url).href
 }
 
 /** The path's segment where its route's pattern has `[slug]`. */
 function slugOf(route: RouteEntry): string {
   const at = route.pattern.split('/').indexOf('[slug]')
   return route.path.split('/')[at] ?? ''
-}
-
-/** "1 entry", "20 entries". */
-function count(n: number, one: string, many: string): string {
-  return `${n} ${n === 1 ? one : many}`
 }
 
 /**
@@ -53,7 +51,7 @@ async function describe(route: RouteEntry): Promise<{ name: string; description:
   const name = route.title
   switch (route.kind) {
     case 'home':
-      return { name: HOME_TITLE, description: config.tagline }
+      return { name: HOME_TITLE, description: siteConfig.tagline }
     case 'concept': {
       const concept = await concepts.get(slugOf(route))
       if (!concept) notFound()
@@ -84,8 +82,7 @@ async function describe(route: RouteEntry): Promise<{ name: string; description:
     }
     case 'library': {
       const titles = ['References', ...(await library.list()).map((page) => page.title)]
-      const listed = `${titles.slice(0, -1).join(', ')} and ${titles.at(-1)}`
-      return { name, description: `The Care4Mind Library: ${listed}.` }
+      return { name, description: `The Care4Mind Library: ${listed(titles)}.` }
     }
     case 'resource-list':
     case 'page': {
@@ -115,7 +112,7 @@ export async function metadataFor(path: string): Promise<Metadata> {
   if (!route) notFound()
   const { name, description } = await describe(route)
   return {
-    title: { absolute: route.kind === 'home' ? name : `${name} · ${config.name}` },
+    title: { absolute: route.kind === 'home' ? name : `${name} · ${siteConfig.name}` },
     description,
     alternates: { canonical: absoluteUrl(route.path) },
   }

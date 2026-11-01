@@ -8,6 +8,7 @@ import { LinkedKnowledge } from '@/components/concept/LinkedKnowledge'
 import { TitleSpellings } from '@/components/concept/TitleSpellings'
 import { TopicPager } from '@/components/concept/TopicPager'
 import { OrnamentRule } from '@/components/OrnamentRule'
+import { titleMorphName } from '@/components/PageTurn'
 import { citationLinks, Provenance, Sections, Text } from '@/components/prose'
 import { VerseCard } from '@/components/prose/VerseCard'
 import { ReadingThread } from '@/components/ReadingThread'
@@ -71,7 +72,7 @@ export default async function ConceptPage({ params }: PageProps<'/concepts/[slug
   const next = concept.next && cards.get(concept.next.slug)
   const contents = contentsOf(concept)
   // A Concept card's title flies into the heading's IAST spelling, or its English title.
-  const morph = `concept-title-${concept.slug}`
+  const morph = titleMorphName('concept', concept.slug)
 
   return (
     <ReadingPage

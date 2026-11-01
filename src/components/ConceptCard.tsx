@@ -4,6 +4,7 @@ import type { ConceptCard as Card } from '@/content'
 import { cx } from '@/lib/cx'
 
 import styles from './ConceptCard.module.css'
+import { titleMorphName } from './PageTurn'
 import { Text } from './prose/Text'
 
 interface Props {
@@ -20,7 +21,7 @@ interface Props {
 export function ConceptCard({ concept, action, className }: Props) {
   return (
     <article className={cx(styles.card, className)}>
-      <ViewTransition name={`concept-title-${concept.slug}`} share="morph" default="none">
+      <ViewTransition name={titleMorphName('concept', concept.slug)} share="morph" default="none">
         <h3 className={styles.title}>
           <span lang={concept.lang}>{concept.name}</span>
         </h3>

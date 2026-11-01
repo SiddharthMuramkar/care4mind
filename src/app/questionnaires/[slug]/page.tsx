@@ -4,7 +4,7 @@ import { notFound } from 'next/navigation'
 import { ViewTransition } from 'react'
 
 import { Citation } from '@/components/Citation'
-import { turnForward } from '@/components/PageTurn'
+import { titleMorphName, turnForward } from '@/components/PageTurn'
 import { PageTitle, ReadingPage, TitlePage } from '@/components/ReadingPage'
 import { Provenance, Text } from '@/components/prose'
 import { ReadingThread } from '@/components/ReadingThread'
@@ -59,7 +59,7 @@ export default async function QuestionnairePage({ params }: PageProps<'/question
         <p className={reading.kicker}>Questionnaire</p>
         <PageTitle>
           {/* The Questionnaires page's card flies into this heading. */}
-          <ViewTransition name={`questionnaire-title-${slug}`} share="morph" default="none">
+          <ViewTransition name={titleMorphName('questionnaire', slug)} share="morph" default="none">
             <span>{questionnaire.title}</span>
           </ViewTransition>
         </PageTitle>

@@ -4,6 +4,14 @@ import { ViewTransition, type ReactNode } from 'react'
 export const turnForward = ['turn-forward']
 export const turnBack = ['turn-back']
 
+/**
+ * The view-transition name a card's title shares with its page's heading, so following the card
+ * morphs one into the other.
+ */
+export function titleMorphName(kind: 'concept' | 'questionnaire' | 'topic', slug: string): string {
+  return `${kind}-title-${slug}`
+}
+
 // Each type is also the class of its animation (globals.css). Untyped page
 // changes, such as the browser's own back and forward, swap the page at once.
 const turn = { 'turn-forward': 'turn-forward', 'turn-back': 'turn-back', default: 'none' }

@@ -4,7 +4,7 @@ import { notFound } from 'next/navigation'
 import { Fragment, ViewTransition, type ReactNode } from 'react'
 
 import { ConceptCard } from '@/components/ConceptCard'
-import { turnForward } from '@/components/PageTurn'
+import { titleMorphName, turnForward } from '@/components/PageTurn'
 import { PageTitle, ReadingPage, TitlePage } from '@/components/ReadingPage'
 import { citationLinks, Provenance, Sections } from '@/components/prose'
 import { ReferenceList } from '@/components/ReferenceList'
@@ -127,7 +127,7 @@ export default async function TopicPage({ params }: PageProps<'/topics/[slug]'>)
             {toDevanagariDigits(String(topic.order))}
           </span>
         </p>
-        <ViewTransition name={`topic-title-${topic.slug}`} share="morph" default="none">
+        <ViewTransition name={titleMorphName('topic', topic.slug)} share="morph" default="none">
           <PageTitle long>{topic.name}</PageTitle>
         </ViewTransition>
         {topic.term ? (

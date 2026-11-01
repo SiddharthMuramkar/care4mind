@@ -15,6 +15,7 @@ import { flushSync } from 'react-dom'
 
 import { whenIdle } from '@/components/nav/current'
 import { cx } from '@/lib/cx'
+import { count } from '@/lib/text'
 
 import styles from './AzIndex.module.css'
 import {
@@ -145,8 +146,6 @@ function showingFor(selection: Selection) {
     ),
   }
 }
-
-const entries = (count: number) => `${count} ${count === 1 ? 'entry' : 'entries'}`
 
 // The reordering list's flights, set here as the island is the only thing that starts them.
 const FLIGHTS = `::view-transition-group(.az-entry) { animation-duration: var(--duration-reorder); animation-timing-function: var(--ease-out); }`
@@ -322,7 +321,7 @@ export function AzIndex({ letters, groups, total, children }: Props) {
     [Rail, letters, shownLetters],
   )
   const pressed = useMemo(() => toChips(selection), [selection])
-  const count = showing?.count ?? total
+  const shownCount = showing?.count ?? total
 
   return (
     <div
@@ -341,7 +340,7 @@ export function AzIndex({ letters, groups, total, children }: Props) {
         <Chips groups={groups} pressed={pressed} onPress={press} />
         <div className={styles.tally}>
           <p className={styles.count} aria-live="polite" aria-atomic="true">
-            {entries(count)}
+            {count(shownCount, 'entry', 'entries')}
           </p>
           {isEmpty(selection) ? null : (
             <button type="button" className={styles.clear} data-ink onClick={() => press([])}>
@@ -353,7 +352,7 @@ export function AzIndex({ letters, groups, total, children }: Props) {
       <nav aria-label="Letters" className={styles.railBand}>
         {rail}
       </nav>
-      {count === 0 ? (
+      {shownCount === 0 ? (
         <p className={styles.none}>
           No entry has all of these. Press a chip again to let its entries back in, or clear the
           filters.

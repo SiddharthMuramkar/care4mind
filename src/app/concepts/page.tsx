@@ -8,6 +8,7 @@ import type { PreviewPayload } from '@/components/preview/LinkPreview'
 import { TopicCard } from '@/components/topics'
 import { concepts, hrefFor, site, topics, works, type AzEntry as Entry } from '@/content'
 import { metadataFor } from '@/lib/metadata'
+import { count } from '@/lib/text'
 
 import reading from '../reading.module.css'
 import styles from './page.module.css'
@@ -27,8 +28,6 @@ const KINDS = [
   { value: 'glossary', label: 'Glossary' },
 ] as const
 
-const counted = (count: number, one: string, many: string) => `${count} ${count === 1 ? one : many}`
-
 /**
  * The Concepts A–Z (D14): the topics as cards, then every Concept, every term explained inside
  * one (or in a topic's introduction) and every glossary entry, by letter, under a rail of letters
@@ -43,7 +42,7 @@ export default async function ConceptsPage() {
     site.routes(),
   ])
   const all = letters.flatMap(({ entries }) => entries)
-  const count = (kind: Entry['kind']) => all.filter((entry) => entry.kind === kind).length
+  const ofKind = (kind: Entry['kind']) => all.filter((entry) => entry.kind === kind).length
   const quoted = new Set(all.flatMap((entry) => entry.works))
   const topicNames = new Map(topicCards.map(({ slug, name }) => [slug, name]))
   const summaries = new Map(conceptCards.map(({ href, summary }) => [href, summary]))
@@ -102,10 +101,10 @@ export default async function ConceptsPage() {
           Every Concept, every term explained inside one, and every glossary entry.
         </p>
         <p className={styles.facts}>
-          {counted(all.length, 'entry', 'entries')}:{' '}
-          {counted(count('concept'), 'Concept page', 'Concept pages')},{' '}
-          {counted(count('term'), 'term', 'terms')} and{' '}
-          {counted(count('glossary'), 'glossary entry', 'glossary entries')}
+          {count(all.length, 'entry', 'entries')}:{' '}
+          {count(ofKind('concept'), 'Concept page', 'Concept pages')},{' '}
+          {count(ofKind('term'), 'term', 'terms')} and{' '}
+          {count(ofKind('glossary'), 'glossary entry', 'glossary entries')}
         </p>
       </TitlePage>
 

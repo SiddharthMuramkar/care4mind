@@ -1,6 +1,6 @@
 import type { MetadataRoute } from 'next'
 
-import { site } from '@/config/site'
+import { siteConfig } from '@/config/site'
 
 /**
  * The web manifest: the name and icons a phone shows for the site on its home screen, which then
@@ -9,9 +9,9 @@ import { site } from '@/config/site'
  */
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: site.name,
-    short_name: site.name,
-    description: site.tagline,
+    name: siteConfig.name,
+    short_name: siteConfig.name,
+    description: siteConfig.tagline,
     start_url: '/',
     display: 'browser',
     theme_color: '#151a3d',

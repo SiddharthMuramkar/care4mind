@@ -4,7 +4,7 @@ import { describe, expect, it } from 'vitest'
 import robots from '@/app/robots'
 import sitemap from '@/app/sitemap'
 import { redirects } from '@/config/redirects'
-import { site as config } from '@/config/site'
+import { siteConfig } from '@/config/site'
 import { site } from '@/content'
 import { metadataFor } from '@/lib/metadata'
 
@@ -12,12 +12,12 @@ import nextConfig from '../../next.config'
 
 // Front-end-site ticket 03: what every page tells the world about itself (D19, NFR-04).
 
-// Typed out rather than read from site.url, so a typo in the config fails.
+// Typed out rather than read from siteConfig.url, so a typo in the config fails.
 const ORIGIN = 'https://www.care4mind.xyz'
 
 describe('the canonical origin', () => {
   it('is www.care4mind.xyz until launch, with no trailing slash', () => {
-    expect(config.url).toBe(ORIGIN)
+    expect(siteConfig.url).toBe(ORIGIN)
   })
 })
 

@@ -6,6 +6,7 @@ import { PageTitle, ReadingPage, TitlePage } from '@/components/ReadingPage'
 import { Provenance, Sections, Text } from '@/components/prose'
 import { library, type ResourceItemView } from '@/content'
 import { metadataFor } from '@/lib/metadata'
+import { count } from '@/lib/text'
 
 import listing from '../../listing.module.css'
 import reading from '../../reading.module.css'
@@ -76,7 +77,11 @@ export default async function LibraryItemPage({ params }: PageProps<'/library/[s
           </p>
         ) : (
           <p className={listing.facts}>
-            {page.groups.reduce((sum, group) => sum + group.items.length, 0)} entries
+            {count(
+              page.groups.reduce((sum, group) => sum + group.items.length, 0),
+              'entry',
+              'entries',
+            )}
           </p>
         )}
       </TitlePage>
