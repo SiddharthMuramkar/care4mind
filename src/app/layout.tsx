@@ -17,6 +17,8 @@ import '@/styles/globals.css'
 
 // The icons are the files beside this layout: an `icons` field would hide them (Next uses one or the other).
 export const metadata: Metadata = {
+  // Share-card URLs are absolute and name the production host, even on a preview.
+  metadataBase: new URL(site.url),
   title: { default: `${site.name}: Indian psychology`, template: `%s · ${site.name}` },
   description: site.tagline,
   robots: site.indexable
