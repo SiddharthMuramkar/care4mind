@@ -1,0 +1,53 @@
+/* The plate stands to the left of the cards, and stays in view while they pass. */
+.spread {
+  display: grid;
+  gap: 2rem;
+}
+
+.plate {
+  align-self: start;
+}
+
+.cards {
+  display: grid;
+  gap: 1.25rem;
+  min-width: 0;
+}
+
+.cardList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 1.25rem;
+}
+
+.cardList > li {
+  min-width: 0;
+}
+
+.card {
+  height: 100%;
+  overflow-wrap: anywhere;
+}
+
+.also {
+  margin: 1rem 0 0;
+  font-variant-caps: all-small-caps;
+  letter-spacing: 0.12em;
+  font-size: 1.125rem;
+  font-weight: 400;
+  color: var(--color-surface-muted);
+}
+
+@media (min-width: 64rem) {
+  .spread {
+    grid-template-columns: minmax(17rem, 21rem) minmax(0, 1fr);
+    gap: 3rem;
+  }
+
+  .plate {
+    position: sticky;
+    top: var(--sticky-top);
+  }
+}

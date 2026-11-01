@@ -934,7 +934,7 @@ describe('topics', () => {
     ])
   })
 
-  it('gives a topic its Concepts, then those also in it, and the verses its Concepts quote', async () => {
+  it('gives a topic its Concepts, then those also in it, and the verses its Concepts quote by work', async () => {
     const view = await content().topics.get('mind')
     expect(view?.concepts.map(({ slug }) => slug)).toEqual(['calm', 'obstacles'])
     expect(view?.secondaryConcepts.map(({ slug }) => slug)).toEqual(['refuge'])
@@ -944,9 +944,9 @@ describe('topics', () => {
         { slug: 'yoga-sutra', title: 'Yoga Sūtra', lang: 'sa-Latn', href: '/texts/yoga-sutra/' },
       ],
     )
-    expect(view?.works.map(({ verses }) => verses.map(({ id }) => id))).toEqual([
-      ['dhammapada/160'],
-      ['yoga-sutra/1.30'],
+    expect(view?.works.map(({ slug, verses }) => [slug, verses.map(({ id }) => id)])).toEqual([
+      ['dhammapada', ['dhammapada/160']],
+      ['yoga-sutra', ['yoga-sutra/1.30']],
     ])
     expect(view?.works[1]?.verses[0]).toEqual({
       id: 'yoga-sutra/1.30',
@@ -1008,6 +1008,47 @@ describe('topics', () => {
       reviewStatus: 'carried-over-not-reviewed',
     })
     expect(view).not.toHaveProperty('intro')
+  })
+
+  it('groups a topic’s verses under each work, every work’s verses in its own order', async () => {
+    const verse = (work: string, ...order: number[]) =>
+      definePassage({
+        ...ys130,
+        id: `${work}/${order.join('.')}`,
+        work,
+        locator: order.join('.'),
+        order,
+      })
+    const quoted = [
+      verse('yoga-sutra', 2, 1),
+      verse('dhammapada', 5),
+      verse('yoga-sutra', 1, 2),
+      verse('dhammapada', 160),
+      verse('yoga-sutra', 1, 30),
+    ]
+    const source = sourceOf(
+      ...[mind, yogaSutra, dhammapada, ...quoted],
+      defineConcept({
+        ...concept,
+        verses: [{ passage: 'yoga-sutra/2.1' }, { passage: 'dhammapada/160' }],
+      }),
+      defineConcept({
+        ...concept,
+        slug: 'calm',
+        name: { term: { iast: 'śānti', ascii: ['Shanti'] } },
+        verses: [
+          { passage: 'yoga-sutra/1.30' },
+          { passage: 'dhammapada/5' },
+          { passage: 'yoga-sutra/1.2' },
+          { passage: 'yoga-sutra/2.1' },
+        ],
+      }),
+    )
+    const view = await createContent(source, ON).topics.get('mind')
+    expect(view?.works.map(({ slug, verses }) => [slug, verses.map(({ id }) => id)])).toEqual([
+      ['dhammapada', ['dhammapada/5', 'dhammapada/160']],
+      ['yoga-sutra', ['yoga-sutra/1.2', 'yoga-sutra/1.30', 'yoga-sutra/2.1']],
+    ])
   })
 
   it('gives the values topic its shared introduction, stored once, with its own References', async () => {
