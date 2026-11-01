@@ -2,15 +2,15 @@ import Link from 'next/link'
 
 import { CurrentLink } from '@/components/nav/CurrentLink'
 import { MenuButton } from '@/components/nav/MenuButton'
-import { SearchGlyph } from '@/components/nav/glyphs'
+import { SearchGlyph } from '@/components/glyphs'
 import { SectionNav } from '@/components/nav/SectionNav'
 import { siteNav } from '@/components/nav/site-nav'
 import { ProposalNote } from '@/components/proposals/ProposalNote'
 import { SearchTrigger } from '@/components/search/SearchTrigger'
 import { cx } from '@/lib/cx'
 
-import { LotusMark } from './Fleuron'
-import { Logo } from './Logo'
+import { LotusMark } from '@/components/ornaments/Fleuron'
+import { Logo } from '@/components/logo/Logo'
 import styles from './SiteHeader.module.css'
 
 /**

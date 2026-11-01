@@ -1,7 +1,7 @@
 import type { Metadata, Route } from 'next'
 import Link from 'next/link'
 
-import { turnForward } from '@/components/PageTurn'
+import { turnForward } from '@/components/page-turn/PageTurn'
 import { PageTitle, ReadingPage, TitlePage } from '@/components/ReadingPage'
 import { hrefFor, site } from '@/content'
 import { metadataFor } from '@/lib/metadata'

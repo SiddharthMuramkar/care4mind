@@ -2,7 +2,7 @@ import type { Route } from 'next'
 import Link from 'next/link'
 import type { CSSProperties } from 'react'
 
-import { turnForward } from '@/components/PageTurn'
+import { turnForward } from '@/components/page-turn/PageTurn'
 import { Text } from '@/components/prose'
 import { ScriptPair } from '@/components/script/ScriptPair'
 import type { PassageView, RecordRef } from '@/content'

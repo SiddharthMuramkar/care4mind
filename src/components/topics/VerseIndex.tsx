@@ -1,7 +1,7 @@
 import type { Route } from 'next'
 import Link from 'next/link'
 
-import { turnForward } from '@/components/PageTurn'
+import { turnForward } from '@/components/page-turn/PageTurn'
 import { hrefFor, type PassageView, type QuotedWork } from '@/content'
 import { openingLine } from '@/lib/sanskrit'
 

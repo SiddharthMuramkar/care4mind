@@ -191,6 +191,7 @@ export default defineConfig([
     },
   },
   ...tseslint.configs.strict.map((config) => ({ ...config, files: ['**/*.{ts,tsx}'] })),
+  ...importBoundaries,
   contentBoundary,
   testsContentBoundary,
   graphBelowViews,

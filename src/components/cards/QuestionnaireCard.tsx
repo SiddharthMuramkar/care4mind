@@ -5,10 +5,10 @@ import { hrefFor, type QuestionnaireCard as Card } from '@/content'
 import { cx } from '@/lib/cx'
 
 import styles from './ConceptCard.module.css'
-import { titleMorphName, turnForward } from './PageTurn'
-import { Text } from './prose/Text'
+import { titleMorphName, turnForward } from '@/components/page-turn/PageTurn'
+import { Text } from '@/components/prose'
 import own from './QuestionnaireCard.module.css'
-import { StatusBadge } from './StatusBadge'
+import { StatusBadge } from '@/components/StatusBadge'
 
 /**
  * A Questionnaire in brief, with its status. Shares the Concept card's press style, and its

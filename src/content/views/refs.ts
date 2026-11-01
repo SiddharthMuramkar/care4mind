@@ -1,5 +1,5 @@
 import type { ContentGraph, RecordKey } from '../graph'
-import type { ConceptRecord, QuestionnaireRecord } from '../schema'
+import type { ConceptRecord, QuestionnaireRecord } from '../schema/index'
 import type { ConceptRef, RecordRef } from '../types'
 import { must, present } from './common'
 import { hrefFor } from './href'

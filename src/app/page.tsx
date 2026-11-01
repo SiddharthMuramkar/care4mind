@@ -1,20 +1,19 @@
 import type { Metadata, Route } from 'next'
 import Link from 'next/link'
 
-import { ConceptCard } from '@/components/ConceptCard'
-import { Fleuron } from '@/components/Fleuron'
-import { Folio } from '@/components/Folio'
-import { OrnamentRule } from '@/components/OrnamentRule'
-import { PageTurn, turnForward } from '@/components/PageTurn'
+import { ConceptCard, QuestionnaireCard } from '@/components/cards'
+import { cta } from '@/components/cta'
+import { Folio } from '@/components/folio'
+import { Fleuron, OrnamentRule } from '@/components/ornaments'
+import { PageTurn, turnForward } from '@/components/page-turn'
 import { Text } from '@/components/prose'
-import { QuestionnaireCard } from '@/components/QuestionnaireCard'
+import { QuestionnaireCard } from '@/components/cards/QuestionnaireCard'
 import { features } from '@/config/features'
 import { concepts, home, hrefFor, questionnaires, site } from '@/content'
 import { heroLinks } from '@/lib/hero-links'
 import { metadataFor } from '@/lib/metadata'
 import { toDevanagariDigits } from '@/lib/text'
 
-import cta from './cta.module.css'
 import styles from './page.module.css'
 
 export function generateMetadata(): Promise<Metadata> {

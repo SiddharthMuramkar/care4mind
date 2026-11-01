@@ -41,6 +41,7 @@ These are judgement calls, so review checks them against the diff, in the codeba
 | --- | --- |
 | Pages read content only through `@/content`, and tests through it or `@/content/testing`; a client file imports it and the feature flags for types only | lint (content boundary) and its test; `server-only` on the entry, at build |
 | Internal links come from `hrefFor()` | lint (`care4mind/href-from-hreffor`) |
+| A component module is reached only through its `index.ts`; only the app imports from `src/app` | lint (components boundary) and its test, which also checks every component sits in a module folder with an index |
 | Every link between records resolves | the graph, at build and in every content test |
 | Sanskrit is NFC with ṃ; each name field holds one script, in characters the fonts cover | content-integrity test |
 | The registry is generated, not edited | git ignores it, `pnpm check` and every test run write it afresh, and the guard refuses edits under `src/content/generated/` |

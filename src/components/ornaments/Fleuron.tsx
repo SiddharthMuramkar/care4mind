@@ -1,9 +1,9 @@
 import type { ReactNode } from 'react'
 
+import { LOTUS } from '@/components/lotus'
 import { cx } from '@/lib/cx'
 
 import styles from './Fleuron.module.css'
-import { LOTUS } from './lotus'
 
 /**
  * A lotus-petal printer's ornament, drawn as line art. Decorative. Still by

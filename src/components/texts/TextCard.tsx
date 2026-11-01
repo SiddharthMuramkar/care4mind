@@ -1,6 +1,6 @@
 import Link from 'next/link'
 
-import { turnForward } from '@/components/PageTurn'
+import { turnForward } from '@/components/page-turn/PageTurn'
 import { hrefFor, type WorkView } from '@/content'
 import { cx } from '@/lib/cx'
 

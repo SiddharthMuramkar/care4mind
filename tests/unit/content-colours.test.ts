@@ -3,7 +3,7 @@ import { readFileSync } from 'node:fs'
 import { describe, expect, it } from 'vitest'
 
 import { type QuestionnaireStatus, topics } from '@/content'
-import { CONTRAST_PAIRS, customProperties } from '@/lib/contrast'
+import { CONTRAST_PAIRS, customProperties } from '@/styles/contrast'
 
 const css = readFileSync('src/styles/globals.css', 'utf8').replace(/\/\*[\s\S]*?\*\//g, '')
 const declarations = customProperties(css)

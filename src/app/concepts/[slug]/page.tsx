@@ -7,13 +7,13 @@ import { Contents, type ContentsEntry } from '@/components/concept/Contents'
 import { LinkedKnowledge } from '@/components/concept/LinkedKnowledge'
 import { TitleSpellings } from '@/components/concept/TitleSpellings'
 import { TopicPager } from '@/components/concept/TopicPager'
-import { OrnamentRule } from '@/components/OrnamentRule'
-import { titleMorphName } from '@/components/PageTurn'
+import { OrnamentRule } from '@/components/ornaments/OrnamentRule'
+import { titleMorphName } from '@/components/page-turn/PageTurn'
 import { citationLinks, Provenance, Sections, Text } from '@/components/prose'
 import { VerseCard } from '@/components/prose/VerseCard'
-import { ReadingThread } from '@/components/ReadingThread'
-import { ReferenceList } from '@/components/ReferenceList'
-import { SpellingsPopover } from '@/components/SpellingsPopover'
+import { ReadingThread } from '@/components/reading-thread/ReadingThread'
+import { ReferenceList } from '@/components/references/ReferenceList'
+import { SpellingsPopover } from '@/components/spellings-popover/SpellingsPopover'
 import {
   concepts,
   hrefFor,
@@ -24,6 +24,7 @@ import {
 } from '@/content'
 import { capitalise } from '@/lib/text'
 import { metadataFor } from '@/lib/metadata'
+import { capitalise } from '@/lib/text'
 
 import reading from '../../reading.module.css'
 import styles from './page.module.css'

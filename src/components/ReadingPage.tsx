@@ -4,9 +4,9 @@ import type { ReactNode } from 'react'
 import { site } from '@/content'
 import { cx } from '@/lib/cx'
 
-import { Breadcrumbs } from './Breadcrumbs'
-import { Folio } from './Folio'
-import { PageTurn } from './PageTurn'
+import { Breadcrumbs } from '@/components/breadcrumbs/Breadcrumbs'
+import { Folio } from '@/components/folio/Folio'
+import { PageTurn } from '@/components/page-turn'
 import styles from './ReadingPage.module.css'
 
 /** The folio is named by its title, and a page has one of each. */

@@ -4,7 +4,7 @@
 import { stripDiacritics } from '@/lib/sanskrit'
 
 import type { ContentGraph } from '../graph'
-import type { ContentKind, Provenance, RecordOf, ReviewStatus, SanskritName } from '../schema'
+import type { ContentKind, Provenance, RecordOf, ReviewStatus, SanskritName } from '../schema/index'
 import type { CarriedOver, ProvenanceView } from '../types'
 
 /**

@@ -2,7 +2,7 @@ import type { Route } from 'next'
 import Link from 'next/link'
 import type { CSSProperties, ReactNode } from 'react'
 
-import { turnForward } from '@/components/PageTurn'
+import { turnForward } from '@/components/page-turn/PageTurn'
 import { cx } from '@/lib/cx'
 
 import styles from './shelf.module.css'

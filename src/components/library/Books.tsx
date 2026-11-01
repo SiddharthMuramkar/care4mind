@@ -1,7 +1,7 @@
 import type { Route } from 'next'
 import Link from 'next/link'
 
-import { turnForward } from '@/components/PageTurn'
+import { turnForward } from '@/components/page-turn/PageTurn'
 import { Text } from '@/components/prose'
 import type { Inline, ReferenceView, ResourceListView } from '@/content'
 

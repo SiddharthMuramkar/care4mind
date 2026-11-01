@@ -4,9 +4,9 @@ import { siteNav } from '@/components/nav/site-nav'
 import { ProposalNote } from '@/components/proposals/ProposalNote'
 import { home } from '@/content'
 
-import { Fleuron } from './Fleuron'
-import { HelpLine } from './HelpLine'
-import { Logo } from './Logo'
+import { Fleuron } from '@/components/ornaments'
+import { HelpLine } from '@/components/HelpLine'
+import { Logo } from '@/components/logo/Logo'
 import styles from './SiteFooter.module.css'
 
 /**

@@ -1,10 +1,10 @@
 import type { Route } from 'next'
 import Link from 'next/link'
 
+import { turnBack, turnForward } from '@/components/page-turn'
+import { LinkPreview } from '@/components/preview'
 import type { ConceptCard, TopicRef } from '@/content'
 
-import { turnBack, turnForward } from '../PageTurn'
-import { LinkPreview } from '../preview/LinkPreview'
 import { conceptPreview } from './previews'
 import styles from './TopicPager.module.css'
 

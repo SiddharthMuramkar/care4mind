@@ -1,11 +1,11 @@
 import Link from 'next/link'
 
+import { turnForward } from '@/components/page-turn'
 import { hrefFor, type VerseView } from '@/content'
 import { cx } from '@/lib/cx'
 import { toDevanagariDigits } from '@/lib/text'
 
-import { turnForward } from './PageTurn'
-import { Text } from './prose/Text'
+import { Text } from './Text'
 import styles from './Shloka.module.css'
 
 /**

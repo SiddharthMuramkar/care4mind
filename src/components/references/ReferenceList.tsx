@@ -1,7 +1,7 @@
 import type { ReferenceView } from '@/content'
 
 import { Citation } from './Citation'
-import { OpenReferences } from './concept/OpenReferences'
+import { OpenReferences } from './OpenReferences'
 import styles from './ReferenceList.module.css'
 
 /**

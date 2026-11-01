@@ -5,7 +5,7 @@ import { describe, expect, it } from 'vitest'
 
 import manifest from '@/app/manifest'
 import { LOTUS } from '@/components/lotus'
-import { customProperties, resolveColour } from '@/lib/contrast'
+import { customProperties, resolveColour } from '@/styles/contrast'
 
 const iconSvg = () => readFileSync('src/app/icon.svg', 'utf8')
 

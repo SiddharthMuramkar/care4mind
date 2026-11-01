@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 
-import { Fleuron } from '@/components/Fleuron'
+import { Fleuron } from '@/components/ornaments'
 import { PageTitle, ReadingPage, TitlePage } from '@/components/ReadingPage'
 import { TextCard } from '@/components/texts'
 import { hrefFor, works, type WorkView } from '@/content'

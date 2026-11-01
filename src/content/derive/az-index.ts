@@ -15,7 +15,7 @@ import type {
   Slug,
   TermBlock,
   TopicRecord,
-} from '../schema'
+} from '../schema/index'
 import type { AzEntry, AzLetter } from '../types'
 import { conceptQuotes, termsIn } from '../views/blocks'
 import { byName, must, present } from '../views/common'

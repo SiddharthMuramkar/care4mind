@@ -11,7 +11,7 @@ import {
   useSyncExternalStore,
 } from 'react'
 
-import { whenIdle } from '@/components/nav/current'
+import { whenIdle } from '@/components/hydration'
 
 import {
   countText,

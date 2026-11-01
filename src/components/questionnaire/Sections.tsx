@@ -1,8 +1,8 @@
 import Link from 'next/link'
 import type { ReactNode } from 'react'
 
-import { Citation } from '@/components/Citation'
-import { turnForward } from '@/components/PageTurn'
+import { Citation } from '@/components/references/Citation'
+import { turnForward } from '@/components/page-turn/PageTurn'
 import { Text } from '@/components/prose'
 import { hrefFor, type ConceptCard, type QuestionnaireView, type ReferenceView } from '@/content'
 

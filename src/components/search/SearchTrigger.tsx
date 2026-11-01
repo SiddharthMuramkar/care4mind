@@ -2,7 +2,7 @@ import type { Route } from 'next'
 import Link from 'next/link'
 import type { ReactNode } from 'react'
 
-import { CurrentLink } from '@/components/nav/CurrentLink'
+import { CurrentLink } from '@/components/nav'
 import { hrefFor } from '@/content'
 
 export interface SearchTriggerProps {

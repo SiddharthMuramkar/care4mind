@@ -1,5 +1,5 @@
 import type { ContentGraph } from '../graph'
-import type { WorkRecord } from '../schema'
+import type { WorkRecord } from '../schema/index'
 import type { WorkCard, WorkView } from '../types'
 import { carriedOver, nameCopy, present } from './common'
 import { compareOrder, passageView, workRef } from './passage'

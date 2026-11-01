@@ -3,7 +3,7 @@
 import { AlertDialog } from '@base-ui/react/alert-dialog'
 import { useRef } from 'react'
 
-import cta from '@/app/cta.module.css'
+import { cta } from '@/components/cta'
 
 import styles from './RetakeDialog.module.css'
 

@@ -5,7 +5,7 @@
  * generated registry of record files, and `memorySource()` holds the made-up records tests build.
  * A CMS source implements the same method later and nothing above it changes.
  */
-import type { ContentKind, ContentRecord, RecordOf } from './schema'
+import type { ContentKind, ContentRecord, RecordOf } from './schema/index'
 
 /**
  * Where records come from. An adapter owes the graph three duties:

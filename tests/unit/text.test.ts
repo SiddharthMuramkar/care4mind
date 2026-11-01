@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { titleMorphName } from '@/components/PageTurn'
+import { titleMorphName } from '@/components/page-turn/PageTurn'
 import { count, listed } from '@/lib/text'
 
 describe('count', () => {

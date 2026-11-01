@@ -1,5 +1,5 @@
 import type { Citation, ContentGraph } from '../graph'
-import type { ReferenceRecord } from '../schema'
+import type { ReferenceRecord } from '../schema/index'
 import type { NumberedReference, ReferenceView } from '../types'
 import { byName, carriedOver, must, present } from './common'
 import { hrefFor, referenceAnchor } from './href'

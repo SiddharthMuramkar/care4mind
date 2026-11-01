@@ -1,10 +1,10 @@
 import type { Route } from 'next'
 import Link from 'next/link'
 
+import { turnBack } from '@/components/page-turn'
 import { site, type Crumb } from '@/content'
 
 import styles from './Breadcrumbs.module.css'
-import { turnBack } from './PageTurn'
 
 /** A transliterated crumb's language tag; none for an English one. */
 const langOf = (crumb: Crumb) => (crumb.lang ? { lang: crumb.lang } : {})

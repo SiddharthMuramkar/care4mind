@@ -1,8 +1,8 @@
 import Link from 'next/link'
 import { Fragment } from 'react'
 
-import { ConceptCard } from '@/components/ConceptCard'
-import { turnForward } from '@/components/PageTurn'
+import { ConceptCard } from '@/components/cards/ConceptCard'
+import { turnForward } from '@/components/page-turn/PageTurn'
 import { hrefFor, type ConceptCard as Concept } from '@/content'
 import { cx } from '@/lib/cx'
 

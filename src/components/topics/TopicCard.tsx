@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import { ViewTransition } from 'react'
 
-import { titleMorphName, turnForward } from '@/components/PageTurn'
+import { titleMorphName, turnForward } from '@/components/page-turn/PageTurn'
 import { ScriptPair } from '@/components/script/ScriptPair'
 import { hrefFor, type TopicCard as Topic } from '@/content'
 import { cx } from '@/lib/cx'

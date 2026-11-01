@@ -3,7 +3,7 @@ import Link from 'next/link'
 
 import { PageTitle, ReadingPage, TitlePage } from '@/components/ReadingPage'
 import { AzIndex, AzLetter, type ChipGroup, type RailLetter } from '@/components/az'
-import { turnForward } from '@/components/PageTurn'
+import { turnForward } from '@/components/page-turn/PageTurn'
 import type { PreviewPayload } from '@/components/preview/LinkPreview'
 import { TopicCard } from '@/components/topics'
 import { concepts, hrefFor, site, topics, works, type AzEntry as Entry } from '@/content'

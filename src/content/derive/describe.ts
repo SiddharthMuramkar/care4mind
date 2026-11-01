@@ -8,7 +8,7 @@ import { siteConfig as config } from '@/config/site'
 import type { ContentGraph } from '../graph'
 import type { PageDescription } from '../types'
 import { byName } from '../views/common'
-import { displayName } from '../views/names'
+import { displayName } from '@/content/names'
 import { normalise, pageRoutes, type PageRoute } from './routes'
 
 /** "1 entry", "20 entries". */

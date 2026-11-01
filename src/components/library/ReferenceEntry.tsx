@@ -1,8 +1,8 @@
 import type { Route } from 'next'
 import Link from 'next/link'
 
-import { Citation } from '@/components/Citation'
-import { turnForward } from '@/components/PageTurn'
+import { Citation } from '@/components/references/Citation'
+import { turnForward } from '@/components/page-turn/PageTurn'
 import { LinkPreview, type PreviewPayload } from '@/components/preview/LinkPreview'
 import type { RecordRef, ReferenceView } from '@/content'
 

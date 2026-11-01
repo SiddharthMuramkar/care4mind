@@ -1,4 +1,4 @@
-import { citationParts, type Cited } from './citation-parts'
+import { citationParts, type Cited } from '@/components/citation-parts'
 import styles from './Citation.module.css'
 
 /** One Reference, formatted for reading. Each run of text is one string, which keeps long lists light. */

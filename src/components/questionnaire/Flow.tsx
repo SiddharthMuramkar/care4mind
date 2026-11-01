@@ -19,9 +19,9 @@ import {
   type ReactNode,
 } from 'react'
 
-import cta from '@/app/cta.module.css'
-import { Fleuron } from '@/components/Fleuron'
-import { turnBack } from '@/components/PageTurn'
+import { cta } from '@/components/cta'
+import { Fleuron } from '@/components/ornaments'
+import { turnBack } from '@/components/page-turn'
 import type { QuestionnaireFormView } from '@/content'
 import {
   addressOf,

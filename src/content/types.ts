@@ -15,7 +15,7 @@ import type {
   ReviewStatus,
   SanskritName,
   Slug,
-} from './schema'
+} from './schema/index'
 
 /** The record schema's plain types that views use, for pages to name. */
 export type { HomepageHero, Inline, QuestionnaireStatus, ReferenceType, SanskritName, Slug }

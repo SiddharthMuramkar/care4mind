@@ -1,9 +1,9 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 
-import { OrnamentRule } from '@/components/OrnamentRule'
-import { turnForward } from '@/components/PageTurn'
-import { QuestionnaireCard } from '@/components/QuestionnaireCard'
+import { OrnamentRule } from '@/components/ornaments/OrnamentRule'
+import { turnForward } from '@/components/page-turn/PageTurn'
+import { QuestionnaireCard } from '@/components/cards/QuestionnaireCard'
 import { PageTitle, ReadingPage, TitlePage } from '@/components/ReadingPage'
 import { StatusBadge } from '@/components/StatusBadge'
 import { hrefFor, questionnaires, topics, type QuestionnaireCard as Card } from '@/content'

@@ -1,11 +1,12 @@
 import { ViewTransition, type ReactNode } from 'react'
 
+import { Text } from '@/components/prose'
 import type { ConceptCard as Card } from '@/content'
 import { cx } from '@/lib/cx'
 
 import styles from './ConceptCard.module.css'
-import { titleMorphName } from './PageTurn'
-import { Text } from './prose/Text'
+import { titleMorphName } from '@/components/page-turn/PageTurn'
+import { Text } from '@/components/prose'
 
 interface Props {
   concept: Pick<Card, 'slug' | 'name' | 'lang' | 'term' | 'english' | 'summary'>
