@@ -6,7 +6,7 @@ import { Citation } from '@/components/Citation'
 import { Folio } from '@/components/Folio'
 import { PageTurn } from '@/components/PageTurn'
 import { Provenance, Sections, Text } from '@/components/prose'
-import { library, type ResourceItemView } from '@/content'
+import { library, site, type ResourceItemView } from '@/content'
 import { metadataFor } from '@/lib/metadata'
 
 import listing from '../../listing.module.css'
@@ -14,16 +14,14 @@ import reading from '../../reading.module.css'
 
 export const dynamicParams = false
 
-export async function generateStaticParams() {
-  return (await library.list()).map(({ slug }) => ({ slug }))
-}
+const PATTERN = '/library/[slug]/' as const
+
+export const generateStaticParams = () => site.params(PATTERN)
 
 export async function generateMetadata({
   params,
 }: PageProps<'/library/[slug]'>): Promise<Metadata> {
-  const page = await library.get((await params).slug)
-  if (!page) notFound()
-  return metadataFor(page.href)
+  return metadataFor(PATTERN.replace('[slug]', (await params).slug))
 }
 
 /** One entry on a reading list: a book, cited in full with its note, or a course. */
