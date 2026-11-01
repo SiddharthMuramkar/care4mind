@@ -60,6 +60,27 @@ const through = (last: number): FlowAction[] =>
   Array.from({ length: last }, (_, i) => [...answerPart(i + 1), { type: 'next' } as const]).flat()
 
 describe('the flow', () => {
+  it('starts a statement whose id is constructor unanswered', () => {
+    const madeUp = {
+      parts: [
+        {
+          id: 'only',
+          title: 'Only',
+          instructions: 'Answer.',
+          items: [{ id: 'constructor', text: 'A statement.', options: ['Yes', 'No'] }],
+        },
+      ],
+    }
+    const state = startFlow(madeUp)
+    expect(progressOf(state).answered).toBe(0)
+    expect(progressText(progressOf(state))).toBe('Part 1 of 1 · 0 of 1 answered')
+    expect(flowReducer(state, { type: 'next' }).missing).toEqual(['constructor'])
+    const given = flowReducer(state, { type: 'answer', item: 'constructor', option: 'Yes' })
+    expect(progressOf(given).answered).toBe(1)
+    expect(scoreQuestionnaire(madeUp, {})).toEqual({ status: 'incomplete' })
+    expect(scoreQuestionnaire(madeUp, { constructor: 'Yes' })).toEqual({ status: 'pending' })
+  })
+
   it('starts on part 1 with nothing answered', () => {
     const state = startFlow(form)
     expect(state.step).toBe('part-1')
