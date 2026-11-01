@@ -1,9 +1,13 @@
+import type { LatinScript } from '@/content'
+
 /** What a toast says: a short confirmation, such as "Copied", and what it was about. */
 export interface ToastMessage {
   /** The message itself, in a word or two: "Copied". */
   title: string
   /** A second line, such as what was copied: "Yoga Sūtra 1.30". */
   description?: string
+  /** The description's language when it is a romanized source, such as `sa-Latn`. */
+  lang?: LatinScript
 }
 
 type Show = (message: ToastMessage) => void
