@@ -1,7 +1,8 @@
 /**
- * What every page tells browsers and search engines about itself (D19, NFR-04): its title, its
- * description and its canonical address, as Next's metadata. A page asks by its path, and
- * `site.describe` supplies the rest, so no page writes its metadata by hand.
+ * What every page tells browsers and search engines about itself: its title, its description and
+ * its canonical address, as Next's metadata, so a search result names the page and every copy of
+ * it points to one address. A page asks by its path, and `site.describe` supplies the rest, so no
+ * page writes its metadata by hand.
  */
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'

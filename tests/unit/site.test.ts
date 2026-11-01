@@ -10,8 +10,6 @@ import { metadataFor } from '@/lib/metadata'
 
 import nextConfig from '../../next.config'
 
-// Front-end-site ticket 03: what every page tells the world about itself (D19, NFR-04).
-
 // Typed out rather than read from site.url, so a typo in the config fails.
 const ORIGIN = 'https://www.care4mind.xyz'
 
@@ -21,7 +19,7 @@ describe('the canonical origin', () => {
   })
 })
 
-describe('a page’s metadata (D19)', () => {
+describe('a page’s metadata', () => {
   it('names a Concept by its term and gloss, describes it by its summary and gives its address', async () => {
     expect(await metadataFor('/concepts/vikshepa/')).toEqual({
       title: { absolute: 'Vikṣepa (Distraction) · Care4Mind' },
@@ -110,7 +108,7 @@ describe('a page’s metadata (D19)', () => {
   })
 })
 
-describe('the sitemap and robots.txt (NFR-04)', () => {
+describe('the sitemap and robots.txt', () => {
   it('lists every route in the registry once, at its production address, with its slash', async () => {
     const urls = (await sitemap()).map(({ url }) => url)
     const paths = (await site.routes()).map(({ path }) => path)
