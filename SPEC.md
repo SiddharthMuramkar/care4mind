@@ -109,8 +109,6 @@ The code still holds these patterns, and new code doesn't copy them. Each line n
 - The "Devanagari first" stubs, which render nothing, though the proposals page calls the feature built (#43).
 - Settings that look load-bearing but do nothing here: the root layout's `title.template`, since every page sets an absolute title (#64), and `typedRoutes`, which can't check paths that end in a slash (#55). The checks that do hold links true are the `hrefFor()` lint rule and the browser crawler.
 
-"Lane", in `scripts/lane/` and the `archive/lane-*` tags, is the old name for the parallel builders `ship` runs. New code says builder.
-
 ## Changing this file
 
 - A rule comes in together with what keeps it true: a check, or "review".
