@@ -15,7 +15,7 @@ const OFF: Features = { questionnairePreview: false, conceptMap: false, devanaga
 
 const site = createContent(localSource, ON)
 
-/** The 19 Concepts, by the slugs the batch tickets chose. */
+/** The 19 Concepts, by the slugs the migration chose. */
 const CONCEPTS = [
   'ahimsa',
   'asteya',
@@ -102,7 +102,7 @@ function ofKind<K extends ContentRecord['kind']>(kind: K): RecordOf<K>[] {
 }
 
 describe('the records the migration carried over', () => {
-  it('are 19 Concepts, by the slugs the batch tickets chose', () => {
+  it('are 19 Concepts, by the slugs the migration chose', () => {
     expect(
       ofKind('concept')
         .map(({ slug }) => slug)
@@ -193,7 +193,7 @@ describe('what the site derives from them', () => {
     ).toEqual(CONCEPTS.map((slug) => `/concepts/${slug}/`).toSorted())
   })
 
-  it('is 448 search documents, by the counts the tickets record', async () => {
+  it('is 448 search documents, as the migration counted them', async () => {
     const documents = await site.site.searchDocuments()
     const count: Record<string, number> = {}
     for (const { kind } of documents) count[kind] = (count[kind] ?? 0) + 1
