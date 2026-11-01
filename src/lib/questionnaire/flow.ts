@@ -126,6 +126,15 @@ export function addressOf(step: StepId): string {
   return `?step=${step}`
 }
 
+/** A history entry of the flow's own, numbered by its place among them. */
+export const entryAt = (place: number) => ({ flowPlace: place })
+
+/** The place of a flow entry; null for an entry the flow didn't make. */
+export function placeOf(entry: unknown): number | null {
+  if (typeof entry !== 'object' || entry === null || !('flowPlace' in entry)) return null
+  return typeof entry.flowPlace === 'number' ? entry.flowPlace : null
+}
+
 /** The step an address names; part 1 when it names none. */
 export function stepFromAddress(search: string): StepId {
   const step = new URLSearchParams(search).get('step')
