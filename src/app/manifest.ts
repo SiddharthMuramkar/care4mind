@@ -1,6 +1,6 @@
 import type { MetadataRoute } from 'next'
 
-import { site } from '@/config/site'
+import { siteConfig } from '@/config/site'
 import { home } from '@/content'
 
 /**
@@ -10,8 +10,8 @@ import { home } from '@/content'
  */
 export default async function manifest(): Promise<MetadataRoute.Manifest> {
   return {
-    name: site.name,
-    short_name: site.name,
+    name: siteConfig.name,
+    short_name: siteConfig.name,
     description: (await home.get()).tagline,
     start_url: '/',
     display: 'browser',

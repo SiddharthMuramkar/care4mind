@@ -9,7 +9,7 @@ import { LinkPreviewRoot } from '@/components/preview/LinkPreviewRoot'
 import { SiteFooter } from '@/components/SiteFooter'
 import { SiteHeader } from '@/components/SiteHeader'
 import { Toaster } from '@/components/toast/Toaster'
-import { site } from '@/config/site'
+import { siteConfig } from '@/config/site'
 import { home } from '@/content'
 import { playfairDisplay, playfairText, playfairTextStyles } from '@/fonts/playfair'
 import { tiroDevanagariSanskrit } from '@/fonts/tiro-devanagari-sanskrit'
@@ -20,10 +20,10 @@ import '@/styles/globals.css'
 export async function generateMetadata(): Promise<Metadata> {
   return {
     // Share-card URLs are absolute and name the production host, even on a preview.
-    metadataBase: new URL(site.url),
-    title: { default: `${site.name}: Indian psychology`, template: `%s · ${site.name}` },
+    metadataBase: new URL(siteConfig.url),
+    title: { default: `${siteConfig.name}: Indian psychology` },
     description: (await home.get()).tagline,
-    robots: site.indexable
+    robots: siteConfig.indexable
       ? undefined
       : { index: false, follow: false, googleBot: { index: false, follow: false } },
   }

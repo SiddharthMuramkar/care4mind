@@ -7,19 +7,19 @@ import { describe, expect, it } from 'vitest'
 import robots from '@/app/robots'
 import sitemap from '@/app/sitemap'
 import { redirects } from '@/config/redirects'
-import { site as config } from '@/config/site'
+import { siteConfig } from '@/config/site'
 import { concepts, site } from '@/content'
 import { metadataFor, shareCardText } from '@/lib/metadata'
 import { CARD_COLOURS } from '@/lib/share-card'
 
 import nextConfig from '../../next.config'
 
-// Typed out rather than read from site.url, so a typo in the config fails.
+// Typed out rather than read from siteConfig.url, so a typo in the config fails.
 const ORIGIN = 'https://www.care4mind.xyz'
 
 describe('the canonical origin', () => {
   it('is www.care4mind.xyz until launch, with no trailing slash', () => {
-    expect(config.url).toBe(ORIGIN)
+    expect(siteConfig.url).toBe(ORIGIN)
   })
 })
 
@@ -32,7 +32,7 @@ function withShareTags(meta: {
   const share = { title: meta.title.absolute, description: meta.description }
   return {
     ...meta,
-    openGraph: { type: 'website', siteName: config.name, url: meta.alternates.canonical, ...share },
+    openGraph: { type: 'website', siteName: siteConfig.name, url: meta.alternates.canonical, ...share },
     twitter: { card: 'summary_large_image', ...share },
   }
 }
@@ -158,7 +158,7 @@ describe('a page’s metadata', () => {
     expect(await shareCardText('/concepts/vikshepa/')).toMatchObject({
       title: `${route?.title} · ${concept?.english}`,
     })
-    expect(await shareCardText('/')).toEqual({ title: config.name, description: config.tagline })
+    expect(await shareCardText('/')).toEqual({ title: siteConfig.name, description: siteConfig.tagline })
   })
 
   it('answers 404 for a path that is no page in this build', async () => {

@@ -1,13 +1,12 @@
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 
-import { Breadcrumbs } from '@/components/Breadcrumbs'
 import { Citation } from '@/components/Citation'
-import { Folio } from '@/components/Folio'
-import { PageTurn } from '@/components/PageTurn'
+import { PageTitle, ReadingPage, TitlePage } from '@/components/ReadingPage'
 import { Provenance, Sections, Text } from '@/components/prose'
 import { library, site, type ResourceItemView } from '@/content'
 import { metadataFor } from '@/lib/metadata'
+import { count } from '@/lib/text'
 
 import listing from '../../listing.module.css'
 import reading from '../../reading.module.css'
@@ -66,44 +65,41 @@ export default async function LibraryItemPage({ params }: PageProps<'/library/[s
   if (!page) notFound()
 
   return (
-    <PageTurn>
-      <main id="main" className={reading.page}>
-        <Breadcrumbs path={page.href} />
-        <Folio as="article" className={reading.article} aria-labelledby="page-title">
-          <header className={reading.titlePage}>
-            <p className={reading.kicker}>Library</p>
-            <h1 id="page-title" className={reading.title}>
-              {page.title}
-            </h1>
-            {page.kind === 'page' ? (
-              <p className={reading.summary}>
-                <Text text={page.summary} />
-              </p>
-            ) : (
-              <p className={listing.facts}>
-                {page.groups.reduce((sum, group) => sum + group.items.length, 0)} entries
-              </p>
+    <ReadingPage path={page.href}>
+      <TitlePage>
+        <p className={reading.kicker}>Library</p>
+        <PageTitle>{page.title}</PageTitle>
+        {page.kind === 'page' ? (
+          <p className={reading.summary}>
+            <Text text={page.summary} />
+          </p>
+        ) : (
+          <p className={listing.facts}>
+            {count(
+              page.groups.reduce((sum, group) => sum + group.items.length, 0),
+              'entry',
+              'entries',
             )}
-          </header>
+          </p>
+        )}
+      </TitlePage>
 
-          {page.kind === 'page' ? (
-            <Sections sections={page.sections} />
-          ) : (
-            page.groups.map((group) => (
-              <section key={group.id} id={group.id} className={reading.section}>
-                <h2 className={reading.sectionTitle}>{group.heading}</h2>
-                <ul className={listing.entries}>
-                  {group.items.map((item, index) => (
-                    <Item key={index} item={item} />
-                  ))}
-                </ul>
-              </section>
-            ))
-          )}
+      {page.kind === 'page' ? (
+        <Sections sections={page.sections} />
+      ) : (
+        page.groups.map((group) => (
+          <section key={group.id} id={group.id} className={reading.section}>
+            <h2 className={reading.sectionTitle}>{group.heading}</h2>
+            <ul className={listing.entries}>
+              {group.items.map((item, index) => (
+                <Item key={index} item={item} />
+              ))}
+            </ul>
+          </section>
+        ))
+      )}
 
-          <Provenance of={page} />
-        </Folio>
-      </main>
-    </PageTurn>
+      <Provenance of={page} />
+    </ReadingPage>
   )
 }

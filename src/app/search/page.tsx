@@ -1,9 +1,8 @@
 import type { Metadata, Route } from 'next'
 import Link from 'next/link'
 
-import { Breadcrumbs } from '@/components/Breadcrumbs'
-import { Folio } from '@/components/Folio'
-import { PageTurn, turnForward } from '@/components/PageTurn'
+import { turnForward } from '@/components/PageTurn'
+import { PageTitle, ReadingPage, TitlePage } from '@/components/ReadingPage'
 import { hrefFor, site, type SearchKind } from '@/content'
 import { metadataFor } from '@/lib/metadata'
 import { documentsMatching } from '@/lib/search'
@@ -53,65 +52,58 @@ export default async function SearchPage({ searchParams }: PageProps<'/search'>)
   })).filter(({ results }) => results.length > 0)
 
   return (
-    <PageTurn>
-      <main id="main" className={reading.page}>
-        <Breadcrumbs path={PATH} />
-        <Folio as="article" className={reading.article} aria-labelledby="search-title">
-          <header className={reading.titlePage}>
-            <h1 id="search-title" className={reading.title}>
-              Search
-            </h1>
-            <form action={PATH} role="search" className={styles.form}>
-              <label htmlFor="search-query" className={styles.label}>
-                A Concept, a term, a verse, a text or an author
-              </label>
-              <input
-                id="search-query"
-                name="q"
-                type="search"
-                defaultValue={query}
-                className={styles.input}
-              />
-              <button type="submit" className={styles.button}>
-                Search
-              </button>
-            </form>
-          </header>
+    <ReadingPage path={PATH}>
+      <TitlePage>
+        <PageTitle>Search</PageTitle>
+        <form action={PATH} role="search" className={styles.form}>
+          <label htmlFor="search-query" className={styles.label}>
+            A Concept, a term, a verse, a text or an author
+          </label>
+          <input
+            id="search-query"
+            name="q"
+            type="search"
+            defaultValue={query}
+            className={styles.input}
+          />
+          <button type="submit" className={styles.button}>
+            Search
+          </button>
+        </form>
+      </TitlePage>
 
-          {query === '' ? null : (
-            <section className={reading.section} aria-labelledby="results-title">
-              <h2 id="results-title" className={reading.sectionTitle}>
-                {found.length} {found.length === 1 ? 'result' : 'results'} for “{query}”
-              </h2>
-              {groups.map(({ kind, heading, results }) => (
-                <div key={kind} className={listing.group}>
-                  <h3 className={listing.groupTitle}>{heading}</h3>
-                  <ul className={listing.entries}>
-                    {results.slice(0, SHOWN).map((result) => (
-                      <li key={result.id} className={listing.entry}>
-                        <p className={listing.entryName}>
-                          {/* Each result's path, made by hrefFor() in the content module. */}
-                          <Link
-                            href={result.href as Route}
-                            lang={IAST.test(result.title) ? 'sa-Latn' : undefined}
-                            transitionTypes={turnForward}
-                          >
-                            {result.title}
-                          </Link>
-                        </p>
-                        {result.parent ? <p className={listing.meta}>In {result.parent}</p> : null}
-                      </li>
-                    ))}
-                  </ul>
-                  {results.length > SHOWN ? (
-                    <p className={listing.note}>And {results.length - SHOWN} more.</p>
-                  ) : null}
-                </div>
-              ))}
-            </section>
-          )}
-        </Folio>
-      </main>
-    </PageTurn>
+      {query === '' ? null : (
+        <section className={reading.section} aria-labelledby="results-title">
+          <h2 id="results-title" className={reading.sectionTitle}>
+            {found.length} {found.length === 1 ? 'result' : 'results'} for “{query}”
+          </h2>
+          {groups.map(({ kind, heading, results }) => (
+            <div key={kind} className={listing.group}>
+              <h3 className={listing.groupTitle}>{heading}</h3>
+              <ul className={listing.entries}>
+                {results.slice(0, SHOWN).map((result) => (
+                  <li key={result.id} className={listing.entry}>
+                    <p className={listing.entryName}>
+                      {/* Each result's path, made by hrefFor() in the content module. */}
+                      <Link
+                        href={result.href as Route}
+                        lang={IAST.test(result.title) ? 'sa-Latn' : undefined}
+                        transitionTypes={turnForward}
+                      >
+                        {result.title}
+                      </Link>
+                    </p>
+                    {result.parent ? <p className={listing.meta}>In {result.parent}</p> : null}
+                  </li>
+                ))}
+              </ul>
+              {results.length > SHOWN ? (
+                <p className={listing.note}>And {results.length - SHOWN} more.</p>
+              ) : null}
+            </div>
+          ))}
+        </section>
+      )}
+    </ReadingPage>
   )
 }

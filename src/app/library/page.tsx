@@ -1,11 +1,11 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 
-import { Breadcrumbs } from '@/components/Breadcrumbs'
-import { Folio } from '@/components/Folio'
-import { PageTurn, turnForward } from '@/components/PageTurn'
+import { turnForward } from '@/components/PageTurn'
+import { PageTitle, ReadingPage, TitlePage } from '@/components/ReadingPage'
 import { hrefFor, library, references } from '@/content'
 import { metadataFor } from '@/lib/metadata'
+import { count } from '@/lib/text'
 
 import listing from '../listing.module.css'
 import reading from '../reading.module.css'
@@ -21,7 +21,6 @@ export function generateMetadata(): Promise<Metadata> {
  */
 export default async function LibraryPage() {
   const [pages, all] = await Promise.all([library.list(), references.list()])
-  const count = (n: number, one: string, many: string) => `${n} ${n === 1 ? one : many}`
   // What each holds: a reading list its entries, a page its sections.
   const holds = await Promise.all(
     pages.map(async (page) => {
@@ -46,32 +45,25 @@ export default async function LibraryPage() {
   ]
 
   return (
-    <PageTurn>
-      <main id="main" className={reading.page}>
-        <Breadcrumbs path={PATH} />
-        <Folio as="article" className={reading.article} aria-labelledby="library-title">
-          <header className={reading.titlePage}>
-            <h1 id="library-title" className={reading.title}>
-              Library
-            </h1>
-            <p className={reading.summary}>
-              Every source the site cites, its reading lists, and the methods it describes.
-            </p>
-          </header>
+    <ReadingPage path={PATH}>
+      <TitlePage>
+        <PageTitle>Library</PageTitle>
+        <p className={reading.summary}>
+          Every source the site cites, its reading lists, and the methods it describes.
+        </p>
+      </TitlePage>
 
-          <ul className={listing.contents}>
-            {shelf.map((item) => (
-              <li key={item.key}>
-                <Link href={item.href} transitionTypes={turnForward}>
-                  {item.title}
-                </Link>
-                <span className={listing.leader} aria-hidden />
-                <span className={listing.count}>{item.holds}</span>
-              </li>
-            ))}
-          </ul>
-        </Folio>
-      </main>
-    </PageTurn>
+      <ul className={listing.contents}>
+        {shelf.map((item) => (
+          <li key={item.key}>
+            <Link href={item.href} transitionTypes={turnForward}>
+              {item.title}
+            </Link>
+            <span className={listing.leader} aria-hidden />
+            <span className={listing.count}>{item.holds}</span>
+          </li>
+        ))}
+      </ul>
+    </ReadingPage>
   )
 }

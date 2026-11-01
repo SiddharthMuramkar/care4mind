@@ -7,7 +7,7 @@
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 
-import { site as config } from '@/config/site'
+import { siteConfig } from '@/config/site'
 import {
   concepts,
   home,
@@ -18,9 +18,10 @@ import {
   type RouteEntry,
   type RouteKind,
 } from '@/content'
+import { count, listed } from '@/lib/text'
 
 /** The homepage keeps the site's own title. */
-const HOME_TITLE = `${config.name}: Indian psychology`
+const HOME_TITLE = `${siteConfig.name}: Indian psychology`
 
 /** One sentence each for the pages with no summary of their own. */
 const ABOUT: Partial<Record<RouteKind, string>> = {
@@ -39,21 +40,18 @@ const ABOUT: Partial<Record<RouteKind, string>> = {
 }
 
 /** The 404 page's metadata: a title, and no canonical address, as it is no page of the site. */
-export const notFoundMetadata: Metadata = { title: { absolute: `Page not found · ${config.name}` } }
+export const notFoundMetadata: Metadata = {
+  title: { absolute: `Page not found · ${siteConfig.name}` },
+}
 
 /** A path on the production site, as an absolute URL: canonical addresses and the sitemap. */
 export function absoluteUrl(path: string): string {
-  return new URL(path, config.url).href
+  return new URL(path, siteConfig.url).href
 }
 
 /** A Concept as it is named everywhere: "Vikṣepa · Distraction". Kept here until the shared naming function exists. */
 function conceptName(name: string, english: string | undefined): string {
   return english ? `${name} · ${english}` : name
-}
-
-/** "1 entry", "20 entries". */
-function count(n: number, one: string, many: string): string {
-  return `${n} ${n === 1 ? one : many}`
 }
 
 /**
@@ -99,8 +97,7 @@ async function describe(
     }
     case 'library': {
       const titles = ['References', ...(await library.list()).map((page) => page.title)]
-      const listed = `${titles.slice(0, -1).join(', ')} and ${titles.at(-1)}`
-      return { name, description: `The Care4Mind Library: ${listed}.` }
+      return { name, description: `The Care4Mind Library: ${listed(titles)}.` }
     }
     case 'resource-list':
     case 'page': {
@@ -127,14 +124,14 @@ async function describe(
 export async function metadataFor(path: string): Promise<Metadata> {
   const route = await routeAt(path)
   const { name, description } = await describe(route)
-  const title = route.kind === 'home' ? name : `${name} · ${config.name}`
+  const title = route.kind === 'home' ? name : `${name} · ${siteConfig.name}`
   const canonical = absoluteUrl(route.path)
   // No `images` here: each route segment's opengraph-image file supplies them, and Next uses one or the other.
   return {
     title: { absolute: title },
     description,
     alternates: { canonical },
-    openGraph: { type: 'website', siteName: config.name, title, description, url: canonical },
+    openGraph: { type: 'website', siteName: siteConfig.name, title, description, url: canonical },
     twitter: { card: 'summary_large_image', title, description },
   }
 }
@@ -142,7 +139,7 @@ export async function metadataFor(path: string): Promise<Metadata> {
 /** The text of the page's share card: the site's name and tagline on the homepage. */
 export async function shareCardText(path: string): Promise<{ title: string; description: string }> {
   const route = await routeAt(path)
-  if (route.kind === 'home') return { title: config.name, description: config.tagline }
+  if (route.kind === 'home') return { title: siteConfig.name, description: siteConfig.tagline }
   const { name, description, card } = await describe(route)
   return { title: card ?? name, description }
 }

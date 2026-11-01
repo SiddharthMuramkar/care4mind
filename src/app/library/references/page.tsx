@@ -1,9 +1,7 @@
 import type { Metadata } from 'next'
 
-import { Breadcrumbs } from '@/components/Breadcrumbs'
 import { Citation } from '@/components/Citation'
-import { Folio } from '@/components/Folio'
-import { PageTurn } from '@/components/PageTurn'
+import { PageTitle, ReadingPage, TitlePage } from '@/components/ReadingPage'
 import { RecordLink } from '@/components/prose'
 import { hrefFor, references } from '@/content'
 import { metadataFor } from '@/lib/metadata'
@@ -24,42 +22,35 @@ export function generateMetadata(): Promise<Metadata> {
 export default async function ReferencesPage() {
   const all = await references.list()
   return (
-    <PageTurn>
-      <main id="main" className={reading.page}>
-        <Breadcrumbs path={PATH} />
-        <Folio as="article" className={reading.article} aria-labelledby="references-title">
-          <header className={reading.titlePage}>
-            <p className={reading.kicker}>Library</p>
-            <h1 id="references-title" className={reading.title}>
-              References
-            </h1>
-            <p className={reading.summary}>Every source the site cites, by author.</p>
-            <p className={listing.facts}>{all.length} References</p>
-          </header>
+    <ReadingPage path={PATH}>
+      <TitlePage>
+        <p className={reading.kicker}>Library</p>
+        <PageTitle>References</PageTitle>
+        <p className={reading.summary}>Every source the site cites, by author.</p>
+        <p className={listing.facts}>{all.length} References</p>
+      </TitlePage>
 
-          <ul className={listing.entries}>
-            {all.map((reference) => (
-              <li key={reference.id} id={reference.anchor} className={listing.entry}>
-                <p>
-                  <Citation reference={reference} />
-                </p>
-                {reference.citedIn.length > 0 ? (
-                  <div className={listing.cited}>
-                    Cited in
-                    <ul className={listing.inline}>
-                      {reference.citedIn.map((record) => (
-                        <li key={`${record.kind}/${record.id}`}>
-                          <RecordLink record={record} />
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                ) : null}
-              </li>
-            ))}
-          </ul>
-        </Folio>
-      </main>
-    </PageTurn>
+      <ul className={listing.entries}>
+        {all.map((reference) => (
+          <li key={reference.id} id={reference.anchor} className={listing.entry}>
+            <p>
+              <Citation reference={reference} />
+            </p>
+            {reference.citedIn.length > 0 ? (
+              <div className={listing.cited}>
+                Cited in
+                <ul className={listing.inline}>
+                  {reference.citedIn.map((record) => (
+                    <li key={`${record.kind}/${record.id}`}>
+                      <RecordLink record={record} />
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ) : null}
+          </li>
+        ))}
+      </ul>
+    </ReadingPage>
   )
 }

@@ -1,8 +1,3 @@
-/* A topic's page: wider than a reading page, so its contents plate can stand beside its cards. */
-main.page {
-  max-width: 76rem;
-}
-
 .order {
   margin-inline-start: 0.35em;
   font-family: var(--font-deva);

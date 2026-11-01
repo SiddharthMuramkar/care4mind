@@ -5,7 +5,7 @@ import { ViewTransition, type CSSProperties, type ReactNode } from 'react'
 import { hrefFor, type ConceptView, type VerseView } from '@/content'
 import { statusWords } from '@/lib/questionnaire/gate'
 
-import { turnForward } from '../PageTurn'
+import { titleMorphName, turnForward } from '../PageTurn'
 import { LinkPreview } from '../preview/LinkPreview'
 import { Text } from '../prose'
 import { conceptPreview, passagePreview } from './previews'
@@ -168,7 +168,11 @@ export function LinkedKnowledge({
                   href={hrefFor({ kind: 'questionnaire', id: slug, status })}
                   transitionTypes={turnForward}
                 >
-                  <ViewTransition name={`questionnaire-title-${slug}`} share="morph" default="none">
+                  <ViewTransition
+                    name={titleMorphName('questionnaire', slug)}
+                    share="morph"
+                    default="none"
+                  >
                     <span>{title}</span>
                   </ViewTransition>
                 </Link>

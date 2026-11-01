@@ -39,7 +39,7 @@ The developer is learning Git, GitHub, CI and Vercel by doing. When they ask how
 
 - Old work is in `archive/*` tags (`git tag -n -l 'archive/*'`). `archive/frontend-press-only` is the last full build, and `archive/lane-search` holds the search engine.
 - Saved copies of the current site are in the private repo `SiddharthMuramkar/care4mind-captures`, apart from this repo.
-- Vercel deploys through its Git link: a preview for every branch, and production from `main`. Every page is noindex until launch (`site.indexable`).
+- Vercel deploys through its Git link: a preview for every branch, and production from `main`. Every page is noindex until launch (`siteConfig.indexable`).
 
 ## Agent skills
 

@@ -14,9 +14,9 @@ Each module is named by its capability, and outside code reaches it only through
 - **Content source**, the seam under Content: `ContentSource.records(kind)`. Two adapters satisfy it, the generated registry of record files (`localSource`) and the made-up records tests hold in memory (`memorySource()`), so the seam is real. The interface's doc comment lists an adapter's duties; the graph sorts each kind by id. A content back end becomes one more adapter, and nothing above it changes. _Tests: content-registry, content-interface, content-derive._
 - **Records**: one file per record. Each is default-exported through its kind's `define…` helper from `@/content/schema`, and points at other records by id only. The registry that lists them is generated. _Types, the graph's dangling-id check, the content tests, and the registry that `pnpm check` and every test run write afresh._
 - **Addresses**: every internal link comes from `hrefFor()`. _Lint: `care4mind/href-from-hreffor`._
-- **Pages**: App Router routes that read content only through `@/content`. `site.routes()` is the one list of public pages, and the sitemap, page metadata, the navigation and the link crawler read it. _Tests: content-derive, routes; browser: crawler._
+- **Pages**: App Router routes that read content only through `@/content`. `site.routes()` is the one list of public pages, and the sitemap, page metadata, the reading page shell, the navigation, the links to optional pages and the link crawler read it. A page never asks a flag whether it exists. _Tests: content-derive, routes, page-shell; browser: crawler._
 - **Page metadata and share cards**: `metadataFor(path)` in `@/lib/metadata` gives every page its title, description, canonical address and Open Graph and Twitter text. Images never go in metadata: each page's route segment has an `opengraph-image.tsx` that calls `shareCard()` (`@/lib/share-card`), which reads the WOFF twins of the font subsets through `@/fonts/card-faces`. _Tests: site; browser: share-card._
-- **Feature flags**: `features`, read once at build, on the server. A client component gets a flag as a prop. A feature that's built but not yet approved for launch is on in previews and off in production. The built proposals are the Concept map and Start here (`/start/`, linked from the header and the Menu); with a flag off, its route leaves `site.routes()`, so its links go too. _Tests: features. Lint: a 'use client' file imports `@/config/features` for types only (content-boundary)._
+- **Feature flags**: `features`, read once at build, on the server. A client component gets a flag as a prop. A feature that's built but not yet approved for launch is on in previews and off in production. The built proposals are the Concept map and Start here (`/start/`, linked from the header and the Menu); with a flag off, its route leaves `site.routes()`, so its links go too. _Tests: features; browser: the crawler and pages specs on a build with every flag off, as production has. Lint: a 'use client' file imports `@/config/features` for types only (content-boundary)._
 - **Redirects**: one table, each entry served as a 301. _Tests: redirects (unit and browser)._
 - **Questionnaire flow**: one reducer holds a person's answers, and nothing else does (no storage, cookies, address or request). No record stores scoring until the Psychology expert's rules arrive. _Types (`scoring.status` is `'pending'`), the content-integrity "held back" test, review._
 - **Script pair**: `script/ScriptPair` is the one drawer of a name's IAST and Devanagari set together, IAST first. A heading whose Devanagari sits on its own line below (a Concept card, a text's title page), verses, numerals and the hero keep their own markup. _Browser: concept._
@@ -70,7 +70,7 @@ These are judgement calls, so review checks them against the diff, in the codeba
   6. The pages, the navigation, Linked knowledge and the search page's headings.
   7. The tools behind `content:new` and `verify`.
   8. GLOSSARY.md.
-- **A page:** a route that reads `@/content`. Its address is an `hrefFor()` target, and its entry in `site.routes()` puts it in the sitemap, breadcrumbs and crawler. A page with a `[slug]` builds the params `site.params(pattern)` gives it, so it has exactly the routes the registry lists.
+- **A page:** a route that reads `@/content`. Its address is an `hrefFor()` target, and its entry in `site.routes()` puts it in the sitemap, breadcrumbs and crawler. A page with a `[slug]` builds the params `site.params(pattern)` gives it, so it has exactly the routes the registry lists. Below the homepage it renders `ReadingPage` itself (never from a layout, so the page turn takes the whole page), with `TitlePage` and `PageTitle`, and picks a named width. _Tests: page-shell; browser: pages._
 - **A topic:** its record, plus its colour token, its `[data-topic]` rule and its contrast pair. Nothing checks the last three yet (#81).
 - **A colour, duration or easing:** a token in the global stylesheet. A colour pair that carries text joins the contrast list.
 - **A feature awaiting the Project owner's approval:** a flag in `features`.
@@ -80,7 +80,7 @@ These are judgement calls, so review checks them against the diff, in the codeba
 
 ## The feedback loop
 
-`pnpm check` is the one local signal that a change is done. CI runs it on every PR and every push to `main`, then the browser tests in parallel shards and Lighthouse on the build it made. The job named `ci`, which `.github/rulesets/main.json` requires, waits for all of them, and GitHub won't merge a PR until it passes on a branch that's up to date with `main`. Also run the browser tests you touched, against the build `pnpm check` made: `E2E_ONLY=<spec names> pnpm check:e2e`, where the names are file names in `tests/e2e` without `.spec.ts`.
+`pnpm check` is the one local signal that a change is done. CI runs it on every PR and every push to `main`, then the browser tests in parallel shards and Lighthouse on the build it made. Beside them, one job builds with every `FEATURE_*` variable at `0`, as production has, and runs the crawler and the pages spec on that build. The job named `ci`, which `.github/rulesets/main.json` requires, waits for all of them, and GitHub won't merge a PR until it passes on a branch that's up to date with `main`. Also run the browser tests you touched, against the build `pnpm check` made: `E2E_ONLY=<spec names> pnpm check:e2e`, where the names are file names in `tests/e2e` without `.spec.ts`.
 
 An agent's PR is done when it's open, green and every review thread is answered. `ship` stops there, and the developer reviews, merges and deletes the branch.
 
@@ -105,7 +105,7 @@ The code still holds these patterns, and new code doesn't copy them. Each line n
 - Scripts that send authors to `docs/agents/content-migration.md`, which no longer exists (#37).
 - `Flag.ticket` numbers on records. They come from a deleted local tracker and point at the wrong GitHub issues (#39).
 - Tests that pin how many records exist (#45).
-- Settings that look load-bearing but do nothing here: the root layout's `title.template`, since every page sets an absolute title (#64), and `typedRoutes`, which can't check paths that end in a slash (#55). The checks that do hold links true are the `hrefFor()` lint rule and the browser crawler.
+- A setting that looks load-bearing but does nothing here: `typedRoutes`, which can't check paths that end in a slash (#55). The checks that do hold links true are the `hrefFor()` lint rule and the browser crawler.
 
 "Lane", in `scripts/lane/` and the `archive/lane-*` tags, is the old name for the parallel builders `ship` runs. New code says builder.
 

@@ -1,7 +1,7 @@
 'use client'
 
 import { Folio } from '@/components/Folio'
-import { site } from '@/config/site'
+import { siteConfig } from '@/config/site'
 import { playfairText } from '@/fonts/playfair'
 import { cx } from '@/lib/cx'
 
@@ -21,7 +21,7 @@ export default function GlobalError({
   return (
     <html lang="en" className={playfairText.variable}>
       <body>
-        <title>{`Page not shown · ${site.name}`}</title>
+        <title>{`Page not shown · ${siteConfig.name}`}</title>
         <main id="main" className={reading.page}>
           <Folio className={styles.folio}>
             <p className={reading.kicker}>Error · Page not shown</p>

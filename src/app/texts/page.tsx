@@ -1,9 +1,8 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 
-import { Breadcrumbs } from '@/components/Breadcrumbs'
-import { Folio } from '@/components/Folio'
-import { PageTurn, turnForward } from '@/components/PageTurn'
+import { turnForward } from '@/components/PageTurn'
+import { PageTitle, ReadingPage, TitlePage } from '@/components/ReadingPage'
 import { ScriptPair } from '@/components/script/ScriptPair'
 import { hrefFor, works } from '@/content'
 import { metadataFor } from '@/lib/metadata'
@@ -23,46 +22,39 @@ export function generateMetadata(): Promise<Metadata> {
 export default async function TextsPage() {
   const all = await works.list()
   return (
-    <PageTurn>
-      <main id="main" className={reading.page}>
-        <Breadcrumbs path={PATH} />
-        <Folio as="article" className={reading.article} aria-labelledby="texts-title">
-          <header className={reading.titlePage}>
-            <h1 id="texts-title" className={reading.title}>
-              Traditional texts
-            </h1>
-            <p className={reading.summary}>
-              The works the site quotes, each with every verse it quotes from them.
-            </p>
-          </header>
+    <ReadingPage path={PATH}>
+      <TitlePage>
+        <PageTitle>Traditional texts</PageTitle>
+        <p className={reading.summary}>
+          The works the site quotes, each with every verse it quotes from them.
+        </p>
+      </TitlePage>
 
-          <ul className={listing.entries}>
-            {all.map((work) => (
-              <li key={work.slug} className={listing.entry}>
-                <p className={listing.entryName}>
-                  <ScriptPair
-                    lang={work.lang}
-                    iast={
-                      <Link
-                        href={hrefFor({ kind: 'work', id: work.slug })}
-                        transitionTypes={turnForward}
-                      >
-                        {work.title}
-                      </Link>
-                    }
-                    devanagari={work.term.devanagari}
-                  />
-                </p>
-                <p className={listing.meta}>
-                  {[work.english, work.attribution].filter(Boolean).join(' · ')}
-                  {work.english || work.attribution ? ' · ' : null}
-                  {work.passageCount} {work.passageCount === 1 ? 'verse' : 'verses'} quoted
-                </p>
-              </li>
-            ))}
-          </ul>
-        </Folio>
-      </main>
-    </PageTurn>
+      <ul className={listing.entries}>
+        {all.map((work) => (
+          <li key={work.slug} className={listing.entry}>
+            <p className={listing.entryName}>
+              <ScriptPair
+                lang={work.lang}
+                iast={
+                  <Link
+                    href={hrefFor({ kind: 'work', id: work.slug })}
+                    transitionTypes={turnForward}
+                  >
+                    {work.title}
+                  </Link>
+                }
+                devanagari={work.term.devanagari}
+              />
+            </p>
+            <p className={listing.meta}>
+              {[work.english, work.attribution].filter(Boolean).join(' · ')}
+              {work.english || work.attribution ? ' · ' : null}
+              {work.passageCount} {work.passageCount === 1 ? 'verse' : 'verses'} quoted
+            </p>
+          </li>
+        ))}
+      </ul>
+    </ReadingPage>
   )
 }

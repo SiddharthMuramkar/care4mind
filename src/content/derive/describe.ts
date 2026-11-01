@@ -3,7 +3,7 @@
  * describes it, its summary where it has one, otherwise one plain sentence about what it holds.
  */
 import type { Features } from '@/config/features'
-import { site as config } from '@/config/site'
+import { siteConfig as config } from '@/config/site'
 
 import type { ContentGraph } from '../graph'
 import type { PageDescription } from '../types'

@@ -1,10 +1,3 @@
-/* A Concept page: the reading folio, wider where its contents sit beside the text. */
-@media (min-width: 64rem) {
-  .page {
-    max-width: 78rem;
-  }
-}
-
 /* "Also spelled", centred under the title. */
 .spellingTools {
   display: flex;
@@ -75,7 +68,8 @@
  * the References open; each link that leaves the site followed by its address.
  */
 @media print {
-  .page {
+  /* main.page outranks the shell's width classes, whatever order the stylesheets load in. */
+  main.page {
     max-width: none;
     padding: 0;
   }

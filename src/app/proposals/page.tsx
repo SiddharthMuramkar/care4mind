@@ -1,15 +1,13 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import { notFound } from 'next/navigation'
 
-import { Breadcrumbs } from '@/components/Breadcrumbs'
-import { Folio } from '@/components/Folio'
+import { PageTitle, ReadingPage, TitlePage } from '@/components/ReadingPage'
 import { layoutMap } from '@/components/map/layout'
 import { PlatePicture } from '@/components/map/PlatePicture'
-import { PageTurn, turnForward } from '@/components/PageTurn'
+import { turnForward } from '@/components/PageTurn'
 import { ProposalNote } from '@/components/proposals/ProposalNote'
 import { type Proposal, proposalsFor } from '@/components/proposals/proposals'
-import { features, proposalsPageOn } from '@/config/features'
+import { features } from '@/config/features'
 import { hrefFor, site, topics } from '@/content'
 import { toDevanagariDigits } from '@/lib/text'
 import { metadataFor } from '@/lib/metadata'
@@ -70,68 +68,60 @@ async function TryIt({ proposal }: { proposal: Proposal }) {
  * Each entry says what it adds, what it costs and how it is switched off.
  */
 export default function ProposalsPage() {
-  if (!proposalsPageOn()) notFound()
   const proposals = proposalsFor(features)
   const built = proposals.filter((proposal) => proposal.built).length
 
   return (
-    <PageTurn>
-      <main id="main" className={reading.page}>
-        <Breadcrumbs path={PATH} />
-        <Folio as="article" className={reading.article} aria-labelledby="proposals-title">
-          <header className={reading.titlePage}>
-            <ProposalNote here>Each awaits the Project owner’s decision</ProposalNote>
-            <h1 id="proposals-title" className={reading.title}>
-              Proposals
-            </h1>
-            <p className={reading.summary}>
-              What the design suggests beyond the brief, for the Project owner to accept or refuse.
-              A refused one is switched off with one setting, and no code changes.
-            </p>
-            <p className={listing.facts}>
-              {built} built · {proposals.length - built} described
-            </p>
-          </header>
+    <ReadingPage path={PATH}>
+      <TitlePage>
+        <ProposalNote here>Each awaits the Project owner’s decision</ProposalNote>
+        <PageTitle>Proposals</PageTitle>
+        <p className={reading.summary}>
+          What the design suggests beyond the brief, for the Project owner to accept or refuse. A
+          refused one is switched off with one setting, and no code changes.
+        </p>
+        <p className={listing.facts}>
+          {built} built · {proposals.length - built} described
+        </p>
+      </TitlePage>
 
-          <ol className={styles.entries}>
-            {proposals.map((proposal, index) => (
-              <li key={proposal.key}>
-                <article className={styles.entry} aria-labelledby={`${proposal.key}-title`}>
-                  <header className={styles.head}>
-                    <span className={styles.numeral} lang="sa-Deva" aria-hidden>
-                      {toDevanagariDigits(String(index + 1))}
-                    </span>
-                    <h2 id={`${proposal.key}-title`} className={styles.name}>
-                      {proposal.name}
-                    </h2>
-                    <p className={styles.status} data-built={proposal.built || undefined}>
-                      {proposal.built ? 'Built' : 'Described, not built'}
-                    </p>
-                  </header>
-                  <dl className={styles.facts}>
-                    <dt>What it adds</dt>
-                    <dd>{proposal.adds}</dd>
-                    <dt>What it costs</dt>
-                    <dd>
-                      <p>
-                        <span className={styles.cost}>In speed.</span> {proposal.speed}
-                      </p>
-                      <p>
-                        <span className={styles.cost}>In upkeep.</span> {proposal.upkeep}
-                      </p>
-                    </dd>
-                    <dt>How it is switched off</dt>
-                    <dd>
-                      <p>{withSettings(proposal.off)}</p>
-                    </dd>
-                  </dl>
-                  <TryIt proposal={proposal} />
-                </article>
-              </li>
-            ))}
-          </ol>
-        </Folio>
-      </main>
-    </PageTurn>
+      <ol className={styles.entries}>
+        {proposals.map((proposal, index) => (
+          <li key={proposal.key}>
+            <article className={styles.entry} aria-labelledby={`${proposal.key}-title`}>
+              <header className={styles.head}>
+                <span className={styles.numeral} lang="sa-Deva" aria-hidden>
+                  {toDevanagariDigits(String(index + 1))}
+                </span>
+                <h2 id={`${proposal.key}-title`} className={styles.name}>
+                  {proposal.name}
+                </h2>
+                <p className={styles.status} data-built={proposal.built || undefined}>
+                  {proposal.built ? 'Built' : 'Described, not built'}
+                </p>
+              </header>
+              <dl className={styles.facts}>
+                <dt>What it adds</dt>
+                <dd>{proposal.adds}</dd>
+                <dt>What it costs</dt>
+                <dd>
+                  <p>
+                    <span className={styles.cost}>In speed.</span> {proposal.speed}
+                  </p>
+                  <p>
+                    <span className={styles.cost}>In upkeep.</span> {proposal.upkeep}
+                  </p>
+                </dd>
+                <dt>How it is switched off</dt>
+                <dd>
+                  <p>{withSettings(proposal.off)}</p>
+                </dd>
+              </dl>
+              <TryIt proposal={proposal} />
+            </article>
+          </li>
+        ))}
+      </ol>
+    </ReadingPage>
   )
 }

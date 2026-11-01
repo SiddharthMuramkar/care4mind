@@ -2,14 +2,13 @@ import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { ViewTransition, type CSSProperties } from 'react'
 
-import { Breadcrumbs } from '@/components/Breadcrumbs'
+import { PageTitle, ReadingPage, TitlePage } from '@/components/ReadingPage'
 import { Contents, type ContentsEntry } from '@/components/concept/Contents'
 import { LinkedKnowledge } from '@/components/concept/LinkedKnowledge'
 import { TitleSpellings } from '@/components/concept/TitleSpellings'
 import { TopicPager } from '@/components/concept/TopicPager'
-import { Folio } from '@/components/Folio'
 import { OrnamentRule } from '@/components/OrnamentRule'
-import { PageTurn } from '@/components/PageTurn'
+import { titleMorphName } from '@/components/PageTurn'
 import { citationLinks, Provenance, Sections, Text } from '@/components/prose'
 import { VerseCard } from '@/components/prose/VerseCard'
 import { ReadingThread } from '@/components/ReadingThread'
@@ -24,7 +23,6 @@ import {
   type VerseView,
 } from '@/content'
 import { capitalise } from '@/lib/text'
-import { cx } from '@/lib/cx'
 import { metadataFor } from '@/lib/metadata'
 
 import reading from '../../reading.module.css'
@@ -76,104 +74,97 @@ export default async function ConceptPage({ params }: PageProps<'/concepts/[slug
   const { previous, next } = concept
   const contents = contentsOf(concept)
   // A Concept card's title flies into the heading's IAST spelling, or its English title.
-  const morph = `concept-title-${concept.slug}`
+  const morph = titleMorphName('concept', concept.slug)
 
   return (
-    <PageTurn>
-      <main id="main" className={cx(reading.page, styles.page)}>
-        <ReadingThread />
-        <Breadcrumbs path={hrefFor({ kind: 'concept', id: concept.slug })} />
-        <Folio
-          as="article"
-          className={cx(reading.article, styles.article)}
-          aria-labelledby="concept-title"
-        >
-          <header className={reading.titlePage}>
-            <p className={reading.kicker}>Concept</p>
-            <h1
-              id="concept-title"
-              className={concept.term ? reading.title : cx(reading.title, reading.titleLong)}
-            >
-              {concept.term?.devanagari ? (
-                <TitleSpellings
-                  iast={capitalise(concept.term.iast)}
-                  devanagari={concept.term.devanagari}
-                  name={morph}
-                />
-              ) : (
-                <ViewTransition name={morph} share="morph" default="none">
-                  <span {...(concept.term ? { lang: 'sa-Latn' } : {})}>
-                    {concept.term ? capitalise(concept.term.iast) : concept.name}
-                  </span>
-                </ViewTransition>
-              )}
-            </h1>
-            {concept.term && concept.english ? (
-              <p className={reading.gloss}>{concept.english}</p>
-            ) : null}
-            {concept.term ? (
-              <div className={styles.spellingTools}>
-                <SpellingsPopover iast={concept.term.iast} spellings={concept.spellings} />
-              </div>
-            ) : null}
-            <p className={reading.summary}>
-              <Text text={concept.summary} citations={citations} />
-            </p>
-          </header>
+    <ReadingPage
+      path={hrefFor({ kind: 'concept', id: concept.slug })}
+      width="contents"
+      className={styles.page}
+      articleClassName={styles.article}
+      lead={<ReadingThread />}
+    >
+      <TitlePage>
+        <p className={reading.kicker}>Concept</p>
+        <PageTitle long={!concept.term}>
+          {concept.term?.devanagari ? (
+            <TitleSpellings
+              iast={capitalise(concept.term.iast)}
+              devanagari={concept.term.devanagari}
+              name={morph}
+            />
+          ) : (
+            <ViewTransition name={morph} share="morph" default="none">
+              <span {...(concept.term ? { lang: 'sa-Latn' } : {})}>
+                {concept.term ? capitalise(concept.term.iast) : concept.name}
+              </span>
+            </ViewTransition>
+          )}
+        </PageTitle>
+        {concept.term && concept.english ? (
+          <p className={reading.gloss}>{concept.english}</p>
+        ) : null}
+        {concept.term ? (
+          <div className={styles.spellingTools}>
+            <SpellingsPopover iast={concept.term.iast} spellings={concept.spellings} />
+          </div>
+        ) : null}
+        <p className={reading.summary}>
+          <Text text={concept.summary} citations={citations} />
+        </p>
+      </TitlePage>
 
-          {/* The verses it opens with stand across the page, like an epigraph. */}
-          {concept.verses.length > 0 ? (
-            <div className={styles.epigraph}>
-              {concept.verses.map((verse) => (
-                <VerseCard key={verse.passage} verse={verse} />
+      {/* The verses it opens with stand across the page, like an epigraph. */}
+      {concept.verses.length > 0 ? (
+        <div className={styles.epigraph}>
+          {concept.verses.map((verse) => (
+            <VerseCard key={verse.passage} verse={verse} />
+          ))}
+        </div>
+      ) : null}
+
+      <OrnamentRule className={styles.rule} />
+
+      <div
+        className={styles.body}
+        // The sections' view timelines, for the contents to follow (see Contents).
+        style={
+          {
+            timelineScope: contents.map(({ id }) => `--section-${id}`).join(', '),
+          } as CSSProperties
+        }
+      >
+        <Contents entries={contents} />
+
+        <div className={styles.text}>
+          <Sections sections={concept.sections} citations={citations} />
+
+          <LinkedKnowledge concept={concept} verses={versesOf(concept)} />
+
+          {concept.external.length > 0 ? (
+            <p className={styles.external}>
+              Read more on another site:{' '}
+              {concept.external.map((link, index) => (
+                <span key={link.url}>
+                  {index > 0 ? ', ' : null}
+                  <a href={link.url}>{link.label}</a>
+                </span>
               ))}
-            </div>
+              .
+            </p>
           ) : null}
 
-          <OrnamentRule className={styles.rule} />
+          <ReferenceList references={concept.references} />
 
-          <div
-            className={styles.body}
-            // The sections' view timelines, for the contents to follow (see Contents).
-            style={
-              {
-                timelineScope: contents.map(({ id }) => `--section-${id}`).join(', '),
-              } as CSSProperties
-            }
-          >
-            <Contents entries={contents} />
+          <TopicPager
+            topic={concept.topic}
+            {...(previous ? { previous } : {})}
+            {...(next ? { next } : {})}
+          />
 
-            <div className={styles.text}>
-              <Sections sections={concept.sections} citations={citations} />
-
-              <LinkedKnowledge concept={concept} verses={versesOf(concept)} />
-
-              {concept.external.length > 0 ? (
-                <p className={styles.external}>
-                  Read more on another site:{' '}
-                  {concept.external.map((link, index) => (
-                    <span key={link.url}>
-                      {index > 0 ? ', ' : null}
-                      <a href={link.url}>{link.label}</a>
-                    </span>
-                  ))}
-                  .
-                </p>
-              ) : null}
-
-              <ReferenceList references={concept.references} />
-
-              <TopicPager
-                topic={concept.topic}
-                {...(previous ? { previous } : {})}
-                {...(next ? { next } : {})}
-              />
-
-              <Provenance of={concept} />
-            </div>
-          </div>
-        </Folio>
-      </main>
-    </PageTurn>
+          <Provenance of={concept} />
+        </div>
+      </div>
+    </ReadingPage>
   )
 }
