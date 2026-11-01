@@ -20,7 +20,7 @@ The code is the documentation. Before you refactor, add a module, seam, content 
 - Name things in the glossary's terms; a name says what a thing is or what it returns.
 - Comments say why, in one line, and only what the code can't: a browser bug, a standard, a measured trade-off. Ticket numbers, decision codes and dates belong in git and in issues.
 - Press is the only design language: ink, rules and paper. The first Press build, tag `archive/press-original`, is the design reference.
-- `src/content/data/` holds text carried over from the old site. Edit it only to fix a listed error, and record the edit in that record's provenance. Sanskrit is NFC and uses ṃ, not ṁ. IAST takes `lang="sa-Latn"` and Devanagari `lang="sa-Deva"`.
+- `src/content/data/` holds text carried over from the current site. Edit it only to fix a listed error, and record the edit in that record's provenance. Sanskrit is NFC and uses ṃ, not ṁ. IAST takes `lang="sa-Latn"` and Devanagari `lang="sa-Deva"`.
 
 ## Research
 
@@ -38,7 +38,7 @@ The developer is learning Git, GitHub, CI and Vercel by doing. When they ask how
 ## Where things live
 
 - Old work is in `archive/*` tags (`git tag -n -l 'archive/*'`). `archive/frontend-press-only` is the last full build, and `archive/lane-search` holds the search engine.
-- Saved copies of the old site are in the private repo `SiddharthMuramkar/care4mind-captures`, apart from this repo.
+- Saved copies of the current site are in the private repo `SiddharthMuramkar/care4mind-captures`, apart from this repo.
 - Vercel deploys through its Git link: a preview for every branch, and production from `main`. Every page is noindex until launch (`site.indexable`).
 
 ## Agent skills
