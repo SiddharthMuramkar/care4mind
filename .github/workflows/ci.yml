@@ -84,6 +84,39 @@ jobs:
           overwrite: true
           retention-days: 1
 
+  flags-off:
+    # Production's flag set: a link to a switched-off page would otherwise first fail live.
+    name: Browser tests with every feature off
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    # Flags are read at build, so this job builds its own site rather than reuse check's.
+    env:
+      FEATURE_QUESTIONNAIRE_PREVIEW: '0'
+      FEATURE_CONCEPT_MAP: '0'
+      FEATURE_DEVANAGARI_FIRST: '0'
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+      - id: playwright
+        run: echo "version=$(node -p "require('@playwright/test/package.json').version")" >> "$GITHUB_OUTPUT"
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ steps.playwright.outputs.version }}
+      - run: pnpm exec playwright install --with-deps chromium
+      - run: pnpm check:e2e
+        env:
+          E2E_ONLY: crawler,pages
+          # The crawler follows every link whatever the scope; the pages spec takes each kind once.
+          E2E_SCOPE: sample
+          E2E_WORKERS: 50%
+
   report:
     name: Browser test report
     needs: e2e
@@ -142,7 +175,7 @@ jobs:
   gate:
     # main's ruleset requires a check by this name.
     name: Checks, browser tests (FR-06, NFR-01) and Lighthouse (NFR-02)
-    needs: [check, e2e, lighthouse]
+    needs: [check, e2e, flags-off, lighthouse]
     # A skipped required check counts as passing, so this runs whatever happened before it.
     if: ${{ always() }}
     runs-on: ubuntu-24.04

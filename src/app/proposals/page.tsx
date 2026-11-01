@@ -1,6 +1,5 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import { notFound } from 'next/navigation'
 
 import { PageTitle, ReadingPage, TitlePage } from '@/components/ReadingPage'
 import { layoutMap } from '@/components/map/layout'
@@ -8,7 +7,7 @@ import { PlatePicture } from '@/components/map/PlatePicture'
 import { turnForward } from '@/components/PageTurn'
 import { ProposalNote } from '@/components/proposals/ProposalNote'
 import { type Proposal, proposalsFor } from '@/components/proposals/proposals'
-import { features, proposalsPageOn } from '@/config/features'
+import { features } from '@/config/features'
 import { hrefFor, site, topics } from '@/content'
 import { toDevanagariDigits } from '@/lib/text'
 import { metadataFor } from '@/lib/metadata'
@@ -80,7 +79,6 @@ async function TryIt({ proposal }: { proposal: Proposal }) {
  * Each entry says what it adds, what it costs and how it is switched off.
  */
 export default function ProposalsPage() {
-  if (!proposalsPageOn()) notFound()
   const proposals = proposalsFor(features)
   const built = proposals.filter((proposal) => proposal.built).length
 

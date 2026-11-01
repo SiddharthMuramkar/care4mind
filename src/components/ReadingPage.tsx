@@ -1,5 +1,7 @@
+import { notFound } from 'next/navigation'
 import type { ReactNode } from 'react'
 
+import { site } from '@/content'
 import { cx } from '@/lib/cx'
 
 import { Breadcrumbs } from './Breadcrumbs'
@@ -50,9 +52,18 @@ interface ReadingPageProps extends PageMainProps {
 
 /**
  * A page below the homepage: its trail, then one folio of paper named by its title. Each page
- * renders it itself, never a layout, so that the page turn takes the whole page.
+ * renders it itself, never a layout, so that the page turn takes the whole page. A path the route
+ * registry doesn't list, such as a switched-off feature's, is not found, so the page answers 404.
  */
-export function ReadingPage({ path, articleClassName, lead, children, ...main }: ReadingPageProps) {
+export async function ReadingPage({
+  path,
+  articleClassName,
+  lead,
+  children,
+  ...main
+}: ReadingPageProps) {
+  const bare = path.replace(/[?#].*$/, '')
+  if (!(await site.routes()).some((route) => route.path === bare)) notFound()
   return (
     <PageMain {...main}>
       {lead}
