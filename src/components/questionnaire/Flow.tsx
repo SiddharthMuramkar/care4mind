@@ -426,7 +426,7 @@ interface EndProps {
 
 /**
  * The end screen: a placeholder where the result will be, set as a plate still to be printed.
- * No number, percentage or band: the scoring rules aren't confirmed (D12). Its lotus breathes, as every lotus does.
+ * No number, percentage or band: the scoring rules aren't confirmed. Its lotus rests.
  */
 function EndStep({ form, state, limits, sources, onRetake }: EndProps) {
   useEffect(() => {

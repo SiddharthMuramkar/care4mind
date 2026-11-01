@@ -4,7 +4,6 @@ import type { ReactNode } from 'react'
 import { HydrationMarker } from '@/components/HydrationMarker'
 import { InkSpread } from '@/components/InkSpread'
 import { LateFonts } from '@/components/LateFonts'
-import { LotusHeadScript } from '@/components/LotusHeadScript'
 import { LotusPointer } from '@/components/LotusPointer'
 import { LinkPreviewRoot } from '@/components/preview/LinkPreviewRoot'
 import { HeadScript } from '@/components/script/HeadScript'
@@ -45,10 +44,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       // The head scripts mark <html> with the reader's choices before React hydrates.
       suppressHydrationWarning
     >
-      <head>
-        <LotusHeadScript />
-        {features.devanagariFirst ? <HeadScript /> : null}
-      </head>
+      <head>{features.devanagariFirst ? <HeadScript /> : null}</head>
       <body>
         <a href="#main" className="skip-link">
           Skip to content

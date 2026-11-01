@@ -186,9 +186,7 @@ test("the wordmark's 4 sits in a vermilion ring, in the header and the footer", 
   expect(await ring(footerWordmark(page))).toEqual(VERMILION_RING)
 })
 
-test('pointing at or focusing the logo animates nothing beside its breathing lotus', async ({
-  page,
-}) => {
+test('pointing at or focusing the logo animates nothing beside its lotus', async ({ page }) => {
   await recordAnimationStarts(page)
   await gotoReady(page, '/')
   const logo = homeLink(page)

@@ -3,7 +3,6 @@ import type { Locator, Page } from '@playwright/test'
 import { expectNoAxeViolations } from './axe'
 import { unfinishedRules } from './drawings'
 import { expect, gotoReady, test } from './fixtures'
-import { moving } from './lotuses'
 
 // Front-end-site ticket 10: taking the KarmaYoga Scale (C4, D16). Local runs and CI build with the
 // preview flag on, so the flow exists. What is checked is what a visitor sees and does: parts,
@@ -160,6 +159,10 @@ test.describe('the KarmaYoga flow', () => {
     await expect(progress(page)).not.toHaveAttribute('aria-live')
     await answerPart(page)
     await next(page).click()
+    // The leaving part stays through the turn. A click before it goes can land on a statement
+    // already answered, so the tally reads one short.
+    await expect(partHeading(page, 2)).toBeVisible()
+    await expect(statements(page)).toHaveCount(PARTS[1].count)
     await statements(page).nth(0).getByRole('radio').first().check()
     await statements(page).nth(1).getByRole('radio').first().check()
     await expect(progress(page)).toHaveAttribute(
@@ -555,7 +558,7 @@ const transitions = (page: Page) =>
   )
 
 test.describe('motion', () => {
-  test('turns the page between parts, and keeps the end screen still but for its breathing lotus', async ({
+  test('turns the page between parts, and keeps the end screen still, its lotus too', async ({
     page,
   }) => {
     await recordTransitions(page)
@@ -584,17 +587,11 @@ test.describe('motion', () => {
         (section) =>
           document.getAnimations().filter((animation) => {
             const target = (animation.effect as KeyframeEffect | null)?.target
-            return (
-              target &&
-              section.contains(target) &&
-              !target.closest('svg[data-lotus]') &&
-              animation.playState === 'running'
-            )
+            return target && section.contains(target) && animation.playState === 'running'
           }).length,
       ),
-      'nothing on the end screen moves but its lotus',
+      'nothing on the end screen moves',
     ).toBe(0)
-    expect(await moving(end.locator('svg[data-lotus]')), 'its lotus breathes').toBe(true)
   })
 
   test.describe('reduced', () => {

@@ -26,21 +26,6 @@ export function Fleuron({ className, draw = false }: { className?: string; draw?
         <Flower />
         <path className={styles.rule} pathLength={1} d="M42 30H2" />
         <path className={styles.rule} pathLength={1} d="M118 30h40" />
-        {/* Lines, not paths: a path here is a stroke of the draw-in, and a ripple never draws in. */}
-        <line
-          className={cx(styles.ripple, styles.rippleLeft)}
-          x1={40}
-          y1={33.5}
-          x2={28}
-          y2={33.5}
-        />
-        <line
-          className={cx(styles.ripple, styles.rippleRight)}
-          x1={120}
-          y1={33.5}
-          x2={132}
-          y2={33.5}
-        />
       </g>
     </svg>
   )
