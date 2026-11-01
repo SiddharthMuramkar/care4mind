@@ -6,6 +6,7 @@ import { ViewTransition } from 'react'
 import { Breadcrumbs } from '@/components/Breadcrumbs'
 import { Citation } from '@/components/Citation'
 import { Folio } from '@/components/Folio'
+import { HelpLine } from '@/components/HelpLine'
 import { PageTurn, turnForward } from '@/components/PageTurn'
 import { Provenance, Text } from '@/components/prose'
 import { ReadingThread } from '@/components/ReadingThread'
@@ -123,8 +124,11 @@ export default async function QuestionnairePage({ params }: PageProps<'/question
                   </li>
                 ))}
               </ul>
+              <HelpLine className={styles.help} />
             </section>
-          ) : null}
+          ) : (
+            <HelpLine className={`${reading.section} ${styles.help}`} />
+          )}
 
           {questionnaire.source ? (
             <section className={reading.section} aria-labelledby="source-title">

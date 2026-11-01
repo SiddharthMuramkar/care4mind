@@ -5,6 +5,7 @@ import { ProposalNote } from '@/components/proposals/ProposalNote'
 import { site } from '@/config/site'
 
 import { Fleuron } from './Fleuron'
+import { HelpLine } from './HelpLine'
 import { Logo } from './Logo'
 import styles from './SiteFooter.module.css'
 
@@ -89,6 +90,7 @@ export async function SiteFooter() {
         </nav>
       </div>
       <div className={styles.imprint}>
+        <HelpLine className={styles.help} />
         <p className={styles.credit}>Powered by IIT Bombay-SJMSOM &amp; HUA</p>
         <p className={styles.preview}>
           A preview of the new site, not yet public. Content carried over from the current site has

@@ -15,6 +15,7 @@ Each module is named by its capability, and outside code reaches it only through
 - **Records**: one file per record. Each is default-exported through its kind's `define…` helper from `@/content/schema`, and points at other records by id only. The registry that lists them is generated. _Types, the graph's dangling-id check, the content tests, and the registry that `pnpm check` and every test run write afresh._
 - **Addresses**: every internal link comes from `hrefFor()`. _Lint: `care4mind/href-from-hreffor`._
 - **Pages**: App Router routes that read content only through `@/content`. `site.routes()` is the one list of public pages, and the sitemap, page metadata, the navigation and the link crawler read it. _Tests: content-derive, routes; browser: crawler._
+- **Page metadata and share cards**: `metadataFor(path)` in `@/lib/metadata` gives every page its title, description, canonical address and Open Graph and Twitter text. Images never go in metadata: each page's route segment has an `opengraph-image.tsx` that calls `shareCard()` (`@/lib/share-card`), which reads the WOFF twins of the font subsets through `@/fonts/card-faces`. _Tests: site; browser: share-card._
 - **Feature flags**: `features`, read once at build, on the server. A client component gets a flag as a prop. A feature that's built but not yet approved for launch is on in previews and off in production. _Tests: features. Review for the server-only reading._
 - **Redirects**: one table, each entry served as a 301. _Tests: redirects (unit and browser)._
 - **Questionnaire flow**: one reducer holds a person's answers, and nothing else does (no storage, cookies, address or request). No record stores scoring until the Psychology expert's rules arrive. _Types (`scoring.status` is `'pending'`), the content-integrity "held back" test, review._
@@ -89,11 +90,11 @@ The content registry is rewritten by `dev`, `build`, `typecheck`, `test`, `test:
 The planning map, issue #6, lists them. Until each is decided, the code leaves its seam empty:
 
 - the content back end, search, media storage and editor login (Architecture review)
-- what search finds
+- what search finds, beyond the fields, ranking, grouping and construct rule settled on #14
 - the Questionnaire record, its scoring sources and its results page
-- content types, topics, links between content, traditional texts, and References, people and journals
-- how Sanskrit terms are stored and displayed
-- the site map and navigation, URLs and redirects, and findability
+- content types, topics, links between content, traditional texts, and References, people and journals (the related set is settled on #10; the construct link's structure isn't)
+- how Sanskrit names are stored (their display is settled on #11)
+- URLs and redirects, findability, and the rest of the site map (the navigation proposed on #16 awaits the Project owner)
 
 ## Code that misleads
 
