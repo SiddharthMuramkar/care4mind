@@ -90,6 +90,10 @@ export function NavPanels({
 
   // Whole item, as an element: a function anchor is read only on mount, so a switch keeps the first pointer.
   const anchor = value ? (slots[value]?.closest('li') ?? null) : null
+  // The positioner keeps the floating store of the trigger it mounted with, so a switch would leave
+  // the pointer under the first item: a fresh positioner per panel measures the new one.
+  const [placedFor, setPlacedFor] = useState(value)
+  if (value && value !== placedFor) setPlacedFor(value)
 
   return (
     <NavigationMenu.Root
@@ -155,6 +159,7 @@ export function NavPanels({
 
       <NavigationMenu.Portal>
         <NavigationMenu.Positioner
+          key={placedFor ?? 'none'}
           className={styles.positioner}
           anchor={anchor}
           align="start"
