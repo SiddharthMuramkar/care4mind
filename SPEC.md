@@ -47,7 +47,7 @@ These are judgement calls, so review checks them against the diff, in the codeba
 | Icon and manifest colours equal their tokens | icons test |
 | Lotus motion is CSS only, transform and opacity, still under reduced motion and when paused | lotus and motion specs |
 | A `styles.x` lookup names a class its CSS module defines | nothing yet (#67) |
-| IAST and Devanagari carry `lang` | components, for name fields and Devanagari runs. IAST inside running text is untagged (#76) |
+| IAST and Devanagari carry `lang` | components, for name fields, the verse-copied toast and Devanagari runs. IAST inside running text is untagged (#76) |
 | Carried-over text changes only to fix a listed error | `verify.mjs`, which runs only on a machine with the captures; nothing in CI (#48) |
 | Comments state reasons, not ticket numbers or decision codes | nothing yet (#38) |
 | Agents never merge a PR, turn on auto-merge, push to `main` or delete a branch | the guard and its test (guard). It reads commands, not intent: a script it can't read makes it ask, and review covers the rest |
