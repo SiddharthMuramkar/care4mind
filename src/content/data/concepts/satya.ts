@@ -216,12 +216,12 @@ export default defineConcept({
       {
         for: 'research-editor',
         note: 'The Satya values page writes its headword “Satya”, and its IAST only in passing (“truthfulness (satya)”). The record’s IAST and Devanagari, “satya” and “सत्य”, are split out of the compound in the page’s own Yoga Sūtra 2.30 verse, in their dictionary form. Confirm them; nothing was looked up.',
-        ticket: 15,
+        decidedBy: 'sanskrit-terms',
       },
       {
         for: 'research-editor',
         note: 'The Satya values page heads its four verses with chapter and number only (“Chapter 2, Sutra 30”, “Chapter 2, Sutra 32”, “Chapter 2, Sutra 36”, “Chapter 17, Verse 15”), naming no work. The first three are stored under the Yoga Sūtra and the last under the Bhagavad Gītā, which their text is; the page’s reference list cites Shlokam’s “Bhagavad Gita Chapter 17 – Verse 15”. Confirm the attribution.',
-        ticket: 16,
+        decidedBy: 'traditional-texts',
       },
     ],
   },

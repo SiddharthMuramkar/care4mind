@@ -29,12 +29,12 @@ export default defineReference({
       {
         for: 'research-editor',
         note: 'The pages write the author “Khalil, G.”, as if Khalil were the surname; Inspirational Books’ own description calls him “Khalil Gibran”, and Text Books’ link address reads “Kahlil-Gibran”. Kept as written; nothing was looked up.',
-        ticket: 17,
+        decidedBy: 'references',
       },
       {
         for: 'project-owner',
         note: 'Its only link on the current site goes to a retailer (Amazon), kept as its URL. Decide whether the site links to retailers, or to another page for the book.',
-        ticket: 17,
+        decidedBy: 'references',
       },
     ],
   },

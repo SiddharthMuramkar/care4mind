@@ -18,7 +18,9 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import {
   CONTENT_KINDS,
   KIND_FOLDERS,
+  PLANNING_ISSUES,
   type Block as RecordBlock,
+  type Flag,
   type ConceptRecord,
   type ContentRecord,
   type GlossaryEntryRecord,
@@ -84,7 +86,11 @@ const verify = (await import(pathToFileURL(join(TOOLS, 'verify.mjs')).href)) as 
 }
 
 const report = (await import(pathToFileURL(join(TOOLS, 'report.mjs')).href)) as {
-  buildReport(records: readonly ContentRecord[], captures: Captures): string
+  buildReport(
+    records: readonly ContentRecord[],
+    captures: Captures,
+    issues: typeof PLANNING_ISSUES,
+  ): string
   FLAGS_PACK: string
 }
 
@@ -867,7 +873,11 @@ describe('report', () => {
     kind: 'glossary',
     slug,
     name: { ascii: slug },
-    provenance: { sources, edits: [], flags: [{ for: 'project-owner', note: shared, ticket: 13 }] },
+    provenance: {
+      sources,
+      edits: [],
+      flags: [{ for: 'project-owner', note: shared, decidedBy: 'content-types' }],
+    },
   })
   const records: ContentRecord[] = [
     entry('two'),
@@ -891,7 +901,7 @@ describe('report', () => {
         sources,
         edits: [],
         flags: [
-          { for: 'research-editor', note: 'Note A.', ticket: 17 },
+          { for: 'research-editor', note: 'Note A.', decidedBy: 'references' },
           { for: 'project-owner', note: shared },
         ],
         drafted: ['summary'],
@@ -916,24 +926,34 @@ describe('report', () => {
   })
 
   it('groups every flag by role, collapsing identical notes into one line with a count', () => {
-    const lines = report.buildReport(records, site).split('\n')
+    const lines = report.buildReport(records, site, PLANNING_ISSUES).split('\n')
     const section = (heading: string) => {
       const start = lines.indexOf(heading)
       const end = lines.findIndex((line, i) => i > start && line.startsWith('## '))
       return lines.slice(start + 1, end === -1 ? undefined : end).filter(Boolean)
     }
     expect(section('## Research editor: 2 flags')).toEqual([
-      '- Note A. — concept/udaharana (ticket 17)',
+      '- Note A. — concept/udaharana (decided by #13 References, people and journals)',
       '- Note C. — topic/values',
     ])
     expect(section('## Psychology expert: 1 flag')).toEqual(['- Note B. — questionnaire/udaharana'])
     expect(section('## Project owner: 3 flags')).toEqual([
-      `- ${shared} — 3 records: concept/udaharana, glossary/one, glossary/two (ticket 13)`,
+      `- ${shared} — 3 records: concept/udaharana, glossary/one, glossary/two (decided by #9 Content types, topics and shared fields)`,
     ])
   })
 
+  it('accepts only a decidedBy the planning issues table holds', () => {
+    const decided = { for: 'project-owner', note: 'Note D.', decidedBy: 'site-map' } satisfies Flag
+    // @ts-expect-error 17 was the old tracker's number, not a key of the table.
+    const old: Flag = { for: 'project-owner', note: 'Note E.', decidedBy: 17 }
+    // @ts-expect-error a key missing from the table.
+    const missing: Flag = { for: 'project-owner', note: 'Note F.', decidedBy: 'design-direction' }
+    expect(PLANNING_ISSUES[decided.decidedBy].issue).toBe(16)
+    expect([old, missing]).toHaveLength(2)
+  })
+
   it('lists the drafted fields, each Questionnaire’s held-back items and a map of the saved pages', () => {
-    const text = report.buildReport(records, site)
+    const text = report.buildReport(records, site, PLANNING_ISSUES)
     expect(text).toContain('## Drafted fields\n\n- concept/udaharana: summary\n')
     expect(text).toContain(
       '### questionnaire/udaharana\n\n- Three result bands with their messages — Under the last heading\n',

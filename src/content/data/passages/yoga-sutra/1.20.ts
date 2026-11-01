@@ -30,7 +30,7 @@ export default definePassage({
       {
         for: 'research-editor',
         note: 'The Five Steps of Perfection page heads this verse “Shlokas of Perfection from Chapter 1, Sutra 20” and names no work; it is stored as Yoga Sūtra 1.20, which its text is. Confirm the attribution.',
-        ticket: 16,
+        decidedBy: 'traditional-texts',
       },
     ],
   },

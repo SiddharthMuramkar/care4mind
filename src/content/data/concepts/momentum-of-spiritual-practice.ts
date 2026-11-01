@@ -205,12 +205,12 @@ export default defineConcept({
       {
         for: 'research-editor',
         note: 'The page gives no Sanskrit headword: the Concept is named by its English title, “Momentum of Spiritual Practice”. A possible headword is saṃvega, from the page’s Yoga Sūtra 1.21 (“tīvrasaṃvegānāmāsannaḥ”), whose Meaning says “tīvra-saṃvegānām” “refers to people who practice with strong urgency and unwavering effort”. Decide whether to name the Concept by it. Nothing was looked up.',
-        ticket: 15,
+        decidedBy: 'sanskrit-terms',
       },
       {
         for: 'research-editor',
         note: 'The Momentum of Spiritual Practice page heads its two verses “Chapter 1, Sutra 21,22” and names no work there; they are stored as Yoga Sūtra 1.21 and 1.22, which their text is and which the page’s Meaning calls “Patanjali’s Yoga Sutras”. Confirm the attribution.',
-        ticket: 16,
+        decidedBy: 'traditional-texts',
       },
       {
         for: 'research-editor',
@@ -223,7 +223,7 @@ export default defineConcept({
       {
         for: 'research-editor',
         note: 'The reference list includes Fopka-Kowalczyk et al. (2022), which only the held-back note on the score indicators cites. It stays on the Concept’s list; decide whether to keep it.',
-        ticket: 17,
+        decidedBy: 'references',
       },
     ],
   },

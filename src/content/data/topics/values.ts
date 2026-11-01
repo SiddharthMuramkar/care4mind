@@ -90,7 +90,7 @@ export default defineTopic({
         {
           for: 'research-editor',
           note: 'The yama–niyama section prints no Devanagari for “Yama” and “Niyama”: the record’s “यम” and “नियम” are split out of the Yoga Sūtra 2.30 and 2.32 verses the values pages quote (“यमाः”, “नियमाः”). The sub-headings give no English gloss, so the two term blocks have none. Confirm the forms, and supply glosses or confirm none; nothing was looked up.',
-          ticket: 15,
+          decidedBy: 'sanskrit-terms',
         },
         {
           for: 'research-editor',

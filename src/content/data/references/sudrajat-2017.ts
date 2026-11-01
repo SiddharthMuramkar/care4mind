@@ -31,7 +31,7 @@ export default defineReference({
       {
         for: 'research-editor',
         note: 'The page lists “Universitas Pendidikan Indonesia” as a second author; it may be the first author’s university. Kept as given; nothing was looked up.',
-        ticket: 17,
+        decidedBy: 'references',
       },
     ],
   },

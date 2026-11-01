@@ -49,7 +49,7 @@ export default defineConcept({
       {
         for: 'research-editor',
         note: 'The headword’s Devanagari is “जगत”, as the page writes it (“जगत || jagat”), without the virāma of the glossary card’s “जगत्”. Kept as the page has it; confirm the form. Nothing was looked up.',
-        ticket: 15,
+        decidedBy: 'sanskrit-terms',
       },
     ],
   },

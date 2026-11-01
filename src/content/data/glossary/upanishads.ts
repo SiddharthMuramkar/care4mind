@@ -18,7 +18,7 @@ export default defineGlossaryEntry({
       {
         for: 'research-editor',
         note: 'The page has two “Upanishads” cards with the same description: one writes “उपनिषदः”, the other “उपनिषद्”, and each links to its own DharmaWiki article. The entry keeps the first card’s Devanagari and link. Confirm which to keep. Nothing was looked up.',
-        ticket: 15,
+        decidedBy: 'sanskrit-terms',
       },
       {
         for: 'project-owner',

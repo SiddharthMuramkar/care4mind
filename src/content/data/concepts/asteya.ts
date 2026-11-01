@@ -116,12 +116,12 @@ export default defineConcept({
       {
         for: 'research-editor',
         note: 'The Asteya values page writes its headword “Asteya”, and its IAST only in passing (“non-stealing (asteya)”). The record’s IAST and Devanagari, “asteya” and “अस्तेय”, are split out of the compound in the page’s own Yoga Sūtra 2.30 verse, in their dictionary form. Confirm them; nothing was looked up.',
-        ticket: 15,
+        decidedBy: 'sanskrit-terms',
       },
       {
         for: 'research-editor',
         note: 'The Asteya values page heads its two verses with chapter and sutra only (“Chapter 2, Sutra 30”, “Chapter 2, Sutra 32”), naming no work; they are stored under the Yoga Sūtra, which their text is. Confirm the attribution.',
-        ticket: 16,
+        decidedBy: 'traditional-texts',
       },
     ],
   },

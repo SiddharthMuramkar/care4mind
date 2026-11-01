@@ -23,7 +23,7 @@ export default definePassage({
       {
         for: 'research-editor',
         note: 'No page gives a transliteration of this verse; none is stored, and none was made.',
-        ticket: 16,
+        decidedBy: 'traditional-texts',
       },
     ],
   },

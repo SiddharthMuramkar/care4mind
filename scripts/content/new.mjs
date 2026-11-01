@@ -43,7 +43,7 @@ const PROVENANCE = `  provenance: {
     // saved copies were made.
     sources: [{ url: '', retrieved: '2026-10-27' }],
     edits: [], // one change each; a replacement is written “old” → “new”, a deletion “old” → “”
-    flags: [], // { for: 'research-editor' | 'psychology-expert' | 'project-owner', note, ticket? }
+    flags: [], // { for: 'research-editor' | 'psychology-expert' | 'project-owner', note, decidedBy? }
     // drafted: [], // fields written for the new site: never in a migration ticket
   },`
 

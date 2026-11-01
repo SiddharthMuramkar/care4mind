@@ -26,7 +26,7 @@ export default definePassage({
       {
         for: 'research-editor',
         note: 'The Devanagari reads “वास्तु” where the transliteration reads “vastu”; not changed.',
-        ticket: 16,
+        decidedBy: 'traditional-texts',
       },
     ],
   },

@@ -128,6 +128,20 @@
   transform: rotate(45deg);
 }
 
+/* Windows' contrast themes repaint the pressed chip's ground: draw it in the theme's selection colours. */
+@media (forced-colors: active) {
+  .chip[aria-pressed='true'] {
+    forced-color-adjust: none;
+    background: Highlight;
+    border-color: Highlight;
+    color: HighlightText;
+  }
+
+  .chip[aria-pressed='true']::after {
+    background: HighlightText;
+  }
+}
+
 .chip:focus-visible {
   outline: 3px solid var(--color-focus);
   outline-offset: 2px;

@@ -60,7 +60,7 @@ export function FlowProgress({ state }: { state: FlowState }) {
       max={progress.total}
       getAriaValueText={() => text}
     >
-      <Progress.Label className={styles.visuallyHidden}>Your progress</Progress.Label>
+      <Progress.Label className="sr-only">Your progress</Progress.Label>
       <Tally parts={state.parts} answers={state.answers} current={progress.part} />
       <Progress.Value className={styles.progressText}>{() => text}</Progress.Value>
     </Progress.Root>

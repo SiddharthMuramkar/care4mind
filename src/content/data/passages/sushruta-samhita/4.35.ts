@@ -30,12 +30,12 @@ export default definePassage({
       {
         for: 'research-editor',
         note: 'The Triguna page gives no translation of this verse and no “Meaning”; none is stored, and none was looked up.',
-        ticket: 16,
+        decidedBy: 'traditional-texts',
       },
       {
         for: 'research-editor',
         note: 'The page numbers this verse “Sush Samh 4.35” and names it “Sushruta Samhita (Sharirasthanam Adhyayam 4 Sutram 35)” in its Online Resources; the locator 4.35 doesn’t name the section (sthāna). Confirm how the site should number it.',
-        ticket: 16,
+        decidedBy: 'traditional-texts',
       },
     ],
   },

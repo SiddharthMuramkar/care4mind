@@ -24,7 +24,6 @@ export default defineReference({
       {
         for: 'research-editor',
         note: 'Taken from the Published scales research (planning ticket 11), which read excerpts of the paper, not from a page of the current site. Check the fields against the paper.',
-        ticket: 11,
       },
     ],
   },

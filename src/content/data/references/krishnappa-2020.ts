@@ -32,7 +32,7 @@ export default defineReference({
       {
         for: 'research-editor',
         note: 'Know Your Mind lists this paper twice, as 2020a and 2020b, with the same authors, title, journal and DOI. Stored as one Reference, with both lines kept as cited. Confirm they are one work; nothing was looked up.',
-        ticket: 17,
+        decidedBy: 'references',
       },
     ],
   },

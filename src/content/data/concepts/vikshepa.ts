@@ -391,7 +391,7 @@ export default defineConcept({
       {
         for: 'research-editor',
         note: 'The text cites “(Sharma et al.)” for Sharma & Pareek, a paper by two authors with no year; not changed.',
-        ticket: 17,
+        decidedBy: 'references',
       },
     ],
     drafted: ['summary', 'keywords'],

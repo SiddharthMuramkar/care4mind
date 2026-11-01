@@ -105,6 +105,15 @@ test.describe('without JavaScript', () => {
     await expect(banner(page).getByRole('button')).toHaveCount(0)
   })
 
+  test('the header names Search in words only once there is room', async ({ page }) => {
+    await page.goto('/concepts/vikshepa/')
+    const label = banner(page).getByRole('link', { name: 'Search' }).getByText('Search')
+    const box = await label.boundingBox()
+    // sr-only leaves a 1px box; the wide header undoes it from a later cascade layer.
+    if ((page.viewportSize()?.width ?? 0) >= WIDE) expect(box?.width).toBeGreaterThan(1)
+    else expect(box?.width ?? 0).toBeLessThanOrEqual(1)
+  })
+
   test('every header link opens its page', async ({ page }) => {
     const names = isWide(page) ? SECTIONS : SECTIONS.filter(({ name }) => name === 'Search')
     for (const { name, path } of names) {

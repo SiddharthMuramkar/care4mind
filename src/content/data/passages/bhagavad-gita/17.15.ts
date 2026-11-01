@@ -38,7 +38,7 @@ export default definePassage({
       {
         for: 'research-editor',
         note: 'The Satya values page heads this verse “Chapter 17, Verse 15” and names no work; it is stored as Bhagavad Gītā 17.15, which its text is and which the page’s reference list names. Confirm the attribution.',
-        ticket: 16,
+        decidedBy: 'traditional-texts',
       },
     ],
   },

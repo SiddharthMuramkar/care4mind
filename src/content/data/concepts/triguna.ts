@@ -174,32 +174,32 @@ export default defineConcept({
       {
         for: 'research-editor',
         note: 'The page writes its headword only as “Triguna” and “Trigunas”, with no IAST or Devanagari. The record’s IAST, “triguṇa”, writes that spelling with “guṇa” as the page’s Bhagavad Gītā 14.5 does (“guṇāḥ”), and no Devanagari is stored. Confirm the form; nothing was looked up.',
-        ticket: 15,
+        decidedBy: 'sanskrit-terms',
       },
       {
         for: 'research-editor',
         note: 'The Devanagari of the three guṇas, “सत्त्व”, “रजस्” and “तमस्”, is split out of the page’s verses (“सत्त्वं”, “रजस्तम इति”, “तमस्त्वज्ञानजं”) in dictionary forms; their IAST, “sattva”, “rajas” and “tamas”, is the page’s own. Confirm them; nothing was looked up.',
-        ticket: 15,
+        decidedBy: 'sanskrit-terms',
       },
       {
         for: 'research-editor',
         note: 'The page gives no English gloss for triguṇa: the nearest, “The threefold characteristics—Sattva, Rajas, and Tamas—”, names the three guṇas rather than glossing the term. The record has no English name. Supply one, or approve leaving it out; nothing was looked up.',
-        ticket: 15,
+        decidedBy: 'sanskrit-terms',
       },
       {
         for: 'research-editor',
         note: 'The text cites “(Swaroop et al., 2017)”; the page’s reference list gives Swaroop et al. (2016), which it also cites as “(Swaroop et al., 2016)”. Kept as written; nothing was looked up.',
-        ticket: 17,
+        decidedBy: 'references',
       },
       {
         for: 'research-editor',
         note: 'The Triguna page heads this verse without naming a work; its number belongs to chapter 14, which the page names as the Bhagavad Gita’s, and it is stored under the Bhagavad Gītā. Confirm the attribution.',
-        ticket: 16,
+        decidedBy: 'traditional-texts',
       },
       {
         for: 'research-editor',
         note: 'The page numbers this verse “Sush Samh 4.35” and names it “Sushruta Samhita (Sharirasthanam Adhyayam 4 Sutram 35)” in its Online Resources; the locator 4.35 doesn’t name the section (sthāna). Confirm how the site should number it.',
-        ticket: 16,
+        decidedBy: 'traditional-texts',
       },
     ],
   },

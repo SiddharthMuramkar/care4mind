@@ -4,9 +4,9 @@ import Link from 'next/link'
 import { Breadcrumbs } from '@/components/Breadcrumbs'
 import { Folio } from '@/components/Folio'
 import { PageTurn, turnForward } from '@/components/PageTurn'
-import { hrefFor, site, type SearchKind } from '@/content'
+import { hrefFor, type SearchKind } from '@/content'
 import { metadataFor } from '@/lib/metadata'
-import { documentsMatching } from '@/lib/search'
+import { search } from '@/lib/search/server'
 
 import listing from '../listing.module.css'
 import reading from '../reading.module.css'
@@ -18,7 +18,7 @@ export function generateMetadata(): Promise<Metadata> {
   return metadataFor(PATH)
 }
 
-/** Each kind of result, in the order the page shows them. */
+/** Each kind of result under its heading. */
 const KINDS: readonly { kind: SearchKind; heading: string }[] = [
   { kind: 'concept', heading: 'Concepts' },
   { kind: 'term', heading: 'Terms inside Concepts' },
@@ -39,18 +39,19 @@ const SHOWN = 25
 const IAST = /[āīūṛṝḷḹṅñṭḍṇśṣṃḥ]/iu
 
 /**
- * Search, rendered on the server for each query, so it works without JavaScript. It finds a
- * query inside any stored spelling.
+ * Search, rendered on the server for each query, so it works without JavaScript. It finds any
+ * spelling of a name, a typo or a match by sound included.
  */
 export default async function SearchPage({ searchParams }: PageProps<'/search'>) {
   const { q } = await searchParams
   const query = (Array.isArray(q) ? q[0] : q)?.trim() ?? ''
-  const found = query === '' ? [] : documentsMatching(await site.searchDocuments(), query)
-  const groups = KINDS.map(({ kind, heading }) => ({
+  const found = query === '' ? [] : await search(query)
+  // Groups in the order search ranks them: the kind holding the best result first.
+  const groups = [...new Set(found.map(({ kind }) => kind))].map((kind) => ({
     kind,
-    heading,
-    results: found.filter((document) => document.kind === kind),
-  })).filter(({ results }) => results.length > 0)
+    heading: KINDS.find((entry) => entry.kind === kind)?.heading ?? kind,
+    results: found.filter((result) => result.kind === kind),
+  }))
 
   return (
     <PageTurn>
