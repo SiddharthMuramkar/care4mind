@@ -208,11 +208,14 @@ export function ConceptMap({ layout }: { layout: MapLayout }) {
                       <ConceptLink point={place.get(connection.source)} /> and{' '}
                       <ConceptLink point={place.get(connection.target)} />
                     </p>
-                    <p className={styles.reasons}>
-                      {connection.reasons.map((reason) => (
-                        <span key={reason}>{reason}</span>
+                    <ul className={styles.reasons}>
+                      {connection.reasons.map((reason, index) => (
+                        <li key={reason}>
+                          {index > 0 ? <span aria-hidden="true"> · </span> : null}
+                          {reason}
+                        </li>
                       ))}
-                    </p>
+                    </ul>
                   </li>
                 ))}
               </ul>

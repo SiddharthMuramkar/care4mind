@@ -55,5 +55,9 @@ export function hrefFor(target: HrefTarget): string {
     case 'resource-list':
     case 'page':
       return withAnchor(`/library/${target.id}/`, target.anchor)
+    default: {
+      const unplaced: never = target
+      throw new Error(`A ${(unplaced as { kind: string }).kind} has no address.`)
+    }
   }
 }

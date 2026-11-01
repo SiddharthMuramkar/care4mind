@@ -16,7 +16,6 @@ import {
   site,
   topics,
   type RouteEntry,
-  type RouteKind,
 } from '@/content'
 import { count, listed } from '@/lib/text'
 
@@ -24,7 +23,7 @@ import { count, listed } from '@/lib/text'
 const HOME_TITLE = `${siteConfig.name}: Indian psychology`
 
 /** One sentence each for the pages with no summary of their own. */
-const ABOUT: Partial<Record<RouteKind, string>> = {
+const ABOUT = {
   concepts:
     'Every Concept on Care4Mind, every term explained inside one and every glossary entry, from A to Z.',
   'concept-map':
@@ -37,7 +36,7 @@ const ABOUT: Partial<Record<RouteKind, string>> = {
   start:
     'A proposal: what Indian psychology is, how Care4Mind is organised, how to read Sanskrit names and where to begin.',
   proposals: 'Features proposed beyond the brief, for the Project owner to accept or refuse.',
-}
+} as const satisfies Partial<Record<RouteEntry['kind'], string>>
 
 /** The 404 page's metadata: a title, and no canonical address, as it is no page of the site. */
 export const notFoundMetadata: Metadata = {
@@ -110,8 +109,18 @@ async function describe(
         description: `${count(entries, 'entry', 'entries')} on the ${name} list in the Care4Mind Library.`,
       }
     }
-    default:
-      return { name, description: ABOUT[route.kind] ?? '' }
+    case 'concepts':
+    case 'concept-map':
+    case 'texts':
+    case 'questionnaires':
+    case 'references':
+    case 'search':
+    case 'proposals':
+      return { name, description: ABOUT[route.kind] }
+    default: {
+      const undescribed: never = route.kind
+      throw new Error(`No description for a ${String(undescribed)} page.`)
+    }
   }
 }
 

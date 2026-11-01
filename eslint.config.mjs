@@ -91,6 +91,26 @@ const testsContentBoundary = {
   },
 }
 
+// The graph sits below the views and the derivations that read it: an import upward would make
+// a cycle, and the names it shares with them live in src/content/names.ts, under all three.
+const graphBelowViews = {
+  files: ['src/content/graph/**/*.ts'],
+  rules: {
+    'no-restricted-imports': [
+      'error',
+      {
+        patterns: [
+          {
+            regex: '^(?:@/content|\\.\\.)/(?:views|derive)(?:/|$)',
+            caseSensitive: true,
+            message: 'The graph is below the views and the derivations: never import from them.',
+          },
+        ],
+      },
+    ],
+  },
+}
+
 // Every internal link comes from hrefFor() (front-end-site spec, "Addresses"), so an address
 // changes in one place. A path typed into an href fails, however it is written; a fragment
 // (#main), another site (https://, //) and a path a view or hrefFor() made pass.
@@ -173,6 +193,7 @@ export default defineConfig([
   ...tseslint.configs.strict.map((config) => ({ ...config, files: ['**/*.{ts,tsx}'] })),
   contentBoundary,
   testsContentBoundary,
+  graphBelowViews,
   internalLinks,
   prettier,
   globalIgnores([

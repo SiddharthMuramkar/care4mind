@@ -10,7 +10,7 @@ Every fact has one home. For most facts that home is the code: its names, types,
 
 Each module is named by its capability, and outside code reaches it only through its entry. What guards each seam is in italics.
 
-- **Content**, through `@/content`. Its namespaces are `concepts`, `topics`, `works`, `references`, `questionnaires`, `library`, `home` and `site`, plus `hrefFor()`, `displayName()`, `asciiSpellings()` and the view types. A page gets a view: plain, serialisable data shaped for that page. Behind the entry sit the record schema, the graph and the derivations. The graph resolves every link once and refuses a dangling id. The derivations are the route registry, breadcrumbs, page descriptions, the A–Z, search documents and the Concept map. Tests may also use `@/content/testing`, which adds the seam, the schema and the graph. The entry is `server-only`, so a browser bundle that pulls in content fails to build, and the test runners load a stand-in for it. _Lint: the content boundary, with its own test (content-boundary); the build, for `server-only`._
+- **Content**, through `@/content`. Its namespaces are `concepts`, `topics`, `works`, `references`, `questionnaires`, `library`, `home` and `site`, plus `hrefFor()`, `displayName()`, `asciiSpellings()`, the view types and `RELATION_STRENGTH`, the kinds of relation strongest first. A page gets a view: plain, serialisable data shaped for that page. Behind the entry sit the record schema, the graph and the derivations. The graph resolves every link once and refuses a dangling id. The derivations are the route registry, breadcrumbs, page descriptions, the A–Z, search documents and the Concept map. Tests may also use `@/content/testing`, which adds the seam, the schema and the graph. The entry is `server-only`, so a browser bundle that pulls in content fails to build, and the test runners load a stand-in for it. _Lint: the content boundary, with its own test (content-boundary); the build, for `server-only`._
 - **Content source**, the seam under Content: `ContentSource.records(kind)`. Two adapters satisfy it, the generated registry of record files (`localSource`) and the made-up records tests hold in memory (`memorySource()`), so the seam is real. The interface's doc comment lists an adapter's duties; the graph sorts each kind by id. A content back end becomes one more adapter, and nothing above it changes. _Tests: content-registry, content-interface, content-derive._
 - **Records**: one file per record. Each is default-exported through its kind's `define…` helper from `@/content/schema`, and points at other records by id only. The registry that lists them is generated. _Types, the graph's dangling-id check, the content tests, and the registry that `pnpm check` and every test run write afresh._
 - **Addresses**: every internal link comes from `hrefFor()`. _Lint: `care4mind/href-from-hreffor`._
@@ -61,12 +61,12 @@ These are judgement calls, so review checks them against the diff, in the codeba
 
 - **A record of an existing kind:** `pnpm content:new <kind> <id>` writes a template that compiles. Fill it in, then run `pnpm check`. Today that check fails on tests that pin record counts (#45).
 - **A link field:** the record schema, the graph's link check, then the view that shows it.
-- **A content kind:** the compiler finds only some of these places, so work through every step:
+- **A content kind:** the compiler finds some of these places, so work through every step:
   1. The record schema: its type, its `define…` helper and its kind's folder.
-  2. The graph: the link check and the reverse indexes. Nothing fails if you miss these (#49).
+  2. The graph: the link check and the reverse indexes. Each switches on the kind with a `never` default, so a missed kind fails to compile.
   3. The view types and views: Ref, Card and View, plus `hrefFor()`'s target.
   4. Its namespace on `@/content`.
-  5. The derivations: routes, and search documents. Nothing fails if you miss search (#49).
+  5. The derivations: routes, and search documents. Search documents are a table typed `satisfies Record<ContentKind, …>`, so it fails to compile without the kind.
   6. The pages, the navigation, Linked knowledge and the search page's headings.
   7. The tools behind `content:new` and `verify`.
   8. GLOSSARY.md.

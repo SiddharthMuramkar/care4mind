@@ -452,6 +452,17 @@ describe('the graph', () => {
     )
   })
 
+  it('refuses a record of a kind it has no link check for, rather than skip its links', async () => {
+    // A kind added to the schema but not to the graph fails to compile; this is the build's guard.
+    const novel = { kind: 'novel', slug: 'unknown' } as unknown as ContentRecord
+    const source: ContentSource = {
+      async records<K extends ContentKind>(kind: K) {
+        return (kind === 'topic' ? [novel] : []) as RecordOf<K>[]
+      },
+    }
+    await expect(buildGraph(source)).rejects.toThrow('The graph has no link check for a novel.')
+  })
+
   it('is built once per source', async () => {
     const source = memorySource(...world)
     expect(await graphFor(source)).toBe(await graphFor(source))

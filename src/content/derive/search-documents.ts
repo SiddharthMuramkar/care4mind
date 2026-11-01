@@ -6,18 +6,19 @@
 import { capitalise } from '@/lib/text'
 
 import type { ContentGraph } from '../graph'
-import type { Block, ConceptRecord, PassageRecord, SanskritName, WorkRecord } from '../schema'
+import type {
+  Block,
+  ConceptRecord,
+  ContentKind,
+  PassageRecord,
+  SanskritName,
+  WorkRecord,
+} from '../schema'
 import type { SearchDocument } from '../types'
 import { conceptQuotes, termsIn } from '../views/blocks'
 import { must } from '../views/common'
 import { hrefFor } from '../views/href'
-import {
-  asciiSpellings,
-  authorNames,
-  displayName,
-  passageLabel,
-  referenceLabel,
-} from '../views/names'
+import { asciiSpellings, authorNames, displayName, passageLabel, referenceLabel } from '../names'
 import { questionnaireHref } from '../views/refs'
 
 const EXCERPT = 300
@@ -257,15 +258,18 @@ export function searchDocuments(graph: ContentGraph): SearchDocument[] {
     })),
   ]
 
-  return [
-    ...concepts,
-    ...glossary,
-    ...works,
-    ...passages,
-    ...references,
-    ...libraryItems,
-    ...questionnaires,
-    ...topics,
-    ...pages,
-  ]
+  // Each kind's documents, in the corpus's order, so a new kind can't compile without a line.
+  const byKind = {
+    concept: concepts,
+    glossary,
+    work: works,
+    passage: passages,
+    reference: references,
+    'resource-list': libraryItems,
+    questionnaire: questionnaires,
+    topic: topics,
+    page: pages,
+    home: [],
+  } satisfies Record<ContentKind, SearchDocument[]>
+  return Object.values(byKind).flat()
 }

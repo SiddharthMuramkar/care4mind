@@ -53,7 +53,17 @@ export function idOf(record: ContentRecord): string {
       return record.id
     case 'home':
       return 'home'
-    default:
+    case 'concept':
+    case 'topic':
+    case 'work':
+    case 'questionnaire':
+    case 'glossary':
+    case 'resource-list':
+    case 'page':
       return record.slug
+    default: {
+      const unnamed: never = record
+      return (unnamed as { slug: string }).slug
+    }
   }
 }

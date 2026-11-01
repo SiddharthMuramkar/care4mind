@@ -409,13 +409,16 @@
 }
 
 .reasons {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0 0.9rem;
   margin: 0.1rem 0 0;
+  padding: 0;
+  list-style: none;
   font-size: 0.9375rem;
   line-height: 1.45;
   color: var(--color-surface-muted);
+}
+
+.reasons li {
+  display: inline;
 }
 
 /*
