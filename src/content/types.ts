@@ -421,7 +421,16 @@ export type LibraryCard =
 /** An item on a reading list: a book, resolved to its Reference, or a course. */
 export type ResourceItemView =
   | { type: 'reference'; reference: ReferenceView; annotation?: Inline }
-  | { type: 'course'; provider: string; name: string; description?: Inline; url?: string }
+  | {
+      type: 'course'
+      /** The institution that offers it. */
+      provider: string
+      /** Where the institution is, where the page says. */
+      city?: string
+      name: string
+      description?: Inline
+      url?: string
+    }
 
 /** A reading list in the Library (D13), grouped under the pages' own headings. */
 export interface ResourceListView extends CarriedOver {
@@ -438,7 +447,7 @@ export interface ResourceListView extends CarriedOver {
   }[]
 }
 
-/** A page of text in the Library, such as Methods. */
+/** A page of text in the Library, such as Therapy approaches. */
 export interface PageView extends CarriedOver {
   kind: 'page'
   slug: Slug

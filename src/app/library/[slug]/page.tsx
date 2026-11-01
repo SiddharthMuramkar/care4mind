@@ -1,15 +1,21 @@
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
+import type { CSSProperties } from 'react'
 
 import { Breadcrumbs } from '@/components/Breadcrumbs'
-import { Citation } from '@/components/Citation'
+import { Contents } from '@/components/concept/Contents'
 import { Folio } from '@/components/Folio'
+import { BookGroup } from '@/components/library/Books'
+import { counted, holdingsOf } from '@/components/library/catalogue'
+import { CourseGroup } from '@/components/library/Courses'
+import styles from '@/components/library/library.module.css'
+import { OrnamentRule } from '@/components/OrnamentRule'
 import { PageTurn } from '@/components/PageTurn'
 import { Provenance, Sections, Text } from '@/components/prose'
-import { library, type ResourceItemView } from '@/content'
+import { library, type PageView, type ResourceListView } from '@/content'
+import { cx } from '@/lib/cx'
 import { metadataFor } from '@/lib/metadata'
 
-import listing from '../../listing.module.css'
 import reading from '../../reading.module.css'
 
 export const dynamicParams = false
@@ -26,50 +32,60 @@ export async function generateMetadata({
   return metadataFor(page.href)
 }
 
-/** One entry on a reading list: a book, cited in full with its note, or a course. */
-function Item({ item }: { item: ResourceItemView }) {
-  if (item.type === 'reference')
-    return (
-      <li className={listing.entry}>
-        <p>
-          <Citation reference={item.reference} />
-        </p>
-        {item.annotation ? (
-          <p className={listing.note}>
-            <Text text={item.annotation} />
-          </p>
-        ) : null}
-      </li>
-    )
+/** A reading list: its books on their shelves, or its courses as cards, group by group. */
+function ReadingList({ list }: { list: ResourceListView }) {
+  // One group's heading would only repeat the page's title.
+  const headed = list.groups.length > 1
+  return list.groups.map((group) =>
+    group.items.every((item) => item.type === 'course') ? (
+      <CourseGroup key={group.id} group={group} headed={headed} />
+    ) : (
+      <BookGroup key={group.id} group={group} headed={headed} />
+    ),
+  )
+}
+
+/** A page of text, such as Therapy approaches: its contents beside its sections, tables in their frames. */
+function TextPage({ page }: { page: PageView }) {
   return (
-    <li className={listing.entry}>
-      <p className={listing.entryName}>{item.name}</p>
-      <p className={listing.meta}>{item.provider}</p>
-      {item.description ? (
-        <p>
-          <Text text={item.description} />
-        </p>
-      ) : null}
-      {item.url ? (
-        <p>
-          <a href={item.url}>{new URL(item.url).hostname.replace(/^www\./, '')}</a>, another site
-        </p>
-      ) : null}
-    </li>
+    <div
+      className={styles.body}
+      // The sections' view timelines, for the contents to follow (see Contents).
+      style={
+        {
+          timelineScope: page.toc.map(({ id }) => `--section-${id}`).join(', '),
+        } as CSSProperties
+      }
+    >
+      <Contents
+        entries={page.toc.map(({ id, heading, terms }) => ({
+          id,
+          heading,
+          terms: terms.map((term) => ({ id: term.id, name: term.name })),
+        }))}
+      />
+      <div className={styles.text}>
+        <Sections sections={page.sections} />
+      </div>
+    </div>
   )
 }
 
 /**
- * A Library page (D13): a reading list, its groups anchored where links lead
- * (`/library/textbooks/#positive-psychology`), or a page of text such as Methods.
+ * A Library page: a reading list, its groups anchored where links lead
+ * (`/library/textbooks/#positive-psychology`), or a page of text such as Therapy approaches.
  */
 export default async function LibraryItemPage({ params }: PageProps<'/library/[slug]'>) {
   const page = await library.get((await params).slug)
   if (!page) notFound()
+  const { count, unit } = holdingsOf(page)
 
   return (
     <PageTurn>
-      <main id="main" className={reading.page}>
+      <main
+        id="main"
+        className={cx(reading.page, styles.page, page.kind === 'page' && styles.wide)}
+      >
         <Breadcrumbs path={page.href} />
         <Folio as="article" className={reading.article} aria-labelledby="page-title">
           <header className={reading.titlePage}>
@@ -82,27 +98,20 @@ export default async function LibraryItemPage({ params }: PageProps<'/library/[s
                 <Text text={page.summary} />
               </p>
             ) : (
-              <p className={listing.facts}>
-                {page.groups.reduce((sum, group) => sum + group.items.length, 0)} entries
+              <p className={styles.facts}>
+                {`${count} ${unit}`}
+                {page.groups.length > 1
+                  ? unit.startsWith('book')
+                    ? ` on ${counted(page.groups.length, 'shelf', 'shelves')}`
+                    : ` in ${counted(page.groups.length, 'group', 'groups')}`
+                  : null}
               </p>
             )}
           </header>
 
-          {page.kind === 'page' ? (
-            <Sections sections={page.sections} />
-          ) : (
-            page.groups.map((group) => (
-              <section key={group.id} id={group.id} className={reading.section}>
-                <h2 className={reading.sectionTitle}>{group.heading}</h2>
-                <ul className={listing.entries}>
-                  {group.items.map((item, index) => (
-                    <Item key={index} item={item} />
-                  ))}
-                </ul>
-              </section>
-            ))
-          )}
+          {page.kind === 'page' ? <TextPage page={page} /> : <ReadingList list={page} />}
 
+          <OrnamentRule className={styles.rule} />
           <Provenance of={page} />
         </Folio>
       </main>

@@ -45,7 +45,7 @@ export function resourceListView(
               type: 'course' as const,
               provider: item.provider,
               name: item.name,
-              ...present({ description: item.description, url: item.url }),
+              ...present({ city: item.city, description: item.description, url: item.url }),
             },
       ),
     })),
@@ -53,7 +53,7 @@ export function resourceListView(
   }
 }
 
-/** A page of text in the Library, such as Methods. */
+/** A page of text in the Library, such as Therapy approaches. */
 export function pageView(record: PageRecord, graph: ContentGraph): PageView {
   const owner: Owner = { kind: 'page', id: record.slug }
   return {

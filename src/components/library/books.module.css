@@ -1,0 +1,140 @@
+/*
+ * A reading list's books: each group's shelf, then the books in two columns on a wide screen,
+ * each marked in the binding of its spine, its title and authors set in type over its note.
+ */
+
+.group {
+  display: grid;
+  gap: 2rem;
+  scroll-margin-top: calc(var(--sticky-top) + 1rem);
+}
+
+.group > * {
+  min-width: 0;
+}
+
+.groupTitle {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: clamp(1.75rem, 4.5vw, 2.25rem);
+  line-height: 1.15;
+  text-align: center;
+  text-wrap: balance;
+}
+
+.books {
+  display: grid;
+  gap: 1.75rem 2.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+@media (min-width: 52rem) {
+  .books {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.book {
+  position: relative;
+  display: grid;
+  align-content: start;
+  gap: 0.35rem;
+  padding-inline-start: 1.25rem;
+  scroll-margin-top: calc(var(--sticky-top) + 1.5rem);
+  overflow-wrap: anywhere;
+}
+
+.book > * {
+  margin: 0;
+  min-width: 0;
+}
+
+/* The binding of its spine on the shelf, as a band beside its title. */
+.book::before {
+  content: '';
+  position: absolute;
+  top: 0.3rem;
+  left: 0;
+  width: 0.4rem;
+  height: 2.6rem;
+  border-radius: 1px;
+  background: var(--tone);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-surface-ink) 25%, transparent);
+}
+
+.book[data-tone='ground'] {
+  --tone: var(--color-ground);
+}
+
+.book[data-tone='paper'] {
+  --tone: color-mix(in srgb, var(--color-surface) 45%, var(--color-ink));
+}
+
+.book[data-tone='accent'] {
+  --tone: var(--color-accent);
+}
+
+.book[data-tone='highlight'] {
+  --tone: var(--color-highlight);
+}
+
+.title {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: 1.5rem;
+  line-height: 1.2;
+  text-wrap: balance;
+}
+
+.title cite {
+  font-style: normal;
+}
+
+.authors {
+  font-variant-caps: all-small-caps;
+  letter-spacing: 0.08em;
+  font-size: 1.125rem;
+}
+
+.details {
+  color: var(--color-surface-muted);
+  font-size: 1rem;
+}
+
+.note {
+  margin-top: 0.4rem;
+  max-width: 60ch;
+  font-size: 1.0625rem;
+  line-height: 1.6;
+}
+
+.links {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.25rem 1.25rem;
+  margin-top: 0.35rem;
+  font-size: 1rem;
+}
+
+/* The entry a spine leads to: a vermilion wash for a moment's reading, and its band set in it. */
+.book:target {
+  background: color-mix(in srgb, var(--color-highlight) 8%, transparent);
+  box-shadow: 0 0 0 0.6rem color-mix(in srgb, var(--color-highlight) 8%, transparent);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .book:target::before {
+    animation: band-down var(--duration-stroke) var(--ease-out) both;
+    transform-origin: top;
+  }
+}
+
+@keyframes band-down {
+  from {
+    transform: scaleY(0);
+  }
+}

@@ -118,29 +118,47 @@ function reorder(from: Selection, to: Selection, change: () => void) {
  * changes are touched, which keeps a press quick on a slow phone (a stylesheet would restyle
  * the whole page).
  */
-function filterList(selection: Selection) {
+function filterList(selection: Selection, query: string) {
   const list = document.getElementById(LIST)
   if (!list) return
-  const shown = shownEntries(selection)
+  const shows = matcher(selection, query)
   const hide = (element: HTMLElement, hidden: boolean) => {
     if (element.hidden !== hidden) element.hidden = hidden
   }
-  for (const entry of list.querySelectorAll<HTMLElement>('[data-entry]'))
-    hide(entry, !entry.matches(shown))
+  for (const entry of list.querySelectorAll<HTMLElement>('[data-entry]')) hide(entry, !shows(entry))
   for (const section of list.querySelectorAll<HTMLElement>('[data-letter]'))
-    hide(section, !section.querySelector(shown))
+    hide(section, ![...section.querySelectorAll('[data-entry]')].some(shows))
 }
 
-/** Which entries and letters a selection leaves showing, read from the server-rendered list. */
-function showingFor(selection: Selection) {
-  const list = typeof document === 'undefined' ? null : document.getElementById(LIST)
-  if (isEmpty(selection) || !list) return null
+/** Words as a search compares them: without case or diacritics, so "manas" finds "Manas" and "mānas". */
+const fold = (text: string) =>
+  text.normalize('NFD').replace(/\p{M}/gu, '').toLowerCase().replace(/\s+/g, ' ').trim()
+
+const folded = new WeakMap<Element, string>()
+const wordsOf = (entry: Element) => {
+  let words = folded.get(entry)
+  if (words === undefined) folded.set(entry, (words = fold(entry.textContent ?? '')))
+  return words
+}
+
+/** Whether an entry shows: it matches the chips, and holds the searched words. */
+function matcher(selection: Selection, query: string) {
   const shown = shownEntries(selection)
+  const words = fold(query)
+  return (entry: Element) =>
+    entry.matches(shown) && (words === '' || wordsOf(entry).includes(words))
+}
+
+/** Which entries and letters a selection and a search leave showing, read from the server-rendered list. */
+function showingFor(selection: Selection, query: string) {
+  const list = typeof document === 'undefined' ? null : document.getElementById(LIST)
+  if ((isEmpty(selection) && fold(query) === '') || !list) return null
+  const shows = matcher(selection, query)
   return {
-    count: list.querySelectorAll(shown).length,
+    count: [...list.querySelectorAll('[data-entry]')].filter(shows).length,
     letters: new Set(
       [...list.querySelectorAll<HTMLElement>('[data-letter]')]
-        .filter((section) => section.querySelector(shown))
+        .filter((section) => [...section.querySelectorAll('[data-entry]')].some(shows))
         .map(({ id }) => id),
     ),
   }
@@ -224,6 +242,8 @@ interface Props {
   letters: readonly RailLetter[]
   groups: readonly ChipGroup[]
   total: number
+  /** The search box's label, where the list has one: it narrows the entries to those holding its words. */
+  search?: string
   /** The entries, by letter, as the server renders them. */
   children: ReactNode
 }
@@ -236,7 +256,7 @@ interface Props {
  * until then the letters are plain links and the chips plain toggle buttons. Without JavaScript
  * the chips are hidden and the whole list shows.
  */
-export function AzIndex({ letters, groups, total, children }: Props) {
+export function AzIndex({ letters, groups, total, search: searchLabel, children }: Props) {
   const known = useMemo(
     () =>
       Object.fromEntries(
@@ -249,7 +269,9 @@ export function AzIndex({ letters, groups, total, children }: Props) {
   )
   const address = useSyncExternalStore(subscribe, search, noSearch)
   const selection = useMemo(() => readSelection(address, known), [address, known])
-  const showing = useMemo(() => showingFor(selection), [selection])
+  const [typed, setTyped] = useState('')
+  const query = useDeferredValue(typed)
+  const showing = useMemo(() => showingFor(selection, query), [selection, query])
   const [parts, setParts] = useState<KeyboardParts>()
   const controls = useRef<HTMLDivElement>(null)
   const handoff = useRef<string | undefined>(undefined)
@@ -291,7 +313,7 @@ export function AzIndex({ letters, groups, total, children }: Props) {
   useEffect(() => whenIdle(upgrade), [upgrade])
 
   // In the same commit as the chips and the count, so a view transition sees them change together.
-  useLayoutEffect(() => filterList(selection), [selection])
+  useLayoutEffect(() => filterList(selection, query), [selection, query])
 
   useEffect(() => {
     const key = handoff.current
@@ -338,13 +360,34 @@ export function AzIndex({ letters, groups, total, children }: Props) {
     >
       <style>{`${FLIGHTS}${ALONE}${CURRENT}`}</style>
       <div className={styles.filters}>
+        {searchLabel ? (
+          <label className={styles.search}>
+            <span className={styles.groupLabel}>{searchLabel}</span>
+            <input
+              type="search"
+              className={styles.searchBox}
+              value={typed}
+              onChange={(event) => setTyped(event.currentTarget.value)}
+              autoComplete="off"
+              spellCheck={false}
+            />
+          </label>
+        ) : null}
         <Chips groups={groups} pressed={pressed} onPress={press} />
         <div className={styles.tally}>
           <p className={styles.count} aria-live="polite" aria-atomic="true">
             {entries(count)}
           </p>
-          {isEmpty(selection) ? null : (
-            <button type="button" className={styles.clear} data-ink onClick={() => press([])}>
+          {isEmpty(selection) && typed === '' ? null : (
+            <button
+              type="button"
+              className={styles.clear}
+              data-ink
+              onClick={() => {
+                setTyped('')
+                press([])
+              }}
+            >
               Clear filters
             </button>
           )}
@@ -355,8 +398,8 @@ export function AzIndex({ letters, groups, total, children }: Props) {
       </nav>
       {count === 0 ? (
         <p className={styles.none}>
-          No entry has all of these. Press a chip again to let its entries back in, or clear the
-          filters.
+          No entry has all of these. Press a chip again or shorten the search to let its entries
+          back in, or clear the filters.
         </p>
       ) : null}
       <div id={LIST}>{children}</div>

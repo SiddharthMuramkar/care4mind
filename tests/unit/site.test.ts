@@ -51,14 +51,14 @@ describe('a page’s metadata (D19)', () => {
 
   it('describes a Library page by its summary, and a reading list by its size', async () => {
     expect(await metadataFor('/library/methods/')).toEqual({
-      title: { absolute: 'Methods · Care4Mind' },
+      title: { absolute: 'Therapy approaches · Care4Mind' },
       description:
         'Psychotherapy, also known as talk therapy, involves various techniques to help individuals enhance their mental and emotional well-being.',
       alternates: { canonical: `${ORIGIN}/library/methods/` },
     })
     expect(await metadataFor('/library/textbooks/')).toEqual({
-      title: { absolute: 'Text Books · Care4Mind' },
-      description: '20 entries on the Text Books list in the Care4Mind Library.',
+      title: { absolute: 'Textbooks · Care4Mind' },
+      description: '20 entries on the Textbooks list in the Care4Mind Library.',
       alternates: { canonical: `${ORIGIN}/library/textbooks/` },
     })
   })
@@ -187,8 +187,8 @@ describe('breadcrumbs (D15)', () => {
     ])
     expect(await labels('/library/')).toEqual(['Home', 'Library'])
     expect(await labels('/library/references/')).toEqual(['Home', 'Library', 'References'])
-    expect(await labels('/library/textbooks/')).toEqual(['Home', 'Library', 'Text Books'])
-    expect(await labels('/library/methods/')).toEqual(['Home', 'Library', 'Methods'])
+    expect(await labels('/library/textbooks/')).toEqual(['Home', 'Library', 'Textbooks'])
+    expect(await labels('/library/methods/')).toEqual(['Home', 'Library', 'Therapy approaches'])
     expect(await labels('/search/')).toEqual(['Home', 'Search'])
     expect(await labels('/proposals/')).toEqual(['Home', 'Proposals'])
   })
