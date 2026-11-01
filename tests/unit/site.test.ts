@@ -114,7 +114,7 @@ describe('a page’s metadata (D19)', () => {
     expect(await metadataFor('/')).toEqual(
       withShareTags({
         title: { absolute: 'Care4Mind: Indian psychology' },
-        description: 'Indic ways to invoke a perfect balanced mind',
+        description: 'Indian ideas for a balanced mind, explained simply.',
         alternates: { canonical: `${ORIGIN}/` },
       }),
     )

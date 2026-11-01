@@ -214,6 +214,15 @@ const methods = definePage({
 })
 const home = defineHome({
   kind: 'home',
+  tagline: 'A made-up tagline.',
+  hero: {
+    promise: 'Made up.',
+    subhead: 'Made up.',
+    startHere: 'Start',
+    browseConcepts: 'Browse',
+    exploreConcepts: 'Explore',
+  },
+  sectionIntros: { concepts: 'Made up.', questionnaires: 'Made up.' },
   shloka: { devanagari: 'उदाहरणम्', iast: 'udāharaṇam', translation: 'Made up.' },
   intro: 'Made up.',
   areas: [],

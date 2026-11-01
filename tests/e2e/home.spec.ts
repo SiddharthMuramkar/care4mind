@@ -220,35 +220,52 @@ test('each Contents numeral is its Devanagari digit as plain text, with nothing 
   }
 })
 
-// The header's Concepts opens the Concepts page since front-end-site ticket 04 (D01), so only the
-// opening folio's calls to action glide down this page.
-for (const { from, name, to } of [
-  { from: 'main', name: 'Explore Concepts', to: 'Concepts' },
-  { from: 'main', name: 'Questionnaires', to: 'Questionnaires' },
-] as const) {
-  test(`"${name}" in the ${from === 'main' ? 'opening folio' : 'header'} glides down to the ${to} section, its heading in full view`, async ({
+test.describe('the opening folio says what the site is', () => {
+  test('its H1 is the promise, and the motto is a small label above it', async ({ page }) => {
+    await gotoReady(page, '/')
+    const folio = openingFolio(page)
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText(
+      'Indian psychology, explained simply.',
+    )
+    await expect(folio.locator('h1 [lang]')).toHaveCount(0)
+    await expect(folio.locator('[lang="sa-Deva"]')).toHaveText('यद् भावं तद् भवति')
+    await expect(folio.locator('[lang="sa-Latn"]')).toHaveText('yad bhāvaṃ tad bhavati')
+  })
+
+  test('leads to Start here, with Browse concepts beside it, and nothing else', async ({
     page,
   }) => {
     await gotoReady(page, '/')
-    const around =
-      from === 'main' ? page.getByRole('main') : page.getByRole('navigation', { name: 'Main' })
-    const link = around.getByRole('link', { name, exact: true })
-    const heading = page.getByRole('heading', { name: to, level: 2 })
-    await link.scrollIntoViewIfNeeded()
-    const path = await scrollPath(page, async () => {
-      await link.click()
-      await expect(heading).toBeInViewport()
-    })
-    expect(path.length, 'a glide passes through many positions').toBeGreaterThan(4)
-    await expect(heading).toBeInViewport({ ratio: 1 })
-    // Not under the header, wherever the header is.
-    const [title, header] = await Promise.all([
-      heading.boundingBox(),
-      page.getByRole('banner').boundingBox(),
-    ])
-    expect(title?.y).toBeGreaterThanOrEqual(Math.max(0, (header?.y ?? 0) + (header?.height ?? 0)))
+    const folio = openingFolio(page)
+    await expect(folio.getByRole('link')).toHaveCount(2)
+    await expect(folio.getByRole('link', { name: 'Start here' })).toHaveAttribute('href', '/start/')
+    await expect(folio.getByRole('link', { name: 'Browse concepts' })).toHaveAttribute(
+      'href',
+      '/concepts/',
+    )
   })
-}
+
+  for (const viewport of [
+    { width: 1366, height: 768 },
+    { width: 390, height: 844 },
+  ]) {
+    test(`at ${viewport.width}×${viewport.height}, the H1, the subhead and the primary button show without scrolling`, async ({
+      page,
+    }) => {
+      await page.setViewportSize(viewport)
+      await gotoReady(page, '/')
+      const folio = openingFolio(page)
+      for (const part of [
+        page.getByRole('heading', { level: 1 }),
+        folio.getByText(/^Ideas about the mind from India’s traditional texts/),
+        // The primary button, whichever the Start here flag makes it.
+        folio.getByRole('link').first(),
+      ]) {
+        await expect(part).toBeInViewport({ ratio: 1 })
+      }
+    })
+  }
+})
 
 test('links to another page open it at once, without gliding from where you were', async ({
   page,

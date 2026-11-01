@@ -13,7 +13,6 @@ import { pageTurns, prefetched, recordPageTurns } from './page-turns'
 import { inkSpreadsOn, recordInkSpreads } from './presses'
 import { READING_PAGES, readingThread, readTo } from './reading'
 import { at, MISSING, ROUTES_IN_SCOPE } from './routes'
-import { scrollPath } from './scrolling'
 
 /** Animations still moving: anything running longer than the 1 ms the reduced-motion rule allows. */
 async function movingAnimations(page: Page) {
@@ -163,35 +162,16 @@ test('the References plus becomes a minus at once, with nothing moving, with red
   expect(await turns(rules), 'a plus again').toEqual([0, 90])
 })
 
-// The header's Concepts opens the Concepts page since front-end-site ticket 04 (D01); its
-// reduced-motion checks are in nav.spec.ts.
-for (const { from, name } of [{ from: 'main', name: 'Explore Concepts' }] as const) {
-  test(`"${name}" in the ${from === 'main' ? 'opening folio' : 'header'} jumps straight to the Concepts, with reduced motion`, async ({
-    page,
-  }) => {
-    await gotoReady(page, '/')
-    const around =
-      from === 'main' ? page.getByRole('main') : page.getByRole('navigation', { name: 'Main' })
-    const link = around.getByRole('link', { name, exact: true })
-    const heading = page.getByRole('heading', { name: 'Concepts', level: 2 })
-    await link.scrollIntoViewIfNeeded()
-    const path = await scrollPath(page, async () => {
-      await link.click()
-      await expect(heading).toBeInViewport()
-    })
-    expect(path, 'one jump, from where it was to the section').toHaveLength(2)
-    await expect(heading).toBeInViewport({ ratio: 1 })
-  })
-}
-
 test('pressing a call to action spreads no ink and moves nothing, with reduced motion', async ({
   page,
+  context,
 }) => {
   await recordInkSpreads(page)
   await gotoReady(page, '/')
-  const cta = page.getByRole('main').getByRole('link', { name: 'Explore Concepts', exact: true })
-  await cta.click()
-  await expect(page.getByRole('heading', { name: 'Concepts', level: 2 })).toBeInViewport()
+  const cta = page.getByRole('main').getByRole('link', { name: 'Start here', exact: true })
+  const opened = context.waitForEvent('page')
+  await cta.click({ modifiers: ['ControlOrMeta'] })
+  await (await opened).close()
   await page.waitForTimeout(50)
   expect(await inkSpreadsOn(cta)).toEqual([])
   expect(await movingAnimations(page)).toEqual([])
