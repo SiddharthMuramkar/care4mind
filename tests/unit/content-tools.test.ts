@@ -66,10 +66,6 @@ const capturesModule = (await import(pathToFileURL(join(TOOLS, 'captures.mjs')).
   openCaptures(dir: string): Captures
 }
 
-const recordsModule = (await import(pathToFileURL(join(TOOLS, 'records.mjs')).href)) as {
-  KIND_FOLDERS: Record<string, string>
-}
-
 /** What verify finds for one record. */
 interface Check {
   record: string
@@ -993,12 +989,6 @@ describe('the shared modules', () => {
   it('are libraries, not commands', () => {
     for (const file of SHARED)
       expect(readFileSync(join(TOOLS, file), 'utf8'), file).not.toMatch(/\brunTool\(import\.meta/)
-  })
-})
-
-describe('the kinds of record', () => {
-  it('are the schema’s, with the same folders', () => {
-    expect(recordsModule.KIND_FOLDERS).toEqual(KIND_FOLDERS)
   })
 })
 

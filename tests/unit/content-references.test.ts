@@ -1,6 +1,7 @@
 import { beforeAll, describe, expect, it } from 'vitest'
 
 import { references, type ReferenceView } from '@/content'
+import { SLUG } from '@/content/schema'
 
 // Ticket 03, the References census (content-v1): every Reference the kept pages cite or list
 // exists once, with each way the pages wrote it. Read through the public interface, as the
@@ -57,9 +58,6 @@ function shared(views: readonly ReferenceView[], keyOf: (view: ReferenceView) =>
     .filter(([, holders]) => holders.length > 1)
     .map(([key, holders]) => ({ key, holders }))
 }
-
-/** Lowercase ASCII words joined by hyphens. */
-const SLUG = /^[a-z0-9]+(?:-[a-z0-9]+)*$/
 
 /** A text's words, folded: "Rodríguez-Nieto, G." gives rodriguez, nieto and g. */
 const wordsOf = (text = '') => fold(text).split(' ').filter(Boolean)

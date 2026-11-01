@@ -1,6 +1,6 @@
-// The records as the content tools see them: the kinds and their folders, each record's id and
-// order, and every record the generated registry lists, read with the repo's own TypeScript
-// compiler. Plain Node, no new dependency.
+// The records as the content tools see them: the record schema the tools take its facts from,
+// each record's order, and every record the generated registry lists, read with the repo's own
+// TypeScript compiler. Plain Node, no new dependency.
 
 import { spawnSync } from 'node:child_process'
 import { existsSync, readFileSync, statSync } from 'node:fs'
@@ -13,26 +13,6 @@ import { ToolError } from './cli.mjs'
 const HERE = dirname(fileURLToPath(import.meta.url))
 const REGISTRY_SCRIPT = join(HERE, 'registry.mjs')
 const REGISTRY = 'src/content/generated/registry.ts'
-
-/** The kinds of record, in the order tools list them, and each kind's folder (as the schema). */
-export const KIND_FOLDERS = {
-  concept: 'concepts',
-  topic: 'topics',
-  work: 'works',
-  passage: 'passages',
-  reference: 'references',
-  questionnaire: 'questionnaires',
-  glossary: 'glossary',
-  'resource-list': 'resource-lists',
-  page: 'pages',
-  home: 'home',
-}
-
-export function idOf(record) {
-  if (record.kind === 'passage' || record.kind === 'reference') return record.id
-  if (record.kind === 'home') return 'home'
-  return record.slug
-}
 
 /** Records in the order tools list them: by kind, then by id. */
 export function sortRecords(records) {
@@ -48,6 +28,27 @@ export function sortRecords(records) {
 // TypeScript compiler, and resolves `@/` to `src/` as the repo's tsconfig does.
 
 let hooked = false
+/** The repo root `@/` resolves against: this repo's, until a tool reads another root's records. */
+let aliasRoot = join(HERE, '../..')
+
+/** A TypeScript module, compiled as it loads by the repo's TypeScript compiler. */
+async function importTypeScript(file) {
+  if (typeof registerHooks !== 'function')
+    throw new ToolError('Reading records needs Node 22.15 or newer (module.registerHooks).')
+  if (!hooked) {
+    const ts = (await import('typescript')).default
+    registerHooks(typeScriptHooks(ts))
+    hooked = true
+  }
+  return import(pathToFileURL(file).href)
+}
+
+/**
+ * The record schema, `src/content/schema`, that the tools take its facts from: the kinds and
+ * their folders, each record's id, the slug rule, the link fields and how text is stored.
+ */
+export const schema = await importTypeScript(join(HERE, '../../src/content/schema/index.ts'))
+export const { KIND_FOLDERS, idOf } = schema
 
 /** Every record the registry under `root` lists, in its order. Throws if the registry is stale. */
 export async function loadRecords(root) {
@@ -55,18 +56,12 @@ export async function loadRecords(root) {
     encoding: 'utf8',
   })
   if (check.status !== 0) throw new ToolError(check.stderr.trim() || 'The registry check failed.')
-  if (typeof registerHooks !== 'function')
-    throw new ToolError('Reading records needs Node 22.15 or newer (module.registerHooks).')
-  if (!hooked) {
-    const ts = (await import('typescript')).default
-    registerHooks(typeScriptHooks(root, ts))
-    hooked = true
-  }
-  const { registry } = await import(pathToFileURL(join(root, REGISTRY)).href)
+  aliasRoot = root
+  const { registry } = await importTypeScript(join(root, REGISTRY))
   return registry.map((entry) => entry.record)
 }
 
-function typeScriptHooks(root, ts) {
+function typeScriptHooks(ts) {
   const file = (path) =>
     [path, `${path}.ts`, join(path, 'index.ts')].find(
       (candidate) =>
@@ -75,7 +70,7 @@ function typeScriptHooks(root, ts) {
   return {
     resolve(specifier, context, nextResolve) {
       let found
-      if (specifier.startsWith('@/')) found = file(join(root, 'src', specifier.slice(2)))
+      if (specifier.startsWith('@/')) found = file(join(aliasRoot, 'src', specifier.slice(2)))
       else if (/^\.\.?\//.test(specifier) && context.parentURL?.endsWith('.ts'))
         found = file(fileURLToPath(new URL(specifier, context.parentURL)))
       return found

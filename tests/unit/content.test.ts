@@ -9,7 +9,7 @@ import {
   type ConceptView,
   type QuestionnaireView,
 } from '@/content'
-import { isNormalisedSanskrit } from '@/lib/sanskrit'
+import { isNormalisedSanskrit } from '@/content/schema'
 
 /** Every string anywhere inside a value. */
 function strings(value: unknown): string[] {
