@@ -306,3 +306,10 @@
   padding-top: 1rem;
   color: var(--color-highlight);
 }
+
+/* Windows' contrast themes drop box-shadows, the sheet's only edge: give it a border they paint. */
+@media (forced-colors: active) {
+  .sheet {
+    border: 1px solid CanvasText;
+  }
+}
