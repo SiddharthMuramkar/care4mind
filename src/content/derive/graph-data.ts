@@ -6,7 +6,7 @@
 import type { ContentGraph } from '../graph'
 import type { ConceptGraph, ConceptGraphEdge } from '../types'
 import { byName } from '../views/common'
-import { displayName } from '../views/names'
+import { displayName } from '../names'
 import { conceptRef } from '../views/refs'
 
 const EDGE_KINDS: readonly ConceptGraphEdge['kind'][] = ['passage', 'work', 'reference']

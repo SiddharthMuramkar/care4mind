@@ -3,10 +3,11 @@
 // drafted fields, each Questionnaire's held-back items and a map of the saved pages.
 //
 //   node scripts/content/report.mjs            prints the pack
-//   node scripts/content/report.mjs --write    saves it as .scratch/content-v1/flags.md
+//   node scripts/content/report.mjs --write    saves it as .scratch/content-flags.md
 //
 // It reads the saved copies only from $CARE4MIND_CAPTURES and never touches the network. It
-// writes nothing unless asked with --write. Only content-v1 ticket 12 commits the pack.
+// writes nothing unless asked with --write, and then only into .scratch/, which git ignores: the
+// pack is a working list for the people who answer flags, rebuilt from the records at will.
 
 import { mkdirSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
@@ -14,7 +15,8 @@ import { dirname, join } from 'node:path'
 import { openCaptures, runTool, ToolError } from './extract.mjs'
 import { idOf, loadRecords, rootFrom, sortRecords } from './verify.mjs'
 
-const PACK = '.scratch/content-v1/flags.md'
+/** Where --write saves the pack, relative to the repo root: a path git ignores. */
+export const FLAGS_PACK = '.scratch/content-flags.md'
 
 const ROLES = [
   ['research-editor', 'Research editor'],
@@ -106,9 +108,7 @@ export function buildReport(records, captures) {
     '',
     '## Page map',
     '',
-    'Every saved page and post of the current site, with the records whose provenance names it. ' +
-      'Why each is kept, merged or dropped: the keep, merge or drop table in the ' +
-      '[spec](spec.md#provisional-structure).',
+    'Every saved page and post of the current site, with the records whose provenance names it.',
     '',
     '| Saved page | Title | Records |',
     '| --- | --- | --- |',
@@ -130,7 +130,7 @@ const USAGE = `Usage: node scripts/content/report.mjs [--write]
 
 Prints the flags pack: every flag in the records, by role, then the drafted fields, each
 Questionnaire's held-back items and a map of the saved pages in $CARE4MIND_CAPTURES.
---write saves it as ${PACK} instead.`
+--write saves it as ${FLAGS_PACK} instead.`
 
 async function main(args) {
   if (args.includes('--help') || args.includes('-h')) {
@@ -147,10 +147,10 @@ async function main(args) {
     process.stdout.write(text)
     return 0
   }
-  const file = join(root, PACK)
+  const file = join(root, FLAGS_PACK)
   mkdirSync(dirname(file), { recursive: true })
   writeFileSync(file, text)
-  process.stdout.write(`Wrote ${PACK}.\n`)
+  process.stdout.write(`Wrote ${FLAGS_PACK}.\n`)
   return 0
 }
 
