@@ -205,7 +205,7 @@ test('the texts list sets each title in IAST before its Devanagari, each with it
   page,
 }) => {
   await gotoReady(page, '/texts/')
-  const entries = await page.locator('main li').evaluateAll((items) =>
+  const entries = await page.locator('main article li').evaluateAll((items) =>
     items.map((li) => {
       const iast = li.querySelector('[lang="sa-Latn"], [lang="pi-Latn"]')
       const deva = li.querySelector('[lang="sa-Deva"]')
