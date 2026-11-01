@@ -128,6 +128,9 @@ describe('record schema', () => {
       }),
       defineHome({
         kind: 'home',
+        tagline: '',
+        hero: { promise: '', subhead: '', startHere: '', browseConcepts: '', exploreConcepts: '' },
+        sectionIntros: { concepts: '', questionnaires: '' },
         shloka: { devanagari: 'यद्', iast: 'yad', translation: 'As' },
         intro: '',
         areas: [],
@@ -450,8 +453,18 @@ describe('the graph', () => {
 })
 
 describe('feature flags (D16, D20)', () => {
-  const allOn = { questionnairePreview: true, conceptMap: true, devanagariFirst: true }
-  const allOff = { questionnairePreview: false, conceptMap: false, devanagariFirst: false }
+  const allOn = {
+    questionnairePreview: true,
+    conceptMap: true,
+    devanagariFirst: true,
+    startHere: true,
+  }
+  const allOff = {
+    questionnairePreview: false,
+    conceptMap: false,
+    devanagariFirst: false,
+    startHere: false,
+  }
 
   it('switches every flag on in local runs and Vercel previews, and off in production', () => {
     expect(readFeatures({})).toEqual(allOn)
@@ -474,6 +487,10 @@ describe('feature flags (D16, D20)', () => {
       ...allOff,
       devanagariFirst: true,
     })
+    expect(readFeatures({ ...production, FEATURE_START_HERE: '1' })).toEqual({
+      ...allOff,
+      startHere: true,
+    })
   })
 
   it('lets each flag’s own variable force it off anywhere else', () => {
@@ -489,6 +506,7 @@ describe('feature flags (D16, D20)', () => {
       ...allOn,
       devanagariFirst: false,
     })
+    expect(readFeatures({ FEATURE_START_HERE: '0' })).toEqual({ ...allOn, startHere: false })
   })
 
   it('refuses an override that is neither 1 nor 0', () => {
@@ -499,7 +517,8 @@ describe('feature flags (D16, D20)', () => {
     expect(proposalsPageOn(allOn)).toBe(true)
     expect(proposalsPageOn({ ...allOff, conceptMap: true })).toBe(true)
     expect(proposalsPageOn({ ...allOff, devanagariFirst: true })).toBe(true)
-    expect(proposalsPageOn({ ...allOn, conceptMap: false, devanagariFirst: false })).toBe(false)
+    expect(proposalsPageOn({ ...allOff, startHere: true })).toBe(true)
+    expect(proposalsPageOn(allOff)).toBe(false)
   })
 
   it('reads the flags once, from this process’s environment', () => {

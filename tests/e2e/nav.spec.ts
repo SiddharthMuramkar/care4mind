@@ -2,6 +2,7 @@ import type { Locator, Page } from '@playwright/test'
 
 import { expectNoAxeViolations } from './axe'
 import { expect, gotoReady, test } from './fixtures'
+import { ROUTES } from './routes'
 
 // The navigation shell (front-end-site ticket 04): the header's five sections, the panels a
 // computer opens from two of them, the Drawer a phone opens from Menu, and the footer.
@@ -33,6 +34,9 @@ const LIBRARY = [
   { name: /^Text Books/, path: '/library/textbooks/', holds: '20 entries' },
   { name: /^Methods/, path: '/library/methods/', holds: '5 sections' },
 ] as const
+
+/** Start here follows the wordmark from 30rem (480 px), while its proposal's route exists. */
+const START_LINK = ROUTES.some(({ path }) => path === '/start/') ? ['Start here'] : []
 
 const isWide = (page: Page) => (page.viewportSize()?.width ?? 0) >= WIDE
 const banner = (page: Page) => page.getByRole('banner')
@@ -89,6 +93,7 @@ test.describe('without JavaScript', () => {
     if (isWide(page)) {
       await expect(links).toHaveText([
         'Care4Mind',
+        ...START_LINK,
         ...SECTIONS.map(({ name }) => new RegExp(`^\\s*${name}\\s*$`)),
       ])
       for (const { name, path } of SECTIONS) {
@@ -96,7 +101,8 @@ test.describe('without JavaScript', () => {
       }
     } else {
       // On a phone the sections wait behind Menu, which is a link to the footer's navigation.
-      await expect(links).toHaveText(['Care4Mind', /Search/, /Menu/])
+      const start = (page.viewportSize()?.width ?? 0) >= 480 ? START_LINK : []
+      await expect(links).toHaveText(['Care4Mind', ...start, /Search/, /Menu/])
       const menu = banner(page).getByRole('link', { name: 'Menu' })
       await expect(menu).toHaveAttribute('href', '#site-nav')
       expect(await pathOf(banner(page).getByRole('link', { name: 'Search' }))).toBe('/search/')
@@ -148,7 +154,7 @@ test.describe('without JavaScript', () => {
     )
     const footer = page.getByRole('contentinfo')
     await expect(footer.getByText('Care4Mind', { exact: true })).toBeVisible()
-    await expect(footer).toContainText('Indic ways to invoke a perfect balanced mind')
+    await expect(footer).toContainText('Indian ideas for a balanced mind, explained simply.')
     await expect(footer).toContainText('Powered by IIT Bombay-SJMSOM & HUA')
     await expect(footer).toContainText('A preview of the new site, not yet public.')
   })

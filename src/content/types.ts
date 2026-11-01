@@ -6,6 +6,7 @@
  * JSON round trip unchanged and a server component can hand it to a client island as it is.
  */
 import type {
+  HomepageHero,
   Inline,
   Provenance,
   QuestionnaireStatus,
@@ -16,7 +17,7 @@ import type {
 } from './schema'
 
 /** The record schema's plain types that views use, for pages to name. */
-export type { Inline, QuestionnaireStatus, ReferenceType, SanskritName, Slug }
+export type { HomepageHero, Inline, QuestionnaireStatus, ReferenceType, SanskritName, Slug }
 
 // Links and names
 
@@ -31,6 +32,7 @@ export type FixedPage =
   | 'references'
   | 'search'
   | 'proposals'
+  | 'start'
 
 /**
  * What `hrefFor` turns into a path: a record (by its kind and id, with an anchor inside it where
@@ -451,7 +453,10 @@ export interface PageView extends CarriedOver {
 
 /** The homepage: its own text, each area linking to its new page where it has one. */
 export interface HomepageView extends CarriedOver {
+  tagline: string
   shloka: { devanagari: string; iast: string; translation: string }
+  hero: HomepageHero
+  sectionIntros: { concepts: string; questionnaires: string }
   intro: Inline
   areas: readonly { title: string; text: Inline; href?: string }[]
   closing: Inline
@@ -478,6 +483,7 @@ export type RouteKind =
   | 'page'
   | 'search'
   | 'proposals'
+  | 'start'
 
 /** One public page in the route registry. */
 export interface RouteEntry {

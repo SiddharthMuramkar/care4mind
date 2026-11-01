@@ -96,17 +96,17 @@ describe('the home-screen icon, apple-icon.png', () => {
 })
 
 describe('the web manifest', () => {
-  it('is coloured with the ground', () => {
+  it('is coloured with the ground', async () => {
     const ground = colourTokens().get('ground')
-    const { theme_color, background_color } = manifest()
+    const { theme_color, background_color } = await manifest()
     expect({ theme_color, background_color }).toEqual({
       theme_color: ground,
       background_color: ground,
     })
   })
 
-  it('names icons that are files beside it', () => {
-    const sources = (manifest().icons ?? []).map(({ src }) => src)
+  it('names icons that are files beside it', async () => {
+    const sources = ((await manifest()).icons ?? []).map(({ src }) => src)
     expect(sources).not.toEqual([])
     const missing = sources.filter((src) => !existsSync(join('src/app', src)))
     expect(missing, 'icons the manifest names that src/app doesn’t hold').toEqual([])

@@ -8,7 +8,7 @@ import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 
 import { site as config } from '@/config/site'
-import { concepts, library, questionnaires, site, topics, type RouteEntry } from '@/content'
+import { concepts, home, library, questionnaires, site, topics, type RouteEntry } from '@/content'
 
 /** The homepage keeps the site's own title. */
 const HOME_TITLE = `${config.name}: Indian psychology`
@@ -24,6 +24,8 @@ const ABOUT: Partial<Record<RouteEntry['kind'], string>> = {
     'Every Questionnaire on Care4Mind: what each one is for, and whether you can take it yet.',
   references: 'Every Reference Care4Mind cites, in one style, with the pages that cite it.',
   search: 'Search Care4Mind for a Concept, a term, a verse, a text or a Reference.',
+  start:
+    'A proposal: what Indian psychology is, how Care4Mind is organised, how to read Sanskrit names and where to begin.',
   proposals: 'Features proposed beyond the brief, for the Project owner to accept or refuse.',
 }
 
@@ -61,7 +63,7 @@ async function describe(
   const name = route.title
   switch (route.kind) {
     case 'home':
-      return { name: HOME_TITLE, description: config.tagline }
+      return { name: HOME_TITLE, description: (await home.get()).tagline }
     case 'concept': {
       const concept = await concepts.get(slugOf(route))
       if (!concept) notFound()
@@ -136,7 +138,7 @@ export async function metadataFor(path: string): Promise<Metadata> {
 /** The text of the page's share card: the site's name and tagline on the homepage. */
 export async function shareCardText(path: string): Promise<{ title: string; description: string }> {
   const route = await routeAt(path)
-  if (route.kind === 'home') return { title: config.name, description: config.tagline }
+  if (route.kind === 'home') return { title: config.name, description: (await home.get()).tagline }
   const { name, description, card } = await describe(route)
   return { title: card ?? name, description }
 }

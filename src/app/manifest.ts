@@ -1,17 +1,18 @@
 import type { MetadataRoute } from 'next'
 
 import { site } from '@/config/site'
+import { home } from '@/content'
 
 /**
  * The web manifest: the name and icons a phone shows for the site on its home screen, which then
  * opens it in the browser. Its colours are --color-ground, written out because a manifest can't
  * read the stylesheet; the icons test keeps them equal.
  */
-export default function manifest(): MetadataRoute.Manifest {
+export default async function manifest(): Promise<MetadataRoute.Manifest> {
   return {
     name: site.name,
     short_name: site.name,
-    description: site.tagline,
+    description: (await home.get()).tagline,
     start_url: '/',
     display: 'browser',
     theme_color: '#151a3d',

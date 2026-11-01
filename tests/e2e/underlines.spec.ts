@@ -24,8 +24,7 @@ const DRAWN: { page: string; name: string; in: (page: Page) => Locator; width?: 
     // The header shows its sections from 72rem; narrower screens find them in the Menu.
     width: 1440,
   },
-  { page: '/', name: 'Explore Concepts', in: (page: Page) => page.getByRole('main') },
-  { page: '/', name: 'Questionnaires', in: (page: Page) => page.getByRole('main') },
+  { page: '/', name: 'Start here', in: (page: Page) => page.getByRole('main') },
   { page: MISSING, name: 'Go to the homepage', in: (page: Page) => page.getByRole('main') },
 ]
 
@@ -101,7 +100,7 @@ test('pressing a card still presses it into the page', async ({ page }) => {
 
 test('a call to action keeps its focus ring', async ({ page }) => {
   await gotoReady(page, '/')
-  const cta = page.getByRole('main').getByRole('link', { name: 'Explore Concepts', exact: true })
+  const cta = page.getByRole('main').getByRole('link', { name: 'Start here', exact: true })
   await focusFromKeyboard(page, cta)
   await expect(cta).toHaveCSS('outline-style', 'solid')
   expect(parseFloat(await cta.evaluate((element) => getComputedStyle(element).outlineWidth))).toBe(

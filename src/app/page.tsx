@@ -8,7 +8,9 @@ import { OrnamentRule } from '@/components/OrnamentRule'
 import { PageTurn, turnForward } from '@/components/PageTurn'
 import { Text } from '@/components/prose'
 import { QuestionnaireCard } from '@/components/QuestionnaireCard'
+import { features } from '@/config/features'
 import { concepts, home, hrefFor, questionnaires, site } from '@/content'
+import { heroLinks } from '@/lib/hero-links'
 import { metadataFor } from '@/lib/metadata'
 import { toDevanagariDigits } from '@/lib/text'
 
@@ -50,27 +52,35 @@ export default async function HomePage() {
       <main id="main" className={styles.main}>
         <section className={styles.hero} aria-labelledby="home-title">
           <Folio className={styles.heroFolio}>
-            <p className={styles.kicker}>A portal for Indian psychology</p>
-            <h1 id="home-title" className={styles.heroTitle}>
+            <p className={styles.motto}>
               <span lang="sa-Deva" className={styles.heroDeva}>
                 {page.shloka.devanagari}
               </span>
               <span lang="sa-Latn" className={styles.heroIast}>
                 {page.shloka.iast}
               </span>
+              <span className={styles.translation}>{page.shloka.translation}</span>
+            </p>
+            <h1 id="home-title" className={styles.heroTitle}>
+              {page.hero.promise}
             </h1>
-            <p className={styles.translation}>{page.shloka.translation}</p>
+            <p className={styles.subhead}>{page.hero.subhead}</p>
+            <p className={styles.ctas}>
+              {heroLinks(page.hero, features.startHere).map((link, i) =>
+                i === 0 ? (
+                  <Link key={link.href} href={link.href as Route} className={cta.primary} data-ink>
+                    {link.label}
+                  </Link>
+                ) : (
+                  <Link key={link.href} href={link.href as Route} className={styles.textLink}>
+                    {link.label}
+                  </Link>
+                ),
+              )}
+            </p>
             <Fleuron draw className={styles.heroFleuron} />
             <p className={styles.intro}>
               <Text text={page.intro} />
-            </p>
-            <p className={styles.ctas}>
-              <a href="#concepts" className={cta.primary} data-ink>
-                Explore Concepts
-              </a>
-              <a href="#questionnaires" className={cta.secondary} data-ink>
-                Questionnaires
-              </a>
             </p>
           </Folio>
         </section>
@@ -111,9 +121,7 @@ export default async function HomePage() {
           <h2 id="concepts-title" className={styles.sectionTitle}>
             Concepts
           </h2>
-          <p className={styles.sectionIntro}>
-            Each Concept is a single idea from Indian psychology, named by its Sanskrit term.
-          </p>
+          <p className={styles.sectionIntro}>{page.sectionIntros.concepts}</p>
           <ul className={styles.cards}>
             {featuredConcepts.map((concept) => (
               <li key={concept.slug}>
@@ -148,10 +156,7 @@ export default async function HomePage() {
           <h2 id="questionnaires-title" className={styles.sectionTitle}>
             Questionnaires
           </h2>
-          <p className={styles.sectionIntro}>
-            A Questionnaire gives you a result from documented scoring rules. Each one sets out its
-            purpose and limitations before you start.
-          </p>
+          <p className={styles.sectionIntro}>{page.sectionIntros.questionnaires}</p>
           <ul className={styles.cards}>
             {featured.map((questionnaire) => (
               <li key={questionnaire.slug}>

@@ -158,7 +158,10 @@ ${PROVENANCE}
 })`,
   home: () => `defineHome({
   kind: 'home',
+  tagline: '',
   shloka: { devanagari: '', iast: '', translation: '' },
+  hero: { promise: '', subhead: '', startHere: '', browseConcepts: '', exploreConcepts: '' },
+  sectionIntros: { concepts: '', questionnaires: '' },
   intro: '',
   areas: [], // { title, text, target? }
   closing: '',

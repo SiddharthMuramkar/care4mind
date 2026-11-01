@@ -31,7 +31,10 @@ export function targetHref(target: Target, graph: ContentGraph): string {
 /** The homepage, each area's target turned into a path; an area without a real one has none. */
 export function homepageView(record: HomepageRecord, graph: ContentGraph): HomepageView {
   return {
+    tagline: record.tagline,
     shloka: { ...record.shloka },
+    hero: { ...record.hero },
+    sectionIntros: { ...record.sectionIntros },
     intro: record.intro,
     areas: record.areas.map((area) => ({
       title: area.title,

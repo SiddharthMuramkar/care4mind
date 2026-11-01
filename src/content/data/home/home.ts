@@ -2,10 +2,24 @@ import { defineHome } from '@/content/schema'
 
 export default defineHome({
   kind: 'home',
+  tagline: 'Indian ideas for a balanced mind, explained simply.',
   shloka: {
     devanagari: 'यद् भावं तद् भवति',
     iast: 'yad bhāvaṃ tad bhavati',
     translation: 'As are the thoughts, so are the manifestations.',
+  },
+  hero: {
+    promise: 'Indian psychology, explained simply.',
+    subhead:
+      'Ideas about the mind from India’s traditional texts, such as distraction, anger, values and staying steady, explained in plain English, with the References behind them.',
+    startHere: 'Start here',
+    browseConcepts: 'Browse concepts',
+    exploreConcepts: 'Explore concepts',
+  },
+  sectionIntros: {
+    concepts: 'Each Concept is a single idea from Indian psychology, named by its Sanskrit term.',
+    questionnaires:
+      'A Questionnaire gives you a result from documented scoring rules. Each one sets out its purpose and limitations before you start.',
   },
   intro:
     'The Bharatiya way of philosophic analysis starts with the reflection on the inner Self of man with the ultimate goal, of all mental training, being attainment of Moksha.',
@@ -57,6 +71,7 @@ export default defineHome({
       'Left out: the four placeholder “Questionaire” cards, which repeat one text, and the survey placeholders.',
       // Listed when the record was re-homed into content v1.
       'Shloka translation: “thoughts…so” → “thoughts, so”.',
+      'sectionIntros: the two section intros the homepage had hard-coded, moved here word for word.',
       'Concepts area: “unique concepts of Ancient Indian Psychology” → “unique concepts of ancient Indian psychology.”.',
       'Resources area: “to mentor the mind” → “to mentor the mind.”.',
       'Research area: “create ,and host” → “create and host”.',
@@ -85,6 +100,6 @@ export default defineHome({
         ticket: 20,
       },
     ],
-    drafted: ['helpLine'],
+    drafted: ['tagline', 'hero', 'helpLine'],
   },
 })

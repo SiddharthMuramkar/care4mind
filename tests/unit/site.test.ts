@@ -114,7 +114,7 @@ describe('a page’s metadata (D19)', () => {
     expect(await metadataFor('/')).toEqual(
       withShareTags({
         title: { absolute: 'Care4Mind: Indian psychology' },
-        description: 'Indic ways to invoke a perfect balanced mind',
+        description: 'Indian ideas for a balanced mind, explained simply.',
         alternates: { canonical: `${ORIGIN}/` },
       }),
     )
@@ -154,7 +154,10 @@ describe('a page’s metadata (D19)', () => {
     expect(await shareCardText('/concepts/vikshepa/')).toMatchObject({
       title: `${route?.title} · ${concept?.english}`,
     })
-    expect(await shareCardText('/')).toEqual({ title: config.name, description: config.tagline })
+    expect(await shareCardText('/')).toEqual({
+      title: config.name,
+      description: 'Indian ideas for a balanced mind, explained simply.',
+    })
   })
 
   it('answers 404 for a path that is no page in this build', async () => {

@@ -271,6 +271,8 @@ test.describe('the filter chips', () => {
     await gotoReady(page, PATH)
     await chip(page, mind.name).click()
     await expect(count(page)).toHaveText(entries(inMind.length))
+    // The click scrolls a Topic card under the sticky header, where axe counts the header's links as overlapping it.
+    await page.evaluate(() => window.scrollTo(0, 0))
     await expectNoAxeViolations(page, 'filtered A–Z')
   })
 })
