@@ -37,6 +37,16 @@ export default defineConcept({
   },
   summary:
     'The challenges a seeker encounters on the path to liberation. The Yoga Sūtra names nine obstacles, or diversions, on the yoga path.',
+  keywords: [
+    'distraction',
+    'obstacles',
+    'doubt',
+    'laziness',
+    'illness',
+    'focus',
+    'concentration',
+    'attachment',
+  ],
   topics: { primary: 'mind' },
   verses: [
     {
@@ -384,6 +394,6 @@ export default defineConcept({
         ticket: 17,
       },
     ],
-    drafted: ['summary'],
+    drafted: ['summary', 'keywords'],
   },
 })

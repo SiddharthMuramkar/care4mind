@@ -1,0 +1,4 @@
+/* A phone number read across two lines is easy to misdial. */
+.number {
+  white-space: nowrap;
+}

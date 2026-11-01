@@ -22,6 +22,8 @@ export interface ConceptRecord {
   name: ConceptName
   /** Sentence(s) from the page, never newly written. */
   summary: Inline
+  /** Plain lowercase words a reader might search for, drawn from the Concept's own text. */
+  keywords: readonly string[]
   /** Exactly one primary topic (D03), which sets the breadcrumb; `also` never repeats it. */
   topics: { primary: Slug; also?: readonly Slug[] }
   /** The verses at the top of the page, in source order. */

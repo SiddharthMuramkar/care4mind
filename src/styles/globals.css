@@ -86,13 +86,6 @@
   --color-drawer-ink: #1d1a2e;
   --color-drawer-muted: #5a4a2e;
   --color-drawer-line: #8c7a55;
-  /* The search palette: a card in a catalogue, its chosen row marked as with a highlighter. */
-  --color-palette: #f6eedb;
-  --color-palette-ink: #1d1a2e;
-  --color-palette-muted: #5a4a2e;
-  --color-palette-line: #8c7a55;
-  --color-palette-highlight: #f0b429;
-  --color-palette-highlight-ink: #151a3d;
   /* Link previews: a slip of paper, ruled off from the page it lies on. */
   --color-preview: #f6eedb;
   --color-preview-ink: #1d1a2e;
@@ -104,7 +97,7 @@
   --color-toast-muted: #c9c2d8;
   --color-toast-line: #f0b429;
 
-  /* Behind a modal Drawer or the palette; and the shadow at a scrolling table's edge. Translucent. */
+  /* Behind a modal Drawer; and the shadow at a scrolling table's edge. Translucent. */
   --color-backdrop: #0b0d1fb3;
   --color-scroll-shadow: #0b0d1f59;
 
@@ -122,7 +115,6 @@
   --layer-thread: 10;
   --layer-popup: 20;
   --layer-drawer: 30;
-  --layer-palette: 40;
   --layer-toast: 50;
   --layer-skip-link: 100;
 

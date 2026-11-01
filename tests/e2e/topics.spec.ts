@@ -3,6 +3,7 @@ import type { Locator, Page } from '@playwright/test'
 import { hrefFor, topics } from '@/content'
 
 import { expectNoAxeViolations } from './axe'
+import { focusRingContrast } from './focus-ring'
 import { expect, gotoReady, scrollsSideways, test } from './fixtures'
 import { expectPageTurned, pageTurns, prefetched, recordPageTurns } from './page-turns'
 
@@ -169,4 +170,11 @@ test('has no accessibility violations, with a row lit', async ({ page }) => {
     })
     await expectNoAxeViolations(page, id)
   }
+})
+
+test("a card's focus ring contrasts with the colour behind it", async ({ page }) => {
+  await gotoReady(page, hrefFor({ kind: 'topic', id: 'mind' }))
+  const [first] = conceptsOf(mind)
+  if (!first) throw new Error('The mind topic has a Concept.')
+  expect(await focusRingContrast(page, card(page, first.name))).toBeGreaterThanOrEqual(3)
 })

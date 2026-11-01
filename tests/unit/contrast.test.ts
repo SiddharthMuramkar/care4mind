@@ -65,3 +65,96 @@ describe('palettes meet WCAG 2.2 AA contrast', () => {
     }
   }
 })
+
+/** A rule's body, comments already gone, for a selector that is exactly `selector`. */
+function rule(file: string, selector: string): string {
+  const css = readFileSync(file, 'utf8').replace(/\/\*[\s\S]*?\*\//g, '')
+  const bodies = [...css.matchAll(/([^{}]+)\{([^{}]*)\}/g)]
+    .filter(([, found]) => (found ?? '').split(',').some((part) => part.trim() === selector))
+    .map(([, , body]) => body ?? '')
+  if (bodies.length === 0) throw new Error(`no ${selector} in ${file}`)
+  return bodies.join('\n')
+}
+
+function declared(body: string, property: string): string | undefined {
+  const match = new RegExp(`(?:^|[^\\w-])${property}\\s*:\\s*([^;]+)`).exec(body)
+  return match?.[1]?.replace(/\s+/g, ' ').trim()
+}
+
+function hex(palette: { colours: Record<string, string> }, name: string): string {
+  const value = palette.colours[name]
+  if (!value || !/^#[0-9a-f]{6}$/i.test(value)) {
+    throw new Error(`the palette has no #rrggbb --color-${name}`)
+  }
+  return value
+}
+
+/** The colour a reader sees: the ink at `opacity`, laid over the paper. */
+function seen(ink: string, paper: string, opacity = 1): string {
+  const alpha = Math.round(opacity * 255)
+    .toString(16)
+    .padStart(2, '0')
+  return composite(`${ink}${alpha}`, paper)
+}
+
+describe('numerals and the paragraph anchor', () => {
+  const palette = palettes().find((item) => item.name.includes('globals.css'))
+  if (!palette) throw new Error('the site palette is missing')
+  const paper = hex(palette, 'surface')
+
+  it('the paragraph anchor: surface-link at its opacity on the paper ≥ 4.5:1', () => {
+    const body = rule('src/components/prose/Prose.module.css', '.anchor')
+    expect(declared(body, 'color')).toBe('var(--color-surface-link)')
+    const opacity = Number(declared(body, 'opacity') ?? '1')
+    expect(
+      contrastRatio(seen(hex(palette, 'surface-link'), paper, opacity), paper),
+    ).toBeGreaterThanOrEqual(4.5)
+  })
+
+  it('the contents numeral: surface-muted on the paper ≥ 4.5:1', () => {
+    const body = rule('src/components/concept/Contents.module.css', '.numeral')
+    expect(declared(body, 'color')).toBe('var(--color-surface-muted)')
+    expect(contrastRatio(hex(palette, 'surface-muted'), paper)).toBeGreaterThanOrEqual(4.5)
+  })
+
+  it('the topic kicker numeral: surface-link on the paper ≥ 4.5:1', () => {
+    const body = rule('src/app/topics/[slug]/page.module.css', '.order')
+    expect(declared(body, 'color')).toBe('var(--color-surface-link)')
+    expect(contrastRatio(hex(palette, 'surface-link'), paper)).toBeGreaterThanOrEqual(4.5)
+  })
+
+  it('the lit plate numeral: surface-link on the lit row ≥ 4.5:1', () => {
+    const numeral = declared(
+      rule('src/components/topics/ContentsPlate.module.css', '.numeral'),
+      'color',
+    )
+    const background = declared(
+      rule('src/components/topics/ContentsPlate.module.css', '.row'),
+      'background',
+    )
+    expect(numeral).toMatch(/var\(--color-surface-link\)\s*calc\(var\(--lit,\s*0\)\s*\*\s*100%\)/)
+    const wash = /var\(--color-highlight\)\s*calc\(var\(--lit,\s*0\)\s*\*\s*([\d.]+)%\)/.exec(
+      background ?? '',
+    )
+    const percent = Number(wash?.[1])
+    expect(percent).toBeGreaterThan(0)
+    const row = seen(hex(palette, 'highlight'), paper, percent / 100)
+    expect(contrastRatio(hex(palette, 'surface-link'), row)).toBeGreaterThanOrEqual(4.5)
+  })
+
+  it('no module uses --color-surface-rule as a text colour', () => {
+    const hits: string[] = []
+    for (const file of globSync('src/**/*.module.css')) {
+      const css = readFileSync(file, 'utf8').replace(/\/\*[\s\S]*?\*\//g, '')
+      for (const [, selector, body] of css.matchAll(/([^{}]+)\{([^{}]*)\}/g)) {
+        for (const declaration of (body ?? '').matchAll(/(?:^|[^\w-])color\s*:\s*([^;]+)/g)) {
+          const value = declaration[1] ?? ''
+          if (value.includes('--color-surface-rule')) {
+            hits.push(`${file} ${(selector ?? '').trim()}: ${value.trim()}`)
+          }
+        }
+      }
+    }
+    expect(hits).toEqual([])
+  })
+})

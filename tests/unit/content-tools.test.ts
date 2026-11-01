@@ -22,6 +22,7 @@ import {
   type ConceptRecord,
   type ContentRecord,
   type GlossaryEntryRecord,
+  type HomepageRecord,
   type PassageRecord,
   type QuestionnaireRecord,
   type ReferenceRecord,
@@ -485,6 +486,7 @@ function concept(
     slug: 'udaharana',
     name: { english: 'Example' },
     summary: 'Every rule needs an example.',
+    keywords: [],
     topics: { primary: 'mind' },
     verses: [],
     sections: [{ id: 'what-is-an-example', heading: 'What is an example?', blocks }],
@@ -574,6 +576,25 @@ describe('verify', () => {
     const term = { iast: 'udāharaṇam', ascii: ['UDAHARANAM', 'Uda-haranam', 'Udaharnam'] }
     const record = concept([{ kind: 'term', id: 'udaharanam', term, blocks: [] }])
     expect(verify.checkRecord(record, site).misses.map((miss) => miss.text)).toEqual(['Udaharnam'])
+  })
+
+  it('checks the homepage shloka’s translation, which is the English line', () => {
+    const record: HomepageRecord = {
+      kind: 'home',
+      shloka: {
+        devanagari: 'उदाहरणम् इदम् ।',
+        iast: 'udāharaṇam idam |',
+        translation: 'A line no page has.',
+      },
+      intro: 'Every rule needs an example.',
+      areas: [{ title: 'Introduction', text: 'Every rule needs an example.' }],
+      closing: 'Every rule needs an example.',
+      helpLine: 'Every rule needs an example.',
+      provenance: { sources: [{ url: PAGE, retrieved: '2026-10-27' }], edits: [], flags: [] },
+    }
+    expect(verify.checkRecord(record, site).misses.map((miss) => miss.path)).toEqual([
+      'shloka.translation',
+    ])
   })
 
   it('skips ids, links between records, URLs and meta fields, and lists drafted fields', () => {
@@ -802,6 +823,22 @@ describe('the verify command', { timeout: 30_000 }, () => {
     )
   })
 
+  it('exits 2 when items.json is not valid JSON', () => {
+    const dir = join(scratch, 'broken-items')
+    mkdirSync(dir, { recursive: true })
+    writeFileSync(join(dir, 'items.json'), '{')
+    const result = run('verify', [], { CARE4MIND_CAPTURES: dir })
+    expect(result.status).toBe(2)
+    expect(result.stderr).toContain(`${join(dir, 'items.json')} isn't valid JSON`)
+  })
+
+  it('exits 2 when a saved page has no link', () => {
+    const dir = captures('no-link', [{ kind: 'page', slug: 'bare', title: 'Bare' }])
+    const result = run('verify', [], { CARE4MIND_CAPTURES: dir })
+    expect(result.status).toBe(2)
+    expect(result.stderr).toContain(`${join(dir, 'items.json')}: “bare” has no link.`)
+  })
+
   it('refuses a kind or an id it has no record for', () => {
     expect(verifyIn('concept/nothing').stderr).toContain('No record concept/nothing.')
     expect(verifyIn('glossary').stderr).toContain('No glossary records.')
@@ -1011,6 +1048,8 @@ describe('new', { timeout: 30_000 }, () => {
       ['reference', 'tomar 2024'],
       ['passage', 'yoga-sutra'],
       ['passage', 'Yoga-Sutra/1.30'],
+      ['passage', 'x/1.05'],
+      ['passage', 'x/01.2'],
       ['home', 'homepage'],
       ['colour', 'red'],
     ] as const) {

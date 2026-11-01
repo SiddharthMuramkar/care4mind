@@ -17,6 +17,7 @@ export default defineConcept({
   },
   summary:
     'Deriving the concept of Trigunas from ancient Indian texts, each represents a personality trait or characteristic in humans. The threefold characteristics—Sattva, Rajas, and Tamas—described in the Bhagavad Gita form the core of human nature and bind the Atman to the Sarira.',
+  keywords: ['characteristics', 'purity', 'inertia', 'personality', 'nature'],
   topics: { primary: 'temperament' },
   verses: [],
   sections: [
@@ -32,7 +33,7 @@ export default defineConcept({
           kind: 'term',
           id: 'sattva',
           term: sattva,
-          gloss: 'purity',
+          gloss: 'Purity',
           blocks: [
             {
               kind: 'paragraph',
@@ -44,7 +45,7 @@ export default defineConcept({
           kind: 'term',
           id: 'rajas',
           term: rajas,
-          gloss: 'passion or hyperactivity',
+          gloss: 'Passion or hyperactivity',
           blocks: [
             {
               kind: 'paragraph',
@@ -56,7 +57,7 @@ export default defineConcept({
           kind: 'term',
           id: 'tamas',
           term: tamas,
-          gloss: 'passivity and inertia',
+          gloss: 'Passivity and inertia',
           blocks: [
             {
               kind: 'paragraph',
@@ -151,8 +152,9 @@ export default defineConcept({
     'esushruta',
   ],
   questionnaire: 'triguna',
-  reviewStatus: 'carried-over-not-reviewed',
+  reviewStatus: 'drafted-not-reviewed',
   provenance: {
+    drafted: ['keywords'],
     sources: [{ url: 'https://care4mind.org/triguna/', retrieved: '2026-10-27' }],
     edits: [
       'IAST written for the headword, which the page spells “Triguna” and “Trigunas”: “triguṇa”, with “guṇa” as the page’s Bhagavad Gītā 14.5 writes it (“guṇāḥ”). The page prints no Devanagari for it, so none is stored.',
@@ -164,6 +166,9 @@ export default defineConcept({
       'The quotation marks around the Meaning of Bhagavad Gītā 14.5 are left out, as they are around the translations of 14.9 to 14.13.',
       'Interface text dropped: the “References” heading, the “Online Resources:” label in the reference list and the “Meaning:” label before 14.5’s reading; the horizontal rules under four headings are left out.',
       'Left out: the leftover test shortcode at the end of the page, after its reference list, which called a PHP snippet named “Mind”, and the test message it showed on the live page.',
+      'Gloss in sentence case: “purity” → “Purity”.',
+      'Gloss in sentence case: “passion or hyperactivity” → “Passion or hyperactivity”.',
+      'Gloss in sentence case: “passivity and inertia” → “Passivity and inertia”.',
     ],
     flags: [
       {

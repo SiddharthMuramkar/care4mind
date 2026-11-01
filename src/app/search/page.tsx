@@ -4,9 +4,9 @@ import Link from 'next/link'
 import { Breadcrumbs } from '@/components/Breadcrumbs'
 import { Folio } from '@/components/Folio'
 import { PageTurn, turnForward } from '@/components/PageTurn'
-import { hrefFor, site, type SearchDocument, type SearchKind } from '@/content'
+import { hrefFor, site, type SearchKind } from '@/content'
 import { metadataFor } from '@/lib/metadata'
-import { stripDiacritics } from '@/lib/sanskrit'
+import { documentsMatching } from '@/lib/search'
 
 import listing from '../listing.module.css'
 import reading from '../reading.module.css'
@@ -38,15 +38,6 @@ const SHOWN = 25
 /** IAST's own letters: a title holding one is a transliteration, read as Sanskrit. */
 const IAST = /[āīūṛṝḷḹṅñṭḍṇśṣṃḥ]/iu
 
-/** For matching: one form, lower case, no diacritics. */
-const fold = (text: string) => stripDiacritics(text.normalize('NFC')).toLowerCase()
-
-/** Whether a name, title, keyword or author holds the query, diacritics and case ignored. */
-function holds(document: SearchDocument, query: string): boolean {
-  const { title, names, keywords, people } = document
-  return [title, ...names, ...keywords, ...people].some((field) => fold(field).includes(query))
-}
-
 /**
  * Search, rendered on the server for each query, so it works without JavaScript. It finds a
  * query inside any stored spelling.
@@ -54,8 +45,7 @@ function holds(document: SearchDocument, query: string): boolean {
 export default async function SearchPage({ searchParams }: PageProps<'/search'>) {
   const { q } = await searchParams
   const query = (Array.isArray(q) ? q[0] : q)?.trim() ?? ''
-  const folded = fold(query)
-  const found = folded === '' ? [] : (await site.searchDocuments()).filter((d) => holds(d, folded))
+  const found = query === '' ? [] : documentsMatching(await site.searchDocuments(), query)
   const groups = KINDS.map(({ kind, heading }) => ({
     kind,
     heading,

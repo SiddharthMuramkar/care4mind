@@ -44,6 +44,7 @@ These are judgement calls, so review checks them against the diff, in the codeba
 | The registry is generated, not edited | git ignores it, `pnpm check` and every test run write it afresh, and the guard refuses edits under `src/content/generated/` |
 | No record stores scoring | types and the content-integrity test |
 | Press colour pairs meet contrast | contrast test, for the pairs it lists. Colours mixed inside modules are unchecked (#79) |
+| `--color-surface-rule` is a rule, never text | contrast test |
 | Icon and manifest colours equal their tokens | icons test |
 | Lotus motion is CSS only, transform and opacity, still under reduced motion and when paused | lotus and motion specs |
 | A `styles.x` lookup names a class its CSS module defines | nothing yet (#67) |
