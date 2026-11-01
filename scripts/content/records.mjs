@@ -33,8 +33,6 @@ let aliasRoot = join(HERE, '../..')
 
 /** A TypeScript module, compiled as it loads by the repo's TypeScript compiler. */
 async function importTypeScript(file) {
-  if (typeof registerHooks !== 'function')
-    throw new ToolError('Reading records needs Node 22.15 or newer (module.registerHooks).')
   if (!hooked) {
     const ts = (await import('typescript')).default
     registerHooks(typeScriptHooks(ts))
