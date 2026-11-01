@@ -46,8 +46,7 @@ export const CONTRAST_PAIRS = [
   { foreground: 'focus', background: 'ground', minimum: 3 },
   { foreground: 'surface-focus', background: 'surface', minimum: 3 },
   { foreground: 'accent', background: 'ground', minimum: 3 },
-  // The "Devanagari first" switch, on the paper: its printer's-rule track, and its vermilion roundel knob.
-  { foreground: 'surface-ink', background: 'surface', minimum: 3 },
+  // Vermilion marks on the paper: the Folio's rule and the lotus Fleuron.
   { foreground: 'highlight', background: 'surface', minimum: 3 },
   // A pressed control's label over its ink at the ink's strongest; the ink is translucent, so it is laid over the control.
   { foreground: 'ink', background: 'ink-spread', over: 'ground', minimum: 4.5 },

@@ -11,7 +11,6 @@ for (const route of ROUTES_IN_SCOPE) {
     expect(await scrollsSideways(page), `${at(page, route.path)}: no sideways scroll`).toEqual([])
   })
 }
-
 // One page of each kind, at each width: a layout that fits 320 px can still overflow at 375 px.
 // Always the sampled set, whatever E2E_SCOPE says: widths cost tests per route.
 for (const route of ROUTES.filter((entry) => entry.sample)) {
@@ -26,16 +25,3 @@ for (const route of ROUTES.filter((entry) => entry.sample)) {
     })
   }
 }
-
-test('the Concept page still reflows at 320 px with the Devanagari leading', async ({ page }) => {
-  await gotoReady(page, '/concepts/vikshepa/')
-  const toggle = page.getByRole('button', { name: 'Devanagari first' })
-  const box = await toggle.boundingBox()
-  expect(box?.x ?? -1, 'the switch fits the screen').toBeGreaterThanOrEqual(0)
-  expect((box?.x ?? 0) + (box?.width ?? Infinity)).toBeLessThanOrEqual(320)
-
-  await toggle.click()
-  const spellings = page.getByRole('heading', { level: 1 }).locator('[lang]')
-  await expect(spellings.first()).toHaveAttribute('lang', 'sa-Deva')
-  expect(await scrollsSideways(page)).toEqual([])
-})

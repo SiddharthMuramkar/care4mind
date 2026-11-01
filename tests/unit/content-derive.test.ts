@@ -27,8 +27,8 @@ import { createContent } from '@/content/views'
 // whatever records a source holds. Each test builds a made-up source and reads `site` through
 // the same interface the pages use. Every record and string here is made up for the test.
 
-const ON: Features = { questionnairePreview: true, conceptMap: true, devanagariFirst: true }
-const OFF: Features = { questionnairePreview: false, conceptMap: false, devanagariFirst: false }
+const ON: Features = { questionnairePreview: true, conceptMap: true }
+const OFF: Features = { questionnairePreview: false, conceptMap: false }
 
 const provenance = {
   sources: [{ url: 'https://example.org/page/', retrieved: '2026-10-27' }],
@@ -359,9 +359,8 @@ describe('site.routes', () => {
     expect(await paths({ ...ON, questionnairePreview: false })).toEqual(
       without('/questionnaires/work-scale/take/'),
     )
-    expect(await paths({ ...ON, conceptMap: false })).toEqual(without('/concepts/map/'))
-    expect(await paths({ ...OFF, devanagariFirst: true })).toEqual(
-      without('/concepts/map/', '/questionnaires/work-scale/take/'),
+    expect(await paths({ ...ON, conceptMap: false })).toEqual(
+      without('/concepts/map/', '/proposals/'),
     )
   })
 

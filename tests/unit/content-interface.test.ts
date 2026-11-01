@@ -28,8 +28,8 @@ import { createContent } from '@/content/views'
 // seam: each test builds a small made-up content source and reads it through the same
 // namespaces the pages use. Every record and string here is made up for the test.
 
-const ON: Features = { questionnairePreview: true, conceptMap: true, devanagariFirst: true }
-const OFF: Features = { questionnairePreview: false, conceptMap: false, devanagariFirst: false }
+const ON: Features = { questionnairePreview: true, conceptMap: true }
+const OFF: Features = { questionnairePreview: false, conceptMap: false }
 
 const provenance = {
   sources: [{ url: 'https://example.org/page/', retrieved: '2026-10-27' }],
@@ -1702,16 +1702,12 @@ describe('the feature flags, from the environment to the interface (D16, D20)', 
       map: true,
       proposals: true,
     })
-    expect(await offered({ ...production, FEATURE_DEVANAGARI_FIRST: '1' })).toEqual({
-      ...nothing,
-      proposals: true,
-    })
     expect(await offered({ FEATURE_QUESTIONNAIRE_PREVIEW: '0' })).toEqual({
       ...everything,
       form: false,
       flow: false,
     })
-    expect(await offered({ FEATURE_CONCEPT_MAP: '0', FEATURE_DEVANAGARI_FIRST: '0' })).toEqual({
+    expect(await offered({ FEATURE_CONCEPT_MAP: '0' })).toEqual({
       ...everything,
       map: false,
       proposals: false,

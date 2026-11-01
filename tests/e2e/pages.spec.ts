@@ -200,3 +200,28 @@ test.describe('running text', () => {
     await expect(page.getByRole('link', { name: 'Values: yama and niyama' }).first()).toBeVisible()
   })
 })
+
+test('the texts list sets each title in IAST before its Devanagari, each with its language tag', async ({
+  page,
+}) => {
+  await gotoReady(page, '/texts/')
+  const entries = await page.locator('main article li').evaluateAll((items) =>
+    items.map((li) => {
+      const iast = li.querySelector('[lang="sa-Latn"], [lang="pi-Latn"]')
+      const deva = li.querySelector('[lang="sa-Deva"]')
+      return {
+        name: li.textContent?.trim().slice(0, 40),
+        iast: Boolean(iast),
+        order:
+          !deva || (iast && iast.compareDocumentPosition(deva) & Node.DOCUMENT_POSITION_FOLLOWING)
+            ? 'ok'
+            : 'wrong',
+      }
+    }),
+  )
+  expect(entries.length).toBeGreaterThan(0)
+  for (const entry of entries) {
+    expect.soft(entry.iast, `${entry.name} has a transliteration`).toBe(true)
+    expect.soft(entry.order, `${entry.name} sets IAST first`).toBe('ok')
+  }
+})

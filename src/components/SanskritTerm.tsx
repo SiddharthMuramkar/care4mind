@@ -3,6 +3,7 @@ import { capitalise } from '@/lib/text'
 
 import { cx } from '@/lib/cx'
 
+import { ScriptPair } from './script/ScriptPair'
 import styles from './SanskritTerm.module.css'
 
 interface Props {
@@ -27,12 +28,12 @@ export function SanskritTerm({
 }: Props) {
   return (
     <span className={cx(styles.term, className)}>
-      <span lang="sa-Latn">{capitalised ? capitalise(term.iast) : term.iast}</span>
-      {devanagari && term.devanagari ? (
-        <span lang="sa-Deva" className={styles.deva}>
-          {term.devanagari}
-        </span>
-      ) : null}
+      <ScriptPair
+        className={styles.pair}
+        iast={capitalised ? capitalise(term.iast) : term.iast}
+        devanagari={devanagari ? term.devanagari : undefined}
+        devanagariClassName={styles.deva}
+      />
       {gloss ? <span className={styles.gloss}>({gloss})</span> : null}
     </span>
   )

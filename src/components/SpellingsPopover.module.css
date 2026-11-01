@@ -56,8 +56,7 @@
 
 /*
  * Where anchor positioning is supported, the popover opens under its button,
- * from the button's left edge, and clear of whatever shares the button's row
- * (the "Devanagari first" switch, which narrow screens wrap below it). It stays
+ * from the button's left edge, and clear of whatever shares the button's row. It stays
  * open as focus moves on, so it must never cover a control (WCAG 2.4.11).
  * Placed on the page rather than the screen, it scrolls with its button, and
  * focusing its Close scrolls it into view like anything else on the page.

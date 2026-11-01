@@ -7,11 +7,9 @@ import { LateFonts } from '@/components/LateFonts'
 import { LotusHeadScript } from '@/components/LotusHeadScript'
 import { LotusPointer } from '@/components/LotusPointer'
 import { LinkPreviewRoot } from '@/components/preview/LinkPreviewRoot'
-import { HeadScript } from '@/components/script/HeadScript'
 import { SiteFooter } from '@/components/SiteFooter'
 import { SiteHeader } from '@/components/SiteHeader'
 import { Toaster } from '@/components/toast/Toaster'
-import { features } from '@/config/features'
 import { site } from '@/config/site'
 import { playfairDisplay, playfairText, playfairTextStyles } from '@/fonts/playfair'
 import { tiroDevanagariSanskrit } from '@/fonts/tiro-devanagari-sanskrit'
@@ -47,7 +45,6 @@ export default function RootLayout({ children }: { children: ReactNode }) {
     >
       <head>
         <LotusHeadScript />
-        {features.devanagariFirst ? <HeadScript /> : null}
       </head>
       <body>
         <a href="#main" className="skip-link">

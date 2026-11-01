@@ -14,7 +14,7 @@ import { createContent } from '@/content/views'
 // come from the ticket, the spec and the quiz's settings as the extract tool prints them, never
 // from the records themselves.
 
-const ON: Features = { questionnairePreview: true, conceptMap: true, devanagariFirst: true }
+const ON: Features = { questionnairePreview: true, conceptMap: true }
 const OFF: Features = { ...ON, questionnairePreview: false }
 
 const FREQUENCY = ['Always', 'Often', 'Sometimes', 'Rarely', 'Never']
