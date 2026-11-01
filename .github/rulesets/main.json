@@ -31,7 +31,7 @@
         "do_not_enforce_on_create": false,
         "required_status_checks": [
           {
-            "context": "Checks, browser tests (FR-06, NFR-01) and Lighthouse (NFR-02)",
+            "context": "ci",
             "integration_id": 15368
           }
         ]
