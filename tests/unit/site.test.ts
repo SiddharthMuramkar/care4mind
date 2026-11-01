@@ -8,7 +8,7 @@ import robots from '@/app/robots'
 import sitemap from '@/app/sitemap'
 import { redirects } from '@/config/redirects'
 import { site as config } from '@/config/site'
-import { concepts, site } from '@/content'
+import { concepts, site, topics } from '@/content'
 import { metadataFor, shareCardText } from '@/lib/metadata'
 import { CARD_COLOURS } from '@/lib/share-card'
 
@@ -61,11 +61,11 @@ describe('a page’s metadata (D19)', () => {
   })
 
   it('describes a topic, which has no summary, by what its page holds', async () => {
+    const held = (await topics.get('mind'))?.concepts.length
     expect(await metadataFor('/topics/mind/')).toEqual(
       withShareTags({
         title: { absolute: 'Mind: states and obstacles · Care4Mind' },
-        description:
-          '5 Concepts in the topic “Mind: states and obstacles”, and the verses they quote.',
+        description: `${held} Concepts in the topic “Mind: states and obstacles”, and the verses they quote.`,
         alternates: { canonical: `${ORIGIN}/topics/mind/` },
       }),
     )
