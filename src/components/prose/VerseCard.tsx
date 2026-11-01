@@ -4,16 +4,7 @@ import { cx } from '@/lib/cx'
 import { Shloka } from '../Shloka'
 import { CopyVerse } from './CopyVerse'
 import styles from './Prose.module.css'
-
-/** A verse as plain text to copy: its Devanagari, transliteration, translation and locator. */
-export function verseAsText(verse: VerseView): string {
-  const translation = verse.translation
-    ? `${verse.translation}${verse.translationSource ? ` (${verse.translationSource})` : ''}`
-    : ''
-  return [verse.devanagari.join('\n'), verse.transliteration.join('\n'), translation, verse.source]
-    .filter(Boolean)
-    .join('\n\n')
-}
+import { verseAsText } from './verse-text'
 
 /**
  * A verse card: the verse set like a manuscript, a chip naming its work and locator that leads to
