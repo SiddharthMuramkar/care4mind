@@ -53,17 +53,6 @@
   max-width: 40ch;
 }
 
-/* The status badge: its words, on its status's colour (globals.css). */
-.status {
-  margin: 0;
-  padding: 0.2rem 0.75rem;
-  background: var(--status);
-  color: var(--status-ink);
-  font-variant-caps: all-small-caps;
-  letter-spacing: 0.1em;
-  font-size: 1.0625rem;
-}
-
 /* Where to call for help now: set apart from the limits above by a rule, in ink. */
 .help {
   margin: 0;

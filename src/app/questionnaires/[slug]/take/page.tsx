@@ -7,11 +7,11 @@ import { Citation } from '@/components/Citation'
 import { Folio } from '@/components/Folio'
 import { PageTurn, turnForward } from '@/components/PageTurn'
 import { Text } from '@/components/prose'
+import { StatusBadge } from '@/components/StatusBadge'
 import { Flow } from '@/components/questionnaire/Flow'
 import { concepts, hrefFor, questionnaires, site } from '@/content'
 import { cx } from '@/lib/cx'
 import { metadataFor } from '@/lib/metadata'
-import { shownStatus, statusWords } from '@/lib/questionnaire/gate'
 
 import reading from '../../../reading.module.css'
 import styles from './page.module.css'
@@ -43,7 +43,7 @@ export default async function TakeQuestionnairePage({
     questionnaires.form(slug),
   ])
   if (!questionnaire || !form) notFound()
-  const { title, status, limitations, source } = questionnaire
+  const { title, status, shownStatus, limitations, source } = questionnaire
   const intro = hrefFor({ kind: 'questionnaire', id: slug, status })
   const related = (await concepts.list()).filter((concept) =>
     questionnaire.concepts.some((ref) => ref.slug === concept.slug),
@@ -114,9 +114,7 @@ export default async function TakeQuestionnairePage({
             <h1 id="flow-title" className={cx(reading.title, reading.titleLong)}>
               {title}
             </h1>
-            <p className={styles.status} data-status={shownStatus(status)}>
-              {statusWords(status)}
-            </p>
+            <StatusBadge status={shownStatus} />
             <p className={styles.promise}>
               Your answers aren’t scored yet. They stay on this page while it is open: nothing you
               answer is saved or sent anywhere.

@@ -1,3 +1,5 @@
+import type { Features } from '@/config/features'
+
 import type { ContentGraph, Relation } from '../graph'
 import type { Block, ConceptRecord, Slug } from '../schema'
 import {
@@ -81,14 +83,18 @@ function linkedWorks(record: ConceptRecord, graph: ContentGraph): LinkedWork[] {
 }
 
 /** Its own Questionnaire first, then every other that lists the Concept, in source order. */
-function linkedQuestionnaires(record: ConceptRecord, graph: ContentGraph): QuestionnaireCard[] {
+function linkedQuestionnaires(
+  record: ConceptRecord,
+  graph: ContentGraph,
+  flags: Features,
+): QuestionnaireCard[] {
   const own = record.questionnaire === undefined ? [] : [record.questionnaire]
   const listing = graph
     .records('questionnaire')
     .filter((questionnaire) => questionnaire.concepts.includes(record.slug))
     .map((questionnaire) => questionnaire.slug)
   return [...new Set([...own, ...listing])].map((slug) =>
-    questionnaireCard(must(graph, 'questionnaire', slug), graph),
+    questionnaireCard(must(graph, 'questionnaire', slug), graph, flags),
   )
 }
 
@@ -125,7 +131,11 @@ function citationsOnPage(record: ConceptRecord, graph: ContentGraph) {
 }
 
 /** A Concept's page: the record with every id resolved. */
-export function conceptView(record: ConceptRecord, graph: ContentGraph): ConceptView {
+export function conceptView(
+  record: ConceptRecord,
+  graph: ContentGraph,
+  flags: Features,
+): ConceptView {
   const owner: Owner = { kind: 'concept', id: record.slug }
   return {
     ...conceptCard(record, graph),
@@ -139,7 +149,7 @@ export function conceptView(record: ConceptRecord, graph: ContentGraph): Concept
     linked: {
       related: relatedConcepts(record, graph),
       works: linkedWorks(record, graph),
-      questionnaires: linkedQuestionnaires(record, graph),
+      questionnaires: linkedQuestionnaires(record, graph, flags),
       sections: record.sections.flatMap((section) =>
         section.role === undefined
           ? []

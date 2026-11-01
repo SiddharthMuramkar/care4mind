@@ -4,16 +4,6 @@
   padding-bottom: 0.5rem;
 }
 
-.status {
-  margin: 0;
-  padding: 0.2rem 0.75rem;
-  background: var(--status);
-  color: var(--status-ink);
-  font-variant-caps: all-small-caps;
-  letter-spacing: 0.1em;
-  font-size: 1.0625rem;
-}
-
 .promise {
   max-width: 44ch;
   margin: 0;
