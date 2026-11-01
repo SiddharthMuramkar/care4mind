@@ -34,9 +34,6 @@ export async function SiteFooter() {
                   {concepts.label}
                 </Link>
                 <ul className={styles.pages}>
-                  <li>
-                    <Link href={nav.concepts.index.href}>{nav.concepts.index.label}</Link>
-                  </li>
                   {nav.concepts.topics.map((topic) => (
                     <li key={topic.slug} className={styles.topic} data-topic={topic.slug}>
                       <Link href={topic.href}>{topic.label}</Link>
@@ -51,15 +48,6 @@ export async function SiteFooter() {
                 </ul>
               </li>
             ) : null}
-            {[texts, questionnaires].map((section) =>
-              section ? (
-                <li key={section.id} className={styles.group}>
-                  <Link href={section.href} className={styles.head}>
-                    {section.label}
-                  </Link>
-                </li>
-              ) : null,
-            )}
             {library ? (
               <li className={styles.group}>
                 <Link href={library.href} className={styles.head}>
@@ -75,9 +63,18 @@ export async function SiteFooter() {
               </li>
             ) : null}
             <li className={styles.group}>
-              <Link href={nav.search.href} className={styles.head}>
-                {nav.search.label}
-              </Link>
+              <ul className={styles.pages}>
+                {[texts, questionnaires].map((section) =>
+                  section ? (
+                    <li key={section.id}>
+                      <Link href={section.href}>{section.label}</Link>
+                    </li>
+                  ) : null,
+                )}
+                <li>
+                  <Link href={nav.search.href}>{nav.search.label}</Link>
+                </li>
+              </ul>
             </li>
             {nav.proposals ? (
               <li className={styles.group}>
