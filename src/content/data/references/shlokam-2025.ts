@@ -29,7 +29,7 @@ export default defineReference({
       {
         for: 'research-editor',
         note: 'The pages cite the shlokam.org home page three ways: dated 2025, July 2 on Vikshepa and Sthitaprajna; as “Hindu Shlokas, Bhagavad Gita, Upanishads, Granthas, Mantras” dated 2025, March 22 on Brahma Vihara; and as “Shlokam.org” among Triguna’s online resources. Stored as one Reference with each form kept as cited, and the July date. Confirm the date; nothing was looked up.',
-        ticket: 17,
+        decidedBy: 'references',
       },
     ],
   },

@@ -25,12 +25,12 @@ export default defineReference({
       {
         for: 'research-editor',
         note: 'The page links this paper as a PDF on old.rrjournals.com, under a WordPress uploads address, which the content rules keep out of records; the link is left out and nothing was looked up. Give a stable link for it, such as a DOI or the journal’s article page.',
-        ticket: 17,
+        decidedBy: 'references',
       },
       {
         for: 'research-editor',
         note: 'No journal (container) is given on the current site; not looked up.',
-        ticket: 17,
+        decidedBy: 'references',
       },
     ],
   },

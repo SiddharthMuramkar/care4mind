@@ -2,7 +2,7 @@
  * The record schema: the storage shape, one type per kind, each with an identity helper that
  * exists only to type-check a record file. Record files import from here; pages never do.
  */
-export type * from './common'
+export * from './common'
 export * from './concept'
 export * from './glossary'
 export * from './home'

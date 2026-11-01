@@ -35,7 +35,7 @@ export default definePassage({
       {
         for: 'research-editor',
         note: 'The Brahmacharya values page heads this verse “Chapter 6, Verse 17” and names no work there; its Meaning calls it “the Bhagavad Gita (6.17)”, and it is stored as Bhagavad Gītā 6.17. Confirm the attribution.',
-        ticket: 16,
+        decidedBy: 'traditional-texts',
       },
     ],
   },

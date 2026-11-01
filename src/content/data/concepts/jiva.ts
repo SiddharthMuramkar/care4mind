@@ -82,7 +82,7 @@ export default defineConcept({
       {
         for: 'research-editor',
         note: 'The post’s text may be adapted from DharmaWiki: it carries DharmaWiki’s citation markers, which are dropped here. Decide how to credit DharmaWiki. Nothing was looked up.',
-        ticket: 17,
+        decidedBy: 'references',
       },
       {
         for: 'project-owner',

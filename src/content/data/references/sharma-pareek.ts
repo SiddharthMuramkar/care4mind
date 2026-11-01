@@ -20,7 +20,7 @@ export default defineReference({
       {
         for: 'research-editor',
         note: 'No year or journal (container) is given on the current site; not looked up. The address of its link suggests IJHSR, volume 9, issue 10 (October 2019).',
-        ticket: 17,
+        decidedBy: 'references',
       },
     ],
   },

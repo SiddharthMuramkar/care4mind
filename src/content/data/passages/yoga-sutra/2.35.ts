@@ -33,7 +33,7 @@ export default definePassage({
       {
         for: 'research-editor',
         note: 'A Know Your Values page heads this verse with its chapter and sutra only, naming no work; it is stored under the Yoga Sūtra, which its text is. Confirm the attribution.',
-        ticket: 16,
+        decidedBy: 'traditional-texts',
       },
     ],
   },

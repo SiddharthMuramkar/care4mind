@@ -15,6 +15,9 @@ import { dirname, join } from 'node:path'
 import { openCaptures, runTool, ToolError } from './extract.mjs'
 import { idOf, loadRecords, rootFrom, sortRecords } from './verify.mjs'
 
+/** The schema module that holds the planning issues table: this repo's, whatever --root says. */
+const SCHEMA = new URL('../../src/content/schema/common.ts', import.meta.url)
+
 /** Where --write saves the pack, relative to the repo root: a path git ignores. */
 export const FLAGS_PACK = '.scratch/content-flags.md'
 
@@ -32,8 +35,11 @@ function provenancesOf(record) {
   return [record.provenance]
 }
 
-/** The flags pack, as Markdown, for these records and the saved pages in `captures`. */
-export function buildReport(records, captures) {
+/**
+ * The flags pack, as Markdown, for these records and the saved pages in `captures`. `issues` is
+ * the schema's `PLANNING_ISSUES`, which names the issue each flag's `decidedBy` points at.
+ */
+export function buildReport(records, captures, issues) {
   const sorted = sortRecords(records)
   const name = (record) => `${record.kind}/${idOf(record)}`
   const out = []
@@ -45,10 +51,10 @@ export function buildReport(records, captures) {
       for (const flag of provenance.flags) {
         const notes = byRole.get(flag.for)
         if (!notes) continue
-        const line = notes.get(flag.note) ?? { records: [], tickets: new Set(), count: 0 }
+        const line = notes.get(flag.note) ?? { records: [], issues: new Set(), count: 0 }
         line.count += 1
         if (!line.records.includes(name(record))) line.records.push(name(record))
-        if (flag.ticket !== undefined) line.tickets.add(flag.ticket)
+        if (flag.decidedBy !== undefined) line.issues.add(flag.decidedBy)
         notes.set(flag.note, line)
       }
   const flagCount = (role) => [...byRole.get(role).values()].reduce((sum, l) => sum + l.count, 0)
@@ -65,11 +71,11 @@ export function buildReport(records, captures) {
   for (const [role, title] of ROLES) {
     out.push('', `## ${title}: ${plural(flagCount(role), 'flag')}`, '')
     for (const [note, line] of byRole.get(role)) {
-      const tickets = [...line.tickets].sort((a, b) => a - b)
-      const ticket =
-        tickets.length === 0
-          ? ''
-          : ` (${tickets.length === 1 ? 'ticket' : 'tickets'} ${tickets.join(', ')})`
+      const decided = [...line.issues]
+        .map((key) => issues[key])
+        .sort((a, b) => a.issue - b.issue)
+        .map(({ issue, title }) => `#${issue} ${title}`)
+      const ticket = decided.length === 0 ? '' : ` (decided by ${decided.join('; ')})`
       const named =
         line.records.length > 1
           ? `${line.records.length} records: ${line.records.join(', ')}`
@@ -142,7 +148,10 @@ async function main(args) {
   const write = rest.includes('--write')
   const unknown = rest.filter((arg) => arg !== '--write')
   if (unknown.length > 0) throw new ToolError(`Unknown argument: ${unknown[0]}\n${USAGE}`)
-  const text = buildReport(await loadRecords(root), captures)
+  const records = await loadRecords(root)
+  // Imported after loadRecords, which registers the hooks that let Node read TypeScript.
+  const { PLANNING_ISSUES } = await import(SCHEMA.href)
+  const text = buildReport(records, captures, PLANNING_ISSUES)
   if (!write) {
     process.stdout.write(text)
     return 0

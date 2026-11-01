@@ -199,27 +199,27 @@ export default defineConcept({
       {
         for: 'research-editor',
         note: 'The page writes its headword and the term paired with it only as “Atma Bandhu” and “Aatmaripu” (its only IAST forms, “ātmabandhu” and “ātmaripu”, are in its held-back score section). The record’s IAST, “ātma-bandhu” and “ātma-ripu”, is written from those spellings, with the vowels of the page’s Bhagavad Gītā 6.5 (“ātmano bandhur”, “ripur ātmanaḥ”). The page prints no Devanagari for either, and none is stored. Confirm the forms; nothing was looked up.',
-        ticket: 15,
+        decidedBy: 'sanskrit-terms',
       },
       {
         for: 'research-editor',
         note: 'The page gives no English gloss for ātma-bandhu or ātma-ripu outside its held-back score section: its title asks “Are you a Friend/Foe of Yourself?”, and its reading of Bhagavad Gītā 6.5 calls the Self “the friend of oneself” and “the enemy of oneself”, but neither glosses the terms. The record has no English name and the term no gloss. Supply them, or approve leaving them out; nothing was looked up.',
-        ticket: 15,
+        decidedBy: 'sanskrit-terms',
       },
       {
         for: 'research-editor',
         note: 'The table’s caption is the sub-heading set above it, “Comparative of states of mind in Western and Indian philosophies (Krishnappa et al., 2020; Prabhu & Bhat, 2013)”, word for word the heading of a table on the Know Your Mind page. Here the table compares Western and Indian views of the self, not states of mind, and neither Krishnappa et al. (2020) nor Prabhu & Bhat (2013) is on this page’s reference list. Kept as written, with “el al.” corrected; nothing was looked up.',
-        ticket: 17,
+        decidedBy: 'references',
       },
       {
         for: 'research-editor',
         note: 'The text cites “(Paranjape, 2010)” twice; the page’s reference list spells the author Paranjpe, A. C. (2010), as do the citations in its held-back score section. Kept as written; nothing was looked up.',
-        ticket: 17,
+        decidedBy: 'references',
       },
       {
         for: 'research-editor',
         note: 'The text cites “(Hegde & Nayak, 2024)”; the page’s reference list gives Hegde & Nayak (2025), and its held-back score section cites them as 2025. Kept as written; nothing was looked up.',
-        ticket: 17,
+        decidedBy: 'references',
       },
       {
         for: 'research-editor',

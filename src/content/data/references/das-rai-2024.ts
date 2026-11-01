@@ -28,7 +28,7 @@ export default defineReference({
       {
         for: 'research-editor',
         note: 'The page’s title stops at “with Special Reference to…”, cut short (the address of its link continues it), and gives ResearchGate, the site that holds the paper, as its journal. Kept as given; nothing was looked up.',
-        ticket: 17,
+        decidedBy: 'references',
       },
     ],
   },

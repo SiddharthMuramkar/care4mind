@@ -16,7 +16,7 @@ export default defineGlossaryEntry({
       {
         for: 'research-editor',
         note: 'The card writes the Devanagari “छान्दोग्योपनिषतद्”, with a “त” before the final “द्”, and so does its link. Kept as the card has it, not fixed; confirm the form. Nothing was looked up.',
-        ticket: 15,
+        decidedBy: 'sanskrit-terms',
       },
       {
         for: 'project-owner',

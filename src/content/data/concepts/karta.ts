@@ -187,22 +187,22 @@ export default defineConcept({
       {
         for: 'research-editor',
         note: 'The page writes its headword only as “Karta” and ‘karta’, with no IAST or Devanagari, and none of its verses holds the word. The record’s IAST, “kartā”, is written from that spelling, and no Devanagari is stored. Confirm the form; nothing was looked up.',
-        ticket: 15,
+        decidedBy: 'sanskrit-terms',
       },
       {
         for: 'research-editor',
         note: 'The page writes the three types of doer only as “Sattvik Karta”, “Rajasic Karta” and “Tamasic Karta”. The record’s IAST, “sāttvika kartā”, “rājasa kartā” and “tāmasa kartā”, takes each adjective from the verse the page sets under that type (“sāttvikam”, 18.23; “rājasam”, 18.24; “tāmasam”, 18.25), in its dictionary form, with the headword. No Devanagari is stored. Confirm the forms; nothing was looked up.',
-        ticket: 15,
+        decidedBy: 'sanskrit-terms',
       },
       {
         for: 'research-editor',
         note: 'The page glosses the three types of doer only in the sub-headings of its held-back score section, so their term blocks have no gloss. Supply them, or approve leaving them out; nothing was looked up.',
-        ticket: 15,
+        decidedBy: 'sanskrit-terms',
       },
       {
         for: 'research-editor',
         note: 'The page heads Bhagavad Gītā 18.23–18.25 “Bhagavad Gita – Types of Karta”, and each verse “Sattvik Karta”, “Rajasic Karta” or “Tamasic Karta”, but the verses’ own words (“karma”) and the English lines under them (“An action which…”, “That action which…”) speak of types of action rather than of the doer. Kept as the page has them; nothing was changed or looked up.',
-        ticket: 16,
+        decidedBy: 'traditional-texts',
       },
       {
         for: 'research-editor',

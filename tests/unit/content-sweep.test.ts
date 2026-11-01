@@ -592,7 +592,7 @@ describe('the late links', () => {
 
   it('flag that placement for the Project owner as a structure call', () => {
     const calls = provenanceOf('questionnaire/dosha-survey').flags.filter(
-      (flag) => flag.for === 'project-owner' && flag.ticket === 13,
+      (flag) => flag.for === 'project-owner' && flag.decidedBy === 'content-types',
     )
     expect(calls).toHaveLength(1)
     expect(calls[0]?.note).toMatch(/temperament/)

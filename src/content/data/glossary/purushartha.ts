@@ -19,7 +19,7 @@ export default defineGlossaryEntry({
       {
         for: 'research-editor',
         note: 'The card writes the Devanagari “पुरुषार्थ:”, with an ASCII colon where the visarga goes; the entry writes “पुरुषार्थः”. Its link, kept exactly as the card has it, ends with the colon too. Confirm. Nothing was looked up.',
-        ticket: 15,
+        decidedBy: 'sanskrit-terms',
       },
       {
         for: 'project-owner',

@@ -40,7 +40,7 @@ export default defineQuestionnaire({
       {
         for: 'psychology-expert',
         note: 'The purpose is the page’s own sentence, “A Triguna Profile Questionnaire is a tool to estimate the high and low characteristics of Trigunas in a person.”, with “high and low” left out, since no record holds score-level wording. It says what the questionnaire measures and interprets no score. Approve it, rewrite it, or leave it out.',
-        ticket: 26,
+        decidedBy: 'questionnaire-record',
       },
     ],
   },

@@ -106,7 +106,6 @@ The planning map, issue #6, lists them. Until each is decided, the code leaves i
 The code still holds these patterns, and new code doesn't copy them. Each line names the ticket that removes the pattern, and the PR that closes that ticket deletes the line.
 
 - Comments that cite ticket numbers, decision codes (D01–D21), design codes (such as B6) or spec names. The documents they point at were deleted in `bfdbff0`. State the reason instead (#38).
-- `Flag.ticket` numbers on records. They come from a deleted local tracker and point at the wrong GitHub issues (#39).
 - Tests that pin how many records exist (#45).
 - The "Devanagari first" stubs, which render nothing, though the proposals page calls the feature built (#43).
 - Settings that look load-bearing but do nothing here: the root layout's `title.template`, since every page sets an absolute title (#64), and `typedRoutes`, which can't check paths that end in a slash (#55). The checks that do hold links true are the `hrefFor()` lint rule and the browser crawler.

@@ -219,17 +219,17 @@ export default defineConcept({
       {
         for: 'research-editor',
         note: 'The page gives no Sanskrit headword: the Concept is named by its English title, “Five Steps of Perfection”, the page title without “Profiling”. Give it a headword, or confirm the English title. Nothing was looked up.',
-        ticket: 15,
+        decidedBy: 'sanskrit-terms',
       },
       {
         for: 'research-editor',
         note: 'The Five Steps of Perfection page heads this verse “Shlokas of Perfection from Chapter 1, Sutra 20” and names no work; it is stored as Yoga Sūtra 1.20, which its text is. Confirm the attribution.',
-        ticket: 16,
+        decidedBy: 'traditional-texts',
       },
       {
         for: 'research-editor',
         note: 'The five steps’ IAST and Devanagari are split out of the compound in the page’s Yoga Sūtra 1.20: “śraddhā”, “vīrya”, “smṛti”, “samādhi” and “prajñā”. The page’s own text writes them only as “Shraddha”, “Virya”, “Smriti”, “Samadhi” and “Prajna”. Confirm the forms. Nothing was looked up.',
-        ticket: 15,
+        decidedBy: 'sanskrit-terms',
       },
       {
         for: 'research-editor',
@@ -238,7 +238,7 @@ export default defineConcept({
       {
         for: 'research-editor',
         note: 'The reference list includes www.wisdomlib.org (2025b), “Prajna: Significance and symbolism”, which only the held-back note on the score indicators cites. It stays on the Concept’s list; decide whether to keep it.',
-        ticket: 17,
+        decidedBy: 'references',
       },
     ],
   },

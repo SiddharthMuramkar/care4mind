@@ -134,27 +134,27 @@ export default defineQuestionnaire({
       {
         for: 'psychology-expert',
         note: 'Question 9’s topic label is kept as the page spaces it, “( First Reaction to Something New)”, where the other eleven have no space inside the bracket. Nothing was changed.',
-        ticket: 26,
+        decidedBy: 'questionnaire-record',
       },
       {
         for: 'psychology-expert',
         note: 'After question 9 the saved form has a text field labelled “learn to you”. It is the hidden anti-spam field the form plugin adds (visitors never see it, and its label changes from load to load), not a lost question, so the record leaves it out. All 12 of the survey’s questions are kept.',
-        ticket: 26,
+        decidedBy: 'questionnaire-record',
       },
       {
         for: 'psychology-expert',
         note: 'The survey’s page says nothing about what it measures, so no purpose is stored, and none was written. The current homepage’s “Dosha” card, left out with the homepage’s other questionnaire cards, describes it: “The Dosha Survey helps identify your unique mind-body type based on the three Ayurvedic principles — Vāta (air & space), Pitta (fire & water), and Kapha (earth & water)..”. Decide whether that sentence becomes its purpose, or approve leaving it out.',
-        ticket: 26,
+        decidedBy: 'questionnaire-record',
       },
       {
         for: 'project-owner',
         note: 'No published source was found for the Dosha Survey (research ticket 11), so its author and rights holder are unknown. Its questions are stored but not offered as a form; permission is needed before they are published.',
-        ticket: 1,
+        decidedBy: 'client-questions',
       },
       {
         for: 'project-owner',
         note: 'The current Dosha Survey page links no Concept. The record names triguṇa as its Concept, which places the survey’s card in the temperament topic, as the design notes do (B3): a structure call, not something the page says. Confirm the placement, or choose another topic or none.',
-        ticket: 13,
+        decidedBy: 'content-types',
       },
     ],
   },

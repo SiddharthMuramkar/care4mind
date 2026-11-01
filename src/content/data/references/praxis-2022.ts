@@ -26,7 +26,7 @@ export default defineReference({
       {
         for: 'research-editor',
         note: 'The page cites the journal as a whole, under its own name, and links the journal’s DOI rather than an article’s. Kept as given; confirm which article was meant. Nothing was looked up.',
-        ticket: 17,
+        decidedBy: 'references',
       },
     ],
   },

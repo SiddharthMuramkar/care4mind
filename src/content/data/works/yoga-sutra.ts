@@ -38,12 +38,12 @@ export default defineWork({
       {
         for: 'research-editor',
         note: 'The title is written in IAST as “Yoga Sūtra”; the pages write “Yoga Sutra”. Confirm the form.',
-        ticket: 16,
+        decidedBy: 'traditional-texts',
       },
       {
         for: 'research-editor',
         note: 'No page names the translator or the source of the translations it gives for this work’s verses; none is stored, and none was looked up.',
-        ticket: 16,
+        decidedBy: 'traditional-texts',
       },
     ],
   },

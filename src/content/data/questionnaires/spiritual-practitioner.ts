@@ -41,12 +41,12 @@ export default defineQuestionnaire({
       {
         for: 'psychology-expert',
         note: 'The page says nothing about what its questionnaire measures outside its held-back score section, so no purpose is stored, and none was written. Write one, or approve leaving it out.',
-        ticket: 26,
+        decidedBy: 'questionnaire-record',
       },
       {
         for: 'psychology-expert',
         note: 'The Concept’s definition says “such profiling” illuminates the psychological, ethical and behavioral characteristics of spiritual practitioners, citing a study (Sekagya et al., 2024). It describes profiling in general, not this questionnaire, so it stays in the Concept and is not taken as this record’s purpose.',
-        ticket: 26,
+        decidedBy: 'questionnaire-record',
       },
     ],
   },

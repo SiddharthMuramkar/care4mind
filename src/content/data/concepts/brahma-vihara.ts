@@ -197,22 +197,22 @@ export default defineConcept({
       {
         for: 'research-editor',
         note: 'The page prints no IAST and no Devanagari for its headword, which it writes “Brahma Vihara” (also “BrahmaVihara”, and “Brahmavihara” in a cited title). The record’s IAST, “brahmavihāra”, is the design notes’ form; no Devanagari is stored. Confirm the IAST and give the Devanagari. Nothing was looked up.',
-        ticket: 15,
+        decidedBy: 'sanskrit-terms',
       },
       {
         for: 'research-editor',
         note: 'The page gives no English gloss for its headword, so none is stored. It calls the four components “these four ‘sublime states’”. Decide whether that, or another gloss, names the Concept. Nothing was looked up.',
-        ticket: 15,
+        decidedBy: 'sanskrit-terms',
       },
       {
         for: 'research-editor',
         note: 'The four components’ IAST and Devanagari are split out of the compound in the page’s Yoga Sūtra 1.33 (“मैत्रीकरुणामुदितोपेक्षणां”), in their dictionary forms: maitrī, karuṇā, muditā and upekṣā (मैत्री, करुणा, मुदिता, उपेक्षा). The page’s text writes them “Maitra” or “Maitri”, “Karuna”, “Mudita” and “Upeksha”, and its table once “Maitrī”. Confirm the forms. Nothing was looked up.',
-        ticket: 15,
+        decidedBy: 'sanskrit-terms',
       },
       {
         for: 'research-editor',
         note: 'The text cites “(Gilbert & Choden, 2013)”, “(Mishra & Kumar, 2020)” and “(Bhattacharjee, 2024)”, which match no entry on the page’s reference list; it lists Gilbert (2015) and Bhattacharjee (2016). Not changed, and nothing was looked up.',
-        ticket: 17,
+        decidedBy: 'references',
       },
       {
         for: 'research-editor',
