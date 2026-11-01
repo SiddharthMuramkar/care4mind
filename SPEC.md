@@ -14,7 +14,7 @@ Each module is named by its capability, and outside code reaches it only through
 - **Content source**, the seam under Content: `ContentSource.records(kind)`. Two adapters satisfy it, the generated registry of record files and the made-up sources the tests build, so the seam is real. A content back end becomes one more adapter, and nothing above it changes. _Tests: content-registry, content-interface, content-derive._
 - **Records**: one file per record. Each is default-exported through its kind's `define…` helper from `@/content/schema`, and points at other records by id only. The registry that lists them is generated. _Types, the graph's dangling-id check, the content tests, and the registry that `pnpm check` and every test run write afresh._
 - **Addresses**: every internal link comes from `hrefFor()`. _Lint: `care4mind/href-from-hreffor`._
-- **Pages**: App Router routes that read content only through `@/content`. `site.routes()` is the one list of public pages, and the sitemap, page metadata, the navigation and the link crawler read it. _Tests: content-derive, routes; browser: crawler._
+- **Pages**: App Router routes that read content only through `@/content`. `site.routes()` is the one list of public pages, and `site.route(path)` and `site.params(pattern)` read it. A dynamic page's `generateStaticParams` is `site.params` of its pattern. The sitemap, page metadata, the navigation and the link crawler read the list. _Tests: content-derive, routes; browser: crawler._
 - **Page metadata and share cards**: `metadataFor(path)` in `@/lib/metadata` gives every page its title, description, canonical address and Open Graph and Twitter text. Images never go in metadata: each page's route segment has an `opengraph-image.tsx` that calls `shareCard()` (`@/lib/share-card`), which reads the WOFF twins of the font subsets through `@/fonts/card-faces`. _Tests: site; browser: share-card._
 - **Feature flags**: `features`, read once at build, on the server. A client component gets a flag as a prop. A feature that's built but not yet approved for launch is on in previews and off in production. _Tests: features. Review for the server-only reading._
 - **Redirects**: one table, each entry served as a 301. _Tests: redirects (unit and browser)._
@@ -37,6 +37,7 @@ These are judgement calls, so review checks them against the diff, in the codeba
 | Rule | Kept true by |
 | --- | --- |
 | Pages read content only through `@/content`; a client file imports it for types only | lint (content boundary) and its test |
+| A dynamic page's params are the registry entries of its pattern | routes test |
 | The graph imports neither the views nor the derivations above it | lint (content boundary) and its test |
 | Internal links come from `hrefFor()` | lint (`care4mind/href-from-hreffor`) |
 | Every link between records resolves | the graph, at build and in every content test |
@@ -55,7 +56,7 @@ These are judgement calls, so review checks them against the diff, in the codeba
 | Agents never merge a PR, turn on auto-merge, push to `main` or delete a branch | the guard and its test (guard). It reads commands, not intent: a script it can't read makes it ask, and review covers the rest |
 | `main` changes only through a squashed PR whose required check passed on an up-to-date branch | the ruleset on GitHub, whose file the ruleset test checks; `pnpm ruleset:check` compares the two |
 | Nobody commits to `main` or pushes to it, the developer included | the git hooks in `.githooks/`, installed by `prepare` (githooks test). `--no-verify` skips them, and the guard refuses that to agents |
-| `ship` opens PRs and stops, and its agents run light | ship test |
+| `ship` opens PRs, has a reviewer agent review each and its builder answer the review, then stops; its agents run light | ship test |
 | Each "Code that misleads" line names an open ticket | review |
 | Names use glossary terms; comments say why; Press only; depth; tests at the seam | review |
 
@@ -84,7 +85,7 @@ These are judgement calls, so review checks them against the diff, in the codeba
 
 `pnpm check` is the one local signal that a change is done. CI runs it on every PR and every push to `main`, then the browser tests in parallel shards and Lighthouse on the build it made. The job named `ci`, which `.github/rulesets/main.json` requires, waits for all of them, and GitHub won't merge a PR until it passes on a branch that's up to date with `main`. Also run the browser tests you touched, against the build `pnpm check` made: `E2E_ONLY=<spec names> pnpm check:e2e`, where the names are file names in `tests/e2e` without `.spec.ts`.
 
-An agent's PR is done when it's open, green and every review thread is answered. `ship` stops there, and the developer reviews, merges and deletes the branch.
+An agent's PR is done when it's open, green and every review thread is answered. In `ship`, a reviewer agent posts that review and the PR's builder answers it. `ship` stops there, and the developer reviews, merges and deletes the branch.
 
 The content registry is rewritten by `dev`, `build`, `typecheck`, `test`, `test:e2e`, `check` and every Vitest run. A running `next dev` sees a new record file only once the registry is rewritten: rerun the registry script, or restart.
 
