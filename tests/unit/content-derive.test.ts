@@ -630,7 +630,29 @@ describe('site.azIndex', () => {
 describe('site.searchDocuments', () => {
   const long = `${'A made-up sentence that runs on. '.repeat(12)}The end.`
   const records = [
-    ...world.filter((record) => record !== obstacles && record !== reading),
+    ...world.filter((record) => record !== obstacles && record !== reading && record !== self),
+    defineTopic({
+      ...self,
+      intro: {
+        sections: [
+          {
+            id: 'restraints',
+            heading: 'Restraints',
+            blocks: [
+              {
+                kind: 'term',
+                id: 'yama',
+                term: { iast: 'yama', devanagari: 'यम', ascii: [] },
+                gloss: 'Restraint',
+                blocks: [{ kind: 'paragraph', text: 'Made-up text about restraint.' }],
+              },
+            ],
+          },
+        ],
+        references: [],
+        provenance,
+      },
+    }),
     defineConcept({
       ...obstacles,
       summary: long,
@@ -680,7 +702,7 @@ describe('site.searchDocuments', () => {
     for (const { kind } of await documents()) count[kind] = (count[kind] ?? 0) + 1
     expect(count).toEqual({
       concept: 3,
-      term: 1,
+      term: 2,
       glossary: 1,
       work: 2,
       passage: 2,
@@ -730,6 +752,20 @@ describe('site.searchDocuments', () => {
       keywords: ['Doubt'],
       people: [],
       excerpt: 'Made-up text about doubt.',
+    })
+  })
+
+  it('gives a term in a topic’s introduction the topic as its parent, at its anchor there', async () => {
+    expect(await find('term:topic/self#yama')).toEqual({
+      id: 'term:topic/self#yama',
+      kind: 'term',
+      title: 'Yama',
+      href: '/topics/self/#yama',
+      parent: 'Self',
+      names: ['yama', 'यम'],
+      keywords: ['Restraint'],
+      people: [],
+      excerpt: 'Made-up text about restraint.',
     })
   })
 
