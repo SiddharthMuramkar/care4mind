@@ -80,7 +80,7 @@ These are judgement calls, so review checks them against the diff, in the codeba
 
 ## The feedback loop
 
-`pnpm check` is the one local signal that a change is done. CI runs it on every PR and every push to `main`, then the browser tests in parallel shards and Lighthouse on the build it made. The job that `.github/rulesets/main.json` requires waits for all of them, and GitHub won't merge a PR until it passes on a branch that's up to date with `main`. Also run the browser tests you touched, against the build `pnpm check` made: `E2E_ONLY=<spec names> pnpm check:e2e`, where the names are file names in `tests/e2e` without `.spec.ts`.
+`pnpm check` is the one local signal that a change is done. CI runs it on every PR and every push to `main`, then the browser tests in parallel shards and Lighthouse on the build it made. The job named `ci`, which `.github/rulesets/main.json` requires, waits for all of them, and GitHub won't merge a PR until it passes on a branch that's up to date with `main`. Also run the browser tests you touched, against the build `pnpm check` made: `E2E_ONLY=<spec names> pnpm check:e2e`, where the names are file names in `tests/e2e` without `.spec.ts`.
 
 An agent's PR is done when it's open, green and every review thread is answered. `ship` stops there, and the developer reviews, merges and deletes the branch.
 
