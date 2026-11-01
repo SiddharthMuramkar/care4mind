@@ -79,10 +79,13 @@ module.exports = {
       // The certificate is self-signed, which Chrome would refuse. Every Lighthouse setting,
       // throttling included, stays its default.
       ...(H2 && { settings: { chromeFlags: '--ignore-certificate-errors' } }),
-      numberOfRuns: 3,
+      // Five runs give the blocking-time median a middle value that one slow run can't move.
+      numberOfRuns: 5,
     },
     assert: {
       assertions: {
+        // LCP and CLS stay on the representative run: a GC pause shows up as blocking time,
+        // not as layout shift or paint.
         'largest-contentful-paint': [
           'error',
           { maxNumericValue: 2500, aggregationMethod: 'median-run' },
@@ -91,7 +94,9 @@ module.exports = {
           'error',
           { maxNumericValue: 0.1, aggregationMethod: 'median-run' },
         ],
-        'total-blocking-time': ['error', { maxNumericValue: 200, aggregationMethod: 'median-run' }],
+        // Judged on the median of all five runs, not on the run picked by its FCP and TTI, so one
+        // garbage-collection pause in one run can't fail the budget.
+        'total-blocking-time': ['error', { maxNumericValue: 200, aggregationMethod: 'median' }],
         'categories:accessibility': ['error', { minScore: 0.95 }],
         'categories:performance': ['warn', { minScore: 0.9 }],
       },

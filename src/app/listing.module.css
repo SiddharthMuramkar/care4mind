@@ -90,8 +90,8 @@
 
 /* The entry a link leads to stands out for a moment's reading. */
 .entry:target {
-  background: color-mix(in srgb, var(--color-highlight) 10%, transparent);
-  box-shadow: 0 0 0 0.5rem color-mix(in srgb, var(--color-highlight) 10%, transparent);
+  background: var(--color-highlight-wash-10);
+  box-shadow: 0 0 0 0.5rem var(--color-highlight-wash-10);
 }
 
 .entryName {
