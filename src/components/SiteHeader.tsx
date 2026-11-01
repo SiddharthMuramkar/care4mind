@@ -1,5 +1,6 @@
 import Link from 'next/link'
 
+import { CurrentLink } from '@/components/nav/CurrentLink'
 import { MenuButton } from '@/components/nav/MenuButton'
 import { SearchGlyph } from '@/components/nav/glyphs'
 import { SectionNav } from '@/components/nav/SectionNav'
@@ -19,7 +20,8 @@ import styles from './SiteHeader.module.css'
  * leading home, then Concepts · Texts · Questionnaires · Library · Search, each a server-rendered
  * link that works without JavaScript. On a computer Concepts and Library open panels, and "Pause
  * the lotus" ends the strip; on a narrow screen the sections and the pause move into the Menu's
- * Drawer, and Search stays.
+ * Drawer, and Search stays. While its proposal is on, Start here follows the wordmark from 30rem
+ * up, and below that it heads the Drawer's list.
  */
 export async function SiteHeader() {
   const nav = await siteNav()
@@ -32,6 +34,11 @@ export async function SiteHeader() {
           <LotusMark className={styles.mark} />
           <Logo />
         </Link>
+        {nav.start ? (
+          <CurrentLink href={nav.start.href} className={styles.start}>
+            {nav.start.label}
+          </CurrentLink>
+        ) : null}
         <nav aria-label="Main" className={styles.nav}>
           <SectionNav nav={nav} mapNote={mapNote} />
           <SearchTrigger placement="header" className={styles.search}>
