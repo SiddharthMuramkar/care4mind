@@ -79,6 +79,8 @@ module.exports = {
       // The certificate is self-signed, which Chrome would refuse. Every Lighthouse setting,
       // throttling included, stays its default.
       ...(H2 && { settings: { chromeFlags: '--ignore-certificate-errors' } }),
+      // LCP and CLS stay on the representative run: a GC pause shows up as blocking time,
+      // not as layout shift or paint.
       numberOfRuns: 5,
     },
     assert: {
