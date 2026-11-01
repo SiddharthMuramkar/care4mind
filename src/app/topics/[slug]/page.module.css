@@ -8,7 +8,8 @@ main.page {
   font-family: var(--font-deva);
   font-variant-caps: normal;
   letter-spacing: 0;
-  color: var(--color-highlight);
+  /* Vermilion on the paper is under 4.5:1 at this size. */
+  color: var(--color-surface-link);
 }
 
 /* The topic's own Sanskrit word, in italic as transliteration always is, beside its Devanagari. */

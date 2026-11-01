@@ -123,14 +123,24 @@ export function danglingLinks(record: ContentRecord, index: Index): string[] {
       if (record.candidateSource !== undefined)
         need('candidateSource', 'reference', record.candidateSource)
       const sets = record.form?.responseSets ?? {}
-      record.form?.parts.forEach((part, p) =>
+      const partIds = new Set<string>()
+      const itemIds = new Set<string>()
+      record.form?.parts.forEach((part, p) => {
+        if (partIds.has(part.id))
+          problems.push(`${where(`form.parts[${p}].id`)}: repeated part id “${part.id}”`)
+        partIds.add(part.id)
         part.items.forEach((item, i) => {
+          if (itemIds.has(item.id))
+            problems.push(
+              `${where(`form.parts[${p}].items[${i}].id`)}: repeated item id “${item.id}”`,
+            )
+          itemIds.add(item.id)
           if (!Object.hasOwn(sets, item.responseSet))
             problems.push(
               `${where(`form.parts[${p}].items[${i}].responseSet`)}: no response set “${item.responseSet}”`,
             )
-        }),
-      )
+        })
+      })
       break
     }
     case 'glossary':

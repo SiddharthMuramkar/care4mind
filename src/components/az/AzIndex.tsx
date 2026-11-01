@@ -131,9 +131,8 @@ function filterList(selection: Selection) {
     hide(section, !section.querySelector(shown))
 }
 
-/** Which entries and letters a selection leaves showing, read from the server-rendered list. */
-function showingFor(selection: Selection) {
-  const list = typeof document === 'undefined' ? null : document.getElementById(LIST)
+/** Which entries and letters a selection leaves showing, read from the list once it is mounted. */
+function showingFor(list: HTMLElement | null, selection: Selection) {
   if (isEmpty(selection) || !list) return null
   const shown = shownEntries(selection)
   return {
@@ -147,6 +146,14 @@ function showingFor(selection: Selection) {
 }
 
 const entries = (count: number) => `${count} ${count === 1 ? 'entry' : 'entries'}`
+
+/** The clear button unmounts with the filter, which would drop focus on the page. */
+function focusBeforeClear(root: ParentNode | null) {
+  const next =
+    root?.querySelector<HTMLElement>('[data-chip]') ??
+    root?.querySelector<HTMLElement>('[aria-live="polite"]')
+  next?.focus()
+}
 
 // The reordering list's flights, set here as the island is the only thing that starts them.
 const FLIGHTS = `::view-transition-group(.az-entry) { animation-duration: var(--duration-reorder); animation-timing-function: var(--ease-out); }`
@@ -249,9 +256,10 @@ export function AzIndex({ letters, groups, total, children }: Props) {
   )
   const address = useSyncExternalStore(subscribe, search, noSearch)
   const selection = useMemo(() => readSelection(address, known), [address, known])
-  const showing = useMemo(() => showingFor(selection), [selection])
+  const [showing, setShowing] = useState<ReturnType<typeof showingFor>>(null)
   const [parts, setParts] = useState<KeyboardParts>()
   const controls = useRef<HTMLDivElement>(null)
+  const listRef = useRef<HTMLDivElement>(null)
   const handoff = useRef<string | undefined>(undefined)
 
   // A press under way when Base UI arrives finishes on the plain chip first: swapping the
@@ -290,8 +298,12 @@ export function AzIndex({ letters, groups, total, children }: Props) {
 
   useEffect(() => whenIdle(upgrade), [upgrade])
 
-  // In the same commit as the chips and the count, so a view transition sees them change together.
-  useLayoutEffect(() => filterList(selection), [selection])
+  // The list is rendered below, so a client mount (Back) can't count it during render. Reading
+  // it here keeps the count and the rail in the same commit as the chips.
+  useLayoutEffect(() => {
+    filterList(selection)
+    setShowing(showingFor(listRef.current, selection))
+  }, [selection])
 
   useEffect(() => {
     const key = handoff.current
@@ -310,8 +322,9 @@ export function AzIndex({ letters, groups, total, children }: Props) {
   const Rail = parts?.Rail ?? PlainRail
   const Chips = parts?.Chips ?? PlainChips
   // The rail follows a press a moment later, and only when it changes which letters are links:
-  // the press itself then has only the chips and the count to redraw.
-  const later = useDeferredValue(showing)
+  // the press itself then has only the chips and the count to redraw. A mount's first count is
+  // null, so that one isn't deferred: the letters paint with the count.
+  const later = useDeferredValue(showing) ?? showing
   const letterKey = later ? [...later.letters].join(' ') : null
   const shownLetters = useMemo(
     () => (letterKey === null ? null : new Set(letterKey.split(' ').filter(Boolean))),
@@ -340,11 +353,19 @@ export function AzIndex({ letters, groups, total, children }: Props) {
       <div className={styles.filters}>
         <Chips groups={groups} pressed={pressed} onPress={press} />
         <div className={styles.tally}>
-          <p className={styles.count} aria-live="polite" aria-atomic="true">
+          <p tabIndex={-1} className={styles.count} aria-live="polite" aria-atomic="true">
             {entries(count)}
           </p>
           {isEmpty(selection) ? null : (
-            <button type="button" className={styles.clear} data-ink onClick={() => press([])}>
+            <button
+              type="button"
+              className={styles.clear}
+              data-ink
+              onClick={() => {
+                focusBeforeClear(controls.current)
+                press([])
+              }}
+            >
               Clear filters
             </button>
           )}
@@ -359,7 +380,9 @@ export function AzIndex({ letters, groups, total, children }: Props) {
           filters.
         </p>
       ) : null}
-      <div id={LIST}>{children}</div>
+      <div id={LIST} ref={listRef}>
+        {children}
+      </div>
     </div>
   )
 }
