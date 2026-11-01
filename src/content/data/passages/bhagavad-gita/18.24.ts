@@ -27,7 +27,7 @@ export default definePassage({
       {
         for: 'research-editor',
         note: 'The page prints the English line under this verse with no “Translation” or “Meaning” label; it is stored as the verse’s translation. Confirm it is a translation rather than the page’s own reading.',
-        ticket: 16,
+        decidedBy: 'traditional-texts',
       },
     ],
   },

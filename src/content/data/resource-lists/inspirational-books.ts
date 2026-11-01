@@ -110,12 +110,12 @@ export default defineResourceList({
       {
         for: 'research-editor',
         note: 'Both annotations of Paul Brunton’s books write “Sri Ramana Maharashi”, and the second writes “the foot of Arunchala”, while the page’s line for that book writes “The Maharshi and his message”. Kept as the page writes them; confirm the spellings. Nothing was looked up.',
-        ticket: 17,
+        decidedBy: 'references',
       },
       {
         for: 'research-editor',
         note: 'The annotation of Brunton (2009) calls his 1934 book “A search in Secret India”; the page’s line for Brunton (1934) titles it “A search into secret India”. Both kept as the page has them; confirm the title. Nothing was looked up.',
-        ticket: 17,
+        decidedBy: 'references',
       },
       {
         for: 'project-owner',

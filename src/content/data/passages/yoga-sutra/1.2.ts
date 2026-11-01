@@ -21,12 +21,12 @@ export default definePassage({
       {
         for: 'research-editor',
         note: 'No page gives this verse in Devanagari. The list is left empty; nothing was filled from elsewhere.',
-        ticket: 16,
+        decidedBy: 'traditional-texts',
       },
       {
         for: 'research-editor',
         note: 'The page that quotes this verse gives no line labelled “Translation”: its English line is labelled “Meaning” and stays on that page’s quote. No translation is stored, and none was looked up.',
-        ticket: 16,
+        decidedBy: 'traditional-texts',
       },
     ],
   },

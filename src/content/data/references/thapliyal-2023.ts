@@ -41,7 +41,7 @@ export default defineReference({
       {
         for: 'research-editor',
         note: 'The title’s “postCOvid” is kept as the four values pages write it; nothing was looked up.',
-        ticket: 17,
+        decidedBy: 'references',
       },
     ],
   },

@@ -33,12 +33,12 @@ export default defineQuestionnaire({
       {
         for: 'psychology-expert',
         note: 'No published source was found for this questionnaire (research ticket 11): Tomar (2024), which 14 of the 16 description pages’ questionnaires match by name, has none by this name in its searchable text. The record has no candidate source. Confirm where its questions come from before it is offered; nothing was looked up.',
-        ticket: 28,
+        decidedBy: 'questionnaire-scope',
       },
       {
         for: 'psychology-expert',
         note: 'The page says nothing about what its questionnaire measures outside its held-back score section, so no purpose is stored, and none was written. Write one, or approve leaving it out.',
-        ticket: 26,
+        decidedBy: 'questionnaire-record',
       },
     ],
   },

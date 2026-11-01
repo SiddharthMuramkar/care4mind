@@ -189,22 +189,22 @@ export default defineConcept({
       {
         for: 'research-editor',
         note: 'The Ahimsa values page writes its headword only as “Ahimsa”. The record’s IAST and Devanagari, “ahiṃsā” and “अहिंसा”, are split out of the compound in the page’s own Yoga Sūtra 2.30 verse, in their dictionary form. Confirm them; nothing was looked up.',
-        ticket: 15,
+        decidedBy: 'sanskrit-terms',
       },
       {
         for: 'research-editor',
         note: 'The Ahimsa values page heads its three verses with chapter and sutra only (“Chapter 2, Sutra 30”, “Chapter 2, Sutra 32”, “Chapter 2, Sutra 35”), naming no work; they are stored under the Yoga Sūtra, which their text is. Confirm the attribution.',
-        ticket: 16,
+        decidedBy: 'traditional-texts',
       },
       {
         for: 'research-editor',
         note: 'The Ahimsa values page cites “(Jain & Prakrit Bharati academy, JaiPur, 2016)” twice, and its reference list has no such entry. Kept as written; nothing was looked up.',
-        ticket: 17,
+        decidedBy: 'references',
       },
       {
         for: 'research-editor',
         note: 'The Ahimsa values page cites “(Reznik et al., 2019b)” under “Absence of Ahimsa” and “(Reznik et al., 2019)” in its definition; its reference list has one Reznik et al. (2019) entry, with no letter. Kept as written; nothing was looked up.',
-        ticket: 17,
+        decidedBy: 'references',
       },
     ],
   },

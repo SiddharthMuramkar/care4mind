@@ -230,17 +230,17 @@ export default defineConcept({
       {
         for: 'research-editor',
         note: 'The Brahmacharya values page writes its headword “Brahmacharya”. The record’s IAST and Devanagari, “brahmacarya” and “ब्रह्मचर्य”, are split out of the compound in the page’s own Yoga Sūtra 2.30 verse, in their dictionary form. Confirm them; nothing was looked up.',
-        ticket: 15,
+        decidedBy: 'sanskrit-terms',
       },
       {
         for: 'research-editor',
         note: 'The Brahmacharya values page’s title, “Know Your Values: Brahmacharya Profiling”, gives no English gloss, so the Concept has no English name. The page glosses the term only in passing: “chastity or control over sensuality (brahmacharya)” in its reading of Yoga Sūtra 2.30, and “Brahmacharya (sense control or celibacy)” in the shared yama–niyama section. Choose a gloss or confirm none; nothing was written for it.',
-        ticket: 15,
+        decidedBy: 'sanskrit-terms',
       },
       {
         for: 'research-editor',
         note: 'The Brahmacharya values page heads its nine verses with chapter and number only (“Chapter 2, Sutra 30”, “Chapter 2, Sutra 32”, “Chapter 6, Verse 17”, and “Chapter 2, Verse 54” to “Chapter 2, Verse 68”), naming no work. The first two are stored under the Yoga Sūtra, and the rest under the Bhagavad Gītā, which the page’s reading of 6.17 names (“the Bhagavad Gita (6.17)”) and whose 2.54–2.68 the Sthitaprajna page also quotes. Confirm the attribution.',
-        ticket: 16,
+        decidedBy: 'traditional-texts',
       },
       {
         for: 'research-editor',

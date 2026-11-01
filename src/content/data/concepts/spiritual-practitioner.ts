@@ -132,12 +132,12 @@ export default defineConcept({
       {
         for: 'research-editor',
         note: 'The page gives no Sanskrit headword: the Concept is named by its English title, “Spiritual Practitioner”, the page title without “Profiling”. Give it a headword, or confirm the English title. Nothing was looked up.',
-        ticket: 15,
+        decidedBy: 'sanskrit-terms',
       },
       {
         for: 'research-editor',
         note: 'The text cites “(Inbadas, 2017)”, which isn’t on the page’s reference list. Not changed, and nothing was looked up.',
-        ticket: 17,
+        decidedBy: 'references',
       },
       {
         for: 'research-editor',

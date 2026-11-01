@@ -23,7 +23,7 @@ export default defineGlossaryEntry({
       {
         for: 'research-editor',
         note: 'The post’s sentence, now the end of this entry’s description, may be adapted from DharmaWiki: the post wraps it in “(Read more…)” links to DharmaWiki’s Anubandha Chatushtaya article. Decide how to credit DharmaWiki. Nothing was looked up.',
-        ticket: 17,
+        decidedBy: 'references',
       },
       {
         for: 'project-owner',

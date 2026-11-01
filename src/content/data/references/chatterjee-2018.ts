@@ -27,7 +27,7 @@ export default defineReference({
       {
         for: 'research-editor',
         note: 'The page gives its pages as “2320–2882”, which reads like the journal’s ISSN rather than a page range. Kept as given; nothing was looked up.',
-        ticket: 17,
+        decidedBy: 'references',
       },
     ],
   },

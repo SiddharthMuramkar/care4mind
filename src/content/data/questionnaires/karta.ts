@@ -39,12 +39,12 @@ export default defineQuestionnaire({
       {
         for: 'psychology-expert',
         note: 'The page says nothing about what its questionnaire measures outside its held-back score section, so no purpose is stored, and none was written. Write one, or approve leaving it out.',
-        ticket: 26,
+        decidedBy: 'questionnaire-record',
       },
       {
         for: 'project-owner',
         note: 'The held-back “Karta Score-Based Indicators” section also describes each type of doer in a paragraph that interprets no score, and the Concept kartā doesn’t carry those paragraphs. Decide whether they belong on the Concept page once the score text is reviewed.',
-        ticket: 19,
+        decidedBy: 'current-pages',
       },
     ],
   },

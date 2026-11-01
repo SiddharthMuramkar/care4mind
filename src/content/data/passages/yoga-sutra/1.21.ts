@@ -31,7 +31,7 @@ export default definePassage({
       {
         for: 'research-editor',
         note: 'The Momentum of Spiritual Practice page heads its two verses “Chapter 1, Sutra 21,22” and names no work there; they are stored as Yoga Sūtra 1.21 and 1.22, which their text is and which the page’s Meaning calls “Patanjali’s Yoga Sutras”. Confirm the attribution.',
-        ticket: 16,
+        decidedBy: 'traditional-texts',
       },
     ],
   },

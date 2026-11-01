@@ -72,17 +72,17 @@ export default defineHome({
       {
         for: 'project-owner',
         note: 'The homepage’s Applications area linked to the current site’s questionnaire app, which no longer works, so it has no link on the new site. Choose a destination for it, or drop the area.',
-        ticket: 19,
+        decidedBy: 'current-pages',
       },
       {
         for: 'project-owner',
         note: 'The homepage’s Tradition and Texts area linked to /text-books-2-2/, a reading list, so it now leads to Text Books, where that page went. Its text is about ancient Indian philosophical texts, which the new Texts index (/texts/) may suit better. Confirm, or choose another destination.',
-        ticket: 20,
+        decidedBy: 'site-map',
       },
       {
         for: 'project-owner',
         note: 'The homepage’s Research area linked to /institutes/, so it now leads to Courses, where that page went. Its text is about opportunities in Indian psychology research, which no page of the new site covers as such. Confirm, or choose another destination.',
-        ticket: 20,
+        decidedBy: 'site-map',
       },
     ],
     drafted: ['helpLine'],

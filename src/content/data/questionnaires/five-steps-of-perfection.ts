@@ -38,17 +38,17 @@ export default defineQuestionnaire({
       {
         for: 'psychology-expert',
         note: 'No published source was found for this questionnaire: the Published scales research (planning ticket 11) didn’t find Five Steps of Perfection in the searchable text of Tomar (2024), which the page cites, so the record names no candidate source. Decide whether it can be offered without one.',
-        ticket: 28,
+        decidedBy: 'questionnaire-scope',
       },
       {
         for: 'psychology-expert',
         note: 'The page says nothing about what its questionnaire measures outside its held-back score section, so no purpose is stored, and none was written. Write one, or approve leaving it out.',
-        ticket: 26,
+        decidedBy: 'questionnaire-record',
       },
       {
         for: 'research-editor',
         note: 'The held-back note on where the score indicators were referred from also cites “Samhita, 2024”, which isn’t on the page’s reference list. Nothing was looked up.',
-        ticket: 17,
+        decidedBy: 'references',
       },
     ],
   },

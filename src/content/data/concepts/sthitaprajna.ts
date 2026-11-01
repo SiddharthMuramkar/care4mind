@@ -262,27 +262,27 @@ export default defineConcept({
       {
         for: 'research-editor',
         note: 'The page writes its headword only as “Sthitaprajna” (and “sthita-prajna”). The record’s IAST, “sthitaprajña”, and Devanagari, “स्थितप्रज्ञ”, are split out of Bhagavad Gītā 2.54’s “sthitaprajñasya” and “स्थितप्रज्ञस्य”. Confirm them; nothing was looked up.',
-        ticket: 15,
+        decidedBy: 'sanskrit-terms',
       },
       {
         for: 'research-editor',
         note: 'The text cites “(Sharma, 1977)”; the only Sharma on the page’s reference list is Sharma, A. (1997), “Sankara on the Sthitaprajna”. Kept as written; nothing was looked up.',
-        ticket: 17,
+        decidedBy: 'references',
       },
       {
         for: 'research-editor',
         note: 'The table’s caption cites “(Samant, 2023)”; the page’s reference list gives Samant with no year, so the citation resolves to no Reference. Kept as written; nothing was looked up.',
-        ticket: 17,
+        decidedBy: 'references',
       },
       {
         for: 'research-editor',
         note: 'The text cites “(Surti et al., 2021)” for Surti & Ganga (2021), a paper by two authors. Kept as written; nothing was looked up.',
-        ticket: 17,
+        decidedBy: 'references',
       },
       {
         for: 'research-editor',
         note: 'The text names works its reference list doesn’t include: Gayathri (2015) and Chauhan (2017). Kept as written; nothing was looked up.',
-        ticket: 17,
+        decidedBy: 'references',
       },
       {
         for: 'research-editor',

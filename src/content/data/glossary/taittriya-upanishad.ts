@@ -16,7 +16,7 @@ export default defineGlossaryEntry({
       {
         for: 'research-editor',
         note: 'The card spells the name “Taittriya Upanishad”, and so does its link, while its Devanagari reads “तैत्तिरीय-उपनिषद्”. Kept as the card has it, and the slug follows it; confirm the spelling. Nothing was looked up.',
-        ticket: 15,
+        decidedBy: 'sanskrit-terms',
       },
       {
         for: 'project-owner',

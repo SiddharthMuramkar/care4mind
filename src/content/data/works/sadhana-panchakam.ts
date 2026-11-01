@@ -15,12 +15,12 @@ export default defineWork({
       {
         for: 'research-editor',
         note: 'The title is written in IAST as “Sādhana Pañcakam”; the page writes “Sadhana Panchakam”, and “Sādhana Panchakam” in its reference list. Confirm the form.',
-        ticket: 16,
+        decidedBy: 'traditional-texts',
       },
       {
         for: 'research-editor',
         note: 'No page names the translator or the source of the translations it gives for this work’s verses; none is stored, and none was looked up.',
-        ticket: 16,
+        decidedBy: 'traditional-texts',
       },
     ],
   },

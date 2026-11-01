@@ -30,7 +30,7 @@ export default defineReference({
       {
         for: 'research-editor',
         note: 'After the volume and issue the page gives “X 15GJRA-GLOBAL JOURNAL FOR RESEARCH ANALYSIS” where its pages would be, left out of the fields; and its link is the journal’s DOI (https://doi.org/10.36106/gjra), not the paper’s, kept as its URL. Give the pages and the paper’s own DOI; nothing was looked up.',
-        ticket: 17,
+        decidedBy: 'references',
       },
     ],
   },

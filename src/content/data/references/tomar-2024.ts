@@ -57,12 +57,12 @@ export default defineReference({
       {
         for: 'project-owner',
         note: 'Rights: Tomar (2024) is a commercial handbook of questionnaires, cited on all 16 description pages, and the candidate source for 14 of their coming-later Questionnaires (Published scales research, planning ticket 11). Its questions can’t be reproduced without the rights holder’s permission, and the author’s relation to the Client is unknown. Ask the Client; nothing from the book is reproduced meanwhile.',
-        ticket: 28,
+        decidedBy: 'questionnaire-scope',
       },
       {
         for: 'research-editor',
         note: 'The pages write this book five ways, all kept as cited: with and without “Dr.” before the initials, in sentence and in title case, with “(1st ed., Vol. 1)” on Know Your Mind and Triguna, and with the publisher as “Prabhat Prakashan Pvt. Ltd.” on Triguna and cut short to “Prabhat” on Know Your Mind. The record keeps “Tomar, V. S.”, “Prabhat Prakashan” and the 1st edition, and no volume, since the foundation’s pages show it without one. Confirm the volume; nothing was looked up.',
-        ticket: 17,
+        decidedBy: 'references',
       },
     ],
   },

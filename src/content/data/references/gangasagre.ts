@@ -21,12 +21,12 @@ export default defineReference({
       {
         for: 'research-editor',
         note: 'The page gives the title as “WJPMR | Abstract”, the name of the journal’s abstract page rather than the paper’s title, and the authors as “Gangasagre, J. N. G. a. D. N. S.”, which may run two authors together. Kept as given; nothing was looked up.',
-        ticket: 17,
+        decidedBy: 'references',
       },
       {
         for: 'research-editor',
         note: 'No year or journal (container) is given on the current site; not looked up.',
-        ticket: 17,
+        decidedBy: 'references',
       },
     ],
   },

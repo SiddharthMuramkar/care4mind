@@ -25,7 +25,7 @@ export default defineReference({
       {
         for: 'research-editor',
         note: 'No year is given on the current site; not looked up.',
-        ticket: 17,
+        decidedBy: 'references',
       },
     ],
   },
