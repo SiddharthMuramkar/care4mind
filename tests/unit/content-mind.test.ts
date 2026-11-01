@@ -215,13 +215,13 @@ describe('the mind topic', () => {
 
 describe('the mind Concepts', () => {
   it.each(CARRIED_OVER)(
-    'names $slug by its headword, in the mind topic, carried over unreviewed',
+    'names $slug by its headword, in the mind topic, its keywords drafted, unreviewed',
     async ({ slug, name, page }) => {
       const concept = await concepts.get(slug)
       expect(concept).toMatchObject({
         name,
         topic: { slug: 'mind' },
-        reviewStatus: 'carried-over-not-reviewed',
+        reviewStatus: 'drafted-not-reviewed',
       })
       expect(concept?.provenance.sources.map(({ url }) => url)).toEqual([page])
     },

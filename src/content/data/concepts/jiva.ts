@@ -9,10 +9,11 @@ export default defineConcept({
   name: {
     // The headword is “Jiva (Samskrit: जीवः)”; the IAST is the page's own (“the term jīva”).
     term: { iast: 'jīva', devanagari: 'जीवः', ascii: ['Jiva'] },
-    english: 'living being',
+    english: 'Living being',
   },
   summary:
     'Jiva (Samskrit: जीवः), literally means a living being, in Indian philosophical thought it is a technical term closest to what is called “person” in contemporary psychology.',
+  keywords: ['self', 'living', 'body', 'mind'],
   topics: { primary: 'self' },
   verses: [],
   sections: [
@@ -61,8 +62,9 @@ export default defineConcept({
       url: 'https://dharmawiki.org/index.php/Jiva_(%E0%A4%9C%E0%A5%80%E0%A4%B5%E0%A4%83)',
     },
   ],
-  reviewStatus: 'carried-over-not-reviewed',
+  reviewStatus: 'drafted-not-reviewed',
   provenance: {
+    drafted: ['keywords'],
     sources: [{ url: 'https://care4mind.org/jiva/', retrieved: '2026-10-27' }],
     edits: [
       'The page has no heading before its first paragraph: it is a section headed by its title, “Jiva”.',
@@ -70,6 +72,7 @@ export default defineConcept({
       'The text stops mid-citation; its last character, a lone “[” linking into DharmaWiki’s Jiva article, dropped: “levels.[” → “levels.”.',
       'Inline DharmaWiki links dropped, their words kept: “Indian concept self” (to its Indian Concept of Self article) and “purusha” (to its Purusha article).',
       'External link kept, labelled “DharmaWiki”: the Concept’s own DharmaWiki article, which the post’s citation markers link into, at the address the glossary card “Jiva (जीवः)” on https://care4mind.org/concepts/ links.',
+      'Name gloss in sentence case: “living being” → “Living being”.',
     ],
     flags: [
       {

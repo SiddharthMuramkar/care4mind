@@ -47,6 +47,7 @@ const concept: ConceptRecord = {
   slug: 'example',
   name: { term: { iast: 'udāharaṇa', ascii: ['Udaharana'] }, english: 'Example' },
   summary: 'A sentence from the page.',
+  keywords: [],
   topics: { primary: 'mind' },
   verses: [],
   sections: [],
@@ -428,6 +429,64 @@ describe('the graph', () => {
     const others = world.filter((record) => record !== steadiness)
     await expect(buildGraph(sourceOf(...others, wrongKind))).rejects.toThrow(
       'concept “steadiness”, field topics.primary: no topic “obstacles”',
+    )
+  })
+
+  it('refuses a repeated part id in a form', async () => {
+    const repeated = defineQuestionnaire({
+      ...profile,
+      form: {
+        responseSets: { yes: ['Yes'] },
+        parts: [
+          {
+            id: 'same',
+            title: 'A',
+            instructions: 'Answer.',
+            items: [{ id: 'a', text: 'A', responseSet: 'yes' }],
+          },
+          {
+            id: 'same',
+            title: 'B',
+            instructions: 'Answer.',
+            items: [{ id: 'b', text: 'B', responseSet: 'yes' }],
+          },
+        ],
+      },
+    })
+    const others = world.filter((record) => record !== profile)
+    const build = buildGraph(sourceOf(...others, repeated))
+    await expect(build).rejects.toThrow(DanglingIdError)
+    await expect(build).rejects.toThrow(
+      'questionnaire “example”, field form.parts[1].id: repeated part id “same”',
+    )
+  })
+
+  it('refuses a repeated item id in a form', async () => {
+    const repeated = defineQuestionnaire({
+      ...profile,
+      form: {
+        responseSets: { yes: ['Yes'] },
+        parts: [
+          {
+            id: 'one',
+            title: 'One',
+            instructions: 'Answer.',
+            items: [{ id: 'q1', text: 'First', responseSet: 'yes' }],
+          },
+          {
+            id: 'two',
+            title: 'Two',
+            instructions: 'Answer.',
+            items: [{ id: 'q1', text: 'Copied', responseSet: 'yes' }],
+          },
+        ],
+      },
+    })
+    const others = world.filter((record) => record !== profile)
+    const build = buildGraph(sourceOf(...others, repeated))
+    await expect(build).rejects.toThrow(DanglingIdError)
+    await expect(build).rejects.toThrow(
+      'questionnaire “example”, field form.parts[1].items[0].id: repeated item id “q1”',
     )
   })
 

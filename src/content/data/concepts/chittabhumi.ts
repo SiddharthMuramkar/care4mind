@@ -16,10 +16,19 @@ export default defineConcept({
   name: {
     // The page writes only the plural, “chittabhumis”, glossed “states of mind” (see the flags).
     term: { iast: 'citta-bhūmi', ascii: ['Chittabhumis'] },
-    english: 'state of mind',
+    english: 'State of mind',
   },
   summary:
     'Maharishi Patanjali outlines five progressive states of mind, known as chittabhumis, which chart the path toward a yogic and spiritually awakened consciousness.',
+  keywords: [
+    'mind',
+    'states',
+    'focus',
+    'concentration',
+    'awareness',
+    'discipline',
+    'consciousness',
+  ],
   topics: { primary: 'mind' },
   verses: [
     {
@@ -248,8 +257,9 @@ export default defineConcept({
       url: 'https://dharmawiki.org/index.php/Chitta_Bhumis_(%E0%A4%9A%E0%A4%BF%E0%A4%A4%E0%A5%8D%E0%A4%A4%E0%A4%AD%E0%A5%82%E0%A4%AE%E0%A4%AF%E0%A4%83)',
     },
   ],
-  reviewStatus: 'carried-over-not-reviewed',
+  reviewStatus: 'drafted-not-reviewed',
   provenance: {
+    drafted: ['keywords'],
     sources: [{ url: 'https://care4mind.org/knowyourmind/', retrieved: '2026-10-27' }],
     edits: [
       'IAST transliterated for the headword: “citta-bhūmi”, from the page’s plural “chittabhumis”, in the singular. The page prints no Devanagari for it or for the five states, so none is stored; the states’ IAST is the page’s own (“Mūḍha, Kṣipta, Vikṣipta, Ekāgra, and Niruddha”).',
@@ -263,6 +273,7 @@ export default defineConcept({
       'The reference list names Krishnappa et al. (2020) twice, as 2020a and 2020b. The Reference krishnappa-2020 keeps both lines as cited, and is listed once, where it first appears.',
       'Interface text dropped: the “Introduction” and “References” labels, and the “Meaning:” labels before the verses’ readings.',
       'Left out: the page’s “Score- Based Indicators” section, which belongs to its Questionnaire and is listed there as held back.',
+      'Name gloss in sentence case: “state of mind” → “State of mind”.',
     ],
     flags: [
       {

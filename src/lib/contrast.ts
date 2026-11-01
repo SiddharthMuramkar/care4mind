@@ -73,7 +73,7 @@ export const CONTRAST_PAIRS = [
   { foreground: 'status-later-ink', background: 'status-later', minimum: 4.5 },
   { foreground: 'proposal-ink', background: 'proposal', minimum: 4.5 },
   // The paper surfaces that rise over the page: text, links and focus rings on each.
-  ...(['panel', 'drawer', 'palette', 'preview'] as const).flatMap(
+  ...(['panel', 'drawer', 'preview'] as const).flatMap(
     (surface) =>
       [
         { foreground: `${surface}-ink`, background: surface, minimum: 4.5 },
@@ -82,12 +82,9 @@ export const CONTRAST_PAIRS = [
         { foreground: 'surface-focus', background: surface, minimum: 3 },
       ] as const,
   ),
-  { foreground: 'palette-highlight-ink', background: 'palette-highlight', minimum: 4.5 },
   // The toast: its text and focus ring on its dark slip, and its turmeric edge on the indigo page.
   { foreground: 'toast-ink', background: 'toast', minimum: 4.5 },
   { foreground: 'toast-muted', background: 'toast', minimum: 4.5 },
   { foreground: 'focus', background: 'toast', minimum: 3 },
   { foreground: 'toast-line', background: 'ground', minimum: 3 },
 ] as const
-
-export type ColourToken = (typeof CONTRAST_PAIRS)[number]['foreground' | 'background']

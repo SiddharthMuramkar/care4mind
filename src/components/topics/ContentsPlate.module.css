@@ -73,9 +73,10 @@
   grid-area: numeral;
   font-family: var(--font-deva);
   font-size: 1.125rem;
+  /* Vermilion on the lit row is under 4.5:1 at this size. */
   color: color-mix(
     in srgb,
-    var(--color-highlight) calc(var(--lit, 0) * 100%),
+    var(--color-surface-link) calc(var(--lit, 0) * 100%),
     var(--color-surface-muted)
   );
 }

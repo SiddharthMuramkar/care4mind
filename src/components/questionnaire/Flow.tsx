@@ -79,9 +79,10 @@ function focusStatement(item: string, behavior?: ScrollBehavior) {
   option?.focus({ preventScroll: true })
 }
 
-/** A plain press of a link, which the flow answers itself; others open the link as usual. */
-const plainPress = (event: MouseEvent) =>
-  event.button === 0 && !event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey
+/** A plain press of a link: the flow answers it itself or asks before leaving; others open the link as usual. */
+const plainPress = (
+  event: Pick<MouseEvent, 'button' | 'metaKey' | 'ctrlKey' | 'shiftKey' | 'altKey'>,
+) => event.button === 0 && !event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey
 
 /**
  * Taking a Questionnaire, one part per screen, then a review and the end screen (C4). Every
@@ -147,13 +148,33 @@ export function Flow({ form, instructions, intro, limits, sources }: Props) {
     return () => window.removeEventListener('popstate', listener)
   }, [])
 
-  // Leaving with answers given and the end screen not reached asks first.
+  // Leaving with answers given and the end screen not reached asks first: on unload, and on a
+  // plain press of a link to another page here. Browser Back from part 1 is a client-side
+  // traversal that can't be cancelled, so it leaves without asking.
   const dirty = unsaved(state)
   useEffect(() => {
     if (!dirty) return
     const warn = (event: BeforeUnloadEvent) => event.preventDefault()
+    const ask = (event: globalThis.MouseEvent) => {
+      if (event.defaultPrevented || !plainPress(event)) return
+      const link = event.target instanceof Element ? event.target.closest('a[href]') : null
+      if (!(link instanceof HTMLAnchorElement) || link.target || link.hasAttribute('download'))
+        return
+      // Other origins unload the document, which beforeunload asks about; links to this page
+      // are the flow's own (Change, the error summary).
+      const to = new URL(link.href)
+      if (to.origin !== window.location.origin || to.pathname === window.location.pathname) return
+      if (!window.confirm('Leave the Questionnaire? Your answers will be lost.')) {
+        event.preventDefault()
+      }
+    }
     window.addEventListener('beforeunload', warn)
-    return () => window.removeEventListener('beforeunload', warn)
+    // Capture, so the question comes before Next's Link reads defaultPrevented.
+    document.addEventListener('click', ask, true)
+    return () => {
+      window.removeEventListener('beforeunload', warn)
+      document.removeEventListener('click', ask, true)
+    }
   }, [dirty])
 
   const part = partOf(state.step)

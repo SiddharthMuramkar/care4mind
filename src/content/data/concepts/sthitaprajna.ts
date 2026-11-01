@@ -14,10 +14,11 @@ export default defineConcept({
       devanagari: 'स्थितप्रज्ञ',
       ascii: ['Sthitaprajna', 'sthita-prajna'],
     },
-    english: 'person of steady wisdom',
+    english: 'Person of steady wisdom',
   },
   summary:
     'As mentioned in Bhagavad Gita, Sthitaprajna means a state of stable intellect, mind, living devoid of desires, stable mental resilience in spite of any physical suffering or unfavourable situations, unaffected by others opinions, devoid of attachments and maintains equilibrium (Tomar, 2024).',
+  keywords: ['steady', 'wisdom', 'emotions', 'detachment', 'desires', 'anger', 'peace', 'balance'],
   topics: { primary: 'mind', also: ['self'] },
   verses: [
     {
@@ -243,8 +244,9 @@ export default defineConcept({
     'wisdomlib-2022',
   ],
   questionnaire: 'sthitaprajna',
-  reviewStatus: 'carried-over-not-reviewed',
+  reviewStatus: 'drafted-not-reviewed',
   provenance: {
+    drafted: ['keywords'],
     sources: [{ url: 'https://care4mind.org/sthitaprajna/', retrieved: '2026-10-27' }],
     edits: [
       'Headword forms split out of the inflected words of Bhagavad Gītā 2.54: the IAST “sthitaprajña” from “sthitaprajñasya”, and the Devanagari “स्थितप्रज्ञ” from “स्थितप्रज्ञस्य”. The page’s spellings, “Sthitaprajna” and, in a verse’s reading, “sthita-prajna”, are kept as ASCII spellings.',
@@ -254,6 +256,7 @@ export default defineConcept({
       'Inline DharmaWiki links dropped, their words kept: “Nishkam Karma”, “moksha”, “karma-yoga”, “bhakti-yoga”, “Bhakti” and “Karma”.',
       'Interface text dropped: the “Introduction” and “References” labels, and the “Meaning:” labels before the verses’ readings.',
       'Left out: the page’s “Overall Score indicator” section, which belongs to its Questionnaire and is listed there as held back.',
+      'Name gloss in sentence case: “person of steady wisdom” → “Person of steady wisdom”.',
     ],
     flags: [
       {
