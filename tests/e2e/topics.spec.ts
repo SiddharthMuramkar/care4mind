@@ -5,6 +5,7 @@ import { hrefFor, topics } from '@/content'
 import { expectNoAxeViolations } from './axe'
 import { expect, gotoReady, scrollsSideways, test } from './fixtures'
 import { expectPageTurned, pageTurns, prefetched, recordPageTurns } from './page-turns'
+import { expectFocusRingContrast } from './paper'
 
 // The topic pages (front-end-site ticket 06): each topic's Concepts as cards and as a contents
 // plate set like a book's, the verses they quote, and the values topic's shared introduction.
@@ -92,6 +93,13 @@ test('opens a verse after its speaker’s line, even one joined by sandhi', asyn
     .locator(`a[href="${verse.href}"]`)
   await expect(link).toContainText('प्रजहाति यदा कामान्सर्वान्पार्थ मनोगतान्')
   await expect(link).not.toContainText('उवाच')
+})
+
+test('a focused card rings clear of the folio it lies on', async ({ page }) => {
+  await gotoReady(page, hrefFor({ kind: 'topic', id: 'mind' }))
+  const [first] = conceptsOf(mind)
+  if (!first) throw new Error('The mind topic has Concepts.')
+  await expectFocusRingContrast(card(page, first.name), '::after')
 })
 
 test('focusing a card lights its row and inks in the row’s leader', async ({ page }) => {

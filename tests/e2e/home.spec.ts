@@ -10,6 +10,7 @@ import {
 } from './drawings'
 import { expect, gotoReady, test } from './fixtures'
 import { isBreath } from './lotuses'
+import { expectFocusRingContrast } from './paper'
 import { placeOnScreen, scrollPath } from './scrolling'
 
 const section = (page: Page, name: string) => page.getByRole('region', { name, exact: true })
@@ -344,4 +345,20 @@ test('the homepage leads on to every Concept and every Questionnaire', async ({ 
   await main.getByRole('link', { name: /more Questionnaires from the current site/ }).click()
   await expect(page).toHaveURL('/questionnaires/')
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('Questionnaires')
+})
+
+test('a focused card rings clear of the indigo ground it lies on', async ({ page }) => {
+  await gotoReady(page, '/')
+  await expectFocusRingContrast(
+    section(page, 'Concepts')
+      .getByRole('link', { name: /^Read about/ })
+      .first(),
+    '::after',
+  )
+  await expectFocusRingContrast(
+    section(page, 'Questionnaires')
+      .getByRole('link', { name: /^About the/ })
+      .first(),
+    '::after',
+  )
 })

@@ -28,8 +28,6 @@
 }
 
 .sheet {
-  --color-focus: var(--color-surface-focus);
-  --color-link: var(--color-surface-link);
   position: relative;
   width: min(24rem, calc(100vw - 2.5rem));
   height: 100%;
@@ -313,4 +311,11 @@
   margin: auto auto 0;
   padding-top: 1rem;
   color: var(--color-highlight);
+}
+
+/* Windows' contrast themes drop box-shadows, the sheet's only edge: give it a border they paint. */
+@media (forced-colors: active) {
+  .sheet {
+    border: 1px solid CanvasText;
+  }
 }

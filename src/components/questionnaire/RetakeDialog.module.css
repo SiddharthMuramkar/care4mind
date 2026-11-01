@@ -34,8 +34,6 @@
     inset 0 0 0 12px var(--color-surface),
     inset 0 0 0 13px color-mix(in srgb, var(--color-surface-ink) 30%, transparent),
     0 30px 60px -20px var(--color-backdrop);
-  --color-focus: var(--color-surface-focus);
-  --color-link: var(--color-surface-link);
 }
 
 .title {
@@ -84,5 +82,12 @@
   .popup[data-ending-style] {
     opacity: 0;
     transform: translate(-50%, calc(-50% + 1rem));
+  }
+}
+
+/* Windows' contrast themes drop box-shadows, the popup's only edge: give it a border they paint. */
+@media (forced-colors: active) {
+  .popup {
+    border: 1px solid CanvasText;
   }
 }

@@ -75,7 +75,7 @@
   --color-proposal: #8fd0f5;
   --color-proposal-ink: #151a3d;
 
-  /* Surfaces that rise over the page. Paper ones take surface-link and surface-focus for links and focus. */
+  /* Surfaces that rise over the page. Paper ones carry data-paper, which takes surface-link and surface-focus. */
   /* Navigation panels: index cards hung from the header. */
   --color-panel: #f1e6c8;
   --color-panel-ink: #1d1a2e;
@@ -213,6 +213,12 @@
     outline: 3px solid var(--color-focus);
     outline-offset: 3px;
     border-radius: 2px;
+  }
+
+  /* A paper surface, marked data-paper: the page's turmeric ring and links all but vanish on it. */
+  [data-paper] {
+    --color-focus: var(--color-surface-focus);
+    --color-link: var(--color-surface-link);
   }
 
   /*

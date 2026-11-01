@@ -52,7 +52,7 @@ export function MenuDrawer({
       <Drawer.Portal>
         <Drawer.Backdrop className={styles.backdrop} />
         <Drawer.Viewport className={styles.viewport}>
-          <Drawer.Popup className={styles.sheet} finalFocus={focusOnClose}>
+          <Drawer.Popup className={styles.sheet} data-paper finalFocus={focusOnClose}>
             {/* Content lets a mouse select text instead of swiping. A link's click closes the
                 Drawer; the link itself is the keyboard's way in. */}
             <Drawer.Content className={styles.body} onClick={closeOnLink}>

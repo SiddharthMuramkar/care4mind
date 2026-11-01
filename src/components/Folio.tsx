@@ -14,7 +14,7 @@ interface Props {
 /** A page of paper on the indigo ground, framed by a printer's double rule. */
 export function Folio({ as: Element = 'div', className, children, ...rest }: Props) {
   return (
-    <Element className={cx(styles.folio, className)} {...rest}>
+    <Element className={cx(styles.folio, className)} data-paper {...rest}>
       <span className={styles.corner} data-corner="tl" aria-hidden />
       <span className={styles.corner} data-corner="tr" aria-hidden />
       <span className={styles.corner} data-corner="bl" aria-hidden />
