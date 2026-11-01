@@ -494,6 +494,46 @@ test.describe('the KarmaYoga flow', () => {
     expect(asked).toEqual(['confirm', 'confirm', 'confirm'])
   })
 
+  test('passes over the steps a Retake emptied: one browser Back from part 1 reaches the intro', async ({
+    page,
+  }) => {
+    await gotoReady(page, INTRO)
+    await page.getByRole('link', { name: 'Start the Questionnaire' }).click()
+    await expect(page.locator('html')).toHaveAttribute('data-hydrated')
+    await toEnd(page)
+    await page.getByRole('button', { name: 'Retake' }).click()
+    await page.getByRole('button', { name: 'Clear and start again' }).click()
+    await expect(partHeading(page, 1)).toBeFocused()
+    await page.goBack()
+    await expect(page).toHaveURL(INTRO)
+    await expect(page.getByRole('link', { name: 'Start the Questionnaire' })).toBeVisible()
+    // Forward isn't sent back again: it returns to the flow.
+    await page.goForward()
+    await expect(partHeading(page, 1)).toBeVisible()
+    await expect(page).toHaveURL(`${FLOW}?step=part-1`)
+  })
+
+  test('passes over the steps a reload emptied: one browser Back from part 1 reaches the intro', async ({
+    page,
+  }) => {
+    page.on('dialog', (dialog) => void dialog.accept())
+    await gotoReady(page, INTRO)
+    await page.getByRole('link', { name: 'Start the Questionnaire' }).click()
+    await expect(page.locator('html')).toHaveAttribute('data-hydrated')
+    for (const part of [1, 2]) {
+      await expect(partHeading(page, part)).toBeVisible()
+      await answerPart(page)
+      await next(page).click()
+    }
+    await expect(page).toHaveURL(`${FLOW}?step=part-3`)
+    await page.reload()
+    await expect(page.locator('html')).toHaveAttribute('data-hydrated')
+    await expect(partHeading(page, 1)).toBeVisible()
+    await page.goBack()
+    await expect(page).toHaveURL(INTRO)
+    await expect(page.getByRole('link', { name: 'Start the Questionnaire' })).toBeVisible()
+  })
+
   test('leaves without asking on browser Back from part 1: a client-side traversal can’t be held', async ({
     page,
   }) => {

@@ -6,7 +6,9 @@ import { localSource, type ContentSource } from '@/content/source'
 import { createContent } from '@/content/views'
 import {
   addressOf,
+  entryAt,
   flowReducer,
+  placeOf,
   progressOf,
   progressText,
   startFlow,
@@ -184,6 +186,18 @@ describe('the address', () => {
     expect(stepFromAddress('')).toBe('part-1')
     expect(stepFromAddress('?step=part-0')).toBe('part-1')
     expect(stepFromAddress('?step=elsewhere')).toBe('part-1')
+  })
+
+  it('numbers its history entries, so a traversal tells Back from Forward', () => {
+    expect(placeOf(entryAt(0))).toBe(0)
+    expect(placeOf(entryAt(3))).toBe(3)
+    expect(placeOf({ ...entryAt(2), __NA: true })).toBe(2)
+  })
+
+  it('reads no place from an entry that is not the flow’s', () => {
+    expect(placeOf(null)).toBeNull()
+    expect(placeOf({ __NA: true })).toBeNull()
+    expect(placeOf({ flowPlace: 'two' })).toBeNull()
   })
 
   it('never carries an answer', () => {
