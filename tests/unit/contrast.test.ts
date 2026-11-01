@@ -2,7 +2,7 @@ import { globSync, readFileSync } from 'node:fs'
 
 import { describe, expect, it } from 'vitest'
 
-import { composite, CONTRAST_PAIRS, contrastRatio } from '@/lib/contrast'
+import { composite, CONTRAST_PAIRS, contrastRatio } from '@/styles/contrast'
 
 describe('contrastRatio', () => {
   it('matches the WCAG reference values', () => {

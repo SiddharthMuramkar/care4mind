@@ -3,7 +3,7 @@
 import { Progress } from '@base-ui/react/progress'
 import { memo } from 'react'
 
-import { progressOf, progressText, type FlowState } from '@/lib/questionnaire/flow'
+import { progressOf, progressText, type FlowState } from './flow-state'
 
 import styles from './Flow.module.css'
 

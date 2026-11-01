@@ -33,7 +33,7 @@ import {
   type FlowAction,
   type FlowState,
   type StepId,
-} from '@/lib/questionnaire/flow'
+} from './flow-state'
 
 import styles from './Flow.module.css'
 import { FlowProgress } from './FlowProgress'
