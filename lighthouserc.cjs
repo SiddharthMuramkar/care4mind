@@ -101,7 +101,7 @@ module.exports = {
       },
     },
     upload: {
-      // Reports stay on the CI runner and are uploaded as a build artifact, never published.
+      // Reports stay on the CI runner and are uploaded as the lighthouse-reports artifact, never published.
       target: 'filesystem',
       outputDir: '.lighthouseci',
     },

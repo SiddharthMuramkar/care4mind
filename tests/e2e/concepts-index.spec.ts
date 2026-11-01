@@ -182,6 +182,46 @@ test.describe('the filter chips', () => {
     await expect(shown(page)).toHaveCount(all.length)
   })
 
+  test('keeps the filtered count and rail after an entry and Back', async ({ page }) => {
+    // Back remounts the island. The list is its own output, so a count read during render
+    // still says the total and the rail still links letters whose sections are hidden.
+    await gotoReady(page, PATH)
+    await chip(page, mind.name).click()
+    await expect(count(page)).toHaveText(entries(inMind.length))
+    await expect(shown(page)).toHaveCount(inMind.length)
+    const hidden = await list(page)
+      .locator('[data-letter][hidden]')
+      .evaluateAll((sections) => sections.map((section) => section.id))
+    expect(hidden.length).toBeGreaterThan(0)
+    await shown(page)
+      .locator('a[href^="/concepts/"][href$="/"]:not([href="/concepts/"])')
+      .first()
+      .click()
+    await expect(page).toHaveURL(/\/concepts\/[^/]+\/$/)
+    await page.goBack()
+    await expect(page).toHaveURL(/\?topic=mind$/)
+    await expect(chip(page, mind.name)).toHaveAttribute('aria-pressed', 'true')
+    await expect(count(page)).toHaveText(entries(inMind.length))
+    await expect(shown(page)).toHaveCount(inMind.length)
+    for (const id of hidden) await expect(rail(page).locator(`a[href="#${id}"]`)).toHaveCount(0)
+  })
+
+  test('Clear filters from the keyboard leaves focus on the first chip', async ({ page }) => {
+    await gotoReady(page, PATH)
+    await expect(toolbar(page)).toBeVisible()
+    await chip(page, mind.name).click()
+    await page.getByRole('button', { name: 'Clear filters' }).focus()
+    await page.keyboard.press('Enter')
+    await expect(page).toHaveURL(new RegExp(`${PATH}$`))
+    await expect(count(page)).toHaveText(entries(all.length))
+    const first = page
+      .getByRole('group', { name: 'Filter the entries' })
+      .getByRole('button')
+      .first()
+    await expect(first).toBeFocused()
+    await expect(page.locator('body')).not.toBeFocused()
+  })
+
   test('filter by keyboard: one Tab stop, arrows between chips, Space to press', async ({
     page,
   }) => {
