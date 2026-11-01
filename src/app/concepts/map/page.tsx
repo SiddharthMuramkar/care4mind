@@ -1,5 +1,4 @@
 import type { Metadata } from 'next'
-import { notFound } from 'next/navigation'
 
 import { Breadcrumbs } from '@/components/Breadcrumbs'
 import { Folio } from '@/components/Folio'
@@ -7,7 +6,6 @@ import { ConceptMap } from '@/components/map/ConceptMap'
 import { layoutMap } from '@/components/map/layout'
 import { PageTurn } from '@/components/PageTurn'
 import { ProposalNote } from '@/components/proposals/ProposalNote'
-import { features } from '@/config/features'
 import { hrefFor, site, topics } from '@/content'
 import { cx } from '@/lib/cx'
 import { metadataFor } from '@/lib/metadata'
@@ -27,7 +25,6 @@ export function generateMetadata(): Promise<Metadata> {
  * every connection in words. Its layout is worked out here, while the site builds.
  */
 export default async function ConceptMapPage() {
-  if (!features.conceptMap) notFound()
   const [graph, topicCards] = await Promise.all([site.graph(), topics.list()])
   const layout = layoutMap(
     graph,
