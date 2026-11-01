@@ -3,9 +3,8 @@ import { beforeAll, describe, expect, it } from 'vitest'
 import { works, type PassageView } from '@/content'
 import { type PassageRecord, localSource } from '@/content/testing'
 
-// Ticket 04, the works and passages census: every verse the 16 description pages quote is one
-// passage under its work. The census itself is .scratch/content-v1/census/passages.md. These
-// tests read the real records through the public interface, and through the content source
+// The works and passages census: every verse the 16 description pages quote is one passage
+// under its work, as the census below lists them. These tests read the real records through the public interface, and through the content source
 // where a rule is about what a record stores.
 
 /** The census: each work's passages, in reading order. */

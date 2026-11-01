@@ -83,6 +83,7 @@ const verify = (await import(pathToFileURL(join(TOOLS, 'verify.mjs')).href)) as 
 
 const report = (await import(pathToFileURL(join(TOOLS, 'report.mjs')).href)) as {
   buildReport(records: readonly ContentRecord[], captures: Captures): string
+  FLAGS_PACK: string
 }
 
 let scratch = ''
@@ -100,6 +101,7 @@ describe('the captures rule', { timeout: 30_000 }, () => {
     const result = run(tool, ['example'], { CARE4MIND_CAPTURES: undefined })
     expect(result.status).toBe(2)
     expect(result.stderr).toContain('CARE4MIND_CAPTURES is not set')
+    expect(result.stderr).toContain('private repo SiddharthMuramkar/care4mind-captures')
   })
 
   it.each(CAPTURE_READERS)('%s refuses a captures folder that is missing', (tool) => {
@@ -970,10 +972,30 @@ describe('the tools write nothing', { timeout: 30_000 }, () => {
     expect({ repo: snapshot(root), captures: snapshot(site) }).toEqual(before)
 
     expect(run('report', ['--root', root, '--write'], env).status).toBe(0)
-    const pack = join(root, '.scratch/content-v1/flags.md')
+    const pack = join(root, report.FLAGS_PACK)
     expect(existsSync(pack)).toBe(true)
     expect(readFileSync(pack, 'utf8')).toBe(printed.stdout)
     expect(snapshot(root)).toEqual({ ...before.repo, [pack]: printed.stdout })
+  })
+})
+
+describe('the flags pack', () => {
+  it('is written where git ignores it', () => {
+    const ignored = spawnSync('git', ['check-ignore', '-q', report.FLAGS_PACK])
+    expect(ignored.status).toBe(0)
+  })
+})
+
+describe('the tools’ own words', () => {
+  it('name no file or folder of this repo that doesn’t exist', () => {
+    const tools = readdirSync(TOOLS).filter((file) => file.endsWith('.mjs'))
+    const missing = tools.flatMap((file) =>
+      [...readFileSync(join(TOOLS, file), 'utf8').matchAll(/\b(?:docs|tests|src)\/[\w./-]*\w/g)]
+        .map(([path]) => path)
+        .filter((path) => !path.includes('${') && !existsSync(path))
+        .map((path) => `${file}: ${path}`),
+    )
+    expect(missing).toEqual([])
   })
 })
 
@@ -1050,6 +1072,8 @@ describe('new', { timeout: 30_000 }, () => {
       ['reference', 'tomar 2024'],
       ['passage', 'yoga-sutra'],
       ['passage', 'Yoga-Sutra/1.30'],
+      ['passage', 'x/1.05'],
+      ['passage', 'x/01.2'],
       ['home', 'homepage'],
       ['colour', 'red'],
     ] as const) {

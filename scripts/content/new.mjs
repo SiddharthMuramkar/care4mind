@@ -6,7 +6,9 @@
 //   node scripts/content/new.mjs <kind> <id> [--root <dir>]
 //
 // It refuses a file that exists and an id that breaks the id rules. It reads no saved page and
-// never touches the network. How to fill the template: docs/agents/content-migration.md.
+// never touches the network. How to fill it is in the comment atop each template (`FILLING`), the
+// comments on its fields, and the schema's doc comments; tests/unit/content-integrity.test.ts
+// and content-completeness.test.ts enforce the rest.
 
 import { spawnSync } from 'node:child_process'
 import { existsSync, mkdirSync, writeFileSync } from 'node:fs'
@@ -20,7 +22,8 @@ const USAGE = `Usage: pnpm content:new <kind> <id>
 Kinds: ${Object.keys(KIND_FOLDERS).join(', ')}.`
 
 const SLUG = /^[a-z0-9]+(?:-[a-z0-9]+)*$/
-const LOCATOR = /^\d+(?:\.\d+)*$/
+// No leading zeros: the locator becomes the number literals of `order`, where 05 is not a number.
+const LOCATOR = /^(?:0|[1-9]\d*)(?:\.(?:0|[1-9]\d*))*$/
 
 /** Why an id breaks the id rules for its kind (D02, settled rule 15), or nothing if it doesn't. */
 function idProblem(kind, id) {
@@ -44,6 +47,25 @@ const PROVENANCE = `  provenance: {
     flags: [], // { for: 'research-editor' | 'psychology-expert' | 'project-owner', note, ticket? }
     // drafted: [], // fields written for the new site: never in a migration ticket
   },`
+
+/** How to fill any record from a saved page: the rules no test or type can check. */
+const FILLING = `//
+// - Every string is the page's own text, or a change listed in provenance.edits. Nothing is
+//   invented, reworded or looked up: a gap is flagged.
+// - Text is NFC, with anusvara written ṃ, never ṁ (normaliseSanskrit() does both; list it once).
+// - Typos are fixed and listed: “Negliegence” → “Negligence”. Questionnaire items, options and
+//   forms are the exception: kept verbatim, and an oddity is flagged for the psychology expert.
+// - A problem you notice but may not fix stays as the page has it, flagged for the role that
+//   decides it: research-editor (sources, spellings, wording), psychology-expert (anything about
+//   a Questionnaire) or project-owner (keep, merge or drop, rights, links with nowhere to go).
+//   Write each note to stand alone; a question another record asks is copied word for word.
+// - # links are dropped and flagged; other links in running text are dropped and listed. A
+//   Reference's own link moves to its url or doi.
+// - Interface text ("Read more", "Click to learn more", accordion titles) and images are dropped,
+//   and listed once.
+// - Score and interpretation text never comes over: describe each in heldBack, never quote it.
+// - Nothing is drafted: a migrated record is carried-over-not-reviewed.
+//`
 
 /** The body of each kind's record, as TypeScript: every field, optional ones commented out. */
 const TEMPLATES = {
@@ -178,8 +200,9 @@ function template(kind, id) {
   const helper = body.slice(0, body.indexOf('('))
   return `import { ${helper} } from '@/content/schema'
 
-// Written by \`pnpm content:new ${kind} ${id}\`. Fill every field from the saved page, as
-// docs/agents/content-migration.md says; delete the commented fields the page doesn't give.
+// Written by \`pnpm content:new ${kind} ${id}\`. Fill every field from the saved page's outline
+// (\`node scripts/content/extract.mjs <slug>\`); delete the commented fields the page doesn't give.
+${FILLING}
 // Then check it with \`node scripts/content/verify.mjs ${kind}/${id}\`.
 export default ${body}
 `
