@@ -37,6 +37,7 @@ These are judgement calls, so review checks them against the diff, in the codeba
 | Rule | Kept true by |
 | --- | --- |
 | Pages read content only through `@/content`; a client file imports it for types only | lint (content boundary) and its test |
+| The graph imports neither the views nor the derivations above it | lint (content boundary) and its test |
 | Internal links come from `hrefFor()` | lint (`care4mind/href-from-hreffor`) |
 | Every link between records resolves | the graph, at build and in every content test |
 | Sanskrit is NFC with ṃ; each name field holds one script, in characters the fonts cover | content-integrity test |
