@@ -9,7 +9,8 @@ import type {
   TopicRef,
 } from '../types'
 import { topicRef } from './blocks'
-import { carriedOver, must, present } from './common'
+import { byName, carriedOver, must, present } from './common'
+import { conceptCard } from './concept'
 import { referenceView } from './reference'
 import { conceptRef, questionnaireHref } from './refs'
 
@@ -66,6 +67,9 @@ export function questionnaireView(
     id === undefined ? undefined : referenceView(must(graph, 'reference', id), graph)
   return {
     ...questionnaireCard(record, graph),
+    concepts: record.concepts
+      .map((slug) => conceptCard(must(graph, 'concept', slug), graph))
+      .sort((a, b) => byName(a.name, b.name)),
     ...present({
       purpose: record.purpose && [...record.purpose],
       format: record.format && [...record.format],

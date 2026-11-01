@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 
 import { readFeatures, type Features } from '@/config/features'
 import * as ownContent from '@/content'
-import { asciiSpellings, displayName, hrefFor } from '@/content'
+import { hrefFor } from '@/content'
 import { DanglingIdError } from '@/content/graph'
 import {
   defineConcept,
@@ -23,6 +23,7 @@ import {
 } from '@/content/schema'
 import type { ContentSource } from '@/content/source'
 import { createContent } from '@/content/views'
+import { asciiSpellings, displayName } from '@/content/names'
 
 // The content module's public interface (content-v1 spec, "Public interface"), tested at its one
 // seam: each test builds a small made-up content source and reads it through the same
@@ -821,12 +822,11 @@ describe('the rest of a Concept’s page', () => {
     expect(await around('first')).toEqual([undefined, 'calm'])
     expect(await around('calm')).toEqual(['first', 'obstacles'])
     expect(await around('obstacles')).toEqual(['calm', undefined])
-    expect((await content.concepts.get('calm'))?.next).toEqual({
-      slug: 'obstacles',
-      name: 'Vighna',
-      lang: 'sa-Latn',
-      href: '/concepts/obstacles/',
-    })
+    const cards = await content.concepts.list()
+    const card = (slug: string) => cards.find((found) => found.slug === slug)
+    expect((await content.concepts.get('calm'))?.previous).toEqual(card('first'))
+    expect((await content.concepts.get('calm'))?.next).toEqual(card('obstacles'))
+    expect(card('obstacles')).toMatchObject({ name: 'Vighna', href: '/concepts/obstacles/' })
   })
 
   it('carries its names, topics, external links, provenance and review status', async () => {
@@ -952,12 +952,17 @@ describe('topics', () => {
     const view = await content().topics.get('mind')
     expect(view?.concepts.map(({ slug }) => slug)).toEqual(['calm', 'obstacles'])
     expect(view?.secondaryConcepts.map(({ slug }) => slug)).toEqual(['refuge'])
-    expect(view?.works).toEqual([
-      { slug: 'dhammapada', title: 'Dhammapada', lang: 'pi-Latn', href: '/texts/dhammapada/' },
-      { slug: 'yoga-sutra', title: 'Yoga Sūtra', lang: 'sa-Latn', href: '/texts/yoga-sutra/' },
+    expect(view?.works.map(({ slug, title, lang, href }) => ({ slug, title, lang, href }))).toEqual(
+      [
+        { slug: 'dhammapada', title: 'Dhammapada', lang: 'pi-Latn', href: '/texts/dhammapada/' },
+        { slug: 'yoga-sutra', title: 'Yoga Sūtra', lang: 'sa-Latn', href: '/texts/yoga-sutra/' },
+      ],
+    )
+    expect(view?.works.map(({ verses }) => verses.map(({ id }) => id))).toEqual([
+      ['dhammapada/160'],
+      ['yoga-sutra/1.30'],
     ])
-    expect(view?.verses.map(({ id }) => id)).toEqual(['dhammapada/160', 'yoga-sutra/1.30'])
-    expect(view?.verses[1]).toEqual({
+    expect(view?.works[1]?.verses[0]).toEqual({
       id: 'yoga-sutra/1.30',
       work: {
         slug: 'yoga-sutra',
@@ -1244,9 +1249,7 @@ describe('questionnaires', () => {
       summary: 'A made-up summary.',
       anchor: 'work-scale',
       href: '/questionnaires/work-scale/',
-      concepts: [
-        { slug: 'obstacles', name: 'Vighna', lang: 'sa-Latn', href: '/concepts/obstacles/' },
-      ],
+      concepts: await content(ON).concepts.list(),
       topics: [{ slug: 'mind', name: 'Mind', href: '/topics/mind/' }],
       purpose: ['A made-up purpose.'],
       format: ['A made-up format.'],

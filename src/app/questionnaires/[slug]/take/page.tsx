@@ -8,7 +8,7 @@ import { Folio } from '@/components/Folio'
 import { PageTurn, turnForward } from '@/components/PageTurn'
 import { Text } from '@/components/prose'
 import { Flow } from '@/components/questionnaire/Flow'
-import { concepts, hrefFor, questionnaires, site } from '@/content'
+import { hrefFor, questionnaires, site } from '@/content'
 import { cx } from '@/lib/cx'
 import { metadataFor } from '@/lib/metadata'
 import { shownStatus, statusWords } from '@/lib/questionnaire/gate'
@@ -45,9 +45,6 @@ export default async function TakeQuestionnairePage({
   if (!questionnaire || !form) notFound()
   const { title, status, limitations, source } = questionnaire
   const intro = hrefFor({ kind: 'questionnaire', id: slug, status })
-  const related = (await concepts.list()).filter((concept) =>
-    questionnaire.concepts.some((ref) => ref.slug === concept.slug),
-  )
 
   const limits = limitations ? (
     <section className={styles.limits} aria-labelledby="end-limits">
@@ -81,13 +78,13 @@ export default async function TakeQuestionnairePage({
           </p>
         </section>
       ) : null}
-      {related.length > 0 ? (
+      {questionnaire.concepts.length > 0 ? (
         <section className={styles.section} aria-labelledby="end-related">
           <h3 id="end-related" className={styles.title}>
             Related Concepts
           </h3>
           <ul className={styles.list}>
-            {related.map((concept) => (
+            {questionnaire.concepts.map((concept) => (
               <li key={concept.slug}>
                 <Link
                   href={hrefFor({ kind: 'concept', id: concept.slug })}

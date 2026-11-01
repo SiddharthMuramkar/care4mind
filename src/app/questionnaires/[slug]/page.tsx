@@ -10,7 +10,7 @@ import { HelpLine } from '@/components/HelpLine'
 import { PageTurn, turnForward } from '@/components/PageTurn'
 import { Provenance, Text } from '@/components/prose'
 import { ReadingThread } from '@/components/ReadingThread'
-import { concepts, hrefFor, questionnaires, site } from '@/content'
+import { hrefFor, questionnaires, site } from '@/content'
 import { metadataFor } from '@/lib/metadata'
 import { shownStatus, startOf, statusWords } from '@/lib/questionnaire/gate'
 
@@ -42,9 +42,6 @@ export default async function QuestionnairePage({ params }: PageProps<'/question
 
   const { slug, status } = questionnaire
   const start = startOf(questionnaire, await questionnaires.form(slug))
-  const related = (await concepts.list()).filter((concept) =>
-    questionnaire.concepts.some((ref) => ref.slug === concept.slug),
-  )
 
   return (
     <PageTurn>
@@ -170,13 +167,13 @@ export default async function QuestionnairePage({ params }: PageProps<'/question
             )}
           </div>
 
-          {related.length > 0 ? (
+          {questionnaire.concepts.length > 0 ? (
             <section className={reading.section} aria-labelledby="related-title">
               <h2 id="related-title" className={reading.sectionTitle}>
                 Related Concepts
               </h2>
               <ul className={styles.list}>
-                {related.map((concept) => (
+                {questionnaire.concepts.map((concept) => (
                   <li key={concept.slug}>
                     <Link
                       href={hrefFor({ kind: 'concept', id: concept.slug })}

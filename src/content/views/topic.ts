@@ -1,6 +1,6 @@
 import type { ContentGraph } from '../graph'
 import type { TopicRecord } from '../schema'
-import type { TopicCard, TopicView, WorkRef } from '../types'
+import type { QuotedWork, TopicCard, TopicView } from '../types'
 import { conceptQuotes, sectionViews, tocOf, topicRef, type Owner } from './blocks'
 import { byName, carriedOver, must, nameCopy, present } from './common'
 import { conceptCard } from './concept'
@@ -34,17 +34,20 @@ export function topicView(record: TopicRecord, graph: ContentGraph): TopicView {
     [...quoted].map((id) => must(graph, 'passage', id)),
     graph,
   )
-  const works = new Map<string, WorkRef>()
-  for (const passage of passages)
-    if (!works.has(passage.work))
-      works.set(passage.work, workRef(must(graph, 'work', passage.work)))
+  const works = new Map<string, QuotedWork>()
+  for (const passage of passages) {
+    const work = works.get(passage.work) ?? {
+      ...workRef(must(graph, 'work', passage.work)),
+      verses: [],
+    }
+    works.set(passage.work, { ...work, verses: [...work.verses, passageView(passage, graph)] })
+  }
   const intro = record.intro
   return {
     ...topicCard(record, graph),
     concepts: cards(primary),
     secondaryConcepts: cards(also),
     works: [...works.values()],
-    verses: passages.map((passage) => passageView(passage, graph)),
     ...(intro === undefined
       ? {}
       : {

@@ -353,7 +353,7 @@ async function anchorsByPage(): Promise<Map<string, Set<string>>> {
       ]),
     )
     links.push(...(topic?.intro?.references ?? []).map(({ anchor }) => `${topic?.href}#${anchor}`))
-    links.push(...(topic?.verses ?? []).map(({ href }) => href))
+    links.push(...(topic?.works ?? []).flatMap((work) => work.verses.map(({ href }) => href)))
   }
   for (const { slug } of await works.list())
     links.push(...((await works.get(slug))?.passages ?? []).map(({ href }) => href))
