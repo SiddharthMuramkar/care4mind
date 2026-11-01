@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest'
 
-import { type Features, proposalsPageOn, readFeatures } from '@/config/features'
+import { type Features, features, proposalsPageOn, readFeatures } from '@/config/features'
+
+import { OFF, ON } from './flags'
 
 // Each flag, the variable that forces it, and the other flags, which an override must leave alone.
 const FLAGS = [
@@ -82,11 +84,20 @@ describe('feature flags (D16, D20)', () => {
     })
   })
 
+  it('reads the flags once, from this process’s environment', () => {
+    expect(features).toEqual(readFeatures(process.env))
+  })
+
+  it('gives tests every flag on, and every flag off', () => {
+    expect(Object.values(ON)).toEqual(FLAGS.map(() => true))
+    expect(Object.values(OFF)).toEqual(FLAGS.map(() => false))
+  })
+
   it('shows the proposals page while either proposal is on, and the preview flag has no say', () => {
-    const off = { questionnairePreview: false, conceptMap: false, devanagariFirst: false }
-    expect(proposalsPageOn(off)).toBe(false)
-    expect(proposalsPageOn({ ...off, questionnairePreview: true })).toBe(false)
-    expect(proposalsPageOn({ ...off, conceptMap: true })).toBe(true)
-    expect(proposalsPageOn({ ...off, devanagariFirst: true })).toBe(true)
+    expect(proposalsPageOn(OFF)).toBe(false)
+    expect(proposalsPageOn({ ...OFF, questionnairePreview: true })).toBe(false)
+    expect(proposalsPageOn({ ...OFF, conceptMap: true })).toBe(true)
+    expect(proposalsPageOn({ ...OFF, devanagariFirst: true })).toBe(true)
+    expect(proposalsPageOn(ON)).toBe(true)
   })
 })

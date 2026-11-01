@@ -23,13 +23,12 @@ import {
   createContent,
 } from '@/content/testing'
 
+import { OFF, ON } from './flags'
+
 // The site derivations (content-v1 spec, "What the site derivations return"): the routes, the
 // breadcrumb trail, the A–Z, the search documents and the Concept-map data, each computed from
 // whatever records a source holds. Each test builds a made-up source and reads `site` through
 // the same interface the pages use. Every record and string here is made up for the test.
-
-const ON: Features = { questionnairePreview: true, conceptMap: true, devanagariFirst: true }
-const OFF: Features = { questionnairePreview: false, conceptMap: false, devanagariFirst: false }
 
 const provenance = {
   sources: [{ url: 'https://example.org/page/', retrieved: '2026-10-27' }],

@@ -24,12 +24,11 @@ import {
   createContent,
 } from '@/content/testing'
 
+import { OFF, ON } from './flags'
+
 // The content module's public interface (content-v1 spec, "Public interface"), tested at its one
 // seam: each test builds a small made-up content source and reads it through the same
 // namespaces the pages use. Every record and string here is made up for the test.
-
-const ON: Features = { questionnairePreview: true, conceptMap: true, devanagariFirst: true }
-const OFF: Features = { questionnairePreview: false, conceptMap: false, devanagariFirst: false }
 
 const provenance = {
   sources: [{ url: 'https://example.org/page/', retrieved: '2026-10-27' }],

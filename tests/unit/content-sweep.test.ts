@@ -1,6 +1,5 @@
 import { beforeAll, describe, expect, it } from 'vitest'
 
-import type { Features } from '@/config/features'
 import {
   CONTENT_KINDS,
   idOf,
@@ -12,13 +11,12 @@ import {
   createContent,
 } from '@/content/testing'
 
+import { OFF, ON } from './flags'
+
 // Content-v1 ticket 12, the fidelity sweep: content v1 is complete, so the site derivations give
 // real answers on the real content. Read through the public interface, built over the site's own
 // content source with the feature flags each test needs, and through the content source itself
 // for what a record stores (its links, flags and listed edits).
-
-const ON: Features = { questionnairePreview: true, conceptMap: true, devanagariFirst: true }
-const OFF: Features = { questionnairePreview: false, conceptMap: false, devanagariFirst: false }
 
 const site = createContent(localSource, ON)
 
