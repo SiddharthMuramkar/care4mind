@@ -383,7 +383,7 @@ function Answers({ form, answers, level, onChange }: AnswersProps) {
                     }}
                   >
                     Change
-                    <span className={styles.visuallyHidden}> your answer to “{item.text}”</span>
+                    <span className="sr-only"> your answer to “{item.text}”</span>
                   </a>
                 </dd>
               ) : null}

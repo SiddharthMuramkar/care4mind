@@ -1,12 +1,19 @@
-@import 'tailwindcss';
+/* Tailwind scans no files, so words in records never become utilities; the site's @theme blocks are static, since CSS modules read tokens Tailwind cannot see. */
+@import 'tailwindcss' source(none);
+@source inline('sr-only');
 
 /*
- * Design tokens. Every colour, type step, duration and easing is declared once
- * here; components use the generated utilities (bg-ground, text-ink, …) or the
- * variables directly. Colour tokens are semantic, so each text/background pair
- * in tests/unit/contrast.test.ts is checked for WCAG AA contrast.
+ * Design tokens. Every colour, duration, easing and layer is declared once here,
+ * and components read them with var() in their own CSS modules. Tailwind
+ * supplies these tokens and Preflight, nothing more: markup names no utility
+ * but sr-only, beside the site's own skip-link (tests/unit/class-names.test.ts).
+ * Colour tokens are semantic, so each text/background pair in
+ * tests/unit/contrast.test.ts is checked for WCAG AA contrast.
  */
-@theme {
+@theme static {
+  /* Press is the only palette: Tailwind's default colours are dropped. */
+  --color-*: initial;
+
   /* Press: a scholar's edition. Indigo ink grounds, paper folios, turmeric and vermilion. */
   --color-ground: #151a3d;
   --color-ink: #f3ecdc;
@@ -451,7 +458,7 @@
 }
 
 /* The lotus keeps its own, slower clock: it is only looked at, never waited on. */
-@theme {
+@theme static {
   --duration-stroke: 900ms;
   /* The hero's draw-in (5/3 of a stroke) and its breath must end within 5 s: WCAG 2.2.2. */
   --duration-breath: 3.2s;

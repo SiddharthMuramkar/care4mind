@@ -7,6 +7,7 @@ import { SectionNav } from '@/components/nav/SectionNav'
 import { siteNav } from '@/components/nav/site-nav'
 import { ProposalNote } from '@/components/proposals/ProposalNote'
 import { SearchTrigger } from '@/components/search/SearchTrigger'
+import { cx } from '@/lib/cx'
 
 import { LotusMark } from './Fleuron'
 import { Logo } from './Logo'
@@ -39,7 +40,7 @@ export async function SiteHeader() {
           <SectionNav nav={nav} mapNote={mapNote} />
           <SearchTrigger placement="header" className={styles.search}>
             <SearchGlyph className={styles.searchGlyph} />
-            <span className={styles.searchLabel}>Search</span>
+            <span className={cx('sr-only', styles.searchLabel)}>Search</span>
           </SearchTrigger>
         </nav>
         <MenuButton

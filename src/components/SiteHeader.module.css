@@ -171,15 +171,6 @@
   height: 22px;
 }
 
-.searchLabel {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  clip-path: inset(50%);
-  white-space: nowrap;
-}
-
 .search:is(:hover, :focus-visible),
 .search[aria-current] {
   color: var(--color-ink);
@@ -216,10 +207,12 @@
     box-shadow: inset 0 0 0 1px var(--color-accent);
   }
 
+  /* Shown once there is room: undoes sr-only, which sits in a lower cascade layer. */
   .searchLabel {
     position: static;
     width: auto;
     height: auto;
+    margin: 0;
     overflow: visible;
     clip-path: none;
     font-variant-caps: all-small-caps;
