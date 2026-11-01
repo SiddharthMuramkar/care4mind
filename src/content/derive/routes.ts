@@ -112,7 +112,7 @@ export function pageRoutes(graph: ContentGraph, flags: Features): PageRoute[] {
     ...concepts.sort(byPath),
     ...(flags.conceptMap ? [fixed('concept-map', 'concept-map', 'Concept map', true)] : []),
     ...topics,
-    fixed('texts', 'texts', 'Texts'),
+    fixed('texts', 'texts', 'Traditional texts'),
     ...works.sort(byPath),
     fixed('questionnaires', 'questionnaires', 'Questionnaires'),
     ...questionnaires,

@@ -27,9 +27,8 @@ export default async function TextsPage() {
         <Breadcrumbs path={PATH} />
         <Folio as="article" className={reading.article} aria-labelledby="texts-title">
           <header className={reading.titlePage}>
-            <p className={reading.kicker}>Traditional texts</p>
             <h1 id="texts-title" className={reading.title}>
-              Texts
+              Traditional texts
             </h1>
             <p className={reading.summary}>
               The works the site quotes, each with every verse it quotes from them.

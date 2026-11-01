@@ -228,8 +228,8 @@ describe('breadcrumbs (D15)', () => {
     expect(await labels('/concepts/')).toEqual(['Home', 'Concepts'])
     expect(await labels('/concepts/map/')).toEqual(['Home', 'Concepts', 'Concept map'])
     expect(await labels('/topics/values/')).toEqual(['Home', 'Concepts', 'Values: yama and niyama'])
-    expect(await labels('/texts/')).toEqual(['Home', 'Texts'])
-    expect(await labels('/texts/yoga-sutra/')).toEqual(['Home', 'Texts', 'Yoga Sūtra'])
+    expect(await labels('/texts/')).toEqual(['Home', 'Traditional texts'])
+    expect(await labels('/texts/yoga-sutra/')).toEqual(['Home', 'Traditional texts', 'Yoga Sūtra'])
     expect(await labels('/questionnaires/')).toEqual(['Home', 'Questionnaires'])
     expect(await labels('/questionnaires/karmayoga-scale/')).toEqual([
       'Home',
