@@ -1,8 +1,17 @@
 .backdrop {
   position: fixed;
   inset: 0;
+  /* Tall enough for the strips under iOS 26's translucent toolbars. */
+  min-height: 100dvh;
   z-index: var(--layer-popup);
   background: var(--color-backdrop);
+}
+
+/* Fixed stops short of those strips; absolute covers them once the body is positioned. */
+@supports (-webkit-touch-callout: none) {
+  .backdrop {
+    position: absolute;
+  }
 }
 
 /* A leaf of paper laid over the page, framed by the folio's double rule. */

@@ -543,14 +543,71 @@ test.describe('the Drawer, on a phone', () => {
     await gotoReady(page, '/')
     await menu(page).click()
     // A swipe begins on the sheet as it rests, not while it is still sliding in.
+    // The text itself is selectable, so the swipe starts on the strip beside the sheet.
     await settled(page)
-    const box = await drawer(page).getByText('Menu', { exact: true }).boundingBox()
-    if (!box) throw new Error('the Drawer has its title')
-    await page.mouse.move(box.x + 4, box.y + box.height / 2)
+    const sheet = await drawer(page).boundingBox()
+    if (!sheet) throw new Error('the Drawer has its sheet')
+    const y = sheet.y + 24
+    await page.mouse.move(Math.max(2, sheet.x - 12), y)
     await page.mouse.down()
-    await page.mouse.move(box.x + 300, box.y + box.height / 2, { steps: 12 })
+    await page.mouse.move(sheet.x + sheet.width * 0.7, y, { steps: 12 })
     await page.mouse.up()
     await expect(drawer(page)).toBeHidden()
+  })
+
+  test('widening the header closes it, leaves the page scrollable, and puts focus on a visible element', async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 360, height: 800 })
+    await gotoReady(page, '/')
+    await menu(page).click()
+    await expect(drawer(page)).toBeVisible()
+    await page.setViewportSize({ width: 1280, height: 900 })
+    await expect(drawer(page)).toBeHidden()
+    await expect
+      .poll(() =>
+        page.evaluate(() => {
+          const current = document.activeElement
+          return (
+            current instanceof HTMLElement && current !== document.body && current.checkVisibility()
+          )
+        }),
+      )
+      .toBe(true)
+    expect(
+      await page.evaluate(() => {
+        // Smooth scrolling would report the old position in this same turn.
+        const before = window.scrollY
+        window.scrollTo({ top: before + 400, behavior: 'instant' })
+        const moved = window.scrollY > before
+        window.scrollTo({ top: before, behavior: 'instant' })
+        return moved
+      }),
+    ).toBe(true)
+  })
+
+  test('dragging across the Menu text selects it and leaves the sheet where it was', async ({
+    page,
+  }) => {
+    await gotoReady(page, '/')
+    await menu(page).click()
+    await settled(page)
+    const sheet = drawer(page)
+    const title = sheet.getByText('Menu', { exact: true })
+    const before = await sheet.boundingBox()
+    const box = await title.boundingBox()
+    if (!before || !box) throw new Error('the Drawer has its title')
+    await page.mouse.move(box.x + 1, box.y + box.height / 2)
+    await page.mouse.down()
+    await page.mouse.move(box.x + box.width - 1, box.y + box.height / 2, { steps: 10 })
+    await page.mouse.up()
+    expect((await page.evaluate(() => getSelection()?.toString() ?? '')).toLowerCase()).toContain(
+      'menu',
+    )
+    const after = await sheet.boundingBox()
+    expect(after?.x).toBeCloseTo(before.x, 0)
+    expect(after?.y).toBeCloseTo(before.y, 0)
+    await expect(sheet).toBeVisible()
   })
 
   test('following a link closes it and opens the page', async ({ page }) => {
