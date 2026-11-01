@@ -160,6 +160,7 @@ test.describe('the KarmaYoga flow', () => {
     await expect(progress(page)).not.toHaveAttribute('aria-live')
     await answerPart(page)
     await next(page).click()
+    await expect(partHeading(page, 2)).toBeVisible()
     await statements(page).nth(0).getByRole('radio').first().check()
     await statements(page).nth(1).getByRole('radio').first().check()
     await expect(progress(page)).toHaveAttribute(

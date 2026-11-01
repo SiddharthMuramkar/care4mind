@@ -61,8 +61,13 @@ for (const route of ROUTES_IN_SCOPE) {
       .soft(await unfinishedRules(page), `${where}: rules short of full width on load`)
       .toEqual([])
 
-    await page.mouse.wheel(0, 4000)
-    await page.waitForTimeout(100)
+    // The wheel doesn't wait for the scroll; a page shorter than the screen doesn't scroll at all.
+    if (await page.evaluate(() => document.documentElement.scrollHeight > window.innerHeight)) {
+      await scrollPath(page, async () => {
+        await page.mouse.wheel(0, 4000)
+        await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(0)
+      })
+    }
     expect.soft(await movingAnimations(page), `${where}: moving after a scroll`).toEqual([])
     expect.soft(await unfinishedDrawings(page), `${where}: unfinished after a scroll`).toEqual([])
     expect
