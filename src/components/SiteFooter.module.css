@@ -133,6 +133,7 @@
   text-align: center;
 }
 
+.help,
 .credit,
 .preview {
   margin: 0;
@@ -145,6 +146,11 @@
   font-variant-caps: all-small-caps;
   letter-spacing: 0.1em;
   font-size: 1.0625rem;
+}
+
+/* The help line comes first, in ink, so it reads before the credit. */
+.help {
+  color: var(--color-ink);
 }
 
 /* A printed page is its content alone: the footer stays off paper. */
