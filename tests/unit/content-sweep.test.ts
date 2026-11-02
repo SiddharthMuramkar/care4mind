@@ -192,13 +192,13 @@ describe('the search documents, on the real content', () => {
     const documents = await site.site.searchDocuments()
     const count: Record<string, number> = {}
     for (const { kind } of documents) count[kind] = (count[kind] ?? 0) + 1
-    // The counts the tickets record: 19 Concepts and their 46 term blocks (tickets 01, 05 and
+    // The counts the tickets record: 19 Concepts and their 46 term blocks, plus the 2 in the Values introduction (tickets 01, 05 and
     // 08–11), 78 glossary entries (05), 6 works and 43 passages (04), 188 References (03), the
     // 41 books and courses on the three reading lists (07), 18 Questionnaires, 5 topics, and
     // the Methods page with the three lists as pages.
     expect(count).toEqual({
       concept: 19,
-      term: 46,
+      term: 48,
       glossary: 78,
       work: 6,
       passage: 43,
@@ -208,7 +208,7 @@ describe('the search documents, on the real content', () => {
       topic: 5,
       page: 4,
     })
-    expect(documents).toHaveLength(448)
+    expect(documents).toHaveLength(450)
   })
 
   it('give every Concept that cites Tomar (2024) the person Tomar', async () => {
