@@ -35,6 +35,7 @@ export function RetakeDialog({ open, onOpenChange, onConfirm, afterConfirm }: Pr
         <AlertDialog.Backdrop className={styles.backdrop} />
         <AlertDialog.Popup
           className={styles.popup}
+          data-paper
           finalFocus={() => (confirmed.current ? afterConfirm() : true)}
         >
           <AlertDialog.Title className={styles.title}>Start again?</AlertDialog.Title>
