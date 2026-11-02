@@ -21,9 +21,9 @@ function definedClasses(css: string): Set<string> {
     .replace(/'[^']*'|"[^"]*"/g, "''")
   const names = new Set<string>()
   for (const selectors of stripped.matchAll(/([^{};]+)\{/g)) {
-    const text = selectors[1].trim()
+    const text = (selectors[1] ?? '').trim()
     if (text.startsWith('@')) continue
-    for (const match of text.matchAll(/\.(-?[_a-zA-Z][\w-]*)/g)) names.add(match[1])
+    for (const match of text.matchAll(/\.(-?[_a-zA-Z][\w-]*)/g)) names.add(match[1] ?? '')
   }
   return names
 }
@@ -35,15 +35,15 @@ function moduleUses() {
     const source = readFileSync(file, 'utf8')
     const text = source.replace(/^import .*$/gm, '')
     for (const imp of source.matchAll(/import\s+(\w+)\s+from\s+'([^']+\.module\.css)'/g)) {
-      const [, binding, spec] = imp
+      const [, binding = '', spec = ''] = imp
       const path = resolveImport(file, spec)
       const entry = uses.get(path) ?? { names: new Set<string>(), dynamic: false, readers: [] }
       entry.readers.push(file)
       for (const read of text.matchAll(new RegExp(`\\b${binding}\\.(\\w+)`, 'g'))) {
-        entry.names.add(read[1])
+        entry.names.add(read[1] ?? '')
       }
       for (const read of text.matchAll(new RegExp(`\\b${binding}\\['([\\w-]+)'\\]`, 'g'))) {
-        entry.names.add(read[1])
+        entry.names.add(read[1] ?? '')
       }
       if (new RegExp(`\\b${binding}\\[(?!')`).test(text)) entry.dynamic = true
       uses.set(path, entry)
