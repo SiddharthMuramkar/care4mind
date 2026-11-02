@@ -329,7 +329,7 @@ export function idOf(record) {
 
 /**
  * Every string in a value, with its field path, as { path, text }. An ASCII spelling of a
- * Sanskrit term (an `ascii` beside an `iast`) also carries the term's IAST.
+ * Sanskrit name (an `ascii` beside an `iast`) also carries the term's IAST.
  */
 function stringsOf(value, skip, path = '', iast = undefined) {
   if (typeof value === 'string') return [{ path, text: value, ...(iast ? { iast } : {}) }]

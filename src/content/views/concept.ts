@@ -69,9 +69,9 @@ function relatedConcepts(record: ConceptRecord, graph: ContentGraph): RelatedCon
       (a, b) => strongest(a.relations) - strongest(b.relations) || byName(a.card.name, b.card.name),
     )
   return keepRelated(sorted).map(({ card, relations }) => ({
-      ...card,
-      reasons: relations.map((relation) => ({ kind: relation.kind, text: relation.reason })),
-    }))
+    ...card,
+    reasons: relations.map((relation) => ({ kind: relation.kind, text: relation.reason })),
+  }))
 }
 
 /** The works a Concept quotes, in the order it first quotes each, with their passages in order. */

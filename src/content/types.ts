@@ -121,7 +121,7 @@ export interface VerseView {
   href: string
 }
 
-/** A table row's heading cell: plain text, or a Sanskrit term with its display name and gloss. */
+/** A table row's heading cell: plain text, or a Sanskrit name with its display name and gloss. */
 export type TableRowView = {
   head?: Inline | { term: SanskritName; name: string; gloss?: string }
   cells: readonly Inline[]

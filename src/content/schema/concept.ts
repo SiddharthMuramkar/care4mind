@@ -9,7 +9,7 @@ import type {
 } from './common'
 
 /**
- * A Concept's name: its Sanskrit term, an English name, or both (settled rule 6). The English
+ * A Concept's name: its Sanskrit name, an English name, or both (settled rule 6). The English
  * name is only a gloss the page itself gives; a page without one leaves it empty, flagged.
  */
 export type ConceptName =

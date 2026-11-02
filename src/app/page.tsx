@@ -112,7 +112,7 @@ export default async function HomePage() {
             Concepts
           </h2>
           <p className={styles.sectionIntro}>
-            Each Concept is a single idea from Indian psychology, named by its Sanskrit term.
+            Each Concept is a single idea from Indian psychology, named by its Sanskrit name.
           </p>
           <ul className={styles.cards}>
             {featuredConcepts.map((concept) => (
