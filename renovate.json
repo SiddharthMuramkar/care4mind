@@ -1,0 +1,70 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:recommended",
+    "helpers:pinGitHubActionDigests",
+    "helpers:disableTypesNodeMajor"
+  ],
+  "rangeStrategy": "pin",
+  "schedule": ["before 6am on monday"],
+  "lockFileMaintenance": {
+    "enabled": true,
+    "schedule": ["before 6am on the first day of the month"]
+  },
+  "minimumReleaseAge": "3 days",
+  "osvVulnerabilityAlerts": true,
+  "packageRules": [
+    {
+      "groupName": "Next",
+      "matchPackageNames": ["next", "eslint-config-next", "typescript-eslint"]
+    },
+    {
+      "groupName": "React",
+      "matchPackageNames": ["react", "react-dom", "@types/react", "@types/react-dom"]
+    },
+    {
+      "groupName": "Vitest and Vite",
+      "matchPackageNames": ["vitest", "vite", "@vitest/**", "@vitejs/**"]
+    },
+    {
+      "groupName": "Playwright",
+      "matchPackageNames": ["@playwright/test", "playwright", "@axe-core/playwright"]
+    },
+    {
+      "groupName": "ESLint",
+      "matchPackageNames": [
+        "eslint",
+        "@eslint/js",
+        "eslint-config-prettier",
+        "eslint-plugin-jsx-a11y"
+      ]
+    },
+    {
+      "groupName": "Tailwind",
+      "matchPackageNames": ["tailwindcss", "@tailwindcss/postcss"]
+    },
+    {
+      "groupName": "GitHub Actions",
+      "matchManagers": ["github-actions"]
+    },
+    {
+      "description": "ESLint 10 waits on #141.",
+      "matchPackageNames": ["eslint", "@eslint/js"],
+      "allowedVersions": "<10"
+    },
+    {
+      "description": "TypeScript 7 waits on #142.",
+      "matchPackageNames": ["typescript"],
+      "allowedVersions": "<7"
+    },
+    {
+      "description": "Node majors beyond 26 wait on their own ticket.",
+      "matchDepNames": ["node"],
+      "allowedVersions": "<27"
+    },
+    {
+      "matchUpdateTypes": ["patch", "digest"],
+      "automerge": true
+    }
+  ]
+}

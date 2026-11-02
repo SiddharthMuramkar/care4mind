@@ -1,4 +1,5 @@
-@import 'tailwindcss';
+@import 'tailwindcss' source(none);
+@source inline('sr-only');
 
 /*
  * Press: a scholar's edition. Indigo ink grounds, paper folios, turmeric and vermilion.
