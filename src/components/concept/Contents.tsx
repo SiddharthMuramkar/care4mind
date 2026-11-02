@@ -49,7 +49,7 @@ export function Contents({ entries }: { entries: readonly ContentsEntry[] }) {
               <span className={styles.numeral} aria-hidden>
                 {toDevanagariDigits(String(index + 1))}
               </span>
-              <span className={styles.heading}>
+              <span>
                 {entry.role ? <span className={styles.role}>{ROLES[entry.role]}: </span> : null}
                 <Text text={entry.heading} />
               </span>

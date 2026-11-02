@@ -76,7 +76,7 @@ export function MenuDrawer({
                 </div>
               ) : null}
 
-              <nav aria-label="Main" className={styles.contents}>
+              <nav aria-label="Main">
                 <ol className={styles.sections}>
                   {nav.sections.map((section, index) => {
                     const panel = panelOf(section.id)

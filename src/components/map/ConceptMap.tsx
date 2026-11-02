@@ -148,7 +148,7 @@ export function ConceptMap({ layout }: { layout: MapLayout }) {
             </div>
           </div>
           <div className={styles.legend}>
-            <div className={styles.legendGroup}>
+            <div>
               <p className={styles.legendTitle}>Lines</p>
               <ul className={styles.legendList}>
                 {KINDS.map((kind) => (
@@ -159,7 +159,7 @@ export function ConceptMap({ layout }: { layout: MapLayout }) {
                 ))}
               </ul>
             </div>
-            <div className={styles.legendGroup}>
+            <div>
               <p className={styles.legendTitle}>Topics</p>
               <ul className={styles.legendList}>
                 {layout.sectors.map((sector) => (
