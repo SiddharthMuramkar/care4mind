@@ -5,7 +5,6 @@ import type { Block, ConceptRecord, Slug } from '../schema'
 import {
   RELATION_STRENGTH,
   type ConceptCard,
-  type ConceptRef,
   type ConceptView,
   type LinkedWork,
   type QuestionnaireCard,
