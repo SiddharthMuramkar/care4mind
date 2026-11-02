@@ -639,6 +639,27 @@ describe('a Concept’s related Concepts (D06)', () => {
     ])
   })
 
+  it('leaves out Concepts that only quote the same work, unless fewer than 3 would be left', async () => {
+    const lone = (slug: string, primary: string, passage: string) =>
+      relating(slug, { term: { iast: slug, ascii: [] } }, { primary }, passage, [])
+    const many = [
+      ...[mind, values, self, rao, yogaSutra, dhammapada, ys130, ys230, dp160],
+      lone('alone', 'mind', 'yoga-sutra/1.30'),
+      lone('kin-a', 'values', 'yoga-sutra/2.30'),
+      lone('kin-b', 'values', 'yoga-sutra/2.30'),
+      lone('kin-c', 'values', 'yoga-sutra/2.30'),
+      lone('kin-d', 'values', 'yoga-sutra/2.30'),
+    ]
+    const relatedIn = async (slug: string) =>
+      (await createContent(sourceOf(...many), ON).concepts.get(slug))?.linked.related.map(
+        (concept) => concept.slug,
+      )
+    // Every link of "alone" is the shared work, so the three strongest come back.
+    expect(await relatedIn('alone')).toEqual(['kin-a', 'kin-b', 'kin-c'])
+    // "kin-a" has three by verse, so "alone", linked by the work only, is left out.
+    expect(await relatedIn('kin-a')).toEqual(['kin-b', 'kin-c', 'kin-d'])
+  })
+
   it('never relates through a Reference four Concepts cite, or through Tomar (2024)', async () => {
     expect(await related('refuge')).toEqual([
       {
