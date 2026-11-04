@@ -136,6 +136,8 @@ test.describe('Concept page', () => {
     await expect(
       page.getByRole('link', { name: 'doi:10.3389/fpsyg.2025.1554014' }),
     ).toHaveAttribute('href', 'https://doi.org/10.3389/fpsyg.2025.1554014')
+    // From the top: axe counts only the part of a target not scrolled under the sticky header.
+    await page.evaluate(() => window.scrollTo(0, 0))
     await expectNoAxeViolations(page)
   })
 

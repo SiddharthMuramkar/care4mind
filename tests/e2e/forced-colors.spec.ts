@@ -73,10 +73,10 @@ test('a pressed map chip stands apart from the others', async ({ page }) => {
   expect(await seen(lines.nth(1))).not.toEqual(await seen(lines.nth(2)))
 })
 
-test('the home page’s secondary call to action keeps its edge', async ({ page }) => {
-  await gotoReady(page, '/')
+test('a secondary call to action keeps its edge', async ({ page }) => {
+  await gotoReady(page, FLOW)
   await expectVisibleEdge(
-    page.getByRole('main').getByRole('link', { name: 'Questionnaires', exact: true }),
+    page.getByRole('main').getByRole('link', { name: 'Back to its purpose and limits' }),
     'secondary call to action',
   )
 })
