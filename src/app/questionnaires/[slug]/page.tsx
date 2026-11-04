@@ -11,7 +11,7 @@ import { PageTurn, turnForward } from '@/components/PageTurn'
 import { Provenance, Text } from '@/components/prose'
 import { ReadingThread } from '@/components/ReadingThread'
 import { StatusBadge } from '@/components/StatusBadge'
-import { concepts, hrefFor, questionnaires, site } from '@/content'
+import { hrefFor, questionnaires, site } from '@/content'
 import { metadataFor } from '@/lib/metadata'
 
 import cta from '../../cta.module.css'
@@ -41,9 +41,6 @@ export default async function QuestionnairePage({ params }: PageProps<'/question
   if (!questionnaire || questionnaire.status === 'coming-later') notFound()
 
   const { slug, status, shownStatus, takeHref } = questionnaire
-  const related = (await concepts.list()).filter((concept) =>
-    questionnaire.concepts.some((ref) => ref.slug === concept.slug),
-  )
 
   return (
     <PageTurn>
@@ -167,13 +164,13 @@ export default async function QuestionnairePage({ params }: PageProps<'/question
             )}
           </div>
 
-          {related.length > 0 ? (
+          {questionnaire.concepts.length > 0 ? (
             <section className={reading.section} aria-labelledby="related-title">
               <h2 id="related-title" className={reading.sectionTitle}>
                 Related Concepts
               </h2>
               <ul className={styles.list}>
-                {related.map((concept) => (
+                {questionnaire.concepts.map((concept) => (
                   <li key={concept.slug}>
                     <Link
                       href={hrefFor({ kind: 'concept', id: concept.slug })}

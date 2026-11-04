@@ -29,12 +29,12 @@ export interface Quotation {
 }
 
 export interface ContentGraph {
-  /** Every record of a kind, in the source's order. */
+  /** Every record of a kind, in id order. */
   records<K extends ContentKind>(kind: K): readonly RecordOf<K>[]
   record<K extends ContentKind>(kind: K, id: string): RecordOf<K> | undefined
   /** The records that cite a Reference: Concepts, topic introductions, Questionnaires, lists. */
   citedBy(reference: string): readonly RecordKey[]
-  /** Where a passage is quoted ("quoted in"), in source order. */
+  /** Where a passage is quoted ("quoted in"), in id order. */
   quotedIn(passage: string): readonly Quotation[]
   /** The Concepts whose primary topic this is, and those that are also in it. */
   conceptsInTopic(topic: Slug): { primary: readonly Slug[]; also: readonly Slug[] }
@@ -43,18 +43,26 @@ export interface ContentGraph {
   /** The in-text citations in a Concept, or in a topic's introduction, in reading order. */
   citations(kind: 'concept' | 'topic', id: string): readonly Citation[]
   /**
-   * Every fact relating a Concept to another, by the other Concept in source order, then by
+   * Every fact relating a Concept to another, by the other Concept in id order, then by
    * kind, then in the Concept's own order: shared passages, then works it quotes from with no
    * passage in common, then rarely cited References, then topics.
    */
   related(concept: Slug): readonly Relation[]
 }
 
-/** Builds the graph from a source, refusing duplicate and dangling ids. */
+/** By code unit, not locale, because that is how the registry sorts and the pages keep its order. */
+function byId(records: readonly ContentRecord[]): readonly ContentRecord[] {
+  return records
+    .map((record) => [idOf(record), record] as const)
+    .sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0))
+    .map(([, record]) => record)
+}
+
+/** Builds the graph from a source, sorting each kind by id and refusing duplicate and dangling ids. */
 export async function buildGraph(source: ContentSource): Promise<ContentGraph> {
   const byKind = new Map<ContentKind, readonly ContentRecord[]>(
     await Promise.all(
-      CONTENT_KINDS.map(async (kind) => [kind, await source.records(kind)] as const),
+      CONTENT_KINDS.map(async (kind) => [kind, byId(await source.records(kind))] as const),
     ),
   )
 

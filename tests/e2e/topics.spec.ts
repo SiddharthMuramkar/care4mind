@@ -13,6 +13,8 @@ import { expectPageTurned, pageTurns, prefetched, recordPageTurns } from './page
 const mind = await topics.get('mind')
 const values = await topics.get('values')
 if (!mind || !values) throw new Error('The mind and values topics are in the content.')
+/** The verses the mind topic's Concepts quote, in the order its page lists them. */
+const quoted = mind.works.flatMap((work) => work.verses)
 
 /** Every Concept in a topic, those whose primary topic it is first, as the plate numbers them. */
 const conceptsOf = (topic: NonNullable<typeof mind>) => [
@@ -67,7 +69,7 @@ test('says how many Concepts it has, how many verses they quote and from which w
   await gotoReady(page, hrefFor({ kind: 'topic', id: 'mind' }))
   const facts = page.getByRole('main').getByText(/\d+ Concepts ·/)
   await expect(facts).toContainText(`${mind.conceptCount} Concepts`)
-  await expect(facts).toContainText(`${mind.verses.length} verses quoted`)
+  await expect(facts).toContainText(`${quoted.length} verses quoted`)
   for (const work of mind.works) await expect(facts).toContainText(work.title)
 })
 
@@ -75,14 +77,14 @@ test('lists the verses its Concepts quote, each leading to its passage', async (
   await gotoReady(page, hrefFor({ kind: 'topic', id: 'mind' }))
   const verses = page.getByRole('region', { name: 'Verses its Concepts quote' })
   const links = verses.getByRole('listitem').getByRole('link')
-  await expect(links).toHaveCount(mind.verses.length)
-  for (const [index, verse] of mind.verses.entries())
+  await expect(links).toHaveCount(quoted.length)
+  for (const [index, verse] of quoted.entries())
     await expect(links.nth(index)).toHaveAttribute('href', verse.href)
 })
 
 test('opens a verse after its speaker’s line, even one joined by sandhi', async ({ page }) => {
   await gotoReady(page, hrefFor({ kind: 'topic', id: 'mind' }))
-  const verse = mind.verses.find(({ id }) => id === 'bhagavad-gita/2.55')
+  const verse = quoted.find(({ id }) => id === 'bhagavad-gita/2.55')
   if (!verse) throw new Error('The mind topic quotes Bhagavad Gītā 2.55.')
   const link = page
     .getByRole('region', { name: 'Verses its Concepts quote' })
