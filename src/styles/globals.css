@@ -1,4 +1,5 @@
-@import 'tailwindcss';
+@import 'tailwindcss' source(none);
+@source inline('sr-only');
 
 /*
  * Press: a scholar's edition. Indigo ink grounds, paper folios, turmeric and vermilion.
@@ -42,7 +43,8 @@
  * Colour tokens are semantic, so each text/background pair in src/lib/contrast.ts
  * is checked for WCAG AA contrast, mixed colours included.
  */
-@theme {
+/* Static: only CSS modules read these tokens, and Tailwind emits just the ones it sees used. */
+@theme static {
   --color-ground: var(--press-indigo);
   --color-ink: var(--press-cream);
   --color-ink-muted: var(--press-lilac);
@@ -514,7 +516,7 @@
 }
 
 /* The lotus keeps its own, slower clock: it is only looked at, never waited on. */
-@theme {
+@theme static {
   --duration-stroke: 900ms;
   --duration-breath: 8s;
   --duration-bloom: 1600ms;

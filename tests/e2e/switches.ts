@@ -14,6 +14,13 @@ export function recordScriptedAnimations(page: Page) {
       started.push(animation)
       return animation
     }
+    // Motion builds a composed transform with new Animation, which skips Element.animate.
+    window.Animation = class extends window.Animation {
+      constructor(...args: ConstructorParameters<typeof Animation>) {
+        super(...args)
+        started.push(this)
+      }
+    }
   })
 }
 
