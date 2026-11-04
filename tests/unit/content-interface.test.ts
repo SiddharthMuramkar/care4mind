@@ -26,8 +26,18 @@ import { asciiSpellings, displayName } from '@/content/names'
 // seam: each test builds a small made-up content source and reads it through the same
 // namespaces the pages use. Every record and string here is made up for the test.
 
-const ON: Features = { questionnairePreview: true, conceptMap: true, devanagariFirst: true }
-const OFF: Features = { questionnairePreview: false, conceptMap: false, devanagariFirst: false }
+const ON: Features = {
+  questionnairePreview: true,
+  conceptMap: true,
+  devanagariFirst: true,
+  startHere: true,
+}
+const OFF: Features = {
+  questionnairePreview: false,
+  conceptMap: false,
+  devanagariFirst: false,
+  startHere: false,
+}
 
 const provenance = {
   sources: [{ url: 'https://example.org/page/', retrieved: '2026-10-27' }],
@@ -1464,6 +1474,15 @@ describe('the homepage', () => {
   })
   const home = defineHome({
     kind: 'home',
+    tagline: 'A made-up tagline.',
+    hero: {
+      promise: 'Made up.',
+      subhead: 'Made up.',
+      startHere: 'Start',
+      browseConcepts: 'Browse',
+      exploreConcepts: 'Explore',
+    },
+    sectionIntros: { concepts: 'Made up.', questionnaires: 'Made up.' },
     shloka: { devanagari: 'उदाहरणम्', iast: 'udāharaṇam', translation: 'A made-up line.' },
     intro: 'A made-up introduction.',
     areas: [
@@ -1483,6 +1502,15 @@ describe('the homepage', () => {
 
   it('turns every area’s target into a path, and leaves an area without one unlinked', async () => {
     expect(await createContent(memorySource(later, methods, home), ON).home.get()).toEqual({
+      tagline: 'A made-up tagline.',
+      hero: {
+        promise: 'Made up.',
+        subhead: 'Made up.',
+        startHere: 'Start',
+        browseConcepts: 'Browse',
+        exploreConcepts: 'Explore',
+      },
+      sectionIntros: { concepts: 'Made up.', questionnaires: 'Made up.' },
       shloka: { devanagari: 'उदाहरणम्', iast: 'udāharaṇam', translation: 'A made-up line.' },
       intro: 'A made-up introduction.',
       areas: [
@@ -1613,6 +1641,15 @@ describe('every view', () => {
     }),
     defineHome({
       kind: 'home',
+      tagline: 'A made-up tagline.',
+      hero: {
+        promise: 'Made up.',
+        subhead: 'Made up.',
+        startHere: 'Start',
+        browseConcepts: 'Browse',
+        exploreConcepts: 'Explore',
+      },
+      sectionIntros: { concepts: 'Made up.', questionnaires: 'Made up.' },
       shloka: { devanagari: 'उदाहरणम्', iast: 'udāharaṇam', translation: 'Made up.' },
       intro: 'Made up.',
       areas: [{ title: 'Made up', text: 'Made up.', target: { kind: 'concept', id: 'obstacles' } }],
@@ -1674,10 +1711,11 @@ describe('the feature flags, from the environment to the interface (D16, D20)', 
       flow: paths.includes('/questionnaires/work-scale/take/'),
       map: paths.includes('/concepts/map/'),
       proposals: paths.includes('/proposals/'),
+      start: paths.includes('/start/'),
     }
   }
-  const everything = { form: true, flow: true, map: true, proposals: true }
-  const nothing = { form: false, flow: false, map: false, proposals: false }
+  const everything = { form: true, flow: true, map: true, proposals: true, start: true }
+  const nothing = { form: false, flow: false, map: false, proposals: false, start: false }
 
   it('offers everything in local runs and Vercel previews, and none of it in production', async () => {
     expect(await offered({})).toEqual(everything)
@@ -1701,6 +1739,11 @@ describe('the feature flags, from the environment to the interface (D16, D20)', 
       ...nothing,
       proposals: true,
     })
+    expect(await offered({ ...production, FEATURE_START_HERE: '1' })).toEqual({
+      ...nothing,
+      proposals: true,
+      start: true,
+    })
     expect(await offered({ FEATURE_QUESTIONNAIRE_PREVIEW: '0' })).toEqual({
       ...everything,
       form: false,
@@ -1709,7 +1752,13 @@ describe('the feature flags, from the environment to the interface (D16, D20)', 
     expect(await offered({ FEATURE_CONCEPT_MAP: '0', FEATURE_DEVANAGARI_FIRST: '0' })).toEqual({
       ...everything,
       map: false,
-      proposals: false,
     })
+    expect(
+      await offered({
+        FEATURE_CONCEPT_MAP: '0',
+        FEATURE_DEVANAGARI_FIRST: '0',
+        FEATURE_START_HERE: '0',
+      }),
+    ).toEqual({ ...everything, map: false, proposals: false, start: false })
   })
 })

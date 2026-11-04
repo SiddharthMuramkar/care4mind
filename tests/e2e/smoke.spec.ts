@@ -1,11 +1,11 @@
 import { unfinishedDrawings, unfinishedRules } from './drawings'
 import { expect, gotoReady, scrollsSideways, test } from './fixtures'
-import { breathes, logoLotus, moving } from './lotuses'
+import { breathes, logoLotus } from './lotuses'
 import { READING_PAGES, readingThread, readTo } from './reading'
 import { at, ROUTES_IN_SCOPE } from './routes'
 
 // Firefox, and WebKit in CI: every route renders without errors or sideways scroll, with the
-// wordmark and its breathing lotus, and shows the drawings and rules these browsers can't drive by scroll simply finished.
+// wordmark and its lotus, and shows the drawings and rules these browsers can't drive by scroll simply finished.
 for (const route of ROUTES_IN_SCOPE) {
   test(`${route.path} renders, its drawings and rules finished`, async ({ page }) => {
     const where = at(page, route.path)
@@ -24,10 +24,7 @@ for (const route of ROUTES_IN_SCOPE) {
         `${where}: the lotus and a set wordmark`,
       )
       .toHaveCount(0)
-    expect.soft(await breathes(logoLotus(page)), `${where}: the logo's lotus breathes`).toBe(true)
-    await expect
-      .poll(() => moving(logoLotus(page)), { message: `${where}: the logo's lotus is moving` })
-      .toBe(true)
+    expect.soft(await breathes(logoLotus(page)), `${where}: the logo's lotus rests`).toBe(false)
     await expect
       .poll(() => unfinishedDrawings(page), { message: `${where}: unfinished drawings` })
       .toEqual([])

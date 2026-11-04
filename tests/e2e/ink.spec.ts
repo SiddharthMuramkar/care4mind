@@ -12,15 +12,15 @@ test.beforeEach(async ({ page }) => {
 const CALLS_TO_ACTION = [
   {
     from: '/',
-    name: 'Explore Concepts',
-    to: '/#concepts',
-    heading: (page: Page) => page.getByRole('heading', { name: 'Concepts', level: 2 }),
+    name: 'Start here',
+    to: '/start/',
+    heading: (page: Page) => page.getByRole('heading', { level: 1 }),
   },
   {
     from: '/',
-    name: 'Questionnaires',
-    to: '/#questionnaires',
-    heading: (page: Page) => page.getByRole('heading', { name: 'Questionnaires', level: 2 }),
+    name: 'Browse concepts',
+    to: '/concepts/',
+    heading: (page: Page) => page.getByRole('heading', { name: 'Concepts', level: 1 }),
   },
   {
     from: MISSING,
@@ -52,10 +52,13 @@ for (const { from, name, to, heading } of CALLS_TO_ACTION) {
   }
 }
 
-test('pressing "Explore Concepts" spreads ink from the point pressed', async ({ page }) => {
+// Each press opens the page in a new tab, so the homepage and its ink stay in view.
+test('pressing "Start here" spreads ink from the point pressed', async ({ page, context }) => {
   await gotoReady(page, '/')
-  const cta = page.getByRole('main').getByRole('link', { name: 'Explore Concepts', exact: true })
-  await cta.click({ position: { x: 14, y: 9 } })
+  const cta = page.getByRole('main').getByRole('link', { name: 'Start here', exact: true })
+  const opened = context.waitForEvent('page')
+  await cta.click({ modifiers: ['ControlOrMeta'], position: { x: 14, y: 9 } })
+  await (await opened).close()
   await expect.poll(() => inkSpreadsOn(cta)).toHaveLength(1)
   const [spread] = await inkSpreadsOn(cta)
   const [x = NaN, y = NaN] = centre(spread?.from ?? '')
@@ -63,13 +66,20 @@ test('pressing "Explore Concepts" spreads ink from the point pressed', async ({ 
   expect(spread?.grew, 'the ink spreads out from there').toBe(true)
 })
 
-test('pressing a call to action again spreads fresh ink from the new point', async ({ page }) => {
+test('pressing a call to action again spreads fresh ink from the new point', async ({
+  page,
+  context,
+}) => {
   await gotoReady(page, '/')
-  const cta = page.getByRole('main').getByRole('link', { name: 'Questionnaires', exact: true })
-  const heading = page.getByRole('heading', { name: 'Questionnaires', level: 2 })
-  await cta.click({ position: { x: 10, y: 10 } })
-  await expect(heading).toBeInViewport()
-  await cta.click({ position: { x: 40, y: 30 } })
+  const cta = page.getByRole('main').getByRole('link', { name: 'Start here', exact: true })
+  for (const position of [
+    { x: 10, y: 10 },
+    { x: 40, y: 30 },
+  ]) {
+    const opened = context.waitForEvent('page')
+    await cta.click({ modifiers: ['ControlOrMeta'], position })
+    await (await opened).close()
+  }
   await expect.poll(() => inkSpreadsOn(cta)).toHaveLength(2)
   const [first, second] = await inkSpreadsOn(cta)
   const [x = NaN, y = NaN] = centre(second?.from ?? '')
@@ -91,10 +101,12 @@ test('pressing the 404 page\'s "Go to the homepage" spreads ink too', async ({ p
   expect(Math.hypot(x - 20, y - 12), 'centred on the press').toBeLessThan(1.5)
 })
 
-test('pressing Enter on "Explore Concepts" spreads ink from its centre', async ({ page }) => {
+test('pressing Enter on "Start here" spreads ink from its centre', async ({ page, context }) => {
   await gotoReady(page, '/')
-  const cta = page.getByRole('main').getByRole('link', { name: 'Explore Concepts', exact: true })
+  const cta = page.getByRole('main').getByRole('link', { name: 'Start here', exact: true })
   await cta.focus()
-  await page.keyboard.press('Enter')
+  const opened = context.waitForEvent('page')
+  await page.keyboard.press('ControlOrMeta+Enter')
+  await (await opened).close()
   await expect.poll(() => inkSpreadsOn(cta)).toEqual([{ from: '50% 50%', grew: true }])
 })

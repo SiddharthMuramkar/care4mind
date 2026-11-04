@@ -11,6 +11,7 @@ const FIXED_PAGES = {
   references: '/library/references/',
   search: '/search/',
   proposals: '/proposals/',
+  start: '/start/',
 } as const
 
 const withAnchor = (path: string, anchor: string | undefined) =>

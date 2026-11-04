@@ -1,9 +1,6 @@
 'use client'
 
-import { usePathname } from 'next/navigation'
 import { useEffect } from 'react'
-
-import { onLotusMotionChange } from './lotus-motion'
 
 const LOTUS = 'svg[data-lotus]'
 // Smaller changes can't be seen, and skipping them spares a style recalculation.
@@ -14,10 +11,6 @@ const smoothstep = (t: number) => {
   const x = clamp(t, 0, 1)
   return x * x * (3 - 2 * x)
 }
-
-const reducedMotion = () => !window.matchMedia('(prefers-reduced-motion: no-preference)').matches
-const lotusesMayMove = () =>
-  !reducedMotion() && document.documentElement.dataset.lotusMotion === 'breathing'
 
 function write(svg: SVGSVGElement, name: '--lotus-near' | '--lotus-lean', value: number) {
   const now = Number(svg.style.getPropertyValue(name) || 0)
@@ -86,49 +79,25 @@ function attach() {
   }
 }
 
-/** The breath animations of a lotus: the endless ones. */
-const breathOf = (svg: Element) =>
-  svg
-    .getAnimations({ subtree: true })
-    .filter((animation) => animation.effect?.getComputedTiming().iterations === Infinity)
-
-/**
- * Lotuses lean and open toward a mouse or pen and bloom when pressed, only while motion is
- * allowed and they breathe; after each page change, the lotuses on it breathe with the header's.
- */
+/** Lotuses lean and open toward a mouse or pen and bloom when pressed, only while motion is allowed. */
 export function LotusPointer() {
-  const pathname = usePathname()
-
   useEffect(() => {
     const query = window.matchMedia('(prefers-reduced-motion: no-preference)')
     let detach: (() => void) | null = null
     const check = () => {
-      if (lotusesMayMove() && !detach) detach = attach()
-      else if (!lotusesMayMove() && detach) {
+      if (query.matches && !detach) detach = attach()
+      else if (!query.matches && detach) {
         detach()
         detach = null
       }
     }
     check()
     query.addEventListener('change', check)
-    const unsubscribe = onLotusMotionChange(check)
     return () => {
       query.removeEventListener('change', check)
-      unsubscribe()
       detach?.()
     }
   }, [])
-
-  useEffect(() => {
-    if (!lotusesMayMove()) return
-    const header = document.querySelector(`header ${LOTUS}`)
-    const startTime = header ? breathOf(header)[0]?.startTime : null
-    if (startTime == null) return
-    for (const svg of document.querySelectorAll(LOTUS)) {
-      if (svg === header) continue
-      for (const animation of breathOf(svg)) animation.startTime = startTime
-    }
-  }, [pathname])
 
   return null
 }

@@ -24,8 +24,18 @@ import { createContent } from '@/content/views'
 // whatever records a source holds. Each test builds a made-up source and reads `site` through
 // the same interface the pages use. Every record and string here is made up for the test.
 
-const ON: Features = { questionnairePreview: true, conceptMap: true, devanagariFirst: true }
-const OFF: Features = { questionnairePreview: false, conceptMap: false, devanagariFirst: false }
+const ON: Features = {
+  questionnairePreview: true,
+  conceptMap: true,
+  devanagariFirst: true,
+  startHere: true,
+}
+const OFF: Features = {
+  questionnairePreview: false,
+  conceptMap: false,
+  devanagariFirst: false,
+  startHere: false,
+}
 
 const provenance = {
   sources: [{ url: 'https://example.org/page/', retrieved: '2026-10-27' }],
@@ -194,6 +204,15 @@ const methods = definePage({
 })
 const home = defineHome({
   kind: 'home',
+  tagline: 'A made-up tagline.',
+  hero: {
+    promise: 'Made up.',
+    subhead: 'Made up.',
+    startHere: 'Start',
+    browseConcepts: 'Browse',
+    exploreConcepts: 'Explore',
+  },
+  sectionIntros: { concepts: 'Made up.', questionnaires: 'Made up.' },
   shloka: { devanagari: 'उदाहरणम्', iast: 'udāharaṇam', translation: 'Made up.' },
   intro: 'Made up.',
   areas: [],
@@ -211,6 +230,14 @@ describe('site.routes', () => {
   it('lists one entry per public page, with one sample per kind', async () => {
     expect(await createContent(memorySource(...world), ON).site.routes()).toEqual([
       { path: '/', kind: 'home', pattern: '/', title: 'Home', sample: true },
+      {
+        path: '/start/',
+        kind: 'start',
+        pattern: '/start/',
+        title: 'Start here',
+        sample: true,
+        proposal: true,
+      },
       {
         path: '/concepts/',
         kind: 'concepts',
@@ -366,15 +393,16 @@ describe('site.routes', () => {
     const without = (...gone: string[]) => all.filter((path) => !gone.includes(path))
 
     expect(await paths(OFF)).toEqual(
-      without('/concepts/map/', '/proposals/', '/questionnaires/work-scale/take/'),
+      without('/start/', '/concepts/map/', '/proposals/', '/questionnaires/work-scale/take/'),
     )
     expect(await paths({ ...ON, questionnairePreview: false })).toEqual(
       without('/questionnaires/work-scale/take/'),
     )
     expect(await paths({ ...ON, conceptMap: false })).toEqual(without('/concepts/map/'))
     expect(await paths({ ...OFF, devanagariFirst: true })).toEqual(
-      without('/concepts/map/', '/questionnaires/work-scale/take/'),
+      without('/start/', '/concepts/map/', '/questionnaires/work-scale/take/'),
     )
+    expect(await paths({ ...ON, startHere: false })).toEqual(without('/start/'))
   })
 
   it('gives a Questionnaire coming later no route, one that can’t be taken no flow, and /topics/ none', async () => {
