@@ -7,7 +7,6 @@ import { Folio } from '@/components/Folio'
 import { PageTurn, turnForward } from '@/components/PageTurn'
 import type { PreviewPayload } from '@/components/preview/LinkPreview'
 import { TopicCard } from '@/components/topics'
-import { features } from '@/config/features'
 import { concepts, hrefFor, site, topics, works, type AzEntry as Entry } from '@/content'
 import { cx } from '@/lib/cx'
 import { metadataFor } from '@/lib/metadata'
@@ -38,11 +37,12 @@ const counted = (count: number, one: string, many: string) => `${count} ${count 
  * and filter chips.
  */
 export default async function ConceptsPage() {
-  const [letters, topicCards, workCards, conceptCards] = await Promise.all([
+  const [letters, topicCards, workCards, conceptCards, routes] = await Promise.all([
     site.azIndex(),
     topics.list(),
     works.list(),
     concepts.list(),
+    site.routes(),
   ])
   const all = letters.flatMap(({ entries }) => entries)
   const count = (kind: Entry['kind']) => all.filter((entry) => entry.kind === kind).length
@@ -130,7 +130,7 @@ export default async function ConceptsPage() {
             <p className={styles.note}>
               Looking for a term by another spelling?{' '}
               <Link href={hrefFor({ page: 'search' })}>Search the site</Link>.
-              {features.conceptMap ? (
+              {routes.some((route) => route.kind === 'concept-map') ? (
                 <>
                   {' '}
                   Or see how the Concepts connect on the{' '}
