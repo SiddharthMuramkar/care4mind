@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
 import { home } from '@/content'
-import { heroLinks } from '@/lib/hero-links'
+import { heroLinks } from '@/app/hero-links'
 
 describe('the opening folio’s links', () => {
   it('lead to Start here, then Browse concepts, while Start here is on', async () => {

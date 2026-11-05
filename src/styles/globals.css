@@ -40,7 +40,7 @@
  * and components read them with var() in their own CSS modules. Tailwind
  * supplies these tokens and Preflight, nothing more: markup names no utility
  * but sr-only, beside the site's own skip-link (tests/unit/class-names.test.ts).
- * Colour tokens are semantic, so each text/background pair in src/lib/contrast.ts
+ * Colour tokens are semantic, so each text/background pair in src/styles/contrast.ts
  * is checked for WCAG AA contrast, mixed colours included.
  */
 /* Static: only CSS modules read these tokens, and Tailwind emits just the ones it sees used. */
@@ -337,32 +337,6 @@
   z-index: 1;
   animation-duration: var(--duration-morph);
   animation-timing-function: var(--ease-out);
-}
-
-/*
- * The "Devanagari first" switch: a term's two spellings trade places and sizes
- * (TermSpellings). They pass side by side, the one coming to lead on the left.
- */
-::view-transition-group(.script-swap) {
-  animation-duration: var(--duration-move);
-  animation-timing-function: var(--ease-in-out);
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  ::view-transition-image-pair(.script-lead),
-  ::view-transition-image-pair(.script-follow) {
-    animation: pass-by var(--duration-move) var(--ease-in-out);
-  }
-
-  ::view-transition-image-pair(.script-follow) {
-    --pass: 1;
-  }
-}
-
-@keyframes pass-by {
-  50% {
-    transform: translateX(calc(var(--pass, -1) * 55%));
-  }
 }
 
 /* The header and footer keep their own names, so they stay put, above the turning page and any flying title. */

@@ -6,7 +6,6 @@ import { type Features, proposalsPageOn, readFeatures } from '@/config/features'
 const FLAGS = [
   { flag: 'questionnairePreview', variable: 'FEATURE_QUESTIONNAIRE_PREVIEW' },
   { flag: 'conceptMap', variable: 'FEATURE_CONCEPT_MAP' },
-  { flag: 'devanagariFirst', variable: 'FEATURE_DEVANAGARI_FIRST' },
   { flag: 'startHere', variable: 'FEATURE_START_HERE' },
 ] as const satisfies readonly { flag: keyof Features; variable: string }[]
 
@@ -71,7 +70,6 @@ describe('feature flags (D16, D20)', () => {
     expect(readFeatures({ VERCEL_ENV: 'development' })).toEqual({
       questionnairePreview: true,
       conceptMap: true,
-      devanagariFirst: true,
       startHere: true,
     })
   })
@@ -80,7 +78,6 @@ describe('feature flags (D16, D20)', () => {
     expect(readFeatures({ VERCEL_ENV: 'production' })).toEqual({
       questionnairePreview: false,
       conceptMap: false,
-      devanagariFirst: false,
       startHere: false,
     })
   })
@@ -89,13 +86,11 @@ describe('feature flags (D16, D20)', () => {
     const off = {
       questionnairePreview: false,
       conceptMap: false,
-      devanagariFirst: false,
       startHere: false,
     }
     expect(proposalsPageOn(off)).toBe(false)
     expect(proposalsPageOn({ ...off, questionnairePreview: true })).toBe(false)
     expect(proposalsPageOn({ ...off, conceptMap: true })).toBe(true)
-    expect(proposalsPageOn({ ...off, devanagariFirst: true })).toBe(true)
     expect(proposalsPageOn({ ...off, startHere: true })).toBe(true)
   })
 })
