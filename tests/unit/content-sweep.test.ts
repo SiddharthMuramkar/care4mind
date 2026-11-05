@@ -249,6 +249,19 @@ describe('the search documents, on the real content', () => {
   })
 })
 
+describe('the related Concepts, on the real content', () => {
+  it('lists four for Vikṣepa: none by the shared work alone', async () => {
+    const related = (await site.concepts.get('vikshepa'))?.linked.related ?? []
+    expect(related.map(({ slug }) => slug)).toEqual([
+      'chittabhumi',
+      'panch-klesha',
+      'upa-vikshepa',
+      'sthitaprajna',
+    ])
+    expect(related.every(({ reasons }) => reasons.some(({ kind }) => kind !== 'work'))).toBe(true)
+  })
+})
+
 describe('the Concept map, on the real content', () => {
   it('has the 19 Concepts as its nodes', async () => {
     const { nodes } = await site.site.graph()
