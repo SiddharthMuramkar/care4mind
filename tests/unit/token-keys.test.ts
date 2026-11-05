@@ -2,7 +2,7 @@ import { readdirSync, readFileSync } from 'node:fs'
 
 import { describe, expect, it } from 'vitest'
 
-import { CONTRAST_PAIRS } from '@/lib/contrast'
+import { CONTRAST_PAIRS } from '@/styles/contrast'
 
 const globals = readFileSync('src/styles/globals.css', 'utf8')
 const topicSlugs = readdirSync('src/content/data/topics').map((name) => name.replace(/\.ts$/, ''))

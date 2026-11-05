@@ -102,12 +102,6 @@
   margin: 0;
 }
 
-.tryLabel {
-  font-variant-caps: all-small-caps;
-  letter-spacing: 0.12em;
-  color: var(--color-surface-muted);
-}
-
 /* The map's entry: its plate in miniature, then the way in. */
 .tryMap {
   display: grid;

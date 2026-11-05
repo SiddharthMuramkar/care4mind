@@ -6,7 +6,7 @@
 //
 // It refuses to require a check that hasn't completed on <sha> (a PR's head, or main's), so a
 // misspelt or renamed check can't lock main: with no bypass, nothing could merge until someone
-// fixed the ruleset by hand. The guard asks the developer before this runs.
+// fixed the ruleset by hand.
 //
 // To undo an apply, put the previous file back (git show <commit>:.github/rulesets/main.json)
 // and apply again, or edit the ruleset under Settings → Rules on GitHub.

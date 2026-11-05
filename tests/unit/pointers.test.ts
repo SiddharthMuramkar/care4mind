@@ -87,7 +87,7 @@ describe('pointers in docs and comments', () => {
     for (const file of ['CLAUDE.md', 'SPEC.md', 'README.md', 'GLOSSARY.md'])
       expect(sources).toContain(file)
     expect(sources).toContain('docs/adr/0005-rules-live-in-checks.md')
-    expect(sources).toContain('.claude/hooks/guard.mjs')
+    expect(sources).toContain('.claude/workflows/ship.js')
     expect(sources.some((file) => file.startsWith('tests/e2e/'))).toBe(true)
   })
 

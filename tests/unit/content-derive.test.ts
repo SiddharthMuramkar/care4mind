@@ -27,13 +27,11 @@ import { createContent } from '@/content/views'
 const ON: Features = {
   questionnairePreview: true,
   conceptMap: true,
-  devanagariFirst: true,
   startHere: true,
 }
 const OFF: Features = {
   questionnairePreview: false,
   conceptMap: false,
-  devanagariFirst: false,
   startHere: false,
 }
 
@@ -405,9 +403,6 @@ describe('site.routes', () => {
       without('/questionnaires/work-scale/take/'),
     )
     expect(await paths({ ...ON, conceptMap: false })).toEqual(without('/concepts/map/'))
-    expect(await paths({ ...OFF, devanagariFirst: true })).toEqual(
-      without('/start/', '/concepts/map/', '/questionnaires/work-scale/take/'),
-    )
     expect(await paths({ ...ON, startHere: false })).toEqual(without('/start/'))
   })
 
@@ -788,6 +783,7 @@ describe('site.searchDocuments', () => {
       id: 'concept:obstacles',
       kind: 'concept',
       title: 'Vighna',
+      lang: 'sa-Latn',
       href: '/concepts/obstacles/',
       names: ['vighna', 'विघ्न', 'Vigna'],
       keywords: [
@@ -841,6 +837,7 @@ describe('site.searchDocuments', () => {
       id: 'term:topic/self#yama',
       kind: 'term',
       title: 'Yama',
+      lang: 'sa-Latn',
       href: '/topics/self/#yama',
       parent: 'Self',
       names: ['yama', 'यम'],
@@ -855,6 +852,7 @@ describe('site.searchDocuments', () => {
       id: 'term:obstacles#samsaya',
       kind: 'term',
       title: 'Saṃśaya',
+      lang: 'sa-Latn',
       href: '/concepts/obstacles/#samsaya',
       parent: 'Vighna',
       names: ['saṃśaya', 'संशय', 'samsaya', 'Sanshay'],
@@ -869,6 +867,7 @@ describe('site.searchDocuments', () => {
       id: 'passage:yoga-sutra/1.30',
       kind: 'passage',
       title: 'Yoga Sūtra 1.30',
+      lang: 'sa-Latn',
       href: '/texts/yoga-sutra/#1-30',
       parent: 'Yoga Sūtra',
       names: [],
@@ -880,11 +879,63 @@ describe('site.searchDocuments', () => {
       id: 'work:yoga-sutra',
       kind: 'work',
       title: 'Yoga Sūtra',
+      lang: 'sa-Latn',
       href: '/texts/yoga-sutra/',
       names: ['Yoga Sūtra', 'योगसूत्र', 'Yoga Sutra'],
       keywords: ['YS'],
       people: [],
       excerpt: '',
+    })
+  })
+
+  it('gives a Pali work and its passages pi-Latn, and no language where a title is not a transliteration', async () => {
+    expect(await find('work:dhammapada')).toEqual({
+      id: 'work:dhammapada',
+      kind: 'work',
+      title: 'Dhammapada',
+      lang: 'pi-Latn',
+      href: '/texts/dhammapada/',
+      names: ['Dhammapada'],
+      keywords: [],
+      people: [],
+      excerpt: '',
+    })
+    expect(await find('passage:dhammapada/160')).toEqual({
+      id: 'passage:dhammapada/160',
+      kind: 'passage',
+      title: 'Dhammapada 160',
+      lang: 'pi-Latn',
+      href: '/texts/dhammapada/#160',
+      parent: 'Dhammapada',
+      names: [],
+      keywords: ['Dhammapada 160'],
+      people: [],
+      excerpt: '',
+    })
+    expect(await find('concept:refuge')).toMatchObject({ title: 'Refuge of the self' })
+    expect(await find('concept:refuge')).not.toHaveProperty('lang')
+    const plain = await createContent(
+      memorySource(
+        ...records,
+        defineGlossaryEntry({
+          kind: 'glossary',
+          slug: 'plain',
+          name: { ascii: 'Plain' },
+          definition: 'A made-up plain entry.',
+          provenance,
+        }),
+      ),
+      ON,
+    ).site.searchDocuments()
+    expect(plain.find((document) => document.id === 'glossary:plain')).toEqual({
+      id: 'glossary:plain',
+      kind: 'glossary',
+      title: 'Plain',
+      href: '/concepts/#plain',
+      names: ['Plain'],
+      keywords: [],
+      people: [],
+      excerpt: 'A made-up plain entry.',
     })
   })
 
@@ -903,6 +954,7 @@ describe('site.searchDocuments', () => {
       id: 'glossary:avarana',
       kind: 'glossary',
       title: 'Āvaraṇa',
+      lang: 'sa-Latn',
       href: '/concepts/#avarana',
       names: ['āvaraṇa', 'आवरण', 'Avarana'],
       keywords: [],

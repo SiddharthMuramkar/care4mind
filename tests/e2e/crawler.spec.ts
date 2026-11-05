@@ -1,6 +1,6 @@
 import type { APIRequestContext, Page } from '@playwright/test'
 
-import { site as config } from '@/config/site'
+import { siteConfig as config } from '@/config/site'
 import { concepts, library, questionnaires, site, topics, works } from '@/content'
 
 import { expect, test } from './fixtures'

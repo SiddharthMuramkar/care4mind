@@ -1,9 +1,9 @@
 export const meta = {
   name: 'ship',
   description:
-    "Build a spec's tickets: one PR per ticket into main, each reviewed by a reviewer agent and left open for the developer once its checks are green and every review thread is answered",
+    "Build a spec's tickets: one PR per ticket into main, each reviewed by a reviewer agent, answered by its builder, then squash-merged once its checks are green and every review thread is answered",
   whenToUse:
-    "After /to-tickets has published a spec's tickets as sub-issues of its spec issue. Rerun it after the developer merges, to build the tickets that were waiting. Args: { spec: <issue number>, builders?: 2, dryRun?: false }",
+    "After /to-tickets has published a spec's tickets as sub-issues of its spec issue. Rerun it any time: it lands reviewed green PRs and builds the tickets that were waiting. Args: { spec: <issue number>, builders?: 2, dryRun?: false }",
   phases: [
     {
       title: 'Start',
@@ -52,11 +52,11 @@ const FRONTIER = {
   type: 'object',
   properties: {
     ready: { type: 'array', items: TICKET },
-    awaitingYou: { type: 'array', items: AWAITING },
+    awaitingMerge: { type: 'array', items: AWAITING },
     forDeveloper: { type: 'array', items: TICKET },
     open: { type: 'integer' },
   },
-  required: ['ready', 'awaitingYou', 'forDeveloper', 'open'],
+  required: ['ready', 'awaitingMerge', 'forDeveloper', 'open'],
 }
 const OUTCOME = {
   type: 'object',
@@ -77,6 +77,15 @@ const REVIEW = {
   },
   required: ['posted', 'comments', 'note'],
 }
+const LANDED = {
+  type: 'object',
+  properties: {
+    merged: { type: 'boolean' },
+    pr: { type: 'integer' },
+    note: { type: 'string' },
+  },
+  required: ['merged', 'note'],
+}
 const STARTED = {
   type: 'object',
   properties: { ok: { type: 'boolean' }, note: { type: 'string' } },
@@ -87,9 +96,9 @@ const frontier = (skip) =>
   agent(
     `Read-only: change nothing. Report the frontier of spec issue #${spec} in ${REPO}, using gh.
 - Its tickets are its sub-issues: gh api repos/${REPO}/issues/${spec}/sub_issues --paginate
-- A ticket is unblocked when every issue in gh api repos/${REPO}/issues/<number>/dependencies/blocked_by is closed. A blocker closed as not planned counts as closed. A blocker whose PR is open but not merged is not closed: the developer merges.
+- A ticket is unblocked when every issue in gh api repos/${REPO}/issues/<number>/dependencies/blocked_by is closed. A blocker closed as not planned counts as closed. A blocker whose PR is open but not merged is not closed: ship lands it first.
 - A ticket's PR is an open PR whose body says it closes the ticket (gh pr list --state open --json number,body).
-- awaitingYou: open tickets whose PR has every check green (gh pr checks <pr>) and every review thread resolved or answered, each with its PR number.
+- awaitingMerge: open tickets whose PR has every check green (gh pr checks <pr>), at least one review posted (gh pr view <pr> --json reviews) and every review thread resolved or answered, each with its PR number. A green PR with no review is never awaitingMerge: it is ready, so its builder and reviewer run.
 - ready: open, unblocked tickets labelled ready-for-agent and not needs-info, with no PR yet or with a PR that is red or has an unanswered thread${skip.length ? `, except #${skip.join(', #')}` : ''}.
 - forDeveloper: open, unblocked tickets labelled ready-for-human or needs-info.
 - open: how many of the spec's tickets are still open.`,
@@ -103,7 +112,7 @@ const look = async (skip) => (await frontier(skip)) ?? (await frontier(skip))
 const ports = (slot) => `E2E_PORT=${3110 + 10 * slot} and SHOTS_PORT=${3111 + 10 * slot}`
 
 const HANDS_OFF =
-  "The developer reviews the PR, merges it and deletes its branch, so you never merge it, never turn on auto-merge, and never delete a branch. If only the developer can unblock you, comment on the ticket saying exactly what you need, add the needs-info label, and stop.\nNever push to main, force-push, skip hooks, weaken or skip a check, or change files the ticket doesn't need."
+  "Ship squash-merges the PR itself once a review is posted, every thread is answered and ci is green, and GitHub deletes its branch, so you never merge it, never turn on auto-merge, and never delete a branch: only ship's land step merges. If only the developer can unblock you, comment on the ticket saying exactly what you need, add the needs-info label, and stop.\nNever push to main, force-push, weaken or skip a check, or change files the ticket doesn't need."
 
 const WATCH =
   'gh pr checks --watch. On a red check, read gh run view <run id> --log-failed, fix, push, and watch again. If the PR is behind main, gh pr update-branch, then watch again.'
@@ -168,6 +177,18 @@ Return opened, ready (every check green and every thread answered or resolved), 
     },
   )
 
+/** The only step that merges: re-checks the PR, then squash-merges it. */
+const land = ({ number, pr }) =>
+  agent(
+    `Land PR #${pr} in ${REPO}, which closes ticket #${number} of spec #${spec}. You change no file: your only writes are updating and merging this PR.
+1. Re-check it yourself; merge nothing on another agent's word: gh pr view ${pr} --json state,mergeStateStatus,reviews,closingIssuesReferences. It must be open, closing #${number}, with at least one review posted. Every review thread must be resolved (GraphQL reviewThreads). ${WATCH} until every check is green.
+2. Anything short of that (red, unreviewed, a thread open, conflicted, or a refusal you cannot fix by updating the branch): stop without merging and say exactly what is short.
+3. Otherwise land it: gh pr merge ${pr} --squash. Never merge with admin rights, never turn on auto-merge, never edit the ruleset, never close the PR or delete its branch yourself: merging closes the ticket and GitHub deletes the branch.
+4. Confirm gh pr view ${pr} --json state says MERGED before you report merged.
+Return merged, the PR number and a one-line note.`,
+    { label: `land #${number}`, phase: 'Build', schema: LANDED, ...LIGHT },
+  )
+
 /** Builds the ticket, has its PR reviewed, and has its builder answer the review. */
 const deliver = async (ticket, slot) => {
   const built = await build(ticket, slot)
@@ -188,7 +209,7 @@ if (args?.dryRun === true) {
   const plan = await look([])
   if (!plan) throw new Error(`Cannot plan: ${LOST}`)
   log(
-    `Ready: ${numbers(plan.ready)} · for your review: ${prs(plan.awaitingYou) || 'none'} · for you: ${numbers(plan.forDeveloper)} · open: ${plan.open}`,
+    `Ready: ${numbers(plan.ready)} · awaiting merge: ${prs(plan.awaitingMerge) || 'none'} · for you: ${numbers(plan.forDeveloper)} · open: ${plan.open}`,
   )
   return plan
 }
@@ -203,15 +224,38 @@ if (!started?.ok) throw new Error(`Cannot start: ${started?.note ?? 'no answer'}
 phase('Build')
 const running = new Map()
 const freeSlots = Array.from({ length: builders }, (_, slot) => slot)
-const readyForYou = new Map()
+const merged = new Map()
 const stopped = []
-let known = { ready: [], awaitingYou: [], forDeveloper: [], open: 0 }
+let known = { ready: [], awaitingMerge: [], forDeveloper: [], open: 0 }
 let latest = await look([])
+
+const landOne = async ({ number, pr }) => {
+  const landed = await land({ number, pr })
+  if (landed?.merged) {
+    merged.set(number, pr)
+    log(`#${number} landed: PR #${pr} merged`)
+    return true
+  }
+  stopped.push(number)
+  log(`#${number} stopped: not landed: ${landed?.note ?? 'the land step ended without an answer'}`)
+  return false
+}
 
 while (latest) {
   known = latest
+  let landedAny = false
+  for (const awaiting of latest.awaitingMerge) {
+    if (merged.has(awaiting.number) || stopped.includes(awaiting.number)) continue
+    if (running.has(awaiting.number)) continue
+    landedAny = (await landOne(awaiting)) || landedAny
+  }
+  if (landedAny) {
+    latest = await look([...running.keys(), ...stopped])
+    continue
+  }
   for (const ticket of latest.ready) {
     if (!freeSlots.length) break
+    if (merged.has(ticket.number) || stopped.includes(ticket.number)) continue
     const slot = freeSlots.shift()
     log(`#${ticket.number} ${ticket.title}: building`)
     running.set(
@@ -224,38 +268,46 @@ while (latest) {
   running.delete(ticket.number)
   freeSlots.push(slot)
   if (outcome?.opened && outcome.ready) {
-    readyForYou.set(ticket.number, outcome.pr)
-    log(`#${ticket.number} is ready for your review: PR #${outcome.pr}`)
+    await landOne({ number: ticket.number, pr: outcome.pr })
   } else {
     stopped.push(ticket.number)
     log(`#${ticket.number} stopped: ${outcome?.note ?? 'the builder ended without an answer'}`)
   }
-  latest = await look([...running.keys(), ...stopped, ...readyForYou.keys()])
+  latest = await look([...running.keys(), ...stopped])
 }
 
-const awaitingYou = [
-  ...known.awaitingYou.filter((ticket) => !readyForYou.has(ticket.number)),
-  ...[...readyForYou].map(([number, pr]) => ({ number, pr })),
-]
+const landedList = [...merged].map(([number, pr]) => ({ number, pr }))
+const awaitingMerge = known.awaitingMerge.filter((ticket) => !merged.has(ticket.number))
 if (!latest) log(`Ship stopped: ${LOST}.`)
 if (running.size) log(`Still running: #${[...running.keys()].join(', #')}`)
-if (awaitingYou.length) log(`Ready for your review: ${prs(awaitingYou)}`)
+if (awaitingMerge.length) log(`Awaiting merge: ${prs(awaitingMerge)}`)
 if (known.forDeveloper.length) log(`Waiting on you: ${numbers(known.forDeveloper)}`)
 if (stopped.length) log(`Stopped: #${stopped.join(', #')}`)
 if (!latest)
   return {
     lost: LOST,
     running: [...running.keys()],
-    awaitingYou,
+    merged: landedList,
+    awaitingMerge,
     stopped,
     waitingOnYou: known.forDeveloper,
   }
 if (latest.open > 0)
-  return { awaitingYou, stopped, waitingOnYou: latest.forDeveloper, open: latest.open }
+  return {
+    merged: landedList,
+    awaitingMerge,
+    stopped,
+    waitingOnYou: latest.forDeveloper,
+    open: latest.open,
+  }
 
 phase('Finish')
 const finalReview = await agent(
-  `Every ticket of spec #${spec} in ${REPO} is closed: the developer has merged them all. Run git fetch origin --tags, then review everything built for it with the code-review skill. The fixed point is ${startTag}, the code is origin/main, the spec is issue #${spec}, and the standards are CLAUDE.md and SPEC.md: does anything built make a line in them untrue? Fix every finding worth fixing in one PR into main, by the builders' rules: branch from origin/main with --no-track, a body that starts "Part of #${spec}", checks green, every review thread answered, and then stop, because the developer reviews and merges it. Last, remove each worktree under .claude/worktrees whose PR has merged (git worktree remove <path>, then git worktree prune), and keep every branch: list the local branches whose PRs have merged, for the developer to delete. Return opened, ready, the PR number if there is one, and a one-line note on what the review found and which branches the developer can delete.`,
+  `Every ticket of spec #${spec} in ${REPO} is closed: ship has merged them all. Run git fetch origin --tags, then review everything built for it with the code-review skill. The fixed point is ${startTag}, the code is origin/main, the spec is issue #${spec}, and the standards are CLAUDE.md and SPEC.md: does anything built make a line in them untrue? Fix every finding worth fixing in one PR into main, by the builders' rules: branch from origin/main with --no-track, a body that starts "Part of #${spec}", checks green, every review thread answered, and then stop with the PR open: no reviewer agent runs after you, so nothing lands it in this run. Last, remove each worktree under .claude/worktrees whose PR has merged (git worktree remove <path>, then git worktree prune); GitHub already deleted the merged branches. Return opened, ready, the PR number if there is one, and a one-line note on what the review found.`,
   { label: 'final review', phase: 'Finish', isolation: 'worktree', schema: OUTCOME, ...REVIEWER },
 )
-return { awaitingYou, stopped, review: finalReview }
+const finalPr =
+  finalReview?.opened && finalReview.pr
+    ? [...awaitingMerge, { number: spec, pr: finalReview.pr }]
+    : awaitingMerge
+return { merged: landedList, awaitingMerge: finalPr, stopped, review: finalReview }
