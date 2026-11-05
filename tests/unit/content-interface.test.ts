@@ -45,6 +45,9 @@ const provenance = {
   flags: [],
 }
 
+/** The same provenance as a view carries it: no flag reaches a page. */
+const shownProvenance = { sources: provenance.sources, edits: [] }
+
 const mind = defineTopic({
   kind: 'topic',
   slug: 'mind',
@@ -160,6 +163,31 @@ const concept: ConceptRecord = {
 }
 
 describe('concepts.get', () => {
+  it('shows a written record’s author and keeps its flag notes off the page', async () => {
+    const written = defineConcept({
+      ...concept,
+      reviewStatus: 'drafted-not-reviewed',
+      provenance: {
+        origin: 'written',
+        sources: [],
+        edits: [],
+        flags: [{ for: 'research-editor', note: 'An internal note no page may show.' }],
+        writtenBy: 'An Author',
+        writtenOn: '2026-11-06',
+      },
+    })
+    const content = createContent(memorySource(mind, written), ON)
+    const view = await content.concepts.get('obstacles')
+    expect(view?.provenance).toEqual({
+      origin: 'written',
+      sources: [],
+      edits: [],
+      writtenBy: 'An Author',
+      writtenOn: '2026-11-06',
+    })
+    expect(JSON.stringify(view)).not.toContain('An internal note')
+  })
+
   it('returns null for an unknown slug and a view for a known one', async () => {
     const content = createContent(memorySource(mind, defineConcept(concept)), ON)
     expect(await content.concepts.get('nothing-here')).toBeNull()
@@ -558,7 +586,7 @@ describe('a Concept’s References', () => {
             href: '/concepts/obstacles/',
           },
         ],
-        provenance: { ...provenance, drafted: ['title'] },
+        provenance: { ...shownProvenance, drafted: ['title'] },
         reviewStatus: 'drafted-not-reviewed',
       },
       {
@@ -586,7 +614,7 @@ describe('a Concept’s References', () => {
           },
           { kind: 'topic', id: 'values', title: 'Values', href: '/topics/values/' },
         ],
-        provenance,
+        provenance: shownProvenance,
         reviewStatus: 'carried-over-not-reviewed',
       },
     ])
@@ -949,7 +977,7 @@ describe('the rest of a Concept’s page', () => {
       topic: { slug: 'mind', name: 'Mind', href: '/topics/mind/' },
       secondaryTopics: [{ slug: 'self', name: 'Self', href: '/topics/self/' }],
       external: [{ label: 'DharmaWiki', url: 'https://dharmawiki.org/index.php/Example' }],
-      provenance: { ...provenance, drafted: ['summary'] },
+      provenance: { ...shownProvenance, drafted: ['summary'] },
       reviewStatus: 'drafted-not-reviewed',
     })
   })
@@ -1127,7 +1155,7 @@ describe('topics', () => {
           href: '/concepts/obstacles/',
         },
       ],
-      provenance,
+      provenance: shownProvenance,
       reviewStatus: 'carried-over-not-reviewed',
     })
     expect(view).not.toHaveProperty('intro')
@@ -1154,7 +1182,7 @@ describe('topics', () => {
       ],
       references: [expect.objectContaining({ number: 1, id: 'rao-2001', anchor: 'ref-rao-2001' })],
       citations: { 'Rao, 2001': 'rao-2001' },
-      provenance,
+      provenance: shownProvenance,
       reviewStatus: 'carried-over-not-reviewed',
     })
   })
@@ -1218,7 +1246,7 @@ describe('works', () => {
       language: 'sa',
       locatorLabel: 'Sutra',
       editions: ['A made-up edition'],
-      provenance,
+      provenance: shownProvenance,
       reviewStatus: 'carried-over-not-reviewed',
     })
     expect(view?.passages.map(({ id, quotedIn }) => [id, quotedIn.map((ref) => ref.id)])).toEqual([
@@ -1367,7 +1395,7 @@ describe('questionnaires', () => {
       limitations: { items: ['A made-up limitation.'], status: 'draft-pending-psychology-expert' },
       source: expect.objectContaining({ id: 'rao-2001', label: 'Rao (2001)' }),
       candidateSource: expect.objectContaining({ id: 'jain-diwakar-2019' }),
-      provenance: { ...provenance, drafted: ['summary'] },
+      provenance: { ...shownProvenance, drafted: ['summary'] },
       reviewStatus: 'drafted-not-reviewed',
     })
     expect(JSON.stringify(view)).not.toMatch(/held|scor|band|rights/i)
@@ -1533,7 +1561,7 @@ describe('the Library', () => {
           ],
         },
       ],
-      provenance,
+      provenance: shownProvenance,
       reviewStatus: 'carried-over-not-reviewed',
     })
   })
@@ -1554,7 +1582,7 @@ describe('the Library', () => {
         },
       ],
       toc: [{ id: 'two-ways', heading: 'Two ways', href: '/library/methods/#two-ways', terms: [] }],
-      provenance,
+      provenance: shownProvenance,
       reviewStatus: 'carried-over-not-reviewed',
     })
   })
@@ -1640,7 +1668,7 @@ describe('the homepage', () => {
       closing: 'A made-up closing.',
       helpLine: 'A made-up help line.',
       footerQuestionnaires: 'A made-up footer label.',
-      provenance,
+      provenance: shownProvenance,
       reviewStatus: 'carried-over-not-reviewed',
     })
   })

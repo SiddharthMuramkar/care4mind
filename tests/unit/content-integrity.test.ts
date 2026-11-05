@@ -167,21 +167,105 @@ describe('scripts', () => {
   })
 })
 
+const DATE = /^\d{4}-\d{2}-\d{2}$/
+
+/**
+ * Why a provenance is dishonest. Carried over (no origin), it names dated sources and no author.
+ * Written, it names who wrote it and when, and invents no source, edit or drafted field.
+ */
+function provenanceProblems(name: string, provenance: Provenance): string[] {
+  if (provenance.origin === 'written')
+    return [
+      ...(provenance.writtenBy?.trim() ? [] : [`${name} is written but names no author`]),
+      ...(provenance.writtenOn && DATE.test(provenance.writtenOn)
+        ? []
+        : [`${name} is written but “${provenance.writtenOn ?? ''}” is not its day`]),
+      ...(provenance.sources.length === 0 ? [] : [`${name} is written but names a source`]),
+      ...(provenance.edits.length === 0 ? [] : [`${name} is written but lists edits`]),
+      ...((provenance.drafted ?? []).length === 0
+        ? []
+        : [`${name} is written but lists drafted fields`]),
+    ]
+  return [
+    ...(provenance.writtenBy === undefined && provenance.writtenOn === undefined
+      ? []
+      : [`${name} names an author but is not written`]),
+    ...(provenance.sources.length === 0 ? [`${name} names no source`] : []),
+    ...provenance.sources
+      .filter(({ url, retrieved }) => url === '' || !DATE.test(retrieved))
+      .map(({ url }) => `${name}: source “${url}” needs a URL and a date`),
+  ]
+}
+
+/** Why a Concept's or Questionnaire's review status disagrees with how its text was made. */
+function reviewProblems<T extends { provenance: Provenance; reviewStatus: string }>(
+  name: string,
+  record: T,
+): string[] {
+  const drafted = record.provenance.drafted ?? []
+  return [
+    ...(drafted.length > 0 && record.reviewStatus !== 'drafted-not-reviewed'
+      ? [`${name} is “${record.reviewStatus}”`]
+      : []),
+    ...(record.provenance.origin === 'written' &&
+    record.reviewStatus === 'carried-over-not-reviewed'
+      ? [`${name} is written but “carried over, not reviewed”`]
+      : []),
+    ...drafted
+      .filter((path) => !((path.split('.')[0] ?? '') in record))
+      .map((path) => `${name} declares a missing field drafted: ${path}`),
+  ]
+}
+
 describe('provenance', () => {
-  it('gives every record but a topic at least one dated source, and a topic introduction its own', () => {
+  it('gives every carried-over record dated sources and every written one an author and a day', () => {
     const problems = records.flatMap((record) => {
       const own = provenancesOf(record)
       if (record.kind !== 'topic' && own.length === 0)
         return [`${nameOf(record)} has no provenance`]
-      return own.flatMap((provenance) =>
-        provenance.sources.length === 0
-          ? [`${nameOf(record)} names no source`]
-          : provenance.sources
-              .filter(({ url, retrieved }) => url === '' || !/^\d{4}-\d{2}-\d{2}$/.test(retrieved))
-              .map(({ url }) => `${nameOf(record)}: source “${url}” needs a URL and a date`),
-      )
+      return own.flatMap((provenance) => provenanceProblems(nameOf(record), provenance))
     })
     expect(problems).toEqual([])
+  })
+
+  it('rejects dishonest provenances in made-up examples', () => {
+    const carried: Provenance = {
+      sources: [{ url: 'https://care4mind.org/example/', retrieved: '2026-10-27' }],
+      edits: [],
+      flags: [],
+    }
+    const written: Provenance = {
+      origin: 'written',
+      sources: [],
+      edits: [],
+      flags: [],
+      writtenBy: 'An Author',
+      writtenOn: '2026-11-06',
+    }
+    expect(provenanceProblems('example', carried)).toEqual([])
+    expect(provenanceProblems('example', written)).toEqual([])
+    expect(provenanceProblems('example', { ...carried, sources: [] })).toEqual([
+      'example names no source',
+    ])
+    expect(provenanceProblems('example', { ...written, writtenBy: undefined })).toEqual([
+      'example is written but names no author',
+    ])
+    expect(provenanceProblems('example', { ...written, writtenOn: 'last week' })).toEqual([
+      'example is written but “last week” is not its day',
+    ])
+    expect(provenanceProblems('example', { ...written, sources: carried.sources })).toEqual([
+      'example is written but names a source',
+    ])
+    expect(provenanceProblems('example', { ...written, drafted: ['summary'] })).toEqual([
+      'example is written but lists drafted fields',
+    ])
+    expect(
+      provenanceProblems('example', {
+        ...carried,
+        writtenBy: 'An Author',
+        writtenOn: '2026-11-06',
+      }),
+    ).toEqual(['example names an author but is not written'])
   })
 
   it('keeps WordPress addresses and author pages out of every string', () => {
@@ -202,19 +286,30 @@ describe('provenance', () => {
     expect(offenders).toEqual([])
   })
 
-  it('gives a record with drafted fields the review status “drafted, not reviewed”', () => {
+  it('keeps each review status honest about how its text was made', () => {
     const offenders = records.flatMap((record) => {
       if (record.kind !== 'concept' && record.kind !== 'questionnaire') return []
-      const drafted = record.provenance.drafted ?? []
-      const missing = drafted.filter((path) => !((path.split('.')[0] ?? '') in record))
-      return [
-        ...(drafted.length > 0 && record.reviewStatus !== 'drafted-not-reviewed'
-          ? [`${nameOf(record)} is “${record.reviewStatus}”`]
-          : []),
-        ...missing.map((path) => `${nameOf(record)} declares a missing field drafted: ${path}`),
-      ]
+      return reviewProblems(nameOf(record), record)
     })
     expect(offenders).toEqual([])
+  })
+
+  it('rejects a written record that calls itself carried over, in a made-up example', () => {
+    const provenance: Provenance = {
+      origin: 'written',
+      sources: [],
+      edits: [],
+      flags: [],
+      writtenBy: 'An Author',
+      writtenOn: '2026-11-06',
+    }
+    expect(reviewProblems('example', { provenance, reviewStatus: 'drafted-not-reviewed' })).toEqual(
+      [],
+    )
+    expect(reviewProblems('example', { provenance, reviewStatus: 'reviewed' })).toEqual([])
+    expect(
+      reviewProblems('example', { provenance, reviewStatus: 'carried-over-not-reviewed' }),
+    ).toEqual(['example is written but “carried over, not reviewed”'])
   })
 })
 
@@ -557,7 +652,8 @@ describe('Concept keywords', () => {
   it('gives every Concept drafted keywords that name no modern construct or condition', () => {
     const problems = ofKind('concept').flatMap((concept) => [
       ...(concept.keywords.length === 0 ? [`${concept.slug} has no keywords`] : []),
-      ...(concept.provenance.drafted?.includes('keywords')
+      ...(concept.provenance.origin === 'written' ||
+      concept.provenance.drafted?.includes('keywords')
         ? []
         : [`${concept.slug} doesn’t name keywords as drafted`]),
       ...concept.keywords

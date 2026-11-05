@@ -655,6 +655,25 @@ describe('verify', () => {
     })
   })
 
+  it('checks no string of a written record against a page', () => {
+    const record = concept(paragraphs('Words no saved page has, written new.'), {
+      reviewStatus: 'drafted-not-reviewed',
+      provenance: {
+        origin: 'written',
+        sources: [],
+        edits: [],
+        flags: [],
+        writtenBy: 'An Author',
+        writtenOn: '2026-11-06',
+      },
+    })
+    expect(verify.checkRecord(record, site)).toMatchObject({
+      status: 'written',
+      checked: 0,
+      misses: [],
+    })
+  })
+
   it('reads a Questionnaire’s source as a link, and a translation’s source as text', () => {
     const questionnaire: QuestionnaireRecord = {
       kind: 'questionnaire',
@@ -838,7 +857,7 @@ describe('the verify command', { timeout: 30_000 }, () => {
       /unchecked\s+reference\/author-2020: no saved copy of https:\/\/doi\.org\/10\.0000\/example/,
     )
     expect(result.stdout).toContain(
-      'verify: 3 records · 1 passed · 1 unchecked · 1 structure only · 0 failed',
+      'verify: 3 records · 1 passed · 1 unchecked · 0 written · 1 structure only · 0 failed',
     )
   })
 
@@ -850,7 +869,7 @@ describe('the verify command', { timeout: 30_000 }, () => {
     expect(result.stdout).toContain('Every rule needs an exemplar.')
     expect(result.stdout).toContain('Every rule needs an example.')
     expect(result.stdout).toContain(
-      'verify: 4 records · 1 passed · 1 unchecked · 1 structure only · 1 failed',
+      'verify: 4 records · 1 passed · 1 unchecked · 0 written · 1 structure only · 1 failed',
     )
   })
 
@@ -1162,6 +1181,45 @@ describe('new', { timeout: 30_000 }, () => {
     expect(result.stdout).toContain('src/content/data/passages/example-sutra/1.12.ts')
   })
 
+  it('writes a written template with no source to invent', () => {
+    const root = emptyRepo('new-written')
+    const result = run('new', ['concept', 'example', '--written', '--root', root])
+    expect(result.status).toBe(0)
+    const template = readFileSync(join(root, 'src/content/data/concepts/example.ts'), 'utf8')
+    expect(template).toContain("origin: 'written'")
+    expect(template).toContain("writtenBy: ''")
+    expect(template).toContain("writtenOn: ''")
+    expect(template).toContain("reviewStatus: 'drafted-not-reviewed'")
+    expect(template).not.toContain('care4mind.org/vikshepa')
+    expect(template).not.toContain("retrieved: '2026-10-27'")
+    expect(result.stdout).toContain('Write it, then check it')
+  })
+
+  it('writes a written template for every kind that typechecks', { timeout: 60_000 }, () => {
+    const root = emptyRepo('new-written-every-kind')
+    const files = CONTENT_KINDS.map((kind) => {
+      const id = kind === 'home' ? 'home' : kind === 'passage' ? 'example-sutra/1.2' : 'example'
+      expect(run('new', [kind, id, '--written', '--root', root]).status, kind).toBe(0)
+      return join(root, 'src/content/data', KIND_FOLDERS[kind], `${id}.ts`)
+    })
+    for (const file of files) expect(readFileSync(file, 'utf8'), file).toContain("'written'")
+    const program = ts.createProgram(files, {
+      strict: true,
+      noEmit: true,
+      skipLibCheck: true,
+      target: ts.ScriptTarget.ES2023,
+      module: ts.ModuleKind.ESNext,
+      moduleResolution: ts.ModuleResolutionKind.Bundler,
+      verbatimModuleSyntax: true,
+      types: [],
+      paths: { '@/*': [`${resolve('src')}/*`] },
+    })
+    const problems = ts
+      .getPreEmitDiagnostics(program)
+      .map((d) => `${d.file?.fileName}: ${ts.flattenDiagnosticMessageText(d.messageText, '\n')}`)
+    expect(problems).toEqual([])
+  })
+
   it('refuses a file that exists and an id that breaks the id rules', () => {
     const root = emptyRepo('new-refusals')
     expect(run('new', ['concept', 'example', '--root', root]).status).toBe(0)
@@ -1234,7 +1292,9 @@ describe('new', { timeout: 30_000 }, () => {
       const text = source.getFullText()
       const missing = [
         ...fields,
-        ...(kind === 'topic' ? [] : ['sources', 'edits', 'flags', 'drafted']),
+        ...(kind === 'topic'
+          ? []
+          : ['origin', 'sources', 'edits', 'flags', 'drafted', 'writtenBy', 'writtenOn']),
       ].filter((field) => !new RegExp(`(^|[\\s{,/])${field}:`, 'm').test(text))
       expect(missing, kind).toEqual([])
     }
