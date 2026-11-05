@@ -73,7 +73,7 @@ These are judgement calls, so review checks them against the diff, in the codeba
   3. The view types and views: Ref, Card and View, plus `hrefFor()`'s target.
   4. Its namespace on `@/content`.
   5. The derivations: routes, and search documents. Nothing fails if you miss search (#49).
-  6. The pages, the navigation, Linked knowledge and the search page's headings.
+  6. The pages, the navigation, Linked knowledge and search's result headings.
   7. The tools behind `content:new` and `verify`.
   8. GLOSSARY.md.
 - **A page:** a route that reads `@/content`. Its address is an `hrefFor()` target, and its entry in `site.routes()` puts it in the sitemap, breadcrumbs and crawler.
