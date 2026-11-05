@@ -128,6 +128,7 @@ export default async function HomePage() {
             {featuredConcepts.map((concept) => (
               <li key={concept.slug}>
                 <ConceptCard
+                  featured
                   concept={concept}
                   action={
                     <Link
@@ -162,7 +163,7 @@ export default async function HomePage() {
           <ul className={styles.cards}>
             {featured.map((questionnaire) => (
               <li key={questionnaire.slug}>
-                <QuestionnaireCard questionnaire={questionnaire} />
+                <QuestionnaireCard featured questionnaire={questionnaire} />
               </li>
             ))}
           </ul>
