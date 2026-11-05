@@ -4,6 +4,11 @@
  */
 import type { ProvenanceView } from '@/content'
 
+/** This page's own provenance: a page view's shape, plus its flags for the Research editor. */
+interface StartHereProvenance extends ProvenanceView {
+  flags: readonly { for: 'research-editor' | 'psychology-expert' | 'project-owner'; note: string }[]
+}
+
 export interface StartHere {
   /** What Indian psychology is, in plain sentences. */
   about: readonly string[]
@@ -13,7 +18,7 @@ export interface StartHere {
   sounds: readonly { letters: string; text: string }[]
   /** The Concepts to read first, by slug, in order. */
   firstReads: readonly string[]
-  provenance: ProvenanceView
+  provenance: StartHereProvenance
 }
 
 export const startHere: StartHere = {

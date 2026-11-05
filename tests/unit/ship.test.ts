@@ -315,6 +315,19 @@ describe("ship's agents", () => {
     expect(land?.prompt).toMatch(/Never merge with admin rights, never turn on auto-merge/)
   })
 
+  it('gates a data PR on a recorded verify run, and stops for the captures when absent', async () => {
+    const calls = await everyCall()
+    const prompt = (label: string) => calls.find((call) => call.opts.label === label)?.prompt
+    for (const label of ['#5', '#5 answers']) {
+      expect(prompt(label)).toMatch(/src\/content\/data/)
+      expect(prompt(label)).toMatch(/content:verify --changed origin\/main/)
+      expect(prompt(label)).toMatch(/captures are absent/)
+      expect(prompt(label)).toMatch(/needs-info/)
+    }
+    expect(prompt('review #5')).toMatch(/no recorded verify run is a finding/)
+    expect(prompt('land #5')).toMatch(/no recorded verify run, no merge/)
+  })
+
   it('builders are told ship lands it, never them', async () => {
     const calls = await everyCall()
     for (const label of ['#5', '#5 answers']) {

@@ -117,6 +117,9 @@ const HANDS_OFF =
 const WATCH =
   'gh pr checks --watch. On a red check, read gh run view <run id> --log-failed, fix, push, and watch again. If the PR is behind main, gh pr update-branch, then watch again.'
 
+const CONTENT_GATE =
+  'If your diff touches src/content/data, `pnpm content:verify --changed origin/main` must pass, and you record its passing summary in the PR body (Evidence). If it cannot run because the captures are absent (CARE4MIND_CAPTURES unset or its folder missing), stop with needs-info as below, naming the captures: a data PR with no verify run never lands.'
+
 const build = (ticket, slot) =>
   agent(
     `You are a builder in ${REPO}. Build ticket #${ticket.number} ("${ticket.title}") of spec #${spec} as one PR into main. A reviewer agent reviews it once its checks are green, and then you answer that review.
@@ -125,7 +128,7 @@ You are in a worktree of your own. Your ports are ${ports(slot)}; no other build
 1. git fetch origin. If an open PR already says it closes #${ticket.number}, check it out (gh pr checkout) and carry on where it stopped. Otherwise branch from origin/main: git switch -c ticket-${ticket.number}-<two or three words> --no-track origin/main.
 2. Read the ticket (gh issue view ${ticket.number} --comments) and the spec (gh issue view ${spec}). Follow CLAUDE.md, and read SPEC.md before you change a module, a seam, a content kind or a page.
 3. pnpm install --frozen-lockfile. Build the ticket test-first with the tdd skill. Look library APIs up with Context7, and the web with Octen, Firecrawl or Parallel, instead of guessing.
-4. pnpm check must pass, and so must the browser tests you added or touched. Read your own diff against the ticket, CLAUDE.md and SPEC.md: does it meet every acceptance criterion, and does it make any line in CLAUDE.md or SPEC.md untrue? Commit in plain English, then git push -u origin <your branch>.
+4. pnpm check must pass, and so must the browser tests you added or touched. ${CONTENT_GATE} Read your own diff against the ticket, CLAUDE.md and SPEC.md: does it meet every acceptance criterion, and does it make any line in CLAUDE.md or SPEC.md untrue? Commit in plain English, then git push -u origin <your branch>.
 5. If the PR isn't open yet, gh pr create --base main: the title is the ticket's title, and the body starts "Closes #${ticket.number}", then follows the pr skill's template.
 6. ${WATCH}
 7. Stop once the PR is open and every check is green, and return it.
@@ -144,7 +147,7 @@ const review = (ticket, pr) =>
   agent(
     `You are the reviewer of PR #${pr} in ${REPO}, which builds ticket #${ticket.number} ("${ticket.title}") of spec #${spec}. Change no file, commit nothing and push nothing: your one write is the review.
 1. git fetch origin, then gh pr checkout ${pr} in your worktree.
-2. Review it with the code-review skill: the fixed point is where the PR leaves main (git merge-base origin/main HEAD), and you check it against ticket #${ticket.number}, CLAUDE.md and SPEC.md. Does it meet every acceptance criterion, keep the rules SPEC.md lists, and leave no line in CLAUDE.md or SPEC.md untrue?
+2. Review it with the code-review skill: the fixed point is where the PR leaves main (git merge-base origin/main HEAD), and you check it against ticket #${ticket.number}, CLAUDE.md and SPEC.md. Does it meet every acceptance criterion, keep the rules SPEC.md lists, and leave no line in CLAUDE.md or SPEC.md untrue? If gh pr diff ${pr} --name-only lists src/content/data, the PR body must record a passing \`pnpm content:verify --changed origin/main\` summary for its head (run it yourself when CARE4MIND_CAPTURES is set); no recorded verify run is a finding.
 3. Post your findings as one PR review with inline comments: write {"event": "COMMENT", "body": <a summary>, "comments": [{"path", "line", "side": "RIGHT", "body"}, …]} to a file outside the repo, then gh api repos/${REPO}/pulls/${pr}/reviews --method POST --input <that file>. One comment per finding, on the line it concerns, saying what is wrong and what would fix it. Leave out style the linters already check. Post the review even when you find nothing, with a body that says so.
 Return posted (whether the PR now carries your review), comments (how many inline comments it has) and a one-line note.`,
     {
@@ -163,7 +166,7 @@ You are in a worktree of your own. Your ports are ${ports(slot)}; no other build
 
 1. git fetch origin, gh pr checkout ${pr}, pnpm install --frozen-lockfile.
 2. Read every review comment (gh api repos/${REPO}/pulls/${pr}/comments, and the PR's reviews). Fix each, or reply with the reason you won't, then resolve its thread (GraphQL resolveReviewThread). Judge each against the ticket, CLAUDE.md and SPEC.md.
-3. pnpm check must pass, and so must the browser tests you touched. Commit in plain English and git push.
+3. pnpm check must pass, and so must the browser tests you touched. ${CONTENT_GATE} Commit in plain English and git push.
 4. ${WATCH}
 5. Stop once every thread is answered or resolved and every check is green, with the PR open.
 ${HANDS_OFF}
@@ -181,7 +184,7 @@ Return opened, ready (every check green and every thread answered or resolved), 
 const land = ({ number, pr }) =>
   agent(
     `Land PR #${pr} in ${REPO}, which closes ticket #${number} of spec #${spec}. You change no file: your only writes are updating and merging this PR.
-1. Re-check it yourself; merge nothing on another agent's word: gh pr view ${pr} --json state,mergeStateStatus,reviews,closingIssuesReferences. It must be open, closing #${number}, with at least one review posted. Every review thread must be resolved (GraphQL reviewThreads). ${WATCH} until every check is green.
+1. Re-check it yourself; merge nothing on another agent's word: gh pr view ${pr} --json state,mergeStateStatus,reviews,closingIssuesReferences,body. It must be open, closing #${number}, with at least one review posted. Every review thread must be resolved (GraphQL reviewThreads). If gh pr diff ${pr} --name-only lists src/content/data, its body must record a passing \`pnpm content:verify --changed origin/main\` summary: no recorded verify run, no merge. ${WATCH} until every check is green.
 2. Anything short of that (red, unreviewed, a thread open, conflicted, or a refusal you cannot fix by updating the branch): stop without merging and say exactly what is short.
 3. Otherwise land it: gh pr merge ${pr} --squash. Never merge with admin rights, never turn on auto-merge, never edit the ruleset, never close the PR or delete its branch yourself: merging closes the ticket and GitHub deletes the branch.
 4. Confirm gh pr view ${pr} --json state says MERGED before you report merged.

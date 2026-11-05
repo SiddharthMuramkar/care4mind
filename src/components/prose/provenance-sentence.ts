@@ -18,6 +18,11 @@ export function provenanceSentence({ provenance, reviewStatus }: CarriedOver) {
   const { sources, drafted = [] } = provenance
   const review =
     reviewStatus === 'reviewed' ? 'Reviewed.' : 'Not yet reviewed by the Research editor.'
+  if (provenance.origin === 'written') {
+    const by = provenance.writtenBy ? ` by ${provenance.writtenBy}` : ''
+    const on = provenance.writtenOn ? ` on ${provenance.writtenOn}` : ''
+    return { opening: `Written for this site${by}${on}. `, sources: [], closing: review }
+  }
   if (sources.length === 0) return { opening: '', sources: [], closing: review }
   const fromCurrentSite = sources.every((source) => CURRENT_SITE.test(source.url))
   const dates = [...new Set(sources.map((source) => source.retrieved))].sort()

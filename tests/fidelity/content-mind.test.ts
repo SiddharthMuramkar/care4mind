@@ -290,10 +290,9 @@ describe('each mind Concept’s coming-later Questionnaire', () => {
     },
   )
 
-  it('flags Sthitaprajña’s Questionnaire for the Psychology expert: no published source found', async () => {
-    const questionnaire = await questionnaires.get('sthitaprajna')
+  it('flags Sthitaprajña’s Questionnaire for the Psychology expert: no published source found', () => {
     expect(
-      questionnaire?.provenance.flags.filter(
+      questionnaireRecord('sthitaprajna')?.provenance.flags.filter(
         (flag) => flag.for === 'psychology-expert' && /no published source/i.test(flag.note),
       ),
     ).toHaveLength(1)

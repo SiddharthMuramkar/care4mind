@@ -65,7 +65,7 @@ These are judgement calls, so review checks them against the diff, in the codeba
 | A Library link to another site says so in words ("another site", the arrow decoration) | keep-list test, over every Reference read elsewhere; browser: library |
 | IAST and Devanagari carry `lang` | script-pair test for name fields, keep-list test for Devanagari runs in running text and the document's own `lang`; components, for the verse-copied toast and the rest. IAST inside running text is untagged (#76) |
 | The migration's records, counts and derived pages stay as carried over, until the client signs it off | the fidelity suite in `tests/fidelity`, which `verify.mjs` runs after checking every record (or `pnpm content:fidelity` alone); not in `pnpm check`, so new content needs no test edit |
-| Carried-over text changes only to fix a listed error | `verify.mjs`, which runs only on a machine with the captures; nothing in CI (#48) |
+| Carried-over text changes only to fix a listed error | `pnpm content:verify` against the captures (`--changed <ref>` scopes it to a branch's records and needs no captures when none changed); ship's builders must pass it on a data PR and record its summary, its reviewer flags a missing run, its land step merges none without one, and a builder stops `needs-info` when the captures are absent (ship test). CI has no captures, so no CI job runs it |
 | Comments and test titles state reasons, not ticket numbers or decision codes | comment-codes test, over every tracked `.ts`, `.tsx`, `.mjs`, `.cjs`, `.js`, `.css` and `.yml` file |
 | A backticked repo path, a `pnpm` script or a section of a doc named in a doc or a comment exists | pointers test |
 | An agent squash-merges only a PR whose `ci` passed on an up-to-date branch, with a review posted and every thread answered; nobody uses auto-merge or `--admin` | the ruleset (squash, up-to-date, threads resolved, `ci`, no bypass) and the ship test, which lets only its land step merge, after review |
@@ -77,7 +77,7 @@ These are judgement calls, so review checks them against the diff, in the codeba
 
 ## Where a change goes
 
-- **A record of an existing kind:** `pnpm content:new <kind> <id>` writes a template that compiles. Fill it in, then run `pnpm check`: no test needs an edit. `pnpm content:fidelity`, and so `verify.mjs`, will then fail, since it pins what the migration carried over; update it only for a change to that migration.
+- **A record of an existing kind:** `pnpm content:new <kind> <id>` writes a template that compiles; with `--written` it writes one for a record written for the new site, whose provenance names its author and day instead of a source page, and which `verify.mjs` doesn't check against the saved pages. Fill it in, then run `pnpm check`: no test needs an edit. `pnpm content:fidelity`, and so `verify.mjs`, will then fail, since it pins what the migration carried over; update it only for a change to that migration.
 - **A link field:** the record schema, the graph's link check, then the view that shows it.
 - **A content kind:** the compiler finds only some of these places, so work through every step:
   1. The record schema: its type, its `define…` helper and its kind's folder.

@@ -2,8 +2,11 @@
 // @ts-check
 // Writes a new record file, with every field of its kind laid out, then the content registry.
 //
-//   pnpm content:new <kind> <id>
-//   node scripts/content/new.mjs <kind> <id> [--root <dir>]
+//   pnpm content:new <kind> <id> [--written]
+//   node scripts/content/new.mjs <kind> <id> [--written] [--root <dir>]
+//
+// Without --written the record is carried over from a saved page. With it the record is written
+// for the new site: its provenance names its author and day instead of a source page.
 //
 // It refuses a file that exists and an id that breaks the id rules. It reads no saved page and
 // never touches the network. How to fill it is in the comment atop each template (`FILLING`), the
@@ -18,8 +21,8 @@ import { fileURLToPath } from 'node:url'
 import { rootFrom, runTool, ToolError } from './cli.mjs'
 import { KIND_FOLDERS } from './records.mjs'
 
-const USAGE = `Usage: pnpm content:new <kind> <id>
-Kinds: ${Object.keys(KIND_FOLDERS).join(', ')}.`
+const USAGE = `Usage: pnpm content:new <kind> <id> [--written]
+Kinds: ${Object.keys(KIND_FOLDERS).join(', ')}. --written writes a record written for the new site, with no source page.`
 
 const SLUG = /^[a-z0-9]+(?:-[a-z0-9]+)*$/
 // No leading zeros: the locator becomes the number literals of `order`, where 05 is not a number.
@@ -46,7 +49,22 @@ const PROVENANCE = `  provenance: {
     edits: [], // one change each; a replacement is written “old” → “new”, a deletion “old” → “”
     flags: [], // { for: 'research-editor' | 'psychology-expert' | 'project-owner', note, decidedBy? }
     // drafted: [], // fields written for the new site: never in a migration ticket
+    // origin: 'written', writtenBy: '', writtenOn: '', // only a record made with --written
   },`
+
+const PROVENANCE_WRITTEN = `  provenance: {
+    // Written for the new site: no saved page holds these words, so no source is named.
+    origin: 'written',
+    sources: [],
+    edits: [],
+    flags: [], // { for: 'research-editor' | 'psychology-expert' | 'project-owner', note, decidedBy? }
+    writtenBy: '', // who wrote this record
+    writtenOn: '', // the day it was written, as 2026-11-06
+  },`
+
+/** A template's provenance and review status: carried over, or written with `--written`. */
+const provenanceOf = (written) => (written ? PROVENANCE_WRITTEN : PROVENANCE)
+const statusOf = (written) => (written ? 'drafted-not-reviewed' : 'carried-over-not-reviewed')
 
 /** How to fill any record from a saved page: the rules no test or type can check. */
 const FILLING = `//
@@ -67,16 +85,28 @@ const FILLING = `//
 // - Nothing is drafted: a migrated record is carried-over-not-reviewed.
 //`
 
+/** How to write a record new: the rules no test or type can check. */
+const FILLING_WRITTEN = `//
+// - Every field is yours to write: nothing came from a saved page, so provenance names no
+//   source, no edits and no drafted fields — only origin: 'written', writtenBy and writtenOn.
+// - Text is NFC, with anusvara written ṃ, never ṁ. A fact you cannot stand over is flagged
+//   for the role that decides it: research-editor (sources, spellings, wording),
+//   psychology-expert (anything about a Questionnaire) or project-owner (rights, scope).
+//   Write each note to stand alone.
+// - Score and interpretation text is never written: describe each in heldBack, never quote it.
+// - Until a person checks it, a written record is drafted-not-reviewed.
+//`
+
 /** The body of each kind's record, as TypeScript: every field, optional ones commented out. */
 const TEMPLATES = {
-  concept: (id) => `defineConcept({
+  concept: (id, written) => `defineConcept({
   kind: 'concept',
   slug: '${id}',
   // The headword from the page's own text; \`english\` only as a gloss the page gives.
   name: { term: { iast: '', devanagari: '', ascii: [] }, english: '' },
-  summary: '', // sentences from the page, never newly written
+  summary: '', // ${written ? 'your own sentences' : 'sentences from the page, never newly written'}
   // whyItMatters: '', // one line, once the Research editor supplies it
-  keywords: [], // plain lowercase words from its own text; name 'keywords' in provenance.drafted
+  keywords: [], // plain lowercase words from its own text${written ? '' : "; name 'keywords' in provenance.drafted"}
   topics: { primary: '' }, // also: []
   verses: [], // { passage: 'work/locator', translation: '', meaning: '' }, in the page's order
   sections: [], // { id, heading, role?, blocks }
@@ -84,17 +114,17 @@ const TEMPLATES = {
   // questionnaire: '',
   // related: [],
   // external: [{ label: '', url: '' }],
-  reviewStatus: 'carried-over-not-reviewed',
-${PROVENANCE}
+  reviewStatus: '${statusOf(written)}',
+${provenanceOf(written)}
 })`,
-  topic: (id) => `defineTopic({
+  topic: (id, written) => `defineTopic({
   kind: 'topic',
   slug: '${id}',
   name: { english: '' }, // term: { iast: '', ascii: [] }
   order: 0,
-  // intro: { sections: [], references: [], provenance: { sources: [], edits: [], flags: [] } },
+  // intro: { sections: [], references: [], provenance: { ${written ? "origin: 'written', sources: [], edits: [], flags: [], writtenBy: '', writtenOn: ''" : 'sources: [], edits: [], flags: []'} } },
 })`,
-  work: (id) => `defineWork({
+  work: (id, written) => `defineWork({
   kind: 'work',
   slug: '${id}',
   title: { iast: '', ascii: [] }, // devanagari: '', english: ''
@@ -102,9 +132,9 @@ ${PROVENANCE}
   // attribution: '',
   locatorLabel: '',
   // editions: [],
-${PROVENANCE}
+${provenanceOf(written)}
 })`,
-  passage: (id) => {
+  passage: (id, written) => {
     const [work, locator] = id.split('/')
     return `definePassage({
   kind: 'passage',
@@ -115,10 +145,10 @@ ${PROVENANCE}
   devanagari: [], // lines as a page gives them; empty, and flagged, when no page does
   // transliteration: { lines: [], scheme: 'iast' }, // 'informal' unless it follows IAST
   translations: [], // { id, text, source? }: each text a page labels "Translation"
-${PROVENANCE}
+${provenanceOf(written)}
 })`
   },
-  reference: (id) => `defineReference({
+  reference: (id, written) => `defineReference({
   kind: 'reference',
   id: '${id}',
   type: 'journal-article', // book, chapter, thesis, web-page, dictionary-entry, report or other
@@ -135,9 +165,9 @@ ${PROVENANCE}
   // url: '',
   // noStableLink: 'none given on the current site; not looked up',
   asCited: [], // each distinct way a page writes it
-${PROVENANCE}
+${provenanceOf(written)}
 })`,
-  questionnaire: (id) => `defineQuestionnaire({
+  questionnaire: (id, written) => `defineQuestionnaire({
   kind: 'questionnaire',
   slug: '${id}',
   title: '', // the name the page gives its questionnaire, else the page title
@@ -154,34 +184,34 @@ ${PROVENANCE}
   scoring: { status: 'pending', reason: '' },
   heldBack: [], // { what, where }: each score section left out, described, never quoted
   // rights: { status: 'permission-needed', holder: '', note: '' },
-  reviewStatus: 'carried-over-not-reviewed',
-${PROVENANCE}
+  reviewStatus: '${statusOf(written)}',
+${provenanceOf(written)}
 })`,
-  glossary: (id) => `defineGlossaryEntry({
+  glossary: (id, written) => `defineGlossaryEntry({
   kind: 'glossary',
   slug: '${id}',
   name: { ascii: '' }, // devanagari: '', iast: ''
   // definition: '',
   // url: '', // its DharmaWiki article, exactly as the card links it
   // concept: '',
-${PROVENANCE}
+${provenanceOf(written)}
 })`,
-  'resource-list': (id) => `defineResourceList({
+  'resource-list': (id, written) => `defineResourceList({
   kind: 'resource-list',
   slug: '${id}',
   title: '',
   groups: [], // { id, heading, items }: each item a Reference or a course (see the schema)
-${PROVENANCE}
+${provenanceOf(written)}
 })`,
-  page: (id) => `definePage({
+  page: (id, written) => `definePage({
   kind: 'page',
   slug: '${id}',
   title: '',
   summary: '',
   sections: [],
-${PROVENANCE}
+${provenanceOf(written)}
 })`,
-  home: () => `defineHome({
+  home: (_id, written) => `defineHome({
   kind: 'home',
   tagline: '',
   shloka: { devanagari: '', iast: '', translation: '' },
@@ -196,19 +226,22 @@ ${PROVENANCE}
   closing: '',
   helpLine: '',
   footerQuestionnaires: '',
-${PROVENANCE}
+${provenanceOf(written)}
 })`,
 }
 
 /** The record file for a new record of this kind and id. */
-function template(kind, id) {
-  const body = TEMPLATES[kind](id)
+function template(kind, id, written) {
+  const body = TEMPLATES[kind](id, written)
   const helper = body.slice(0, body.indexOf('('))
+  const madeWith = written ? ` --written` : ''
+  const filling = written
+    ? `Write every field yourself; delete the commented fields you leave out.`
+    : `Fill every field from the saved page's outline\n// (\`node scripts/content/extract.mjs <slug>\`); delete the commented fields the page doesn't give.`
   return `import { ${helper} } from '@/content/schema'
 
-// Written by \`pnpm content:new ${kind} ${id}\`. Fill every field from the saved page's outline
-// (\`node scripts/content/extract.mjs <slug>\`); delete the commented fields the page doesn't give.
-${FILLING}
+// Written by \`pnpm content:new ${kind} ${id}${madeWith}\`. ${filling}
+${written ? FILLING_WRITTEN : FILLING}
 // Then check it with \`node scripts/content/verify.mjs ${kind}/${id}\`.
 export default ${body}
 `
@@ -220,7 +253,8 @@ async function main(args) {
     return 0
   }
   const { root, rest } = rootFrom(args)
-  const [kind, id, ...extra] = rest
+  const written = rest.includes('--written')
+  const [kind, id, ...extra] = rest.filter((arg) => arg !== '--written')
   if (!kind || !id || extra.length > 0) throw new ToolError(USAGE)
   if (!(kind in KIND_FOLDERS)) throw new ToolError(`“${kind}” is not a kind of record.\n${USAGE}`)
   const problem = idProblem(kind, id)
@@ -230,15 +264,17 @@ async function main(args) {
   const file = join(root, path)
   if (existsSync(file)) throw new ToolError(`${path} exists already: edit it instead.`)
   mkdirSync(dirname(file), { recursive: true })
-  writeFileSync(file, template(kind, id))
+  writeFileSync(file, template(kind, id, written))
 
   const registry = fileURLToPath(new URL('./registry.mjs', import.meta.url))
-  const written = spawnSync(process.execPath, [registry, '--root', root], { encoding: 'utf8' })
-  if (written.status !== 0) throw new ToolError(written.stderr.trim())
+  const registryRun = spawnSync(process.execPath, [registry, '--root', root], { encoding: 'utf8' })
+  if (registryRun.status !== 0) throw new ToolError(registryRun.stderr.trim())
   process.stdout.write(
     `Wrote ${path}, and the registry.\n` +
-      `Fill it from the saved page (node scripts/content/extract.mjs <slug>), then check it with ` +
-      `node scripts/content/verify.mjs ${kind}/${id}\n`,
+      (written
+        ? `Write it, then check it with node scripts/content/verify.mjs ${kind}/${id}\n`
+        : `Fill it from the saved page (node scripts/content/extract.mjs <slug>), then check it with ` +
+          `node scripts/content/verify.mjs ${kind}/${id}\n`),
   )
   return 0
 }

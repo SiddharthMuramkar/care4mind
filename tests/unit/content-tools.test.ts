@@ -13,7 +13,7 @@ import { join, resolve } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 
 import ts from 'typescript'
-import { afterAll, beforeAll, describe, expect, it } from 'vitest'
+import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 
 import {
   CONTENT_KINDS,
@@ -655,6 +655,25 @@ describe('verify', () => {
     })
   })
 
+  it('checks no string of a written record against a page', () => {
+    const record = concept(paragraphs('Words no saved page has, written new.'), {
+      reviewStatus: 'drafted-not-reviewed',
+      provenance: {
+        origin: 'written',
+        sources: [],
+        edits: [],
+        flags: [],
+        writtenBy: 'An Author',
+        writtenOn: '2026-11-06',
+      },
+    })
+    expect(verify.checkRecord(record, site)).toMatchObject({
+      status: 'written',
+      checked: 0,
+      misses: [],
+    })
+  })
+
   it('reads a Questionnaire’s source as a link, and a translation’s source as text', () => {
     const questionnaire: QuestionnaireRecord = {
       kind: 'questionnaire',
@@ -838,7 +857,7 @@ describe('the verify command', { timeout: 30_000 }, () => {
       /unchecked\s+reference\/author-2020: no saved copy of https:\/\/doi\.org\/10\.0000\/example/,
     )
     expect(result.stdout).toContain(
-      'verify: 3 records · 1 passed · 1 unchecked · 1 structure only · 0 failed',
+      'verify: 3 records · 1 passed · 1 unchecked · 0 written · 1 structure only · 0 failed',
     )
   })
 
@@ -850,7 +869,7 @@ describe('the verify command', { timeout: 30_000 }, () => {
     expect(result.stdout).toContain('Every rule needs an exemplar.')
     expect(result.stdout).toContain('Every rule needs an example.')
     expect(result.stdout).toContain(
-      'verify: 4 records · 1 passed · 1 unchecked · 1 structure only · 1 failed',
+      'verify: 4 records · 1 passed · 1 unchecked · 0 written · 1 structure only · 1 failed',
     )
   })
 
@@ -920,6 +939,100 @@ describe('the verify command', { timeout: 30_000 }, () => {
       const result = run('verify', ['--root', pinning('fidelity-named', 2), 'concept'], env)
       expect(result.stdout).not.toContain('fidelity:')
       expect(result.status).toBe(0)
+    })
+  })
+
+  describe('with --changed', () => {
+    let changedRoot = ''
+
+    const gitIn = (...args: string[]) =>
+      spawnSync(
+        'git',
+        ['-C', changedRoot, '-c', 'user.email=test@example.org', '-c', 'user.name=Test', ...args],
+        { encoding: 'utf8' },
+      )
+
+    const writeConcept = (slug: string, record: object) => {
+      writeFileSync(
+        join(changedRoot, 'src/content/data/concepts', `${slug}.ts`),
+        recordFile(record),
+      )
+      expect(run('registry', ['--root', changedRoot]).status).toBe(0)
+    }
+
+    const changedIn = (env: Record<string, string | undefined> = { CARE4MIND_CAPTURES: site }) =>
+      run('verify', ['--root', changedRoot, '--changed', 'HEAD'], env)
+
+    beforeAll(() => {
+      changedRoot = repo('verify-changed-repo', {
+        'concepts/udaharana.ts': recordFile(concept(paragraphs('Every rule needs an example.'))),
+        'concepts/broken.ts': recordFile(
+          concept(paragraphs('Every rule needs an exemplar.'), { slug: 'broken' }),
+        ),
+      })
+      expect(gitIn('init').status).toBe(0)
+      expect(gitIn('add', '-A').status).toBe(0)
+      expect(gitIn('commit', '-m', 'base').status).toBe(0)
+    })
+
+    beforeEach(() => {
+      gitIn('checkout', '--', '.')
+      gitIn('clean', '-fd', '--', 'src/content/data')
+      expect(run('registry', ['--root', changedRoot]).status).toBe(0)
+      gitIn('checkout', '--', 'src/content/generated')
+    })
+
+    it('passes at once without the captures when no record file changed', () => {
+      const result = changedIn({ CARE4MIND_CAPTURES: undefined })
+      expect(result.status).toBe(0)
+      expect(result.stdout).toContain('verify: no record files changed since HEAD')
+    })
+
+    it('checks only the changed records, and a listed edit passes', () => {
+      writeConcept(
+        'udaharana',
+        concept(paragraphs('Every rule needs a law.'), editedBy('“an example” → “a law”')),
+      )
+      const result = changedIn()
+      expect(result.status).toBe(0)
+      expect(result.stdout).toContain('concept/udaharana')
+      expect(result.stdout).not.toContain('concept/broken')
+      expect(result.stdout).toContain('verify: 1 records')
+    })
+
+    it('fails a changed record whose new text no listed edit explains', () => {
+      writeConcept('udaharana', concept(paragraphs('Every rule needs an exemplar.')))
+      const result = changedIn()
+      expect(result.status).toBe(1)
+      expect(result.stdout).toMatch(/FAILED\s+concept\/udaharana/)
+      expect(result.stdout).not.toContain('concept/broken')
+    })
+
+    it('never fails a changed record written for the new site, which has no source page', () => {
+      const written = JSON.parse(
+        JSON.stringify(
+          concept(paragraphs('A sentence written here, on no saved page.'), { slug: 'written' }),
+        ),
+      ) as { provenance: Record<string, unknown> }
+      written.provenance = { origin: 'written', sources: [], edits: [], flags: [] }
+      writeConcept('written', written)
+      const result = changedIn()
+      expect(result.status).toBe(0)
+      expect(result.stdout).toContain('concept/written')
+      expect(result.stdout).not.toContain('FAILED')
+    })
+
+    it('exits 2 for a ref git cannot use, and for --changed with no ref', () => {
+      const unknown = run('verify', ['--root', changedRoot, '--changed', 'no-such-ref'], {
+        CARE4MIND_CAPTURES: site,
+      })
+      expect(unknown.status).toBe(2)
+      expect(unknown.stderr).toContain('--changed no-such-ref')
+      const missing = run('verify', ['--root', changedRoot, '--changed'], {
+        CARE4MIND_CAPTURES: site,
+      })
+      expect(missing.status).toBe(2)
+      expect(missing.stderr).toContain('--changed needs a ref')
     })
   })
 })
@@ -1162,6 +1275,45 @@ describe('new', { timeout: 30_000 }, () => {
     expect(result.stdout).toContain('src/content/data/passages/example-sutra/1.12.ts')
   })
 
+  it('writes a written template with no source to invent', () => {
+    const root = emptyRepo('new-written')
+    const result = run('new', ['concept', 'example', '--written', '--root', root])
+    expect(result.status).toBe(0)
+    const template = readFileSync(join(root, 'src/content/data/concepts/example.ts'), 'utf8')
+    expect(template).toContain("origin: 'written'")
+    expect(template).toContain("writtenBy: ''")
+    expect(template).toContain("writtenOn: ''")
+    expect(template).toContain("reviewStatus: 'drafted-not-reviewed'")
+    expect(template).not.toContain('care4mind.org/vikshepa')
+    expect(template).not.toContain("retrieved: '2026-10-27'")
+    expect(result.stdout).toContain('Write it, then check it')
+  })
+
+  it('writes a written template for every kind that typechecks', { timeout: 60_000 }, () => {
+    const root = emptyRepo('new-written-every-kind')
+    const files = CONTENT_KINDS.map((kind) => {
+      const id = kind === 'home' ? 'home' : kind === 'passage' ? 'example-sutra/1.2' : 'example'
+      expect(run('new', [kind, id, '--written', '--root', root]).status, kind).toBe(0)
+      return join(root, 'src/content/data', KIND_FOLDERS[kind], `${id}.ts`)
+    })
+    for (const file of files) expect(readFileSync(file, 'utf8'), file).toContain("'written'")
+    const program = ts.createProgram(files, {
+      strict: true,
+      noEmit: true,
+      skipLibCheck: true,
+      target: ts.ScriptTarget.ES2023,
+      module: ts.ModuleKind.ESNext,
+      moduleResolution: ts.ModuleResolutionKind.Bundler,
+      verbatimModuleSyntax: true,
+      types: [],
+      paths: { '@/*': [`${resolve('src')}/*`] },
+    })
+    const problems = ts
+      .getPreEmitDiagnostics(program)
+      .map((d) => `${d.file?.fileName}: ${ts.flattenDiagnosticMessageText(d.messageText, '\n')}`)
+    expect(problems).toEqual([])
+  })
+
   it('refuses a file that exists and an id that breaks the id rules', () => {
     const root = emptyRepo('new-refusals')
     expect(run('new', ['concept', 'example', '--root', root]).status).toBe(0)
@@ -1234,7 +1386,9 @@ describe('new', { timeout: 30_000 }, () => {
       const text = source.getFullText()
       const missing = [
         ...fields,
-        ...(kind === 'topic' ? [] : ['sources', 'edits', 'flags', 'drafted']),
+        ...(kind === 'topic'
+          ? []
+          : ['origin', 'sources', 'edits', 'flags', 'drafted', 'writtenBy', 'writtenOn']),
       ].filter((field) => !new RegExp(`(^|[\\s{,/])${field}:`, 'm').test(text))
       expect(missing, kind).toEqual([])
     }

@@ -11,7 +11,6 @@ import type {
   ContentKind,
   HomepageHero,
   Inline,
-  Provenance,
   QuestionnaireStatus,
   ReferenceType,
   ReviewStatus,
@@ -90,13 +89,24 @@ export interface RecordRef {
   href: Route
 }
 
-/** Where a carried-over record's text came from, the old address included, and every change made. */
-export type ProvenanceView = Provenance
+/**
+ * Where a record's text came from, as a page may show it: its sources, the edits made on the
+ * way, and who wrote it and when if it was written here. A record's flags are internal notes
+ * for named people, so no view carries them.
+ */
+export interface ProvenanceView {
+  origin?: 'written'
+  sources: readonly { url: string; retrieved: string }[]
+  edits: readonly string[]
+  drafted?: readonly string[]
+  writtenBy?: string
+  writtenOn?: string
+}
 
 /** Whether anyone has checked a record's text: carried over, drafted or reviewed. */
 export type ContentReviewStatus = ReviewStatus
 
-/** What every view of a carried-over record carries. */
+/** What every view of a record carries: where its text came from, and whether it was reviewed. */
 export interface CarriedOver {
   provenance: ProvenanceView
   reviewStatus: ContentReviewStatus

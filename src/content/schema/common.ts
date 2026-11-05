@@ -50,6 +50,12 @@ export interface Flag {
 
 /** Where a record came from, and every change made on the way. */
 export interface Provenance {
+  /**
+   * `'written'` when the record was written for the new site, with `writtenBy` and `writtenOn`
+   * naming its author and day, and no sources, edits or drafted fields. Absent, the record was
+   * carried over from its sources.
+   */
+  origin?: 'written'
   /** The current-site pages (or, for a record no page holds, the source) it was read from. */
   sources: readonly { url: string; retrieved: string }[]
   /**
@@ -62,6 +68,10 @@ export interface Provenance {
   flags: readonly Flag[]
   /** Field paths written for the new site rather than carried over, such as `summary`. */
   drafted?: readonly string[]
+  /** Who wrote a record with `origin: 'written'`. */
+  writtenBy?: string
+  /** The day a record with `origin: 'written'` was written, as `2026-11-06`. */
+  writtenOn?: string
 }
 
 /** Whether anyone has checked a record. One with drafted fields is "drafted, not reviewed". */
