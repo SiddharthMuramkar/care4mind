@@ -539,8 +539,11 @@ test.describe('Concept page v2: citations', () => {
     await expect(entry).toBeFocused()
     await expect(entry).toBeInViewport()
     await expect(references(page).disclosure).toHaveAttribute('open')
-    // At the top the sticky header covers nothing, so no target reads as partly obscured.
-    await page.evaluate(() => window.scrollTo({ top: 0, behavior: 'instant' }))
+    // Clear of the sticky header, which would otherwise cover part of a link: scroll-padding
+    // parks the list's control just below it, and instantly, as axe can't scan a moving page.
+    await references(page).toggle.evaluate((toggle) =>
+      toggle.scrollIntoView({ block: 'start', behavior: 'instant' }),
+    )
     await expectNoAxeViolations(page)
   })
 
