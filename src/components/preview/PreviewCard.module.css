@@ -25,8 +25,6 @@
 
 .kind {
   color: var(--color-preview-muted);
-  font-variant-caps: all-small-caps;
-  letter-spacing: 0.14em;
   font-size: 1rem;
 }
 
@@ -53,8 +51,6 @@
 
 .gloss {
   color: var(--color-preview-muted);
-  font-variant-caps: all-small-caps;
-  letter-spacing: 0.08em;
   font-size: 1.0625rem;
 }
 

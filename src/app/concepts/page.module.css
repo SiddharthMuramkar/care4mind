@@ -1,8 +1,6 @@
 /* What the A–Z holds, counted. */
 .facts {
   margin: 0;
-  font-variant-caps: all-small-caps;
-  letter-spacing: 0.1em;
   font-size: 1.0625rem;
   color: var(--color-surface-muted);
 }
@@ -31,4 +29,8 @@
 .note {
   font-style: italic;
   color: var(--color-surface-muted);
+}
+
+.note a {
+  font-style: normal;
 }

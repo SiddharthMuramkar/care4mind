@@ -117,8 +117,6 @@
   flex: none;
   max-inline-size: 48%;
   font-family: var(--font-text);
-  font-variant-caps: all-small-caps;
-  letter-spacing: 0.08em;
   font-size: 0.875rem;
   line-height: 1.1;
 }
@@ -204,16 +202,12 @@
   writing-mode: horizontal-tb;
   max-inline-size: none;
   font-family: var(--font-display);
-  font-variant-caps: normal;
   font-size: 1.375rem;
-  letter-spacing: 0;
 }
 
 /* What a volume holds, as a number on its spine; in words to a screen reader and on a phone. */
 .unit {
   font-family: var(--font-text);
-  font-variant-caps: all-small-caps;
-  letter-spacing: 0.08em;
   font-size: 1.0625rem;
 }
 

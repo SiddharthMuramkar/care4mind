@@ -102,7 +102,7 @@
   }
 }
 
-/* A panel's running head: small capitals over a printer's double rule, a thick line over a thin. */
+/* A panel's running head, over a printer's double rule, a thick line over a thin. */
 .head {
   margin-bottom: 0.5rem;
 }
@@ -110,8 +110,6 @@
 .kicker {
   margin: 0 0 0.5rem;
   color: var(--color-panel-muted);
-  font-variant-caps: all-small-caps;
-  letter-spacing: 0.14em;
   font-size: 1rem;
 }
 
@@ -156,7 +154,7 @@
 }
 
 .concepts .entry {
-  grid-template-columns: 1.75rem auto minmax(1.5rem, 1fr) auto;
+  grid-template-columns: 3.25rem auto minmax(1.5rem, 1fr) auto;
 }
 
 /* A wash behind the row, faded in by opacity. */
@@ -215,8 +213,6 @@
 
 .count {
   color: var(--color-panel-muted);
-  font-variant-caps: all-small-caps;
-  letter-spacing: 0.08em;
   font-variant-numeric: oldstyle-nums proportional-nums;
   white-space: nowrap;
 }
@@ -295,9 +291,7 @@
   align-items: center;
   gap: 0.5rem;
   min-height: 44px;
-  color: var(--color-surface-link);
-  font-variant-caps: all-small-caps;
-  letter-spacing: 0.1em;
+  color: var(--color-link);
   font-size: 1.0625rem;
   text-decoration: none;
 }

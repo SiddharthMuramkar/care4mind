@@ -102,8 +102,8 @@ export default async function TopicPage({ params }: PageProps<'/topics/[slug]'>)
       width="plate"
       kicker={
         <>
-          Topic{' '}
-          <span className={styles.order} aria-hidden>
+          Topic {topic.order}
+          <span className={styles.order} lang="sa-Deva" aria-hidden>
             {toDevanagariDigits(String(topic.order))}
           </span>
         </>

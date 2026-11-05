@@ -103,27 +103,19 @@
 .away {
   font-family: var(--font-text);
   font-size: 0.75em;
-  font-variant-caps: all-small-caps;
-  letter-spacing: 0.08em;
   white-space: nowrap;
 }
 
 .meta {
-  font-variant-caps: all-small-caps;
-  letter-spacing: 0.08em;
   font-size: 1.0625rem;
   color: var(--color-surface-muted);
 }
 
 .gloss {
-  font-variant-caps: normal;
-  letter-spacing: 0;
   font-style: italic;
 }
 
 .within {
-  font-variant-caps: normal;
-  letter-spacing: 0;
 }
 
 .within:lang(sa-Latn) {

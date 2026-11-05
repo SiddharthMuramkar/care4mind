@@ -38,8 +38,8 @@ export const plateScope = styles.scope
 export const plateCard = (row: number) => ({ 'data-plate-card': row })
 
 /**
- * The Topics contents plate: rows set like a book's contents, each a Devanagari numeral,
- * a name and a dotted leader running out to what the row holds. Pointing at or focusing a row,
+ * The Topics contents plate: rows set like a book's contents, each a Western numeral beside
+ * its Devanagari one, a name and a dotted leader running out to what the row holds. Pointing at or focusing a row,
  * or the card it stands for, lights it, and its leader inks in from the centre. Finished and
  * still by default and in print; the numerals and leaders are decoration. The homepage sets its
  * five topics with it too.
@@ -79,7 +79,8 @@ export function ContentsPlate({
               return (
                 <li key={row.key} className={styles.row} data-plate-row={number}>
                   <span className={styles.numeral} aria-hidden>
-                    {toDevanagariDigits(String(number))}
+                    <span>{number}</span>{' '}
+                    <span lang="sa-Deva">{toDevanagariDigits(String(number))}</span>
                   </span>
                   <Link
                     href={row.href}

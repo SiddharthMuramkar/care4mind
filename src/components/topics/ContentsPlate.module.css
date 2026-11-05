@@ -26,8 +26,6 @@
 
 .groupTitle {
   margin: 0.75rem 0 0;
-  font-variant-caps: all-small-caps;
-  letter-spacing: 0.1em;
   color: var(--color-surface-muted);
 }
 
@@ -41,7 +39,7 @@
 .row {
   position: relative;
   display: grid;
-  grid-template-columns: 2rem minmax(0, max-content) minmax(1rem, 1fr) auto;
+  grid-template-columns: 3.5rem minmax(0, max-content) minmax(1rem, 1fr) auto;
   grid-template-areas: 'numeral name leader trailing';
   /* A name that wraps runs its leader out from its last line, as a book's contents do. */
   align-items: last baseline;
@@ -130,15 +128,11 @@
   grid-area: trailing;
   max-width: 14rem;
   text-align: end;
-  font-variant-caps: all-small-caps;
-  letter-spacing: 0.08em;
   color: var(--color-surface-muted);
 }
 
 .trailing:lang(sa-Deva) {
   font-family: var(--font-deva);
-  font-variant-caps: normal;
-  letter-spacing: 0;
   font-size: 1.125rem;
 }
 

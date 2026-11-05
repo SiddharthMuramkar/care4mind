@@ -85,8 +85,9 @@ export function MenuDrawer({
                         className={styles.section}
                         style={{ '--index': index } as CSSProperties}
                       >
-                        <span lang="sa-Deva" className={styles.numeral} aria-hidden>
-                          {toDevanagariDigits(String(index + 1))}
+                        <span className={styles.numeral} aria-hidden>
+                          <span>{index + 1}</span>{' '}
+                          <span lang="sa-Deva">{toDevanagariDigits(String(index + 1))}</span>
                         </span>
                         <Link
                           href={section.href}

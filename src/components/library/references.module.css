@@ -100,8 +100,6 @@
 }
 
 .type {
-  font-variant-caps: all-small-caps;
-  letter-spacing: 0.1em;
   font-size: 1rem;
   color: var(--color-surface-muted);
 }
@@ -164,7 +162,7 @@
   color: var(--color-link);
 }
 
-/* "Copy citation": a quiet line of small capitals, pressed into the paper. */
+/* "Copy citation": a quiet line, pressed into the paper. */
 .copy {
   display: inline-flex;
   align-items: center;
@@ -177,8 +175,6 @@
   background: none;
   color: var(--color-link);
   font: inherit;
-  font-variant-caps: all-small-caps;
-  letter-spacing: 0.1em;
   font-size: 1.0625rem;
   cursor: pointer;
   overflow: hidden;

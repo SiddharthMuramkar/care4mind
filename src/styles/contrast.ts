@@ -131,7 +131,8 @@ export const CONTRAST_PAIRS = [
   { foreground: 'ink', background: 'ink-spread', over: 'ground', minimum: 4.5 },
   { foreground: 'surface-ink', background: 'ink-spread', over: 'surface', minimum: 4.5 },
 
-  // Topic hues are drawings, never text, on the page and on paper alike.
+  // Topic hues are drawings, never text, on the page and on paper alike. The TopicChip's
+  // mark is one: its text is the surface-ink on surface pair above, its dot these on surface.
   ...(['self', 'mind', 'practice', 'values', 'temperament'] as const).flatMap(
     (topic) =>
       [
