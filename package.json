@@ -21,7 +21,7 @@
     "lint": "eslint --cache --cache-location node_modules/.cache/eslint/ .",
     "format": "prettier --write .",
     "format:check": "prettier --check --cache .",
-    "typecheck": "node scripts/content/registry.mjs && next typegen && tsc --noEmit",
+    "typecheck": "node scripts/content/registry.mjs && next typegen && tsc --noEmit && tsc -p scripts --noEmit",
     "test": "node scripts/content/registry.mjs && vitest run",
     "test:watch": "vitest",
     "test:e2e": "node scripts/content/registry.mjs && playwright test",
@@ -33,8 +33,7 @@
     "content:new": "node scripts/content/new.mjs",
     "content:fidelity": "vitest run --config vitest.fidelity.config.ts",
     "ruleset:check": "node scripts/github/ruleset.mjs",
-    "ruleset:apply": "node scripts/github/apply-ruleset.mjs",
-    "prepare": "node scripts/githooks/install.mjs"
+    "ruleset:apply": "node scripts/github/apply-ruleset.mjs"
   },
   "dependencies": {
     "@base-ui/react": "1.9.0",

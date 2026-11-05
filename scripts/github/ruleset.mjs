@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+// @ts-check
 // The ruleset that protects main lives in .github/rulesets/main.json, and this compares it with
 // the one GitHub enforces. Agents act through the developer's own GitHub login, so GitHub can't
 // tell them apart, and the ruleset has no bypass: it holds for everyone.

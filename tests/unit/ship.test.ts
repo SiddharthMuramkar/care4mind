@@ -3,8 +3,8 @@ import { readFileSync } from 'node:fs'
 import { describe, expect, it } from 'vitest'
 
 // The ship workflow (.claude/workflows/ship.js), run against made-up agents: it opens PRs, has a
-// reviewer agent review each and its builder answer the review, leaves them for the developer,
-// never tells an agent to merge or delete a branch, and gives every agent an explicit, light model.
+// reviewer agent review each and its builder answer the review, then its land step alone
+// squash-merges each reviewed green PR, and gives every agent an explicit, light model.
 
 interface Call {
   prompt: string
@@ -18,7 +18,7 @@ interface Ticket {
 
 interface Frontier {
   ready: Ticket[]
-  awaitingYou: { number: number; pr: number }[]
+  awaitingMerge: { number: number; pr: number }[]
   forDeveloper: Ticket[]
   open: number
 }
@@ -59,17 +59,18 @@ const frontiers = (...answers: (Frontier | null)[]) => {
 
 const TICKET = { number: 5, title: 'A ticket' }
 const OTHER = { number: 6, title: 'Another ticket' }
-const NOTHING: Frontier = { ready: [], awaitingYou: [], forDeveloper: [], open: 1 }
+const NOTHING: Frontier = { ready: [], awaitingMerge: [], forDeveloper: [], open: 1 }
 const REVIEWED = { posted: true, comments: 2, note: 'two findings' }
 const GREEN = { opened: true, ready: true, pr: 50, note: 'green' }
 
-/** Answers the start and the reviewer; `frontier` answers the frontier and `builder` the rest. */
+/** Answers start, reviewer and land; `frontier` answers the frontier and `builder` the rest. */
 const agents =
   (frontier: () => unknown, builder: (call: Call) => unknown = () => GREEN) =>
   (call: Call) => {
     if (call.opts.label === 'start') return { ok: true, note: '' }
     if (call.opts.label === 'frontier') return frontier()
     if (call.opts.label?.startsWith('review')) return REVIEWED
+    if (call.opts.label?.startsWith('land')) return { merged: true, pr: 50, note: 'merged' }
     return builder(call)
   }
 
@@ -85,20 +86,30 @@ describe('ship', () => {
     expect(calls.map((call) => call.opts.label)).toEqual(['frontier'])
   })
 
-  it('builds a ready ticket, then leaves its PR for the developer instead of merging', async () => {
-    const frontier = frontiers(
-      { ...NOTHING, ready: [TICKET], open: 2 },
-      { ...NOTHING, awaitingYou: [{ number: 5, pr: 50 }], open: 2 },
-    )
+  it('builds a ready ticket, then lands its PR once reviewed and green', async () => {
+    const frontier = frontiers({ ...NOTHING, ready: [TICKET], open: 2 }, NOTHING)
     const { result, calls, logs } = await ship({ spec: 101 }, agents(frontier))
     expect(result).toEqual({
-      awaitingYou: [{ number: 5, pr: 50 }],
+      merged: [{ number: 5, pr: 50 }],
+      awaitingMerge: [],
       stopped: [],
       waitingOnYou: [],
-      open: 2,
+      open: 1,
     })
-    expect(logs).toContain('Ready for your review: PR #50 (#5)')
+    expect(logs).toContain('#5 landed: PR #50 merged')
+    expect(calls.map((call) => call.opts.label)).toContain('land #5')
     expect(calls.map((call) => call.opts.label)).not.toContain('final review')
+  })
+
+  it('lands a reviewed green PR left by an earlier run, without rebuilding it', async () => {
+    const frontier = frontiers(
+      { ...NOTHING, awaitingMerge: [{ number: 5, pr: 50 }], open: 2 },
+      NOTHING,
+    )
+    const { result, calls } = await ship({ spec: 101 }, agents(frontier))
+    expect(result).toMatchObject({ merged: [{ number: 5, pr: 50 }], awaitingMerge: [] })
+    expect(calls.map((call) => call.opts.label)).not.toContain('#5')
+    expect(calls.map((call) => call.opts.label)).toContain('land #5')
   })
 
   it('names a ticket whose builder stopped', async () => {
@@ -107,18 +118,21 @@ describe('ship', () => {
       { spec: 101 },
       agents(frontier, () => ({ opened: false, ready: false, note: 'needs the captures repo' })),
     )
-    expect(result).toMatchObject({ stopped: [5], awaitingYou: [] })
+    expect(result).toMatchObject({ stopped: [5], awaitingMerge: [] })
     expect(calls.map((call) => call.opts.label)).not.toContain('review #5')
   })
 
-  it('tells the next frontier to skip what is running, stopped or waiting for review', async () => {
+  it('tells the next frontier to skip what is running or stopped', async () => {
     const frontier = frontiers({ ...NOTHING, ready: [TICKET] }, NOTHING)
-    const { calls } = await ship({ spec: 101 }, agents(frontier))
+    const { calls } = await ship(
+      { spec: 101 },
+      agents(frontier, () => ({ opened: false, ready: false, note: 'blocked' })),
+    )
     const [, second] = calls.filter((call) => call.opts.label === 'frontier')
     expect(second?.prompt).toMatch(/except #5/)
   })
 
-  it('runs the final review only once the developer has merged every ticket', async () => {
+  it('runs the final review only once every ticket is closed', async () => {
     const { calls } = await ship({ spec: 101 }, (call) => {
       if (call.opts.label === 'start') return { ok: true, note: '' }
       if (call.opts.label === 'frontier') return { ...NOTHING, open: 0 }
@@ -159,9 +173,10 @@ describe("ship's review", () => {
       '#5',
       'review #5',
       '#5 answers',
+      'land #5',
       'frontier',
     ])
-    const [build, review, answers] = calls.slice(2)
+    const [build, review, answers, land] = calls.slice(2)
     expect(build?.prompt).toMatch(/Stop once the PR is open and every check is green/)
     expect(review?.opts).toMatchObject({ model: 'sonnet', effort: 'low' })
     expect(review?.prompt).toMatch(/PR #50/)
@@ -171,12 +186,15 @@ describe("ship's review", () => {
     expect(review?.prompt).toMatch(/Change no file/)
     expect(answers?.prompt).toMatch(/gh pr checkout 50/)
     expect(answers?.prompt).toMatch(/resolveReviewThread/)
-    expect(result).toMatchObject({ awaitingYou: [{ number: 5, pr: 50 }] })
+    expect(land?.prompt).toMatch(/gh pr merge 50 --squash/)
+    expect(land?.prompt).toMatch(/at least one review posted/)
+    expect(land?.prompt).toMatch(/says MERGED/)
+    expect(result).toMatchObject({ merged: [{ number: 5, pr: 50 }], awaitingMerge: [] })
   })
 
-  it('reports the PR ready only once its builder has answered the review', async () => {
+  it('lands nothing until its builder has answered the review', async () => {
     const frontier = frontiers({ ...NOTHING, ready: [TICKET] }, NOTHING)
-    const { result } = await ship(
+    const { result, calls } = await ship(
       { spec: 101 },
       agents(frontier, (call) =>
         call.opts.label === '#5 answers'
@@ -184,7 +202,8 @@ describe("ship's review", () => {
           : GREEN,
       ),
     )
-    expect(result).toMatchObject({ stopped: [5], awaitingYou: [] })
+    expect(result).toMatchObject({ stopped: [5], awaitingMerge: [], merged: [] })
+    expect(calls.map((call) => call.opts.label)).not.toContain('land #5')
   })
 
   it('needs no answers when the review found nothing', async () => {
@@ -196,7 +215,7 @@ describe("ship's review", () => {
         : answer(call),
     )
     expect(calls.map((call) => call.opts.label)).not.toContain('#5 answers')
-    expect(result).toMatchObject({ awaitingYou: [{ number: 5, pr: 50 }] })
+    expect(result).toMatchObject({ merged: [{ number: 5, pr: 50 }], awaitingMerge: [] })
   })
 
   it('stops a ticket whose reviewer posted nothing', async () => {
@@ -205,8 +224,9 @@ describe("ship's review", () => {
     const { result, calls } = await ship({ spec: 101 }, (call) =>
       call.opts.label === 'review #5' ? null : answer(call),
     )
-    expect(result).toMatchObject({ stopped: [5], awaitingYou: [] })
+    expect(result).toMatchObject({ stopped: [5], awaitingMerge: [], merged: [] })
     expect(calls.map((call) => call.opts.label)).not.toContain('#5 answers')
+    expect(calls.map((call) => call.opts.label)).not.toContain('land #5')
   })
 
   it('hands each builder its own browser-test and shots ports', async () => {
@@ -236,7 +256,8 @@ describe("ship's frontier", () => {
     expect(result).toEqual({
       lost: 'the frontier agent ended twice without an answer',
       running: [6],
-      awaitingYou: [{ number: 5, pr: 50 }],
+      merged: [{ number: 5, pr: 50 }],
+      awaitingMerge: [],
       stopped: [],
       waitingOnYou: [yours],
     })
@@ -263,6 +284,7 @@ describe("ship's agents", () => {
       '#5',
       'review #5',
       '#5 answers',
+      'land #5',
       'frontier',
       'final review',
     ])
@@ -272,19 +294,28 @@ describe("ship's agents", () => {
     }
   })
 
-  it.each([
-    'gh pr merge',
-    '--auto',
-    'branch -d',
-    'branch -D',
-    'squash-merged',
-    'merge it yourself',
-  ])('are never told %j', async (phrase) => {
-    expect(SOURCE).not.toContain(phrase)
-    for (const { prompt } of await everyCall()) expect(prompt).not.toContain(phrase)
+  it.each(['--auto', '--admin', 'branch -d', 'branch -D', 'merge it yourself'])(
+    'are never told to run %j (a prohibition on it is fine)',
+    async (phrase) => {
+      for (const { prompt } of await everyCall()) {
+        const told = prompt
+          .split('\n')
+          .filter((line) => line.includes(phrase) && !/never/i.test(line))
+        expect(told).toEqual([])
+      }
+    },
+  )
+
+  it('only the land step is told to merge, and only with squash', async () => {
+    const calls = await everyCall()
+    for (const call of calls)
+      if (call.prompt.includes('gh pr merge')) expect(call.opts.label).toMatch(/^land /)
+    const land = calls.find((call) => call.opts.label === 'land #5')
+    expect(land?.prompt).toMatch(/gh pr merge 50 --squash/)
+    expect(land?.prompt).toMatch(/Never merge with admin rights, never turn on auto-merge/)
   })
 
-  it('are told the developer merges and deletes', async () => {
+  it('builders are told ship lands it, never them', async () => {
     const calls = await everyCall()
     for (const label of ['#5', '#5 answers']) {
       const builder = calls.find((call) => call.opts.label === label)

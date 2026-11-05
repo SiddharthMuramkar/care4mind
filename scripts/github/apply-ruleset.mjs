@@ -1,11 +1,12 @@
 #!/usr/bin/env node
+// @ts-check
 // Makes the ruleset GitHub enforces on main match .github/rulesets/main.json.
 //
 //   pnpm ruleset:apply --commit <sha>
 //
 // It refuses to require a check that hasn't completed on <sha> (a PR's head, or main's), so a
 // misspelt or renamed check can't lock main: with no bypass, nothing could merge until someone
-// fixed the ruleset by hand. The guard asks the developer before this runs.
+// fixed the ruleset by hand.
 //
 // To undo an apply, put the previous file back (git show <commit>:.github/rulesets/main.json)
 // and apply again, or edit the ruleset under Settings → Rules on GitHub.
@@ -72,7 +73,8 @@ if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1]
   try {
     main(process.argv.slice(2))
   } catch (error) {
-    console.error(`ruleset:apply: ${error.message}`)
+    const message = error instanceof Error ? error.message : String(error)
+    console.error(`ruleset:apply: ${message}`)
     process.exitCode = 1
   }
 }
