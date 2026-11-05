@@ -166,6 +166,15 @@ export function createContent(source: ContentSource, flags: Features) {
         if (!record?.form || !canTake(record, flags)) return null
         return questionnaireFormView({ ...record, form: record.form })
       },
+      /**
+       * Whether any Questionnaire can be taken in this build: a live one with a form, or a
+       * preview one with a form while `questionnairePreview` is on. The header lists
+       * Questionnaires only then, so the link returns by itself when one goes live.
+       */
+      async anyTakeable(): Promise<boolean> {
+        const read = await graph()
+        return read.records('questionnaire').some((record) => canTake(record, flags))
+      },
     },
 
     library: {

@@ -550,7 +550,7 @@ test.describe('Concept page v2: linked knowledge', () => {
       'href',
       '/questionnaires/karmayoga-scale/',
     )
-    await expect(questionnaire).toContainText(/Open|Preview|Coming soon|Coming later/)
+    await expect(questionnaire).toContainText(/Open|Preview|In preparation/)
     // Its rules are decoration, silent to assistive technology.
     const rules = panel.locator('li [aria-hidden="true"]')
     await expect(rules).toHaveCount(await vikshepaRowsWithRules())

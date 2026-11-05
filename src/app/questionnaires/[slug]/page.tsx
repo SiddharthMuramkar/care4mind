@@ -159,7 +159,7 @@ export default async function QuestionnairePage({ params }: PageProps<'/question
               Start the Questionnaire
             </button>
             <p id="start-note" className={styles.startNote}>
-              <strong>Coming soon.</strong> The questions open here once their scoring rules are
+              <strong>In preparation.</strong> The questions open here once their scoring rules are
               confirmed.
             </p>
           </>

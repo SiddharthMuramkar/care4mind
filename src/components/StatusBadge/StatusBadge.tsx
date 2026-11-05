@@ -6,8 +6,8 @@ import styles from './StatusBadge.module.css'
 const WORDS: Record<QuestionnaireStatus, string> = {
   live: 'Open',
   preview: 'Preview',
-  'coming-soon': 'Coming soon',
-  'coming-later': 'Coming later',
+  'coming-soon': 'In preparation',
+  'coming-later': 'In preparation',
 }
 
 /** A Questionnaire's status in words, never by colour alone (WCAG 1.4.1). */
@@ -17,7 +17,7 @@ export function statusWords(status: QuestionnaireStatus): string {
 
 /**
  * A Questionnaire's status as a visitor sees it: its words on its status's colour. Pass the view's
- * `shownStatus`, never its `status`, so a preview whose flag is off reads as coming soon.
+ * `shownStatus`, never its `status`, so a preview whose flag is off reads as in preparation.
  */
 export function StatusBadge({
   status,

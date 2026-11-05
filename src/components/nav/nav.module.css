@@ -1,5 +1,5 @@
 /*
- * The header's three sections, shared by the server-rendered list and the NavigationMenu that
+ * The header's sections, shared by the server-rendered list and the NavigationMenu that
  * replaces it, so the swap changes nothing you can see. They show from 72rem (WIDE in
  * current.ts); narrower screens reach them through the Menu.
  */

@@ -64,6 +64,7 @@ export function homepageView(
     whoBehind: record.whoBehind,
     closing: record.closing,
     helpLine: record.helpLine,
+    footerQuestionnaires: record.footerQuestionnaires,
     ...carriedOver(record),
   }
 }

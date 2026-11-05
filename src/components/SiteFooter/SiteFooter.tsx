@@ -16,7 +16,10 @@ import styles from './SiteFooter.module.css'
  */
 export async function SiteFooter() {
   const [nav, { tagline }] = await Promise.all([siteNav(), home.get()])
-  const [concepts, texts, library] = nav.sections
+  const section = (id: string) => nav.sections.find((entry) => entry.id === id)
+  const concepts = section('concepts')
+  const texts = section('texts')
+  const library = section('library')
   return (
     // Its own transition name keeps it still while the page turns (globals.css).
     <footer className={styles.footer} style={{ viewTransitionName: 'site-footer' }}>

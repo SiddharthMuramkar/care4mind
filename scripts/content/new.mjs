@@ -195,6 +195,7 @@ ${PROVENANCE}
   whoBehind: '',
   closing: '',
   helpLine: '',
+  footerQuestionnaires: '',
 ${PROVENANCE}
 })`,
 }

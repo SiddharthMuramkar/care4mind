@@ -615,6 +615,7 @@ describe('verify', () => {
       whoBehind: 'Every rule needs an example.',
       closing: 'Every rule needs an example.',
       helpLine: 'Every rule needs an example.',
+      footerQuestionnaires: 'Every rule needs an example.',
       provenance: {
         sources: [{ url: PAGE, retrieved: '2026-10-27' }],
         edits: [],
