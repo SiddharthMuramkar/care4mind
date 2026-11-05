@@ -14,6 +14,11 @@ const PATH = hrefFor({ page: 'concept-map' })
 const graph = await site.graph()
 const nameOf = new Map(graph.nodes.map(({ slug, name }) => [slug, name]))
 const named = (slug: string) => nameOf.get(slug) ?? slug
+/** A Concept as the connections list names it: its Sanskrit name, then its gloss where it has one. */
+const inFull = new Map(
+  graph.nodes.map(({ slug, name, gloss }) => [slug, gloss ? `${name} · ${gloss}` : name]),
+)
+const namedInFull = (slug: string) => inFull.get(slug) ?? slug
 const connections = [
   ...new Set(graph.edges.map(({ source, target, kind }) => `${kind} ${source} ${target}`)),
 ]
@@ -90,7 +95,8 @@ test.describe('the Concept map', () => {
     for (const { source, target, reason } of graph.edges) {
       const row = shown.find(
         ({ names, text }) =>
-          names.join(' | ') === `${named(source)} | ${named(target)}` && text.includes(reason),
+          names.join(' | ') === `${namedInFull(source)} | ${namedInFull(target)}` &&
+          text.includes(reason),
       )
       expect(row, `${named(source)} and ${named(target)}: ${reason}`).toBeDefined()
     }
@@ -100,8 +106,8 @@ test.describe('the Concept map', () => {
         (edge.source === 'sthitaprajna' && edge.target === 'brahmacharya'),
     )
     const row = rows(page)
-      .filter({ has: page.getByRole('link', { name: named('brahmacharya'), exact: true }) })
-      .filter({ has: page.getByRole('link', { name: named('sthitaprajna'), exact: true }) })
+      .filter({ has: page.getByRole('link', { name: namedInFull('brahmacharya'), exact: true }) })
+      .filter({ has: page.getByRole('link', { name: namedInFull('sthitaprajna'), exact: true }) })
     const text = (await row.evaluate((item) => item.textContent)) ?? ''
     const reasons = shared.filter((edge) => text.includes(edge.reason)).map((edge) => edge.reason)
     expect(reasons.length).toBeGreaterThan(1)
@@ -112,7 +118,7 @@ test.describe('the Concept map', () => {
       expect(text).toContain(`${left} · ${right}`)
     }
 
-    const link = list(page).getByRole('link', { name: named(graph.edges[0]?.source ?? '') })
+    const link = list(page).getByRole('link', { name: namedInFull(graph.edges[0]?.source ?? '') })
     await expect(link.first()).toHaveAttribute(
       'href',
       hrefFor({ kind: 'concept', id: graph.edges[0]?.source ?? '' }),
