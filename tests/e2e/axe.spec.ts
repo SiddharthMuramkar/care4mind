@@ -48,6 +48,48 @@ test(
 )
 
 test(
+  'passes unsettled large text whose colours are a reviewed pair at 3:1',
+  { tag: '@from-1440' },
+  async ({ page }) => {
+    // highlight on surface is a reviewed pair at 3:1 (about 3.85:1 read); 44 px is WCAG large text, so 3:1 settles it. The 0-wide gradient is what axe leaves unsettled, as a link's resting underline.
+    await page.setContent(
+      html(
+        '<main style="background: #eadbb6"><h1>Title</h1><p style="color: #c8342a; font-size: 44px; background: linear-gradient(#c8342a, #c8342a) 0 0 / 0 0.12em no-repeat">A large letter heading</p></main>',
+      ),
+    )
+    await expectNoAxeViolations(page)
+  },
+)
+
+test(
+  'fails the same reviewed 3:1 pair at small text size',
+  { tag: '@from-1440' },
+  async ({ page }) => {
+    // The same colours at 16 px are not large text, so 4.5:1 still applies and about 3.85:1 fails.
+    await page.setContent(
+      html(
+        '<main style="background: #eadbb6"><h1>Title</h1><p style="color: #c8342a; font-size: 16px; background: linear-gradient(#c8342a, #c8342a) 0 0 / 0 0.12em no-repeat">A small letter heading</p></main>',
+      ),
+    )
+    await expect(expectNoAxeViolations(page)).rejects.toThrow(/color-contrast/)
+  },
+)
+
+test(
+  'passes unsettled bold text at the large-text threshold for a reviewed 3:1 pair',
+  { tag: '@from-1440' },
+  async ({ page }) => {
+    // 19 px at weight 700 is WCAG large text (at least 18.66 px bold), so the reviewed 3:1 minimum settles it too.
+    await page.setContent(
+      html(
+        '<main style="background: #eadbb6"><h1>Title</h1><p style="color: #c8342a; font-size: 19px; font-weight: 700; background: linear-gradient(#c8342a, #c8342a) 0 0 / 0 0.12em no-repeat">A bold letter heading</p></main>',
+      ),
+    )
+    await expectNoAxeViolations(page)
+  },
+)
+
+test(
   'fails one unsettled character whose colours are no reviewed pair',
   { tag: '@from-1440' },
   async ({ page }) => {
