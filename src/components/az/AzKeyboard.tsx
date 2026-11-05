@@ -44,7 +44,7 @@ function Chips({ groups, pressed, onPress }: ChipsProps) {
           role="group"
           aria-labelledby={`chips-${group}`}
           className={styles.chipGroup}
-          // On a phone each group scrolls sideways: no Tab stop of its own, its chips have them.
+          // A group is no Tab stop of its own: its chips have them.
           tabIndex={-1}
         >
           <span id={`chips-${group}`} className={styles.groupLabel}>

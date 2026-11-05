@@ -20,7 +20,7 @@ import styles from './AzIndex.module.css'
 import {
   fromChips,
   GROUPS,
-  isEmpty,
+  isDefault,
   readSelection,
   type Selection,
   shownEntries,
@@ -133,7 +133,7 @@ function filterList(selection: Selection) {
 
 /** Which entries and letters a selection leaves showing, read from the list once it is mounted. */
 function showingFor(list: HTMLElement | null, selection: Selection) {
-  if (isEmpty(selection) || !list) return null
+  if (!list) return null
   const shown = shownEntries(selection)
   return {
     count: list.querySelectorAll(shown).length,
@@ -196,7 +196,7 @@ function PlainChips({ groups, pressed, onPress }: ChipsProps) {
           role="group"
           aria-labelledby={`chips-${group}`}
           className={styles.chipGroup}
-          // On a phone each group scrolls sideways: no Tab stop of its own, its chips have them.
+          // A group is no Tab stop of its own: its chips have them.
           tabIndex={-1}
         >
           <span id={`chips-${group}`} className={styles.groupLabel}>
@@ -230,6 +230,7 @@ function PlainChips({ groups, pressed, onPress }: ChipsProps) {
 interface Props {
   letters: readonly RailLetter[]
   groups: readonly ChipGroup[]
+  /** How many entries the plain address shows, before the list is read. */
   total: number
   /** The entries, by letter, as the server renders them. */
   children: ReactNode
@@ -240,8 +241,8 @@ interface Props {
  * filter chips whose state lives in the address. A filter hides the entries whose attributes
  * don't match it, so the list itself never re-renders. Base UI's Toolbar and ToggleGroup (one Tab
  * stop each, arrow keys between) load when the browser is idle or a pointer or focus comes near;
- * until then the letters are plain links and the chips plain toggle buttons. Without JavaScript
- * the chips are hidden and the whole list shows.
+ * until then the letters are plain links and the chips plain toggle buttons. A plain address
+ * shows the Concept pages. Without JavaScript the chips are hidden and the whole list shows.
  */
 export function AzIndex({ letters, groups, total, children }: Props) {
   const known = useMemo(
@@ -305,6 +306,34 @@ export function AzIndex({ letters, groups, total, children }: Props) {
     setShowing(showingFor(listRef.current, selection))
   }, [selection])
 
+  // An anchor in the address (an old glossary link) may name an entry the filter hides: let its
+  // kind in, then take the reader to it, as the browser could not while it was hidden.
+  useEffect(() => {
+    const reveal = () => {
+      const id = decodeURIComponent(window.location.hash.slice(1))
+      const target = id ? document.getElementById(id) : null
+      const entry = target?.closest<HTMLElement>('[data-entry]')
+      const kind = entry?.dataset.kind
+      if (!entry || !kind || !listRef.current?.contains(entry) || !entry.hidden) return
+      const now = readSelection(window.location.search, known)
+      const next = { ...now, kind: [...now.kind, kind] }
+      window.history.replaceState(
+        null,
+        '',
+        `${window.location.pathname}${writeSelection(next)}${window.location.hash}`,
+      )
+      flushSync(() => {
+        for (const listener of listeners) listener()
+      })
+      // Show it now (the layout effect repeats this), then jump: a smooth scroll started mid-load is left behind as the list settles.
+      filterList(next)
+      target?.scrollIntoView({ block: 'start', behavior: 'instant' })
+    }
+    reveal()
+    window.addEventListener('hashchange', reveal)
+    return () => window.removeEventListener('hashchange', reveal)
+  }, [known])
+
   useEffect(() => {
     const key = handoff.current
     if (!parts || !key) return
@@ -356,7 +385,7 @@ export function AzIndex({ letters, groups, total, children }: Props) {
           <p tabIndex={-1} className={styles.count} aria-live="polite" aria-atomic="true">
             {entries(count)}
           </p>
-          {isEmpty(selection) ? null : (
+          {isDefault(selection) ? null : (
             <button
               type="button"
               className={styles.clear}
