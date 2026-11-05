@@ -20,13 +20,12 @@ export interface SearchTriggerProps {
 }
 
 /**
- * Slot, added by front-end-site ticket 04 and filled by ticket 09: the way into search.
+ * The way into search.
  *
- * This stub is a plain link to the search page. Ticket 09 makes it open the palette (and ⌘K)
- * and show the shortcut, keeping these props, keeping it a working link without JavaScript,
- * and keeping its width the same before and after the page is interactive (reserve the
- * shortcut's space), so the header doesn't shift. Render it from a server component; the
- * header hands the Drawer its copy already rendered.
+ * A plain link to the search page. A palette that opens from it (and from ⌘K) must keep these
+ * props, keep it a working link without JavaScript, and keep its width the same before and after
+ * the page is interactive (reserve the shortcut's space), so the header doesn't shift. Render it
+ * from a server component; the header hands the Drawer its copy already rendered.
  */
 export function SearchTrigger({
   placement = 'page',

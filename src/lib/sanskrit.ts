@@ -2,7 +2,7 @@
  * Sanskrit text rules shared by content and display.
  *
  * Stored text is NFC: one precomposed character per letter. Decomposed text
- * renders with misplaced marks in some browsers (ticket 07), and NFC is what
+ * renders with misplaced marks in some browsers, and NFC is what
  * search will match against.
  *
  * Anusvara is written ṃ (m with dot below), never ṁ (m with dot above). The

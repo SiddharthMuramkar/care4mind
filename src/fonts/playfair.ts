@@ -9,7 +9,7 @@ import semiBold from './playfair/PlayfairText-SemiBold.woff2' with { turbopackMo
 // marks. next/font reads these options at build time, so every value is written out literally.
 //
 // Only Text Regular, which sets most of each page, loads with it, preloaded. The other cuts are
-// added once its text is painted (ticket 05).
+// added once its text is painted.
 
 /** Running text: small optical size, sturdy and low in contrast. */
 export const playfairText = localFont({

@@ -1,7 +1,7 @@
 import { defineResourceList } from '@/content/schema'
 
 // /institutes/, titled "Courses", with the IGNOU and NIOS courses of the two Text Books pages
-// merged in (D11). Courses aren't References: each keeps its provider, name, description and
+// merged in. Courses aren't References: each keeps its provider, name, description and
 // link as the pages give them.
 export default defineResourceList({
   kind: 'resource-list',

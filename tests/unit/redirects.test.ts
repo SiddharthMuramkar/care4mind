@@ -8,9 +8,9 @@ import { localSource } from '@/content/source'
 
 import nextConfig from '../../next.config'
 
-// Front-end-site ticket 14: every address the current site served leads to its new page in one
-// hop (FR-07, D11, D17). The expected rows are design B4's decisions, with the slugs content-v1
-// shipped (`chittabhumi`, not the design's `citta-bhumi`).
+// Every address the current site served leads to its new page in one
+// hop (FR-07). The expected rows are the keep, merge or drop list's decisions, with the
+// slugs the content shipped (`chittabhumi`, not the design's `citta-bhumi`).
 
 /** Each of the current site's 33 pages and 6 posts but the two it keeps, and its new page. */
 const PAGES_AND_POSTS: Readonly<Record<string, string>> = {
@@ -40,7 +40,7 @@ const PAGES_AND_POSTS: Readonly<Record<string, string>> = {
   '/atman/': '/concepts/atman/',
   '/jiva/': '/concepts/jiva/',
   '/jagat/': '/concepts/jagat/',
-  // The 16 description pages, each now a Concept (design B5).
+  // The 16 description pages, each now a Concept.
   '/vikshepa/': '/concepts/vikshepa/',
   '/upavikshepaprofiling/': '/concepts/upa-vikshepa/',
   '/panchkleshavikaarprofiling/': '/concepts/panch-klesha/',
@@ -188,7 +188,7 @@ describe('the table (FR-07)', () => {
 
 describe('the table, cross-checked with the content’s provenance', () => {
   /**
-   * The kinds a current page or post was carried into (design B4). Works, passages, References
+   * The kinds a current page or post was carried into. Works, passages, References
    * and topics only quote or cite the pages they name.
    */
   const KEPT = ['concept', 'questionnaire', 'glossary', 'resource-list', 'page', 'home'] as const

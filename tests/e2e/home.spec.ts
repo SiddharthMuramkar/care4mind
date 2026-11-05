@@ -324,7 +324,6 @@ test('nothing shifts while the ornaments draw and ink in, from load to the foot 
   expect(shift).toBeLessThan(0.01)
 })
 
-// Moved here from concept.spec.ts by front-end-site ticket 03.
 test('the homepage card opens the Concept page', async ({ page }) => {
   const errors: string[] = []
   page.on('pageerror', (error) => errors.push(error.message))

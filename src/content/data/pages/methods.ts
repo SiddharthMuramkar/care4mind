@@ -1,6 +1,6 @@
 import { definePage } from '@/content/schema'
 
-// /methods/, kept as a page of the Library (D11, D13): its heading and first paragraph, then its
+// /methods/, kept as a page of the Library: its heading and first paragraph, then its
 // four tabs as sections, the first two holding the page's two tables.
 export default definePage({
   kind: 'page',

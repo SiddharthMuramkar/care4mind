@@ -1,5 +1,5 @@
 /**
- * Feature flags (D16, D20): features that are built but not yet approved for launch.
+ * Feature flags: features that are built but not yet approved for launch.
  *
  * Each flag is on in local runs and Vercel previews, and off in Vercel production (`VERCEL_ENV`
  * is `production`), so nothing the Project owner hasn't approved goes live. Its own environment

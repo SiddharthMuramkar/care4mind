@@ -16,7 +16,7 @@ interface TallyProps {
 
 /**
  * The tally: one short rule per statement, in a group per part, each inked in as its statement is
- * answered (D21). Decoration: the words beside it say the same. Every group's width is set by
+ * answered. Decoration: the words beside it say the same. Every group's width is set by
  * its count, so the box is the same from the first answer to the last.
  */
 const Tally = memo(function Tally({ parts, answers, current }: TallyProps) {

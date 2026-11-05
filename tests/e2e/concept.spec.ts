@@ -289,7 +289,7 @@ test('the References control shows a plus that folds into a minus as the list op
   await expect.poll(() => turns(rules), 'a plus again once closed').toEqual([0, 90])
 })
 
-// Front-end-site ticket 05: the Concept page v2.
+// The Concept page.
 
 const wide = (page: Page) => (page.viewportSize()?.width ?? 0) >= 1024
 const contents = (page: Page) => page.getByRole('navigation', { name: 'Contents' })

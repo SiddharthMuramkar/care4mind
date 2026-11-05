@@ -308,7 +308,7 @@ function onCurrentSite(url) {
 export function checkRecord(record, captures) {
   const name = `${record.kind}/${idOf(record)}`
   // A topic carries over only its introduction, which has its own provenance; its name and
-  // order are the design notes' structure (D03).
+  // order are the site's own structure, not carried-over text.
   const [provenance, content, prefix] =
     record.kind === 'topic'
       ? [record.intro?.provenance, record.intro?.sections, 'intro.sections']

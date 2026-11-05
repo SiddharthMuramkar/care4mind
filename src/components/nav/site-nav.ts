@@ -12,7 +12,7 @@ let built: Promise<SiteNav> | undefined
 /**
  * The navigation every page shares, built once per server from the content module. The Concept
  * map and the proposals page appear only while the route registry has them, so a switched-off
- * feature leaves the navigation with its route (D20).
+ * feature leaves the navigation with its route.
  */
 export function siteNav(): Promise<SiteNav> {
   built ??= build()
@@ -65,7 +65,7 @@ async function build(): Promise<SiteNav> {
       {
         id: 'concepts',
         ...link('Concepts', hrefFor({ page: 'concepts' })),
-        // A topic sits under Concepts (design B6), wherever its own address is.
+        // A topic sits under Concepts, wherever its own address is.
         within: [hrefFor({ page: 'concepts' }), ...topicLinks.map((topic) => topic.href)],
       },
       {

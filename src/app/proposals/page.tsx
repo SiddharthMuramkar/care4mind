@@ -64,7 +64,7 @@ async function TryIt({ proposal }: { proposal: Proposal }) {
 }
 
 /**
- * Features proposed beyond the brief (D20), for the Project owner to accept or refuse in the
+ * Features proposed beyond the brief, for the Project owner to accept or refuse in the
  * sign-off pack: each built one while its flag is on, and audio pronunciation, described only.
  * Each entry says what it adds, what it costs and how it is switched off.
  */

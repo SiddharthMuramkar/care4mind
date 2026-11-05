@@ -1,9 +1,9 @@
 import { expect, gotoReady, test } from './fixtures'
 import { pageTurns, prefetched, recordPageTurns } from './page-turns'
 
-// Local runs and CI build with the preview flag on (D16), so the KarmaYoga Scale's Start opens
-// its flow. Where the flag is off, Start stays disabled and says "Coming soon"; front-end-site
-// ticket 15's flags-off build checks that side.
+// Local runs and CI build with the preview flag on, so the KarmaYoga Scale's Start opens
+// its flow. Where the flag is off, Start stays disabled and says "Coming soon"; the flags-off
+// build checks that side.
 test.describe('Questionnaire page (FR-05)', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/questionnaires/karmayoga-scale/')
@@ -46,8 +46,7 @@ test.describe('Questionnaire page (FR-05)', () => {
   })
 })
 
-// Front-end-site ticket 10 builds the flow itself (questionnaire-flow.spec.ts): its page now asks
-// the questions, so the old check that it held none is gone, and these cover the index (D16).
+// The flow itself is checked in questionnaire-flow.spec.ts; these cover the index.
 test.describe('Questionnaires page (D16)', () => {
   /** The 16 description pages' Questionnaires and the Dosha Survey, at their anchors. */
   const LATER = [

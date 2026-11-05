@@ -358,7 +358,7 @@ export default defineConcept({
   provenance: {
     sources: [{ url: 'https://care4mind.org/vikshepa/', retrieved: '2026-10-27' }],
     edits: [
-      // The front-end foundation's edits (planning ticket 21), kept as it wrote them.
+      // The front-end foundation's edits, kept as it wrote them.
       'The first shloka was headed “Bhagavad Gita (Chapter 1, Sutra 30)”; its text and verse number are Yoga Sūtra 1.30, as the page’s own body says. Relabelled; the Research editor should confirm.',
       'Obstacle names in IAST and Devanagari are taken from the page’s Yoga Sūtra 1.30 shloka. The page’s headings used other forms (for example “Steyan- Steya”, “Alabdhi- Alābdhi”, “Anvastitva- Anavasthitva”); those are kept as ASCII spellings.',
       'Anusvara written with a dot above (U+1E41) normalised to ṃ, as in saṃśaya.',
@@ -367,16 +367,16 @@ export default defineConcept({
       'Reference list: one duplicated author run removed from Gurubhaktananda (2018); the Tomar (2024) Google Books link shortened to the book id; the APA link moved to https.',
       'The link to the KarmaYoga Scale is added for this preview (several of its items are about distraction at work); the current page has none, and the content-links ticket decides real links.',
       'Not changed, for the Research editor: the first paragraph says “five consequences” and lists three; the Vedānta Sāra shloka has “वास्तु” where vastu may be meant; Sharma & Pareek has no year or journal.',
-      // Listed when the record was re-homed into content v1.
+      // Listed when the record was re-homed into the content module.
       'Heading shortened: “What is the definition of Vikshepa- Vikṣepa (Distraction) ?” → “What is vikṣepa?”.',
       'Heading reworded: “Indian vs Western concept” → “Indian and Western concepts”.',
       'Table caption: “related to Vikshepa and its associated obstacles” → “related to vikṣepa and its associated obstacles”.',
       'Table row gloss: “Craving/Sensuality” → “Craving, sensuality”.',
       'Obstacle names split out of the compound in the page’s Yoga Sūtra 1.30 shloka, in their dictionary forms: “आलस्य”, “अविरति”, “अलब्धभूमिकत्व”, “अनवस्थितत्व”, “bhrāntidarśana” and “alabdhabhūmikatva”.',
       'Interface text dropped: the “Introduction” and “References” labels.',
-      // Listed when verify first checked the record (ticket 02): a fix the foundation made.
+      // Listed when verify first checked the record: a fix the foundation made.
       'Typo fixed: “above- mentioned” → “above-mentioned”.',
-      // Listed by the fidelity sweep (ticket 12): headings the page has that no field holds.
+      // Listed by the fidelity sweep: headings the page has that no field holds.
       'Verse headings dropped: “Shloka from Bhagavad Gita (Chapter 1, Sutra 30)” and “Shloka from Vedanta Sara (5.211)”. Each verse shows its work and number.',
     ],
     flags: [

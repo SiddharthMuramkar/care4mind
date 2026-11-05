@@ -1,5 +1,5 @@
 /**
- * What /proposals/ lists for the Project owner's sign-off (D20): the built proposals, each
+ * What /proposals/ lists for the Project owner's sign-off: the built proposals, each
  * only while its flag is on, and one described but not built. Interface text: each entry says
  * what it adds, what it costs in speed and upkeep, and how it is switched off.
  */

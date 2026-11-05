@@ -7,7 +7,7 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
 import { site, type RouteEntry } from '@/content'
 
-// Front-end-site ticket 17: `pnpm shots`, the parts with no browser: what the command line asks
+// `pnpm shots`, the parts with no browser: what the command line asks
 // for, which routes it picks from the registry and the file each shot lands in.
 
 interface Options {

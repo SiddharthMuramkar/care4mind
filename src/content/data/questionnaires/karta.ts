@@ -1,6 +1,6 @@
 import { defineQuestionnaire } from '@/content/schema'
 
-// The questionnaire the /karta-2/ page describes, coming later (D12), under the name its first
+// The questionnaire the /karta-2/ page describes, coming later, under the name its first
 // heading gives it. The page holds none of its questions. Its whole score section is held back:
 // described below, never quoted (FR-05).
 export default defineQuestionnaire({

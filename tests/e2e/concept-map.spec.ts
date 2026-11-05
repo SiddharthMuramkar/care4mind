@@ -6,7 +6,7 @@ import { expectNoAxeViolations } from './axe'
 import { expect, gotoReady, scrollsSideways, test } from './fixtures'
 import { expectPageTurned, pageTurns, prefetched, recordPageTurns } from './page-turns'
 
-// The Concept map (front-end-site ticket 12, a Proposal): the Concepts round a circle on a
+// The Concept map (a Proposal): the Concepts round a circle on a
 // printed plate, joined by hairline curves, with the same connections listed in words. Expected
 // values come from site.graph(): one curve, and one row, for each pair of Concepts and kind.
 

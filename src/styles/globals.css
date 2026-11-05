@@ -100,12 +100,7 @@
   --ease-press: cubic-bezier(0.3, 0, 0.2, 1);
 
   /*
-   * Front-end-site ticket 04: every token the site's pages need, added once.
-   * Later tickets use these and ask in their Comments for anything missing.
-   */
-
-  /*
-   * Topic hues (design B3), for drawings only: lozenges, rules, leaders and swatches. Never text:
+   * Topic hues, for drawings only: lozenges, rules, leaders and swatches. Never text:
    * a topic is always named in words. Each keeps 3:1 against the indigo ground and the paper alike.
    */
   --color-topic-self: var(--press-rose);
@@ -114,7 +109,7 @@
   --color-topic-values: var(--press-green);
   --color-topic-temperament: var(--press-violet);
 
-  /* A Questionnaire's status (D16) as a badge, its text on its ground. Always written in words. */
+  /* A Questionnaire's status as a badge, its text on its ground. Always written in words. */
   --color-status-live: var(--press-mint);
   --color-status-live-ink: var(--press-indigo);
   --color-status-preview: var(--press-turmeric);
@@ -124,7 +119,7 @@
   --color-status-later: var(--press-indigo-rule);
   --color-status-later-ink: var(--press-cream);
 
-  /* The Proposal label (D20): an editor's blue pencil, on any ground. */
+  /* The Proposal label: an editor's blue pencil, on any ground. */
   --color-proposal: var(--press-sky);
   --color-proposal-ink: var(--press-indigo);
 

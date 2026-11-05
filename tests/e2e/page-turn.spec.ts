@@ -142,7 +142,7 @@ test('the "Home" breadcrumb turns the page back to the homepage', async ({ page 
   await expectNoAxeViolations(page)
 })
 
-// Since front-end-site ticket 03 the trail comes from the site map (D15): Questionnaires is a page.
+// The trail comes from the site map: Questionnaires is a page.
 test('the "Questionnaires" breadcrumb turns back to the Questionnaires page', async ({ page }) => {
   await recordPageTurns(page)
   await gotoReady(page, '/questionnaires/karmayoga-scale/')

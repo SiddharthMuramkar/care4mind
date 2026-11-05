@@ -11,7 +11,7 @@ export type ReferenceType =
   | 'other'
 
 /**
- * One published work, stored once however many pages cite it (D09). Every field comes from what
+ * One published work, stored once however many pages cite it. Every field comes from what
  * the pages say; a gap is flagged, never looked up.
  */
 export interface ReferenceRecord {

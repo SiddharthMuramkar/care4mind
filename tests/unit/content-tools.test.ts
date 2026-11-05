@@ -31,7 +31,7 @@ import {
   type TopicRecord,
 } from '@/content/schema'
 
-// The migration tools (content-v1 ticket 02): extract, verify, new and report, in
+// The migration tools: extract, verify, new and report, in
 // scripts/content. They read the saved copies of the current site only from
 // $CARE4MIND_CAPTURES, which CI doesn't have, so every test here builds a made-up captures
 // folder and made-up records in a temporary folder. No captured text appears in this file.

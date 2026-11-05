@@ -8,7 +8,7 @@ import { site, type RouteEntry } from '@/content'
 import { localSource } from '@/content/source'
 import { createContent } from '@/content/views'
 
-// Front-end-site ticket 02: the page files in the app and the route registry agree. The
+// The page files in the app and the route registry agree. The
 // end-to-end suite tests the registry's routes, so a page the registry missed would go untested,
 // and an entry with no page would test nothing but a 404.
 

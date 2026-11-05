@@ -1,5 +1,5 @@
 /*
- * The Concept map (ticket 12): a printed plate of hairline curves under the Concepts, and the
+ * The Concept map: a printed plate of hairline curves under the Concepts, and the
  * same connections in words. Lighting is CSS: the page's generated `:has()` rules give the
  * neighbours of whatever is pointed at `--lit: 1`, and pointing at anything gives the map `--dim: 1`.
  */

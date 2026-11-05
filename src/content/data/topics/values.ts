@@ -1,7 +1,7 @@
 import { defineTopic } from '@/content/schema'
 
-// Topics are provisional (D03; planning ticket 13 confirms them). Their names come from the
-// design notes, B3. Content-v1 ticket 10 added this topic's introduction: the yama–niyama
+// Topics are provisional until the client confirms them. Their names come from the
+// design notes. The values migration added this topic's introduction: the yama–niyama
 // section the four values pages share, stored once here and shown on each values Concept where
 // its page had it, so a correction is made in one place.
 export default defineTopic({

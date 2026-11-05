@@ -1,7 +1,7 @@
 import type { Provenance, SanskritName, Section, Slug } from './common'
 
 /**
- * One of the provisional topics (D03). Topics get no description of their own, except an
+ * One of the provisional topics. Topics get no description of their own, except an
  * introduction where the current site has shared text that belongs to the topic.
  */
 export interface TopicRecord {

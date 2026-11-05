@@ -5,7 +5,7 @@ import { KINDS } from '@/components/map'
 import { layoutMap, type MapLayout } from '@/components/map'
 import { RELATION_STRENGTH, type ConceptGraph, type ConceptGraphEdge } from '@/content'
 
-// Front-end-site ticket 12: the Concept map's layout, worked out while the site builds (the
+// The Concept map's layout, worked out while the site builds (the
 // browser runs none). The seam is the pure layout module: a graph and its topics in, the plate's
 // points, sectors and curves out. A small graph made here keeps the expected values independent.
 

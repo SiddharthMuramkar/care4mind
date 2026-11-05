@@ -51,7 +51,7 @@ function preloadedFaces(page: Page) {
 
 for (const { path, name } of PAGES) {
   test.describe(name, () => {
-    // Ticket 05: only the type that sets most of the page loads ahead of everything else.
+    // Only the type that sets most of the page loads ahead of everything else.
     test('preloads only the font of its running text', async ({ page }) => {
       await page.goto(path)
       const { text } = await pageFonts(page)
@@ -70,7 +70,7 @@ for (const { path, name } of PAGES) {
         .toContain(font(...heading))
     })
 
-    // Ticket 05: the first paint needs nothing more, so every other font is asked for after it.
+    // The first paint needs nothing more, so every other font is asked for after it.
     test('asks for no other font until its text is painted', async ({ page }) => {
       await page.goto(path)
       // The first paint is noted once it reaches the screen, which on a slow machine can be after load.

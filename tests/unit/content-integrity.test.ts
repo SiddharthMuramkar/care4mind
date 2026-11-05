@@ -17,9 +17,9 @@ import {
 import { localSource } from '@/content/source'
 import { isNormalisedSanskrit } from '@/lib/sanskrit'
 
-// Every content rule of the content-v1 spec (Testing Decisions → Integrity), run over every real
-// record, read through the content source. They hold for any amount of content: a record that
-// breaks one fails CI. What the migration carried over is pinned apart, in tests/fidelity.
+// Every content rule, run over every real record, read through the content source. They hold
+// for any amount of content: a record that breaks one fails CI. What the migration carried
+// over is pinned apart, in tests/fidelity.
 
 let records: ContentRecord[] = []
 let graph: ContentGraph

@@ -19,7 +19,7 @@ import {
 import { localSource, memorySource } from '@/content/source'
 import { createContent } from '@/content/views'
 
-// The site derivations (content-v1 spec, "What the site derivations return"): the routes, the
+// The site derivations: the routes, the
 // breadcrumb trail, the A–Z, the search documents and the Concept-map data, each computed from
 // whatever records a source holds. Each test builds a made-up source and reads `site` through
 // the same interface the pages use. Every record and string here is made up for the test.

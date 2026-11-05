@@ -14,7 +14,7 @@ import { MapFilters } from './MapFilters'
 function ConceptLink({ point }: { point: MapPoint | undefined }) {
   if (!point) return null
   return (
-    // The plate's points prefetch these pages already: the list's 148 links needn't watch too.
+    // The plate's points prefetch these pages already: the list's links needn't watch too.
     <Link
       href={hrefFor({ kind: 'concept', id: point.slug })}
       transitionTypes={turnForward}
@@ -26,7 +26,7 @@ function ConceptLink({ point }: { point: MapPoint | undefined }) {
 }
 
 /**
- * The Concept map (Proposal, D20): a printed plate and, beside it, the same connections in words.
+ * The Concept map (Proposal): a printed plate and, beside it, the same connections in words.
  * Everything is laid out while the site builds. The plate is three layers of hairline curves (SVG,
  * hidden from assistive technology), one per kind of connection, under the Concepts themselves:
  * ordinary links, in the topics' order. Pointing at or focusing a Concept lights its neighbours

@@ -5,7 +5,7 @@ import type { QuestionnaireRecord } from '@/content/schema'
 import { localSource } from '@/content/source'
 import { createContent } from '@/content/views'
 
-// Content-v1 ticket 06: the two instruments on the current site with real questions. The
+// The two instruments on the current site with real questions. The
 // KarmaYoga Scale's 45 statements in the four parts its quiz settings give, ready for the preview
 // flow, and the Dosha Survey's 12 questions, stored but never offered as a form.
 //

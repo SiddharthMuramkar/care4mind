@@ -1,5 +1,5 @@
 /**
- * The route registry: one entry per public page in design B2, for the content present and this
+ * The route registry: one entry per public page of the site map, for the content present and this
  * build's feature flags. The end-to-end tests, the sitemap and the link crawler all read it.
  */
 import { proposalsPageOn, type Features } from '@/config/features'
@@ -29,7 +29,7 @@ const byPath = (a: PageRoute, b: PageRoute) => byName(a.entry.path, b.entry.path
 
 /**
  * Every public page, in the site map's order, each kind's first marked as its sample. A route
- * whose feature flag is off is left out (settled rule 17), a Questionnaire coming later has none
+ * whose feature flag is off is left out, a Questionnaire coming later has none
  * (it is an anchor on the Questionnaires page), and `/topics/` is a redirect, not a route.
  */
 export function pageRoutes(graph: ContentGraph, flags: Features): PageRoute[] {

@@ -3,7 +3,7 @@ import { concepts } from '@/content'
 import { expect, gotoReady, inScope, test } from './fixtures'
 import { ROUTES } from './routes'
 
-// FR-01, the one-click test (front-end-site ticket 05): everything a Concept's view says it links
+// FR-01, the one-click test: everything a Concept's view says it links
 // to is a link in its Linked knowledge panel, and each link lands on a page that holds its anchor.
 // The sample scope reads the sample Concept; the full scope reads all 19.
 

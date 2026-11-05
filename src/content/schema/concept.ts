@@ -9,7 +9,7 @@ import type {
 } from './common'
 
 /**
- * A Concept's name: its Sanskrit name, an English name, or both (settled rule 6). The English
+ * A Concept's name: its Sanskrit name, an English name, or both. The English
  * name is only a gloss the page itself gives; a page without one leaves it empty, flagged.
  */
 export type ConceptName =
@@ -24,7 +24,7 @@ export interface ConceptRecord {
   summary: Inline
   /** Plain lowercase words a reader might search for, drawn from the Concept's own text. */
   keywords: readonly string[]
-  /** Exactly one primary topic (D03), which sets the breadcrumb; `also` never repeats it. */
+  /** Exactly one primary topic, which sets the breadcrumb; `also` never repeats it. */
   topics: { primary: Slug; also?: readonly Slug[] }
   /** The verses at the top of the page, in source order. */
   verses: readonly PassageQuote[]
@@ -33,7 +33,7 @@ export interface ConceptRecord {
   references: readonly string[]
   /** Its own Questionnaire, which lists this Concept among its `concepts`. */
   questionnaire?: Slug
-  /** Curated links with an editor's note; empty until planning ticket 14. */
+  /** Curated links with an editor's note; empty until the Research editor curates them. */
   related?: readonly { concept: Slug; note: string }[]
   /** Links that leave the site, such as the Concept's own DharmaWiki article. */
   external?: readonly { label: string; url: string }[]

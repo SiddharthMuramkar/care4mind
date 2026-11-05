@@ -53,7 +53,7 @@ function Later({ questionnaire }: { questionnaire: Card }) {
 }
 
 /**
- * The Questionnaires (D16): those with a page of their own first, then the ones coming later,
+ * The Questionnaires: those with a page of their own first, then the ones coming later,
  * grouped by the topic of their Concepts. Every status is written in words.
  */
 export default async function QuestionnairesPage() {

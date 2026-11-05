@@ -94,8 +94,8 @@ const plainPress = (
 ) => event.button === 0 && !event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey
 
 /**
- * Taking a Questionnaire, one part per screen, then a review and the end screen (C4). Every
- * answer lives in this component's reducer and nowhere else (D16): not in storage, cookies,
+ * Taking a Questionnaire, one part per screen, then a review and the end screen. Every
+ * answer lives in this component's reducer and nowhere else: not in storage, cookies,
  * the address or any request. The address names only the step, so browser Back and Forward move
  * between parts; a reload starts again at part 1.
  */

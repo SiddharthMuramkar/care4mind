@@ -70,8 +70,8 @@ test('the thread never hides a focused control, tabbing down the page or back up
   page,
 }) => {
   await gotoReady(page, '/concepts/vikshepa/')
-  // Since front-end-site ticket 05 the page has many more stops (its contents, verse cards and
-  // Linked knowledge); this goes well down the page and back to the first.
+  // The page has many stops (its contents, verse cards and Linked knowledge); this goes well
+  // down the page and back to the first.
   const steps = [...Array<string>(25).fill('Tab'), ...Array<string>(25).fill('Shift+Tab')]
   let checked = 0
   for (const key of steps) {

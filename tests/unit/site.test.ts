@@ -15,7 +15,7 @@ import { CARD_COLOURS } from '@/lib/share-card'
 
 import nextConfig from '../../next.config'
 
-// Front-end-site ticket 03: what every page tells the world about itself (D19, NFR-04).
+// What every page tells the world about itself (NFR-04).
 
 // Typed out rather than read from site.url, so a typo in the config fails.
 const ORIGIN = 'https://www.care4mind.xyz'

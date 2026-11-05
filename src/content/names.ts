@@ -7,7 +7,7 @@ import { capitalise } from '@/lib/text'
 import type { PassageRecord, ReferenceRecord, SanskritName, WorkRecord } from './schema'
 
 /**
- * The name a heading leads with (D07): the capitalised IAST term if there is one, otherwise the
+ * The name a heading leads with: the capitalised IAST term if there is one, otherwise the
  * English title. `vikṣepa` → "Vikṣepa"; a Concept with no term → its English title.
  */
 export function displayName(name: {

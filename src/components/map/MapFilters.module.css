@@ -1,4 +1,4 @@
-/* The Concept map's filters (ticket 12): two rows of buttons set like the A–Z's, with a tally. */
+/* The Concept map's filters: two rows of buttons set like the A–Z's, with a tally. */
 .filters {
   display: grid;
   gap: 0.9rem;

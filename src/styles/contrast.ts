@@ -131,7 +131,7 @@ export const CONTRAST_PAIRS = [
   { foreground: 'ink', background: 'ink-spread', over: 'ground', minimum: 4.5 },
   { foreground: 'surface-ink', background: 'ink-spread', over: 'surface', minimum: 4.5 },
 
-  // Front-end-site ticket 04. Topic hues are drawings, never text, on the page and on paper alike.
+  // Topic hues are drawings, never text, on the page and on paper alike.
   ...(['self', 'mind', 'practice', 'values', 'temperament'] as const).flatMap(
     (topic) =>
       [

@@ -14,7 +14,7 @@ import {
 import { asciiSpellings } from '@/content/names'
 
 // What the foundation's pages showed of their three items (vikṣepa, the KarmaYoga Scale and the
-// homepage), recorded before content v1 re-homed them. Front-end-site ticket 03 moved the pages
+// homepage), recorded before the content module re-homed them. The pages moved
 // to the v1 views and deleted the legacy adapter that kept this shape; each projection below
 // reads the same facts back out of the views, so nothing the foundation's pages showed is lost.
 //

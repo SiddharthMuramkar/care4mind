@@ -11,7 +11,7 @@ import { turnBack } from '../PageTurn'
 const langOf = (crumb: Crumb) => (crumb.lang ? { lang: crumb.lang } : {})
 
 /**
- * FR-01: every page below the homepage shows where it sits, as design B6 lays out (D15). The
+ * FR-01: every page below the homepage shows where it sits. The
  * trail is the route registry's, so it follows the site map; the last crumb is the page itself.
  * Going back up turns the page back. A path the registry doesn't list, such as a switched-off
  * feature's, has no trail, so its page answers 404.

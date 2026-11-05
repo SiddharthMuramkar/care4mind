@@ -159,7 +159,7 @@ export function createContent(source: ContentSource, flags: Features) {
       },
       /**
        * Its form, or null unless it can be taken in this build: live, or preview while
-       * `questionnairePreview` is on (D16). A form stored for one coming later stays null.
+       * `questionnairePreview` is on. A form stored for one coming later stays null.
        */
       async form(slug: Slug): Promise<QuestionnaireFormView | null> {
         const record = (await graph()).record('questionnaire', slug)
@@ -215,7 +215,7 @@ export function createContent(source: ContentSource, flags: Features) {
           entry.pattern === pattern && entry.record ? [{ slug: entry.record.id }] : [],
         )
       },
-      /** A page's breadcrumbs (design B6), the page itself last; none for a path that isn't one. */
+      /** A page's breadcrumbs, the page itself last; none for a path that isn't one. */
       async trail(path: string): Promise<Crumb[]> {
         return trail(await graph(), flags, path)
       },

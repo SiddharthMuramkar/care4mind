@@ -1,5 +1,5 @@
 /**
- * What every page tells browsers, search engines and link previews about itself (D19, NFR-04):
+ * What every page tells browsers, search engines and link previews about itself (NFR-04):
  * its title, its description, its canonical address and the text of its share card. A page asks
  * by its path, and the route registry and the page's own content supply the rest, so no page
  * writes its metadata by hand.

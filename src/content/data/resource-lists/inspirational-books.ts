@@ -1,7 +1,7 @@
 import { defineResourceList } from '@/content/schema'
 
-// /inspirational-books/, with /text-books/'s "Inspirational Books" tab merged in (D11). Every
-// book is a Reference (D09), by the id the References census gives it; the line the page writes
+// /inspirational-books/, with /text-books/'s "Inspirational Books" tab merged in. Every
+// book is a Reference, by the id the References census gives it; the line the page writes
 // under each book is its annotation.
 export default defineResourceList({
   kind: 'resource-list',

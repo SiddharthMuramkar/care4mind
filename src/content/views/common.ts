@@ -59,7 +59,7 @@ export function provenanceView(provenance: Provenance): ProvenanceView {
 /**
  * What every view of a carried-over record carries: its provenance and its review status. A kind
  * that stores no status hasn't been reviewed: it is "drafted, not reviewed" if it declares
- * drafted fields (settled rule 4), else "carried over, not reviewed".
+ * drafted fields, else "carried over, not reviewed".
  */
 export function carriedOver(record: {
   provenance: Provenance

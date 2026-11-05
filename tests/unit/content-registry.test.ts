@@ -30,9 +30,9 @@ import { localSource, memorySource, registrySource } from '@/content/source'
 
 // The storage layers of the content module: the record schema, the generated registry, the
 // content source (the seam) and the graph that resolves every link once. The graph has no public
-// interface of its own until ticket 13's views, so it is tested here, through its own seam, with
-// made-up sources. The feature flags the interface reads are tested here too: the flags' own
-// test file belongs to front-end-site ticket 04.
+// interface of its own, so it is tested here, through its own seam, with
+// made-up sources. The feature flags the interface reads are tested here too; the flags
+// themselves are tested in features.test.ts.
 
 const provenance = {
   sources: [{ url: 'https://example.org/page/', retrieved: '2026-10-27' }],
@@ -164,7 +164,7 @@ describe('record schema', () => {
     defineConcept({ ...concept, colour: 'saffron' })
     // @ts-expect-error a review status is one of three
     defineConcept({ ...concept, reviewStatus: 'approved' })
-    // @ts-expect-error scoring stays pending until planning tickets 26 and 28 supply rules
+    // @ts-expect-error scoring stays pending until a confirmed key and bands exist
     defineQuestionnaire({ ...questionnaire, scoring: { status: 'scored', reason: '' } })
     // @ts-expect-error a Questionnaire lists what it held back, even when nothing was
     defineQuestionnaire(without(questionnaire, 'heldBack'))

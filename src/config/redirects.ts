@@ -1,11 +1,11 @@
 /**
- * The redirect table (D17): every address the site moves elsewhere, in one place. Each leads to
+ * The redirect table: every address the site moves elsewhere, in one place. Each leads to
  * its page in one hop, and next.config.ts answers each with a 301 (moved permanently), which
  * browsers follow and search engines remember.
  *
  * Next matches a source ignoring case, so `/VIKSHEPA/` takes one hop too. It adds a missing
  * trailing slash before it reads this table, with a 308 of its own, so an old address typed
- * without its slash takes two (front-end-site ticket 14's Comments).
+ * without its slash takes two.
  *
  * Destinations are written out rather than made by hrefFor(): next.config.ts loads this file
  * through a loader that can't follow the `@/` imports the content module uses. The unit test
@@ -22,10 +22,10 @@ export interface Redirect {
 }
 
 export const redirects: readonly Redirect[] = [
-  // Topics have pages of their own, but no index: the Concepts A–Z lists them (design B2).
+  // Topics have pages of their own, but no index: the Concepts A–Z lists them.
   { source: '/topics/', destination: '/concepts/' },
 
-  // The current site's 33 pages and 6 posts (D11, design B4), but `/` and `/concepts/`, whose
+  // The current site's 33 pages and 6 posts, but `/` and `/concepts/`, whose
   // addresses the new site keeps.
 
   // Duplicates of the homepage, and WordPress's placeholder: dropped.
@@ -60,7 +60,7 @@ export const redirects: readonly Redirect[] = [
   { source: '/atman/', destination: '/concepts/atman/' },
   { source: '/jiva/', destination: '/concepts/jiva/' },
   { source: '/jagat/', destination: '/concepts/jagat/' },
-  // The 16 description pages: each a Concept now, its Questionnaire coming later (D12, design B5).
+  // The 16 description pages: each a Concept now, its Questionnaire coming later.
   { source: '/vikshepa/', destination: '/concepts/vikshepa/' },
   { source: '/upavikshepaprofiling/', destination: '/concepts/upa-vikshepa/' },
   { source: '/panchkleshavikaarprofiling/', destination: '/concepts/panch-klesha/' },
@@ -84,7 +84,7 @@ export const redirects: readonly Redirect[] = [
   { source: '/karta-2/', destination: '/concepts/karta/' },
   { source: '/triguna/', destination: '/concepts/triguna/' },
 
-  // Archives and the feed (D17). Any author's archive, and its feed, matches one pattern, so no
+  // Archives and the feed. Any author's archive, and its feed, matches one pattern, so no
   // username is ever written down; the final slash makes it match the address as served.
   { source: '/category/concepts/', destination: '/concepts/' },
   { source: '/category/uncategorized/', destination: '/' },

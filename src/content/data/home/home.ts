@@ -23,7 +23,7 @@ export default defineHome({
   },
   intro:
     'The Bharatiya way of philosophic analysis starts with the reflection on the inner Self of man with the ultimate goal, of all mental training, being attainment of Moksha.',
-  // Each area leads where its current-site link went (ticket 07); Applications led to the dead
+  // Each area leads where its current-site link went; Applications led to the dead
   // questionnaire app, so it has no target until the Project owner gives it one.
   areas: [
     {
@@ -65,11 +65,11 @@ export default defineHome({
       { url: 'https://telemanas.mohfw.gov.in/', retrieved: '2026-11-01' },
     ],
     edits: [
-      // The front-end foundation's edits (planning ticket 21), kept as it wrote them.
+      // The front-end foundation's edits, kept as it wrote them.
       'Ellipsis and spacing tidied in the shloka’s English line and the area texts; “Ancient Indian Psychology” lower-cased mid-sentence; stray “,and” fixed.',
       'Closing line “Open the doors to your inner potential !!!” ends with a full stop.',
       'Left out: the four placeholder “Questionaire” cards, which repeat one text, and the survey placeholders.',
-      // Listed when the record was re-homed into content v1.
+      // Listed when the record was re-homed into the content module.
       'Shloka translation: “thoughts…so” → “thoughts, so”.',
       'Concepts area: “unique concepts of Ancient Indian Psychology” → “unique concepts of ancient Indian psychology.”.',
       'Resources area: “to mentor the mind” → “to mentor the mind.”.',
@@ -78,9 +78,9 @@ export default defineHome({
       'Concepts section intro, in the glossary’s word: “Sanskrit term” → “Sanskrit name”.',
       'Interface text dropped: each area’s link label (“Concepts...”, “Methods...”, “Resources...”, “Persepctives...”, “Applications...”, “Opportunities...”) and the “-” under each area’s text.',
       'Left out: the “Psychology” heading above the areas, the “Karma Yoga: An Indian Perspective of Work” heading, and the closing “Ancient Indian Wisdom” link to DharmaWiki’s main page.',
-      // Listed when ticket 07 set the area targets.
+      // Listed when the area targets were set.
       'Area links set for the new site (D11): Concepts leads to the Concepts index (it linked /concepts/), Techniques to Methods (it linked /methods/), Resources to the Library home (it linked /resources/, an empty page), Tradition and Texts to Text Books (it linked /text-books-2-2/, merged into Text Books) and Research to Courses (it linked /institutes/, now Courses). Applications linked to the current site’s questionnaire app, which no longer works, and has no link.',
-      // Listed by the fidelity sweep (ticket 12): the headings of the cards left out above.
+      // Listed by the fidelity sweep: the headings of the cards left out above.
       'Headings left out with their cards, as the page writes them: “Questionnaires & Surveys” over all of them; “Questionaire”, “Questionaire -02” (twice) and “Questionaire - 03”, whose “Click to begin....” links go to the questionnaire app; and “Dosha”, “Survey -02”, “survey -03” and “Survey -04”, whose “Survey...” links go to the Dosha Survey page. The Dosha card’s description is quoted in a flag on the Dosha Survey.',
     ],
     flags: [

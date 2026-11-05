@@ -18,13 +18,13 @@ import {
 } from '@/content/schema'
 import { localSource } from '@/content/source'
 
-// Content-v1 ticket 11: the self and temperament topics. The last three description pages, Are
+// The self and temperament topics. The last three description pages, Are
 // you a Friend/Foe of Yourself?, Karta and Triguna, become Concepts, each with its coming-later
 // Questionnaire. Read through the public interface and the content source, as the other content
 // tests are.
 
 /**
- * Each Concept, by its slug (D02): its headword as a heading shows it, its page, its topics, every
+ * Each Concept, by its slug: its headword as a heading shows it, its page, its topics, every
  * verse it quotes in the page's order with the census's translation id (null where the page
  * labels none), the anchors of its sub-terms, its reference list in the page's order (census),
  * how many tables its page keeps, and its Questionnaire's titles.

@@ -17,10 +17,10 @@ let show: Show | undefined
 let wake: (() => void) | undefined
 
 /**
- * Confirm something in a toast, the site's one way to say "done" (front-end-site ticket 04):
- * "Copy verse" and "Copy citation" call it. It is announced politely, never takes focus,
- * stays at least 5 seconds (longer while pointed at or focused) and can be dismissed. Call it
- * from the browser; the toasts' code loads with the first one.
+ * Confirm something in a toast, the site's one way to say "done", as "Copy verse" does. It is
+ * announced politely, never takes focus, stays at least 5 seconds (longer while pointed at or
+ * focused) and can be dismissed. Call it from the browser; the toasts' code loads with the first
+ * one.
  */
 export function toast(message: string | ToastMessage): void {
   const next = typeof message === 'string' ? { title: message } : message

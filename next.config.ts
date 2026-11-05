@@ -6,7 +6,7 @@ import { siteConfig } from './src/config/site'
 const nextConfig: NextConfig = {
   poweredByHeader: false,
   typedRoutes: true,
-  // Every address ends with a slash (D02), as the current site's do; the bare one redirects to it.
+  // Every address ends with a slash, as the current site's do; the bare one redirects to it.
   trailingSlash: true,
   // Share cards read their fonts from disk at render time, which the file tracer cannot see.
   outputFileTracingIncludes: { '/**/opengraph-image*': ['./src/fonts/**/*.woff'] },
