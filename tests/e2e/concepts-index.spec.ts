@@ -382,7 +382,7 @@ test.describe('the filter chips', () => {
   })
 })
 
-test('loads without shifting anything, and fits 320 px', async ({ page }) => {
+test('loads without shifting anything', async ({ page }) => {
   await page.addInitScript(() => {
     let shift = 0
     Object.defineProperty(window, '__shift', { get: () => shift })
@@ -396,6 +396,10 @@ test('loads without shifting anything, and fits 320 px', async ({ page }) => {
   expect(
     await page.evaluate(() => (window as unknown as { __shift: number }).__shift),
   ).toBeLessThan(0.1)
+})
+
+test('fits 320 px', { tag: '@self-width' }, async ({ page }) => {
+  await gotoReady(page, PATH)
   await page.setViewportSize({ width: 320, height: 720 })
   expect(await scrollsSideways(page)).toEqual([])
 })

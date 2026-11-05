@@ -11,20 +11,24 @@ import {
   releasePageTurn,
 } from './page-turns'
 
-test('following a Concept card turns the page forward to the Concept page', async ({ page }) => {
-  await recordPageTurns(page)
-  await gotoReady(page, '/')
-  const card = page.getByRole('link', { name: 'Read about Vikṣepa' })
-  await prefetched(card)
-  await card.click()
-  await expect(page).toHaveURL('/concepts/vikshepa/')
-  await expect(page.getByRole('heading', { level: 1 })).toContainText('Vikṣepa')
-  const turns = await pageTurns(page)
-  expect(turns).toHaveLength(1)
-  expectPageTurned(turns[0], 'forward')
-  await expect(page).toHaveTitle(/Vikṣepa/)
-  await expectNoAxeViolations(page)
-})
+test(
+  'following a Concept card turns the page forward to the Concept page',
+  { tag: '@one-width' },
+  async ({ page }) => {
+    await recordPageTurns(page)
+    await gotoReady(page, '/')
+    const card = page.getByRole('link', { name: 'Read about Vikṣepa' })
+    await prefetched(card)
+    await card.click()
+    await expect(page).toHaveURL('/concepts/vikshepa/')
+    await expect(page.getByRole('heading', { level: 1 })).toContainText('Vikṣepa')
+    const turns = await pageTurns(page)
+    expect(turns).toHaveLength(1)
+    expectPageTurned(turns[0], 'forward')
+    await expect(page).toHaveTitle(/Vikṣepa/)
+    await expectNoAxeViolations(page)
+  },
+)
 
 test("a Concept card's title flies into the Concept page's heading as the page turns", async ({
   page,
@@ -110,68 +114,82 @@ test('links in the header change page at once, without turning it', async ({ pag
   }
 })
 
-test("the browser's back button changes page at once, without turning it", async ({ page }) => {
-  await recordPageTurns(page)
-  await gotoReady(page, '/')
-  const card = page.getByRole('link', { name: 'Read about Vikṣepa' })
-  await prefetched(card)
-  await card.click()
-  await expect(page.getByRole('heading', { level: 1 })).toContainText('Vikṣepa')
-  await page.goBack()
-  await expect(page).toHaveURL('/')
-  await expect(card).toBeVisible()
-  const [, back] = await pageTurns(page)
-  expect(back?.leaving ?? null).toBeNull()
-  expect(back?.arriving ?? null).toBeNull()
-})
+test(
+  "the browser's back button changes page at once, without turning it",
+  { tag: '@one-width' },
+  async ({ page }) => {
+    await recordPageTurns(page)
+    await gotoReady(page, '/')
+    const card = page.getByRole('link', { name: 'Read about Vikṣepa' })
+    await prefetched(card)
+    await card.click()
+    await expect(page.getByRole('heading', { level: 1 })).toContainText('Vikṣepa')
+    await page.goBack()
+    await expect(page).toHaveURL('/')
+    await expect(card).toBeVisible()
+    const [, back] = await pageTurns(page)
+    expect(back?.leaving ?? null).toBeNull()
+    expect(back?.arriving ?? null).toBeNull()
+  },
+)
 
-test('the "Home" breadcrumb turns the page back to the homepage', async ({ page }) => {
-  await recordPageTurns(page)
-  await gotoReady(page, '/concepts/vikshepa/')
-  const home = page.getByRole('navigation', { name: 'Breadcrumb' }).getByRole('link', {
-    name: 'Home',
-  })
-  await prefetched(home)
-  await home.click()
-  await expect(page).toHaveURL('/')
-  await expect(page.getByRole('heading', { level: 1 })).toBeInViewport()
-  const turns = await pageTurns(page)
-  expect(turns).toHaveLength(1)
-  expectPageTurned(turns[0], 'back')
-  await expect(page).toHaveTitle(/Indian psychology/)
-  await expectNoAxeViolations(page)
-})
+test(
+  'the "Home" breadcrumb turns the page back to the homepage',
+  { tag: '@one-width' },
+  async ({ page }) => {
+    await recordPageTurns(page)
+    await gotoReady(page, '/concepts/vikshepa/')
+    const home = page.getByRole('navigation', { name: 'Breadcrumb' }).getByRole('link', {
+      name: 'Home',
+    })
+    await prefetched(home)
+    await home.click()
+    await expect(page).toHaveURL('/')
+    await expect(page.getByRole('heading', { level: 1 })).toBeInViewport()
+    const turns = await pageTurns(page)
+    expect(turns).toHaveLength(1)
+    expectPageTurned(turns[0], 'back')
+    await expect(page).toHaveTitle(/Indian psychology/)
+    await expectNoAxeViolations(page)
+  },
+)
 
 // The trail comes from the site map: Questionnaires is a page.
-test('the "Questionnaires" breadcrumb turns back to the Questionnaires page', async ({ page }) => {
-  await recordPageTurns(page)
-  await gotoReady(page, '/questionnaires/karmayoga-scale/')
-  const crumb = page.getByRole('navigation', { name: 'Breadcrumb' }).getByRole('link', {
-    name: 'Questionnaires',
-  })
-  await prefetched(crumb)
-  await crumb.click()
-  await expect(page).toHaveURL('/questionnaires/')
-  await expect(page.getByRole('heading', { name: 'Questionnaires', level: 1 })).toBeInViewport()
-  expectPageTurned((await pageTurns(page))[0], 'back')
-})
+test(
+  'the "Questionnaires" breadcrumb turns back to the Questionnaires page',
+  { tag: '@one-width' },
+  async ({ page }) => {
+    await recordPageTurns(page)
+    await gotoReady(page, '/questionnaires/karmayoga-scale/')
+    const crumb = page.getByRole('navigation', { name: 'Breadcrumb' }).getByRole('link', {
+      name: 'Questionnaires',
+    })
+    await prefetched(crumb)
+    await crumb.click()
+    await expect(page).toHaveURL('/questionnaires/')
+    await expect(page.getByRole('heading', { name: 'Questionnaires', level: 1 })).toBeInViewport()
+    expectPageTurned((await pageTurns(page))[0], 'back')
+  },
+)
 
-test('related links turn the page forward, from a Concept to its Questionnaire and back to the Concept', async ({
-  page,
-}) => {
-  await recordPageTurns(page)
-  await gotoReady(page, '/concepts/vikshepa/')
-  const questionnaire = page.getByRole('link', { name: 'KarmaYoga Scale' })
-  await prefetched(questionnaire)
-  await questionnaire.click()
-  await expect(page.getByRole('heading', { level: 1 })).toHaveText('KarmaYoga Scale')
+test(
+  'related links turn the page forward, from a Concept to its Questionnaire and back to the Concept',
+  { tag: '@one-width' },
+  async ({ page }) => {
+    await recordPageTurns(page)
+    await gotoReady(page, '/concepts/vikshepa/')
+    const questionnaire = page.getByRole('link', { name: 'KarmaYoga Scale' })
+    await prefetched(questionnaire)
+    await questionnaire.click()
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText('KarmaYoga Scale')
 
-  const concept = page.getByRole('link', { name: /^Vikṣepa/ })
-  await prefetched(concept)
-  await concept.click()
-  await expect(page.getByRole('heading', { level: 1 })).toContainText('Vikṣepa')
+    const concept = page.getByRole('link', { name: /^Vikṣepa/ })
+    await prefetched(concept)
+    await concept.click()
+    await expect(page.getByRole('heading', { level: 1 })).toContainText('Vikṣepa')
 
-  const [there, back] = await pageTurns(page)
-  expectPageTurned(there, 'forward')
-  expectPageTurned(back, 'forward')
-})
+    const [there, back] = await pageTurns(page)
+    expectPageTurned(there, 'forward')
+    expectPageTurned(back, 'forward')
+  },
+)

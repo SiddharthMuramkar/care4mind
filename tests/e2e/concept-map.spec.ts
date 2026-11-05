@@ -119,75 +119,81 @@ test.describe('the Concept map', () => {
     )
   })
 
-  test('draws the plate with its points as links in the topics’ order, hiding the lines from assistive technology', async ({
-    page,
-  }) => {
-    test.skip(!wide(page), 'Below 600 px the plate waits one tap away.')
-    await gotoReady(page, PATH)
-    const points = plate(page).getByRole('link')
-    await expect(points).toHaveText(graph.nodes.map(({ name }) => name))
-    const layers = page.locator('[data-map] svg')
-    for (const layer of await layers.all())
-      await expect(layer).toHaveAttribute('aria-hidden', 'true')
-    await expect(page.locator('[data-map] svg path[data-c]')).toHaveCount(connections.length)
-    for (const name of [
-      'Solid: a verse both quote',
-      'Dotted: a rarely cited Reference both cite',
-      'Dashed: a text both quote',
-    ])
-      await expect(plate(page).getByText(name)).toBeVisible()
-  })
+  test(
+    'draws the plate with its points as links in the topics’ order, hiding the lines from assistive technology',
+    { tag: '@from-768' },
+    async ({ page }) => {
+      await gotoReady(page, PATH)
+      const points = plate(page).getByRole('link')
+      await expect(points).toHaveText(graph.nodes.map(({ name }) => name))
+      const layers = page.locator('[data-map] svg')
+      for (const layer of await layers.all())
+        await expect(layer).toHaveAttribute('aria-hidden', 'true')
+      await expect(page.locator('[data-map] svg path[data-c]')).toHaveCount(connections.length)
+      for (const name of [
+        'Solid: a verse both quote',
+        'Dotted: a rarely cited Reference both cite',
+        'Dashed: a text both quote',
+      ])
+        await expect(plate(page).getByText(name)).toBeVisible()
+    },
+  )
 
-  test('focusing a Concept lights its neighbours and its curves, and dims the rest', async ({
-    page,
-  }) => {
-    test.skip(!wide(page), 'Below 600 px the plate waits one tap away.')
-    await gotoReady(page, PATH)
-    const slug = 'sthitaprajna'
-    const near = neighbours(slug)
-    const lit = await token(page, '--color-surface-link')
-    const muted = await token(page, '--color-surface-muted')
-    const vermilion = await token(page, '--color-highlight')
+  test(
+    'focusing a Concept lights its neighbours and its curves, and dims the rest',
+    { tag: '@from-768' },
+    async ({ page }) => {
+      await gotoReady(page, PATH)
+      const slug = 'sthitaprajna'
+      const near = neighbours(slug)
+      const lit = await token(page, '--color-surface-link')
+      const muted = await token(page, '--color-surface-muted')
+      const vermilion = await token(page, '--color-highlight')
 
-    await point(page, slug).focus()
-    expect(await point(page, slug).evaluate((link) => link.matches(':focus-visible'))).toBe(true)
-    for (const node of graph.nodes) {
-      if (node.slug === slug) continue
-      const expected = near.has(node.slug) ? lit : muted
-      expect(await colourOf(point(page, node.slug)), node.name).toEqual(expected)
-    }
-    const curves = page.locator('[data-map] svg path[data-c]')
-    const own = curves.and(page.locator(`[data-ends~="${slug}"]`))
-    await expect(own).toHaveCount(connections.filter((key) => key.split(' ').includes(slug)).length)
-    for (const curve of await own.all()) expect(await colourOf(curve, 'stroke')).toEqual(vermilion)
-    const other = curves.and(page.locator(`:not([data-ends~="${slug}"])`)).first()
-    await expect
-      .poll(() => other.evaluate((curve) => Number(getComputedStyle(curve).opacity)))
-      .toBeLessThan(0.3)
+      await point(page, slug).focus()
+      expect(await point(page, slug).evaluate((link) => link.matches(':focus-visible'))).toBe(true)
+      for (const node of graph.nodes) {
+        if (node.slug === slug) continue
+        const expected = near.has(node.slug) ? lit : muted
+        expect(await colourOf(point(page, node.slug)), node.name).toEqual(expected)
+      }
+      const curves = page.locator('[data-map] svg path[data-c]')
+      const own = curves.and(page.locator(`[data-ends~="${slug}"]`))
+      await expect(own).toHaveCount(
+        connections.filter((key) => key.split(' ').includes(slug)).length,
+      )
+      for (const curve of await own.all())
+        expect(await colourOf(curve, 'stroke')).toEqual(vermilion)
+      const other = curves.and(page.locator(`:not([data-ends~="${slug}"])`)).first()
+      await expect
+        .poll(() => other.evaluate((curve) => Number(getComputedStyle(curve).opacity)))
+        .toBeLessThan(0.3)
 
-    // Moving on lights the next Concept's neighbours instead.
-    await page.keyboard.press('Tab')
-    const next = graph.nodes[graph.nodes.findIndex((node) => node.slug === slug) + 1]
-    expect(await colourOf(point(page, slug))).toEqual(
-      neighbours(next?.slug ?? '').has(slug) ? lit : muted,
-    )
-  })
+      // Moving on lights the next Concept's neighbours instead.
+      await page.keyboard.press('Tab')
+      const next = graph.nodes[graph.nodes.findIndex((node) => node.slug === slug) + 1]
+      expect(await colourOf(point(page, slug))).toEqual(
+        neighbours(next?.slug ?? '').has(slug) ? lit : muted,
+      )
+    },
+  )
 
-  test('a point opens its Concept with a forward page turn, its name flying into the heading', async ({
-    page,
-  }) => {
-    test.skip(!wide(page), 'Below 600 px the plate waits one tap away.')
-    await recordPageTurns(page)
-    await gotoReady(page, PATH)
-    const link = point(page, 'vikshepa')
-    await prefetched(link)
-    await link.click()
-    await expect(page).toHaveURL(new RegExp(`${hrefFor({ kind: 'concept', id: 'vikshepa' })}$`))
-    await expect(page.getByRole('heading', { level: 1 })).toContainText(named('vikshepa'))
-    const [turn] = await pageTurns(page)
-    expectPageTurned(turn, 'forward')
-    expect(turn?.flights.map(({ name }) => name)).toContain('concept-title-vikshepa')
-  })
+  test(
+    'a point opens its Concept with a forward page turn, its name flying into the heading',
+    { tag: '@from-768' },
+    async ({ page }) => {
+      await recordPageTurns(page)
+      await gotoReady(page, PATH)
+      const link = point(page, 'vikshepa')
+      await prefetched(link)
+      await link.click()
+      await expect(page).toHaveURL(new RegExp(`${hrefFor({ kind: 'concept', id: 'vikshepa' })}$`))
+      await expect(page.getByRole('heading', { level: 1 })).toContainText(named('vikshepa'))
+      const [turn] = await pageTurns(page)
+      expectPageTurned(turn, 'forward')
+      expect(turn?.flights.map(({ name }) => name)).toContain('concept-title-vikshepa')
+    },
+  )
 
   test('filters by keyboard: one Tab stop a group, arrows between, Space to press, announced politely', async ({
     page,
@@ -271,50 +277,54 @@ test.describe('the Concept map', () => {
     await expect(page.locator('body')).not.toBeFocused()
   })
 
-  test('an address with a topic opens filtered, the Concepts outside it in a lighter ink', async ({
-    page,
-  }) => {
-    test.skip(!wide(page), 'Below 600 px the plate waits one tap away.')
-    await gotoReady(page, `${PATH}?topic=temperament`)
-    const inTopic = new Set(
-      graph.nodes.filter(({ topics }) => topics.includes('temperament')).map(({ slug }) => slug),
-    )
-    const touching = connections.filter((key) =>
-      key
-        .split(' ')
-        .slice(1)
-        .some((slug) => inTopic.has(slug)),
-    )
-    await expect(rows(page)).toHaveCount(touching.length)
-    await expect(page.locator('[data-map] svg path[data-c]').filter({ visible: true })).toHaveCount(
-      touching.length,
-    )
-    const muted = await token(page, '--color-surface-muted')
-    const ink = await token(page, '--color-surface-ink')
-    for (const node of graph.nodes)
-      expect(await colourOf(point(page, node.slug)), node.name).toEqual(
-        inTopic.has(node.slug) ? ink : muted,
+  test(
+    'an address with a topic opens filtered, the Concepts outside it in a lighter ink',
+    { tag: '@from-768' },
+    async ({ page }) => {
+      await gotoReady(page, `${PATH}?topic=temperament`)
+      const inTopic = new Set(
+        graph.nodes.filter(({ topics }) => topics.includes('temperament')).map(({ slug }) => slug),
       )
-  })
+      const touching = connections.filter((key) =>
+        key
+          .split(' ')
+          .slice(1)
+          .some((slug) => inTopic.has(slug)),
+      )
+      await expect(rows(page)).toHaveCount(touching.length)
+      await expect(
+        page.locator('[data-map] svg path[data-c]').filter({ visible: true }),
+      ).toHaveCount(touching.length)
+      const muted = await token(page, '--color-surface-muted')
+      const ink = await token(page, '--color-surface-ink')
+      for (const node of graph.nodes)
+        expect(await colourOf(point(page, node.slug)), node.name).toEqual(
+          inTopic.has(node.slug) ? ink : muted,
+        )
+    },
+  )
 
-  test('at 360 px the list comes first, with the map one tap away', async ({ page }) => {
-    test.skip(wide(page), 'Above 600 px the plate and the list share the page.')
-    await gotoReady(page, PATH)
-    await expect(plate(page)).toBeHidden()
-    const toPlate = page.getByRole('link', { name: 'See the map' })
-    await expect(toPlate).toBeVisible()
-    const heading = list(page).getByRole('heading', { level: 2 })
-    const [linkTop, listTop] = await Promise.all(
-      [toPlate, heading].map((part) => part.evaluate((e) => e.getBoundingClientRect().top)),
-    )
-    expect(linkTop).toBeLessThan(listTop ?? 0)
-    await toPlate.click()
-    await expect(plate(page)).toBeVisible()
-    await expect(point(page, 'vikshepa')).toBeVisible()
-    expect(await scrollsSideways(page)).toEqual([])
-    await page.getByRole('link', { name: 'Back to the list' }).click()
-    await expect(plate(page)).toBeHidden()
-  })
+  test(
+    'at 360 px the list comes first, with the map one tap away',
+    { tag: '@only-360' },
+    async ({ page }) => {
+      await gotoReady(page, PATH)
+      await expect(plate(page)).toBeHidden()
+      const toPlate = page.getByRole('link', { name: 'See the map' })
+      await expect(toPlate).toBeVisible()
+      const heading = list(page).getByRole('heading', { level: 2 })
+      const [linkTop, listTop] = await Promise.all(
+        [toPlate, heading].map((part) => part.evaluate((e) => e.getBoundingClientRect().top)),
+      )
+      expect(linkTop).toBeLessThan(listTop ?? 0)
+      await toPlate.click()
+      await expect(plate(page)).toBeVisible()
+      await expect(point(page, 'vikshepa')).toBeVisible()
+      expect(await scrollsSideways(page)).toEqual([])
+      await page.getByRole('link', { name: 'Back to the list' }).click()
+      await expect(plate(page)).toBeHidden()
+    },
+  )
 
   test('without JavaScript, every connection shows and no filter does', async ({ browser }) => {
     const context = await browser.newContext({ javaScriptEnabled: false })

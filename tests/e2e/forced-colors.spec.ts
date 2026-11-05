@@ -90,7 +90,7 @@ test('the Retake dialog keeps its edge', async ({ page }) => {
   await expectVisibleEdge(dialog, 'Retake dialog')
 })
 
-test('the Menu Drawer keeps its edge', async ({ page }) => {
+test('the Menu Drawer keeps its edge', { tag: '@self-width' }, async ({ page }) => {
   await page.setViewportSize({ width: 360, height: 800 })
   await gotoReady(page, '/concepts/vikshepa/')
   await page.getByRole('banner').getByRole('button', { name: 'Menu' }).click()
