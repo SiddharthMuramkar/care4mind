@@ -7,15 +7,15 @@
 // It refuses a file that exists and an id that breaks the id rules. It reads no saved page and
 // never touches the network. How to fill it is in the comment atop each template (`FILLING`), the
 // comments on its fields, and the schema's doc comments; tests/unit/content-integrity.test.ts
-// and content-completeness.test.ts enforce the rest.
+// enforces the rest.
 
 import { spawnSync } from 'node:child_process'
 import { existsSync, mkdirSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
-import { runTool, ToolError } from './extract.mjs'
-import { KIND_FOLDERS, rootFrom } from './verify.mjs'
+import { rootFrom, runTool, ToolError } from './cli.mjs'
+import { KIND_FOLDERS } from './records.mjs'
 
 const USAGE = `Usage: pnpm content:new <kind> <id>
 Kinds: ${Object.keys(KIND_FOLDERS).join(', ')}.`

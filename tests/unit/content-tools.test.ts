@@ -66,8 +66,12 @@ interface Captures {
   page(ref: string): SavedPage | undefined
 }
 
-const extract = (await import(pathToFileURL(join(TOOLS, 'extract.mjs')).href)) as {
+const capturesModule = (await import(pathToFileURL(join(TOOLS, 'captures.mjs')).href)) as {
   openCaptures(dir: string): Captures
+}
+
+const recordsModule = (await import(pathToFileURL(join(TOOLS, 'records.mjs')).href)) as {
+  KIND_FOLDERS: Record<string, string>
 }
 
 /** What verify finds for one record. */
@@ -82,7 +86,6 @@ interface Check {
 
 const verify = (await import(pathToFileURL(join(TOOLS, 'verify.mjs')).href)) as {
   checkRecord(record: ContentRecord, captures: Captures): Check
-  KIND_FOLDERS: Record<string, string>
 }
 
 const report = (await import(pathToFileURL(join(TOOLS, 'report.mjs')).href)) as {
@@ -288,7 +291,7 @@ describe('extract', () => {
   let site: Captures
 
   beforeAll(() => {
-    site = extract.openCaptures(
+    site = capturesModule.openCaptures(
       captures('site', [EXAMPLE_PAGE, EXAMPLE_SURVEY, EXAMPLE_QUIZ_PAGE], QUIZ_FILES),
     )
   })
@@ -518,7 +521,7 @@ describe('verify', () => {
   let site: Captures
 
   beforeAll(() => {
-    site = extract.openCaptures(captures('verify-site', [EXAMPLE_PAGE]))
+    site = capturesModule.openCaptures(captures('verify-site', [EXAMPLE_PAGE]))
   })
 
   it('finds each string on its page after normalising both sides', () => {
@@ -876,6 +879,44 @@ describe('the verify command', { timeout: 30_000 }, () => {
     expect(result.status).toBe(2)
     expect(result.stderr).toContain('node scripts/content/registry.mjs')
   })
+
+  describe('with a fidelity suite', () => {
+    /** A repo whose one record passes, and whose fidelity suite pins `pinned` Concepts. */
+    const pinning = (name: string, pinned: number) => {
+      const pinnedRoot = repo(name, {
+        'concepts/udaharana.ts': recordFile(concept(paragraphs('Every rule needs an example.'))),
+      })
+      writeFileSync(join(pinnedRoot, 'package.json'), '{ "type": "module" }\n')
+      writeFileSync(
+        join(pinnedRoot, 'vitest.fidelity.config.ts'),
+        "export default { test: { include: ['tests/fidelity/**/*.test.ts'], globals: true } }\n",
+      )
+      mkdirSync(join(pinnedRoot, 'tests/fidelity'), { recursive: true })
+      writeFileSync(
+        join(pinnedRoot, 'tests/fidelity/pins.test.ts'),
+        `it('pins the Concepts', () => expect(1).toBe(${pinned}))\n`,
+      )
+      return pinnedRoot
+    }
+
+    it('runs it after checking every record, and exits 1 when a pin fails', () => {
+      const env = { CARE4MIND_CAPTURES: site }
+      const held = run('verify', ['--root', pinning('fidelity-held', 1)], env)
+      expect(held.stdout).toContain('fidelity: the migration’s pins hold')
+      expect(held.status).toBe(0)
+
+      const broken = run('verify', ['--root', pinning('fidelity-broken', 2)], env)
+      expect(broken.stdout).toContain('fidelity: a migration pin fails')
+      expect(broken.status).toBe(1)
+    })
+
+    it('leaves it out when only some records are named', () => {
+      const env = { CARE4MIND_CAPTURES: site }
+      const result = run('verify', ['--root', pinning('fidelity-named', 2), 'concept'], env)
+      expect(result.stdout).not.toContain('fidelity:')
+      expect(result.status).toBe(0)
+    })
+  })
 })
 
 describe('report', () => {
@@ -936,7 +977,7 @@ describe('report', () => {
   ]
 
   beforeAll(() => {
-    site = extract.openCaptures(captures('report-site', [EXAMPLE_PAGE, OLD_PAGE]))
+    site = capturesModule.openCaptures(captures('report-site', [EXAMPLE_PAGE, OLD_PAGE]))
   })
 
   it('groups every flag by role, collapsing identical notes into one line with a count', () => {
@@ -1064,9 +1105,32 @@ describe('the network rule', () => {
   })
 })
 
+describe('the shared modules', () => {
+  const SHARED = ['cli.mjs', 'records.mjs', 'captures.mjs']
+  const LOCAL_IMPORT = /^\s*import\b[^'"]*?\bfrom\s*['"]\.\/([^'"]+)['"]/gm
+
+  it('are the only tool files a tool imports', () => {
+    const tools = readdirSync(TOOLS).filter((file) => file.endsWith('.mjs'))
+    expect(tools).toEqual(expect.arrayContaining(SHARED))
+    for (const tool of tools) {
+      const source = readFileSync(join(TOOLS, tool), 'utf8')
+      const imported = [...source.matchAll(LOCAL_IMPORT)].map((match) => match[1] ?? '')
+      expect(
+        imported.filter((file) => !SHARED.includes(file)),
+        tool,
+      ).toEqual([])
+    }
+  })
+
+  it('are libraries, not commands', () => {
+    for (const file of SHARED)
+      expect(readFileSync(join(TOOLS, file), 'utf8'), file).not.toMatch(/\brunTool\(import\.meta/)
+  })
+})
+
 describe('the kinds of record', () => {
   it('are the schema’s, with the same folders', () => {
-    expect(verify.KIND_FOLDERS).toEqual(KIND_FOLDERS)
+    expect(recordsModule.KIND_FOLDERS).toEqual(KIND_FOLDERS)
   })
 })
 
