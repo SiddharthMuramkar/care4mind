@@ -448,7 +448,10 @@ for (const list of bookLists)
         const section = page.locator(`section[id="${group.id}"]`)
         if (headed)
           await expect(section.getByRole('heading', { level: 2 })).toHaveText(group.heading)
-        else await expect(section.getByRole('heading', { level: 2 })).toHaveCount(0)
+        else
+          await expect(
+            section.getByRole('heading', { name: group.heading, exact: true }),
+          ).toHaveCount(0)
         const shelf = section.getByRole('navigation', { name: `Shelf: ${group.heading}` })
         if (isWide(page)) {
           await expect(shelf.getByRole('link')).toHaveCount(booksOf(group).length)
@@ -460,7 +463,10 @@ for (const list of bookLists)
         } else await expect(shelf, 'a phone shows the list alone').toBeHidden()
         for (const { reference, annotation } of booksOf(group)) {
           const book = section.locator(`li[id="${reference.anchor}"]`)
-          await expect(book.getByRole('heading', { level: 3 })).toHaveText(reference.title)
+          // Under a group heading a book's title is an h3; a lone group's books are h2s.
+          await expect(book.getByRole('heading', { level: headed ? 3 : 2 })).toHaveText(
+            reference.title,
+          )
           if (reference.authors) await expect(book).toContainText(reference.authors)
           if (annotation) await expect(book).toContainText(annotation)
           await expect(book.getByRole('link', { name: 'In References' })).toHaveAttribute(
@@ -503,12 +509,22 @@ for (const list of courseLists)
     for (const group of list.groups)
       await expect(
         page.locator(`section[id="${group.id}"]`).getByRole('heading', { level: 2 }),
-      ).toHaveText(list.groups.length > 1 ? group.heading : [])
+      ).toHaveText(
+        list.groups.length > 1
+          ? group.heading
+          : group.items.flatMap((item) => (item.type === 'course' ? [item.name] : [])),
+      )
     for (const course of coursesOf(list)) {
       const card = page
         .getByRole('main')
         .getByRole('listitem')
-        .filter({ has: page.getByRole('heading', { level: 3, name: course.name, exact: true }) })
+        .filter({
+          has: page.getByRole('heading', {
+            level: list.groups.length > 1 ? 3 : 2,
+            name: course.name,
+            exact: true,
+          }),
+        })
         .filter({ hasText: course.provider })
       await expect(card, course.name).toHaveCount(1)
       if (course.city) await expect(card).toContainText(course.city)
@@ -572,9 +588,9 @@ test.describe('Every Library page without JavaScript', () => {
     }
     for (const list of courseLists) {
       await page.goto(list.href)
-      await expect(page.getByRole('main').getByRole('heading', { level: 3 })).toHaveCount(
-        coursesOf(list).length,
-      )
+      await expect(
+        page.getByRole('main').getByRole('heading', { level: list.groups.length > 1 ? 3 : 2 }),
+      ).toHaveCount(coursesOf(list).length)
     }
     for (const textPage of textPages) {
       await page.goto(textPage.href)

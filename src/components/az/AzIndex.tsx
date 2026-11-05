@@ -119,6 +119,34 @@ function reorder(from: Selection, to: Selection, change: () => void) {
 }
 
 /**
+ * Take the reader to an entry and keep it there until the page settles. The browser's own glide
+ * to the entry may still be under way when this runs, and a jump made mid-glide is carried past
+ * it, so aim again each frame until the scroll rests with the entry in place. A wheel, touch,
+ * press or key gives the scroll back to the reader at once.
+ */
+function settleOn(target: HTMLElement) {
+  const inputs = ['wheel', 'touchmove', 'pointerdown', 'keydown'] as const
+  let [last, still, frames] = [-1, 0, 0]
+  let stopped = false
+  const stop = () => {
+    stopped = true
+    for (const type of inputs) window.removeEventListener(type, stop)
+  }
+  for (const type of inputs) window.addEventListener(type, stop, { passive: true })
+  const frame = () => {
+    if (stopped) return
+    target.scrollIntoView({ block: 'start', behavior: 'instant' as ScrollBehavior })
+    still = window.scrollY === last ? still + 1 : 0
+    last = window.scrollY
+    frames += 1
+    if (still >= 3 || frames >= 600) stop()
+    else requestAnimationFrame(frame)
+  }
+  frame()
+  return stop
+}
+
+/**
  * Hide the entries, and the letters, a selection leaves out. Only the elements whose state
  * changes are touched, which keeps a press quick on a slow phone (a stylesheet would restyle
  * the whole page).
@@ -341,17 +369,20 @@ export function AzIndex({
   useEffect(() => whenIdle(upgrade), [upgrade])
 
   // The browser aims its glide to a named entry before the fonts arrive and the list takes its
-  // true heights, so a long list's entry can come to rest under the rail: aim again, at once.
+  // true heights, so a long list's entry can come to rest under the rail: aim again once they
+  // have, and keep aiming until the scroll settles (settleOn), as the glide may still be running.
   useEffect(() => {
     const id = window.location.hash.slice(1)
     if (!id) return
+    let stop: (() => void) | undefined
     let cancelled = false
     void document.fonts.ready.then(() => {
-      if (!cancelled)
-        document.getElementById(id)?.scrollIntoView({ behavior: 'instant' as ScrollBehavior })
+      const target = document.getElementById(id)
+      if (!cancelled && target) stop = settleOn(target)
     })
     return () => {
       cancelled = true
+      stop?.()
     }
   }, [])
 
@@ -371,7 +402,7 @@ export function AzIndex({
       const target = id ? document.getElementById(id) : null
       const entry = target?.closest<HTMLElement>('[data-entry]')
       const kind = entry?.dataset.kind
-      if (!entry || !kind || !listRef.current?.contains(entry) || !entry.hidden) return
+      if (!target || !entry || !kind || !listRef.current?.contains(entry) || !entry.hidden) return
       const now = readSelection(window.location.search, known, defaultKinds)
       // Hidden by the search or another group, not by its kind: letting the kind in shows nothing.
       if (now.kind.includes(kind)) return
@@ -384,13 +415,11 @@ export function AzIndex({
       flushSync(() => {
         for (const listener of listeners) listener()
       })
-      // Show it now (the layout effect repeats this), then jump: a smooth scroll started mid-load is left behind as the list settles.
+      // Show it now (the layout effect repeats this), then settle on it: the entries above are
+      // first drawn at a guessed height (content-visibility), so a single jump can land short of
+      // the entry or past it, under the rail.
       filterList(next, latestQuery.current)
-      const jump = () => target?.scrollIntoView({ block: 'start', behavior: 'instant' })
-      jump()
-      // The entries above are first drawn at a guessed height (content-visibility), so that jump
-      // can land short of the entry or past it, under the rail: jump again once they are real.
-      requestAnimationFrame(() => requestAnimationFrame(jump))
+      settleOn(target)
     }
     reveal()
     window.addEventListener('hashchange', reveal)

@@ -79,9 +79,7 @@
 }
 
 /* Gilt rules across the head and the foot: two hairlines each, as a cloth binding is tooled. */
-.spine::before,
-.spine::after {
-  content: '';
+.gilt {
   position: absolute;
   left: 0.3rem;
   right: 0.3rem;
@@ -91,11 +89,11 @@
   opacity: 0.75;
 }
 
-.spine::before {
+.gilt[data-gilt='head'] {
   top: 0.6rem;
 }
 
-.spine::after {
+.gilt[data-gilt='foot'] {
   bottom: 0.6rem;
 }
 
@@ -152,8 +150,9 @@
 
 /*
  * A reading list's shelf: its books rise onto the board one after another as it scrolls into
- * view, each uncovered from the board up, so none ever shows below it. Finished once the shelf
- * is in view, and still where motion is reduced or the browser has no view timelines.
+ * view, each uncovered from the board up, so none ever shows below it. The spine never leaves
+ * its slot (its box must not lie over the books below): only its clip opens. Finished once the
+ * shelf is in view, and still where motion is reduced or the browser has no view timelines.
  */
 @media (prefers-reduced-motion: no-preference) {
   @supports (animation-timeline: view()) {
@@ -167,12 +166,10 @@
 
 @keyframes rise {
   from {
-    translate: 0 100%;
-    clip-path: inset(-1rem -1rem 100% -1rem);
+    clip-path: inset(100% -1rem -1rem -1rem);
   }
 
   to {
-    translate: 0 0;
     clip-path: inset(-1rem -1rem -1rem -1rem);
   }
 }
@@ -271,16 +268,17 @@
 
   .volumes .head {
     width: 1.5rem;
-    color: var(--color-highlight);
+    /* The darker vermilion: on the paper the bright one does not read at this size. */
+    color: var(--color-surface-link);
     font-size: 1.125rem;
   }
 
-  .volumes .spine::before {
-    content: none;
+  .volumes .gilt[data-gilt='head'] {
+    display: none;
   }
 
-  /* The gilt rule at the foot becomes the leader. */
-  .volumes .spine::after {
+  /* The foot's gilt rule becomes the leader. */
+  .volumes .gilt[data-gilt='foot'] {
     position: static;
     order: 2;
     flex: 1;

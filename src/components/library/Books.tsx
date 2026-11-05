@@ -15,15 +15,20 @@ type Book = { reference: ReferenceView; annotation?: Inline }
 /** The authors as a spine names them: the label's names, without its year ("Hunt & Ellis"). */
 const spineAuthors = (reference: ReferenceView) => reference.label.replace(/\s*\([^)]*\)\s*$/, '')
 
-/** A book on the list: its title and authors set in type, its note, and where to find it. */
-function BookEntry({ book, index }: { book: Book; index: number }) {
+/**
+ * A book on the list: its title and authors set in type, its note, and where to find it. Under
+ * its group's heading its title is an h3; a lone group's books head themselves under the
+ * page's title, so theirs are h2s.
+ */
+function BookEntry({ book, index, headed }: { book: Book; index: number; headed: boolean }) {
   const { reference, annotation } = book
   const details = [reference.year, reference.publisher, reference.edition].filter(Boolean)
+  const Title = headed ? 'h3' : 'h2'
   return (
     <li id={reference.anchor} className={styles.book} data-tone={toneAt(index)}>
-      <h3 className={styles.title}>
+      <Title className={styles.title}>
         <cite>{reference.title}</cite>
-      </h3>
+      </Title>
       {reference.authors ? <p className={styles.authors}>{reference.authors}</p> : null}
       {details.length > 0 ? <p className={styles.details}>{details.join(' · ')}</p> : null}
       {annotation ? (
@@ -78,7 +83,7 @@ export function BookGroup({ group, headed }: { group: Group; headed: boolean }) 
       </Shelf>
       <ul className={styles.books}>
         {books.map((book, index) => (
-          <BookEntry key={book.reference.id} book={book} index={index} />
+          <BookEntry key={book.reference.id} book={book} index={index} headed={headed} />
         ))}
       </ul>
     </section>

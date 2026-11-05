@@ -50,6 +50,10 @@ export function Spine({ href, name, index, head, title, foot, thickness }: Spine
   } as CSSProperties
   const inner = (
     <>
+      {/* The gilt rules, each on its own slip: as the spine's own pseudo-elements they would
+          stand over every word set on it, and its text could not be read against the binding. */}
+      <span className={styles.gilt} data-gilt="head" aria-hidden="true" />
+      <span className={styles.gilt} data-gilt="foot" aria-hidden="true" />
       {head ? (
         <span className={styles.head} aria-hidden>
           {head}
