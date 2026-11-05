@@ -57,11 +57,14 @@ export function AzEntry({
   entry,
   topicNames,
   preview,
+  hidden = false,
 }: {
   entry: Entry
   topicNames: ReadonlyMap<string, string>
   /** The preview a Concept's link shows (ticket 05's LinkPreview). */
   preview?: PreviewPayload
+  /** Left out of the plain address's list, until a filter lets it in. */
+  hidden?: boolean
 }) {
   const [anchor, ...more] = entry.anchors
   const name =
@@ -101,6 +104,7 @@ export function AzEntry({
       {...(anchor ? { id: anchor } : {})}
       className={styles.entry}
       data-entry
+      {...(hidden ? { hidden: true } : {})}
       data-kind={entry.kind}
       {...(entry.topics.length > 0 ? { 'data-topics': entry.topics.join(' ') } : {})}
       {...(entry.works.length > 0 ? { 'data-works': entry.works.join(' ') } : {})}
