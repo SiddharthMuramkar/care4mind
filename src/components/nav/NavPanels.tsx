@@ -16,7 +16,7 @@ import { createPortal } from 'react-dom'
 import { toDevanagariDigits } from '@/lib/text'
 
 import { currentFor, panelOf } from './current'
-import { ArrowGlyph, ChevronGlyph } from './glyphs'
+import { ArrowGlyph, ChevronGlyph } from '../glyphs'
 import nav from './nav.module.css'
 import styles from './NavPanels.module.css'
 import type { PanelId, SiteNav } from './types'

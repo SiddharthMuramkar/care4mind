@@ -2,12 +2,17 @@ import type { Metadata } from 'next'
 
 import { AzIndex, type ChipGroup, type RailLetter } from '@/components/az'
 import { Breadcrumbs } from '@/components/Breadcrumbs'
-import { conceptPreview } from '@/components/concept/previews'
+import { conceptPreview } from '@/components/concept'
 import { Folio } from '@/components/Folio'
-import { catalogue, counted, TYPE_NAMES } from '@/components/library/catalogue'
-import library from '@/components/library/library.module.css'
-import { type CitingConcept, ReferenceEntry } from '@/components/library/ReferenceEntry'
-import styles from '@/components/library/references.module.css'
+import {
+  catalogue,
+  type CitingConcept,
+  counted,
+  libraryStyles as library,
+  ReferenceEntry,
+  referencesStyles as styles,
+  TYPE_NAMES,
+} from '@/components/library'
 import { PageTurn } from '@/components/PageTurn'
 import { concepts, hrefFor } from '@/content'
 import { cx } from '@/lib/cx'

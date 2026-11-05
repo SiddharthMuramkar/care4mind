@@ -4,7 +4,7 @@ import Link from 'next/link'
 import type { ConceptCard, TopicRef } from '@/content'
 
 import { turnBack, turnForward } from '../PageTurn'
-import { LinkPreview } from '../preview/LinkPreview'
+import { LinkPreview } from '../preview'
 import { conceptPreview } from './previews'
 import styles from './TopicPager.module.css'
 

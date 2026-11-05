@@ -14,7 +14,7 @@ import { StatusBadge } from '@/components/StatusBadge'
 import { hrefFor, questionnaires, site } from '@/content'
 import { metadataFor } from '@/lib/metadata'
 
-import cta from '../../cta.module.css'
+import cta from '@/components/Cta'
 import reading from '../../reading.module.css'
 import styles from './page.module.css'
 

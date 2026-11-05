@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { startHere } from '@/components/start/start-here'
+import { startHere } from '@/components/start'
 import { concepts } from '@/content'
 
 describe('the Start here record', () => {

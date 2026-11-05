@@ -38,6 +38,7 @@ These are judgement calls, so review checks them against the diff, in the codeba
 | Rule | Kept true by |
 | --- | --- |
 | Pages read content only through `@/content`; a client file imports it for types only | lint (content boundary) and its test |
+| A component lives in a folder, and that folder's index is its interface | lint (`no-restricted-imports`) and its test |
 | A dynamic page's params are the registry entries of its pattern | routes test |
 | The graph imports neither the views nor the derivations above it | lint (content boundary) and its test |
 | Internal links come from `hrefFor()` | lint (`care4mind/href-from-hreffor`) |

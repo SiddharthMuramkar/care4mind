@@ -3,7 +3,7 @@ import Link from 'next/link'
 
 import { Citation } from '@/components/Citation'
 import { turnForward } from '@/components/PageTurn'
-import { LinkPreview, type PreviewPayload } from '@/components/preview/LinkPreview'
+import { LinkPreview, type PreviewPayload } from '@/components/preview'
 import type { RecordRef, ReferenceView } from '@/content'
 
 import { TYPE_NAMES } from './catalogue'

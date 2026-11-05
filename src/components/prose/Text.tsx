@@ -2,7 +2,7 @@ import type { ReactNode } from 'react'
 
 import type { Inline, NumberedReference } from '@/content'
 
-import { LinkPreview, type PreviewPayload } from '../preview/LinkPreview'
+import { LinkPreview, type PreviewPayload } from '../preview'
 import { citedIn } from './in-text-citations'
 
 /** A citation the page can link: its entry's anchor, and what its preview card shows. */

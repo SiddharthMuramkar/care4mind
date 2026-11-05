@@ -1,6 +1,6 @@
 import { ViewTransition } from 'react'
 
-import { ScriptPair } from '@/components/script/ScriptPair'
+import { ScriptPair } from '@/components/script'
 import type { WorkCard } from '@/content'
 
 import styles from './WorkTitle.module.css'

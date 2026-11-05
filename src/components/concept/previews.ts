@@ -1,6 +1,6 @@
 import type { ConceptCard, LatinScript, VerseView } from '@/content'
 
-import type { PreviewPayload } from '../preview/LinkPreview'
+import type { PreviewPayload } from '../preview'
 
 /** What a Concept link's preview shows: its name, its Devanagari, its gloss and its summary. */
 export function conceptPreview(concept: ConceptCard): PreviewPayload {

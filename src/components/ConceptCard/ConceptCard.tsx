@@ -4,7 +4,7 @@ import type { ConceptCard as Card } from '@/content'
 import { cx } from '@/lib/cx'
 
 import styles from './ConceptCard.module.css'
-import { Text } from './prose/Text'
+import { Text } from '../prose'
 
 interface Props {
   concept: Pick<Card, 'slug' | 'name' | 'lang' | 'term' | 'english' | 'summary'>

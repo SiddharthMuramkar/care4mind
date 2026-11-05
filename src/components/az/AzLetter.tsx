@@ -1,4 +1,4 @@
-import type { PreviewPayload } from '@/components/preview/LinkPreview'
+import type { PreviewPayload } from '@/components/preview'
 import type { AzEntry as Entry } from '@/content'
 
 import styles from './az.module.css'

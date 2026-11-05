@@ -19,10 +19,11 @@ import {
   type ReactNode,
 } from 'react'
 
-import cta from '@/app/cta.module.css'
+import cta from '@/components/Cta'
 import { Fleuron } from '@/components/Fleuron'
 import { turnBack } from '@/components/PageTurn'
 import type { QuestionnaireFormView } from '@/content'
+
 import {
   addressOf,
   entryAt,
@@ -35,8 +36,7 @@ import {
   type FlowAction,
   type FlowState,
   type StepId,
-} from '@/components/questionnaire/flow-state'
-
+} from './flow-state'
 import styles from './Flow.module.css'
 import { FlowProgress } from './FlowProgress'
 import { Statement, statementId } from './Statement'

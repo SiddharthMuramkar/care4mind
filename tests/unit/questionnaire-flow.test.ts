@@ -16,7 +16,7 @@ import {
   unsaved,
   type FlowAction,
   type FlowState,
-} from '@/components/questionnaire/flow-state'
+} from '@/components/questionnaire'
 import { statusWords } from '@/components/StatusBadge'
 
 // Front-end-site ticket 10: the KarmaYoga flow's state, kept only in a reducer (D16), and the

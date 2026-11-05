@@ -28,15 +28,32 @@ function definedClasses(css: string): Set<string> {
   return names
 }
 
+/** The CSS modules a component folder's index re-exports, by folder path and exported name. */
+function reexportedStyles() {
+  const byFolder = new Map<string, Map<string, string>>()
+  for (const file of files('src', /^index\.tsx?$/)) {
+    const source = readFileSync(file, 'utf8')
+    for (const exp of source.matchAll(
+      /export\s+\{\s*default(?:\s+as\s+(\w+))?\s*\}\s+from\s+'([^']+\.module\.css)'/g,
+    )) {
+      const [, name = 'default', spec = ''] = exp
+      const folder = dirname(resolve(file))
+      const entry = byFolder.get(folder) ?? new Map<string, string>()
+      entry.set(name, resolveImport(file, spec))
+      byFolder.set(folder, entry)
+    }
+  }
+  return byFolder
+}
+
 /** Each module, with the classes markup reads from it and whether it reads one by a computed key. */
 function moduleUses() {
   const uses = new Map<string, { names: Set<string>; dynamic: boolean; readers: string[] }>()
+  const reexports = reexportedStyles()
   for (const file of files('src', /\.tsx?$/)) {
     const source = readFileSync(file, 'utf8')
-    const text = source.replace(/^import .*$/gm, '')
-    for (const imp of source.matchAll(/import\s+(\w+)\s+from\s+'([^']+\.module\.css)'/g)) {
-      const [, binding = '', spec = ''] = imp
-      const path = resolveImport(file, spec)
+    const text = source.replace(/import\s+[\s\S]*?\s+from\s+'[^']+'/g, '')
+    const record = (path: string, binding: string) => {
       const entry = uses.get(path) ?? { names: new Set<string>(), dynamic: false, readers: [] }
       entry.readers.push(file)
       for (const read of text.matchAll(new RegExp(`\\b${binding}\\.(\\w+)`, 'g'))) {
@@ -47,6 +64,32 @@ function moduleUses() {
       }
       if (new RegExp(`\\b${binding}\\[(?!')`).test(text)) entry.dynamic = true
       uses.set(path, entry)
+    }
+    for (const imp of source.matchAll(/import\s+(\w+)\s+from\s+'([^']+\.module\.css)'/g)) {
+      const [, binding = '', spec = ''] = imp
+      record(resolveImport(file, spec), binding)
+    }
+    // A folder's index is its interface, styles included: an import of the folder may be a
+    // re-exported CSS module under another name.
+    for (const imp of source.matchAll(/import\s+([\s\S]*?)\s+from\s+'([^']+)'/g)) {
+      const [, clause = '', spec = ''] = imp
+      if (spec.endsWith('.module.css')) continue
+      const styles = reexports.get(resolveImport(file, spec))
+      if (!styles) continue
+      const bindings: [string, string][] = []
+      for (const part of (clause.match(/\{([\s\S]*)\}/)?.[1] ?? '').split(',')) {
+        const named = part.trim().match(/^(?:type\s+)?(\w+)(?:\s+as\s+(\w+))?$/)
+        if (named?.[1]) bindings.push([named[1], named[2] ?? named[1]])
+      }
+      const own = clause
+        .replace(/\{[\s\S]*\}/, '')
+        .replace(/,/g, '')
+        .trim()
+      if (/^\w+$/.test(own)) bindings.push(['default', own])
+      for (const [name, binding] of bindings) {
+        const path = styles.get(name)
+        if (path) record(path, binding)
+      }
     }
   }
   return uses

@@ -3,7 +3,7 @@ import { capitalise } from '@/lib/text'
 
 import { cx } from '@/lib/cx'
 
-import { ScriptPair } from './script/ScriptPair'
+import { ScriptPair } from '../script'
 import styles from './SanskritName.module.css'
 
 interface Props {

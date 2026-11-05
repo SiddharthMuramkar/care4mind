@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { currentFor } from '@/components/nav/current'
+import { currentFor } from '@/components/nav'
 
 describe('which header link is current (aria-current)', () => {
   it('marks a link’s own page as the page, and a page elsewhere as nothing', () => {
