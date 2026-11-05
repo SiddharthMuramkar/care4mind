@@ -17,7 +17,6 @@ import { createContent } from '@/content/views'
 const ON: Features = {
   questionnairePreview: true,
   conceptMap: true,
-  devanagariFirst: true,
   startHere: true,
 }
 const OFF: Features = { ...ON, questionnairePreview: false }

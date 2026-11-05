@@ -1,7 +1,7 @@
 import type { NextConfig } from 'next'
 
 import { redirects } from './src/config/redirects'
-import { site } from './src/config/site'
+import { siteConfig } from './src/config/site'
 
 const nextConfig: NextConfig = {
   poweredByHeader: false,
@@ -11,7 +11,7 @@ const nextConfig: NextConfig = {
   // Share cards read their fonts from disk at render time, which the file tracer cannot see.
   outputFileTracingIncludes: { '/**/opengraph-image*': ['./src/fonts/**/*.woff'] },
   async headers() {
-    if (site.indexable) return []
+    if (siteConfig.indexable) return []
     return [
       {
         source: '/:path*',

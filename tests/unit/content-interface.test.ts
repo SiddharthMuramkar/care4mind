@@ -29,13 +29,11 @@ import { asciiSpellings, displayName } from '@/content/names'
 const ON: Features = {
   questionnairePreview: true,
   conceptMap: true,
-  devanagariFirst: true,
   startHere: true,
 }
 const OFF: Features = {
   questionnairePreview: false,
   conceptMap: false,
-  devanagariFirst: false,
   startHere: false,
 }
 
@@ -1781,10 +1779,6 @@ describe('the feature flags, from the environment to the interface (D16, D20)', 
       map: true,
       proposals: true,
     })
-    expect(await offered({ ...production, FEATURE_DEVANAGARI_FIRST: '1' })).toEqual({
-      ...nothing,
-      proposals: true,
-    })
     expect(await offered({ ...production, FEATURE_START_HERE: '1' })).toEqual({
       ...nothing,
       proposals: true,
@@ -1795,14 +1789,13 @@ describe('the feature flags, from the environment to the interface (D16, D20)', 
       form: false,
       flow: false,
     })
-    expect(await offered({ FEATURE_CONCEPT_MAP: '0', FEATURE_DEVANAGARI_FIRST: '0' })).toEqual({
+    expect(await offered({ FEATURE_CONCEPT_MAP: '0' })).toEqual({
       ...everything,
       map: false,
     })
     expect(
       await offered({
         FEATURE_CONCEPT_MAP: '0',
-        FEATURE_DEVANAGARI_FIRST: '0',
         FEATURE_START_HERE: '0',
       }),
     ).toEqual({ ...everything, map: false, proposals: false, start: false })

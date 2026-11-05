@@ -1,6 +1,6 @@
 import type { Locator, Page } from '@playwright/test'
 
-import { contrastRatio } from '@/lib/contrast'
+import { contrastRatio } from '@/styles/contrast'
 
 import { expect } from './fixtures'
 

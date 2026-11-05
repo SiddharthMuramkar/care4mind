@@ -1,4 +1,4 @@
-import { site } from '@/config/site'
+import { siteConfig } from '@/config/site'
 
 import { expectNoAxeViolations } from './axe'
 import { unfinishedDrawings } from './drawings'
@@ -21,7 +21,7 @@ for (const route of ROUTES_IN_SCOPE) {
     await expect.soft(page.locator('h1'), `${where}: exactly one h1`).toHaveCount(1)
     expect.soft(await scrollsSideways(page), `${where}: no sideways scroll`).toEqual([])
 
-    // Until launch, search engines are told twice (site.indexable).
+    // Until launch, search engines are told twice (siteConfig.indexable).
     expect
       .soft(response?.headers()['x-robots-tag'], `${where}: noindex in the X-Robots-Tag header`)
       .toContain('noindex')
@@ -40,7 +40,7 @@ for (const route of ROUTES_IN_SCOPE) {
     await expect.soft(canonical, `${where}: exactly one canonical link`).toHaveCount(1)
     await expect
       .soft(canonical.first(), `${where}: canonical address`)
-      .toHaveAttribute('href', `${site.url}${route.path}`)
+      .toHaveAttribute('href', `${siteConfig.url}${route.path}`)
     await expect
       .soft(canonical.first(), `${where}: canonical address ends in /`)
       .toHaveAttribute('href', /\/$/)
@@ -202,4 +202,29 @@ test.describe('running text', () => {
     await expect(page.locator('#yama')).toBeVisible()
     await expect(page.getByRole('link', { name: 'Values: yama and niyama' }).first()).toBeVisible()
   })
+})
+
+test('the texts list sets each title in IAST before its Devanagari, each with its language tag', async ({
+  page,
+}) => {
+  await gotoReady(page, '/texts/')
+  const entries = await page.locator('main article').evaluateAll((cards) =>
+    cards.map((card) => {
+      const iast = card.querySelector('[lang="sa-Latn"], [lang="pi-Latn"]')
+      const deva = card.querySelector('[lang="sa-Deva"]')
+      return {
+        name: card.textContent?.trim().slice(0, 40),
+        iast: Boolean(iast),
+        order:
+          !deva || (iast && iast.compareDocumentPosition(deva) & Node.DOCUMENT_POSITION_FOLLOWING)
+            ? 'ok'
+            : 'wrong',
+      }
+    }),
+  )
+  expect(entries.length).toBeGreaterThan(0)
+  for (const entry of entries) {
+    expect.soft(entry.iast, `${entry.name} has a transliteration`).toBe(true)
+    expect.soft(entry.order, `${entry.name} sets IAST first`).toBe('ok')
+  }
 })
