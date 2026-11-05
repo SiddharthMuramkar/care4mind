@@ -147,6 +147,47 @@ function settleOn(target: HTMLElement) {
 }
 
 /**
+ * Once the scroll rests, put an entry or a letter where its link's glide should have left it,
+ * if it is not there. A glide already under way when the link is pressed — Tab taking focus
+ * into the list glides too, the page being smooth-scrolling — can run to its own end and drop
+ * the link's glide, and a long list can still be taking its true heights as the glide is
+ * aimed, so the scroll can come to rest far from its mark. Waiting for the rest first leaves
+ * a glide that lands true untouched. A wheel, touch, press or key gives the scroll back to
+ * the reader at once.
+ */
+function correctWhenRested(target: HTMLElement) {
+  const inputs = ['wheel', 'touchmove', 'pointerdown', 'keydown'] as const
+  let stopped = false
+  let settle: (() => void) | undefined
+  const stop = () => {
+    stopped = true
+    settle?.()
+    for (const type of inputs) window.removeEventListener(type, stop)
+  }
+  for (const type of inputs) window.addEventListener(type, stop, { passive: true })
+  const started = performance.now()
+  let [last, resting] = [window.scrollY, started]
+  const frame = () => {
+    if (stopped) return
+    const now = performance.now()
+    if (window.scrollY !== last) [last, resting] = [window.scrollY, now]
+    if (now - resting < 200 && now - started < 10_000) return requestAnimationFrame(frame)
+    // At rest: the mark is the line a glide to the target leaves it on, below the page's
+    // scroll padding and the target's own scroll margin — unless the page cannot scroll
+    // far enough to bring it there, as with the last letters.
+    const line =
+      (parseFloat(getComputedStyle(document.documentElement).scrollPaddingTop) || 0) +
+      (parseFloat(getComputedStyle(target).scrollMarginTop) || 0)
+    const { top } = target.getBoundingClientRect()
+    const atEnd = window.scrollY + window.innerHeight >= document.documentElement.scrollHeight - 1
+    if (Math.abs(top - line) <= 1 || (atEnd && top > line)) stop()
+    else settle = settleOn(target)
+  }
+  requestAnimationFrame(frame)
+  return stop
+}
+
+/**
  * Hide the entries, and the letters, a selection leaves out. Only the elements whose state
  * changes are touched, which keeps a press quick on a slow phone (a stylesheet would restyle
  * the whole page).
@@ -425,6 +466,27 @@ export function AzIndex({
     window.addEventListener('hashchange', reveal)
     return () => window.removeEventListener('hashchange', reveal)
   }, [known, defaultKinds])
+
+  // A letter's own link glides to its section, but that glide can be dropped by one already
+  // under way, or land where the list's heights put the section when it was aimed: when the
+  // scroll rests, correct a landing that missed (correctWhenRested). An entry the filter
+  // hides is the reveal above's to take the reader to, not this one's.
+  useEffect(() => {
+    let stop: (() => void) | undefined
+    const correct = () => {
+      stop?.()
+      stop = undefined
+      const id = decodeURIComponent(window.location.hash.slice(1))
+      const target = id ? document.getElementById(id) : null
+      if (!target || !listRef.current?.contains(target) || target.closest('[hidden]')) return
+      stop = correctWhenRested(target)
+    }
+    window.addEventListener('hashchange', correct)
+    return () => {
+      window.removeEventListener('hashchange', correct)
+      stop?.()
+    }
+  }, [])
 
   useEffect(() => {
     const key = handoff.current
