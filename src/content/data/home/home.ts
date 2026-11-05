@@ -17,7 +17,7 @@ export default defineHome({
     exploreConcepts: 'Explore concepts',
   },
   sectionIntros: {
-    concepts: 'Each Concept is a single idea from Indian psychology, named by its Sanskrit term.',
+    concepts: 'Each Concept is a single idea from Indian psychology, named by its Sanskrit name.',
     questionnaires:
       'A Questionnaire gives you a result from documented scoring rules. Each one sets out its purpose and limitations before you start.',
   },
@@ -75,6 +75,7 @@ export default defineHome({
       'Resources area: “to mentor the mind” → “to mentor the mind.”.',
       'Research area: “create ,and host” → “create and host”.',
       'Closing line: “potential !!!” → “potential.”.',
+      'Concepts section intro, in the glossary’s word: “Sanskrit term” → “Sanskrit name”.',
       'Interface text dropped: each area’s link label (“Concepts...”, “Methods...”, “Resources...”, “Persepctives...”, “Applications...”, “Opportunities...”) and the “-” under each area’s text.',
       'Left out: the “Psychology” heading above the areas, the “Karma Yoga: An Indian Perspective of Work” heading, and the closing “Ancient Indian Wisdom” link to DharmaWiki’s main page.',
       // Listed when ticket 07 set the area targets.

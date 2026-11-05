@@ -638,6 +638,52 @@ describe('a Concept’s related Concepts (D06)', () => {
     ])
   })
 
+  it('leaves out Concepts that only quote the same work, unless fewer than 3 would be left', async () => {
+    const lone = (slug: string, primary: string, passage: string) =>
+      relating(slug, { term: { iast: slug, ascii: [] } }, { primary }, passage, [])
+    const many = [
+      ...[mind, values, self, rao, yogaSutra, dhammapada, ys130, ys230, dp160],
+      lone('alone', 'mind', 'yoga-sutra/1.30'),
+      lone('kin-a', 'values', 'yoga-sutra/2.30'),
+      lone('kin-b', 'values', 'yoga-sutra/2.30'),
+      lone('kin-c', 'values', 'yoga-sutra/2.30'),
+      lone('kin-d', 'values', 'yoga-sutra/2.30'),
+    ]
+    const relatedIn = async (slug: string) =>
+      (await createContent(memorySource(...many), ON).concepts.get(slug))?.linked.related.map(
+        (concept) => concept.slug,
+      )
+    // Every link of "alone" is the shared work, so the three strongest come back.
+    expect(await relatedIn('alone')).toEqual(['kin-a', 'kin-b', 'kin-c'])
+    // "kin-a" has three by verse, so "alone", linked by the work only, is left out.
+    expect(await relatedIn('kin-a')).toEqual(['kin-b', 'kin-c', 'kin-d'])
+
+    const content = createContent(memorySource(...many), ON)
+    // A link that comes back keeps its reason.
+    const alone = await content.concepts.get('alone')
+    expect(alone?.linked.related[0]?.reasons).toEqual([
+      { kind: 'work', text: 'Both quote the Yoga Sūtra' },
+    ])
+    // The Concept map keeps the links the page leaves out: "alone" to each of the four.
+    const { edges } = await content.site.graph()
+    expect(edges.filter(({ source, target }) => [source, target].includes('alone'))).toHaveLength(4)
+
+    // No cap: with a fifth by verse, "kin-a" lists all four others.
+    const fifth = lone('kin-e', 'values', 'yoga-sutra/2.30')
+    const uncapped = await createContent(memorySource(...many, fifth), ON).concepts.get('kin-a')
+    expect(uncapped?.linked.related.map(({ slug }) => slug)).toEqual([
+      'kin-b',
+      'kin-c',
+      'kin-d',
+      'kin-e',
+    ])
+
+    // Too few shared-text links to reach three: all of them stay.
+    const few = many.slice(0, -2)
+    const short = await createContent(memorySource(...few), ON).concepts.get('alone')
+    expect(short?.linked.related.map(({ slug }) => slug)).toEqual(['kin-a', 'kin-b'])
+  })
+
   it('never relates through a Reference four Concepts cite, or through Tomar (2024)', async () => {
     expect(await related('refuge')).toEqual([
       {

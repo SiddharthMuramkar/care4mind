@@ -225,6 +225,22 @@ function documentsOf(graph: ContentGraph): SearchDocument[] {
     }
   })
 
+  const topicTerms = graph.records('topic').flatMap((topic) =>
+    (topic.intro?.sections ?? [])
+      .flatMap((section) => termsIn(section.blocks))
+      .map((block): SearchDocument => ({
+        id: `term:topic/${topic.slug}#${block.id}`,
+        kind: 'term',
+        title: displayName(block),
+        href: hrefFor({ kind: 'topic', id: topic.slug, anchor: block.id }),
+        parent: topic.name.english,
+        names: spellingsOf(block.term),
+        keywords: unique([block.gloss]),
+        people: [],
+        excerpt: excerpt(firstText(block.blocks)),
+      })),
+  )
+
   const topics = graph.records('topic').map((topic): SearchDocument => ({
     id: `topic:${topic.slug}`,
     kind: 'topic',
@@ -263,6 +279,7 @@ function documentsOf(graph: ContentGraph): SearchDocument[] {
 
   return [
     ...concepts,
+    ...topicTerms,
     ...glossary,
     ...works,
     ...passages,

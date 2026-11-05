@@ -1,5 +1,7 @@
 import type { Locator, Page } from '@playwright/test'
 
+import { concepts } from '@/content'
+
 import { expectNoAxeViolations } from './axe'
 import { recordAnimationStarts, transitionedOn } from './drawings'
 import { expect, gotoReady, scrollsSideways, test } from './fixtures'
@@ -8,6 +10,17 @@ import { expectPageTurned, pageTurns, prefetched, recordPageTurns } from './page
 const spellingsButton = (page: Page) => page.getByRole('button', { name: 'Also spelled' })
 const spellingsPopup = (page: Page) =>
   page.getByRole('dialog', { name: 'Other spellings of vikṣepa' })
+
+/** Linked knowledge's rows that join an entry to its note: all but the References. */
+async function vikshepaRowsWithRules() {
+  const linkedKnowledge = (await concepts.get('vikshepa'))?.linked
+  return (
+    (linkedKnowledge?.related.length ?? 0) +
+    (linkedKnowledge?.works.length ?? 0) +
+    (linkedKnowledge?.sections.length ?? 0) +
+    (linkedKnowledge?.questionnaires.length ?? 0)
+  )
+}
 
 /** The References: a native disclosure, the summary that names them and opens it, and their list. */
 function references(page: Page) {
@@ -458,7 +471,7 @@ test.describe('Concept page v2: linked knowledge', () => {
     await expect(questionnaire).toContainText(/Open|Preview|Coming soon|Coming later/)
     // Its rules are decoration, silent to assistive technology.
     const rules = panel.locator('li [aria-hidden="true"]')
-    expect(await rules.count()).toBeGreaterThan(10)
+    await expect(rules).toHaveCount(await vikshepaRowsWithRules())
     await expectNoAxeViolations(page)
   })
 
@@ -500,7 +513,7 @@ test.describe('Concept page v2: linked knowledge', () => {
     await page.emulateMedia({ reducedMotion: 'reduce' })
     await gotoReady(page, '/concepts/vikshepa/')
     const inks = linked(page).locator('li [aria-hidden="true"] > *')
-    expect(await inks.count()).toBeGreaterThan(10)
+    await expect(inks).toHaveCount(await vikshepaRowsWithRules())
     const still = await inks.evaluateAll((elements) =>
       elements.every(
         (element) =>
@@ -526,8 +539,11 @@ test.describe('Concept page v2: citations', () => {
     await expect(entry).toBeFocused()
     await expect(entry).toBeInViewport()
     await expect(references(page).disclosure).toHaveAttribute('open')
-    // Clear of the sticky header, which would otherwise cover part of the list's control.
-    await references(page).toggle.evaluate((toggle) => toggle.scrollIntoView({ block: 'center' }))
+    // Clear of the sticky header, which would otherwise cover part of a link: scroll-padding
+    // parks the list's control just below it, and instantly, as axe can't scan a moving page.
+    await references(page).toggle.evaluate((toggle) =>
+      toggle.scrollIntoView({ block: 'start', behavior: 'instant' }),
+    )
     await expectNoAxeViolations(page)
   })
 
@@ -754,7 +770,7 @@ test.describe('Concept page v2: print', () => {
     const after = await doi.evaluate((link) => getComputedStyle(link, '::after').content)
     expect(after).toContain('https://doi.org/10.3389/fpsyg.2025.1554014')
     const inks = linked(page).locator('li [aria-hidden="true"] > *')
-    expect(await inks.count()).toBeGreaterThan(10)
+    await expect(inks).toHaveCount(await vikshepaRowsWithRules())
     expect(
       await inks.evaluateAll((elements) =>
         elements.every((element) => getComputedStyle(element).clipPath === 'none'),

@@ -19,7 +19,7 @@ _In code_: `TermBlock` (`kind: 'term'`)
 **Sanskrit name**:
 A word as the site stores it: in IAST, with its Devanagari and plain-ASCII spellings where they exist.
 _Avoid_: Sanskrit term
-_In code_: `SanskritName`, held in a field called `term`; the `SanskritTerm` component
+_In code_: `SanskritName`, held in a field called `term`; the `SanskritName` component
 
 **Gloss**:
 The short English rendering given beside a Sanskrit name, such as Distraction for Vikṣepa.
