@@ -1,6 +1,8 @@
 import { beforeAll, describe, expect, it } from 'vitest'
 
 import { references, type ReferenceView } from '@/content'
+import type { Flag } from '@/content/schema'
+import { localSource } from '@/content/source'
 
 // The References census: every Reference the kept pages cite or list
 // exists once, with each way the pages wrote it. Read through the public interface, as the
@@ -8,10 +10,17 @@ import { references, type ReferenceView } from '@/content'
 // content-completeness.
 
 let all: ReferenceView[] = []
+/** Each Reference record's flags: a view never carries them, so they are read at the source. */
+let flagsById = new Map<string, readonly Flag[]>()
 
 beforeAll(async () => {
   all = await references.list()
+  flagsById = new Map(
+    (await localSource.records('reference')).map((record) => [record.id, record.provenance.flags]),
+  )
 })
+
+const flagsOn = (id: string): readonly Flag[] => flagsById.get(id) ?? []
 
 function reference(id: string): ReferenceView {
   const found = all.find((candidate) => candidate.id === id)
@@ -97,9 +106,8 @@ function hostOf(url: string): string {
  * DOI or URL, `noStableLink` says why and a Research-editor flag asks for one; a retailer's link
  * is kept only with a Project-owner flag.
  */
-function linkProblems(view: ReferenceView): string[] {
+function linkProblems(view: ReferenceView, flags: readonly Flag[] = flagsOn(view.id)): string[] {
   const problems: string[] = []
-  const flags = view.provenance.flags
   if (view.url !== undefined && /^(#.*)?$/.test(view.url.trim()))
     problems.push('keeps a link to nowhere')
   if (!view.doi && view.url === undefined) {
@@ -149,8 +157,8 @@ describe('Tomar (2024)', () => {
   })
 
   it('asks the Project owner about its rights', () => {
-    const notes = reference('tomar-2024')
-      .provenance.flags.filter((flag) => flag.for === 'project-owner')
+    const notes = flagsOn('tomar-2024')
+      .filter((flag) => flag.for === 'project-owner')
       .map((flag) => flag.note)
     expect(notes.some((note) => /rights/i.test(note) && /permission/i.test(note))).toBe(true)
   })
@@ -236,7 +244,7 @@ describe('links', () => {
     url: undefined,
     doi: undefined,
     noStableLink: undefined,
-    provenance: { sources: [], edits: [], flags: [] },
+    provenance: { sources: [], edits: [] },
     ...fields,
   })
   const asking = { for: 'research-editor' as const, note: 'No DOI or link is given; add one.' }
@@ -245,14 +253,7 @@ describe('links', () => {
   it('finds a made-up link to nowhere, a missing link nobody asks for, and an unflagged retailer', () => {
     expect(linkProblems(made({ url: 'https://example.org/book' }))).toEqual([])
     expect(linkProblems(made({ url: '#' }))).toEqual(['keeps a link to nowhere'])
-    expect(
-      linkProblems(
-        made({
-          noStableLink: 'none given',
-          provenance: { ...made({}).provenance, flags: [asking] },
-        }),
-      ),
-    ).toEqual([])
+    expect(linkProblems(made({ noStableLink: 'none given' }), [asking])).toEqual([])
     expect(linkProblems(made({ noStableLink: 'none given' }))).toEqual([
       'has no link, and no Research-editor flag asks for one',
     ])
@@ -263,14 +264,7 @@ describe('links', () => {
     expect(linkProblems(made({ url: 'https://www.amazon.in/dp/1' }))).toEqual([
       'links a retailer, and no Project-owner flag says so',
     ])
-    expect(
-      linkProblems(
-        made({
-          url: 'https://www.amazon.com/dp/1',
-          provenance: { ...made({}).provenance, flags: [retailer] },
-        }),
-      ),
-    ).toEqual([])
+    expect(linkProblems(made({ url: 'https://www.amazon.com/dp/1' }), [retailer])).toEqual([])
   })
 
   it('keeps no link to nowhere, says why a Reference has none and asks for it, and flags retailers', () => {
@@ -286,8 +280,8 @@ describe('links', () => {
       'misra-mohanty-2001',
       'salagame-2011',
     ]) {
-      const notes = reference(id)
-        .provenance.flags.filter((flag) => flag.for === 'research-editor')
+      const notes = flagsOn(id)
+        .filter((flag) => flag.for === 'research-editor')
         .map((flag) => flag.note)
       expect(
         notes.some((note) => note.includes('“#”')),
@@ -300,8 +294,8 @@ describe('links', () => {
 describe('gaps the pages leave (FR-03)', () => {
   /** The Research editor's notes on a Reference. */
   const notesOn = (id: string) =>
-    reference(id)
-      .provenance.flags.filter((flag) => flag.for === 'research-editor')
+    flagsOn(id)
+      .filter((flag) => flag.for === 'research-editor')
       .map((flag) => flag.note)
       .join(' ')
 

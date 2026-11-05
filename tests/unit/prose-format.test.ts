@@ -151,7 +151,6 @@ const provenance = (
   provenance: {
     sources: urls.map((url, index) => ({ url, retrieved: `2026-10-2${index + 7}` })),
     edits: [],
-    flags: [],
     drafted,
   },
   reviewStatus,
@@ -184,6 +183,25 @@ describe('provenanceSentence', () => {
       ],
       closing:
         ', read on 2026-10-27 and 2026-10-28; its summary was drafted for the new site. Reviewed.',
+    })
+  })
+
+  it('names a written record’s author and day instead of a source', () => {
+    expect(
+      provenanceSentence({
+        provenance: {
+          origin: 'written',
+          sources: [],
+          edits: [],
+          writtenBy: 'An Author',
+          writtenOn: '2026-11-06',
+        },
+        reviewStatus: 'drafted-not-reviewed',
+      }),
+    ).toEqual({
+      opening: 'Written for this site by An Author on 2026-11-06. ',
+      sources: [],
+      closing: 'Not yet reviewed by the Research editor.',
     })
   })
 
