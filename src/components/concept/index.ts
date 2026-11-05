@@ -1,3 +1,4 @@
+export { AtAGlance } from './AtAGlance'
 export { Contents, type ContentsEntry } from './Contents'
 export { LinkedKnowledge } from './LinkedKnowledge'
 export { OpenReferences } from './OpenReferences'

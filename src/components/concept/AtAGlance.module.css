@@ -1,0 +1,57 @@
+/* The Terms a Concept explains, each on a slip linking to its place below. */
+.glance {
+  display: grid;
+  gap: 1rem;
+  scroll-margin-top: 1.5rem;
+}
+
+/* The view timeline a table of contents follows where it lacks :target-current. */
+@supports (timeline-scope: none) and (not (scroll-target-group: auto)) {
+  .glance {
+    view-timeline-name: var(--timeline);
+    view-timeline-inset: 30% 69%;
+  }
+}
+
+.title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: clamp(1.75rem, 4.5vw, 2.25rem);
+  line-height: 1.15;
+}
+
+.grid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.4rem;
+  grid-template-columns: repeat(auto-fill, minmax(min(8.5rem, 100%), 1fr));
+}
+
+.term {
+  display: grid;
+  gap: 0.1rem;
+  padding: 0.45rem 0.6rem;
+  border: 1px solid var(--color-surface-rule);
+  color: var(--color-surface-ink);
+  text-decoration: none;
+}
+
+.term:hover {
+  border-color: var(--color-surface-ink);
+}
+
+.name {
+  font-family: var(--font-display);
+  font-size: 1rem;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+
+.gloss {
+  font-size: 0.9375rem;
+  line-height: 1.35;
+  color: var(--color-surface-muted);
+}

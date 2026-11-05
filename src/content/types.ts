@@ -248,9 +248,15 @@ export interface LinkedWork extends WorkRef {
 export interface ConceptView extends ConceptCard, CarriedOver {
   /** Its term's plain-keyboard spellings (asciiSpellings); none without a term. */
   spellings: readonly string[]
+  /** One line on why the Concept matters, where the Research editor has supplied it. */
+  whyItMatters?: Inline
+  /** About how long its page takes to read, in minutes: its body text at 200 words a minute. */
+  readingMinutes: number
+  /** Every Term its sections explain, in page order, for the page's at-a-glance grid. */
+  glance: readonly { id: Slug; name: string; gloss?: string; href: string }[]
   /** The topics it is also in. */
   secondaryTopics: readonly TopicRef[]
-  /** The verses at the top of the page, in source order. */
+  /** The verses it quotes ahead of its sections, in source order. */
   verses: readonly VerseView[]
   sections: readonly SectionView[]
   toc: readonly TocEntry[]

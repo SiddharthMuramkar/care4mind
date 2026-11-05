@@ -185,7 +185,9 @@ test('pressing a call to action spreads no ink and moves nothing, with reduced m
 
 for (const { from, link, to } of [
   { from: '/', link: 'Read about Vikṣepa', to: '/concepts/vikshepa/' },
-  { from: '/concepts/vikshepa/', link: 'Home', to: '/' },
+  // A Concept page's phone breadcrumb shows only its topic, so the "Home" leg starts
+  // from the Concepts index, whose breadcrumb links Home at every width.
+  { from: '/concepts/', link: 'Home', to: '/' },
 ]) {
   test(`following "${link}" changes the page at once, with reduced motion`, async ({ page }) => {
     await recordPageTurns(page)
