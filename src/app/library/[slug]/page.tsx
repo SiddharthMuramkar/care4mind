@@ -3,12 +3,15 @@ import { notFound } from 'next/navigation'
 import type { CSSProperties } from 'react'
 
 import { Breadcrumbs } from '@/components/Breadcrumbs'
-import { Contents } from '@/components/concept/Contents'
+import { Contents } from '@/components/concept'
 import { Folio } from '@/components/Folio'
-import { BookGroup } from '@/components/library/Books'
-import { counted, holdingsOf } from '@/components/library/catalogue'
-import { CourseGroup } from '@/components/library/Courses'
-import styles from '@/components/library/library.module.css'
+import {
+  BookGroup,
+  counted,
+  CourseGroup,
+  holdingsOf,
+  libraryStyles as styles,
+} from '@/components/library'
 import { OrnamentRule } from '@/components/OrnamentRule'
 import { PageTurn } from '@/components/PageTurn'
 import { Provenance, Sections, Text } from '@/components/prose'

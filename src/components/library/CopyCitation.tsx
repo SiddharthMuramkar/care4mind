@@ -1,6 +1,6 @@
 'use client'
 
-import { toast } from '@/components/toast/toast'
+import { toast } from '@/components/toast'
 
 import styles from './references.module.css'
 

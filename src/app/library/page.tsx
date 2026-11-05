@@ -2,9 +2,14 @@ import type { Metadata } from 'next'
 
 import { Breadcrumbs } from '@/components/Breadcrumbs'
 import { Folio } from '@/components/Folio'
-import { counted, holdingsOf } from '@/components/library/catalogue'
-import styles from '@/components/library/library.module.css'
-import { Holds, Shelf, Spine } from '@/components/library/Shelf'
+import {
+  counted,
+  Holds,
+  holdingsOf,
+  libraryStyles as styles,
+  Shelf,
+  Spine,
+} from '@/components/library'
 import { PageTurn } from '@/components/PageTurn'
 import { hrefFor, library, type LibraryCard, references } from '@/content'
 import { cx } from '@/lib/cx'
