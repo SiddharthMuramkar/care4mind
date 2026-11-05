@@ -29,8 +29,6 @@
   align-items: center;
   min-height: 44px;
   color: var(--color-ink-muted);
-  font-variant-caps: all-small-caps;
-  letter-spacing: 0.12em;
   font-size: 1.1875rem;
   text-decoration: none;
   /* A two-word label squeezed onto two lines reflows, and shifts the header, when the toggles swap. */
@@ -41,7 +39,7 @@
 .link::after {
   content: '';
   position: absolute;
-  inset-inline: 0 0.12em;
+  inset-inline: 0;
   top: calc(50% + 0.6em);
   height: 1px;
   background: currentColor;

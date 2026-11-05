@@ -9,8 +9,6 @@
   align-items: center;
   min-height: 48px;
   padding: 0 1.5rem;
-  font-variant-caps: all-small-caps;
-  letter-spacing: 0.12em;
   font-size: 1.1875rem;
   text-decoration: none;
   transition:
@@ -18,12 +16,12 @@
     box-shadow var(--duration-instant) var(--ease-press);
 }
 
-/* On hover and focus a line draws in under the label (short of its last letter-space), by transform. */
+/* On hover and focus a line draws in under the label, by transform. */
 .primary::after,
 .secondary::after {
   content: '';
   position: absolute;
-  inset-inline: 1.5rem calc(1.5rem + 0.12em);
+  inset-inline: 1.5rem;
   top: calc(50% + 0.6em);
   height: 1px;
   background: currentColor;

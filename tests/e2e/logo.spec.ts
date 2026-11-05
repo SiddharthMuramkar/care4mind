@@ -194,40 +194,48 @@ test("the wordmark's 4 sits in a vermilion ring, in the header and the footer", 
   expect(await ring(footerWordmark(page))).toEqual(VERMILION_RING)
 })
 
-test('pointing at or focusing the logo animates nothing beside its lotus', async ({ page }) => {
-  await recordAnimationStarts(page)
-  await gotoReady(page, '/')
-  const logo = homeLink(page)
-  const startsOnTheLogo = async () =>
-    await logo.evaluate(
-      (link) =>
-        (
-          window as unknown as { __animationStarts: { target: Element; property: string }[] }
-        ).__animationStarts.filter(
-          // Pointing leans and opens the lotus by transition; only animations count here.
-          ({ target, property }) => link.contains(target) && property === '',
-        ).length,
-    )
-  const before = await startsOnTheLogo()
-  await logo.hover()
-  await page.keyboard.press('Tab')
-  await page.keyboard.press('Tab')
-  await expect(logo).toBeFocused()
-  await page.waitForTimeout(100)
-  expect(await animationsBesideTheLotus(logo), 'nothing outside the lotus animates').toBe(0)
-  expect(await startsOnTheLogo(), 'focus starts nothing new on the lotus').toBe(before)
-})
+test(
+  'pointing at or focusing the logo animates nothing beside its lotus',
+  { tag: '@one-width' },
+  async ({ page }) => {
+    await recordAnimationStarts(page)
+    await gotoReady(page, '/')
+    const logo = homeLink(page)
+    const startsOnTheLogo = async () =>
+      await logo.evaluate(
+        (link) =>
+          (
+            window as unknown as { __animationStarts: { target: Element; property: string }[] }
+          ).__animationStarts.filter(
+            // Pointing leans and opens the lotus by transition; only animations count here.
+            ({ target, property }) => link.contains(target) && property === '',
+          ).length,
+      )
+    const before = await startsOnTheLogo()
+    await logo.hover()
+    await page.keyboard.press('Tab')
+    await page.keyboard.press('Tab')
+    await expect(logo).toBeFocused()
+    await page.waitForTimeout(100)
+    expect(await animationsBesideTheLotus(logo), 'nothing outside the lotus animates').toBe(0)
+    expect(await startsOnTheLogo(), 'focus starts nothing new on the lotus').toBe(before)
+  },
+)
 
-test('the footer shows the same wordmark, and pointing at it draws nothing', async ({ page }) => {
-  await gotoReady(page, '/')
-  const wordmark = footerWordmark(page)
-  await expect(wordmark).toBeVisible()
-  await expect(wordmark.locator(LINE_ART)).toHaveCount(0)
-  await expect(
-    wordmark.locator('..').locator(LOTUS),
-    'the lotus is the header’s alone',
-  ).toHaveCount(0)
-  await wordmark.hover()
-  await page.waitForTimeout(100)
-  expect(await animationsIn(wordmark)).toBe(0)
-})
+test(
+  'the footer shows the same wordmark, and pointing at it draws nothing',
+  { tag: '@one-width' },
+  async ({ page }) => {
+    await gotoReady(page, '/')
+    const wordmark = footerWordmark(page)
+    await expect(wordmark).toBeVisible()
+    await expect(wordmark.locator(LINE_ART)).toHaveCount(0)
+    await expect(
+      wordmark.locator('..').locator(LOTUS),
+      'the lotus is the header’s alone',
+    ).toHaveCount(0)
+    await wordmark.hover()
+    await page.waitForTimeout(100)
+    expect(await animationsIn(wordmark)).toBe(0)
+  },
+)

@@ -56,66 +56,78 @@ test.describe('Concept page', () => {
     await gotoReady(page, '/concepts/vikshepa/')
   })
 
-  test('names the term in IAST and Devanagari, each with its language tag', async ({ page }) => {
-    const heading = page.getByRole('heading', { level: 1 })
-    await expect(heading).toHaveAccessibleName('Vikṣepa विक्षेप')
-    await expect(heading.locator('[lang="sa-Latn"]')).toHaveText('Vikṣepa')
-    await expect(heading.locator('[lang="sa-Deva"]')).toHaveText('विक्षेप')
-    expect(await page.locator('main [lang="sa-Deva"]').count()).toBeGreaterThan(5)
-  })
+  test(
+    'names the term in IAST and Devanagari, each with its language tag',
+    { tag: '@one-width' },
+    async ({ page }) => {
+      const heading = page.getByRole('heading', { level: 1 })
+      await expect(heading).toHaveAccessibleName('Vikṣepa विक्षेप')
+      await expect(heading.locator('[lang="sa-Latn"]')).toHaveText('Vikṣepa')
+      await expect(heading.locator('[lang="sa-Deva"]')).toHaveText('विक्षेप')
+      expect(await page.locator('main [lang="sa-Deva"]').count()).toBeGreaterThan(5)
+    },
+  )
 
-  test('shows the other spellings in a popover that keyboard users can close', async ({ page }) => {
-    const trigger = page.getByRole('button', { name: 'Also spelled' })
-    await trigger.click()
-    const popup = page.getByRole('dialog')
-    await expect(popup).toContainText('viksepa')
-    await expect(popup).toContainText('Vikshepa')
-    await expectNoAxeViolations(page)
-    await page.keyboard.press('Escape')
-    await expect(popup).toBeHidden()
-    await expect(trigger).toBeFocused()
-  })
-
-  test('opens the other spellings with Enter or Space, and Close or Escape hands focus back', async ({
-    page,
-  }) => {
-    const trigger = spellingsButton(page)
-    const popup = spellingsPopup(page)
-    const close = popup.getByRole('button', { name: 'Close' })
-    for (const [open, shut] of [
-      ['Enter', 'Enter'],
-      ['Space', 'Escape'],
-    ] as const) {
-      await trigger.focus()
-      await page.keyboard.press(open)
-      await expect(popup).toBeVisible()
-      await expect(popup.getByRole('listitem')).toHaveText(['viksepa', 'Vikshepa'])
-      // Focus stays on the button, and the popover's own controls come next.
-      await expect(trigger).toBeFocused()
-      await page.keyboard.press('Tab')
-      await expect(close).toBeFocused()
-      await page.keyboard.press(shut)
+  test(
+    'shows the other spellings in a popover that keyboard users can close',
+    { tag: '@one-width' },
+    async ({ page }) => {
+      const trigger = page.getByRole('button', { name: 'Also spelled' })
+      await trigger.click()
+      const popup = page.getByRole('dialog')
+      await expect(popup).toContainText('viksepa')
+      await expect(popup).toContainText('Vikshepa')
+      await expectNoAxeViolations(page)
+      await page.keyboard.press('Escape')
       await expect(popup).toBeHidden()
       await expect(trigger).toBeFocused()
-    }
-  })
+    },
+  )
 
-  test('opens the other spellings with a click, and closes them with Close or a click elsewhere', async ({
-    page,
-  }) => {
-    const trigger = spellingsButton(page)
-    const popup = spellingsPopup(page)
-    await trigger.click()
-    await expect(popup).toBeVisible()
-    await popup.getByRole('button', { name: 'Close' }).click()
-    await expect(popup).toBeHidden()
-    await expect(trigger).toBeFocused()
+  test(
+    'opens the other spellings with Enter or Space, and Close or Escape hands focus back',
+    { tag: '@one-width' },
+    async ({ page }) => {
+      const trigger = spellingsButton(page)
+      const popup = spellingsPopup(page)
+      const close = popup.getByRole('button', { name: 'Close' })
+      for (const [open, shut] of [
+        ['Enter', 'Enter'],
+        ['Space', 'Escape'],
+      ] as const) {
+        await trigger.focus()
+        await page.keyboard.press(open)
+        await expect(popup).toBeVisible()
+        await expect(popup.getByRole('listitem')).toHaveText(['viksepa', 'Vikshepa'])
+        // Focus stays on the button, and the popover's own controls come next.
+        await expect(trigger).toBeFocused()
+        await page.keyboard.press('Tab')
+        await expect(close).toBeFocused()
+        await page.keyboard.press(shut)
+        await expect(popup).toBeHidden()
+        await expect(trigger).toBeFocused()
+      }
+    },
+  )
 
-    await trigger.click()
-    await expect(popup).toBeVisible()
-    await page.getByRole('heading', { level: 1 }).click()
-    await expect(popup).toBeHidden()
-  })
+  test(
+    'opens the other spellings with a click, and closes them with Close or a click elsewhere',
+    { tag: '@one-width' },
+    async ({ page }) => {
+      const trigger = spellingsButton(page)
+      const popup = spellingsPopup(page)
+      await trigger.click()
+      await expect(popup).toBeVisible()
+      await popup.getByRole('button', { name: 'Close' }).click()
+      await expect(popup).toBeHidden()
+      await expect(trigger).toBeFocused()
+
+      await trigger.click()
+      await expect(popup).toBeVisible()
+      await page.getByRole('heading', { level: 1 }).click()
+      await expect(popup).toBeHidden()
+    },
+  )
 
   // WCAG 2.4.11: the popover stays open as focus moves on, so it must never cover where focus goes.
   test('the other spellings never cover the control that has focus, tabbing on or back', async ({
@@ -316,7 +328,7 @@ function overlap(
 }
 
 test.describe('Concept page v2: heading and blocks', () => {
-  test('leads with the capitalised IAST, the Devanagari beneath it and the gloss in small capitals', async ({
+  test('leads with the capitalised IAST, the Devanagari beneath it and the gloss in sentence case', async ({
     page,
   }) => {
     await gotoReady(page, '/concepts/vikshepa/')
@@ -327,7 +339,7 @@ test.describe('Concept page v2: heading and blocks', () => {
     const [above, below] = [await iast.boundingBox(), await deva.boundingBox()]
     expect(below?.y ?? 0).toBeGreaterThan(above?.y ?? 0)
     const gloss = page.locator('header p', { hasText: 'Distraction' })
-    await expect(gloss).toHaveCSS('font-variant-caps', 'all-small-caps')
+    await expect(gloss).toHaveCSS('font-variant-caps', 'normal')
   })
 
   test('a Concept with an English title leads with it', async ({ page }) => {
@@ -612,32 +624,34 @@ test.describe('Concept page v2: previews', () => {
     await expect(link).toBeFocused()
   })
 
-  test('a verse link shows its translation, and a second preview asks the network for nothing', async ({
-    page,
-  }) => {
-    const first = linked(page).getByRole('link', { name: 'Citta-bhūmi' })
-    await first.scrollIntoViewIfNeeded()
-    await page.mouse.move(1, 1)
-    await first.hover()
-    await expect(previewCard(page)).toContainText('Citta-bhūmi')
-    await page.mouse.move(1, 1)
-    await expect(previewCard(page)).toBeHidden()
+  test(
+    'a verse link shows its translation, and a second preview asks the network for nothing',
+    { tag: '@one-width' },
+    async ({ page }) => {
+      const first = linked(page).getByRole('link', { name: 'Citta-bhūmi' })
+      await first.scrollIntoViewIfNeeded()
+      await page.mouse.move(1, 1)
+      await first.hover()
+      await expect(previewCard(page)).toContainText('Citta-bhūmi')
+      await page.mouse.move(1, 1)
+      await expect(previewCard(page)).toBeHidden()
 
-    // Data the page asks for, not the code or prefetches its links make.
-    const requests: string[] = []
-    page.on('request', (request) => {
-      if (['fetch', 'xhr'].includes(request.resourceType()) && !request.url().includes('_rsc')) {
-        requests.push(request.url())
-      }
-    })
-    const verse = linked(page).getByRole('link', { name: 'Yoga Sūtra 1.30' })
-    await verse.hover()
-    await expect(previewCard(page)).toContainText('Verse')
-    await expect(previewCard(page)).toContainText('Yoga Sūtra 1.30')
-    expect(requests).toEqual([])
-  })
+      // Data the page asks for, not the code or prefetches its links make.
+      const requests: string[] = []
+      page.on('request', (request) => {
+        if (['fetch', 'xhr'].includes(request.resourceType()) && !request.url().includes('_rsc')) {
+          requests.push(request.url())
+        }
+      })
+      const verse = linked(page).getByRole('link', { name: 'Yoga Sūtra 1.30' })
+      await verse.hover()
+      await expect(previewCard(page)).toContainText('Verse')
+      await expect(previewCard(page)).toContainText('Yoga Sūtra 1.30')
+      expect(requests).toEqual([])
+    },
+  )
 
-  test('shows nothing on touch', async ({ browser }) => {
+  test('shows nothing on touch', { tag: '@one-width' }, async ({ browser }) => {
     const context = await browser.newContext({ hasTouch: true, isMobile: true })
     const page = await context.newPage()
     await gotoReady(page, '/concepts/vikshepa/')
@@ -652,56 +666,57 @@ test.describe('Concept page v2: previews', () => {
 })
 
 test.describe('Concept page v2: verse cards', () => {
-  test('a chip leads to the passage, and "Copy verse" copies it and says so politely', async ({
-    page,
-    context,
-  }) => {
-    await context.grantPermissions(['clipboard-read', 'clipboard-write'])
-    await page.clock.install()
-    await gotoReady(page, '/concepts/vikshepa/')
-    const card = page.locator('figure', { hasText: 'Yoga Sūtra 1.30' }).first().locator('..')
-    await expect(card.getByRole('link', { name: 'Yoga Sūtra 1.30' })).toHaveAttribute(
-      'href',
-      '/texts/yoga-sutra/#1-30',
-    )
-    const copy = card.getByRole('button', { name: /^Copy verse/ })
-    await copy.focus()
-    await page.keyboard.press('Enter')
-    const copied = await page.evaluate(() => navigator.clipboard.readText())
-    const devanagari = (await card.locator('blockquote [lang="sa-Deva"]').innerText()).split(
-      '\n',
-    )[0]
-    expect(copied).toContain(devanagari?.trim().slice(0, 12))
-    expect(copied).toContain('Yoga Sūtra 1.30')
-    expect(copied).not.toContain('<')
-
-    const notifications = page.getByRole('region', { name: 'Notifications' })
-    await expect(notifications).toHaveAttribute('aria-live', 'polite')
-    const status = notifications.getByText('Verse copied')
-    await expect(status).toBeVisible()
-    await expect(notifications.getByText('Yoga Sūtra 1.30')).toHaveAttribute('lang', 'sa-Latn')
-    await expect(copy).toBeFocused()
-    // Axe reads colours as they are painted, so let the toast finish arriving first.
-    await expect
-      .poll(() =>
-        notifications.evaluate((element) =>
-          element
-            .getAnimations({ subtree: true })
-            .every((animation) => animation.playState !== 'running'),
-        ),
+  test(
+    'a chip leads to the passage, and "Copy verse" copies it and says so politely',
+    { tag: '@one-width' },
+    async ({ page, context }) => {
+      await context.grantPermissions(['clipboard-read', 'clipboard-write'])
+      await page.clock.install()
+      await gotoReady(page, '/concepts/vikshepa/')
+      const card = page.locator('figure', { hasText: 'Yoga Sūtra 1.30' }).first().locator('..')
+      await expect(card.getByRole('link', { name: 'Yoga Sūtra 1.30' })).toHaveAttribute(
+        'href',
+        '/texts/yoga-sutra/#1-30',
       )
-      .toBe(true)
-    await expectNoAxeViolations(page)
+      const copy = card.getByRole('button', { name: /^Copy verse/ })
+      await copy.focus()
+      await page.keyboard.press('Enter')
+      const copied = await page.evaluate(() => navigator.clipboard.readText())
+      const devanagari = (await card.locator('blockquote [lang="sa-Deva"]').innerText()).split(
+        '\n',
+      )[0]
+      expect(copied).toContain(devanagari?.trim().slice(0, 12))
+      expect(copied).toContain('Yoga Sūtra 1.30')
+      expect(copied).not.toContain('<')
 
-    // Space copies too; its toast stays until just short of 6 seconds, then goes, and focus never moves.
-    await page.keyboard.press(' ')
-    await expect(status).toHaveCount(2)
-    await page.clock.fastForward(5500)
-    await expect(status.last()).toBeVisible()
-    await page.clock.fastForward(1000)
-    await expect(status).toHaveCount(0)
-    await expect(copy).toBeFocused()
-  })
+      const notifications = page.getByRole('region', { name: 'Notifications' })
+      await expect(notifications).toHaveAttribute('aria-live', 'polite')
+      const status = notifications.getByText('Verse copied')
+      await expect(status).toBeVisible()
+      await expect(notifications.getByText('Yoga Sūtra 1.30')).toHaveAttribute('lang', 'sa-Latn')
+      await expect(copy).toBeFocused()
+      // Axe reads colours as they are painted, so let the toast finish arriving first.
+      await expect
+        .poll(() =>
+          notifications.evaluate((element) =>
+            element
+              .getAnimations({ subtree: true })
+              .every((animation) => animation.playState !== 'running'),
+          ),
+        )
+        .toBe(true)
+      await expectNoAxeViolations(page)
+
+      // Space copies too; its toast stays until just short of 6 seconds, then goes, and focus never moves.
+      await page.keyboard.press(' ')
+      await expect(status).toHaveCount(2)
+      await page.clock.fastForward(5500)
+      await expect(status.last()).toBeVisible()
+      await page.clock.fastForward(1000)
+      await expect(status).toHaveCount(0)
+      await expect(copy).toBeFocused()
+    },
+  )
 })
 
 test.describe('Concept page v2: tables', () => {
@@ -800,16 +815,20 @@ test.describe('Concept page v2: print', () => {
 })
 
 for (const { path } of ROUTES_IN_SCOPE.filter((r) => r.path.startsWith('/concepts/'))) {
-  test(`${path} sets its title's IAST before its Devanagari, in DOM order`, async ({ page }) => {
-    await gotoReady(page, path)
-    const order = await page.getByRole('heading', { level: 1 }).evaluate((h) => {
-      const iast = h.querySelector('[lang="sa-Latn"], [lang="pi-Latn"]')
-      const deva = h.querySelector('[lang="sa-Deva"]')
-      if (!deva) return 'no-devanagari'
-      return iast && iast.compareDocumentPosition(deva) & Node.DOCUMENT_POSITION_FOLLOWING
-        ? 'iast-first'
-        : 'wrong'
-    })
-    expect(order).not.toBe('wrong')
-  })
+  test(
+    `${path} sets its title's IAST before its Devanagari, in DOM order`,
+    { tag: '@one-width' },
+    async ({ page }) => {
+      await gotoReady(page, path)
+      const order = await page.getByRole('heading', { level: 1 }).evaluate((h) => {
+        const iast = h.querySelector('[lang="sa-Latn"], [lang="pi-Latn"]')
+        const deva = h.querySelector('[lang="sa-Deva"]')
+        if (!deva) return 'no-devanagari'
+        return iast && iast.compareDocumentPosition(deva) & Node.DOCUMENT_POSITION_FOLLOWING
+          ? 'iast-first'
+          : 'wrong'
+      })
+      expect(order).not.toBe('wrong')
+    },
+  )
 }

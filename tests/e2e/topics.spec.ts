@@ -165,12 +165,16 @@ test('a topic card on the A–Z turns the page forward, its title flying into th
   expect(turn?.flights.map(({ name }) => name)).toContain('topic-title-mind')
 })
 
-test('fits a 320 px screen, every contents row still a link', async ({ page }) => {
-  await page.setViewportSize({ width: 320, height: 720 })
-  await gotoReady(page, hrefFor({ kind: 'topic', id: 'self' }))
-  expect(await scrollsSideways(page)).toEqual([])
-  for (const link of await plate(page).getByRole('link').all()) await expect(link).toBeVisible()
-})
+test(
+  'fits a 320 px screen, every contents row still a link',
+  { tag: '@self-width' },
+  async ({ page }) => {
+    await page.setViewportSize({ width: 320, height: 720 })
+    await gotoReady(page, hrefFor({ kind: 'topic', id: 'self' }))
+    expect(await scrollsSideways(page)).toEqual([])
+    for (const link of await plate(page).getByRole('link').all()) await expect(link).toBeVisible()
+  },
+)
 
 test('has no accessibility violations, with a row lit', async ({ page }) => {
   for (const id of ['mind', 'values']) {

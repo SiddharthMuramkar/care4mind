@@ -112,8 +112,6 @@
   color: var(--color-drawer-muted);
   font-size: 1.0625rem;
   font-weight: 400;
-  font-variant-caps: all-small-caps;
-  letter-spacing: 0.16em;
 }
 
 .close {
@@ -128,8 +126,6 @@
   background: none;
   color: var(--color-drawer-ink);
   font: inherit;
-  font-variant-caps: all-small-caps;
-  letter-spacing: 0.12em;
   font-size: 1.0625rem;
   cursor: pointer;
 }
@@ -158,12 +154,12 @@
 
 .section {
   display: grid;
-  grid-template-columns: 2.25rem 1fr;
+  grid-template-columns: 3.75rem 1fr;
   align-items: baseline;
   column-gap: 0.75rem;
 }
 
-/* A Devanagari numeral, set at the section's size on its baseline, as the homepage's Contents. */
+/* A Western numeral beside its Devanagari one, set at the section's size on its baseline, as the homepage's Contents. */
 .numeral {
   align-self: baseline;
   color: var(--color-highlight);
@@ -229,7 +225,7 @@
 
 .sectionLink[aria-current] {
   text-decoration: underline;
-  text-decoration-color: var(--color-highlight);
+  text-decoration-color: var(--color-link);
   text-decoration-thickness: 2px;
   text-underline-offset: 0.18em;
 }
@@ -261,9 +257,8 @@
 }
 
 .page[aria-current] .name {
-  font-style: italic;
   text-decoration: underline;
-  text-decoration-color: var(--color-highlight);
+  text-decoration-color: var(--color-link);
   text-decoration-thickness: 1px;
   text-underline-offset: 0.18em;
 }

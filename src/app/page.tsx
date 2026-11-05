@@ -93,8 +93,9 @@ export default async function HomePage() {
           <ol className={styles.contents}>
             {areas.map((area, index) => (
               <li key={area.title} className={styles.entry}>
-                <span lang="sa-Deva" className={styles.entryNumber} aria-hidden>
-                  {toDevanagariDigits(String(index + 1))}
+                <span className={styles.entryNumber} aria-hidden>
+                  <span>{index + 1}</span>{' '}
+                  <span lang="sa-Deva">{toDevanagariDigits(String(index + 1))}</span>
                 </span>
                 <span className={styles.entryTitle}>
                   {area.href ? (

@@ -62,15 +62,13 @@
   margin-bottom: 1.25rem;
 }
 
-/* A section's name heads its pages, in the header's small capitals. */
+/* A section's name heads its pages. */
 .head {
   position: relative;
   display: inline-flex;
   align-items: center;
   min-height: 44px;
   color: var(--color-ink);
-  font-variant-caps: all-small-caps;
-  letter-spacing: 0.12em;
   font-size: 1.1875rem;
   text-decoration: none;
 }
@@ -78,7 +76,7 @@
 .head::after {
   content: '';
   position: absolute;
-  inset-inline: 0 0.12em;
+  inset-inline: 0;
   top: calc(50% + 0.6em);
   height: 1px;
   background: currentColor;
@@ -143,8 +141,6 @@
 }
 
 .credit {
-  font-variant-caps: all-small-caps;
-  letter-spacing: 0.1em;
   font-size: 1.0625rem;
 }
 

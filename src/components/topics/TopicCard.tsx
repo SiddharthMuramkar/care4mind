@@ -17,7 +17,8 @@ export function TopicCard({ topic, className }: { topic: Topic; className?: stri
   return (
     <article className={cx(styles.card, className)} data-topic={topic.slug}>
       <span className={styles.numeral} aria-hidden>
-        {toDevanagariDigits(String(topic.order))}
+        <span>{topic.order}</span>{' '}
+        <span lang="sa-Deva">{toDevanagariDigits(String(topic.order))}</span>
       </span>
       <h3 className={styles.title}>
         <Link

@@ -50,7 +50,7 @@ function preloadedFaces(page: Page) {
 }
 
 for (const { path, name } of PAGES) {
-  test.describe(name, () => {
+  test.describe(name, { tag: '@one-width' }, () => {
     // Only the type that sets most of the page loads ahead of everything else.
     test('preloads only the font of its running text', async ({ page }) => {
       await page.goto(path)

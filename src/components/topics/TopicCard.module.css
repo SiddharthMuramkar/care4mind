@@ -19,10 +19,14 @@
 }
 
 .numeral {
-  font-family: var(--font-deva);
+  font-family: var(--font-text);
   font-size: 1.5rem;
   line-height: 1;
   color: var(--color-highlight);
+}
+
+.numeral :lang(sa-Deva) {
+  font-family: var(--font-deva);
 }
 
 .title {
@@ -69,15 +73,13 @@
   margin: 0;
   padding-top: 0.5rem;
   border-top: 1px solid color-mix(in srgb, var(--color-surface-rule) 60%, transparent);
-  font-variant-caps: all-small-caps;
-  letter-spacing: 0.1em;
   color: var(--color-surface-muted);
 }
 
 /* On a phone the card lies on its side: numeral, then name and count, one under the other. */
 @media (max-width: 39.99rem) {
   .card {
-    grid-template-columns: 2rem 1fr;
+    grid-template-columns: 3.5rem 1fr;
     grid-template-rows: none;
     column-gap: 0.75rem;
     row-gap: 0.25rem;

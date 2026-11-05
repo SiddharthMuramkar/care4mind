@@ -8,6 +8,9 @@ import { metadataFor } from '@/lib/metadata'
 import { resultGroups } from '@/lib/search/search'
 import { search } from '@/lib/search/server'
 
+import cta from '@/components/Cta'
+import { cx } from '@/lib/cx'
+
 import listing from '../listing.module.css'
 import reading from '../reading.module.css'
 import styles from './page.module.css'
@@ -45,7 +48,7 @@ export default async function SearchPage({ searchParams }: PageProps<'/search'>)
             defaultValue={query}
             className={styles.input}
           />
-          <button type="submit" className={styles.button}>
+          <button type="submit" className={cx(cta.primary, styles.button)}>
             Search
           </button>
         </form>

@@ -164,8 +164,9 @@ export function ConceptMap({ layout }: { layout: MapLayout }) {
               <ul className={styles.legendList}>
                 {layout.sectors.map((sector) => (
                   <li key={sector.topic} data-topic={sector.topic}>
-                    <span className={styles.topicKey} lang="sa-Deva" aria-hidden>
-                      {toDevanagariDigits(String(sector.order))}
+                    <span className={styles.topicKey} aria-hidden>
+                      <span>{sector.order}</span>{' '}
+                      <span lang="sa-Deva">{toDevanagariDigits(String(sector.order))}</span>
                     </span>
                     <span>{sector.name}</span>
                   </li>

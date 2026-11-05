@@ -68,14 +68,27 @@ const baseURL = process.env.PLAYWRIGHT_BASE_URL ?? `http://localhost:${PORT}`
 const bypass = process.env.VERCEL_AUTOMATION_BYPASS_SECRET
 
 const chrome = devices['Desktop Chrome']
+
+// A tagged test runs only where its tag belongs, instead of opening a page at every width just
+// to skip: @one-width (its assertions read no layout) and @self-width (it sets its own viewport
+// first) run at 360 alone, @only-360 below 600 px, @below-1440 under 72rem, @from-768 from
+// 600 px and @from-1440 from 72rem (or checked once, at 1440 px). Untagged tests run at all three.
+const notAt: Record<number, RegExp> = {
+  360: /@from-768|@from-1440/,
+  768: /@one-width|@self-width|@only-360|@from-1440/,
+  1440: /@one-width|@self-width|@only-360|@below-1440/,
+}
+
 const widthProject = (width: number, height: number): Project => ({
   name: `chromium-${width}`,
   use: { ...chrome, viewport: { width, height } },
+  grepInvert: notAt[width],
   testIgnore: [
     /motion\.spec\.ts/,
     /smoke\.spec\.ts/,
     /reflow\.spec\.ts/,
     /crawler\.spec\.ts/,
+    /redirects\.spec\.ts/,
     /latency\.spec\.ts/,
   ],
 })
@@ -101,11 +114,12 @@ const projects: Project[] = [
     },
     testMatch: /motion\.spec\.ts/,
   },
-  // NFR-04: the link crawler reads the HTML the server sends, so it runs once, at no width.
+  // NFR-04 and FR-07 are HTTP only (the link crawler reads the HTML the server sends, and a
+  // redirect is an answer's status and Location), so they run once, at no width.
   {
-    name: 'crawler',
-    use: { ...chrome },
-    testMatch: /crawler\.spec\.ts/,
+    name: 'http',
+    use: { viewport: null },
+    testMatch: /(?:crawler|redirects)\.spec\.ts/,
   },
   // The CPU is slowed four times, so a second worker beside it would skew the timings.
   {

@@ -13,6 +13,7 @@ import { VerseCard } from '@/components/prose'
 import { ReadingThread } from '@/components/ReadingThread'
 import { ReferenceList } from '@/components/ReferenceList'
 import { SpellingsPopover } from '@/components/SpellingsPopover'
+import { TopicChip } from '@/components/topics'
 import {
   concepts,
   hrefFor,
@@ -114,6 +115,11 @@ export default async function ConceptPage({ params }: PageProps<'/concepts/[slug
           ) : null}
           <p className={reading.summary}>
             <Text text={concept.summary} citations={citations} />
+          </p>
+          <p className={styles.topics}>
+            {[concept.topic, ...concept.secondaryTopics].map((topic) => (
+              <TopicChip key={topic.slug} topic={topic} />
+            ))}
           </p>
         </>
       }

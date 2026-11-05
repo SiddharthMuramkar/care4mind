@@ -227,8 +227,9 @@ function ConceptsPanel({ site, pathname, mapNote }: PanelProps & { mapNote?: Rea
             style={{ '--index': position } as CSSProperties}
           >
             <PanelLink href={topic.href} pathname={pathname} className={styles.entry}>
-              <span lang="sa-Deva" className={styles.numeral} aria-hidden>
-                {toDevanagariDigits(String(position + 1))}
+              <span className={styles.numeral} aria-hidden>
+                <span>{position + 1}</span>{' '}
+                <span lang="sa-Deva">{toDevanagariDigits(String(position + 1))}</span>
               </span>
               <span className={styles.name}>
                 {topic.label}
@@ -298,7 +299,7 @@ function LibraryPanel({ site, pathname }: PanelProps) {
   )
 }
 
-/** A panel's running head in small capitals, over a printer's double rule that inks in from the centre. */
+/** A panel's running head, over a printer's double rule that inks in from the centre. */
 function PanelHead({ children }: { children: ReactNode }) {
   return (
     <div className={styles.head}>

@@ -303,8 +303,6 @@
 
 .legendTitle {
   margin: 0 0 0.35rem;
-  font-variant-caps: all-small-caps;
-  letter-spacing: 0.12em;
   color: var(--color-surface-muted);
 }
 
@@ -323,10 +321,12 @@
 }
 
 .topicKey {
-  display: inline-grid;
-  place-items: center;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.3rem;
   flex: none;
-  width: 1.6rem;
+  min-width: 2.75rem;
   height: 1.6rem;
   border-bottom: 3.5px solid var(--topic);
   color: var(--color-surface-muted);
@@ -366,8 +366,6 @@
   align-items: center;
   gap: 0.6rem;
   margin: 0;
-  font-variant-caps: all-small-caps;
-  letter-spacing: 0.1em;
   font-size: 1.1875rem;
   font-weight: 400;
   line-height: 1.3;

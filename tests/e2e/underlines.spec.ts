@@ -33,15 +33,19 @@ for (const { page: path, name, in: around, width } of DRAWN) {
     ['pointing at', (_page: Page, link: Locator) => link.hover()],
     ['focusing', focusFromKeyboard],
   ] as const) {
-    test(`${how} "${name}" draws a line under it, by transform`, async ({ page }) => {
-      if (width) await page.setViewportSize({ width, height: 900 })
-      await gotoReady(page, path)
-      const link = around(page).getByRole('link', { name, exact: true })
-      await expect(link).toHaveCSS('text-decoration-line', 'none')
-      await act(page, link)
-      await expect.poll(() => transitionedOn(link)).toContain('transform')
-      expect(await transitionedOn(link)).toEqual(['transform'])
-    })
+    test(
+      `${how} "${name}" draws a line under it, by transform`,
+      { tag: '@one-width' },
+      async ({ page }) => {
+        if (width) await page.setViewportSize({ width, height: 900 })
+        await gotoReady(page, path)
+        const link = around(page).getByRole('link', { name, exact: true })
+        await expect(link).toHaveCSS('text-decoration-line', 'none')
+        await act(page, link)
+        await expect.poll(() => transitionedOn(link)).toContain('transform')
+        expect(await transitionedOn(link)).toEqual(['transform'])
+      },
+    )
   }
 }
 
@@ -67,19 +71,21 @@ for (const { page: path, name, in: around } of IN_TEXT) {
     ['pointing at', (_page: Page, link: Locator) => link.hover()],
     ['focusing', focusFromKeyboard],
   ] as const) {
-    test(`${how} "${name}" in running text draws an accent over its underline`, async ({
-      page,
-    }) => {
-      await gotoReady(page, path)
-      const link = around(page).getByRole('link', { name, exact: true })
-      await expect(link).toHaveCSS('text-decoration-line', 'underline')
-      const atRest = await link.screenshot()
-      await act(page, link)
-      await expect.poll(() => transitionedOn(link)).toContain('background-size')
-      expect(await transitionedOn(link)).toEqual(['background-size'])
-      await expect(link, 'still underlined').toHaveCSS('text-decoration-line', 'underline')
-      await expect.poll(async () => (await link.screenshot()).equals(atRest)).toBe(false)
-    })
+    test(
+      `${how} "${name}" in running text draws an accent over its underline`,
+      { tag: '@one-width' },
+      async ({ page }) => {
+        await gotoReady(page, path)
+        const link = around(page).getByRole('link', { name, exact: true })
+        await expect(link).toHaveCSS('text-decoration-line', 'underline')
+        const atRest = await link.screenshot()
+        await act(page, link)
+        await expect.poll(() => transitionedOn(link)).toContain('background-size')
+        expect(await transitionedOn(link)).toEqual(['background-size'])
+        await expect(link, 'still underlined').toHaveCSS('text-decoration-line', 'underline')
+        await expect.poll(async () => (await link.screenshot()).equals(atRest)).toBe(false)
+      },
+    )
   }
 }
 
@@ -98,7 +104,7 @@ test('pressing a card still presses it into the page', async ({ page }) => {
   await page.mouse.up()
 })
 
-test('a call to action keeps its focus ring', async ({ page }) => {
+test('a call to action keeps its focus ring', { tag: '@one-width' }, async ({ page }) => {
   await gotoReady(page, '/')
   const cta = page.getByRole('main').getByRole('link', { name: 'Start here', exact: true })
   await focusFromKeyboard(page, cta)

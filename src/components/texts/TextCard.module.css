@@ -68,8 +68,6 @@
 
 .byline {
   margin: 0;
-  font-variant-caps: all-small-caps;
-  letter-spacing: 0.12em;
   font-size: 1.0625rem;
   color: var(--color-surface-muted);
 }
@@ -86,8 +84,6 @@
 
 .at {
   display: block;
-  font-variant-caps: all-small-caps;
-  letter-spacing: 0.12em;
   color: var(--color-surface-muted);
 }
 
@@ -109,8 +105,6 @@
   gap: 0.5rem 1rem;
   padding-top: 0.6rem;
   border-top: 3px double color-mix(in srgb, var(--color-surface-rule) 70%, transparent);
-  font-variant-caps: all-small-caps;
-  letter-spacing: 0.1em;
   font-size: 1.0625rem;
   line-height: 1.2;
   color: var(--color-surface-muted);

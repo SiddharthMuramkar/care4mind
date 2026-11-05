@@ -153,19 +153,22 @@ test.describe('without JavaScript', () => {
     await expect(page.getByRole('heading', { level: 2, name: 'From A to Z' })).toBeVisible()
   })
 
-  test('Menu leads to the full navigation in the footer', async ({ page }) => {
-    test.skip(isWide(page), 'the sections show in the header at this width')
-    await page.goto('/concepts/vikshepa/')
-    await banner(page).getByRole('link', { name: 'Menu' }).click()
-    await expect(page).toHaveURL(/#site-nav$/)
-    await expect(footerNav(page)).toBeInViewport()
-    // Not under the sticky header.
-    const [nav, strip] = await Promise.all([
-      footerNav(page).boundingBox(),
-      banner(page).boundingBox(),
-    ])
-    expect(nav?.y).toBeGreaterThanOrEqual((strip?.y ?? 0) + (strip?.height ?? 0))
-  })
+  test(
+    'Menu leads to the full navigation in the footer',
+    { tag: '@below-1440' },
+    async ({ page }) => {
+      await page.goto('/concepts/vikshepa/')
+      await banner(page).getByRole('link', { name: 'Menu' }).click()
+      await expect(page).toHaveURL(/#site-nav$/)
+      await expect(footerNav(page)).toBeInViewport()
+      // Not under the sticky header.
+      const [nav, strip] = await Promise.all([
+        footerNav(page).boundingBox(),
+        banner(page).boundingBox(),
+      ])
+      expect(nav?.y).toBeGreaterThanOrEqual((strip?.y ?? 0) + (strip?.height ?? 0))
+    },
+  )
 
   test('the footer carries the full navigation, the wordmark and the notices', async ({ page }) => {
     await page.goto('/')
@@ -214,38 +217,38 @@ test.describe('the section you are in', () => {
     { path: '/proposals/', current: {} },
   ] as const
 
-  test('is marked in the header, by aria-current and a lozenge under its name', async ({
-    page,
-  }) => {
-    test.skip(!isWide(page), 'the sections show in the header from 72rem')
-    for (const { path, current } of CASES) {
-      await gotoReady(page, path)
-      const marked = () =>
-        header(page)
-          .locator('a[aria-current]')
-          .evaluateAll((links) =>
-            Object.fromEntries(
-              links.map((link) => [link.textContent?.trim(), link.getAttribute('aria-current')]),
-            ),
-          )
-      await expect.poll(marked, { message: path }).toEqual(current)
-      for (const name of Object.keys(current)) {
-        const mark = await header(page)
-          .getByRole('link', { name, exact: true })
-          .evaluate((link) => {
-            const marker = getComputedStyle(link, '::before')
-            const after = getComputedStyle(link, '::after')
-            return [marker, after].some(
-              (style) => style.content !== 'none' && parseFloat(style.width) > 0,
+  test(
+    'is marked in the header, by aria-current and a lozenge under its name',
+    { tag: '@from-1440' },
+    async ({ page }) => {
+      for (const { path, current } of CASES) {
+        await gotoReady(page, path)
+        const marked = () =>
+          header(page)
+            .locator('a[aria-current]')
+            .evaluateAll((links) =>
+              Object.fromEntries(
+                links.map((link) => [link.textContent?.trim(), link.getAttribute('aria-current')]),
+              ),
             )
-          })
-        expect(mark, `${name} shows its mark on ${path}`).toBe(true)
+        await expect.poll(marked, { message: path }).toEqual(current)
+        for (const name of Object.keys(current)) {
+          const mark = await header(page)
+            .getByRole('link', { name, exact: true })
+            .evaluate((link) => {
+              const marker = getComputedStyle(link, '::before')
+              const after = getComputedStyle(link, '::after')
+              return [marker, after].some(
+                (style) => style.content !== 'none' && parseFloat(style.width) > 0,
+              )
+            })
+          expect(mark, `${name} shows its mark on ${path}`).toBe(true)
+        }
       }
-    }
-  })
+    },
+  )
 
-  test('is marked in the Drawer', async ({ page }) => {
-    test.skip(isWide(page), 'the Drawer is for narrow screens')
+  test('is marked in the Drawer', { tag: '@below-1440' }, async ({ page }) => {
     await gotoReady(page, '/concepts/vikshepa/')
     await banner(page).getByRole('button', { name: 'Menu' }).click()
     const drawer = page.getByRole('dialog', { name: 'Menu' })
@@ -259,11 +262,7 @@ test.describe('the section you are in', () => {
   })
 })
 
-test.describe('panels, on a computer', () => {
-  test.beforeEach(({ page }) => {
-    test.skip(!isWide(page), 'panels open from the header from 72rem')
-  })
-
+test.describe('panels, on a computer', { tag: '@from-1440' }, () => {
   const toggle = (page: Page, section: string) =>
     header(page).getByRole('button', { name: `More in ${section}` })
   const panel = (page: Page, section: string) =>
@@ -517,7 +516,7 @@ test.describe('panels, on a computer', () => {
   })
 })
 
-test.describe('every panel stays inside the screen', () => {
+test.describe('every panel stays inside the screen', { tag: '@self-width' }, () => {
   const toggle = (page: Page, section: string) =>
     header(page).getByRole('button', { name: `More in ${section}` })
   const panel = (page: Page, section: string) =>
@@ -592,11 +591,7 @@ test.describe('every panel stays inside the screen', () => {
   })
 })
 
-test.describe('the Drawer, on a phone', () => {
-  test.beforeEach(({ page }) => {
-    test.skip(isWide(page), 'the Drawer is for narrow screens')
-  })
-
+test.describe('the Drawer, on a phone', { tag: '@below-1440' }, () => {
   const menu = (page: Page) => banner(page).getByRole('button', { name: 'Menu' })
   // While the Drawer is open the page behind it, Menu included, is hidden from assistive
   // technology, so Menu's state is read from the element itself.
@@ -693,36 +688,40 @@ test.describe('the Drawer, on a phone', () => {
     await expect(drawer(page)).toBeHidden()
   })
 
-  test('widening the header closes it, leaves the page scrollable, and puts focus on a visible element', async ({
-    page,
-  }) => {
-    await page.setViewportSize({ width: 360, height: 800 })
-    await gotoReady(page, '/')
-    await menu(page).click()
-    await expect(drawer(page)).toBeVisible()
-    await page.setViewportSize({ width: 1280, height: 900 })
-    await expect(drawer(page)).toBeHidden()
-    await expect
-      .poll(() =>
-        page.evaluate(() => {
-          const current = document.activeElement
-          return (
-            current instanceof HTMLElement && current !== document.body && current.checkVisibility()
-          )
+  test(
+    'widening the header closes it, leaves the page scrollable, and puts focus on a visible element',
+    { tag: '@self-width' },
+    async ({ page }) => {
+      await page.setViewportSize({ width: 360, height: 800 })
+      await gotoReady(page, '/')
+      await menu(page).click()
+      await expect(drawer(page)).toBeVisible()
+      await page.setViewportSize({ width: 1280, height: 900 })
+      await expect(drawer(page)).toBeHidden()
+      await expect
+        .poll(() =>
+          page.evaluate(() => {
+            const current = document.activeElement
+            return (
+              current instanceof HTMLElement &&
+              current !== document.body &&
+              current.checkVisibility()
+            )
+          }),
+        )
+        .toBe(true)
+      expect(
+        await page.evaluate(() => {
+          // Smooth scrolling would report the old position in this same turn.
+          const before = window.scrollY
+          window.scrollTo({ top: before + 400, behavior: 'instant' })
+          const moved = window.scrollY > before
+          window.scrollTo({ top: before, behavior: 'instant' })
+          return moved
         }),
-      )
-      .toBe(true)
-    expect(
-      await page.evaluate(() => {
-        // Smooth scrolling would report the old position in this same turn.
-        const before = window.scrollY
-        window.scrollTo({ top: before + 400, behavior: 'instant' })
-        const moved = window.scrollY > before
-        window.scrollTo({ top: before, behavior: 'instant' })
-        return moved
-      }),
-    ).toBe(true)
-  })
+      ).toBe(true)
+    },
+  )
 
   test('dragging across the Menu text selects it and leaves the sheet where it was', async ({
     page,
@@ -821,30 +820,32 @@ test('the Drawer, the panels and the toasts are not in any page’s first load',
   }
 })
 
-test('the header fits on one line at 320, 360, 768 and 1440 px, every control a full target', async ({
-  page,
-}) => {
-  for (const width of [320, 360, 768, 1440]) {
-    await page.setViewportSize({ width, height: 800 })
-    await gotoReady(page, '/concepts/vikshepa/')
-    const overflow = await page.evaluate(
-      () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
-    )
-    expect(overflow, `no sideways scroll at ${width} px`).toBeLessThanOrEqual(0)
-    const strip = await banner(page).boundingBox()
-    expect(strip?.height, `one line at ${width} px`).toBeLessThanOrEqual(72)
-    const logo = banner(page).getByRole('link', { name: 'Care4Mind home', exact: true })
-    expect((await logo.boundingBox())?.height ?? 0).toBeGreaterThanOrEqual(48)
-    const controls = banner(page).locator('a:visible, button:visible')
-    for (const control of await controls.all()) {
-      const box = await control.boundingBox()
-      const name = await control.evaluate(
-        (element) => element.textContent?.trim() || element.outerHTML.slice(0, 60),
+test(
+  'the header fits on one line at 320, 360, 768 and 1440 px, every control a full target',
+  { tag: '@self-width' },
+  async ({ page }) => {
+    for (const width of [320, 360, 768, 1440]) {
+      await page.setViewportSize({ width, height: 800 })
+      await gotoReady(page, '/concepts/vikshepa/')
+      const overflow = await page.evaluate(
+        () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
       )
-      expect(box?.width ?? 0, `${name} is wide enough at ${width} px`).toBeGreaterThanOrEqual(44)
-      expect(box?.height ?? 0, `${name} is tall enough at ${width} px`).toBeGreaterThanOrEqual(44)
-      expect(box?.x ?? -1, `${name} is on screen at ${width} px`).toBeGreaterThanOrEqual(0)
-      expect((box?.x ?? 0) + (box?.width ?? 0)).toBeLessThanOrEqual(width)
+      expect(overflow, `no sideways scroll at ${width} px`).toBeLessThanOrEqual(0)
+      const strip = await banner(page).boundingBox()
+      expect(strip?.height, `one line at ${width} px`).toBeLessThanOrEqual(72)
+      const logo = banner(page).getByRole('link', { name: 'Care4Mind home', exact: true })
+      expect((await logo.boundingBox())?.height ?? 0).toBeGreaterThanOrEqual(48)
+      const controls = banner(page).locator('a:visible, button:visible')
+      for (const control of await controls.all()) {
+        const box = await control.boundingBox()
+        const name = await control.evaluate(
+          (element) => element.textContent?.trim() || element.outerHTML.slice(0, 60),
+        )
+        expect(box?.width ?? 0, `${name} is wide enough at ${width} px`).toBeGreaterThanOrEqual(44)
+        expect(box?.height ?? 0, `${name} is tall enough at ${width} px`).toBeGreaterThanOrEqual(44)
+        expect(box?.x ?? -1, `${name} is on screen at ${width} px`).toBeGreaterThanOrEqual(0)
+        expect((box?.x ?? 0) + (box?.width ?? 0)).toBeLessThanOrEqual(width)
+      }
     }
-  }
-})
+  },
+)

@@ -33,8 +33,6 @@
 
 .groupLabel {
   flex-basis: 100%;
-  font-variant-caps: all-small-caps;
-  letter-spacing: 0.12em;
   color: var(--color-surface-muted);
 }
 
@@ -146,8 +144,6 @@
 
 .count {
   margin: 0;
-  font-variant-caps: all-small-caps;
-  letter-spacing: 0.1em;
   font-size: 1.125rem;
   color: var(--color-surface-muted);
 }
