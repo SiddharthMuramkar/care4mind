@@ -1,6 +1,6 @@
 import type { Inline, Provenance, Section, Slug } from './common'
 
-/** A page of text in the Library, such as Methods. */
+/** A page of text in the Library, such as Therapy approaches. */
 export interface PageRecord {
   kind: 'page'
   slug: Slug

@@ -7,7 +7,7 @@ import { defineResourceList } from '@/content/schema'
 export default defineResourceList({
   kind: 'resource-list',
   slug: 'textbooks',
-  title: 'Text Books',
+  title: 'Textbooks',
   groups: [
     {
       id: 'indian-and-western-textbooks',
@@ -66,6 +66,7 @@ export default defineResourceList({
       { url: 'https://care4mind.org/positive-psychology/', retrieved: '2026-10-27' },
     ],
     edits: [
+      'Renamed: the list is titled “Textbooks”, not “Text Books”, the Library’s name for it. Its address is unchanged.',
       'Merged (D11): the two Text Books pages, each book once. The group “Indian and Western Textbooks” holds the eleven books /text-books-2-2/ lists under that heading, in its order; they include the six /text-books/ lists under its tab of that name, in the same order.',
       'Left out: the heading “Psychology Books”, which /text-books/ puts inside its “Indian and Western Textbooks” tab, above the same six books.',
       'Merged: /indian-philosophy/ lists the seven books of /text-books/’s “Indian Psychology & Philosophy Books” tab, under the same heading and in the same order. They are one group, each book once.',
