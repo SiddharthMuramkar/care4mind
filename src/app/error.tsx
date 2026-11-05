@@ -3,7 +3,7 @@
 import { Folio } from '@/components/Folio'
 import { cx } from '@/lib/cx'
 
-import cta from './cta.module.css'
+import cta from '@/components/Cta'
 import styles from './error-page.module.css'
 import reading from './reading.module.css'
 

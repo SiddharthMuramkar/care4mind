@@ -7,7 +7,7 @@ import {
   readSelection,
   shownEntries,
   writeSelection,
-} from '@/components/az/filter'
+} from '@/components/az'
 
 // The A–Z opens on its Concept pages: an address without `kind` asks for them, and a press adds
 // Terms or the Glossary to them.

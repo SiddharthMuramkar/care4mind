@@ -9,7 +9,7 @@ import { Fleuron } from '@/components/Fleuron'
 import { toDevanagariDigits } from '@/lib/text'
 
 import { currentFor, panelOf } from './current'
-import { CloseGlyph } from './glyphs'
+import { CloseGlyph } from '../glyphs'
 import styles from './MenuDrawer.module.css'
 import type { SiteNav } from './types'
 

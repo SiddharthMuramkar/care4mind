@@ -1,12 +1,12 @@
 import Link from 'next/link'
 
-import { siteNav } from '@/components/nav/site-nav'
-import { ProposalNote } from '@/components/proposals/ProposalNote'
+import { siteNav } from '@/components/nav'
+import { ProposalNote } from '@/components/proposals'
 import { home } from '@/content'
 
-import { Fleuron } from './Fleuron'
-import { HelpLine } from './HelpLine'
-import { Logo } from './Logo'
+import { Fleuron } from '../Fleuron'
+import { HelpLine } from '../HelpLine'
+import { Logo } from '../Logo'
 import styles from './SiteFooter.module.css'
 
 /**

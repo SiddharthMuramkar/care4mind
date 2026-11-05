@@ -2,7 +2,7 @@ import { createElement } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { describe, expect, it } from 'vitest'
 
-import { ScriptPair } from '@/components/script/ScriptPair'
+import { ScriptPair } from '@/components/script'
 
 const render = (props: Parameters<typeof ScriptPair>[0]) =>
   renderToStaticMarkup(createElement(ScriptPair, props))

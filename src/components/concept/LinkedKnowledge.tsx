@@ -5,7 +5,7 @@ import { ViewTransition, type CSSProperties, type ReactNode } from 'react'
 import { hrefFor, type ConceptView, type VerseView } from '@/content'
 
 import { turnForward } from '../PageTurn'
-import { LinkPreview } from '../preview/LinkPreview'
+import { LinkPreview } from '../preview'
 import { statusWords } from '../StatusBadge'
 import { Text } from '../prose'
 import { conceptPreview, passagePreview } from './previews'

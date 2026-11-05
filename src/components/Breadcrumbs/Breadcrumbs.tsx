@@ -5,7 +5,7 @@ import { notFound } from 'next/navigation'
 import { site, type Crumb } from '@/content'
 
 import styles from './Breadcrumbs.module.css'
-import { turnBack } from './PageTurn'
+import { turnBack } from '../PageTurn'
 
 /** A transliterated crumb's language tag; none for an English one. */
 const langOf = (crumb: Crumb) => (crumb.lang ? { lang: crumb.lang } : {})

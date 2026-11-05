@@ -1,5 +1,5 @@
 /*
- * The navigation's small drawings, cut like a printer's sorts: hairline strokes in the text's
+ * Small drawings, cut like a printer's sorts: hairline strokes in the text's
  * colour. Decorative: the control around each is named.
  */
 

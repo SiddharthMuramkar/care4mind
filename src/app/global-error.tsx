@@ -5,7 +5,7 @@ import { siteConfig } from '@/config/site'
 import { playfairText } from '@/fonts/playfair'
 import { cx } from '@/lib/cx'
 
-import cta from './cta.module.css'
+import cta from '@/components/Cta'
 import styles from './error-page.module.css'
 import reading from './reading.module.css'
 

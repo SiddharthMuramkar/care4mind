@@ -1,10 +1,10 @@
 import { describe, expect, it } from 'vitest'
 
-import { citationParts } from '@/components/citation-parts'
-import { citedIn, parenthesised } from '@/components/prose/in-text-citations'
-import { provenanceSentence } from '@/components/prose/provenance-sentence'
-import { standingIn } from '@/components/prose/standing-in'
-import { verseAsText } from '@/components/prose/verse-text'
+import { citationParts } from '@/components/Citation'
+import { citedIn, parenthesised } from '@/components/prose'
+import { provenanceSentence } from '@/components/prose'
+import { standingIn } from '@/components/prose'
+import { verseAsText } from '@/components/prose'
 import { references, type CarriedOver, type SectionView, type VerseView } from '@/content'
 
 /** A citation as it reads on the page, with its link's label at the end. */

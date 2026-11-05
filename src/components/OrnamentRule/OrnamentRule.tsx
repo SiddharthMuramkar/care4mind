@@ -1,6 +1,6 @@
 import { cx } from '@/lib/cx'
 
-import { Fleuron } from './Fleuron'
+import { Fleuron } from '../Fleuron'
 import styles from './OrnamentRule.module.css'
 
 /** A section break: two printer's rules either side of the fleuron. They ink in as it scrolls into view. */

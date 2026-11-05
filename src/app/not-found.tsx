@@ -7,7 +7,7 @@ import { PageTurn, turnForward } from '@/components/PageTurn'
 import { concepts, hrefFor } from '@/content'
 import { notFoundMetadata } from '@/lib/metadata'
 
-import cta from './cta.module.css'
+import cta from '@/components/Cta'
 import page from './error-page.module.css'
 import reading from './reading.module.css'
 import styles from './not-found.module.css'

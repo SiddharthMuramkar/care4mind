@@ -4,11 +4,11 @@ import { ViewTransition } from 'react'
 import { hrefFor, type QuestionnaireCard as Card } from '@/content'
 import { cx } from '@/lib/cx'
 
-import styles from './ConceptCard.module.css'
-import { turnForward } from './PageTurn'
-import { Text } from './prose/Text'
+import { conceptCardStyles as styles } from '../ConceptCard'
+import { turnForward } from '../PageTurn'
+import { Text } from '../prose'
 import own from './QuestionnaireCard.module.css'
-import { StatusBadge } from './StatusBadge'
+import { StatusBadge } from '../StatusBadge'
 
 /**
  * A Questionnaire in brief, with its status. Shares the Concept card's press style, and its

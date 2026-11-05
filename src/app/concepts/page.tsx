@@ -5,7 +5,7 @@ import { AzIndex, AzLetter, DEFAULT_KINDS, type ChipGroup, type RailLetter } fro
 import { Breadcrumbs } from '@/components/Breadcrumbs'
 import { Folio } from '@/components/Folio'
 import { PageTurn, turnForward } from '@/components/PageTurn'
-import type { PreviewPayload } from '@/components/preview/LinkPreview'
+import type { PreviewPayload } from '@/components/preview'
 import { TopicCard } from '@/components/topics'
 import { concepts, hrefFor, site, topics, works, type AzEntry as Entry } from '@/content'
 import { cx } from '@/lib/cx'

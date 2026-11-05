@@ -1,16 +1,16 @@
 import Link from 'next/link'
 
-import { CurrentLink } from '@/components/nav/CurrentLink'
-import { MenuButton } from '@/components/nav/MenuButton'
-import { SearchGlyph } from '@/components/nav/glyphs'
-import { SectionNav } from '@/components/nav/SectionNav'
-import { siteNav } from '@/components/nav/site-nav'
-import { ProposalNote } from '@/components/proposals/ProposalNote'
-import { SearchTrigger } from '@/components/search/SearchTrigger'
+import { SearchGlyph } from '@/components/glyphs'
+import { CurrentLink } from '@/components/nav'
+import { MenuButton } from '@/components/nav'
+import { SectionNav } from '@/components/nav'
+import { siteNav } from '@/components/nav'
+import { ProposalNote } from '@/components/proposals'
+import { SearchTrigger } from '@/components/search'
 import { cx } from '@/lib/cx'
 
-import { LotusMark } from './Fleuron'
-import { Logo } from './Logo'
+import { LotusMark } from '../Fleuron'
+import { Logo } from '../Logo'
 import styles from './SiteHeader.module.css'
 
 /**

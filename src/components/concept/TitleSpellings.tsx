@@ -1,6 +1,6 @@
 import { ViewTransition } from 'react'
 
-import { ScriptPair } from '../script/ScriptPair'
+import { ScriptPair } from '../script'
 import styles from './TitleSpellings.module.css'
 
 /**
