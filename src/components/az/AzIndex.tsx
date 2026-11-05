@@ -327,7 +327,11 @@ export function AzIndex({ letters, groups, total, children }: Props) {
       })
       // Show it now (the layout effect repeats this), then jump: a smooth scroll started mid-load is left behind as the list settles.
       filterList(next)
-      target?.scrollIntoView({ block: 'start', behavior: 'instant' })
+      const jump = () => target?.scrollIntoView({ block: 'start', behavior: 'instant' })
+      jump()
+      // The entries above are first drawn at a guessed height (content-visibility), so that jump
+      // can land short of the entry or past it, under the rail: jump again once they are real.
+      requestAnimationFrame(() => requestAnimationFrame(jump))
     }
     reveal()
     window.addEventListener('hashchange', reveal)
