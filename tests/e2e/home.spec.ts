@@ -250,21 +250,23 @@ test.describe('the opening folio says what the site is', () => {
     { width: 1366, height: 768 },
     { width: 390, height: 844 },
   ]) {
-    test(`at ${viewport.width}×${viewport.height}, the H1, the subhead and the primary button show without scrolling`, async ({
-      page,
-    }) => {
-      await page.setViewportSize(viewport)
-      await gotoReady(page, '/')
-      const folio = openingFolio(page)
-      for (const part of [
-        page.getByRole('heading', { level: 1 }),
-        folio.getByText(/^Ideas about the mind from India’s traditional texts/),
-        // The primary button, whichever the Start here flag makes it.
-        folio.getByRole('link').first(),
-      ]) {
-        await expect(part).toBeInViewport({ ratio: 1 })
-      }
-    })
+    test(
+      `at ${viewport.width}×${viewport.height}, the H1, the subhead and the primary button show without scrolling`,
+      { tag: '@self-width' },
+      async ({ page }) => {
+        await page.setViewportSize(viewport)
+        await gotoReady(page, '/')
+        const folio = openingFolio(page)
+        for (const part of [
+          page.getByRole('heading', { level: 1 }),
+          folio.getByText(/^Ideas about the mind from India’s traditional texts/),
+          // The primary button, whichever the Start here flag makes it.
+          folio.getByRole('link').first(),
+        ]) {
+          await expect(part).toBeInViewport({ ratio: 1 })
+        }
+      },
+    )
   }
 })
 

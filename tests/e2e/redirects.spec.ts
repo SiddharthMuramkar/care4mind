@@ -9,9 +9,6 @@ import { expect, inScope, test } from './fixtures'
 // hop (FR-07). Each is requested from the local build without following redirects;
 // nothing here requests the current site.
 
-// HTTP checks need no width, so they run once, in the 1440 px project.
-test.skip(({ viewport }) => viewport?.width !== 1440, 'run once, at 1440 px')
-
 const routes = await site.routes()
 
 /** The addresses a pattern row stands for, under made-up names: real usernames never enter the repo. */

@@ -23,7 +23,7 @@ test.describe('a focused link on paper rings in paper’s focus colour', () => {
     await expectPaperFocusRing(card.getByRole('link', { name: /^About the/ }), '::after')
   })
 
-  test.describe('on a computer', () => {
+  test.describe('on a computer', { tag: '@self-width' }, () => {
     test.use({ viewport: { width: 1280, height: 900 } })
 
     test('in a navigation panel', async ({ page }) => {
@@ -35,7 +35,7 @@ test.describe('a focused link on paper rings in paper’s focus colour', () => {
     })
   })
 
-  test.describe('on a phone', () => {
+  test.describe('on a phone', { tag: '@self-width' }, () => {
     test.use({ viewport: { width: 390, height: 844 } })
 
     test('in the Menu Drawer', async ({ page }) => {
