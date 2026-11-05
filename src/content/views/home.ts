@@ -2,7 +2,7 @@ import type { ContentGraph } from '../graph'
 import type { HomepageRecord, Target } from '../schema'
 import type { HomepageView } from '../types'
 import { carriedOver, must } from './common'
-import { conceptCard, readingMinutes } from './concept'
+import { conceptCard } from './concept'
 import { hrefFor } from './href'
 
 /** The path a record's target names. A Questionnaire's depends on its status. */
@@ -42,10 +42,8 @@ export function homepageView(record: HomepageRecord, graph: ContentGraph): Homep
       text: area.text,
       ...(area.target === undefined ? {} : { href: targetHref(area.target, graph) }),
     })),
-    featured: record.featured.map((slug) => {
-      const concept = must(graph, 'concept', slug)
-      return { ...conceptCard(concept, graph), readingMinutes: readingMinutes(concept) }
-    }),
+    // Each featured card carries the reading time its Concept's page shows, counted in conceptCard.
+    featured: record.featured.map((slug) => conceptCard(must(graph, 'concept', slug), graph)),
     howItWorks: record.howItWorks,
     whoBehind: record.whoBehind,
     closing: record.closing,

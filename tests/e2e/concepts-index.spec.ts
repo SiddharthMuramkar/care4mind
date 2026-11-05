@@ -1,6 +1,6 @@
 import type { Locator, Page } from '@playwright/test'
 
-import { hrefFor, site, topics } from '@/content'
+import { concepts as conceptList, hrefFor, site, topics } from '@/content'
 
 import { expectNoAxeViolations } from './axe'
 import { expect, gotoReady, scrollsSideways, test } from './fixtures'
@@ -17,6 +17,7 @@ if (!mind) throw new Error('The mind topic is in the content.')
 const filled = letters.filter(({ entries }) => entries.length > 0).map(({ letter }) => letter)
 const blank = letters.filter(({ entries }) => entries.length === 0).map(({ letter }) => letter)
 const concepts = all.filter(({ kind }) => kind === 'concept')
+const cards = await conceptList.list()
 const ofKind = (kind: string) => all.filter((entry) => entry.kind === kind).length
 // A plain address shows the Concept pages; its rail links the letters that have one.
 const conceptLetters = letters
@@ -70,6 +71,24 @@ test('lists every Concept, term and glossary entry, names in both scripts with t
     'href',
     hrefFor({ kind: 'topic', id: 'values', anchor: 'yama' }),
   )
+})
+
+test('every Concept entry shows its topic chip and reading time, and no other entry does', async ({
+  page,
+}) => {
+  await gotoReady(page, EVERYTHING)
+  await expect(list(page).locator('[data-topic]')).toHaveCount(concepts.length)
+  for (const card of cards) {
+    const entry = list(page)
+      .locator('li')
+      .filter({ has: page.locator(`a[href="${card.href}"]`) })
+      .first()
+    const minutes = card.readingMinutes
+    await expect(entry.locator(`[data-topic="${card.topic.slug}"]`)).toHaveText(card.topic.name)
+    await expect(entry).toContainText(
+      `About ${minutes} ${minutes === 1 ? 'minute' : 'minutes'} to read`,
+    )
+  }
 })
 
 test('glossary entries lead to their Concept, to DharmaWiki in words, or nowhere', async ({

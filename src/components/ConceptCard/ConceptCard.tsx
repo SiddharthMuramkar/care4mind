@@ -4,15 +4,16 @@ import { FrameCorners } from '@/components/Folio'
 import { TopicChip } from '@/components/topics'
 import type { ConceptCard as Card } from '@/content'
 import { cx } from '@/lib/cx'
+import { readingTimeWords } from '@/lib/text'
 
 import styles from './ConceptCard.module.css'
 import { Text } from '../prose'
 
 interface Props {
-  concept: Pick<Card, 'slug' | 'name' | 'lang' | 'term' | 'english' | 'summary' | 'topic'> & {
-    /** How long the Concept's page takes to read, where the card's page shows it. */
-    readingMinutes?: number
-  }
+  concept: Pick<
+    Card,
+    'slug' | 'name' | 'lang' | 'term' | 'english' | 'summary' | 'topic' | 'readingMinutes'
+  >
   /** The card's one action: a link or button, stretched to cover the whole card. */
   action: ReactNode
   className?: string
@@ -40,11 +41,9 @@ export function ConceptCard({ concept, action, className, featured = false }: Pr
       ) : null}
       {/* The English gloss of a Sanskrit headword; a page with an English title has none. */}
       {concept.term && concept.english ? <p className={styles.gloss}>{concept.english}</p> : null}
-      <p className={styles.topic}>
+      <p className={styles.meta}>
         <TopicChip topic={concept.topic} />
-        {concept.readingMinutes ? (
-          <span className={styles.reading}>{concept.readingMinutes} min read</span>
-        ) : null}
+        <span>{readingTimeWords(concept.readingMinutes)}</span>
       </p>
       <p className={styles.summary}>
         <Text text={concept.summary} />

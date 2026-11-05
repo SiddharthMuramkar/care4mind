@@ -63,6 +63,23 @@ test('lists its Concepts as cards, and as contents rows that are links to them',
   await expect(plate(page).locator('[aria-hidden="true"]').first()).toBeAttached()
 })
 
+test('every Concept card shows its topic chip and reading time', async ({ page }) => {
+  await gotoReady(page, hrefFor({ kind: 'topic', id: 'mind' }))
+  for (const concept of conceptsOf(mind)) {
+    const article = page
+      .getByRole('region', { name: 'Its Concepts' })
+      .getByRole('listitem')
+      .filter({ has: card(page, concept.name) })
+    const minutes = concept.readingMinutes
+    await expect(article.locator(`[data-topic="${concept.topic.slug}"]`)).toHaveText(
+      concept.topic.name,
+    )
+    await expect(article).toContainText(
+      `About ${minutes} ${minutes === 1 ? 'minute' : 'minutes'} to read`,
+    )
+  }
+})
+
 test('says how many Concepts it has, how many verses they quote and from which works', async ({
   page,
 }) => {

@@ -81,12 +81,14 @@ function palette(): Record<string, string> {
   return colours
 }
 
-/** The reviewed text pairs as `#rrggbb` on `#rrggbb`, resolved from the site palette, keyed `fg|bg`. */
-let reviewedPairCache: Map<string, string> | undefined
-function reviewedPairs(): Map<string, string> {
+type ReviewedPair = { name: string; minimum: number }
+
+/** The reviewed text pairs as `#rrggbb` on `#rrggbb`, resolved from the site palette, keyed `fg|bg`; where two pairs resolve to the same colours the stricter minimum stands. */
+let reviewedPairCache: Map<string, ReviewedPair> | undefined
+function reviewedPairs(): Map<string, ReviewedPair> {
   if (reviewedPairCache) return reviewedPairCache
   const colours = palette()
-  const pairs = new Map<string, string>()
+  const pairs = new Map<string, ReviewedPair>()
   for (const pair of CONTRAST_PAIRS) {
     const foreground = colours[pair.foreground]
     let background = colours[pair.background]
@@ -95,11 +97,12 @@ function reviewedPairs(): Map<string, string> {
     if (under) background = composite(background, under)
     if (!/^#[0-9a-f]{6}$/.test(foreground) || !/^#[0-9a-f]{6}$/.test(background)) continue
     const key = `${foreground}|${background}`
-    if (!pairs.has(key))
-      pairs.set(
-        key,
-        `${pair.foreground} on ${pair.background}${'over' in pair ? ` over ${pair.over}` : ''}`,
-      )
+    const standing = pairs.get(key)
+    if (!standing || pair.minimum > standing.minimum)
+      pairs.set(key, {
+        name: `${pair.foreground} on ${pair.background}${'over' in pair ? ` over ${pair.over}` : ''}`,
+        minimum: pair.minimum,
+      })
   }
   reviewedPairCache = pairs
   return pairs
@@ -115,15 +118,35 @@ function nearColour(a: string, b: string): boolean {
 }
 
 /** The reviewed pair a node's colours form, allowing that rounding step; the ratio is still judged on the colours read. */
-function pairName(pairs: Map<string, string>, foreground: string, background: string) {
+function pairFor(
+  pairs: Map<string, ReviewedPair>,
+  foreground: string,
+  background: string,
+): ReviewedPair | undefined {
   const exact = pairs.get(`${foreground}|${background}`)
   if (exact) return exact
-  for (const [key, name] of pairs) {
+  for (const [key, pair] of pairs) {
     const [pairForeground = '', pairBackground = ''] = key.split('|')
     if (nearColour(pairForeground, foreground) && nearColour(pairBackground, background))
-      return name
+      return pair
   }
   return undefined
+}
+
+/** WCAG large text from a node's own computed size and weight (at least 24 px, or at least 18.66 px at weight 700 or more); unreadable values are not large. */
+function isLargeText(fontSize: string | undefined, fontWeight: string | undefined): boolean {
+  if (!fontSize?.endsWith('px')) return false
+  const size = Number(fontSize.slice(0, -2))
+  if (!Number.isFinite(size)) return false
+  if (size >= 24) return true
+  if (size < 18.66) return false
+  const weight = fontWeight === 'bold' ? 700 : fontWeight === 'normal' ? 400 : Number(fontWeight)
+  return Number.isFinite(weight) && weight >= 700
+}
+
+/** The ratio a node must reach for a reviewed pair: the pair's own minimum only for large text, otherwise 4.5:1. */
+function applicableMinimum(pairMinimum: number, large: boolean): number {
+  return large ? pairMinimum : Math.max(pairMinimum, 4.5)
 }
 
 /** A computed colour (`rgb()`, `color(srgb …)` from a `color-mix()`, or hex) as `#rrggbb` plus alpha; undefined when unreadable. */
@@ -512,6 +535,8 @@ export async function expectNoAxeViolations(page: Page, where?: string) {
                 }))
               return {
                 color: isSvg && style.fill && style.fill !== 'none' ? style.fill : style.color,
+                fontSize: style.fontSize,
+                fontWeight: style.fontWeight,
                 glyphs: glyphs.length > 0 ? glyphs : [boxOf(element)],
                 layers,
               }
@@ -520,7 +545,7 @@ export async function expectNoAxeViolations(page: Page, where?: string) {
           unsettled.map((node) => node.target),
         )
   const pairs = reviewedPairs()
-  // One reviewed shade beside the pairs: a table frame's scroll shadow over a reviewed solid pair. It passes only at 4.5:1 of its own, or as an edge sliver: the frame's radial shade tile is 0.875rem wide and fades across it, so a fifth of the glyphs' area under the whole tile is a conservative bound on the glyphs its strongest stop could reach — glyphs at the frame's edge, which scroll onto the solid pair.
+  // One reviewed shade beside the pairs: a table frame's scroll shadow over a reviewed solid pair. It passes only at the ratio its text size requires of its own, or as an edge sliver: the frame's radial shade tile is 0.875rem wide and fades across it, so a fifth of the glyphs' area under the whole tile is a conservative bound on the glyphs its strongest stop could reach — glyphs at the frame's edge, which scroll onto the solid pair.
   const shade = palette()['scroll-shadow']
   const shadeSliver = 0.2
   const unreviewed: string[] = []
@@ -553,32 +578,37 @@ export async function expectNoAxeViolations(page: Page, where?: string) {
       foreground
         ? seen({ hex: foreground.hex, alpha: foreground.alpha * opacity }, background)
         : undefined
+    const large = isLargeText(own?.fontSize, own?.fontWeight)
     const solidText = solid ? textOn(solid) : undefined
-    const solidPair = solidText && solid ? pairName(pairs, solidText, solid) : undefined
+    const solidPair = solidText && solid ? pairFor(pairs, solidText, solid) : undefined
+    const solidMinimum = solidPair !== undefined ? applicableMinimum(solidPair.minimum, large) : 4.5
     const solidPasses =
       solidPair !== undefined &&
       solidText !== undefined &&
       solid !== undefined &&
-      contrastRatio(solidText, solid) >= 4.5
+      contrastRatio(solidText, solid) >= solidMinimum
     const shaded =
       solid && shade && /^#[0-9a-f]{8}$/.test(shade)
         ? [composite(shade, solid), composite(shade, composite(shade, solid))]
         : []
     const checks = (backgrounds ?? []).map(({ background, coverage }) => {
       const text = textOn(background)
-      const pair = text ? pairName(pairs, text, background) : undefined
+      const pair = text ? pairFor(pairs, text, background) : undefined
       const ratio = text ? contrastRatio(text, background) : undefined
-      const byPair = pair !== undefined && ratio !== undefined && ratio >= 4.5
+      const minimum = pair !== undefined ? applicableMinimum(pair.minimum, large) : solidMinimum
+      const byPair = pair !== undefined && ratio !== undefined && ratio >= minimum
       const isShade =
         node.why === 'bgGradient' &&
         solidPasses &&
         shaded.some((expected) => nearColour(expected, background))
-      const byShade = isShade && ratio !== undefined && (ratio >= 4.5 || coverage <= shadeSliver)
+      const byShade =
+        isShade && ratio !== undefined && (ratio >= solidMinimum || coverage <= shadeSliver)
       return {
         background,
         text,
-        pair: pair ?? (byShade ? `scroll-shadow over ${solidPair}` : undefined),
+        pair: pair?.name ?? (byShade ? `scroll-shadow over ${solidPair?.name}` : undefined),
         ratio,
+        minimum: isShade && pair === undefined ? solidMinimum : minimum,
         shadeCoverage: isShade ? coverage : undefined,
         passes: byPair || byShade,
       }
@@ -588,7 +618,7 @@ export async function expectNoAxeViolations(page: Page, where?: string) {
     const evidence = checks
       .map(
         (check) =>
-          `${check.text ?? 'unknown text'} on ${check.background}${check.pair ? ` (${check.pair})` : ' (no reviewed pair)'}${check.ratio !== undefined ? ` ${check.ratio.toFixed(2)}:1` : ''}${check.shadeCoverage !== undefined ? ` shade-cover ${(check.shadeCoverage * 100).toFixed(1)}%` : ''}`,
+          `${check.text ?? 'unknown text'} on ${check.background}${check.pair ? ` (${check.pair})` : ' (no reviewed pair)'}${check.ratio !== undefined ? ` ${check.ratio.toFixed(2)}:1 (needs ${check.minimum.toFixed(1)}:1)` : ''}${check.shadeCoverage !== undefined ? ` shade-cover ${(check.shadeCoverage * 100).toFixed(1)}%` : ''}`,
       )
       .join(', ')
     console.log(
@@ -601,7 +631,7 @@ export async function expectNoAxeViolations(page: Page, where?: string) {
     violations.push({
       rule: 'color-contrast',
       impact: 'unsettled',
-      help: 'axe could not settle this contrast and its colours form no reviewed pair at 4.5:1; fix the colour or record its pair',
+      help: 'axe could not settle this contrast and its colours form no reviewed pair at the ratio its text size requires; fix the colour or record its pair',
       targets: unreviewed,
     })
   }

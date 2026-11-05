@@ -2,7 +2,7 @@
 
 import { useEffect, useId, useSyncExternalStore, type ReactElement } from 'react'
 
-import type { LatinScript } from '@/content'
+import type { LatinScript, TopicRef } from '@/content'
 
 import { CLOSE_DELAY, OPEN_DELAY } from './delays'
 import { getNoParts, getParts, subscribe, want } from './store'
@@ -17,6 +17,10 @@ export interface PreviewPayload {
   devanagari?: string
   /** The English gloss, where there is one. */
   gloss?: string
+  /** A Concept's primary topic, for its chip. */
+  topic?: TopicRef
+  /** About how long a Concept's page takes to read, in minutes. */
+  readingMinutes?: number
   /** A short text from the content: a summary, a definition, a Reference's title, a translation. */
   text?: string
 }

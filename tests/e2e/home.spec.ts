@@ -242,7 +242,9 @@ test('below the hero it shows topics, featured Concepts, how it works and who is
       concept.href,
     )
     await expect(card).toContainText(concept.topic.name)
-    await expect(card).toContainText(`${concept.readingMinutes} min read`)
+    await expect(card).toContainText(
+      `About ${concept.readingMinutes} ${concept.readingMinutes === 1 ? 'minute' : 'minutes'} to read`,
+    )
   }
 
   await expect(section(page, 'How it works')).not.toBeEmpty()

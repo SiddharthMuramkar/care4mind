@@ -10,6 +10,8 @@ import {
   type LinkedWork,
   type QuestionnaireCard,
   type RelatedConcept,
+  type SectionView,
+  type VerseView,
 } from '../types'
 import { conceptQuotes, glanceOf, sectionViews, tocOf, topicRef, type Owner } from './blocks'
 import { byName, carriedOver, must, nameCopy, present } from './common'
@@ -20,51 +22,8 @@ import { questionnaireCard } from './questionnaire'
 import { citationMap, numberedReferences } from './reference'
 import { conceptRef } from './refs'
 
-const wordsIn = (text: string) => text.split(/\s+/).filter(Boolean).length
-
-function blockWords(blocks: readonly Block[]): number {
-  return blocks.reduce((words, block) => {
-    switch (block.kind) {
-      case 'paragraph':
-        return words + wordsIn(block.text)
-      case 'list':
-        return words + block.items.reduce((sum, item) => sum + wordsIn(item), 0)
-      case 'term':
-        return words + wordsIn(block.gloss ?? '') + blockWords(block.blocks)
-      case 'table':
-        return (
-          words +
-          wordsIn(block.caption) +
-          block.columns.reduce((sum, column) => sum + wordsIn(column), 0) +
-          block.rows.reduce(
-            (sum, row) =>
-              sum +
-              (typeof row.head === 'string' ? wordsIn(row.head) : 0) +
-              row.cells.reduce((cellSum, cell) => cellSum + wordsIn(cell), 0),
-            0,
-          )
-        )
-      case 'verse':
-        return words + wordsIn(block.quote.meaning ?? '')
-      case 'topic-intro':
-        return words
-    }
-  }, 0)
-}
-
-/** How long a Concept's page takes to read, from its own words at a plain reading pace. */
-export function readingMinutes(record: ConceptRecord): number {
-  const words =
-    wordsIn(record.summary) +
-    record.sections.reduce(
-      (sum, section) => sum + wordsIn(section.heading) + blockWords(section.blocks),
-      0,
-    )
-  return Math.max(1, Math.ceil(words / 200))
-}
-
-/** A Concept in brief, for lists and cards. */
-export function conceptCard(record: ConceptRecord, graph: ContentGraph): ConceptCard {
+/** A Concept in brief, its reading time already counted from its page's sections and verses. */
+function cardWith(record: ConceptRecord, graph: ContentGraph, readingMinutes: number): ConceptCard {
   return {
     ...conceptRef(record),
     ...present({
@@ -73,7 +32,22 @@ export function conceptCard(record: ConceptRecord, graph: ContentGraph): Concept
     }),
     summary: record.summary,
     topic: topicRef(must(graph, 'topic', record.topics.primary)),
+    readingMinutes,
   }
+}
+
+/** A Concept in brief, for lists and cards: the same count its page shows, from the same words. */
+export function conceptCard(record: ConceptRecord, graph: ContentGraph): ConceptCard {
+  const owner: Owner = { kind: 'concept', id: record.slug }
+  return cardWith(
+    record,
+    graph,
+    readingMinutesOf(
+      record,
+      sectionViews(record.sections, owner, graph),
+      record.verses.map((quote) => verseView(quote, graph)),
+    ),
+  )
 }
 
 // Below this many, a Concept's page would look bare, so shared-text-only links fill it back up.
@@ -224,6 +198,23 @@ function wordsInBlocks(blocks: readonly BlockView[]): number {
   }, 0)
 }
 
+/** About how long a Concept's page takes to read: its lead, sections and verses at 200 words a minute. */
+function readingMinutesOf(
+  record: ConceptRecord,
+  sections: readonly SectionView[],
+  verses: readonly VerseView[],
+): number {
+  const words =
+    [record.summary, record.whyItMatters ?? ''].join(' ').split(/\s+/).filter(Boolean).length +
+    sections.reduce((total, section) => total + wordsInBlocks(section.blocks), 0) +
+    verses.reduce(
+      (total, verse) =>
+        total + `${verse.translation} ${verse.meaning ?? ''}`.split(/\s+/).filter(Boolean).length,
+      0,
+    )
+  return Math.max(1, Math.ceil(words / WORDS_PER_MINUTE))
+}
+
 /** A Concept's page: the record with every id resolved. */
 export function conceptView(
   record: ConceptRecord,
@@ -233,19 +224,10 @@ export function conceptView(
   const owner: Owner = { kind: 'concept', id: record.slug }
   const sections = sectionViews(record.sections, owner, graph)
   const verses = record.verses.map((quote) => verseView(quote, graph))
-  const words =
-    [record.summary, record.whyItMatters ?? ''].join(' ').split(/\s+/).filter(Boolean).length +
-    sections.reduce((total, section) => total + wordsInBlocks(section.blocks), 0) +
-    verses.reduce(
-      (total, verse) =>
-        total + `${verse.translation} ${verse.meaning ?? ''}`.split(/\s+/).filter(Boolean).length,
-      0,
-    )
   return {
-    ...conceptCard(record, graph),
+    ...cardWith(record, graph, readingMinutesOf(record, sections, verses)),
     spellings: record.name.term ? asciiSpellings(record.name.term) : [],
     ...present({ whyItMatters: record.whyItMatters }),
-    readingMinutes: Math.max(1, Math.ceil(words / WORDS_PER_MINUTE)),
     glance: glanceOf(record.sections, owner),
     secondaryTopics: (record.topics.also ?? []).map((slug) => topicRef(must(graph, 'topic', slug))),
     verses,

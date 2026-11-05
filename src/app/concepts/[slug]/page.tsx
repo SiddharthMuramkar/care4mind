@@ -20,7 +20,7 @@ import {
   type ConceptView,
   type VerseView,
 } from '@/content'
-import { capitalise } from '@/lib/text'
+import { capitalise, readingTimeWords } from '@/lib/text'
 import { metadataFor } from '@/lib/metadata'
 
 import reading from '../../reading.module.css'
@@ -117,10 +117,7 @@ export default async function ConceptPage({ params }: PageProps<'/concepts/[slug
             {[concept.topic, ...concept.secondaryTopics].map((topic) => (
               <TopicChip key={topic.slug} topic={topic} />
             ))}
-            <span>
-              About {concept.readingMinutes} {concept.readingMinutes === 1 ? 'minute' : 'minutes'}{' '}
-              to read
-            </span>
+            <span>{readingTimeWords(concept.readingMinutes)}</span>
           </p>
           {concept.term && concept.spellings.length > 0 ? (
             <p className={styles.alsoWritten}>

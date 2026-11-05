@@ -35,6 +35,16 @@
   outline-offset: 2px;
 }
 
+.conceptMeta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.75rem;
+  margin: 0;
+  font-size: 1rem;
+  color: var(--color-surface-muted);
+}
+
 /* Its place in the form; its look is the one primary button. */
 .button {
   grid-area: button;
