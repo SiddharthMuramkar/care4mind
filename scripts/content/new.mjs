@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+// @ts-check
 // Writes a new record file, with every field of its kind laid out, then the content registry.
 //
 //   pnpm content:new <kind> <id>

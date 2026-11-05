@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+// @ts-check
 // Prints a clean outline of one saved page of the current site: headings, paragraphs, lists,
 // tables row by row, verse blocks, reference lines, and links with their targets.
 //
