@@ -10,17 +10,15 @@ import { proposalsFor } from '@/components/proposals/proposals'
 const ON: Features = {
   questionnairePreview: true,
   conceptMap: true,
-  devanagariFirst: true,
   startHere: true,
 }
 
 const listed = (flags: Features) => proposalsFor(flags).map(({ name, built }) => ({ name, built }))
 
 describe('proposalsFor', () => {
-  it('lists the map, Devanagari first and audio pronunciation, and nothing else', () => {
+  it('lists the map, Start here and audio pronunciation, and nothing else', () => {
     expect(listed(ON)).toEqual([
       { name: 'Concept map', built: true },
-      { name: 'Devanagari first, on every page', built: true },
       { name: 'Start here', built: true },
       { name: 'Audio pronunciation', built: false },
     ])
@@ -28,18 +26,11 @@ describe('proposalsFor', () => {
 
   it('leaves out a built proposal whose flag is off', () => {
     expect(listed({ ...ON, conceptMap: false })).toEqual([
-      { name: 'Devanagari first, on every page', built: true },
-      { name: 'Start here', built: true },
-      { name: 'Audio pronunciation', built: false },
-    ])
-    expect(listed({ ...ON, devanagariFirst: false })).toEqual([
-      { name: 'Concept map', built: true },
       { name: 'Start here', built: true },
       { name: 'Audio pronunciation', built: false },
     ])
     expect(listed({ ...ON, startHere: false })).toEqual([
       { name: 'Concept map', built: true },
-      { name: 'Devanagari first, on every page', built: true },
       { name: 'Audio pronunciation', built: false },
     ])
   })

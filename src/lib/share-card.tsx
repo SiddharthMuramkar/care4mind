@@ -1,6 +1,6 @@
 import { ImageResponse } from 'next/og'
 
-import { site as config } from '@/config/site'
+import { siteConfig as config } from '@/config/site'
 import { cardFaces } from '@/fonts/card-faces'
 import { shareCardText } from '@/lib/metadata'
 

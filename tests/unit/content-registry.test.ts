@@ -533,13 +533,11 @@ describe('feature flags (D16, D20)', () => {
   const allOn = {
     questionnairePreview: true,
     conceptMap: true,
-    devanagariFirst: true,
     startHere: true,
   }
   const allOff = {
     questionnairePreview: false,
     conceptMap: false,
-    devanagariFirst: false,
     startHere: false,
   }
 
@@ -560,10 +558,6 @@ describe('feature flags (D16, D20)', () => {
       ...allOff,
       conceptMap: true,
     })
-    expect(readFeatures({ ...production, FEATURE_DEVANAGARI_FIRST: '1' })).toEqual({
-      ...allOff,
-      devanagariFirst: true,
-    })
     expect(readFeatures({ ...production, FEATURE_START_HERE: '1' })).toEqual({
       ...allOff,
       startHere: true,
@@ -579,10 +573,6 @@ describe('feature flags (D16, D20)', () => {
       ...allOn,
       conceptMap: false,
     })
-    expect(readFeatures({ FEATURE_DEVANAGARI_FIRST: '0' })).toEqual({
-      ...allOn,
-      devanagariFirst: false,
-    })
     expect(readFeatures({ FEATURE_START_HERE: '0' })).toEqual({ ...allOn, startHere: false })
   })
 
@@ -593,7 +583,6 @@ describe('feature flags (D16, D20)', () => {
   it('shows the proposals page while either proposal is on, with no flag of its own', () => {
     expect(proposalsPageOn(allOn)).toBe(true)
     expect(proposalsPageOn({ ...allOff, conceptMap: true })).toBe(true)
-    expect(proposalsPageOn({ ...allOff, devanagariFirst: true })).toBe(true)
     expect(proposalsPageOn({ ...allOff, startHere: true })).toBe(true)
     expect(proposalsPageOn(allOff)).toBe(false)
   })

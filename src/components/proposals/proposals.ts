@@ -6,7 +6,7 @@
 import type { Features } from '@/config/features'
 
 export interface Proposal {
-  key: 'concept-map' | 'devanagari-first' | 'start-here' | 'audio-pronunciation'
+  key: 'concept-map' | 'start-here' | 'audio-pronunciation'
   name: string
   built: boolean
   adds: string
@@ -24,18 +24,6 @@ const CONCEPT_MAP: Proposal = {
     'One page of its own. Its layout is worked out when the site is built, so the browser runs no layout code; only the filter buttons run in the browser.',
   upkeep: 'None by hand: a new Concept, verse or Reference joins the map when the content changes.',
   off: 'One setting, FEATURE_CONCEPT_MAP=0, with no code change: the map and every link to it go. The live site leaves it off until you approve it.',
-}
-
-const DEVANAGARI_FIRST: Proposal = {
-  key: 'devanagari-first',
-  name: 'Devanagari first, on every page',
-  built: true,
-  adds: 'One choice puts Devanagari before the transliteration wherever a Sanskrit word shows in both scripts, on every page, and the browser remembers it. Screen readers hear the same words in the same order either way.',
-  speed:
-    'A script of about 200 bytes in each page’s head sets the order before the page first shows, so nothing flashes or moves.',
-  upkeep:
-    'Every page that shows a word in both scripts has to set it with the shared part that orders them, new pages included.',
-  off: 'One setting, FEATURE_DEVANAGARI_FIRST=0, with no code change: the header switch and the head script go, and the switch on a Concept page changes that page only, as before. The live site leaves it off until you approve it.',
 }
 
 const START_HERE: Proposal = {
@@ -64,7 +52,6 @@ const AUDIO: Proposal = {
 export function proposalsFor(flags: Features): Proposal[] {
   return [
     ...(flags.conceptMap ? [CONCEPT_MAP] : []),
-    ...(flags.devanagariFirst ? [DEVANAGARI_FIRST] : []),
     ...(flags.startHere ? [START_HERE] : []),
     AUDIO,
   ]
