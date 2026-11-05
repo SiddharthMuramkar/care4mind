@@ -62,6 +62,20 @@ function provenancesOf(candidate: ContentRecord): Provenance[] {
   return candidate.intro ? [candidate.intro.provenance] : []
 }
 
+/** Where a provenance's words can be checked: written here, from elsewhere, or from a page. */
+type ProvenanceClass = 'written' | 'elsewhere' | 'carried-over'
+
+function provenanceClass(provenance: Provenance): ProvenanceClass {
+  if (provenance.origin === 'written') return 'written'
+  // A written record's empty sources would make every() vacuously true; elsewhere needs a source.
+  if (
+    provenance.sources.length > 0 &&
+    provenance.sources.every(({ url }) => !url.startsWith('https://care4mind.org/'))
+  )
+    return 'elsewhere'
+  return 'carried-over'
+}
+
 /** The provenance of a record named `kind/id`. */
 function provenanceOf(name: string): Provenance {
   const [provenance] = provenancesOf(
@@ -508,11 +522,36 @@ describe('the flags pack', () => {
 })
 
 describe('the records verify can’t check', () => {
+  it('classifies a written record as written, not elsewhere, in made-up examples', () => {
+    const written: Provenance = {
+      origin: 'written',
+      sources: [],
+      edits: [],
+      flags: [],
+      writtenBy: 'An Author',
+      writtenOn: '2026-11-06',
+    }
+    const elsewhere: Provenance = {
+      sources: [{ url: 'https://example.org/a-book', retrieved: '2026-10-27' }],
+      edits: [],
+      flags: [],
+    }
+    const fromPage: Provenance = {
+      sources: [{ url: 'https://care4mind.org/vikshepa/', retrieved: '2026-10-27' }],
+      edits: [],
+      flags: [],
+    }
+    expect(provenanceClass(written)).toBe('written')
+    expect(provenanceClass(elsewhere)).toBe('elsewhere')
+    expect(provenanceClass(fromPage)).toBe('carried-over')
+    expect(
+      provenanceClass({ ...fromPage, sources: [...fromPage.sources, ...elsewhere.sources] }),
+    ).toBe('carried-over')
+  })
+
   it('are those with no saved page, each flagged with where it came from', () => {
     const elsewhere = records.filter((candidate) =>
-      provenancesOf(candidate).some(({ sources }) =>
-        sources.every(({ url }) => !url.startsWith('https://care4mind.org/')),
-      ),
+      provenancesOf(candidate).some((provenance) => provenanceClass(provenance) === 'elsewhere'),
     )
     expect(elsewhere.map(nameOf)).toEqual(['reference/navare-pandey-2022'])
     const unflagged = elsewhere.filter((candidate) =>
