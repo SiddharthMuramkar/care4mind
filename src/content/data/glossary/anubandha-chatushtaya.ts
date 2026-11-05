@@ -1,6 +1,6 @@
 import { defineGlossaryEntry } from '@/content/schema'
 
-// The /anubandha-chatushtaya/ post, a single sentence, merges into this entry (design B4).
+// The /anubandha-chatushtaya/ post, a single sentence, merges into this entry.
 export default defineGlossaryEntry({
   kind: 'glossary',
   slug: 'anubandha-chatushtaya',

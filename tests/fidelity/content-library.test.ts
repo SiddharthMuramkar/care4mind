@@ -245,7 +245,7 @@ describe('the Library', () => {
     expect(fromThem).toEqual([])
   })
 
-  it('lists the images left out of each reading list (D18)', async () => {
+  it('lists the images left out of each reading list', async () => {
     const lists = await localSource.records('resource-list')
     expect(
       lists

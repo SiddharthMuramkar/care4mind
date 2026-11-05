@@ -1,8 +1,8 @@
 import { defineQuestionnaire } from '@/content/schema'
 
-// The questionnaire the /sthitaprajna/ page describes, coming later (D12). The page holds none of
-// its questions, and research ticket 11 found no published source for it, so it has no candidate
-// source. Its score section is held back: described below, never quoted (FR-05).
+// The questionnaire the /sthitaprajna/ page describes, coming later. The page holds none of its
+// questions, and the Published scales research found no published source for it, so it has no
+// candidate source. Its score section is held back: described below, never quoted (FR-05).
 export default defineQuestionnaire({
   kind: 'questionnaire',
   slug: 'sthitaprajna',

@@ -1,6 +1,6 @@
 import type { HrefTarget } from '../types'
 
-/** The site map's fixed pages (design B2), each at its own path. */
+/** The site map's fixed pages, each at its own path. */
 const FIXED_PAGES = {
   home: '/',
   concepts: '/concepts/',
@@ -28,7 +28,7 @@ export function referenceAnchor(id: string): string {
 }
 
 /**
- * The path of a page, or of an anchor on one (design B2), always with its trailing slash. Every
+ * The path of a page, or of an anchor on one, always with its trailing slash. Every
  * internal link on the site is made here, so an address changes in one place.
  */
 export function hrefFor(target: HrefTarget): string {

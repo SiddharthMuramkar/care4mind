@@ -16,7 +16,7 @@ import { referenceView } from './reference'
 import { conceptRef, questionnaireHref } from './refs'
 
 /**
- * Whether a Questionnaire can be taken in this build (D16): a live one always, a preview one only
+ * Whether a Questionnaire can be taken in this build: a live one always, a preview one only
  * while `questionnairePreview` is on, and only if it has a form. Coming soon or later, never.
  */
 export function canTake(record: QuestionnaireRecord, flags: Features): boolean {

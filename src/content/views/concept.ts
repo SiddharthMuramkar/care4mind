@@ -114,7 +114,7 @@ function linkedQuestionnaires(
   )
 }
 
-/** The Concepts before and after this one in its primary topic, alphabetically (settled rule 16). */
+/** The Concepts before and after this one in its primary topic, alphabetically. */
 function neighbours(record: ConceptRecord, graph: ContentGraph) {
   const inTopic = graph
     .conceptsInTopic(record.topics.primary)

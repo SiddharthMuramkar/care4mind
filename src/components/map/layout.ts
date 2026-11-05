@@ -1,5 +1,5 @@
 /**
- * The Concept map's layout (D20, design C5), worked out while the site builds so the browser runs
+ * The Concept map's layout, worked out while the site builds so the browser runs
  * no layout code. The Concepts sit on one circle, one sector per topic, clockwise from the top in
  * the graph's order (so the tab order follows the topics). The topics are split between the
  * circle's right and left halves, and each half spaces its Concepts from top to bottom: their

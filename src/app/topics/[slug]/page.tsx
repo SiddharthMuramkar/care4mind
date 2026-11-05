@@ -64,7 +64,7 @@ function Opening({ verse }: { verse: PassageView }) {
 }
 
 /**
- * A topic (D03): its Concepts as cards beside a contents plate, set like a book's, whose rows
+ * A topic: its Concepts as cards beside a contents plate, set like a book's, whose rows
  * light as their cards are pointed at; the introduction it shares where it has one (the values
  * topic's yama–niyama text, stored once); and the verses its Concepts quote. No JavaScript.
  */

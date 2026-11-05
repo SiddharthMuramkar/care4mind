@@ -1,6 +1,6 @@
 import { defineQuestionnaire } from '@/content/schema'
 
-// The questionnaire the /frienorfoeofself/ page describes, coming later (D12). The page holds
+// The questionnaire the /frienorfoeofself/ page describes, coming later. The page holds
 // none of its questions and gives it no name but its title. Its score section is held back:
 // described below, never quoted (FR-05).
 export default defineQuestionnaire({

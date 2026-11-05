@@ -5,8 +5,8 @@ import { site } from '@/content'
 
 import { expect, inScope, test } from './fixtures'
 
-// Front-end-site ticket 14: every address the current site served leads to its new page in one
-// hop (FR-07, D11, D17). Each is requested from the local build without following redirects;
+// Every address the current site served leads to its new page in one
+// hop (FR-07). Each is requested from the local build without following redirects;
 // nothing here requests the current site.
 
 // HTTP checks need no width, so they run once, in the 1440 px project.
@@ -19,7 +19,7 @@ const PATTERN_EXAMPLES: Readonly<Record<string, readonly string[]>> = {
   '/author/:name*/': ['/author/any-name/', '/author/any-name/feed/'],
 }
 
-/** WordPress's archives and feed (D17), all of which the sample checks. */
+/** WordPress's archives and feed, all of which the sample checks. */
 const isArchiveOrFeed = (source: string) => /^\/(?:category|author|feed)\//.test(source)
 
 /**
@@ -79,7 +79,7 @@ test.describe('every old address (FR-07)', () => {
   }
 })
 
-test.describe('an old address typed another way (ticket 14’s Comments)', () => {
+test.describe('an old address typed another way', () => {
   // Next adds a missing trailing slash, with a 308 of its own, before it reads the redirect
   // table; it matches the table's sources ignoring case.
   const VARIANTS = [
@@ -112,7 +112,7 @@ test.describe('an old address typed another way (ticket 14’s Comments)', () =>
     expect(bare.at).toBe('/concepts/')
   })
 
-  test('/CONCEPTS/ reaches the A–Z (expected to fail until planning ticket 24)', async ({
+  test('/CONCEPTS/ reaches the A–Z (expected to fail while pages match case-sensitively)', async ({
     request,
   }) => {
     test.fail(

@@ -4,11 +4,11 @@ import { concepts, site } from '@/content'
 import type { ConceptRecord, GlossaryEntryRecord } from '@/content/schema'
 import { localSource } from '@/content/source'
 
-// Content-v1 ticket 05: the current /concepts/ page's glossary cards as glossary entries, and the
+// The current /concepts/ page's glossary cards as glossary entries, and the
 // three short posts, Atman, Jiva and Jagat, as Concepts in the self topic. Read through the
 // content source and the public interface, as the other content tests are.
 
-/** The saved /concepts/ page's 82 cards, less the four merges (ticket 05's Comments). */
+/** The saved /concepts/ page's 82 cards, less the four merges. */
 const ENTRIES = 78
 
 /** The short posts that became Concepts, each named by its glossary card too. */

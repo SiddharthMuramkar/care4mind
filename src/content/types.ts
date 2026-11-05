@@ -22,7 +22,7 @@ export type { HomepageHero, Inline, QuestionnaireStatus, ReferenceType, Sanskrit
 
 // Links and names
 
-/** The pages of the site map (design B2) that no record holds. */
+/** The pages of the site map that no record holds. */
 export type FixedPage =
   | 'home'
   | 'concepts'
@@ -165,7 +165,7 @@ export type BlockView =
 export interface SectionView {
   id: Slug
   heading: Inline
-  /** Applications and "Indian vs Western" comparisons are roles of a section (D05). */
+  /** Applications and "Indian vs Western" comparisons are roles of a section. */
   role?: 'applications' | 'comparison'
   /** Its anchor on the page. */
   href: string
@@ -224,7 +224,7 @@ export interface ConceptCard extends ConceptRef {
   /** The English gloss the page gives, or the English title of a page with no Sanskrit headword. */
   english?: string
   summary: Inline
-  /** Its primary topic (D03), which sets its breadcrumb. */
+  /** Its primary topic, which sets its breadcrumb. */
   topic: TopicRef
 }
 
@@ -261,7 +261,7 @@ export interface ConceptView extends ConceptCard, CarriedOver {
   /** What the page links to (FR-01). */
   linked: {
     /**
-     * Related Concepts (D06): those sharing a passage, then a work, then a rarely cited
+     * Related Concepts: those sharing a passage, then a work, then a rarely cited
      * Reference, then only a topic, each group by name. A shared work alone doesn't relate two
      * Concepts, unless the Concept would otherwise have fewer than three related.
      */
@@ -270,7 +270,7 @@ export interface ConceptView extends ConceptCard, CarriedOver {
     works: readonly LinkedWork[]
     /** Its own Questionnaire, then any other that lists it. */
     questionnaires: readonly QuestionnaireCard[]
-    /** Its applications and comparison sections (D05). */
+    /** Its applications and comparison sections. */
     sections: readonly {
       id: Slug
       heading: Inline
@@ -303,7 +303,7 @@ export interface TopicIntroView extends CarriedOver {
   citations: Readonly<Record<string, string>>
 }
 
-/** A topic's page. Topics get no description of their own beyond an introduction (design B3). */
+/** A topic's page. Topics get no description of their own beyond an introduction. */
 export interface TopicView extends TopicCard {
   /** The Concepts whose primary topic it is, by name. */
   concepts: readonly ConceptCard[]
@@ -361,7 +361,7 @@ export interface WorkCard extends WorkRef {
   passageCount: number
 }
 
-/** A work's page: every verse the site quotes from it, in the work's order (D08). */
+/** A work's page: every verse the site quotes from it, in the work's order. */
 export interface WorkView extends WorkCard, CarriedOver {
   /** What the pages call one numbered unit: "Sutra", "Verse". */
   locatorLabel: string
@@ -408,7 +408,7 @@ export interface QuestionnaireView extends QuestionnaireCard, CarriedOver {
   }
   /** The published source of its items. */
   source?: ReferenceView
-  /** A published source its items may come from (research ticket 11). */
+  /** A published source its items may come from. */
   candidateSource?: ReferenceView
 }
 
@@ -488,7 +488,7 @@ export interface HomepageView extends CarriedOver {
 
 // Site derivations (`site`)
 
-/** What kind of page a route is: one per page type in design B2. */
+/** What kind of page a route is: one per page type of the site map. */
 export type RouteKind =
   | 'home'
   | 'concepts'
@@ -521,11 +521,11 @@ export interface RouteEntry {
   record?: { kind: ContentKind; id: string }
   /** One representative route per kind, for sampled end-to-end runs. */
   sample?: true
-  /** A Proposal awaiting the Project owner's decision (D20): the Concept map and `/proposals/`. */
+  /** A Proposal awaiting the Project owner's decision: the Concept map and `/proposals/`. */
   proposal?: true
 }
 
-/** One step of a page's breadcrumb trail (D15). The last is the page itself. */
+/** One step of a page's breadcrumb trail. The last is the page itself. */
 export interface Crumb {
   label: string
   href: string
@@ -533,7 +533,7 @@ export interface Crumb {
   lang?: LatinScript
 }
 
-/** One entry of the Concepts A–Z (D14): a Concept, a term inside one, or a glossary entry. */
+/** One entry of the Concepts A–Z: a Concept, a term inside one, or a glossary entry. */
 export interface AzEntry {
   kind: 'concept' | 'term' | 'glossary'
   /** The leading name: the capitalised IAST, else the English title or the glossary's name. */
@@ -566,7 +566,7 @@ export interface AzLetter {
   entries: readonly AzEntry[]
 }
 
-/** What a search document is (design A4). */
+/** What a search document is. */
 export type SearchKind =
   | 'concept'
   | 'term'
@@ -580,7 +580,7 @@ export type SearchKind =
   | 'page'
 
 /**
- * One thing the site's search can find (design A4). The search engine weighs its fields: names
+ * One thing the site's search can find. The search engine weighs its fields: names
  * 10, title 8, keywords 4, people 4, excerpt 1.
  */
 export interface SearchDocument {
@@ -611,7 +611,7 @@ export interface ConceptGraphNode extends ConceptRef {
   topics: readonly Slug[]
 }
 
-/** A connection on the Concept map, with the fact behind it (D06). */
+/** A connection on the Concept map, with the fact behind it. */
 export interface ConceptGraphEdge {
   source: Slug
   target: Slug
@@ -623,7 +623,7 @@ export interface ConceptGraphEdge {
   reason: string
 }
 
-/** The Concept map's data (D20): its nodes by topic and name, and its edges. */
+/** The Concept map's data: its nodes by topic and name, and its edges. */
 export interface ConceptGraph {
   nodes: readonly ConceptGraphNode[]
   edges: readonly ConceptGraphEdge[]

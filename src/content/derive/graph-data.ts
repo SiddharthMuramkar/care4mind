@@ -1,5 +1,5 @@
 /**
- * The Concept map's data (D06, D20): the Concepts as nodes with their topics, and an edge for
+ * The Concept map's data: the Concepts as nodes with their topics, and an edge for
  * each passage, work or rarely cited Reference two Concepts share. Topics make no edges: they
  * are the map's sectors. The map's layout is the front end's to add.
  */

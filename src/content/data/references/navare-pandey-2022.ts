@@ -1,7 +1,7 @@
 import { defineReference } from '@/content/schema'
 
 // No page of the current site cites this paper: the KarmaYoga Scale's statements come from it,
-// as the Published scales research (planning ticket 11) found. Its fields come from that
+// as the Published scales research found. Its fields come from that
 // research, so verify lists this record as unchecked.
 export default defineReference({
   kind: 'reference',

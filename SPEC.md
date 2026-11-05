@@ -56,7 +56,7 @@ These are judgement calls, so review checks them against the diff, in the codeba
 | IAST and Devanagari carry `lang` | components, for name fields, the verse-copied toast and Devanagari runs. IAST inside running text is untagged (#76) |
 | The migration's records, counts and derived pages stay as carried over, until the client signs it off | the fidelity suite in `tests/fidelity`, which `verify.mjs` runs after checking every record (or `pnpm content:fidelity` alone); not in `pnpm check`, so new content needs no test edit |
 | Carried-over text changes only to fix a listed error | `verify.mjs`, which runs only on a machine with the captures; nothing in CI (#48) |
-| Comments state reasons, not ticket numbers or decision codes | nothing yet (#38) |
+| Comments and test titles state reasons, not ticket numbers or decision codes | comment-codes test, over every tracked `.ts`, `.tsx`, `.mjs`, `.cjs`, `.js`, `.css` and `.yml` file |
 | A backticked repo path, a `pnpm` script or a section of a doc named in a doc or a comment exists | pointers test |
 | An agent squash-merges only a PR whose `ci` passed on an up-to-date branch, with a review posted and every thread answered; nobody uses auto-merge or `--admin` | the ruleset (squash, up-to-date, threads resolved, `ci`, no bypass) and the ship test, which lets only its land step merge, after review |
 | `main` changes only through a squashed PR whose required check passed on an up-to-date branch | the ruleset on GitHub, whose file the ruleset test checks; `pnpm ruleset:check` compares the two |
@@ -112,7 +112,6 @@ The planning map, issue #6, lists them. Until each is decided, the code leaves i
 
 The code still holds these patterns, and new code doesn't copy them. Each line names the ticket that removes the pattern, and the PR that closes that ticket deletes the line.
 
-- Comments that cite ticket numbers, decision codes (D01–D21), design codes (such as B6) or spec names. The documents they point at were deleted in `bfdbff0`. State the reason instead (#38).
 - A setting that looks load-bearing but does nothing here: `typedRoutes`, which can't check paths that end in a slash (#55). The checks that do hold links true are the `hrefFor()` lint rule and the browser crawler.
 
 ## Changing this file

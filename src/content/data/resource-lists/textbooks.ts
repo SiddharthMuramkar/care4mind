@@ -1,7 +1,7 @@
 import { defineResourceList } from '@/content/schema'
 
-// The two Text Books pages merged into one reading list (D11), with /indian-philosophy/ and
-// /positive-psychology/ as groups of their own. Every book is a Reference (D09), by the id the
+// The two Text Books pages merged into one reading list, with /indian-philosophy/ and
+// /positive-psychology/ as groups of their own. Every book is a Reference, by the id the
 // References census gives it. The pages' courses are on Courses, and /text-books/'s
 // inspirational books on Inspirational Books.
 export default defineResourceList({

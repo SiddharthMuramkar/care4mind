@@ -6,7 +6,7 @@ import { expectNoAxeViolations } from './axe'
 import { expect, gotoReady, scrollsSideways, test } from './fixtures'
 import { inPageTransitions, recordPageTurns } from './page-turns'
 
-// The Concepts A–Z (front-end-site ticket 06): one list of every Concept, term and glossary
+// The Concepts A–Z: one list of every Concept, term and glossary
 // entry, a rail of letters, and filter chips whose state lives in the address.
 
 const PATH = hrefFor({ page: 'concepts' })

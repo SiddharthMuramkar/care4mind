@@ -6,7 +6,7 @@ import prettier from 'eslint-config-prettier/flat'
 import jsxA11y from 'eslint-plugin-jsx-a11y'
 import tseslint from 'typescript-eslint'
 
-// The content module's boundary (content-v1 spec, "The boundary rule"). Outside src/content, code
+// The content module's boundary. Outside src/content, code
 // reads content only through its public interface, `@/content`: never an internal, and never
 // the module by a relative path. A 'use client' file may import the interface for types only,
 // with `import type`, so no content reaches the browser bundle. Tests are outside src and may
@@ -67,8 +67,8 @@ const graphBelowViews = {
   },
 }
 
-// Every internal link comes from hrefFor() (front-end-site spec, "Addresses"), so an address
-// changes in one place. A path typed into an href fails, however it is written; a fragment
+// Every internal link comes from hrefFor(), so an address changes in one place. A path typed
+// into an href fails, however it is written; a fragment
 // (#main), another site (https://, //) and a path a view or hrefFor() made pass.
 const INTERNAL_PATH = /^\/(?!\/)/
 

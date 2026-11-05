@@ -434,7 +434,7 @@ describe('their Questionnaires', () => {
   )
 
   it.each(PAGES)(
-    'give $slug’s Questionnaire its candidate source from research ticket 11',
+    'give $slug’s Questionnaire the candidate source the research proposed',
     async ({ slug, candidateSource }) => {
       expect(questionnaireOf(slug)).toBeDefined()
       expect(questionnaireOf(slug)?.candidateSource).toBe(candidateSource)

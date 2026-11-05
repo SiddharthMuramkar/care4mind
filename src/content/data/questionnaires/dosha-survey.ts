@@ -1,9 +1,9 @@
 import { defineQuestionnaire } from '@/content/schema'
 
 // The current site's Dosha Survey, a form of 12 questions. It is kept as a coming-later
-// Questionnaire (D16): its questions are stored word for word but never offered as a form, and
-// its author, rights and scoring are unknown. Its link to triguṇa, set by content-v1 ticket 12
-// once that Concept existed, places its card in the temperament topic (design notes B3).
+// Questionnaire: its questions are stored word for word but never offered as a form, and
+// its author, rights and scoring are unknown. Its link to triguṇa, set
+// once that Concept existed, places its card in the temperament topic.
 export default defineQuestionnaire({
   kind: 'questionnaire',
   slug: 'dosha-survey',

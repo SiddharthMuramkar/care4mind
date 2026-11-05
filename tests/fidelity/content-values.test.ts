@@ -10,7 +10,7 @@ import type {
 } from '@/content/schema'
 import { localSource } from '@/content/source'
 
-// Content-v1 ticket 10: the values topic. The four "Know Your Values" pages become Concepts, each
+// The values topic. The four "Know Your Values" pages become Concepts, each
 // with its coming-later Questionnaire, and the yama–niyama section all four repeat is stored once,
 // as the values topic's introduction. Read through the content source (what each record stores)
 // and the public interface (what a page gets), as the other content tests are.
@@ -27,7 +27,7 @@ const PAGES = [
 const SHARED_TRANSLATION = 'knowyourvaluesahimsanon-violenceprofiling'
 
 /**
- * Each values Concept, by its slug (D02, the page's own ASCII spelling of its headword): its page
+ * Each values Concept, by its slug (the page's own ASCII spelling of its headword): its page
  * and its title as published, its headword as a heading shows it, its term (split out of the
  * pages' Yoga Sūtra 2.30 compound) and the gloss its title gives, the verses at the top of its
  * page with the census's translation ids, its reference list in the page's order (census), and

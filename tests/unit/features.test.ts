@@ -23,7 +23,7 @@ const EXPECTED = {
   'Vercel production': { unset: false, on: true, off: false },
 } as const
 
-describe('feature flags (D16, D20)', () => {
+describe('feature flags', () => {
   for (const { flag, variable } of FLAGS) {
     describe(flag, () => {
       for (const { name, env } of ENVIRONMENTS) {

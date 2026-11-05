@@ -1,6 +1,6 @@
 import type { Route } from 'next'
 
-/** The three sections the header links to, besides Search (D01). */
+/** The three sections the header links to, besides Search. */
 export type SectionId = 'concepts' | 'texts' | 'library'
 
 /** The two sections whose header item opens a panel on a computer, and a list in the Drawer. */

@@ -5,7 +5,7 @@ import type { QuestionnaireRecord } from '@/content/schema'
 import { localSource } from '@/content/source'
 import { createContent } from '@/content/views'
 
-// Content-v1 ticket 06: the two instruments on the current site with real questions. The
+// The two instruments on the current site with real questions. The
 // KarmaYoga Scale's 45 statements in the four parts its quiz settings give, ready for the preview
 // flow, and the Dosha Survey's 12 questions, stored but never offered as a form.
 //
@@ -136,7 +136,7 @@ describe('the KarmaYoga Scale’s rights, scoring and held-back sections', () =>
     expect(heldBack.filter(({ where }) => where.trim() === '')).toEqual([])
   })
 
-  it('leaves scoring pending: the points were only in the current site’s database, and planning tickets 26 and 28 decide the rules', async () => {
+  it('leaves scoring pending: the points were only in the current site’s database, and the scoring rules are still to be decided', async () => {
     const { scoring } = await stored('karmayoga-scale')
     expect(scoring.status).toBe('pending')
     expect(scoring.reason).toMatch(/database/i)

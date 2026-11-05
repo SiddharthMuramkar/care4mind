@@ -1,6 +1,6 @@
 import { defineQuestionnaire } from '@/content/schema'
 
-// The questionnaire the /knowyourvaluesbrahmacharya-profiling/ page describes, coming later (D12).
+// The questionnaire the /knowyourvaluesbrahmacharya-profiling/ page describes, coming later.
 // The page holds none of its questions. Its score section is held back: described below, never
 // quoted (FR-05).
 export default defineQuestionnaire({

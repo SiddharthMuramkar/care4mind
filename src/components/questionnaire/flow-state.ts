@@ -1,8 +1,8 @@
 import type { QuestionnaireFormView } from '@/content'
 
 /**
- * Taking a Questionnaire (front-end-site ticket 10): one part per screen, then a review, then the
- * end screen. The whole state lives here, in memory only (D16): nothing is stored or sent, and
+ * Taking a Questionnaire: one part per screen, then a review, then the
+ * end screen. The whole state lives here, in memory only: nothing is stored or sent, and
  * the address names only the step.
  */
 

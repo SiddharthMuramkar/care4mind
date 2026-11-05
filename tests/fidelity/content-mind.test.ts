@@ -4,16 +4,16 @@ import { concepts, questionnaires, topics, type BlockView } from '@/content'
 import type { ConceptRecord, QuestionnaireRecord } from '@/content/schema'
 import { localSource } from '@/content/source'
 
-// Content-v1 ticket 08: the mind topic. The four remaining "mind" description pages become
-// Concepts, each with its coming-later Questionnaire, and vikṣepa (ticket 01) gets its own.
+// The mind topic. The four remaining "mind" description pages become
+// Concepts, each with its coming-later Questionnaire, and vikṣepa gets its own.
 // Read through the public interface and the content source, as the other content tests are.
 
 /**
- * Each mind Concept, by its slug (D02): its headword as a heading shows it, its page, the verses
+ * Each mind Concept, by its slug: its headword as a heading shows it, its page, the verses
  * at the top of the page with the census's translation ids (null where the page labels none),
  * the anchors of its sub-terms in the page's order, its reference list in the page's order
  * (census), how many tables its page holds, and what its Questionnaire takes from the page and
- * from research ticket 11.
+ * from the Published scales research.
  */
 const MIND = [
   {
@@ -165,12 +165,12 @@ const MIND = [
       'wisdomlib-2022',
     ],
     tables: 1,
-    // Research ticket 11 found no published source for its questionnaire.
+    // The Published scales research found no published source for its questionnaire.
     questionnaire: { title: 'Sthitaprajna', candidateSource: undefined },
   },
 ]
 
-/** The Concepts this ticket carries over; vikṣepa is ticket 01's. */
+/** The mind Concepts carried over from description pages; vikṣepa came first, on its own. */
 const CARRIED_OVER = MIND.filter(({ slug }) => slug !== 'vikshepa')
 
 let conceptRecords: readonly ConceptRecord[] = []
@@ -270,7 +270,7 @@ describe('each mind Concept’s coming-later Questionnaire', () => {
   })
 
   it.each(MIND)(
-    'takes $slug’s title from its page, and its candidate source from research ticket 11',
+    'takes $slug’s title from its page, and the candidate source the research proposed',
     async ({ slug, questionnaire: expected }) => {
       const questionnaire = await questionnaires.get(slug)
       expect(questionnaire?.title).toBe(expected.title)

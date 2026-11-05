@@ -5,7 +5,7 @@ import { unfinishedRules } from './drawings'
 import { expect, gotoReady, test } from './fixtures'
 import { expectPaperFocusRing } from './paper'
 
-// Front-end-site ticket 10: taking the KarmaYoga Scale (C4, D16). Local runs and CI build with the
+// Taking the KarmaYoga Scale. Local runs and CI build with the
 // preview flag on, so the flow exists. What is checked is what a visitor sees and does: parts,
 // answers, focus, history, the review, the end screen, and that nothing is stored or sent.
 

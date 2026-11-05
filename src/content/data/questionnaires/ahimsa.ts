@@ -1,7 +1,7 @@
 import { defineQuestionnaire } from '@/content/schema'
 
-// The questionnaire the /knowyourvaluesahimsanon-violenceprofiling/ page describes, coming later
-// (D12). The page holds none of its questions. Its score section is held back: described below,
+// The questionnaire the /knowyourvaluesahimsanon-violenceprofiling/ page describes, coming later.
+// The page holds none of its questions. Its score section is held back: described below,
 // never quoted (FR-05).
 export default defineQuestionnaire({
   kind: 'questionnaire',

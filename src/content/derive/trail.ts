@@ -1,5 +1,5 @@
 /**
- * The breadcrumb trail of design B6 (D15) for any public page: Home first, the page itself last.
+ * The breadcrumb trail for any public page: Home first, the page itself last.
  */
 import type { Features } from '@/config/features'
 
@@ -27,7 +27,7 @@ function crumb({ entry, lang }: PageRoute): Crumb {
 
 /**
  * The trail to a page: each page above it in the site map that exists, then the page itself.
- * Two pages sit elsewhere than their path says (B6): a topic sits under Concepts, and a Concept
+ * Two pages sit elsewhere than their path says: a topic sits under Concepts, and a Concept
  * under its primary topic. A path that isn't a public page in this build has no trail.
  */
 export function trail(graph: ContentGraph, flags: Features, path: string): Crumb[] {

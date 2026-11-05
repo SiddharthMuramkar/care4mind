@@ -295,7 +295,7 @@ test('every kind of page names the tab icon, the home-screen icon and the manife
   }
 })
 
-test.describe('addresses (D02, D17)', () => {
+test.describe('addresses', () => {
   test('every route answers 200 at its slashed address, and redirects there without the slash', async ({
     request,
   }) => {

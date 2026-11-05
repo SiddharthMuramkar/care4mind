@@ -38,11 +38,11 @@ export const plateScope = styles.scope
 export const plateCard = (row: number) => ({ 'data-plate-card': row })
 
 /**
- * The Topics contents plate (D21): rows set like a book's contents, each a Devanagari numeral,
+ * The Topics contents plate: rows set like a book's contents, each a Devanagari numeral,
  * a name and a dotted leader running out to what the row holds. Pointing at or focusing a row,
  * or the card it stands for, lights it, and its leader inks in from the centre. Finished and
  * still by default and in print; the numerals and leaders are decoration. The homepage sets its
- * five topics with it too (ticket 11).
+ * five topics with it too.
  */
 export function ContentsPlate({
   label,

@@ -76,7 +76,7 @@ function listen(): () => void {
 }
 
 /**
- * The one preview card every LinkPreview on a page opens (front-end-site ticket 05), mounted
+ * The one preview card every LinkPreview on a page opens, mounted
  * once in the root layout. A page with no LinkPreview never loads it; one with them fetches it
  * when a mouse moves or a key is pressed, so touch screens never do.
  */

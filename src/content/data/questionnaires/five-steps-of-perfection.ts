@@ -1,8 +1,8 @@
 import { defineQuestionnaire } from '@/content/schema'
 
 // The coming-later Questionnaire of the /fivestepsofperfectionprofiling/ page. The page gives its
-// questionnaire no name but its title, and no published source for it was found (research
-// ticket 11). Its score section is held back, described here and shown nowhere (FR-05).
+// questionnaire no name but its title, and no published source for it was found by the Published
+// scales research. Its score section is held back, described here and shown nowhere (FR-05).
 export default defineQuestionnaire({
   kind: 'questionnaire',
   slug: 'five-steps-of-perfection',

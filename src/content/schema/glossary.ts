@@ -1,6 +1,6 @@
 import type { Inline, Provenance, Slug } from './common'
 
-/** A short entry from the current site's glossary, with no page of its own (D14). */
+/** A short entry from the current site's glossary, with no page of its own. */
 export interface GlossaryEntryRecord {
   kind: 'glossary'
   slug: Slug

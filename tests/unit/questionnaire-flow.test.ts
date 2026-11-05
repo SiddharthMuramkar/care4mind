@@ -19,7 +19,7 @@ import {
 } from '@/components/questionnaire'
 import { statusWords } from '@/components/StatusBadge'
 
-// Front-end-site ticket 10: the KarmaYoga flow's state, kept only in a reducer (D16), and the
+// The KarmaYoga flow's state, kept only in a reducer, and the
 // Questionnaire gate. Two seams: the pure flow module (what each press does to the flow) and the
 // public content interface built with explicit flags (whether the flow exists at all). Expected
 // values come from the ticket and the spec: four parts of 12, 6, 9 and 18 statements, 45 in all.
@@ -221,7 +221,7 @@ describe('the address', () => {
   })
 })
 
-describe('the gate (D16)', () => {
+describe('the gate', () => {
   const FLOW = '/questionnaires/karmayoga-scale/take/'
 
   /** The site's own records, with the KarmaYoga Scale's status set to `live`. */

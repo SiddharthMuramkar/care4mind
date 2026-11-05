@@ -1,12 +1,11 @@
 /**
- * Shapes shared by every kind of record: the storage shape a CMS collection would hold
- * (design notes A2, content-v1 spec "Records").
+ * Shapes shared by every kind of record: the storage shape a CMS collection would hold.
  *
  * All text is NFC, with anusvara written ṃ, never ṁ.
  */
 import type { ContentKind } from './kinds'
 
-/** Lowercase ASCII words joined by hyphens (D02): `vikshepa`, `five-steps-of-perfection`. */
+/** Lowercase ASCII words joined by hyphens: `vikshepa`, `five-steps-of-perfection`. */
 export type Slug = string
 
 /** A Sanskrit name in each stored form (NFR-03). */
@@ -135,7 +134,7 @@ export interface Section {
   /** The heading's words, lowercase and hyphenated. */
   id: Slug
   heading: Inline
-  /** Applications and "Indian vs Western" comparisons are roles of a section (D05), never types. */
+  /** Applications and "Indian vs Western" comparisons are roles of a section, never types. */
   role?: 'applications' | 'comparison'
   blocks: readonly Block[]
 }

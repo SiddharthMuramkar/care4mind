@@ -3,9 +3,9 @@ import { describe, expect, it } from 'vitest'
 import type { Features } from '@/config/features'
 import { proposalsFor } from '@/components/proposals'
 
-// Front-end-site ticket 12: what /proposals/ lists for the Project owner's sign-off (D20). The
+// What /proposals/ lists for the Project owner's sign-off. The
 // two built proposals show only while their flags are on; audio pronunciation is described, not
-// built; the reading-path idea was dropped with D21. Expected names come from the ticket.
+// built; the reading-path idea was dropped when the site became Press only.
 
 const ON: Features = {
   questionnairePreview: true,

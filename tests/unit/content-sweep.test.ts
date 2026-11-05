@@ -12,7 +12,7 @@ import {
 import { localSource } from '@/content/source'
 import { createContent } from '@/content/views'
 
-// Content-v1 ticket 12, the fidelity sweep: content v1 is complete, so the site derivations give
+// The fidelity sweep: the migration is complete, so the site derivations give
 // real answers on the real content. Read through the public interface, built over the site's own
 // content source with the feature flags each test needs, and through the content source itself
 // for what a record stores (its links, flags and listed edits).
@@ -30,7 +30,7 @@ const OFF: Features = {
 
 const site = createContent(localSource, ON)
 
-/** The pages that only exist while their feature flag is on (settled rule 17). */
+/** The pages that only exist while their feature flag is on. */
 const FLAGGED_PAGES = [
   '/questionnaires/karmayoga-scale/take/',
   '/concepts/map/',
@@ -527,7 +527,7 @@ describe('the records verify can’t check', () => {
   })
 })
 
-describe('the Concept slugs (D02)', () => {
+describe('the Concept slugs', () => {
   const slugOf = (text: string) =>
     text
       .toLowerCase()
@@ -537,8 +537,8 @@ describe('the Concept slugs (D02)', () => {
   it('each name a Concept by its page’s spelling of its headword, else by its English title', () => {
     const unexplained = ofKind('concept').filter(({ slug, name }) => {
       const spellings = name.term ? name.term.ascii : [name.english ?? '']
-      // Know Your Mind writes only the plural, “chittabhumis”: its slug is the singular
-      // (settled rule 14).
+      // Know Your Mind writes only the plural, “chittabhumis”: its slug is the singular,
+      // as a headword slug always is.
       const written = slug === 'chittabhumi' ? 'chittabhumis' : slug
       return !spellings.map(slugOf).includes(written)
     })

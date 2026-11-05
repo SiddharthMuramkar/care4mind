@@ -32,7 +32,7 @@ const KINDS: readonly { value: Entry['kind']; label: string }[] = [
 const counted = (count: number, one: string, many: string) => `${count} ${count === 1 ? one : many}`
 
 /**
- * The Concepts A–Z (D14): the topics as cards, then every Concept, every term explained inside
+ * The Concepts A–Z: the topics as cards, then every Concept, every term explained inside
  * one (or in a topic's introduction) and every glossary entry, by letter, under a rail of letters
  * and filter chips.
  */

@@ -9,7 +9,7 @@ import type { ResourceListRecord } from './resource-list'
 import type { TopicRecord } from './topic'
 import type { WorkRecord } from './work'
 
-/** Every record the content module stores, one kind per type (D04). */
+/** Every record the content module stores, one kind per type. */
 export type ContentRecord =
   | ConceptRecord
   | TopicRecord
@@ -43,7 +43,7 @@ export const KIND_FOLDERS = {
 export const CONTENT_KINDS = Object.keys(KIND_FOLDERS) as readonly ContentKind[]
 
 /**
- * A record's id, unique within its kind (settled rule 1): its slug, a passage's `work/locator`,
+ * A record's id, unique within its kind: its slug, a passage's `work/locator`,
  * a Reference's id, or `home`. Its file name, under its kind's folder, is the same.
  */
 export function idOf(record: ContentRecord): string {

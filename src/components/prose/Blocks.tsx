@@ -179,7 +179,7 @@ export function Blocks({
   ))
 }
 
-/** How a section's role is named above its heading (D05). */
+/** How a section's role is named above its heading. */
 const ROLES = { applications: 'Applications', comparison: 'Comparison' } as const
 
 /**

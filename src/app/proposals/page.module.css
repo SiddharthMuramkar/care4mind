@@ -1,4 +1,4 @@
-/* The proposals page (ticket 12): each proposal set as a proof sheet, numbered, with its stamp. */
+/* The proposals page: each proposal set as a proof sheet, numbered, with its stamp. */
 .entries {
   display: grid;
   margin: 0;

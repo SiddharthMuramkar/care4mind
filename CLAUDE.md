@@ -21,6 +21,8 @@ The code is the documentation. Before you refactor, add a module, seam, content 
 - Comments say why, in one line, and only what the code can't: a browser bug, a standard, a measured trade-off. Ticket numbers, decision codes and dates belong in git and in issues.
 - Press is the only design language: ink, rules and paper. The first Press build, tag `archive/press-original`, is the design reference.
 - `src/content/data/` holds text carried over from the current site. Edit it only to fix a listed error, and record the edit in that record's provenance. Sanskrit is NFC and uses ṃ, not ṁ. IAST takes `lang="sa-Latn"` and Devanagari `lang="sa-Deva"`.
+- Comments in those record files may change like any other comment; the carried-over text a page shows may not.
+- Requirement ids from the brief, such as FR-02 and NFR-01, may stay in comments and test titles: they resolve in `docs/project-brief.md`. Ticket numbers, decision codes, design codes and spec names may not.
 
 ## Research
 

@@ -29,7 +29,7 @@ export interface LinkPreviewProps {
 
 /**
  * Gives a link to a Concept, a glossary entry with a Concept page, a citation or a verse a
- * preview card on hover and keyboard focus (front-end-site ticket 05), opened through the
+ * preview card on hover and keyboard focus, opened through the
  * page's one LinkPreviewRoot. The data comes with the page, so it never waits on the network.
  *
  * The link sits in an inline span, which becomes a detached Base UI trigger with this payload

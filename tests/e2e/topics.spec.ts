@@ -7,7 +7,7 @@ import { focusRingContrast } from './focus-ring'
 import { expect, gotoReady, scrollsSideways, test } from './fixtures'
 import { expectPageTurned, pageTurns, prefetched, recordPageTurns } from './page-turns'
 
-// The topic pages (front-end-site ticket 06): each topic's Concepts as cards and as a contents
+// The topic pages: each topic's Concepts as cards and as a contents
 // plate set like a book's, the verses they quote, and the values topic's shared introduction.
 
 const mind = await topics.get('mind')

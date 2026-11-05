@@ -22,7 +22,7 @@ import { memorySource } from '@/content/source'
 import { createContent } from '@/content/views'
 import { asciiSpellings, displayName } from '@/content/names'
 
-// The content module's public interface (content-v1 spec, "Public interface"), tested at its one
+// The content module's public interface, tested at its one
 // seam: each test builds a small made-up content source and reads it through the same
 // namespaces the pages use. Every record and string here is made up for the test.
 
@@ -551,7 +551,7 @@ describe('a Concept’s References', () => {
   })
 })
 
-describe('a Concept’s related Concepts (D06)', () => {
+describe('a Concept’s related Concepts', () => {
   const self = defineTopic({ kind: 'topic', slug: 'self', name: { english: 'Self' }, order: 3 })
   const ys230 = definePassage({
     ...ys130,
@@ -1716,7 +1716,7 @@ describe('every view', () => {
   })
 })
 
-describe('the feature flags, from the environment to the interface (D16, D20)', () => {
+describe('the feature flags, from the environment to the interface', () => {
   const form: QuestionnaireForm = {
     responseSets: { yes: ['Yes', 'No'] },
     parts: [

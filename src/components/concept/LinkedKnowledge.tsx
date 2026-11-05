@@ -38,10 +38,10 @@ const ROLES = { applications: 'Applications', comparison: 'Comparison' } as cons
 
 /**
  * Linked knowledge (FR-01): everything a Concept connects to, each one link away. Related
- * Concepts with the fact that relates them (D06), the passages it quotes, its applications and
+ * Concepts with the fact that relates them, the passages it quotes, its applications and
  * comparison sections, its References and its Questionnaire with its status in words (its title
  * flies into its page's heading as it is followed). An empty group is left out. The entries are
- * joined to their notes by cross-reference rules (D21), dotted leaders that ink in as they come
+ * joined to their notes by cross-reference rules, dotted leaders that ink in as they come
  * into view, finished and still in print and where motion is reduced.
  */
 export function LinkedKnowledge({

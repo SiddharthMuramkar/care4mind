@@ -44,7 +44,7 @@ const SWITCH_PRESS_WINDOW = 600
 export type Slots = Partial<Record<PanelId, HTMLElement>>
 
 /**
- * Base UI's NavigationMenu (design C1) behind the header's sections: its toggles stand in the
+ * Base UI's NavigationMenu behind the header's sections: its toggles stand in the
  * list beside Concepts and Library, and open their panels on hover, press or ArrowDown. Escape
  * closes a panel and gives focus back to its toggle; Tab runs through a panel and on, never
  * trapped; a new page closes it. The section links are the server's own and are never replaced.

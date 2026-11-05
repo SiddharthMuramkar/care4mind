@@ -289,7 +289,7 @@ test('the References control shows a plus that folds into a minus as the list op
   await expect.poll(() => turns(rules), 'a plus again once closed').toEqual([0, 90])
 })
 
-// Front-end-site ticket 05: the Concept page v2.
+// The Concept page.
 
 const wide = (page: Page) => (page.viewportSize()?.width ?? 0) >= 1024
 const contents = (page: Page) => page.getByRole('navigation', { name: 'Contents' })
@@ -315,7 +315,7 @@ function overlap(
 }
 
 test.describe('Concept page v2: heading and blocks', () => {
-  test('leads with the capitalised IAST, the Devanagari beneath it and the gloss in small capitals (D07)', async ({
+  test('leads with the capitalised IAST, the Devanagari beneath it and the gloss in small capitals', async ({
     page,
   }) => {
     await gotoReady(page, '/concepts/vikshepa/')
@@ -354,7 +354,7 @@ test.describe('Concept page v2: heading and blocks', () => {
     await expect(term.getByRole('heading', { level: 3 })).toBeInViewport()
   })
 
-  test('labels applications and comparison sections, and no comparison calls two ideas equivalent (D05)', async ({
+  test('labels applications and comparison sections, and no comparison calls two ideas equivalent', async ({
     page,
   }) => {
     await gotoReady(page, '/concepts/sthitaprajna/')

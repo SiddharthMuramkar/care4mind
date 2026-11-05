@@ -25,7 +25,7 @@ const SLUG = /^[a-z0-9]+(?:-[a-z0-9]+)*$/
 // No leading zeros: the locator becomes the number literals of `order`, where 05 is not a number.
 const LOCATOR = /^(?:0|[1-9]\d*)(?:\.(?:0|[1-9]\d*))*$/
 
-/** Why an id breaks the id rules for its kind (D02, settled rule 15), or nothing if it doesn't. */
+/** Why an id breaks the id rules for its kind, or nothing if it doesn't. */
 function idProblem(kind, id) {
   if (kind === 'home') return id === 'home' ? undefined : 'The homepage’s id is always “home”.'
   if (kind === 'passage') {
@@ -62,7 +62,7 @@ const FILLING = `//
 // - # links are dropped and flagged; other links in running text are dropped and listed. A
 //   Reference's own link moves to its url or doi.
 // - Interface text ("Read more", "Click to learn more", accordion titles) and images are dropped,
-//   and listed once.
+//   and listed once: no image or other media file from the current site is carried over.
 // - Score and interpretation text never comes over: describe each in heldBack, never quote it.
 // - Nothing is drafted: a migrated record is carried-over-not-reviewed.
 //`

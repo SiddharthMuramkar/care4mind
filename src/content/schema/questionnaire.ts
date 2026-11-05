@@ -1,6 +1,6 @@
 import type { Inline, Provenance, ReviewStatus, Slug } from './common'
 
-/** Live and preview can be taken (preview only where its flag is on); the others can't (D16). */
+/** Live and preview can be taken (preview only where its flag is on); the others can't. */
 export type QuestionnaireStatus = 'live' | 'preview' | 'coming-soon' | 'coming-later'
 
 /** An instrument's questions, word for word, in the order its source gives them. */
@@ -41,14 +41,14 @@ export interface QuestionnaireRecord {
   concepts: readonly Slug[]
   /** A Reference id: the published source of its items. */
   source?: string
-  /** A Reference id: a published source the items may come from (research ticket 11). */
+  /** A Reference id: a published source the items may come from. */
   candidateSource?: string
   limitations?: {
     items: readonly Inline[]
     status: 'draft-pending-psychology-expert' | 'approved'
   }
   form?: QuestionnaireForm
-  /** The only allowed value until planning tickets 26 and 28 supply rules. */
+  /** The only allowed value until a confirmed scoring key and score bands exist. */
   scoring: { status: 'pending'; reason: string }
   /** Each score section left out, described and located, never quoted. */
   heldBack: readonly { what: string; where: string }[]

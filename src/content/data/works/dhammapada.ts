@@ -4,7 +4,7 @@ export default defineWork({
   kind: 'work',
   slug: 'dhammapada',
   title: { iast: 'Dhammapada', ascii: ['Dhammapada'] },
-  // The Friend/Foe page quotes verse 160 in Pali (content-v1 spec, settled rule 7).
+  // The Friend/Foe page quotes verse 160 in Pali.
   language: 'pi',
   locatorLabel: 'Verse',
   provenance: {

@@ -29,7 +29,7 @@ for (const route of ROUTES_IN_SCOPE) {
       .soft(page.locator('meta[name="robots"]'), `${where}: noindex in the robots meta tag`)
       .toHaveAttribute('content', /noindex/)
 
-    // D19: "{name} · Care4Mind", a description and one canonical address, with its slash.
+    // "{name} · Care4Mind", a description and one canonical address, with its slash.
     await expect
       .soft(page, `${where}: title`)
       .toHaveTitle(route.kind === 'home' ? 'Care4Mind: Indian psychology' : / · Care4Mind$/)
@@ -45,7 +45,7 @@ for (const route of ROUTES_IN_SCOPE) {
       .soft(canonical.first(), `${where}: canonical address ends in /`)
       .toHaveAttribute('href', /\/$/)
 
-    // FR-01, D15: every page below the homepage shows its trail, ending at itself.
+    // FR-01: every page below the homepage shows its trail, ending at itself.
     if (route.kind !== 'home') {
       const trail = page.getByRole('navigation', { name: 'Breadcrumb', exact: true })
       await expect.soft(trail, `${where}: one Breadcrumb landmark`).toHaveCount(1)
@@ -72,7 +72,7 @@ for (const route of ROUTES_IN_SCOPE) {
       await expect.soft(link, `${where}: ${visible} dials ${tel}`).toHaveAttribute('href', tel)
     }
 
-    // D02: internal links point at slashed addresses, as rendered here too, after hydration.
+    // Internal links point at slashed addresses, as rendered here too, after hydration.
     const unslashed = await page
       .locator('a[href^="/"]:not([href^="//"])')
       .evaluateAll((links) =>
@@ -161,7 +161,7 @@ test('keyboard focus is visible', async ({ page }) => {
   expect(parseFloat(outline.width)).toBeGreaterThanOrEqual(2)
 })
 
-// The plain prose renderer (front-end-site ticket 03), checked once, at 1440 px.
+// The plain prose renderer, checked once, at 1440 px.
 test.describe('running text', () => {
   test.skip(({ viewport }) => viewport?.width !== 1440, 'checked once, at 1440 px')
 

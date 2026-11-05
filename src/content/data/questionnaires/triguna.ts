@@ -1,6 +1,6 @@
 import { defineQuestionnaire } from '@/content/schema'
 
-// The questionnaire the /triguna/ page describes, coming later (D12), under the name its section
+// The questionnaire the /triguna/ page describes, coming later, under the name its section
 // heading gives it. The page holds none of its questions. The section's first sentence says what
 // it estimates and is its purpose; the rest, a table of score-level characteristics and its
 // lead-in, is held back: described below, never quoted (FR-05).

@@ -1,5 +1,5 @@
 /**
- * A font face the first paint does without (ticket 05). Its text is painted
+ * A font face the first paint does without. Its text is painted
  * first in what stands in for it, the regular slanted or thickened or a system
  * font, and the face is added once that text is on screen (LateFonts).
  */

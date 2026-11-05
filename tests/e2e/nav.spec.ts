@@ -4,7 +4,7 @@ import { expectNoAxeViolations } from './axe'
 import { expect, gotoReady, test } from './fixtures'
 import { ROUTES } from './routes'
 
-// The navigation shell (front-end-site ticket 04): the header's sections and Search, the panels
+// The navigation shell: the header's sections and Search, the panels
 // a computer opens from two of them, the Drawer a phone opens from Menu, and the footer.
 
 /** From 72rem (1152 px) the sections and Search fit on one line; below it the Menu takes over. */
@@ -43,7 +43,7 @@ const header = (page: Page) => banner(page).getByRole('navigation', { name: 'Mai
 const footerNav = (page: Page) =>
   page.getByRole('contentinfo').getByRole('navigation', { name: 'All sections' })
 
-/** A link's address, as a path: every address ends with a slash (D02). */
+/** A link's address, as a path: every address ends with a slash. */
 const pathOf = async (link: Locator) =>
   new URL((await link.getAttribute('href')) ?? '', 'http://site').pathname
 const atPath = (path: string) => new RegExp(`${path.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`)

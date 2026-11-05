@@ -8,9 +8,9 @@ import { localSource } from '@/content/source'
 
 import nextConfig from '../../next.config'
 
-// Front-end-site ticket 14: every address the current site served leads to its new page in one
-// hop (FR-07, D11, D17). The expected rows are design B4's decisions, with the slugs content-v1
-// shipped (`chittabhumi`, not the design's `citta-bhumi`).
+// Every address the current site served leads to its new page in one
+// hop (FR-07). The expected rows are the keep, merge or drop list's decisions, with the
+// slugs the content shipped (`chittabhumi`, not the design's `citta-bhumi`).
 
 /** Each of the current site's 33 pages and 6 posts but the two it keeps, and its new page. */
 const PAGES_AND_POSTS: Readonly<Record<string, string>> = {
@@ -40,7 +40,7 @@ const PAGES_AND_POSTS: Readonly<Record<string, string>> = {
   '/atman/': '/concepts/atman/',
   '/jiva/': '/concepts/jiva/',
   '/jagat/': '/concepts/jagat/',
-  // The 16 description pages, each now a Concept (design B5).
+  // The 16 description pages, each now a Concept.
   '/vikshepa/': '/concepts/vikshepa/',
   '/upavikshepaprofiling/': '/concepts/upa-vikshepa/',
   '/panchkleshavikaarprofiling/': '/concepts/panch-klesha/',
@@ -116,7 +116,7 @@ describe('the matcher these tests copy from Next', () => {
   })
 })
 
-describe('the current site’s pages and posts (D11, design B4)', () => {
+describe('the current site’s pages and posts', () => {
   it('sends each one to its new page, by one row', () => {
     expect(Object.keys(PAGES_AND_POSTS)).toHaveLength(37)
     for (const [old, page] of Object.entries(PAGES_AND_POSTS)) expect(sends(old), old).toBe(page)
@@ -131,7 +131,7 @@ describe('the current site’s pages and posts (D11, design B4)', () => {
   })
 })
 
-describe('archives and the feed (D17)', () => {
+describe('archives and the feed', () => {
   it('sends the category archives to the A–Z and the homepage, and the feed home', () => {
     expect(sends('/category/concepts/')).toBe('/concepts/')
     expect(sends('/category/uncategorized/')).toBe('/')
@@ -188,7 +188,7 @@ describe('the table (FR-07)', () => {
 
 describe('the table, cross-checked with the content’s provenance', () => {
   /**
-   * The kinds a current page or post was carried into (design B4). Works, passages, References
+   * The kinds a current page or post was carried into. Works, passages, References
    * and topics only quote or cite the pages they name.
    */
   const KEPT = ['concept', 'questionnaire', 'glossary', 'resource-list', 'page', 'home'] as const
@@ -222,7 +222,7 @@ describe('the table, cross-checked with the content’s provenance', () => {
     }
   })
 
-  it('sends a page that became both a Concept and a Questionnaire to the Concept (D12)', () => {
+  it('sends a page that became both a Concept and a Questionnaire to the Concept', () => {
     const both = [...oldAddresses()].filter(
       ([, heirs]) =>
         heirs.some(({ kind }) => kind === 'concept') &&

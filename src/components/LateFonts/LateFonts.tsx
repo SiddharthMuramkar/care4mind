@@ -30,8 +30,8 @@ function addAfterFirstPaint(faces: readonly LateFace[]) {
 }
 
 /**
- * Ticket 05: the faces the first paint can do without load after it, so they
- * never hold up the text. An inline script, so it doesn't wait for the page's
+ * The faces the first paint can do without load after it, so they never hold
+ * up the text. An inline script, so it doesn't wait for the page's
  * JavaScript. Without JavaScript their text keeps its stand-in.
  */
 export function LateFonts({ faces }: { faces: readonly LateFace[] }) {

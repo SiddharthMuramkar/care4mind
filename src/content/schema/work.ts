@@ -1,6 +1,6 @@
 import type { Provenance, SanskritName, Slug } from './common'
 
-/** A traditional text the site quotes, made of passages (D08). */
+/** A traditional text the site quotes, made of passages. */
 export interface WorkRecord {
   kind: 'work'
   slug: Slug

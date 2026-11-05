@@ -2,10 +2,10 @@ import { beforeAll, describe, expect, it } from 'vitest'
 
 import { references, type ReferenceView } from '@/content'
 
-// Ticket 03, the References census (content-v1): every Reference the kept pages cite or list
+// The References census: every Reference the kept pages cite or list
 // exists once, with each way the pages wrote it. Read through the public interface, as the
-// References page and every Concept read them. References no record cites yet are expected
-// until the batch tickets land; the completeness checks wait for ticket 12.
+// References page and every Concept read them. The completeness checks are in
+// content-completeness.
 
 let all: ReferenceView[] = []
 
@@ -65,7 +65,7 @@ const SLUG = /^[a-z0-9]+(?:-[a-z0-9]+)*$/
 const wordsOf = (text = '') => fold(text).split(' ').filter(Boolean)
 
 /**
- * How an id breaks settled rule 15, if it does. An id is lowercase ASCII words joined by hyphens:
+ * How an id breaks the id rule, if it does. An id is lowercase ASCII words joined by hyphens:
  * the first author's surname (with no author, a short name the title, container or address
  * gives), then the year when there is one, then a word only to tell two apart.
  */
@@ -191,7 +191,7 @@ describe('once each', () => {
   })
 })
 
-describe('ids (settled rule 15)', () => {
+describe('ids', () => {
   const made = (id: string, fields: Partial<ReferenceView>): ReferenceView => ({
     ...reference('tomar-2024'),
     authors: undefined,

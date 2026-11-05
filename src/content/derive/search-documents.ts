@@ -1,6 +1,6 @@
 /**
- * The search corpus (design A4, D10): one document per Concept, term, glossary entry, work,
- * passage, Reference, library item, Questionnaire, topic and page. The front-end-site search
+ * The search corpus: one document per Concept, term, glossary entry, work,
+ * passage, Reference, library item, Questionnaire, topic and page. The search
  * engine weighs the fields: names 10, title 8, keywords 4, people 4, excerpt 1.
  */
 import { capitalise } from '@/lib/text'

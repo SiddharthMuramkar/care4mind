@@ -1,5 +1,5 @@
 /**
- * The Concepts A–Z (D14): every Concept, every term inside one or inside a topic's introduction,
+ * The Concepts A–Z: every Concept, every term inside one or inside a topic's introduction,
  * and every glossary entry, by letter, sorted by name with diacritics ignored. A glossary entry
  * that names a Concept merges into that Concept's entry.
  */

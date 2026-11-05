@@ -20,7 +20,7 @@ export const dynamicParams = false
 
 const PATTERN = '/questionnaires/[slug]/take/' as const
 
-/** A flow exists only for a Questionnaire that can be taken in this build (D16). */
+/** A flow exists only for a Questionnaire that can be taken in this build. */
 export const generateStaticParams = () => site.params(PATTERN)
 
 export async function generateMetadata({
@@ -30,7 +30,7 @@ export async function generateMetadata({
 }
 
 /**
- * Taking a Questionnaire (C4): the flow is a client island, server-rendered at part 1. Its end
+ * Taking a Questionnaire: the flow is a client island, server-rendered at part 1. Its end
  * screen's limitations, source and related Concepts are set here and handed to it. Without
  * JavaScript the page says why it can't work and leads back to the purpose and limitations.
  */

@@ -318,11 +318,11 @@ export default defineQuestionnaire({
   provenance: {
     sources: [{ url: 'https://care4mind.org/karmayoga-scale/', retrieved: '2026-10-27' }],
     edits: [
-      // The front-end foundation's edits (planning ticket 21), kept as it wrote them.
+      // The front-end foundation's edits, kept as it wrote them.
       'Purpose and format are written from the current page’s four instruction steps and its 45 items; the items themselves are not copied here.',
       'The source citation comes from the planning map’s Published scales research (ticket 11), not from the current page, which cites no source.',
       'The limitations are a draft in the brief’s fallback wording. The Psychology expert owns them.',
-      // Content-v1 ticket 06: the form, its rights and what it holds back.
+      // The form, its rights and what it holds back.
       'The form carries the quiz’s 45 statements and their options word for word, with each part’s title and instructions from its step, in the order the quiz’s settings give (steps 58, 59, 61 and 63, each followed by its statements), not the order the page markup lists them in.',
       'Each option list is stored once, in the order the quiz lists it: the frequency options for parts 1 and 3, the agreement options for parts 2 and 4. Statements 34–42 list the agreement options in reverse, from Strongly Agree, and are marked reversed instead of having a list of their own.',
       'Left out: the quiz’s own title on its start page, “Karma Yoga Scale”; the record keeps the post’s title.',

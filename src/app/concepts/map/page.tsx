@@ -21,7 +21,7 @@ export function generateMetadata(): Promise<Metadata> {
 }
 
 /**
- * The Concept map (Proposal, D20): the Concepts round a circle by topic on a printed plate, and
+ * The Concept map (Proposal): the Concepts round a circle by topic on a printed plate, and
  * every connection in words. Its layout is worked out here, while the site builds.
  */
 export default async function ConceptMapPage() {

@@ -15,7 +15,7 @@ export interface ProposalNoteProps {
 }
 
 /**
- * The label on every Proposal surface (D20), in the editor's blue pencil: "Proposal", linking to
+ * The label on every Proposal surface, in the editor's blue pencil: "Proposal", linking to
  * the proposals page, which exists whenever a Proposal does. Beside a page's heading it carries a
  * sentence saying the proposal awaits the Project owner's decision.
  */

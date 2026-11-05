@@ -1,7 +1,7 @@
 import { ESLint } from 'eslint'
 import { describe, expect, it } from 'vitest'
 
-// The content module's interface is enforced by lint (content-v1 spec, "The boundary rule"):
+// The content module's interface is enforced by lint:
 // outside src/content, code imports content through @/content alone, and a 'use client' file
 // imports it for types only. Each fixture below is linted with the repo's own config, as if it
 // were the file at `path`.
