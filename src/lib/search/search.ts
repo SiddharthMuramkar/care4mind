@@ -15,27 +15,34 @@ export type { SearchField, SearchHit } from './engine'
 export type SearchGroupKind = Exclude<SearchKind, 'library-item' | 'page'> | 'library-and-pages'
 
 /** Each group in the order the results page shows them, under its heading. */
-const GROUPS: readonly { kind: SearchGroupKind; heading: string; holds: readonly SearchKind[] }[] =
-  [
-    { kind: 'concept', heading: 'Concepts', holds: ['concept'] },
-    { kind: 'term', heading: 'Terms', holds: ['term'] },
-    { kind: 'topic', heading: 'Topics', holds: ['topic'] },
-    { kind: 'glossary', heading: 'Glossary entries', holds: ['glossary'] },
-    { kind: 'work', heading: 'Traditional texts', holds: ['work'] },
-    { kind: 'passage', heading: 'Passages', holds: ['passage'] },
-    { kind: 'questionnaire', heading: 'Questionnaires', holds: ['questionnaire'] },
-    { kind: 'reference', heading: 'References', holds: ['reference'] },
-    {
-      kind: 'library-and-pages',
-      heading: 'Library and other pages',
-      holds: ['library-item', 'page'],
-    },
-  ]
+const GROUPS: readonly { kind: SearchGroupKind; heading: string }[] = [
+  { kind: 'concept', heading: 'Concepts' },
+  { kind: 'term', heading: 'Terms' },
+  { kind: 'topic', heading: 'Topics' },
+  { kind: 'glossary', heading: 'Glossary entries' },
+  { kind: 'work', heading: 'Traditional texts' },
+  { kind: 'passage', heading: 'Passages' },
+  { kind: 'questionnaire', heading: 'Questionnaires' },
+  { kind: 'reference', heading: 'References' },
+  { kind: 'library-and-pages', heading: 'Library and other pages' },
+]
 
-/** The group each kind of hit belongs to, by its place in `GROUPS`. */
-const GROUP_OF = new Map<SearchKind, number>(
-  GROUPS.flatMap((group, at) => group.holds.map((kind) => [kind, at] as const)),
-)
+/**
+ * The group each kind of hit belongs to, by its place in `GROUPS`. Every kind of document
+ * names its group here, so a new kind fails to compile until its heading is decided.
+ */
+const GROUP_OF: Record<SearchKind, number> = {
+  concept: 0,
+  term: 1,
+  topic: 2,
+  glossary: 3,
+  work: 4,
+  passage: 5,
+  questionnaire: 6,
+  reference: 7,
+  'library-item': 8,
+  page: 8,
+}
 
 /** The most results shown of one group before “Show all”. */
 const SHOWN = 5
@@ -63,11 +70,7 @@ export function resultGroups(
   expanded?: SearchGroupKind,
 ): SearchGroup[] {
   const byGroup = GROUPS.map((): SearchHit[] => [])
-  for (const hit of hits) {
-    const at = GROUP_OF.get(hit.kind)
-    if (at === undefined) continue
-    byGroup[at]?.push(hit)
-  }
+  for (const hit of hits) byGroup[GROUP_OF[hit.kind]]?.push(hit)
   return GROUPS.flatMap(({ kind, heading }, at) => {
     const all = byGroup[at] as SearchHit[]
     if (all.length === 0) return []
