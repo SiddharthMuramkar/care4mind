@@ -6,7 +6,14 @@
 import { capitalise } from '@/lib/text'
 
 import { firstTextIn, quotesOf, termsInSections, type ContentGraph } from '../graph'
-import type { ConceptRecord, PassageRecord, SanskritName, WorkRecord } from '../schema'
+import {
+  CONTENT_KINDS,
+  type ConceptRecord,
+  type ContentKind,
+  type PassageRecord,
+  type SanskritName,
+  type WorkRecord,
+} from '../schema'
 import type { SearchDocument } from '../types'
 import { must } from '../views/common'
 import { hrefFor } from '../views/href'
@@ -119,152 +126,145 @@ export function searchDocuments(graph: ContentGraph): SearchDocument[] {
   return documents
 }
 
-function documentsOf(graph: ContentGraph): SearchDocument[] {
-  const concepts = graph.records('concept').flatMap((concept) => conceptDocuments(concept, graph))
-
-  const glossary = graph.records('glossary').map((entry): SearchDocument => ({
-    id: `glossary:${entry.slug}`,
-    kind: 'glossary',
-    title: entry.name.iast ? capitalise(entry.name.iast) : entry.name.ascii,
-    ...(entry.name.iast ? { lang: 'sa-Latn' as const } : {}),
-    href: hrefFor({ kind: 'glossary', id: entry.slug }),
-    names: unique([entry.name.iast, entry.name.devanagari, entry.name.ascii]),
-    keywords: [],
-    people: [],
-    excerpt: excerpt(entry.definition),
-  }))
-
-  const works = graph.records('work').map((work): SearchDocument => ({
-    id: `work:${work.slug}`,
-    kind: 'work',
-    title: displayName({ term: work.title }),
-    ...(work.title.english ? { gloss: work.title.english } : {}),
-    lang: latinScript(work),
-    href: hrefFor({ kind: 'work', id: work.slug }),
-    names: unique([work.title.iast, work.title.devanagari, ...work.title.ascii]),
-    keywords: unique([abbreviation(work), work.title.english]),
-    people: unique([work.attribution]),
-    excerpt: '',
-  }))
-
-  const passages = graph.records('passage').map((passage): SearchDocument => {
-    const work = must(graph, 'work', passage.work)
-    return {
-      id: `passage:${passage.id}`,
-      kind: 'passage',
-      title: passageLabel(passage, work),
-      lang: latinScript(work),
-      href: hrefFor({ kind: 'passage', id: passage.id }),
-      parent: displayName({ term: work.title }),
-      names: [],
-      keywords: locatorForms(passage, work),
+/**
+ * Each kind's search documents, declared once; a kind search cannot find says so, so a new
+ * kind fails to compile until its documents are decided here.
+ */
+const SEARCH_DOCUMENTS = {
+  concept: (graph) =>
+    graph.records('concept').flatMap((concept) => conceptDocuments(concept, graph)),
+  topic: (graph) => [
+    ...graph.records('topic').flatMap((topic) =>
+      termsInSections(topic.intro?.sections ?? []).map((block): SearchDocument => ({
+        id: `term:topic/${topic.slug}#${block.id}`,
+        kind: 'term',
+        title: displayName(block),
+        ...(block.gloss ? { gloss: block.gloss } : {}),
+        lang: 'sa-Latn',
+        href: hrefFor({ kind: 'topic', id: topic.slug, anchor: block.id }),
+        parent: topic.name.english,
+        names: spellingsOf(block.term),
+        keywords: unique([block.gloss]),
+        people: [],
+        excerpt: excerpt(firstTextIn(block.blocks)),
+      })),
+    ),
+    ...graph.records('topic').map((topic): SearchDocument => ({
+      id: `topic:${topic.slug}`,
+      kind: 'topic',
+      title: topic.name.english,
+      href: hrefFor({ kind: 'topic', id: topic.slug }),
+      names: topic.name.term ? spellingsOf(topic.name.term) : [],
+      keywords: [],
       people: [],
       excerpt: excerpt(
-        passage.translations[0]?.text ??
-          (passage.transliteration?.lines ?? passage.devanagari).join(' '),
+        topic.intro?.sections.map((section) => firstTextIn(section.blocks)).find(Boolean),
       ),
-    }
-  })
-
-  const references = graph.records('reference').map((reference): SearchDocument => ({
-    id: `reference:${reference.id}`,
-    kind: 'reference',
-    title: reference.title,
-    href: hrefFor({ kind: 'reference', id: reference.id }),
-    names: [],
-    keywords: unique([referenceLabel(reference), reference.container, reference.publisher]),
-    people: authorNames(reference.authors ?? ''),
-    excerpt: excerpt(reference.asCited[0]),
-  }))
-
-  const libraryItems = graph.records('resource-list').flatMap((list) =>
-    list.groups.flatMap((group) =>
-      group.items.map((item, index): SearchDocument => {
-        const where = {
-          id: `library-item:${list.slug}/${group.id}/${index}`,
-          kind: 'library-item' as const,
-          href: hrefFor({ kind: 'resource-list', id: list.slug, anchor: group.id }),
-          parent: list.title,
-          names: [],
-        }
-        if (item.type === 'course')
+    })),
+  ],
+  work: (graph) =>
+    graph.records('work').map((work): SearchDocument => ({
+      id: `work:${work.slug}`,
+      kind: 'work',
+      title: displayName({ term: work.title }),
+      ...(work.title.english ? { gloss: work.title.english } : {}),
+      lang: latinScript(work),
+      href: hrefFor({ kind: 'work', id: work.slug }),
+      names: unique([work.title.iast, work.title.devanagari, ...work.title.ascii]),
+      keywords: unique([abbreviation(work), work.title.english]),
+      people: unique([work.attribution]),
+      excerpt: '',
+    })),
+  passage: (graph) =>
+    graph.records('passage').map((passage): SearchDocument => {
+      const work = must(graph, 'work', passage.work)
+      return {
+        id: `passage:${passage.id}`,
+        kind: 'passage',
+        title: passageLabel(passage, work),
+        lang: latinScript(work),
+        href: hrefFor({ kind: 'passage', id: passage.id }),
+        parent: displayName({ term: work.title }),
+        names: [],
+        keywords: locatorForms(passage, work),
+        people: [],
+        excerpt: excerpt(
+          passage.translations[0]?.text ??
+            (passage.transliteration?.lines ?? passage.devanagari).join(' '),
+        ),
+      }
+    }),
+  reference: (graph) =>
+    graph.records('reference').map((reference): SearchDocument => ({
+      id: `reference:${reference.id}`,
+      kind: 'reference',
+      title: reference.title,
+      href: hrefFor({ kind: 'reference', id: reference.id }),
+      names: [],
+      keywords: unique([referenceLabel(reference), reference.container, reference.publisher]),
+      people: authorNames(reference.authors ?? ''),
+      excerpt: excerpt(reference.asCited[0]),
+    })),
+  questionnaire: (graph) =>
+    graph.records('questionnaire').map((questionnaire): SearchDocument => {
+      const concepts = questionnaire.concepts.map((slug) => must(graph, 'concept', slug))
+      return {
+        id: `questionnaire:${questionnaire.slug}`,
+        kind: 'questionnaire',
+        title: questionnaire.title,
+        href: questionnaireHref(questionnaire),
+        names: [],
+        keywords: unique([
+          questionnaire.sourceTitle === questionnaire.title ? undefined : questionnaire.sourceTitle,
+          ...concepts.map((concept) => displayName(concept.name)),
+          ...concepts.map((concept) => must(graph, 'topic', concept.topics.primary).name.english),
+        ]),
+        people: [],
+        excerpt: excerpt(questionnaire.summary ?? questionnaire.purpose?.[0]),
+      }
+    }),
+  glossary: (graph) =>
+    graph.records('glossary').map((entry): SearchDocument => ({
+      id: `glossary:${entry.slug}`,
+      kind: 'glossary',
+      title: entry.name.iast ? capitalise(entry.name.iast) : entry.name.ascii,
+      ...(entry.name.iast ? { lang: 'sa-Latn' as const } : {}),
+      href: hrefFor({ kind: 'glossary', id: entry.slug }),
+      names: unique([entry.name.iast, entry.name.devanagari, entry.name.ascii]),
+      keywords: [],
+      people: [],
+      excerpt: excerpt(entry.definition),
+    })),
+  'resource-list': (graph) => [
+    ...graph.records('resource-list').flatMap((list) =>
+      list.groups.flatMap((group) =>
+        group.items.map((item, index): SearchDocument => {
+          const where = {
+            id: `library-item:${list.slug}/${group.id}/${index}`,
+            kind: 'library-item' as const,
+            href: hrefFor({ kind: 'resource-list', id: list.slug, anchor: group.id }),
+            parent: list.title,
+            names: [],
+          }
+          if (item.type === 'course')
+            return {
+              ...where,
+              title: item.name,
+              keywords: unique([item.provider, group.heading]),
+              people: [],
+              excerpt: excerpt(item.description),
+            }
+          const reference = must(graph, 'reference', item.reference)
           return {
             ...where,
-            title: item.name,
-            keywords: unique([item.provider, group.heading]),
-            people: [],
-            excerpt: excerpt(item.description),
+            title: reference.title,
+            keywords: unique([group.heading]),
+            people: authorNames(reference.authors ?? ''),
+            excerpt: excerpt(item.annotation),
           }
-        const reference = must(graph, 'reference', item.reference)
-        return {
-          ...where,
-          title: reference.title,
-          keywords: unique([group.heading]),
-          people: authorNames(reference.authors ?? ''),
-          excerpt: excerpt(item.annotation),
-        }
-      }),
+        }),
+      ),
     ),
-  )
-
-  const questionnaires = graph.records('questionnaire').map((questionnaire): SearchDocument => {
-    const concepts = questionnaire.concepts.map((slug) => must(graph, 'concept', slug))
-    return {
-      id: `questionnaire:${questionnaire.slug}`,
-      kind: 'questionnaire',
-      title: questionnaire.title,
-      href: questionnaireHref(questionnaire),
-      names: [],
-      keywords: unique([
-        questionnaire.sourceTitle === questionnaire.title ? undefined : questionnaire.sourceTitle,
-        ...concepts.map((concept) => displayName(concept.name)),
-        ...concepts.map((concept) => must(graph, 'topic', concept.topics.primary).name.english),
-      ]),
-      people: [],
-      excerpt: excerpt(questionnaire.summary ?? questionnaire.purpose?.[0]),
-    }
-  })
-
-  const topicTerms = graph.records('topic').flatMap((topic) =>
-    termsInSections(topic.intro?.sections ?? []).map((block): SearchDocument => ({
-      id: `term:topic/${topic.slug}#${block.id}`,
-      kind: 'term',
-      title: displayName(block),
-      ...(block.gloss ? { gloss: block.gloss } : {}),
-      lang: 'sa-Latn',
-      href: hrefFor({ kind: 'topic', id: topic.slug, anchor: block.id }),
-      parent: topic.name.english,
-      names: spellingsOf(block.term),
-      keywords: unique([block.gloss]),
-      people: [],
-      excerpt: excerpt(firstTextIn(block.blocks)),
-    })),
-  )
-
-  const topics = graph.records('topic').map((topic): SearchDocument => ({
-    id: `topic:${topic.slug}`,
-    kind: 'topic',
-    title: topic.name.english,
-    href: hrefFor({ kind: 'topic', id: topic.slug }),
-    names: topic.name.term ? spellingsOf(topic.name.term) : [],
-    keywords: [],
-    people: [],
-    excerpt: excerpt(
-      topic.intro?.sections.map((section) => firstTextIn(section.blocks)).find(Boolean),
-    ),
-  }))
-
-  const pages = [
-    ...graph.records('page').map((page): SearchDocument => ({
-      id: `page:${page.slug}`,
-      kind: 'page',
-      title: page.title,
-      href: hrefFor({ kind: 'page', id: page.slug }),
-      names: [],
-      keywords: unique(page.sections.map((section) => section.heading)),
-      people: [],
-      excerpt: excerpt(page.summary),
-    })),
     ...graph.records('resource-list').map((list): SearchDocument => ({
       id: `resource-list:${list.slug}`,
       kind: 'page',
@@ -275,18 +275,22 @@ function documentsOf(graph: ContentGraph): SearchDocument[] {
       people: [],
       excerpt: '',
     })),
-  ]
+  ],
+  page: (graph) =>
+    graph.records('page').map((page): SearchDocument => ({
+      id: `page:${page.slug}`,
+      kind: 'page',
+      title: page.title,
+      href: hrefFor({ kind: 'page', id: page.slug }),
+      names: [],
+      keywords: unique(page.sections.map((section) => section.heading)),
+      people: [],
+      excerpt: excerpt(page.summary),
+    })),
+  // The homepage record holds the homepage's own text; search finds the things it links to.
+  home: () => [],
+} as const satisfies { [K in ContentKind]: (graph: ContentGraph) => SearchDocument[] }
 
-  return [
-    ...concepts,
-    ...topicTerms,
-    ...glossary,
-    ...works,
-    ...passages,
-    ...references,
-    ...libraryItems,
-    ...questionnaires,
-    ...topics,
-    ...pages,
-  ]
+function documentsOf(graph: ContentGraph): SearchDocument[] {
+  return CONTENT_KINDS.flatMap((kind) => SEARCH_DOCUMENTS[kind](graph))
 }

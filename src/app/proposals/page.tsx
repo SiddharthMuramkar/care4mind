@@ -14,7 +14,6 @@ import { metadataFor } from '@/lib/metadata'
 
 import cta from '@/components/Cta'
 
-import listing from '../listing.module.css'
 import reading from '../reading.module.css'
 import styles from './page.module.css'
 
@@ -85,7 +84,7 @@ export default function ProposalsPage() {
             What the design suggests beyond the brief, for the Project owner to accept or refuse. A
             refused one is switched off with one setting, and no code changes.
           </p>
-          <p className={listing.facts}>
+          <p className={styles.count}>
             {built} built · {proposals.length - built} described
           </p>
         </>

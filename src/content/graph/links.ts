@@ -1,6 +1,10 @@
 /**
  * The links between records: the index that resolves an id, the check that refuses a dangling
  * one, and the passages and References each record links to.
+ *
+ * Each kind's outgoing links are declared once, in `LINKS`: how to check them, which References
+ * they cite, which passages they quote and which anchors they hold. The table covers every
+ * kind, so a new kind fails to compile until its links are declared here.
  */
 import {
   idOf,
@@ -12,7 +16,7 @@ import {
   type Section,
   type Target,
 } from '../schema'
-import { anchorsOf, walkBlocksAt } from './walk'
+import { anchorsInSections, quotesInSections, walkBlocksAt } from './walk'
 
 /** A record named by its kind and id (ids are unique within a kind, not across kinds). */
 export interface RecordKey {
@@ -36,6 +40,153 @@ export class DanglingIdError extends Error {
     this.name = 'DanglingIdError'
     this.problems = problems
   }
+}
+
+/** The checks a kind's link declaration runs against the index, collecting one line per problem. */
+interface Check {
+  /** Refuse `field` naming no record of `kind` with `id`. */
+  need(field: string, kind: ContentKind, id: string): void
+  /** Refuse a quote naming no passage, or no translation of it. */
+  quote(field: string, quote: PassageQuote): void
+  /** Check every link in a record's sections. */
+  sections(field: string, list: readonly Section[]): void
+  /** Refuse a target naming no record, or no anchor in it. */
+  target(field: string, to: Target): void
+  /** Record a problem at `field`, in the same words a dangling id is refused with. */
+  fail(field: string, problem: string): void
+}
+
+/** One kind's outgoing links: its check, the References it cites, its quotes and its anchors. */
+interface LinksOf<K extends ContentKind> {
+  check(record: RecordOf<K>, check: Check): void
+  references(record: RecordOf<K>): string[]
+  quotes(record: RecordOf<K>): PassageQuote[]
+  anchors(record: RecordOf<K>): string[]
+}
+
+/** A kind that links nowhere: no ids to check, nothing cited or quoted, no anchors. */
+const noLinks = <K extends ContentKind>(): LinksOf<K> => ({
+  check: () => {},
+  references: () => [],
+  quotes: () => [],
+  anchors: () => [],
+})
+
+/** Each kind's outgoing links, declared once; the link check and the reverse indexes read it. */
+const LINKS = {
+  concept: {
+    check: (record, { need, quote, sections }) => {
+      need('topics.primary', 'topic', record.topics.primary)
+      record.topics.also?.forEach((topic, i) => need(`topics.also[${i}]`, 'topic', topic))
+      record.verses.forEach((verse, i) => quote(`verses[${i}]`, verse))
+      sections('sections', record.sections)
+      record.references.forEach((id, i) => need(`references[${i}]`, 'reference', id))
+      if (record.questionnaire !== undefined)
+        need('questionnaire', 'questionnaire', record.questionnaire)
+      record.related?.forEach((link, i) => need(`related[${i}].concept`, 'concept', link.concept))
+    },
+    references: (record) => [...record.references],
+    quotes: (record) => [...record.verses, ...quotesInSections(record.sections)],
+    anchors: (record) => anchorsInSections(record.sections),
+  },
+  topic: {
+    check: (record, { need, sections }) => {
+      if (record.intro) {
+        sections('intro.sections', record.intro.sections)
+        record.intro.references.forEach((id, i) => need(`intro.references[${i}]`, 'reference', id))
+      }
+    },
+    references: (record) => [...(record.intro?.references ?? [])],
+    quotes: (record) => quotesInSections(record.intro?.sections ?? []),
+    anchors: (record) => (record.intro ? anchorsInSections(record.intro.sections) : []),
+  },
+  work: noLinks(),
+  passage: {
+    ...noLinks(),
+    check: (record, { need }) => need('work', 'work', record.work),
+  },
+  reference: noLinks(),
+  questionnaire: {
+    check: (record, { need, fail }) => {
+      record.concepts.forEach((slug, i) => need(`concepts[${i}]`, 'concept', slug))
+      if (record.source !== undefined) need('source', 'reference', record.source)
+      if (record.candidateSource !== undefined)
+        need('candidateSource', 'reference', record.candidateSource)
+      const sets = record.form?.responseSets ?? {}
+      const partIds = new Set<string>()
+      const itemIds = new Set<string>()
+      record.form?.parts.forEach((part, p) => {
+        if (partIds.has(part.id)) fail(`form.parts[${p}].id`, `repeated part id “${part.id}”`)
+        partIds.add(part.id)
+        part.items.forEach((item, i) => {
+          if (itemIds.has(item.id))
+            fail(`form.parts[${p}].items[${i}].id`, `repeated item id “${item.id}”`)
+          itemIds.add(item.id)
+          if (!Object.hasOwn(sets, item.responseSet))
+            fail(
+              `form.parts[${p}].items[${i}].responseSet`,
+              `no response set “${item.responseSet}”`,
+            )
+        })
+      })
+    },
+    references: (record) =>
+      [record.source, record.candidateSource].filter((id) => id !== undefined),
+    quotes: () => [],
+    anchors: () => [],
+  },
+  glossary: {
+    ...noLinks(),
+    check: (record, { need }) => {
+      if (record.concept !== undefined) need('concept', 'concept', record.concept)
+    },
+  },
+  'resource-list': {
+    check: (record, { need }) => {
+      record.groups.forEach((group, g) =>
+        group.items.forEach((item, i) => {
+          if (item.type === 'reference')
+            need(`groups[${g}].items[${i}].reference`, 'reference', item.reference)
+        }),
+      )
+    },
+    references: (record) =>
+      record.groups.flatMap((group) =>
+        group.items.flatMap((item) => (item.type === 'reference' ? [item.reference] : [])),
+      ),
+    quotes: () => [],
+    anchors: (record) => record.groups.map((group) => group.id),
+  },
+  page: {
+    check: (record, { sections }) => sections('sections', record.sections),
+    references: () => [],
+    quotes: (record) => quotesInSections(record.sections),
+    anchors: (record) => anchorsInSections(record.sections),
+  },
+  home: {
+    check: (record, { need, target }) => {
+      record.areas.forEach((area, i) => {
+        if (area.target) target(`areas[${i}].target`, area.target)
+      })
+      record.featured.forEach((slug, i) => need(`featured[${i}]`, 'concept', slug))
+      record.onYourMind.forEach(({ concept }, i) =>
+        need(`onYourMind[${i}].concept`, 'concept', concept),
+      )
+    },
+    references: () => [],
+    quotes: () => [],
+    anchors: () => [],
+  },
+} as const satisfies { [K in ContentKind]: LinksOf<K> }
+
+/** A record's link declaration, typed for its kind. */
+function linksFor(record: ContentRecord): LinksOf<ContentKind> {
+  return LINKS[record.kind] as LinksOf<ContentKind>
+}
+
+/** Every anchor a link may target inside a record: section, term, table and group ids. */
+function anchorsOf(record: ContentRecord): Set<string> {
+  return new Set(linksFor(record).anchors(record))
 }
 
 /** Every link in a record that names a missing id, as one line each. */
@@ -76,96 +227,22 @@ export function danglingLinks(record: ContentRecord, index: Index): string[] {
       )
   }
 
-  switch (record.kind) {
-    case 'concept':
-      need('topics.primary', 'topic', record.topics.primary)
-      record.topics.also?.forEach((topic, i) => need(`topics.also[${i}]`, 'topic', topic))
-      record.verses.forEach((verse, i) => quote(`verses[${i}]`, verse))
-      sections('sections', record.sections)
-      record.references.forEach((id, i) => need(`references[${i}]`, 'reference', id))
-      if (record.questionnaire !== undefined)
-        need('questionnaire', 'questionnaire', record.questionnaire)
-      record.related?.forEach((link, i) => need(`related[${i}].concept`, 'concept', link.concept))
-      break
-    case 'topic':
-      if (record.intro) {
-        sections('intro.sections', record.intro.sections)
-        record.intro.references.forEach((id, i) => need(`intro.references[${i}]`, 'reference', id))
-      }
-      break
-    case 'passage':
-      need('work', 'work', record.work)
-      break
-    case 'questionnaire': {
-      record.concepts.forEach((slug, i) => need(`concepts[${i}]`, 'concept', slug))
-      if (record.source !== undefined) need('source', 'reference', record.source)
-      if (record.candidateSource !== undefined)
-        need('candidateSource', 'reference', record.candidateSource)
-      const sets = record.form?.responseSets ?? {}
-      const partIds = new Set<string>()
-      const itemIds = new Set<string>()
-      record.form?.parts.forEach((part, p) => {
-        if (partIds.has(part.id))
-          problems.push(`${where(`form.parts[${p}].id`)}: repeated part id “${part.id}”`)
-        partIds.add(part.id)
-        part.items.forEach((item, i) => {
-          if (itemIds.has(item.id))
-            problems.push(
-              `${where(`form.parts[${p}].items[${i}].id`)}: repeated item id “${item.id}”`,
-            )
-          itemIds.add(item.id)
-          if (!Object.hasOwn(sets, item.responseSet))
-            problems.push(
-              `${where(`form.parts[${p}].items[${i}].responseSet`)}: no response set “${item.responseSet}”`,
-            )
-        })
-      })
-      break
-    }
-    case 'glossary':
-      if (record.concept !== undefined) need('concept', 'concept', record.concept)
-      break
-    case 'resource-list':
-      record.groups.forEach((group, g) =>
-        group.items.forEach((item, i) => {
-          if (item.type === 'reference')
-            need(`groups[${g}].items[${i}].reference`, 'reference', item.reference)
-        }),
-      )
-      break
-    case 'page':
-      sections('sections', record.sections)
-      break
-    case 'home':
-      record.areas.forEach((area, i) => {
-        if (area.target) target(`areas[${i}].target`, area.target)
-      })
-      record.featured.forEach((slug, i) => need(`featured[${i}]`, 'concept', slug))
-      record.onYourMind.forEach(({ concept }, i) =>
-        need(`onYourMind[${i}].concept`, 'concept', concept),
-      )
-      break
-    case 'work':
-    case 'reference':
-      break
-  }
+  linksFor(record).check(record, {
+    need,
+    quote,
+    sections,
+    target,
+    fail: (field, problem) => problems.push(`${where(field)}: ${problem}`),
+  })
   return problems
+}
+
+/** The passages a record quotes, in reading order. */
+export function quotesOf(record: ContentRecord): PassageQuote[] {
+  return linksFor(record).quotes(record)
 }
 
 /** The References a record cites, in its own order. */
 export function referencesOf(record: ContentRecord): string[] {
-  switch (record.kind) {
-    case 'concept':
-      return [...record.references]
-    case 'topic':
-      return [...(record.intro?.references ?? [])]
-    case 'questionnaire':
-      return [record.source, record.candidateSource].filter((id) => id !== undefined)
-    case 'resource-list':
-      return record.groups.flatMap((group) =>
-        group.items.flatMap((item) => (item.type === 'reference' ? [item.reference] : [])),
-      )
-    default:
-      return []
-  }
+  return linksFor(record).references(record)
 }

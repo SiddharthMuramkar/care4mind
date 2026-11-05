@@ -12,8 +12,15 @@ import {
 } from '../schema'
 import { localSource, type ContentSource } from '../source'
 import { citationsIn, type Citation } from './citations'
-import { DanglingIdError, danglingLinks, lookup, referencesOf, type RecordKey } from './links'
-import { quotesOf, textsIn } from './walk'
+import {
+  DanglingIdError,
+  danglingLinks,
+  lookup,
+  quotesOf,
+  referencesOf,
+  type RecordKey,
+} from './links'
+import { textsIn } from './walk'
 import { relationsOf, type Relation } from './relations'
 
 /** A place a passage is quoted, with the translation the quote shows. */

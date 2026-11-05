@@ -45,6 +45,7 @@ These are judgement calls, so review checks them against the diff, in the codeba
 | The graph imports neither the views nor the derivations above it | lint (content boundary) and its test |
 | Internal links come from `hrefFor()` | lint (`care4mind/href-from-hreffor`) |
 | Every link between records resolves | the graph, at build and in every content test |
+| A new kind's links, pages and search documents are declared before anything compiles | types: the tables typed as one entry per kind in the graph's links, the route registry and the search documents, and the `never` defaults on the per-kind switches (`idOf`, `hrefFor`, `recordRef`, `targetHref`) |
 | Sanskrit is NFC with ṃ; each name field holds one script, in characters the fonts cover | content-integrity test |
 | The registry is generated, not edited | git ignores it, and `pnpm check` and every test run write it afresh |
 | No record stores scoring | types and the content-integrity test |
@@ -80,10 +81,10 @@ These are judgement calls, so review checks them against the diff, in the codeba
 - **A link field:** the record schema, the graph's link check, then the view that shows it.
 - **A content kind:** the compiler finds only some of these places, so work through every step:
   1. The record schema: its type, its `define…` helper and its kind's folder.
-  2. The graph: the link check and the reverse indexes. Nothing fails if you miss these (#49).
+  2. The graph: its entry in the links table (its check, the References it cites, the passages it quotes, its anchors); the reverse indexes are built from it. The compiler refuses until the entry is there, and a kind that links nowhere says so in its entry.
   3. The view types and views: Ref, Card and View, plus `hrefFor()`'s target.
   4. Its namespace on `@/content`.
-  5. The derivations: routes, and search documents. Nothing fails if you miss search (#49).
+  5. The derivations: its entries in the pages table (its route's title and address, or no page of its own) and the search-documents table (its documents, or none). The compiler refuses until each entry is there.
   6. The pages, the navigation, Linked knowledge and search's result headings.
   7. The tools behind `content:new` and `verify`.
   8. GLOSSARY.md.

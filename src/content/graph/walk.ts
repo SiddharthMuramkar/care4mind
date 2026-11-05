@@ -3,15 +3,7 @@
  * blocks inside it. Quotes, terms, topic introductions, anchors and running text are read off
  * this walk, so the tree's shape is known in one place and each fact is gathered once.
  */
-import type {
-  Block,
-  ContentRecord,
-  Inline,
-  PassageQuote,
-  Section,
-  Slug,
-  TermBlock,
-} from '../schema'
+import type { Block, Inline, PassageQuote, Section, Slug, TermBlock } from '../schema'
 
 /** Every block in a list, nested term blocks included, with its field path (`blocks[2].blocks[0]`). */
 export function* walkBlocksAt(
@@ -97,30 +89,13 @@ export function textsIn(sections: readonly Section[]): Inline[] {
   return sections.flatMap((section) => [section.heading, ...fromBlocks(section.blocks)])
 }
 
-/** The sections a record carries: a Concept's or page's own, or a topic introduction's. */
-export function sectionsOf(record: ContentRecord): readonly Section[] {
-  if (record.kind === 'concept' || record.kind === 'page') return record.sections
-  if (record.kind === 'topic') return record.intro?.sections ?? []
-  return []
-}
-
-/**
- * The passages a record quotes, in reading order: a Concept's verses at the top of its page
- * first, then those in its sections. A shared topic introduction's verses are its topic's.
- */
-export function quotesOf(record: ContentRecord): PassageQuote[] {
-  const verses = record.kind === 'concept' ? record.verses : []
-  return [...verses, ...quotesInSections(sectionsOf(record))]
-}
-
-/** Every anchor a link may target inside a record: section, term, table and group ids. */
-export function anchorsOf(record: ContentRecord): Set<string> {
-  const anchors = new Set<string>()
-  for (const section of sectionsOf(record)) {
-    anchors.add(section.id)
+/** Every anchor in a list of sections: section, term and table ids, in reading order. */
+export function anchorsInSections(sections: readonly Section[]): string[] {
+  const anchors: string[] = []
+  for (const section of sections) {
+    anchors.push(section.id)
     for (const block of walkBlocks(section.blocks))
-      if (block.kind === 'term' || block.kind === 'table') anchors.add(block.id)
+      if (block.kind === 'term' || block.kind === 'table') anchors.push(block.id)
   }
-  if (record.kind === 'resource-list') for (const group of record.groups) anchors.add(group.id)
   return anchors
 }

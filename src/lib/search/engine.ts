@@ -53,21 +53,27 @@ export interface SearchIndex {
 }
 
 /**
- * Each kind in the order a score tie is broken: the thing itself before a glossary entry that
- * only defines its name, so “gita” leads with the Bhagavad Gītā, not its glossary entry.
+ * Each kind's place in the order a score tie is broken: the thing itself before a glossary
+ * entry that only defines its name, so “gita” leads with the Bhagavad Gītā, not its glossary
+ * entry. Every kind names its place, so a new kind fails to compile until it is ranked here.
  */
-export const KIND_ORDER: readonly SearchKind[] = [
-  'concept',
-  'term',
-  'topic',
-  'work',
-  'glossary',
-  'passage',
-  'questionnaire',
-  'reference',
-  'library-item',
-  'page',
-]
+const KIND_RANK: Record<SearchKind, number> = {
+  concept: 0,
+  term: 1,
+  topic: 2,
+  work: 3,
+  glossary: 4,
+  passage: 5,
+  questionnaire: 6,
+  reference: 7,
+  'library-item': 8,
+  page: 9,
+}
+
+/** Each kind in the order a score tie is broken, first first. */
+export const KIND_ORDER: readonly SearchKind[] = (Object.keys(KIND_RANK) as SearchKind[]).sort(
+  (a, b) => KIND_RANK[a] - KIND_RANK[b],
+)
 
 const WEIGHT: Record<SearchField, number> = {
   names: 10,
@@ -296,7 +302,7 @@ const bestOf = (values: Map<string, Match>): Match =>
  * other hit; then by score, a tie by kind, then by title. Grouping is `resultGroups`' work.
  */
 function ranked(hits: SearchHit[], exact: ReadonlySet<string>): SearchHit[] {
-  const rank = (hit: SearchHit) => KIND_ORDER.indexOf(hit.kind)
+  const rank = (hit: SearchHit) => KIND_RANK[hit.kind]
   return hits.toSorted(
     (a, b) =>
       Number(exact.has(b.id)) - Number(exact.has(a.id)) ||
