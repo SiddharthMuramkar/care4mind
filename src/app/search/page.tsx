@@ -12,7 +12,6 @@ import { readingTimeWords } from '@/lib/text'
 import { isSearchGroupKind, resultGroups } from '@/lib/search/search'
 import { search } from '@/lib/search/server'
 
-import listing from '../listing.module.css'
 import reading from '../reading.module.css'
 import styles from './page.module.css'
 
@@ -71,14 +70,14 @@ export default async function SearchPage({ searchParams }: PageProps<'/search'>)
             {found.length} {found.length === 1 ? 'result' : 'results'} for “{query}”
           </h2>
           {groups.map(({ kind, heading, results, total }) => (
-            <div key={kind} className={listing.group}>
-              <h3 className={listing.groupTitle}>{heading}</h3>
-              <ul className={listing.entries}>
+            <div key={kind} className={styles.group}>
+              <h3 className={styles.groupTitle}>{heading}</h3>
+              <ul className={styles.entries}>
                 {results.map((result) => {
                   const card = cardOf(result)
                   return (
-                    <li key={result.id} className={listing.entry}>
-                      <p className={listing.entryName}>
+                    <li key={result.id} className={styles.entry}>
+                      <p className={styles.entryName}>
                         {/* Each result's path, made by hrefFor() in the content module. */}
                         <Link
                           href={result.href as Route}
@@ -97,13 +96,13 @@ export default async function SearchPage({ searchParams }: PageProps<'/search'>)
                           <span>{readingTimeWords(card.readingMinutes)}</span>
                         </p>
                       ) : null}
-                      {result.parent ? <p className={listing.meta}>In {result.parent}</p> : null}
+                      {result.parent ? <p className={styles.meta}>In {result.parent}</p> : null}
                     </li>
                   )
                 })}
               </ul>
               {total > results.length ? (
-                <p className={listing.note}>
+                <p className={styles.note}>
                   <Link
                     href={`${PATH}?q=${encodeURIComponent(query)}&all=${kind}` as Route}
                     transitionTypes={turnForward}
