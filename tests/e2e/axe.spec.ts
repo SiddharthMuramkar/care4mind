@@ -28,9 +28,30 @@ test('fails a page whose text contrast axe cannot settle for an unreviewed reaso
   await expect(expectNoAxeViolations(page)).rejects.toThrow(/color-contrast/)
 })
 
-test('passes one character of text, whose contrast axe leaves unsettled', async ({ page }) => {
-  await page.setContent(html('<main><h1>Title</h1><p>H</p></main>'))
+test('passes unsettled text whose colours are a reviewed pair at 4.5:1', async ({ page }) => {
+  // A paper link at rest: axe leaves it unsettled (bgGradient) for the 0-wide underline gradient, and surface-link on surface is a reviewed pair.
+  await page.setContent(
+    html(
+      '<main style="background: #eadbb6"><h1>Title</h1><p><a href="#" style="color: #9c2a1f; background: linear-gradient(#c8342a, #c8342a) 0 0 / 0 0.12em no-repeat">A link on paper</a></p></main>',
+    ),
+  )
   await expectNoAxeViolations(page)
+})
+
+test('fails one unsettled character whose colours are no reviewed pair', async ({ page }) => {
+  await page.setContent(html('<main><h1>Title</h1><p style="color: #cccccc">H</p></main>'))
+  await expect(expectNoAxeViolations(page)).rejects.toThrow(/color-contrast/)
+})
+
+test('fails unsettled text over a covering gradient whose colours are no reviewed pair', async ({
+  page,
+}) => {
+  await page.setContent(
+    html(
+      '<main><h1>Title</h1><p style="color: #bbbbbb; background: linear-gradient(#ffffff, #eeeeee)">Text over a gradient.</p></main>',
+    ),
+  )
+  await expect(expectNoAxeViolations(page)).rejects.toThrow(/color-contrast/)
 })
 
 test('fails a page with two unnamed main landmarks', async ({ page }) => {

@@ -47,7 +47,7 @@ These are judgement calls, so review checks them against the diff, in the codeba
 | No record stores scoring | types and the content-integrity test |
 | Press colour pairs meet contrast, each primitive colour is written once, and colour tokens alias or mix the primitives | contrast test, for the pairs it lists, resolving `var()` and `color-mix()`. A mix that carries text is a token, so it can be listed; review keeps modules from mixing their own |
 | `--color-surface-rule` is a rule, never text | contrast test |
-| Pages pass axe at WCAG 2.2 AA and its structural best-practice rules; text whose contrast axe can't settle passes only with a reviewed reason | `expectNoAxeViolations` in `tests/e2e/axe.ts`, run by the page specs; the axe spec checks the helper itself |
+| Pages pass axe at WCAG 2.2 AA and its structural best-practice rules; text whose contrast axe can't settle passes only for a reviewed reason and when its own colours form a listed pair at 4.5:1, a table frame's scroll shadow over such a pair aside | `expectNoAxeViolations` in `tests/e2e/axe.ts`, run by the page specs; the axe spec checks the helper itself |
 | Icon and manifest colours equal their tokens | icons test |
 | Lotus motion is CSS only, transform and opacity: only the hero moves on its own, once, ending within 5 s of load; every lotus answers the pointer; nothing moves under reduced motion; no pause control | lotus and motion specs |
 | A `styles.x` lookup names a class its CSS module defines, and markup reads every class a module defines | CSS module classes test |
