@@ -2,18 +2,15 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 
-import { Breadcrumbs } from '@/components/Breadcrumbs'
 import { Citation } from '@/components/Citation'
-import { Folio } from '@/components/Folio'
-import { PageTurn, turnForward } from '@/components/PageTurn'
+import { turnForward } from '@/components/PageTurn'
+import { ReadingPage } from '@/components/ReadingPage'
 import { Text } from '@/components/prose'
 import { StatusBadge } from '@/components/StatusBadge'
 import { Flow } from '@/components/questionnaire'
 import { hrefFor, questionnaires, site } from '@/content'
-import { cx } from '@/lib/cx'
 import { metadataFor } from '@/lib/metadata'
 
-import reading from '../../../reading.module.css'
 import styles from './page.module.css'
 
 export const dynamicParams = false
@@ -102,49 +99,48 @@ export default async function TakeQuestionnairePage({
   )
 
   return (
-    <PageTurn>
-      <main id="main" className={reading.page}>
-        <Breadcrumbs path={hrefFor({ kind: 'questionnaire', id: slug, status, flow: true })} />
-        <Folio as="article" className={reading.article} aria-labelledby="flow-title">
-          <header className={cx(reading.titlePage, styles.head)}>
-            <p className={reading.kicker}>Take the Questionnaire</p>
-            <h1 id="flow-title" className={cx(reading.title, reading.titleLong)}>
-              {title}
-            </h1>
-            <StatusBadge status={shownStatus} />
-            <p className={styles.promise}>
-              Your answers aren’t scored yet. They stay on this page while it is open: nothing you
-              answer is saved or sent anywhere.
-            </p>
-          </header>
+    <ReadingPage
+      path={hrefFor({ kind: 'questionnaire', id: slug, status, flow: true })}
+      titleId="flow-title"
+      headerClassName={styles.head}
+      kicker="Take the Questionnaire"
+      title={title}
+      longTitle
+      afterTitle={
+        <>
+          <StatusBadge status={shownStatus} />
+          <p className={styles.promise}>
+            Your answers aren’t scored yet. They stay on this page while it is open: nothing you
+            answer is saved or sent anywhere.
+          </p>
+        </>
+      }
+    >
+      <noscript>
+        <section className={styles.noscript} aria-labelledby="noscript-title">
+          <h2 id="noscript-title" className={styles.title}>
+            This Questionnaire needs JavaScript
+          </h2>
+          <p>
+            Your answers may go neither into the address nor to a server, so they can only be kept
+            in this page while it is open, and that takes JavaScript. Switch it on to take the{' '}
+            {title}.
+          </p>
+          <p>
+            <a href={intro}>Back to what the {title} is for, and its limits</a>
+          </p>
+        </section>
+      </noscript>
 
-          <noscript>
-            <section className={styles.noscript} aria-labelledby="noscript-title">
-              <h2 id="noscript-title" className={styles.title}>
-                This Questionnaire needs JavaScript
-              </h2>
-              <p>
-                Your answers may go neither into the address nor to a server, so they can only be
-                kept in this page while it is open, and that takes JavaScript. Switch it on to take
-                the {title}.
-              </p>
-              <p>
-                <a href={intro}>Back to what the {title} is for, and its limits</a>
-              </p>
-            </section>
-          </noscript>
-
-          <Flow
-            form={form}
-            instructions={form.parts.map((part) => (
-              <Text key={part.id} text={part.instructions} />
-            ))}
-            intro={intro}
-            limits={limits}
-            sources={sources}
-          />
-        </Folio>
-      </main>
-    </PageTurn>
+      <Flow
+        form={form}
+        instructions={form.parts.map((part) => (
+          <Text key={part.id} text={part.instructions} />
+        ))}
+        intro={intro}
+        limits={limits}
+        sources={sources}
+      />
+    </ReadingPage>
   )
 }

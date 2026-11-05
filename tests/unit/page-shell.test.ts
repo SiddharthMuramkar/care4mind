@@ -28,3 +28,17 @@ describe('the route registry decides which pages exist', () => {
     expect(source).not.toMatch(/proposalsPageOn|features\.\w+\s*\?|if\s*\(\s*!?\s*features\./)
   })
 })
+
+describe('every page below the homepage is set in the one shell', () => {
+  const below = pages('src/app').filter((path) => path !== join('src/app', 'page.tsx'))
+
+  // The shell owns the skip link's target, the trail and the title pairing, so none is set by hand.
+  it.each(below)('%s renders the ReadingPage and sets no shell of its own', (path) => {
+    const source = readFileSync(path, 'utf8')
+    expect(source).toContain("from '@/components/ReadingPage'")
+    expect(source).toContain('<ReadingPage')
+    expect(source).not.toMatch(/<main\b/)
+    expect(source).not.toMatch(/<Breadcrumbs\b/)
+    expect(source).not.toMatch(/<Folio\b/)
+  })
+})

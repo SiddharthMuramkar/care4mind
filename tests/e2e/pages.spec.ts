@@ -19,6 +19,9 @@ for (const route of ROUTES_IN_SCOPE) {
 
     expect.soft(response?.status(), `${where}: status`).toBe(200)
     await expect.soft(page.locator('h1'), `${where}: exactly one h1`).toHaveCount(1)
+    await expect
+      .soft(page.locator('main#main'), `${where}: exactly one main#main, the skip link’s target`)
+      .toHaveCount(1)
     expect.soft(await scrollsSideways(page), `${where}: no sideways scroll`).toEqual([])
 
     // Until launch, search engines are told twice (siteConfig.indexable).
@@ -117,6 +120,7 @@ test.describe('404 page', () => {
     expect(response?.status()).toBe(404)
     expect(response?.headers()['x-robots-tag']).toContain('noindex')
     await expect(page.locator('meta[name="robots"]').first()).toHaveAttribute('content', /noindex/)
+    await expect(page.locator('main#main')).toHaveCount(1)
     await expect(page.getByRole('heading', { level: 1 })).toHaveText(/isn’t in the book/)
     await expect(page.getByRole('link', { name: 'Go to the homepage' })).toBeVisible()
     expect(await scrollsSideways(page)).toEqual([])
