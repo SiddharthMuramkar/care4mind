@@ -222,6 +222,7 @@ const home = defineHome({
   whoBehind: 'Made up.',
   closing: 'Made up.',
   helpLine: 'Made up.',
+  footerQuestionnaires: 'Made up.',
   provenance,
 })
 

@@ -1,7 +1,7 @@
 import type { Route } from 'next'
 
-/** The three sections the header links to, besides Search. */
-export type SectionId = 'concepts' | 'texts' | 'library'
+/** The sections the header links to, besides Search; Questionnaires only while one can be taken. */
+export type SectionId = 'concepts' | 'texts' | 'questionnaires' | 'library'
 
 /** The two sections whose header item opens a panel on a computer, and a list in the Drawer. */
 export type PanelId = 'concepts' | 'library'
@@ -50,7 +50,11 @@ export interface SiteNav {
   concepts: { index: NavLink; topics: readonly TopicLink[]; map?: NavLink }
   /** The Library panel: References, then the reading lists from the fullest, then its pages. */
   library: { index: NavLink; pages: readonly LibraryLink[] }
-  /** The footer's plain link to the Questionnaires page; the header and the phone menu do not list it. */
+  /**
+   * The footer's plain link to the Questionnaires page, always listed there. While none can be
+   * taken it carries the home record's drafted label; the header and the phone menu list
+   * Questionnaires only while one can be taken, as a section above.
+   */
   questionnaires: NavLink
   search: NavLink
   proposals?: NavLink

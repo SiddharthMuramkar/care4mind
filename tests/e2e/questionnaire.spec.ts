@@ -2,8 +2,8 @@ import { expect, gotoReady, test } from './fixtures'
 import { pageTurns, prefetched, recordPageTurns } from './page-turns'
 
 // Local runs and CI build with the preview flag on, so the KarmaYoga Scale's Start opens
-// its flow. Where the flag is off, Start stays disabled and says "Coming soon"; the flags-off
-// build checks that side.
+// its flow. Where the flag is off, Start stays disabled and says "In preparation"; the
+// flags-off build checks that side.
 test.describe('Questionnaire page (FR-05)', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/questionnaires/karmayoga-scale/')
@@ -76,17 +76,17 @@ test.describe('Questionnaires page', () => {
     await expect(first.getByText('Preview', { exact: true })).toBeVisible()
   })
 
-  test('groups the 17 coming later by topic, each with its anchor, title, status and Concept', async ({
+  test('groups the 17 in preparation by topic, each with its anchor, title, status and Concept', async ({
     page,
   }) => {
     await page.goto('/questionnaires/')
-    const later = page.getByRole('region', { name: 'Coming later' })
+    const later = page.getByRole('region', { name: 'In preparation' })
     expect(await later.getByRole('heading', { level: 3 }).count()).toBeGreaterThan(1)
     const slips = later.locator('li[id]')
     expect((await slips.evaluateAll((items) => items.map(({ id }) => id))).sort()).toEqual(LATER)
     for (const slip of await slips.all()) {
       await expect(slip.getByRole('heading', { level: 4 })).toHaveText(/\S/)
-      await expect(slip.getByText('Coming later', { exact: true })).toBeVisible()
+      await expect(slip.getByText('In preparation', { exact: true })).toBeVisible()
       await expect(slip.getByRole('link').first()).toHaveAttribute(
         'href',
         /^\/concepts\/[a-z-]+\/$/,

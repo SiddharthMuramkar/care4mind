@@ -139,6 +139,7 @@ describe('record schema', () => {
         whoBehind: '',
         closing: '',
         helpLine: '',
+        footerQuestionnaires: '',
         provenance,
       }),
     ]

@@ -1587,6 +1587,7 @@ describe('the homepage', () => {
     whoBehind: 'Made up.',
     closing: 'A made-up closing.',
     helpLine: 'A made-up help line.',
+    footerQuestionnaires: 'A made-up footer label.',
     provenance,
   })
 
@@ -1615,6 +1616,7 @@ describe('the homepage', () => {
       whoBehind: 'Made up.',
       closing: 'A made-up closing.',
       helpLine: 'A made-up help line.',
+      footerQuestionnaires: 'A made-up footer label.',
       provenance,
       reviewStatus: 'carried-over-not-reviewed',
     })
@@ -1753,6 +1755,7 @@ describe('every view', () => {
       whoBehind: 'Made up.',
       closing: 'Made up.',
       helpLine: 'Made up.',
+      footerQuestionnaires: 'Made up.',
       provenance,
     }),
   ]
@@ -1819,6 +1822,7 @@ describe('the feature flags, from the environment to the interface', () => {
       whoBehind: 'Made up.',
       closing: 'Made up.',
       helpLine: 'Made up.',
+      footerQuestionnaires: 'Made up.',
       provenance,
     }),
   ]

@@ -225,6 +225,15 @@ describe('the address', () => {
 describe('the gate', () => {
   const FLOW = '/questionnaires/karmayoga-scale/take/'
 
+  /** The site's own records, with every Questionnaire coming later. */
+  const laterSource: ContentSource = {
+    async records(kind) {
+      const records = await localSource.records(kind)
+      if (kind !== 'questionnaire') return records
+      return records.map((record) => ({ ...record, status: 'coming-later' })) as typeof records
+    },
+  }
+
   /** The site's own records, with the KarmaYoga Scale's status set to `live`. */
   const liveSource: ContentSource = {
     async records(kind) {
@@ -273,7 +282,7 @@ describe('the gate', () => {
     })
   })
 
-  it('has no flow while the flag is off, and Start is disabled: coming soon', async () => {
+  it('has no flow while the flag is off, and Start is disabled: in preparation', async () => {
     expect(await gate(OFF)).toEqual({
       routed: false,
       form: false,
@@ -296,7 +305,28 @@ describe('the gate', () => {
   it('names every status in words', () => {
     expect(statusWords('live')).toBe('Open')
     expect(statusWords('preview')).toBe('Preview')
-    expect(statusWords('coming-soon')).toBe('Coming soon')
-    expect(statusWords('coming-later')).toBe('Coming later')
+    expect(statusWords('coming-soon')).toBe('In preparation')
+    expect(statusWords('coming-later')).toBe('In preparation')
+  })
+
+  it('reads every Questionnaire a visitor cannot take as in preparation', async () => {
+    const cards = await createContent(localSource, OFF).questionnaires.list()
+    expect(cards.length).toBeGreaterThan(0)
+    for (const card of cards) {
+      expect(card.shownStatus).not.toBe('preview')
+      if (!card.takeHref) expect(statusWords(card.shownStatus)).toBe('In preparation')
+    }
+  })
+
+  it('has a takeable Questionnaire only while one can be taken in the build', async () => {
+    for (const flags of [ON, OFF]) {
+      const content = createContent(localSource, flags)
+      const cards = await content.questionnaires.list()
+      expect(await content.questionnaires.anyTakeable()).toBe(
+        cards.some((card) => card.takeHref !== undefined),
+      )
+      expect(await createContent(liveSource, flags).questionnaires.anyTakeable()).toBe(true)
+      expect(await createContent(laterSource, flags).questionnaires.anyTakeable()).toBe(false)
+    }
   })
 })
