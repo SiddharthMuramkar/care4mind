@@ -3,8 +3,10 @@ import Link from 'next/link'
 
 import { turnForward } from '@/components/PageTurn'
 import { ReadingPage } from '@/components/ReadingPage'
-import { hrefFor } from '@/content'
+import { TopicChip } from '@/components/topics'
+import { concepts, hrefFor } from '@/content'
 import { metadataFor } from '@/lib/metadata'
+import { readingTimeWords } from '@/lib/text'
 import { resultGroups } from '@/lib/search/search'
 import { search } from '@/lib/search/server'
 
@@ -30,6 +32,12 @@ export default async function SearchPage({ searchParams }: PageProps<'/search'>)
   const query = (Array.isArray(q) ? q[0] : q)?.trim() ?? ''
   const found = query === '' ? [] : await search(query)
   const groups = resultGroups(found)
+  // A Concept result shows its card's chip and reading time, as every Concept card does.
+  const cards = new Map(
+    (query === '' ? [] : await concepts.list()).map((card) => [card.href, card]),
+  )
+  const cardOf = (result: (typeof found)[number]) =>
+    result.kind === 'concept' ? cards.get(result.href) : undefined
 
   return (
     <ReadingPage
@@ -63,21 +71,30 @@ export default async function SearchPage({ searchParams }: PageProps<'/search'>)
             <div key={kind} className={listing.group}>
               <h3 className={listing.groupTitle}>{heading}</h3>
               <ul className={listing.entries}>
-                {results.map((result) => (
-                  <li key={result.id} className={listing.entry}>
-                    <p className={listing.entryName}>
-                      {/* Each result's path, made by hrefFor() in the content module. */}
-                      <Link
-                        href={result.href as Route}
-                        lang={result.lang}
-                        transitionTypes={turnForward}
-                      >
-                        {result.title}
-                      </Link>
-                    </p>
-                    {result.parent ? <p className={listing.meta}>In {result.parent}</p> : null}
-                  </li>
-                ))}
+                {results.map((result) => {
+                  const card = cardOf(result)
+                  return (
+                    <li key={result.id} className={listing.entry}>
+                      <p className={listing.entryName}>
+                        {/* Each result's path, made by hrefFor() in the content module. */}
+                        <Link
+                          href={result.href as Route}
+                          lang={result.lang}
+                          transitionTypes={turnForward}
+                        >
+                          {result.title}
+                        </Link>
+                      </p>
+                      {card ? (
+                        <p className={styles.conceptMeta}>
+                          <TopicChip topic={card.topic} />
+                          <span>{readingTimeWords(card.readingMinutes)}</span>
+                        </p>
+                      ) : null}
+                      {result.parent ? <p className={listing.meta}>In {result.parent}</p> : null}
+                    </li>
+                  )
+                })}
               </ul>
               {total > results.length ? (
                 <p className={listing.note}>And {total - results.length} more.</p>

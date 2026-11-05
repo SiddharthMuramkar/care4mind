@@ -226,6 +226,8 @@ export interface ConceptCard extends ConceptRef {
   summary: Inline
   /** Its primary topic, which sets its breadcrumb. */
   topic: TopicRef
+  /** About how long its page takes to read, in minutes: its body text at 200 words a minute. */
+  readingMinutes: number
 }
 
 /** Strongest first. The map uses every kind but topic: a topic is a sector, not an edge. */
@@ -250,8 +252,6 @@ export interface ConceptView extends ConceptCard, CarriedOver {
   spellings: readonly string[]
   /** One line on why the Concept matters, where the Research editor has supplied it. */
   whyItMatters?: Inline
-  /** About how long its page takes to read, in minutes: its body text at 200 words a minute. */
-  readingMinutes: number
   /** Every Term its sections explain, in page order, for the page's at-a-glance grid. */
   glance: readonly { id: Slug; name: string; gloss?: string; href: string }[]
   /** The topics it is also in. */

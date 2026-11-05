@@ -2,7 +2,10 @@ import type { ConceptCard, LatinScript, VerseView } from '@/content'
 
 import type { PreviewPayload } from '../preview'
 
-/** What a Concept link's preview shows: its name, its Devanagari, its gloss and its summary. */
+/**
+ * What a Concept link's preview shows: its name, its Devanagari, its gloss, its topic and
+ * reading time, and its summary.
+ */
 export function conceptPreview(concept: ConceptCard): PreviewPayload {
   return {
     kind: 'concept',
@@ -10,6 +13,8 @@ export function conceptPreview(concept: ConceptCard): PreviewPayload {
     ...(concept.lang ? { lang: concept.lang } : {}),
     ...(concept.term?.devanagari ? { devanagari: concept.term.devanagari } : {}),
     ...(concept.english && concept.term ? { gloss: concept.english } : {}),
+    topic: concept.topic,
+    readingMinutes: concept.readingMinutes,
     text: concept.summary,
   }
 }

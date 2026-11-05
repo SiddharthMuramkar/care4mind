@@ -3,6 +3,9 @@
 import { PreviewCard } from '@base-ui/react/preview-card'
 import { useEffect } from 'react'
 
+import { TopicChip } from '@/components/topics'
+import { readingTimeWords } from '@/lib/text'
+
 import type { PreviewPayload } from './LinkPreview'
 import styles from './PreviewCard.module.css'
 import type { PreviewParts } from './store'
@@ -20,7 +23,7 @@ const KINDS: Record<PreviewPayload['kind'], string> = {
 
 /** A slip of paper with the link's name, its Devanagari and gloss, and a line from the content. */
 function Slip({ payload }: { payload: PreviewPayload }) {
-  const { kind, name, lang, devanagari, gloss, text } = payload
+  const { kind, name, lang, devanagari, gloss, topic, readingMinutes, text } = payload
   return (
     <>
       <p className={styles.kind}>{KINDS[kind]}</p>
@@ -33,6 +36,12 @@ function Slip({ payload }: { payload: PreviewPayload }) {
         ) : null}
       </p>
       {gloss ? <p className={styles.gloss}>{gloss}</p> : null}
+      {topic || readingMinutes !== undefined ? (
+        <p className={styles.meta}>
+          {topic ? <TopicChip topic={topic} /> : null}
+          {readingMinutes !== undefined ? <span>{readingTimeWords(readingMinutes)}</span> : null}
+        </p>
+      ) : null}
       {text ? <p className={styles.text}>{text}</p> : null}
     </>
   )

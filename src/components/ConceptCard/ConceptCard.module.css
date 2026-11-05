@@ -5,7 +5,7 @@
   grid-template-areas:
     'title deva'
     'gloss gloss'
-    'topic topic'
+    'meta meta'
     'summary summary'
     'action action';
   align-items: baseline;
@@ -68,9 +68,16 @@
   font-size: 1.125rem;
 }
 
-.topic {
-  grid-area: topic;
+.meta {
+  grid-area: meta;
   justify-self: start;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.75rem;
+  margin: 0;
+  color: var(--color-surface-muted);
+  font-size: 1rem;
 }
 
 .summary {
@@ -119,7 +126,7 @@
       'title'
       'deva'
       'gloss'
-      'topic'
+      'meta'
       'summary'
       'action';
     padding: 1.5rem;

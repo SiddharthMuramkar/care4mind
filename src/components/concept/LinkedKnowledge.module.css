@@ -77,6 +77,16 @@
   font-style: italic;
 }
 
+.meta {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.6rem;
+  color: var(--color-surface-muted);
+  font-size: 1rem;
+  line-height: 1.45;
+}
+
 .note {
   flex: 0 1 auto;
   max-width: min(100%, 26rem);
