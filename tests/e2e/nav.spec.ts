@@ -28,10 +28,10 @@ const TOPICS = [
 // In the Library page's order, each with what it holds, counted as the Library page counts it.
 const LIBRARY = [
   { name: /^References/, path: '/library/references/', holds: '188 References' },
-  { name: /^Courses/, path: '/library/courses/', holds: '8 entries' },
-  { name: /^Inspirational Books/, path: '/library/inspirational-books/', holds: '13 entries' },
-  { name: /^Text Books/, path: '/library/textbooks/', holds: '20 entries' },
-  { name: /^Methods/, path: '/library/methods/', holds: '5 sections' },
+  { name: /^Courses in India/, path: '/library/courses/', holds: '8 entries' },
+  { name: /^Inspirational books/, path: '/library/inspirational-books/', holds: '13 entries' },
+  { name: /^Textbooks/, path: '/library/textbooks/', holds: '20 entries' },
+  { name: /^Therapy approaches/, path: '/library/methods/', holds: '5 sections' },
 ] as const
 
 /** Start here follows the wordmark from 30rem (480 px), while its proposal's route exists. */
@@ -514,6 +514,81 @@ test.describe('panels, on a computer', () => {
     await expect(panel(page, 'Library')).toBeVisible()
     const shifts = await page.evaluate(() => (window as unknown as { __shifts: number[] }).__shifts)
     expect(shifts.reduce((sum, shift) => sum + shift, 0)).toBeLessThan(0.001)
+  })
+})
+
+test.describe('every panel stays inside the screen', () => {
+  const toggle = (page: Page, section: string) =>
+    header(page).getByRole('button', { name: `More in ${section}` })
+  const panel = (page: Page, section: string) =>
+    page.getByRole('navigation', { name: section, exact: true })
+  const arrow = (page: Page) => page.locator('[class*="arrow"][data-side]')
+
+  /** The open panel keeps its collision padding from each edge, its pointer under its item. */
+  const inside = async (page: Page, section: string) => {
+    const width = page.viewportSize()?.width ?? 0
+    await expect(async () => {
+      const box = await panel(page, section).boundingBox()
+      if (!box) throw new Error(`the ${section} panel is on the page`)
+      expect(box.x, `the ${section} panel keeps off the left edge`).toBeGreaterThanOrEqual(16)
+      expect(
+        box.x + box.width,
+        `the ${section} panel keeps off the right edge`,
+      ).toBeLessThanOrEqual(width - 16)
+      const item = await toggle(page, section).locator('xpath=ancestor::li[1]').boundingBox()
+      const pointer = await arrow(page).boundingBox()
+      if (!item || !pointer) throw new Error('the open panel points at its item')
+      const middle = pointer.x + pointer.width / 2
+      expect(middle, `the ${section} pointer sits under its item`).toBeGreaterThanOrEqual(item.x)
+      expect(middle, `the ${section} pointer sits under its item`).toBeLessThanOrEqual(
+        item.x + item.width,
+      )
+    }).toPass()
+  }
+
+  for (const width of [320, 390, WIDE, 1280]) {
+    test(`at ${width} px no open panel overflows either edge, and a panel's pointer sits under its toggle`, async ({
+      page,
+    }) => {
+      await page.setViewportSize({ width, height: 800 })
+      await gotoReady(page, '/')
+      if (width < WIDE) {
+        // Below 72rem the sections open in the Drawer, the only panel there is.
+        await banner(page).getByRole('button', { name: 'Menu' }).click()
+        const drawer = page.getByRole('dialog', { name: 'Menu' })
+        await expect(drawer).toBeVisible()
+        await settled(page)
+        const box = await drawer.boundingBox()
+        if (!box) throw new Error('the Drawer is on the page')
+        expect(box.x, 'the Drawer stays off the left edge').toBeGreaterThanOrEqual(0)
+        expect(box.x + box.width, 'the Drawer stays off the right edge').toBeLessThanOrEqual(width)
+        return
+      }
+      await expect(toggle(page, 'Library')).toHaveAttribute('data-ready')
+      for (const section of ['Concepts', 'Library']) {
+        await toggle(page, section).click()
+        await expect(panel(page, section)).toBeVisible()
+        await settled(page)
+        await inside(page, section)
+        await page.keyboard.press('Escape')
+        await expect(panel(page, section)).toBeHidden()
+      }
+    })
+  }
+
+  test('a panel open while the window narrows stays inside, its pointer under its toggle', async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 1440, height: 900 })
+    await gotoReady(page, '/')
+    await expect(toggle(page, 'Library')).toHaveAttribute('data-ready')
+    await toggle(page, 'Library').click()
+    await expect(panel(page, 'Library')).toBeVisible()
+    await settled(page)
+    await page.setViewportSize({ width: WIDE, height: 900 })
+    await expect(panel(page, 'Library')).toBeVisible()
+    await settled(page)
+    await inside(page, 'Library')
   })
 })
 
