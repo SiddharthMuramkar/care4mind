@@ -70,7 +70,7 @@ async function build(): Promise<SiteNav> {
       },
       {
         id: 'texts',
-        ...link('Texts', hrefFor({ page: 'texts' })),
+        ...link('Traditional texts', hrefFor({ page: 'texts' })),
         within: [hrefFor({ page: 'texts' })],
       },
       {
@@ -85,7 +85,7 @@ async function build(): Promise<SiteNav> {
       },
     ],
     concepts: {
-      index: link('Concepts A–Z', hrefFor({ page: 'concepts' })),
+      index: link('All concepts A–Z', hrefFor({ page: 'concepts' })),
       topics: topicLinks,
       ...(has('concept-map') ? { map: link('Concept map', hrefFor({ page: 'concept-map' })) } : {}),
     },

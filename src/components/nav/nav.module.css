@@ -33,6 +33,8 @@
   letter-spacing: 0.12em;
   font-size: 1.1875rem;
   text-decoration: none;
+  /* A two-word label squeezed onto two lines reflows, and shifts the header, when the toggles swap. */
+  white-space: nowrap;
 }
 
 /* On hover and focus a line draws in under the label (short of its last letter-space), by transform. */
