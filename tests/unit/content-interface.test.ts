@@ -551,7 +551,7 @@ describe('a Concept’s References', () => {
   })
 })
 
-describe('a Concept’s related Concepts (D06)', () => {
+describe('a Concept’s related Concepts', () => {
   const self = defineTopic({ kind: 'topic', slug: 'self', name: { english: 'Self' }, order: 3 })
   const ys230 = definePassage({
     ...ys130,
@@ -1716,7 +1716,7 @@ describe('every view', () => {
   })
 })
 
-describe('the feature flags, from the environment to the interface (D16, D20)', () => {
+describe('the feature flags, from the environment to the interface', () => {
   const form: QuestionnaireForm = {
     responseSets: { yes: ['Yes', 'No'] },
     parts: [

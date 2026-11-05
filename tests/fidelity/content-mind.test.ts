@@ -270,7 +270,7 @@ describe('each mind Concept’s coming-later Questionnaire', () => {
   })
 
   it.each(MIND)(
-    'takes $slug’s title from its page, and its candidate source from research ticket 11',
+    'takes $slug’s title from its page, and the candidate source the research proposed',
     async ({ slug, questionnaire: expected }) => {
       const questionnaire = await questionnaires.get(slug)
       expect(questionnaire?.title).toBe(expected.title)

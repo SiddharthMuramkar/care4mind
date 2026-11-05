@@ -527,7 +527,7 @@ describe('the records verify can’t check', () => {
   })
 })
 
-describe('the Concept slugs (D02)', () => {
+describe('the Concept slugs', () => {
   const slugOf = (text: string) =>
     text
       .toLowerCase()

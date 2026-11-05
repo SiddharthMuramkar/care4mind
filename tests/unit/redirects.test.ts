@@ -116,7 +116,7 @@ describe('the matcher these tests copy from Next', () => {
   })
 })
 
-describe('the current site’s pages and posts (D11, design B4)', () => {
+describe('the current site’s pages and posts', () => {
   it('sends each one to its new page, by one row', () => {
     expect(Object.keys(PAGES_AND_POSTS)).toHaveLength(37)
     for (const [old, page] of Object.entries(PAGES_AND_POSTS)) expect(sends(old), old).toBe(page)
@@ -131,7 +131,7 @@ describe('the current site’s pages and posts (D11, design B4)', () => {
   })
 })
 
-describe('archives and the feed (D17)', () => {
+describe('archives and the feed', () => {
   it('sends the category archives to the A–Z and the homepage, and the feed home', () => {
     expect(sends('/category/concepts/')).toBe('/concepts/')
     expect(sends('/category/uncategorized/')).toBe('/')
@@ -222,7 +222,7 @@ describe('the table, cross-checked with the content’s provenance', () => {
     }
   })
 
-  it('sends a page that became both a Concept and a Questionnaire to the Concept (D12)', () => {
+  it('sends a page that became both a Concept and a Questionnaire to the Concept', () => {
     const both = [...oldAddresses()].filter(
       ([, heirs]) =>
         heirs.some(({ kind }) => kind === 'concept') &&

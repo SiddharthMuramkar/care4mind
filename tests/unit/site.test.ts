@@ -51,7 +51,7 @@ describe('the share card', () => {
   })
 })
 
-describe('a page’s metadata (D19)', () => {
+describe('a page’s metadata', () => {
   it('names a Concept by its term and gloss, describes it by its summary and gives its address', async () => {
     expect(await metadataFor('/concepts/vikshepa/')).toEqual(
       withShareTags({
@@ -194,7 +194,7 @@ describe('the sitemap and robots.txt (NFR-04)', () => {
   })
 })
 
-describe('addresses and redirects (D02, D17)', () => {
+describe('addresses and redirects', () => {
   it('ends every address with a slash', () => {
     expect(nextConfig.trailingSlash).toBe(true)
   })
@@ -215,7 +215,7 @@ describe('addresses and redirects (D02, D17)', () => {
   })
 })
 
-describe('breadcrumbs (D15)', () => {
+describe('breadcrumbs', () => {
   const labels = async (path: string) => (await site.trail(path)).map(({ label }) => label)
 
   it('leads a Concept through its primary topic, each crumb a link, the Concept last', async () => {
@@ -227,7 +227,7 @@ describe('breadcrumbs (D15)', () => {
     ])
   })
 
-  it('gives one page of every other kind design B6’s trail', async () => {
+  it('gives one page of every other kind a trail from Home through its section', async () => {
     expect(await labels('/concepts/')).toEqual(['Home', 'Concepts'])
     expect(await labels('/concepts/map/')).toEqual(['Home', 'Concepts', 'Concept map'])
     expect(await labels('/topics/values/')).toEqual(['Home', 'Concepts', 'Values: yama and niyama'])

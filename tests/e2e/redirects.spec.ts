@@ -79,7 +79,7 @@ test.describe('every old address (FR-07)', () => {
   }
 })
 
-test.describe('an old address typed another way (ticket 14’s Comments)', () => {
+test.describe('an old address typed another way', () => {
   // Next adds a missing trailing slash, with a 308 of its own, before it reads the redirect
   // table; it matches the table's sources ignoring case.
   const VARIANTS = [
@@ -112,7 +112,7 @@ test.describe('an old address typed another way (ticket 14’s Comments)', () =>
     expect(bare.at).toBe('/concepts/')
   })
 
-  test('/CONCEPTS/ reaches the A–Z (expected to fail until planning ticket 24)', async ({
+  test('/CONCEPTS/ reaches the A–Z (expected to fail while pages match case-sensitively)', async ({
     request,
   }) => {
     test.fail(

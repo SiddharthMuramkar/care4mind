@@ -529,7 +529,7 @@ describe('the graph', () => {
   })
 })
 
-describe('feature flags (D16, D20)', () => {
+describe('feature flags', () => {
   const allOn = {
     questionnairePreview: true,
     conceptMap: true,

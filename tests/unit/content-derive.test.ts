@@ -478,7 +478,7 @@ describe('site.trail', () => {
     ])
   })
 
-  it('gives every other kind of page design B6’s trail', async () => {
+  it('gives every other kind of page a trail from Home through its section', async () => {
     expect(await trail('/')).toEqual([homeCrumb])
     expect(await trail('/concepts/')).toEqual([homeCrumb, concepts])
     expect(await trail('/concepts/map/')).toEqual([

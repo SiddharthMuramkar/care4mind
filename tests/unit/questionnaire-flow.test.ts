@@ -221,7 +221,7 @@ describe('the address', () => {
   })
 })
 
-describe('the gate (D16)', () => {
+describe('the gate', () => {
   const FLOW = '/questionnaires/karmayoga-scale/take/'
 
   /** The site's own records, with the KarmaYoga Scale's status set to `live`. */

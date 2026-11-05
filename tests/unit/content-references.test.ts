@@ -191,7 +191,7 @@ describe('once each', () => {
   })
 })
 
-describe('ids (settled rule 15)', () => {
+describe('ids', () => {
   const made = (id: string, fields: Partial<ReferenceView>): ReferenceView => ({
     ...reference('tomar-2024'),
     authors: undefined,

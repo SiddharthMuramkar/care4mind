@@ -47,7 +47,7 @@ test.describe('Questionnaire page (FR-05)', () => {
 })
 
 // The flow itself is checked in questionnaire-flow.spec.ts; these cover the index.
-test.describe('Questionnaires page (D16)', () => {
+test.describe('Questionnaires page', () => {
   /** The 16 description pages' Questionnaires and the Dosha Survey, at their anchors. */
   const LATER = [
     'ahimsa',
@@ -112,7 +112,7 @@ test.describe('Questionnaires page (D16)', () => {
   })
 })
 
-test('names each Questionnaire page’s place in its breadcrumbs (D15)', async ({ page }) => {
+test('names each Questionnaire page’s place in its breadcrumbs', async ({ page }) => {
   for (const [path, trail] of [
     ['/questionnaires/', ['Home', 'Questionnaires']],
     ['/questionnaires/karmayoga-scale/', ['Home', 'Questionnaires', 'KarmaYoga Scale']],
