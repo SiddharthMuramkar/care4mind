@@ -12,7 +12,7 @@ export async function HelpLine({ className }: { className?: string }) {
         typeof part === 'string' ? (
           part
         ) : (
-          <a key={index} href={part.tel} className={styles.number}>
+          <a key={index} href={part.tel} aria-label={part.label} className={styles.number}>
             {part.number}
           </a>
         ),
