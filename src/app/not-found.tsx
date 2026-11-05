@@ -20,7 +20,7 @@ export default async function NotFound() {
   return (
     <PageTurn>
       <main id="main" className={reading.page}>
-        <Folio className={page.folio}>
+        <Folio variant="page" className={page.folio}>
           <p className={reading.kicker}>Error 404 · Page not found</p>
           <h1 className={page.title}>This page isn’t in the book</h1>
           <Fleuron className={styles.fleuron} />

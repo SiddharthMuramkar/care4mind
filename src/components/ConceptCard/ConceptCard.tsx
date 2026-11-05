@@ -1,5 +1,6 @@
 import { ViewTransition, type ReactNode } from 'react'
 
+import { FrameCorners } from '@/components/Folio'
 import { TopicChip } from '@/components/topics'
 import type { ConceptCard as Card } from '@/content'
 import { cx } from '@/lib/cx'
@@ -12,15 +13,18 @@ interface Props {
   /** The card's one action: a link or button, stretched to cover the whole card. */
   action: ReactNode
   className?: string
+  /** A featured card takes the printer's double frame; the rest keep a single thin rule. */
+  featured?: boolean
 }
 
 /**
  * A Concept in brief. Its title shares a view-transition name with the Concept
  * page's heading, so following the card morphs one into the other.
  */
-export function ConceptCard({ concept, action, className }: Props) {
+export function ConceptCard({ concept, action, className, featured = false }: Props) {
   return (
-    <article className={cx(styles.card, className)} data-paper>
+    <article className={cx(styles.card, featured && styles.featured, className)} data-paper>
+      {featured ? <FrameCorners /> : null}
       <ViewTransition name={`concept-title-${concept.slug}`} share="morph" default="none">
         <h3 className={styles.title}>
           <span lang={concept.lang}>{concept.name}</span>
