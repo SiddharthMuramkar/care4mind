@@ -474,6 +474,12 @@ export interface PageView extends CarriedOver {
   toc: readonly TocEntry[]
 }
 
+/** A Concept the homepage features, with how long its page takes to read. */
+export interface FeaturedConceptCard extends ConceptCard {
+  /** Derived from the Concept's own words, never written in a record. */
+  readingMinutes: number
+}
+
 /** The homepage: its own text, each area linking to its new page where it has one. */
 export interface HomepageView extends CarriedOver {
   tagline: string
@@ -482,6 +488,10 @@ export interface HomepageView extends CarriedOver {
   sectionIntros: { concepts: string; questionnaires: string }
   intro: Inline
   areas: readonly { title: string; text: Inline; href?: string }[]
+  /** The featured Concepts, in the home record's order, with every id resolved. */
+  featured: readonly FeaturedConceptCard[]
+  howItWorks: Inline
+  whoBehind: Inline
   closing: Inline
   helpLine: Inline
 }

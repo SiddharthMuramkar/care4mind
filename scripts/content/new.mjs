@@ -188,6 +188,9 @@ ${PROVENANCE}
   sectionIntros: { concepts: '', questionnaires: '' },
   intro: '',
   areas: [], // { title, text, target? }
+  featured: [],
+  howItWorks: '',
+  whoBehind: '',
   closing: '',
   helpLine: '',
 ${PROVENANCE}

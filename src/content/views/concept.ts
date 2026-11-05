@@ -19,6 +19,49 @@ import { questionnaireCard } from './questionnaire'
 import { citationMap, numberedReferences } from './reference'
 import { conceptRef } from './refs'
 
+const wordsIn = (text: string) => text.split(/\s+/).filter(Boolean).length
+
+function blockWords(blocks: readonly Block[]): number {
+  return blocks.reduce((words, block) => {
+    switch (block.kind) {
+      case 'paragraph':
+        return words + wordsIn(block.text)
+      case 'list':
+        return words + block.items.reduce((sum, item) => sum + wordsIn(item), 0)
+      case 'term':
+        return words + wordsIn(block.gloss ?? '') + blockWords(block.blocks)
+      case 'table':
+        return (
+          words +
+          wordsIn(block.caption) +
+          block.columns.reduce((sum, column) => sum + wordsIn(column), 0) +
+          block.rows.reduce(
+            (sum, row) =>
+              sum +
+              (typeof row.head === 'string' ? wordsIn(row.head) : 0) +
+              row.cells.reduce((cellSum, cell) => cellSum + wordsIn(cell), 0),
+            0,
+          )
+        )
+      case 'verse':
+        return words + wordsIn(block.quote.meaning ?? '')
+      case 'topic-intro':
+        return words
+    }
+  }, 0)
+}
+
+/** How long a Concept's page takes to read, from its own words at a plain reading pace. */
+export function readingMinutes(record: ConceptRecord): number {
+  const words =
+    wordsIn(record.summary) +
+    record.sections.reduce(
+      (sum, section) => sum + wordsIn(section.heading) + blockWords(section.blocks),
+      0,
+    )
+  return Math.max(1, Math.ceil(words / 200))
+}
+
 /** A Concept in brief, for lists and cards. */
 export function conceptCard(record: ConceptRecord, graph: ContentGraph): ConceptCard {
   return {
