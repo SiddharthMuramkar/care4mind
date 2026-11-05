@@ -1,6 +1,6 @@
 import type { Locator, Page } from '@playwright/test'
 
-import { recordAnimationStarts, transitionedOn } from './drawings'
+import { openingFolio, recordAnimationStarts, transitionedOn } from './drawings'
 import { expect, gotoReady, test } from './fixtures'
 import { MISSING } from './routes'
 
@@ -24,7 +24,8 @@ const DRAWN: { page: string; name: string; in: (page: Page) => Locator; width?: 
     // The header shows its sections from 72rem; narrower screens find them in the Menu.
     width: 1440,
   },
-  { page: '/', name: 'Start here', in: (page: Page) => page.getByRole('main') },
+  // The hero's "Start here": the closing button at the foot of the page repeats its label.
+  { page: '/', name: 'Start here', in: openingFolio },
   { page: MISSING, name: 'Go to the homepage', in: (page: Page) => page.getByRole('main') },
 ]
 
@@ -51,7 +52,13 @@ for (const { page: path, name, in: around, width } of DRAWN) {
 
 // Links in running text keep their underline at rest (WCAG 1.4.1) and draw an accent over it.
 const IN_TEXT = [
-  { page: '/', name: 'Concepts', in: (page: Page) => page.getByRole('main') },
+  // The homepage's unclassed links are its featured Concepts' card actions now; the areas
+  // that linked "Concepts" in their text are gone.
+  {
+    page: '/',
+    name: 'Read about Citta-bhūmi',
+    in: (page: Page) => page.getByRole('region', { name: 'Start with these' }),
+  },
   // The Questionnaire is a card in Linked knowledge; its works stay text.
   {
     page: '/concepts/vikshepa/',
@@ -107,7 +114,7 @@ test('pressing a card still presses it into the page', async ({ page }) => {
 
 test('a call to action keeps its focus ring', { tag: '@one-width' }, async ({ page }) => {
   await gotoReady(page, '/')
-  const cta = page.getByRole('main').getByRole('link', { name: 'Start here', exact: true })
+  const cta = openingFolio(page).getByRole('link', { name: 'Start here', exact: true })
   await focusFromKeyboard(page, cta)
   await expect(cta).toHaveCSS('outline-style', 'solid')
   expect(parseFloat(await cta.evaluate((element) => getComputedStyle(element).outlineWidth))).toBe(

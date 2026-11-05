@@ -161,6 +161,7 @@ export function danglingLinks(record: ContentRecord, index: Index): string[] {
       record.areas.forEach((area, i) => {
         if (area.target) target(`areas[${i}].target`, area.target)
       })
+      record.featured.forEach((slug, i) => need(`featured[${i}]`, 'concept', slug))
       break
     case 'work':
     case 'reference':

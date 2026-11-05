@@ -7,11 +7,11 @@ import { Folio } from '@/components/Folio'
 import { OrnamentRule } from '@/components/OrnamentRule'
 import { PageTurn, turnForward } from '@/components/PageTurn'
 import { Text } from '@/components/prose'
-import { QuestionnaireCard } from '@/components/QuestionnaireCard'
-import { concepts, home, hrefFor, questionnaires, site } from '@/content'
+import { TopicCard } from '@/components/topics'
+import { home, hrefFor, site, topics } from '@/content'
 import { heroLinks } from './hero-links'
+import { cx } from '@/lib/cx'
 import { metadataFor } from '@/lib/metadata'
-import { toDevanagariDigits } from '@/lib/text'
 
 import cta from '@/components/Cta'
 import styles from './page.module.css'
@@ -20,33 +20,10 @@ export function generateMetadata(): Promise<Metadata> {
   return metadataFor(hrefFor({ page: 'home' }))
 }
 
-/** Where an area's link leads, as the site map names it: "Library › Therapy approaches". */
-async function placeOf(href: string): Promise<string> {
-  return (await site.trail(href))
-    .slice(1)
-    .map((crumb) => crumb.label)
-    .join(' › ')
-}
-
 export default async function HomePage() {
-  const [page, allConcepts, allQuestionnaires, routes] = await Promise.all([
-    home.get(),
-    concepts.list(),
-    questionnaires.list(),
-    site.routes(),
-  ])
+  const [page, topicCards, routes] = await Promise.all([home.get(), topics.list(), site.routes()])
   const startHereListed = routes.some((route) => route.kind === 'start')
-  // The homepage features the Questionnaires with pages of their own, and the Concepts they draw
-  // on; the A–Z and the Questionnaires page hold the rest.
-  const featured = allQuestionnaires.filter(({ status }) => status !== 'coming-later')
-  const later = allQuestionnaires.length - featured.length
-  const drawnOn = new Set(
-    featured.flatMap((questionnaire) => questionnaire.concepts.map((c) => c.slug)),
-  )
-  const featuredConcepts = allConcepts.filter(({ slug }) => drawnOn.has(slug))
-  const areas = await Promise.all(
-    page.areas.map(async (area) => ({ ...area, place: area.href && (await placeOf(area.href)) })),
-  )
+  const closingLink = heroLinks(page.hero, startHereListed)[0]
 
   return (
     <PageTurn>
@@ -86,46 +63,30 @@ export default async function HomePage() {
           </Folio>
         </section>
 
-        <section id="contents" className={styles.section} aria-labelledby="contents-title">
-          <h2 id="contents-title" className={styles.sectionTitle}>
-            Contents
+        {/* The slot its own piece of work fills; it holds nothing until then. */}
+        <section id="on-your-mind" className={styles.slot} />
+
+        <section id="topics" className={styles.section} aria-labelledby="topics-title">
+          <h2 id="topics-title" className={styles.sectionTitle}>
+            Explore by topic
           </h2>
-          <ol className={styles.contents}>
-            {areas.map((area, index) => (
-              <li key={area.title} className={styles.entry}>
-                <span className={styles.entryNumber} aria-hidden>
-                  <span>{index + 1}</span>{' '}
-                  <span lang="sa-Deva">{toDevanagariDigits(String(index + 1))}</span>
-                </span>
-                <span className={styles.entryTitle}>
-                  {area.href ? (
-                    // The homepage's areas lead to the pages the content module gives them.
-                    <Link href={area.href as Route} transitionTypes={turnForward}>
-                      {area.title}
-                    </Link>
-                  ) : (
-                    area.title
-                  )}
-                </span>
-                <span className={styles.entryLeader} aria-hidden />
-                <span className={styles.entryStatus}>{area.place || 'In preparation'}</span>
-                <span className={styles.entryText}>
-                  <Text text={area.text} />
-                </span>
+          <ul className={styles.topics}>
+            {topicCards.map((topic) => (
+              <li key={topic.slug}>
+                <TopicCard topic={topic} />
               </li>
             ))}
-          </ol>
+          </ul>
         </section>
 
         <OrnamentRule className={styles.rule} />
 
-        <section id="concepts" className={styles.section} aria-labelledby="concepts-title">
-          <h2 id="concepts-title" className={styles.sectionTitle}>
-            Concepts
+        <section id="featured" className={styles.section} aria-labelledby="featured-title">
+          <h2 id="featured-title" className={styles.sectionTitle}>
+            Start with these
           </h2>
-          <p className={styles.sectionIntro}>{page.sectionIntros.concepts}</p>
           <ul className={styles.cards}>
-            {featuredConcepts.map((concept) => (
+            {page.featured.map((concept) => (
               <li key={concept.slug}>
                 <ConceptCard
                   featured
@@ -142,43 +103,46 @@ export default async function HomePage() {
               </li>
             ))}
           </ul>
-          <p className={styles.note}>
-            <Link href={hrefFor({ page: 'concepts' })} transitionTypes={turnForward}>
-              All {allConcepts.length} Concepts, from A to Z
-            </Link>
+        </section>
+
+        <OrnamentRule className={styles.rule} />
+
+        <section id="how-it-works" className={styles.section} aria-labelledby="how-it-works-title">
+          <h2 id="how-it-works-title" className={styles.sectionTitle}>
+            How it works
+          </h2>
+          <p className={styles.sectionIntro}>
+            <Text text={page.howItWorks} />
           </p>
         </section>
 
         <OrnamentRule className={styles.rule} />
 
-        <section
-          id="questionnaires"
-          className={styles.section}
-          aria-labelledby="questionnaires-title"
-        >
-          <h2 id="questionnaires-title" className={styles.sectionTitle}>
-            Questionnaires
+        <section id="who-behind" className={styles.section} aria-labelledby="who-behind-title">
+          <h2 id="who-behind-title" className={styles.sectionTitle}>
+            Who’s behind this
           </h2>
-          <p className={styles.sectionIntro}>{page.sectionIntros.questionnaires}</p>
-          <ul className={styles.cards}>
-            {featured.map((questionnaire) => (
-              <li key={questionnaire.slug}>
-                <QuestionnaireCard featured questionnaire={questionnaire} />
-              </li>
-            ))}
-          </ul>
-          {later > 0 ? (
-            <p className={styles.note}>
-              <Link href={hrefFor({ page: 'questionnaires' })} transitionTypes={turnForward}>
-                {later} more Questionnaires from the current site, coming later
+          <p className={styles.sectionIntro}>
+            <Text text={page.whoBehind} />
+          </p>
+        </section>
+
+        <section className={styles.closingSection} aria-label="Closing">
+          <p className={styles.closing}>
+            <Text text={page.closing} />
+          </p>
+          {closingLink ? (
+            <p className={styles.closingCta}>
+              <Link
+                href={closingLink.href as Route}
+                className={cx(cta.primary, styles.closingButton)}
+                data-ink
+              >
+                {closingLink.label}
               </Link>
             </p>
           ) : null}
         </section>
-
-        <p className={styles.closing}>
-          <Text text={page.closing} />
-        </p>
       </main>
     </PageTurn>
   )

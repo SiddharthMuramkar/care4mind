@@ -13,13 +13,18 @@ test.describe('a focused link on paper rings in paper’s focus colour', () => {
 
   test('on a Concept card', async ({ page }) => {
     await gotoReady(page, '/')
-    const card = page.locator('#concepts').getByRole('article').first()
+    // The homepage's Concept cards are its featured ones now, under "Start with these".
+    const card = page.locator('#featured').getByRole('article').first()
     await expectPaperFocusRing(card.getByRole('link', { name: /^Read about/ }), '::after')
   })
 
   test('on a Questionnaire card', async ({ page }) => {
-    await gotoReady(page, '/')
-    const card = page.locator('#questionnaires').getByRole('article').first()
+    // The homepage no longer shows Questionnaire cards; they live on their own index.
+    await gotoReady(page, '/questionnaires/')
+    const card = page
+      .getByRole('region', { name: /With a page of/ })
+      .getByRole('article')
+      .first()
     await expectPaperFocusRing(card.getByRole('link', { name: /^About the/ }), '::after')
   })
 
