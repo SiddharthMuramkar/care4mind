@@ -195,6 +195,77 @@
   vertical-align: bottom;
 }
 
+/* A comparison table on a phone: no frame to scroll; each row a card, each cell under its
+   column's name, which the hidden head row still names for a screen reader. */
+@media screen and (max-width: 40rem) {
+  .frameStacked {
+    overflow: visible;
+    border: 0;
+    background: none;
+  }
+
+  .tableStacked {
+    display: block;
+    min-width: 0;
+  }
+
+  .tableStacked .caption {
+    display: block;
+    padding-inline: 0;
+  }
+
+  .tableStacked tbody {
+    display: grid;
+    gap: 1rem;
+  }
+
+  .tableStacked tr {
+    display: grid;
+    padding-block: 0.25rem;
+    border: 1px solid var(--color-surface-rule);
+  }
+
+  .tableStacked :is(th, td) {
+    border-top: 0;
+  }
+
+  .tableStacked :is(th, td):first-child {
+    position: static;
+    width: auto;
+    min-width: 0;
+    max-width: none;
+    background: none;
+    box-shadow: none;
+  }
+
+  .tableStacked td {
+    display: grid;
+    gap: 0.15rem;
+  }
+
+  .tableStacked td::before {
+    content: attr(data-label);
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: var(--color-surface-muted);
+  }
+}
+
+/* A stacked table's head row carries sr-only on a phone; above one it is itself again. */
+@media screen and (min-width: 40.01rem) {
+  .stackedHead {
+    position: static;
+    width: auto;
+    height: auto;
+    padding: 0;
+    margin: 0;
+    overflow: visible;
+    clip-path: none;
+    white-space: normal;
+    border: 0;
+  }
+}
+
 /*
  * A verse card: the verse between rules, centred like a manuscript leaf, its source a chip that
  * leads to the passage, and "Copy verse" beneath.
@@ -217,7 +288,7 @@
 }
 
 /* Its translation and meaning are prose: set to the left, where long lines read easily. */
-.verse blockquote + div {
+.verse > div {
   justify-self: stretch;
   margin-inline: auto;
   text-align: start;

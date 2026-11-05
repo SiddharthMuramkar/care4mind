@@ -22,11 +22,13 @@ export interface ConceptRecord {
   name: ConceptName
   /** Sentence(s) from the page, never newly written. */
   summary: Inline
+  /** One line on why the Concept matters, once the Research editor supplies it. */
+  whyItMatters?: Inline
   /** Plain lowercase words a reader might search for, drawn from the Concept's own text. */
   keywords: readonly string[]
   /** Exactly one primary topic, which sets the breadcrumb; `also` never repeats it. */
   topics: { primary: Slug; also?: readonly Slug[] }
-  /** The verses at the top of the page, in source order. */
+  /** The verses the page quotes ahead of its sections, in source order. */
   verses: readonly PassageQuote[]
   sections: readonly Section[]
   /** The page's reference list, in source order, as Reference ids. */

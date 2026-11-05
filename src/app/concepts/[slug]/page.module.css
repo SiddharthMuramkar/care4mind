@@ -1,19 +1,64 @@
-/* Its topics, named under the summary. */
-.topics {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 0.5rem;
+/* Its gloss, a subtitle at reading size under the name. */
+.gloss {
   margin: 0;
+  font-size: 1.375rem;
+  line-height: 1.4;
+  color: var(--color-surface-muted);
 }
 
-/* "Also spelled", centred under the title. */
-.spellingTools {
+/* Its topics, named beside how long the page takes to read. */
+.meta {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
   align-items: center;
-  gap: 0.25rem 1rem;
+  gap: 0.5rem 1rem;
+  margin: 0;
+  color: var(--color-surface-muted);
+}
+
+/* Its plain-keyboard spellings, in the open under the title block. */
+.alsoWritten {
+  margin: 0;
+  font-size: 1.0625rem;
+  color: var(--color-surface-muted);
+}
+
+/* Everything the contents follow: the lead, then the contents beside the text. */
+.scope {
+  display: grid;
+  gap: 2.5rem;
+}
+
+.scope > * {
+  min-width: 0;
+}
+
+/* A lead section of the page: "In short", and the traditional texts below the sections. */
+.lead {
+  display: grid;
+  gap: 1rem;
+  scroll-margin-top: 1.5rem;
+}
+
+.lead > * {
+  min-width: 0;
+}
+
+/* The view timeline a table of contents follows where it lacks :target-current. */
+@supports (timeline-scope: none) and (not (scroll-target-group: auto)) {
+  .lead {
+    view-timeline-name: var(--timeline);
+    view-timeline-inset: 30% 69%;
+  }
+}
+
+.why {
+  max-width: 62ch;
+}
+
+.whyLabel {
+  font-weight: 600;
 }
 
 /* The contents, then the text; beside each other on a wide screen, divided by a hairline. */
@@ -49,27 +94,60 @@
   }
 }
 
-/* The opening verses, across the page; side by side where two fit. */
-.epigraph {
+/* Its verses, below its sections; side by side where two fit. */
+.verses {
   display: grid;
   gap: 1.5rem;
 }
 
 @media (min-width: 64rem) {
-  .epigraph {
-    grid-template-columns: repeat(auto-fit, minmax(24rem, 1fr));
+  .verses {
+    grid-template-columns: repeat(auto-fit, minmax(min(24rem, 100%), 1fr));
     column-gap: 2.5rem;
     align-items: start;
   }
 }
 
-.rule {
-  width: min(24rem, 100%);
-  margin-inline: auto;
-}
-
 .external {
   color: var(--color-surface-muted);
+}
+
+/* On a phone the trail is one line back to its topic: "← Mind: states and obstacles".
+   The lead also stands closer together, so the first section is a short scroll away. */
+@media (max-width: 40rem) {
+  .scope,
+  .body {
+    gap: 2rem;
+  }
+
+  .meta {
+    font-size: 1.0625rem;
+  }
+  main.page nav[aria-label='Breadcrumb'] ol {
+    flex-wrap: nowrap;
+  }
+
+  main.page nav[aria-label='Breadcrumb'] li {
+    display: none;
+  }
+
+  main.page nav[aria-label='Breadcrumb'] li:nth-last-child(2) {
+    display: inline-flex;
+    min-width: 0;
+  }
+
+  main.page nav[aria-label='Breadcrumb'] li:nth-last-child(2)::before {
+    content: '←' / '';
+    margin-inline: 0 0.5em;
+    color: var(--color-highlight);
+    font-weight: 600;
+  }
+
+  main.page nav[aria-label='Breadcrumb'] a {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
 }
 
 /*
@@ -94,9 +172,7 @@
   }
 
   .article > span[aria-hidden],
-  .rule,
-  .article button,
-  .article [popover] {
+  .article button {
     display: none;
   }
 

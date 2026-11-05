@@ -94,6 +94,18 @@ export function termsIn(blocks: readonly Block[]): TermBlock[] {
   return blocks.flatMap((block) => (block.kind === 'term' ? [block, ...termsIn(block.blocks)] : []))
 }
 
+/** Every term a page's sections explain, in page order, each with its anchor on the page. */
+export function glanceOf(sections: readonly Section[], owner: Owner) {
+  return sections.flatMap((section) =>
+    termsIn(section.blocks).map((term) => ({
+      id: term.id,
+      name: displayName(term),
+      ...present({ gloss: term.gloss }),
+      href: anchorOn(owner, term.id),
+    })),
+  )
+}
+
 /** The sections, each with the terms inside it, for a page's table of contents. */
 export function tocOf(sections: readonly Section[], owner: Owner): TocEntry[] {
   return sections.map((section) => ({

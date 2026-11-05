@@ -9,9 +9,8 @@ import { expect, gotoReady, scrollsSideways, test } from './fixtures'
 import { expectPageTurned, pageTurns, prefetched, recordPageTurns } from './page-turns'
 import { ROUTES_IN_SCOPE } from './routes'
 
-const spellingsButton = (page: Page) => page.getByRole('button', { name: 'Also spelled' })
-const spellingsPopup = (page: Page) =>
-  page.getByRole('dialog', { name: 'Other spellings of vikṣepa' })
+/** The page's title block: its name, gloss, topics, reading time and plain spellings. */
+const titleBlock = (page: Page) => page.locator('header').filter({ has: page.locator('h1') })
 
 /** Linked knowledge's rows that join an entry to its note: all but the References. */
 async function vikshepaRowsWithRules() {
@@ -29,26 +28,6 @@ function references(page: Page) {
   const toggle = page.locator('summary', { hasText: 'References' })
   const disclosure = page.locator('details', { has: toggle })
   return { toggle, disclosure, list: disclosure.getByRole('list') }
-}
-
-/**
- * The control that has focus, and how much of it (in px²) lies under an open
- * dialog outside it: 0 when none does. Null when focus is on nothing.
- */
-function focusUnderDialog(page: Page) {
-  return page.evaluate(() => {
-    const focused = document.activeElement
-    if (!focused || focused === document.body) return null
-    const what = `${focused.tagName.toLowerCase()} "${focused.textContent?.trim().slice(0, 30)}"`
-    const dialog = document.querySelector('[role="dialog"]')
-    if (!dialog || dialog.contains(focused) || dialog.getClientRects().length === 0) {
-      return { what, covered: 0 }
-    }
-    const [a, b] = [focused.getBoundingClientRect(), dialog.getBoundingClientRect()]
-    const width = Math.max(0, Math.min(a.right, b.right) - Math.max(a.left, b.left))
-    const height = Math.max(0, Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top))
-    return { what, covered: width * height }
-  })
 }
 
 test.describe('Concept page', () => {
@@ -69,89 +48,25 @@ test.describe('Concept page', () => {
   )
 
   test(
-    'shows the other spellings in a popover that keyboard users can close',
+    'shows the other spellings as plain text in the title block, behind no button',
     { tag: '@one-width' },
     async ({ page }) => {
-      const trigger = page.getByRole('button', { name: 'Also spelled' })
-      await trigger.click()
-      const popup = page.getByRole('dialog')
-      await expect(popup).toContainText('viksepa')
-      await expect(popup).toContainText('Vikshepa')
+      const alsoWritten = titleBlock(page).getByText('Also written:')
+      await expect(alsoWritten).toBeVisible()
+      await expect(alsoWritten).toContainText('viksepa, Vikshepa')
+      await expect(page.getByRole('button', { name: /Also spelled|Also written/ })).toHaveCount(0)
       await expectNoAxeViolations(page)
-      await page.keyboard.press('Escape')
-      await expect(popup).toBeHidden()
-      await expect(trigger).toBeFocused()
     },
   )
 
   test(
-    'opens the other spellings with Enter or Space, and Close or Escape hands focus back',
+    'names its topic and how long it takes to read under its title',
     { tag: '@one-width' },
     async ({ page }) => {
-      const trigger = spellingsButton(page)
-      const popup = spellingsPopup(page)
-      const close = popup.getByRole('button', { name: 'Close' })
-      for (const [open, shut] of [
-        ['Enter', 'Enter'],
-        ['Space', 'Escape'],
-      ] as const) {
-        await trigger.focus()
-        await page.keyboard.press(open)
-        await expect(popup).toBeVisible()
-        await expect(popup.getByRole('listitem')).toHaveText(['viksepa', 'Vikshepa'])
-        // Focus stays on the button, and the popover's own controls come next.
-        await expect(trigger).toBeFocused()
-        await page.keyboard.press('Tab')
-        await expect(close).toBeFocused()
-        await page.keyboard.press(shut)
-        await expect(popup).toBeHidden()
-        await expect(trigger).toBeFocused()
-      }
+      await expect(titleBlock(page)).toContainText('Mind: states and obstacles')
+      await expect(titleBlock(page)).toContainText(/About \d+ minutes? to read/)
     },
   )
-
-  test(
-    'opens the other spellings with a click, and closes them with Close or a click elsewhere',
-    { tag: '@one-width' },
-    async ({ page }) => {
-      const trigger = spellingsButton(page)
-      const popup = spellingsPopup(page)
-      await trigger.click()
-      await expect(popup).toBeVisible()
-      await popup.getByRole('button', { name: 'Close' }).click()
-      await expect(popup).toBeHidden()
-      await expect(trigger).toBeFocused()
-
-      await trigger.click()
-      await expect(popup).toBeVisible()
-      await page.getByRole('heading', { level: 1 }).click()
-      await expect(popup).toBeHidden()
-    },
-  )
-
-  // WCAG 2.4.11: the popover stays open as focus moves on, so it must never cover where focus goes.
-  test('the other spellings never cover the control that has focus, tabbing on or back', async ({
-    page,
-  }) => {
-    const trigger = spellingsButton(page)
-    const popup = spellingsPopup(page)
-    const width = page.viewportSize()?.width ?? 0
-    // As the page loads, then on a screen too short to show all of the popover below the button.
-    for (const height of [page.viewportSize()?.height ?? 0, 600]) {
-      await page.setViewportSize({ width, height })
-      await page.evaluate(() => window.scrollTo({ top: 0, behavior: 'instant' }))
-      await trigger.click()
-      await expect(popup).toBeVisible()
-      for (const key of [...Array<string>(4).fill('Tab'), ...Array<string>(8).fill('Shift+Tab')]) {
-        await page.keyboard.press(key)
-        const focus = await focusUnderDialog(page)
-        expect(focus, `${key}: focus is on a control`).not.toBeNull()
-        expect(focus?.covered, `${key} to ${focus?.what}: none of it under the popover`).toBe(0)
-      }
-      await page.keyboard.press('Escape')
-      await expect(popup).toBeHidden()
-    }
-  })
 
   test('folds the References away and opens them on request (FR-03)', async ({ page }) => {
     const { toggle: trigger, disclosure } = references(page)
@@ -194,11 +109,11 @@ test.describe('Concept page', () => {
     await expect(page.getByRole('heading', { level: 1 })).toHaveText('KarmaYoga Scale')
   })
 
-  test('keeps the wide comparison table scrollable in its own frame', async ({ page }) => {
+  test('keeps the wide comparison table in its own frame', async ({ page }) => {
     const frame = page.getByRole('region', { name: /Comparison between Indian and Western/ })
     await expect(frame).toBeVisible()
     await expect(frame).toHaveAttribute('tabindex', '0')
-    await expect(frame.getByRole('row')).toHaveCount(10)
+    await expect(frame.locator('tr')).toHaveCount(10)
   })
 })
 
@@ -206,14 +121,9 @@ test.describe('Concept page', () => {
 test.describe('with JavaScript off', () => {
   test.use({ javaScriptEnabled: false })
 
-  test('the Concept page still shows the other spellings, and closes them', async ({ page }) => {
+  test('the Concept page still shows the other spellings as plain text', async ({ page }) => {
     await page.goto('/concepts/vikshepa/')
-    const popup = spellingsPopup(page)
-    await spellingsButton(page).click()
-    await expect(popup).toBeVisible()
-    await expect(popup.getByRole('listitem')).toHaveText(['viksepa', 'Vikshepa'])
-    await popup.getByRole('button', { name: 'Close' }).click()
-    await expect(popup).toBeHidden()
+    await expect(titleBlock(page).getByText('Also written:')).toContainText('viksepa, Vikshepa')
   })
 
   test('the Concept page still opens its References, and a link to one of them', async ({
@@ -236,17 +146,13 @@ test.describe('with JavaScript off', () => {
 })
 
 // Arriving by a link, the page is drawn by React in the browser, not from the server's HTML.
-test('arriving from the homepage, the other spellings and the References still open', async ({
+test('arriving from the homepage, the other spellings show and the References still open', async ({
   page,
 }) => {
   await gotoReady(page, '/')
   await page.getByRole('link', { name: 'Read about Vikṣepa' }).click()
   await expect(page).toHaveURL('/concepts/vikshepa/')
-  const popup = spellingsPopup(page)
-  await spellingsButton(page).click()
-  await expect(popup).toBeVisible()
-  await page.keyboard.press('Escape')
-  await expect(popup).toBeHidden()
+  await expect(titleBlock(page).getByText('Also written:')).toContainText('viksepa, Vikshepa')
   const doi = page.getByRole('link', { name: 'doi:10.3389/fpsyg.2025.1554014' })
   await references(page).toggle.click()
   await expect(doi).toBeVisible()
@@ -327,20 +233,171 @@ function overlap(
   return width * height
 }
 
-test.describe('Concept page v2: heading and blocks', () => {
-  test('leads with the capitalised IAST, the Devanagari beneath it and the gloss in sentence case', async ({
+test.describe('Concept page lead', () => {
+  test(
+    'on a 390 px phone "In short" is on the first screen and the first section starts soon after',
+    { tag: '@self-width' },
+    async ({ page }) => {
+      await page.setViewportSize({ width: 390, height: 844 })
+      await gotoReady(page, '/concepts/vikshepa/')
+      const inShort = page.getByRole('heading', { level: 2, name: 'In short' })
+      await expect(inShort).toBeInViewport()
+      await expect(page.locator('#in-short')).toContainText('nine obstacles')
+      const firstSectionTop = await page
+        .locator('section#what-is-viksepa')
+        .evaluate((section) => section.getBoundingClientRect().top + window.scrollY)
+      expect(firstSectionTop).toBeLessThan(1700)
+    },
+  )
+
+  test(
+    'on a phone the breadcrumb is one line back to the Concept’s topic',
+    { tag: '@self-width' },
+    async ({ page }) => {
+      await page.setViewportSize({ width: 390, height: 844 })
+      await gotoReady(page, '/concepts/vikshepa/')
+      const trail = page.getByRole('navigation', { name: 'Breadcrumb', exact: true })
+      const topic = trail.getByRole('link', { name: 'Mind: states and obstacles' })
+      await expect(topic).toBeVisible()
+      await expect(topic).toHaveAttribute('href', '/topics/mind/')
+      await expect(trail.getByRole('link')).toHaveCount(1)
+      const box = await trail.boundingBox()
+      // One line: no taller than its links' own 44 px touch target by more than a breath.
+      expect(box?.height ?? 0).toBeLessThanOrEqual(50)
+    },
+  )
+
+  test(
+    'on a wider screen the breadcrumb keeps its whole trail',
+    { tag: '@self-width' },
+    async ({ page }) => {
+      await page.setViewportSize({ width: 1280, height: 900 })
+      await gotoReady(page, '/concepts/vikshepa/')
+      const trail = page.getByRole('navigation', { name: 'Breadcrumb', exact: true })
+      await expect(trail.getByRole('link', { name: 'Home', exact: true })).toBeVisible()
+      await expect(trail.locator('[aria-current="page"]')).toHaveText(/Vikṣepa/)
+    },
+  )
+
+  test(
+    'orders its parts: the summary, its Terms, its sections, the texts, Linked knowledge, the References',
+    { tag: '@one-width' },
+    async ({ page }) => {
+      await gotoReady(page, '/concepts/vikshepa/')
+      const order = await page.evaluate(() => {
+        const ids = [
+          'in-short',
+          'at-a-glance',
+          'what-is-viksepa',
+          'from-the-traditional-texts',
+          'linked-knowledge',
+          'references',
+        ]
+        const found = ids.map((id) => document.getElementById(id))
+        return found.map((element, index) => {
+          const next = found[index + 1]
+          if (!element || !next) return Boolean(element)
+          return Boolean(element.compareDocumentPosition(next) & Node.DOCUMENT_POSITION_FOLLOWING)
+        })
+      })
+      expect(order).toEqual([true, true, true, true, true, true])
+      // No why-it-matters line shows until one is supplied.
+      await expect(page.locator('#in-short')).not.toContainText('Why it matters')
+    },
+  )
+
+  test('at a glance links each of its nine Terms to its place in the sections', async ({
     page,
   }) => {
     await gotoReady(page, '/concepts/vikshepa/')
-    const heading = page.getByRole('heading', { level: 1 })
-    const [iast, deva] = [heading.locator('[lang="sa-Latn"]'), heading.locator('[lang="sa-Deva"]')]
-    await expect(iast).toHaveText('Vikṣepa')
-    await expect(deva).toHaveText('विक्षेप')
-    const [above, below] = [await iast.boundingBox(), await deva.boundingBox()]
-    expect(below?.y ?? 0).toBeGreaterThan(above?.y ?? 0)
-    const gloss = page.locator('header p', { hasText: 'Distraction' })
-    await expect(gloss).toHaveCSS('font-variant-caps', 'normal')
+    const glance = page.getByRole('region', { name: 'At a glance' })
+    const links = glance.getByRole('link')
+    await expect(links).toHaveCount(9)
+    await expect(glance.getByRole('link', { name: /Vyādhi/ })).toHaveAttribute('href', '#vyadhi')
+    await expect(glance.getByRole('link', { name: /Vyādhi/ })).toContainText('Illness')
+    await glance.getByRole('link', { name: /Saṃśaya/ }).click()
+    await expect(page).toHaveURL(/#samsaya$/)
+    await expect(page.locator('#samsaya').getByRole('heading', { level: 3 })).toBeInViewport()
   })
+
+  test('a Concept with no Terms has no at-a-glance grid', async ({ page }) => {
+    await gotoReady(page, '/concepts/atman/')
+    await expect(page.getByRole('heading', { level: 2, name: 'At a glance' })).toHaveCount(0)
+    await expect(page.getByRole('heading', { level: 2, name: 'In short' })).toBeVisible()
+  })
+
+  test(
+    'a Concept with no gloss shows no empty subtitle, and no Devanagari slot without one',
+    { tag: '@one-width' },
+    async ({ page }) => {
+      await gotoReady(page, '/concepts/brahma-vihara/')
+      const heading = page.getByRole('heading', { level: 1 })
+      await expect(heading.locator('[lang="sa-Deva"]')).toHaveCount(0)
+      await expect(titleBlock(page)).not.toContainText('—')
+    },
+  )
+
+  test(
+    'below the sections, a phone reads the translation first and opens the original on request',
+    { tag: '@self-width' },
+    async ({ page }) => {
+      await page.setViewportSize({ width: 390, height: 844 })
+      await gotoReady(page, '/concepts/vikshepa/')
+      const texts = page.getByRole('region', { name: 'From the traditional texts' })
+      const card = texts.locator('figure', { hasText: 'Yoga Sūtra 1.30' }).first()
+      await card.scrollIntoViewIfNeeded()
+      await expect(card.getByText('Meaning')).toBeVisible()
+      const original = card.locator('blockquote [lang="sa-Deva"]')
+      await expect(original).toBeHidden()
+      await card.getByText('Show original').click()
+      await expect(original).toBeVisible()
+      await expectNoAxeViolations(page)
+    },
+  )
+
+  test(
+    'on a wide screen every part of a verse below the sections stands open',
+    { tag: '@self-width' },
+    async ({ page }) => {
+      await page.setViewportSize({ width: 1280, height: 900 })
+      await gotoReady(page, '/concepts/vikshepa/')
+      const texts = page.getByRole('region', { name: 'From the traditional texts' })
+      const card = texts.locator('figure', { hasText: 'Yoga Sūtra 1.30' }).first()
+      await card.scrollIntoViewIfNeeded()
+      await expect(card.locator('blockquote [lang="sa-Deva"]')).toBeVisible()
+      await expect(card.getByText('Show original')).toBeHidden()
+      await expect(card.getByText('Meaning')).toBeVisible()
+    },
+  )
+})
+
+test.describe('Concept page v2: heading and blocks', () => {
+  test(
+    'leads with the capitalised IAST, the Devanagari beside it and the gloss in sentence case',
+    { tag: '@self-width' },
+    async ({ page }) => {
+      await page.setViewportSize({ width: 390, height: 844 })
+      await gotoReady(page, '/concepts/vikshepa/')
+      const heading = page.getByRole('heading', { level: 1 })
+      const [iast, deva] = [
+        heading.locator('[lang="sa-Latn"]'),
+        heading.locator('[lang="sa-Deva"]'),
+      ]
+      await expect(iast).toHaveText('Vikṣepa')
+      await expect(deva).toHaveText('विक्षेप')
+      const [left, beside] = [await iast.boundingBox(), await deva.boundingBox()]
+      expect(beside?.x ?? 0).toBeGreaterThanOrEqual((left?.x ?? 0) + (left?.width ?? 0) - 1)
+      // Beside, not below: the two spellings share a line.
+      expect(beside?.y ?? 0).toBeLessThan((left?.y ?? 0) + (left?.height ?? 0))
+      expect(left?.y ?? 0).toBeLessThan((beside?.y ?? 0) + (beside?.height ?? 0))
+      const gloss = page.locator('header p', { hasText: 'Distraction' })
+      await expect(gloss).toHaveCSS('font-variant-caps', 'normal')
+      // At reading size, never a small label: at least the title page's own body size.
+      expect(
+        parseFloat(await gloss.evaluate((element) => getComputedStyle(element).fontSize)),
+      ).toBeGreaterThanOrEqual(20)
+    },
+  )
 
   test('a Concept with an English title leads with it', async ({ page }) => {
     await gotoReady(page, '/concepts/five-steps-of-perfection/')
@@ -403,10 +460,21 @@ test.describe('Concept page v2: contents', () => {
     page,
   }) => {
     const links = contents(page).getByRole('link')
+    await expect(contents(page).getByRole('link', { name: 'In short' })).toHaveAttribute(
+      'href',
+      '#in-short',
+    )
+    await expect(contents(page).getByRole('link', { name: 'At a glance' })).toHaveAttribute(
+      'href',
+      '#at-a-glance',
+    )
     await expect(contents(page).getByRole('link', { name: 'What is vikṣepa?' })).toHaveAttribute(
       'href',
       '#what-is-viksepa',
     )
+    await expect(
+      contents(page).getByRole('link', { name: 'From the traditional texts' }),
+    ).toHaveAttribute('href', '#from-the-traditional-texts')
     await expect(contents(page).getByRole('link', { name: 'Linked knowledge' })).toHaveAttribute(
       'href',
       '#linked-knowledge',
@@ -720,10 +788,36 @@ test.describe('Concept page v2: verse cards', () => {
 })
 
 test.describe('Concept page v2: tables', () => {
-  test('a wide table scrolls in its own named region, its first column staying in view', async ({
+  test('on a phone a comparison table stacks as cards, each cell under its column’s name', async ({
     page,
   }) => {
-    test.skip(page.viewportSize()?.width !== 360, 'the table is wider than its frame at 360 px')
+    test.skip(page.viewportSize()?.width !== 360, 'comparison tables stack below 40rem')
+    await gotoReady(page, '/concepts/vikshepa/')
+    const frame = page.getByRole('region', { name: /Comparison between Indian and Western/ })
+    await frame.scrollIntoViewIfNeeded()
+    // Nothing to scroll sideways: the card fits its frame, and so does the page.
+    expect(await frame.evaluate((element) => element.scrollWidth <= element.clientWidth + 1)).toBe(
+      true,
+    )
+    expect(await scrollsSideways(page)).toEqual([])
+    const firstRow = frame.locator('tbody tr').first()
+    const head = firstRow.locator('th, td').first()
+    const cell = firstRow.locator('td').first()
+    await expect(head).toContainText('Vyādhi')
+    const [headBox, cellBox] = [await head.boundingBox(), await cell.boundingBox()]
+    // Stacked: the cell stands under the row's head, on the same left edge.
+    expect(cellBox?.y ?? 0).toBeGreaterThanOrEqual((headBox?.y ?? 0) + (headBox?.height ?? 0) - 1)
+    expect(Math.abs((cellBox?.x ?? 0) - (headBox?.x ?? 0))).toBeLessThanOrEqual(1)
+    // Its column's name heads it.
+    const label = await cell.evaluate((element) => getComputedStyle(element, '::before').content)
+    expect(label).toContain('Indian psychology')
+    await expectNoAxeViolations(page)
+  })
+
+  test('above a phone a wide table scrolls in its own named region, its first column staying in view', async ({
+    page,
+  }) => {
+    test.skip(page.viewportSize()?.width !== 768, 'the table is wider than its frame at 768 px')
     await gotoReady(page, '/concepts/vikshepa/')
     const frame = page.getByRole('region', { name: /Comparison between Indian and Western/ })
     await expect(frame).toHaveAttribute('tabindex', '0')
@@ -797,7 +891,8 @@ test.describe('Concept page v2: print', () => {
     await expect(page.locator('footer').last()).toBeHidden()
     await expect(contents(page)).toBeHidden()
     await expect(page.getByRole('button', { name: /^Copy verse/ }).first()).toBeHidden()
-    await expect(page.getByRole('button', { name: 'Also spelled' })).toBeHidden()
+    await expect(titleBlock(page).getByText('Also written:')).toBeVisible()
+    await expect(page.getByText('Show original').first()).toBeHidden()
     await expect(page.locator('#ref-bhavanani-2012')).toBeVisible()
     const doi = page.getByRole('link', { name: 'doi:10.3389/fpsyg.2025.1554014' })
     await expect(doi).toBeVisible()

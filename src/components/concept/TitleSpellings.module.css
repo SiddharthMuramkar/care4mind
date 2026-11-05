@@ -1,8 +1,10 @@
-/* The heading's two spellings, one above the other; the second is set at half the size. */
+/* The heading's two spellings beside each other; the second is set at half the size. */
 .pair {
-  display: grid;
-  justify-items: center;
-  row-gap: 0.1em;
+  display: inline-flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: baseline;
+  column-gap: 0.35em;
 }
 
 .pair > * {
