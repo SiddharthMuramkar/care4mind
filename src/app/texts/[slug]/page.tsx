@@ -2,16 +2,13 @@ import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import type { CSSProperties } from 'react'
 
-import { Breadcrumbs } from '@/components/Breadcrumbs'
 import { Fleuron } from '@/components/Fleuron'
-import { Folio } from '@/components/Folio'
 import { OrnamentRule } from '@/components/OrnamentRule'
-import { PageTurn } from '@/components/PageTurn'
+import { ReadingPage } from '@/components/ReadingPage'
 import { Provenance } from '@/components/prose'
 import { ReadingThread } from '@/components/ReadingThread'
 import { Passage, VerseRail, VerseTally, WorkTitle } from '@/components/texts'
 import { hrefFor, site, works } from '@/content'
-import { cx } from '@/lib/cx'
 import { metadataFor } from '@/lib/metadata'
 
 import reading from '../../reading.module.css'
@@ -38,57 +35,56 @@ export default async function WorkPage({ params }: PageProps<'/texts/[slug]'>) {
   const path = hrefFor({ kind: 'work', id: work.slug })
 
   return (
-    <PageTurn>
-      <main id="main" className={cx(reading.page, styles.page)}>
-        <ReadingThread />
-        <Breadcrumbs path={path} />
-        <Folio
-          as="article"
-          className={cx(reading.article, styles.article)}
-          aria-labelledby="work-title"
-        >
-          <header className={reading.titlePage}>
-            <p className={reading.kicker}>Traditional text</p>
-            <h1 id="work-title" className={cx(reading.title, styles.title)}>
-              <WorkTitle
-                work={work}
-                className={styles.titlePair}
-                devanagariClassName={styles.titleDeva}
-              />
-            </h1>
-            {work.english ? <p className={reading.gloss}>{work.english}</p> : null}
-            {work.attribution ? <p className={styles.attribution}>{work.attribution}</p> : null}
-            <p className={styles.count}>
-              <VerseTally locators={work.passages.map(({ locator }) => locator)} ink />
-              <span>
-                {work.passageCount} {work.passageCount === 1 ? 'verse' : 'verses'} quoted
-              </span>
-            </p>
-          </header>
+    <ReadingPage
+      path={path}
+      titleId="work-title"
+      width="manuscript"
+      pageClassName={styles.page}
+      articleClassName={styles.article}
+      beforeTrail={<ReadingThread />}
+      kicker="Traditional text"
+      titleClassName={styles.title}
+      title={
+        <WorkTitle
+          work={work}
+          className={styles.titlePair}
+          devanagariClassName={styles.titleDeva}
+        />
+      }
+      afterTitle={
+        <>
+          {work.english ? <p className={reading.gloss}>{work.english}</p> : null}
+          {work.attribution ? <p className={styles.attribution}>{work.attribution}</p> : null}
+          <p className={styles.count}>
+            <VerseTally locators={work.passages.map(({ locator }) => locator)} ink />
+            <span>
+              {work.passageCount} {work.passageCount === 1 ? 'verse' : 'verses'} quoted
+            </span>
+          </p>
+        </>
+      }
+    >
+      <OrnamentRule className={styles.rule} />
 
-          <OrnamentRule className={styles.rule} />
+      <div
+        className={styles.body}
+        // The verses' view timelines, for the rail to follow (see VerseRail).
+        style={
+          {
+            timelineScope: work.passages.map(({ anchor }) => `--verse-${anchor}`).join(', '),
+          } as CSSProperties
+        }
+      >
+        <VerseRail passages={work.passages} />
 
-          <div
-            className={styles.body}
-            // The verses' view timelines, for the rail to follow (see VerseRail).
-            style={
-              {
-                timelineScope: work.passages.map(({ anchor }) => `--verse-${anchor}`).join(', '),
-              } as CSSProperties
-            }
-          >
-            <VerseRail passages={work.passages} />
-
-            <div className={styles.verses}>
-              {work.passages.map((passage) => (
-                <Passage key={passage.id} passage={passage} unit={work.locatorLabel} />
-              ))}
-              <Fleuron className={styles.tailpiece} />
-              <Provenance of={work} />
-            </div>
-          </div>
-        </Folio>
-      </main>
-    </PageTurn>
+        <div className={styles.verses}>
+          {work.passages.map((passage) => (
+            <Passage key={passage.id} passage={passage} unit={work.locatorLabel} />
+          ))}
+          <Fleuron className={styles.tailpiece} />
+          <Provenance of={work} />
+        </div>
+      </div>
+    </ReadingPage>
   )
 }

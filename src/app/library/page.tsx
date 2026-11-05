@@ -1,7 +1,6 @@
 import type { Metadata } from 'next'
 
-import { Breadcrumbs } from '@/components/Breadcrumbs'
-import { Folio } from '@/components/Folio'
+import { ReadingPage } from '@/components/ReadingPage'
 import {
   counted,
   Holds,
@@ -10,9 +9,7 @@ import {
   Shelf,
   Spine,
 } from '@/components/library'
-import { PageTurn } from '@/components/PageTurn'
 import { hrefFor, library, type LibraryCard, references } from '@/content'
-import { cx } from '@/lib/cx'
 import { metadataFor } from '@/lib/metadata'
 import { toDevanagariDigits } from '@/lib/text'
 
@@ -61,38 +58,36 @@ export default async function LibraryPage() {
     .reduce((sum, { holds }) => sum + holds.count, 0)
 
   return (
-    <PageTurn>
-      <main id="main" className={cx(reading.page, styles.page)}>
-        <Breadcrumbs path={PATH} />
-        <Folio as="article" className={reading.article} aria-labelledby="library-title">
-          <header className={reading.titlePage}>
-            <h1 id="library-title" className={reading.title}>
-              Library
-            </h1>
-            <p className={reading.summary}>
-              Every source the site cites, its reading lists, and the methods it describes.
-            </p>
-            <p className={styles.facts}>
-              {counted(all.length, 'source', 'sources')} · {counted(books, 'book', 'books')} to read
-            </p>
-          </header>
-
-          <Shelf label="The Library’s sections" kind="volumes">
-            {volumes.map(({ key, title, href, holds }, index) => (
-              <Spine
-                key={key}
-                href={href}
-                name={key}
-                index={index}
-                head={toDevanagariDigits(String(index + 1))}
-                title={title}
-                foot={<Holds {...holds} />}
-                thickness={thickness(holds.count)}
-              />
-            ))}
-          </Shelf>
-        </Folio>
-      </main>
-    </PageTurn>
+    <ReadingPage
+      path={PATH}
+      titleId="library-title"
+      width="library"
+      title="Library"
+      afterTitle={
+        <>
+          <p className={reading.summary}>
+            Every source the site cites, its reading lists, and the methods it describes.
+          </p>
+          <p className={styles.facts}>
+            {counted(all.length, 'source', 'sources')} · {counted(books, 'book', 'books')} to read
+          </p>
+        </>
+      }
+    >
+      <Shelf label="The Library’s sections" kind="volumes">
+        {volumes.map(({ key, title, href, holds }, index) => (
+          <Spine
+            key={key}
+            href={href}
+            name={key}
+            index={index}
+            head={toDevanagariDigits(String(index + 1))}
+            title={title}
+            foot={<Holds {...holds} />}
+            thickness={thickness(holds.count)}
+          />
+        ))}
+      </Shelf>
+    </ReadingPage>
   )
 }
