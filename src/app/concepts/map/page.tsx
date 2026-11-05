@@ -7,8 +7,8 @@ import { ReadingPage } from '@/components/ReadingPage'
 import { hrefFor, site, topics } from '@/content'
 import { metadataFor } from '@/lib/metadata'
 
-import listing from '../../listing.module.css'
 import reading from '../../reading.module.css'
+import styles from './page.module.css'
 
 const PATH = hrefFor({ page: 'concept-map' })
 
@@ -41,7 +41,7 @@ export default async function ConceptMapPage() {
             The Concepts by topic, and what joins them: a verse, a text or a rarely cited Reference
             they share.
           </p>
-          <p className={listing.facts}>
+          <p className={styles.facts}>
             {layout.points.length} Concepts · {layout.connections.length} connections
           </p>
         </>

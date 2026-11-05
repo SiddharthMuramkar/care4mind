@@ -1,3 +1,10 @@
+/* What a page holds, counted: "5 Concepts · 12 verses". */
+.count {
+  margin: 0;
+  font-size: 1.0625rem;
+  color: var(--color-surface-muted);
+}
+
 /* The proposals page: each proposal set as a proof sheet, numbered, with its stamp. */
 .entries {
   display: grid;
