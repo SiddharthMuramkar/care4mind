@@ -161,10 +161,8 @@ test('keyboard focus is visible', async ({ page }) => {
   expect(parseFloat(outline.width)).toBeGreaterThanOrEqual(2)
 })
 
-// The plain prose renderer, checked once, at 1440 px.
-test.describe('running text', () => {
-  test.skip(({ viewport }) => viewport?.width !== 1440, 'checked once, at 1440 px')
-
+// The plain prose renderer, checked once, at 1440 px (@from-1440).
+test.describe('running text', { tag: '@from-1440' }, () => {
   test('tags each Devanagari run in it as Sanskrit', async ({ page }) => {
     await page.goto('/concepts/jagat/')
     const run = page.locator('main section p [lang="sa-Deva"]').first()

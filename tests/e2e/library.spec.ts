@@ -119,9 +119,7 @@ test.describe('References', () => {
     await expect(entry(page, withoutLink.anchor)).toContainText(withoutLink.noStableLink ?? '?')
   })
 
-  test('shows every record that cites a Reference, and a Concept chip previews it', async ({
-    page,
-  }) => {
+  test('shows every record that cites a Reference', async ({ page }) => {
     await gotoReady(page, REFERENCES)
     const cited = await list(page)
       .locator('li[id^="ref-"]')
@@ -137,20 +135,26 @@ test.describe('References', () => {
       expect(cited[reference.anchor], reference.id).toEqual(
         reference.citedIn.map(({ href }) => href),
       )
-
-    test.skip(!isWide(page), 'previews open on hover with a mouse')
-    const citing = withDoi.citedIn.find(({ kind }) => kind === 'concept')
-    const reference = citing
-      ? withDoi
-      : all.find((r) => r.citedIn.some((c) => c.kind === 'concept'))
-    const concept = reference?.citedIn.find(({ kind }) => kind === 'concept')
-    if (!reference || !concept) throw new Error('A Reference is cited by a Concept.')
-    const chipLink = entry(page, reference.anchor).getByRole('link', { name: concept.title })
-    await chipLink.scrollIntoViewIfNeeded()
-    await page.mouse.move(1, 1)
-    await chipLink.hover()
-    await expect(previewCard(page)).toContainText(concept.title)
   })
+
+  test(
+    'previews a citing Concept from its chip on the Reference',
+    { tag: '@from-768' },
+    async ({ page }) => {
+      await gotoReady(page, REFERENCES)
+      const citing = withDoi.citedIn.find(({ kind }) => kind === 'concept')
+      const reference = citing
+        ? withDoi
+        : all.find((r) => r.citedIn.some((c) => c.kind === 'concept'))
+      const concept = reference?.citedIn.find(({ kind }) => kind === 'concept')
+      if (!reference || !concept) throw new Error('A Reference is cited by a Concept.')
+      const chipLink = entry(page, reference.anchor).getByRole('link', { name: concept.title })
+      await chipLink.scrollIntoViewIfNeeded()
+      await page.mouse.move(1, 1)
+      await chipLink.hover()
+      await expect(previewCard(page)).toContainText(concept.title)
+    },
+  )
 
   test('a citation on a Concept page names the anchor its entry here carries, in view below the rail', async ({
     page,
@@ -482,23 +486,26 @@ for (const list of bookLists)
         await expect(link).toHaveAccessibleName(/, another site$/)
     })
 
-    test('a spine leads to its book below, which takes the eye', async ({ page }) => {
-      test.skip(!isWide(page), 'the shelf stands on wide screens')
-      await gotoReady(page, list.href)
-      const group = list.groups.at(-1)
-      const book = group && booksOf(group).at(-1)
-      if (!group || !book) throw new Error(`${list.title} has a book.`)
-      const spine = page
-        .getByRole('navigation', { name: `Shelf: ${group.heading}` })
-        .getByRole('link')
-        .last()
-      await spine.scrollIntoViewIfNeeded()
-      await spine.click()
-      await expect(page).toHaveURL(new RegExp(`#${book.reference.anchor}$`))
-      const entry = page.locator(`li[id="${book.reference.anchor}"]`)
-      await expect(entry).toBeInViewport()
-      expect(await entry.evaluate((element) => element.matches(':target'))).toBe(true)
-    })
+    test(
+      'a spine leads to its book below, which takes the eye',
+      { tag: '@from-768' },
+      async ({ page }) => {
+        await gotoReady(page, list.href)
+        const group = list.groups.at(-1)
+        const book = group && booksOf(group).at(-1)
+        if (!group || !book) throw new Error(`${list.title} has a book.`)
+        const spine = page
+          .getByRole('navigation', { name: `Shelf: ${group.heading}` })
+          .getByRole('link')
+          .last()
+        await spine.scrollIntoViewIfNeeded()
+        await spine.click()
+        await expect(page).toHaveURL(new RegExp(`#${book.reference.anchor}$`))
+        const entry = page.locator(`li[id="${book.reference.anchor}"]`)
+        await expect(entry).toBeInViewport()
+        expect(await entry.evaluate((element) => element.matches(':target'))).toBe(true)
+      },
+    )
   })
 
 for (const list of courseLists)
@@ -538,38 +545,40 @@ for (const list of courseLists)
   })
 
 for (const textPage of textPages)
-  test(`${textPage.title}: its sections, each table scrolling in its own named, focusable frame`, async ({
-    page,
-  }) => {
-    await page.setViewportSize({ width: 360, height: 800 })
-    await gotoReady(page, textPage.href)
-    const contents = page.getByRole('navigation', { name: 'Contents' })
-    await expect(contents.getByRole('link')).toHaveCount(textPage.toc.length)
-    for (const section of textPage.sections)
-      await expect(
-        page.locator(`section[id="${section.id}"]`).getByRole('heading', { level: 2 }),
-      ).toHaveText(section.heading)
-    const tables = textPage.sections.flatMap(({ blocks }) =>
-      blocks.flatMap((block) => (block.kind === 'table' ? [block] : [])),
-    )
-    expect(tables.length).toBeGreaterThan(0)
-    // The summary opens the page once: no section repeats it.
-    await expect(page.getByRole('main').getByText(textPage.summary, { exact: false })).toHaveCount(
-      1,
-    )
-    for (const table of tables) {
-      const frame = page.getByRole('region', { name: table.caption })
-      await frame.scrollIntoViewIfNeeded()
-      await frame.focus()
-      await expect(frame).toBeFocused()
-      expect(await frame.evaluate((element) => element.scrollWidth > element.clientWidth)).toBe(
-        true,
+  test(
+    `${textPage.title}: its sections, each table scrolling in its own named, focusable frame`,
+    { tag: '@self-width' },
+    async ({ page }) => {
+      await page.setViewportSize({ width: 360, height: 800 })
+      await gotoReady(page, textPage.href)
+      const contents = page.getByRole('navigation', { name: 'Contents' })
+      await expect(contents.getByRole('link')).toHaveCount(textPage.toc.length)
+      for (const section of textPage.sections)
+        await expect(
+          page.locator(`section[id="${section.id}"]`).getByRole('heading', { level: 2 }),
+        ).toHaveText(section.heading)
+      const tables = textPage.sections.flatMap(({ blocks }) =>
+        blocks.flatMap((block) => (block.kind === 'table' ? [block] : [])),
       )
-      await page.keyboard.press('ArrowRight')
-      await expect.poll(() => frame.evaluate((element) => element.scrollLeft)).toBeGreaterThan(0)
-    }
-    expect(await scrollsSideways(page)).toEqual([])
-  })
+      expect(tables.length).toBeGreaterThan(0)
+      // The summary opens the page once: no section repeats it.
+      await expect(
+        page.getByRole('main').getByText(textPage.summary, { exact: false }),
+      ).toHaveCount(1)
+      for (const table of tables) {
+        const frame = page.getByRole('region', { name: table.caption })
+        await frame.scrollIntoViewIfNeeded()
+        await frame.focus()
+        await expect(frame).toBeFocused()
+        expect(await frame.evaluate((element) => element.scrollWidth > element.clientWidth)).toBe(
+          true,
+        )
+        await page.keyboard.press('ArrowRight')
+        await expect.poll(() => frame.evaluate((element) => element.scrollLeft)).toBeGreaterThan(0)
+      }
+      expect(await scrollsSideways(page)).toEqual([])
+    },
+  )
 
 test.describe('Every Library page without JavaScript', () => {
   test.use({ javaScriptEnabled: false })
@@ -600,7 +609,7 @@ test.describe('Every Library page without JavaScript', () => {
   })
 })
 
-test('every Library page fits 320 px', async ({ page }) => {
+test('every Library page fits 320 px', { tag: '@self-width' }, async ({ page }) => {
   await page.setViewportSize({ width: 320, height: 720 })
   for (const path of LIBRARY_PAGES) {
     await gotoReady(page, path)

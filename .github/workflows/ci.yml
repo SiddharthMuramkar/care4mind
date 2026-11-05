@@ -82,7 +82,7 @@ jobs:
       - run: >-
           pnpm check:e2e --shard=${{ matrix.shard }}/${{ strategy.job-total }}
           --project='chromium-*' --project=reflow --project=reduced-motion
-          --project=crawler
+          --project=http
         env:
           E2E_SCOPE: full
           # The private repo's runner has 2 vCPUs, so 50% is one worker; the matrix shards for parallelism.

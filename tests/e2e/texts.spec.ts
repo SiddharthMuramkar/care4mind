@@ -198,94 +198,101 @@ test.describe('a work’s page', () => {
     expect(await look(verse)).not.toBe(await look(passage(page, 'Sutra 1.31')))
   })
 
-  test('on a wide screen its verse rail lists every locator and stays in view as the text scrolls', async ({
-    page,
-  }) => {
-    await page.setViewportSize({ width: 1440, height: 900 })
-    await gotoReady(page, gita.href)
-    const links = rail(page).getByRole('link')
-    await expect(links).toHaveCount(gita.passages.length)
-    expect(await hrefs(links)).toEqual(gita.passages.map(({ anchor }) => `#${anchor}`))
-    for (const [index, verse] of gita.passages.entries())
-      await expect(links.nth(index)).toHaveAccessibleName(verse.locator)
+  test(
+    'on a wide screen its verse rail lists every locator and stays in view as the text scrolls',
+    { tag: '@self-width' },
+    async ({ page }) => {
+      await page.setViewportSize({ width: 1440, height: 900 })
+      await gotoReady(page, gita.href)
+      const links = rail(page).getByRole('link')
+      await expect(links).toHaveCount(gita.passages.length)
+      expect(await hrefs(links)).toEqual(gita.passages.map(({ anchor }) => `#${anchor}`))
+      for (const [index, verse] of gita.passages.entries())
+        await expect(links.nth(index)).toHaveAccessibleName(verse.locator)
 
-    await passage(page, 'Verse 18.25').scrollIntoViewIfNeeded()
-    await expect(rail(page)).toBeInViewport()
-    await rail(page).getByRole('link', { name: '14.5', exact: true }).click()
-    await expect(page).toHaveURL(/#14-5$/)
-    await expect(passage(page, 'Verse 14.5')).toBeInViewport()
-  })
+      await passage(page, 'Verse 18.25').scrollIntoViewIfNeeded()
+      await expect(rail(page)).toBeInViewport()
+      await rail(page).getByRole('link', { name: '14.5', exact: true }).click()
+      await expect(page).toHaveURL(/#14-5$/)
+      await expect(passage(page, 'Verse 14.5')).toBeInViewport()
+    },
+  )
 
-  test('on a phone its verse rail is a compact list above the text that doesn’t stick', async ({
-    page,
-  }) => {
-    await page.setViewportSize({ width: 360, height: 800 })
-    await gotoReady(page, gita.href)
-    const [list, first] = await Promise.all([
-      rail(page).boundingBox(),
-      passage(page, 'Verse 2.54').boundingBox(),
-    ])
-    expect((list?.y ?? 0) + (list?.height ?? 0)).toBeLessThanOrEqual(first?.y ?? 0)
-    // Several locators to a line.
-    const links = rail(page).getByRole('link')
-    const [one, two] = await Promise.all([links.nth(0).boundingBox(), links.nth(1).boundingBox()])
-    expect(one?.y).toBe(two?.y)
-    await passage(page, 'Verse 18.25').scrollIntoViewIfNeeded()
-    await expect(rail(page)).not.toBeInViewport()
-  })
+  test(
+    'on a phone its verse rail is a compact list above the text that doesn’t stick',
+    { tag: '@self-width' },
+    async ({ page }) => {
+      await page.setViewportSize({ width: 360, height: 800 })
+      await gotoReady(page, gita.href)
+      const [list, first] = await Promise.all([
+        rail(page).boundingBox(),
+        passage(page, 'Verse 2.54').boundingBox(),
+      ])
+      expect((list?.y ?? 0) + (list?.height ?? 0)).toBeLessThanOrEqual(first?.y ?? 0)
+      // Several locators to a line.
+      const links = rail(page).getByRole('link')
+      const [one, two] = await Promise.all([links.nth(0).boundingBox(), links.nth(1).boundingBox()])
+      expect(one?.y).toBe(two?.y)
+      await passage(page, 'Verse 18.25').scrollIntoViewIfNeeded()
+      await expect(rail(page)).not.toBeInViewport()
+    },
+  )
 
-  test('wraps its longest verse at 320 px, every line on the page, the Devanagari unclipped on the base line height', async ({
-    page,
-  }, testInfo) => {
-    await page.setViewportSize({ width: 320, height: 720 })
-    const widest = (verse: PassageView) =>
-      Math.max(
-        ...verse.devanagari.map((line) => line.length),
-        ...(verse.transliteration?.lines ?? []).map((line) => line.length),
-      )
-    const [longest] = views
-      .flatMap((view) => view.passages.map((verse) => ({ view, verse })))
-      .sort((a, b) => widest(b.verse) - widest(a.verse))
-    if (!longest) throw new Error('The content has verses.')
-    await gotoReady(page, longest.view.href)
-    await page.waitForLoadState('networkidle')
-    expect(await scrollsSideways(page)).toEqual([])
+  test(
+    'wraps its longest verse at 320 px, every line on the page, the Devanagari unclipped on the base line height',
+    { tag: '@self-width' },
+    async ({ page }, testInfo) => {
+      await page.setViewportSize({ width: 320, height: 720 })
+      const widest = (verse: PassageView) =>
+        Math.max(
+          ...verse.devanagari.map((line) => line.length),
+          ...(verse.transliteration?.lines ?? []).map((line) => line.length),
+        )
+      const [longest] = views
+        .flatMap((view) => view.passages.map((verse) => ({ view, verse })))
+        .sort((a, b) => widest(b.verse) - widest(a.verse))
+      if (!longest) throw new Error('The content has verses.')
+      await gotoReady(page, longest.view.href)
+      await page.waitForLoadState('networkidle')
+      expect(await scrollsSideways(page)).toEqual([])
 
-    const verse = passage(page, nameOf(longest.view, longest.verse))
-    await verse.scrollIntoViewIfNeeded()
-    const spills = await verse.evaluate((region) => {
-      const { left, right } = region.getBoundingClientRect()
-      return [...region.querySelectorAll('[lang]')]
-        .filter((line) => {
-          const box = line.getBoundingClientRect()
-          return box.left < left - 0.5 || box.right > right + 0.5
-        })
-        .map((line) => line.textContent)
-    })
-    expect(spills).toEqual([])
-
-    const devanagari = verse.locator('[lang="sa-Deva"]').filter({ hasText: /[क-ह]/ }).first()
-    const clipping = await devanagari.evaluate((line) => {
-      const clips: string[] = []
-      for (let at: Element | null = line; at && at !== document.body; at = at.parentElement) {
-        const style = getComputedStyle(at)
-        if (style.overflowX !== 'visible' || style.overflowY !== 'visible') clips.push(at.localName)
-      }
-      return clips
-    })
-    expect(clipping, 'nothing clips a conjunct or vowel sign').toEqual([])
-    const ratio = (element: Locator) =>
-      element.evaluate((node) => {
-        const style = getComputedStyle(node)
-        return parseFloat(style.lineHeight) / parseFloat(style.fontSize)
+      const verse = passage(page, nameOf(longest.view, longest.verse))
+      await verse.scrollIntoViewIfNeeded()
+      const spills = await verse.evaluate((region) => {
+        const { left, right } = region.getBoundingClientRect()
+        return [...region.querySelectorAll('[lang]')]
+          .filter((line) => {
+            const box = line.getBoundingClientRect()
+            return box.left < left - 0.5 || box.right > right + 0.5
+          })
+          .map((line) => line.textContent)
       })
-    expect(await ratio(devanagari)).toBeCloseTo(await ratio(main(page).getByRole('article')), 2)
+      expect(spills).toEqual([])
 
-    await testInfo.attach(`${longest.verse.label} at 320 px`, {
-      body: await verse.screenshot(),
-      contentType: 'image/png',
-    })
-  })
+      const devanagari = verse.locator('[lang="sa-Deva"]').filter({ hasText: /[क-ह]/ }).first()
+      const clipping = await devanagari.evaluate((line) => {
+        const clips: string[] = []
+        for (let at: Element | null = line; at && at !== document.body; at = at.parentElement) {
+          const style = getComputedStyle(at)
+          if (style.overflowX !== 'visible' || style.overflowY !== 'visible')
+            clips.push(at.localName)
+        }
+        return clips
+      })
+      expect(clipping, 'nothing clips a conjunct or vowel sign').toEqual([])
+      const ratio = (element: Locator) =>
+        element.evaluate((node) => {
+          const style = getComputedStyle(node)
+          return parseFloat(style.lineHeight) / parseFloat(style.fontSize)
+        })
+      expect(await ratio(devanagari)).toBeCloseTo(await ratio(main(page).getByRole('article')), 2)
+
+      await testInfo.attach(`${longest.verse.label} at 320 px`, {
+        body: await verse.screenshot(),
+        contentType: 'image/png',
+      })
+    },
+  )
 })
 
 test('every verse a Concept links to is at its anchor on its work’s page', async ({ page }) => {
