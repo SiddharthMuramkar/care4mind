@@ -1,6 +1,7 @@
 import type { VerseView } from '@/content'
 import { cx } from '@/lib/cx'
 
+import { FrameCorners } from '../Folio'
 import { Shloka } from '../Shloka'
 import { CopyVerse } from './CopyVerse'
 import styles from './Prose.module.css'
@@ -22,6 +23,7 @@ export function VerseCard({
 }) {
   return (
     <div className={cx(styles.verseCard, className)}>
+      <FrameCorners />
       <Shloka verse={verse} className={styles.verse} foldOriginal={foldOriginal} />
       <CopyVerse text={verseAsText(verse)} source={verse.source} lang={verse.work.lang} />
     </div>

@@ -8,6 +8,13 @@
   padding: clamp(1rem, 3vw, 2rem) clamp(1rem, 4vw, 3rem) 0;
 }
 
+/* Below 640px the folio carries no frame of its own, so this margin is the text's: 16px. */
+@media (max-width: 39.99rem) {
+  .page {
+    padding-inline: 1rem;
+  }
+}
+
 /* Each width variant stands after the reading measure in this one file, so it wins by its
    place here and never by which stylesheet a page happened to import last. */
 

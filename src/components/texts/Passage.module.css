@@ -4,7 +4,7 @@
  * that quote it. The verse an address lands on is washed in vermilion and ruled in the margin.
  */
 .passage {
-  /* The wash reaches a little past the text, never over the folio's double rule. */
+  /* The wash reaches a little past the text, never past the folio's own padding. */
   --bleed: min(1.25rem, max(1.25rem, 6vw) - 1.125rem);
   position: relative;
   display: grid;
@@ -15,6 +15,15 @@
   border-radius: 2px;
   /* An addressed verse lands with its running head clear of the header. */
   scroll-margin-top: 1.5rem;
+}
+
+/* Below 640px the folio has no side padding for the wash to reach into; the margin rule
+   still stands clear of the text. */
+@media (max-width: 39.99rem) {
+  .passage {
+    --bleed: 0rem;
+    padding-inline-start: 1rem;
+  }
 }
 
 .passage > * {
