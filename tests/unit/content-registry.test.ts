@@ -22,13 +22,11 @@ import {
   idOf,
   KIND_FOLDERS,
   type ConceptRecord,
-  type ContentKind,
   type ContentRecord,
   type QuestionnaireRecord,
-  type RecordOf,
   type ReferenceRecord,
 } from '@/content/schema'
-import { localSource, registrySource, type ContentSource } from '@/content/source'
+import { localSource, memorySource, registrySource } from '@/content/source'
 
 // The storage layers of the content module: the record schema, the generated registry, the
 // content source (the seam) and the graph that resolves every link once. The graph has no public
@@ -129,6 +127,9 @@ describe('record schema', () => {
       }),
       defineHome({
         kind: 'home',
+        tagline: '',
+        hero: { promise: '', subhead: '', startHere: '', browseConcepts: '', exploreConcepts: '' },
+        sectionIntros: { concepts: '', questionnaires: '' },
         shloka: { devanagari: 'यद्', iast: 'yad', translation: 'As' },
         intro: '',
         areas: [],
@@ -242,6 +243,14 @@ describe('the content source', () => {
     expect(await source.records('topic')).toEqual([])
   })
 
+  it('holds made-up records in memory, giving each kind its own in the order given', async () => {
+    const later = defineConcept({ ...concept, slug: 'later' })
+    const source = memorySource(later, reference, concept, questionnaire)
+    expect(await source.records('concept')).toEqual([later, concept])
+    expect(await source.records('reference')).toEqual([reference])
+    expect(await source.records('topic')).toEqual([])
+  })
+
   it('fails with the command that writes the registry when the registry is missing', async () => {
     const missing = Object.assign(new Error("Cannot find module './generated/registry'"), {
       code: 'ERR_MODULE_NOT_FOUND',
@@ -255,15 +264,6 @@ describe('the content source', () => {
     await expect(source.records('concept')).rejects.toThrow('A record file threw.')
   })
 })
-
-/** A made-up content source holding the given records. */
-function sourceOf(...records: ContentRecord[]): ContentSource {
-  return {
-    async records<K extends ContentKind>(kind: K) {
-      return records.filter((record): record is RecordOf<K> => record.kind === kind)
-    },
-  }
-}
 
 describe('the graph', () => {
   const mind = defineTopic({ kind: 'topic', slug: 'mind', name: { english: 'Mind' }, order: 1 })
@@ -360,15 +360,36 @@ describe('the graph', () => {
   ]
 
   it('finds each record by its kind and id', async () => {
-    const graph = await buildGraph(sourceOf(...world))
+    const graph = await buildGraph(memorySource(...world))
     expect(graph.record('concept', 'obstacles')).toBe(obstacles)
     expect(graph.record('passage', 'yoga-sutra/1.30')).toBe(ys130)
     expect(graph.record('topic', 'obstacles')).toBeUndefined()
     expect(graph.records('topic')).toEqual([mind, self])
   })
 
+  it('lists each kind in id order, whatever order the source gives', async () => {
+    const graph = await buildGraph(memorySource(...[...world].reverse()))
+    expect(graph.records('topic')).toEqual([mind, self])
+    expect(graph.records('reference')).toEqual([schleim, tomar])
+  })
+
+  it('puts a shorter id before longer ids it begins, as the registry does', async () => {
+    const short = defineTopic({ ...mind, slug: 'mind' })
+    const long = defineTopic({ ...mind, slug: 'mind-body' })
+    const graph = await buildGraph(memorySource(long, short))
+    expect(graph.records('topic')).toEqual([short, long])
+  })
+
+  it('keeps the order of the registry for every kind of the real content', async () => {
+    const graph = await buildGraph(localSource)
+    for (const kind of CONTENT_KINDS) {
+      const inGraph = graph.records(kind).map(idOf)
+      expect(inGraph).toEqual((await localSource.records(kind)).map(idOf))
+    }
+  })
+
   it('lists the records that cite a Reference', async () => {
-    const graph = await buildGraph(sourceOf(...world))
+    const graph = await buildGraph(memorySource(...world))
     expect(graph.citedBy('tomar-2024')).toEqual([
       { kind: 'concept', id: 'obstacles' },
       { kind: 'concept', id: 'steadiness' },
@@ -381,7 +402,7 @@ describe('the graph', () => {
   })
 
   it('lists where a passage is quoted, with the translation each quote shows', async () => {
-    const graph = await buildGraph(sourceOf(...world))
+    const graph = await buildGraph(memorySource(...world))
     expect(graph.quotedIn('yoga-sutra/1.30')).toEqual([
       { record: { kind: 'concept', id: 'obstacles' }, translation: 'first' },
       { record: { kind: 'concept', id: 'steadiness' } },
@@ -389,14 +410,14 @@ describe('the graph', () => {
   })
 
   it('lists the Concepts in each topic and the Concepts quoting each work', async () => {
-    const graph = await buildGraph(sourceOf(...world))
+    const graph = await buildGraph(memorySource(...world))
     expect(graph.conceptsInTopic('mind')).toEqual({ primary: ['obstacles'], also: [] })
     expect(graph.conceptsInTopic('self')).toEqual({ primary: ['steadiness'], also: ['obstacles'] })
     expect(graph.conceptsQuotingWork('yoga-sutra')).toEqual(['obstacles', 'steadiness'])
   })
 
   it('resolves each in-text citation to one of the record’s own References', async () => {
-    const graph = await buildGraph(sourceOf(...world))
+    const graph = await buildGraph(memorySource(...world))
     expect(graph.citations('concept', 'obstacles')).toEqual([
       { text: 'Tomar, 2024', reference: 'tomar-2024' },
       { text: 'Schleim, 2025', reference: 'schleim-2025' },
@@ -414,7 +435,7 @@ describe('the graph', () => {
       references: ['tomar-2024', 'nobody-1999'],
     })
     const others = world.filter((record) => record !== obstacles)
-    const build = buildGraph(sourceOf(...others, broken))
+    const build = buildGraph(memorySource(...others, broken))
     await expect(build).rejects.toThrow(DanglingIdError)
     await expect(build).rejects.toThrow(
       'concept “obstacles”, field verses[0].passage: no passage “yoga-sutra/9.99”',
@@ -427,7 +448,7 @@ describe('the graph', () => {
   it('refuses an id of the wrong kind', async () => {
     const wrongKind = defineConcept({ ...steadiness, topics: { primary: 'obstacles' } })
     const others = world.filter((record) => record !== steadiness)
-    await expect(buildGraph(sourceOf(...others, wrongKind))).rejects.toThrow(
+    await expect(buildGraph(memorySource(...others, wrongKind))).rejects.toThrow(
       'concept “steadiness”, field topics.primary: no topic “obstacles”',
     )
   })
@@ -454,7 +475,7 @@ describe('the graph', () => {
       },
     })
     const others = world.filter((record) => record !== profile)
-    const build = buildGraph(sourceOf(...others, repeated))
+    const build = buildGraph(memorySource(...others, repeated))
     await expect(build).rejects.toThrow(DanglingIdError)
     await expect(build).rejects.toThrow(
       'questionnaire “example”, field form.parts[1].id: repeated part id “same”',
@@ -483,7 +504,7 @@ describe('the graph', () => {
       },
     })
     const others = world.filter((record) => record !== profile)
-    const build = buildGraph(sourceOf(...others, repeated))
+    const build = buildGraph(memorySource(...others, repeated))
     await expect(build).rejects.toThrow(DanglingIdError)
     await expect(build).rejects.toThrow(
       'questionnaire “example”, field form.parts[1].items[0].id: repeated item id “q1”',
@@ -496,21 +517,31 @@ describe('the graph', () => {
       verses: [{ passage: 'yoga-sutra/1.30', translation: 'second' }],
     })
     const others = world.filter((record) => record !== obstacles)
-    await expect(buildGraph(sourceOf(...others, wrongTranslation))).rejects.toThrow(
+    await expect(buildGraph(memorySource(...others, wrongTranslation))).rejects.toThrow(
       'concept “obstacles”, field verses[0].translation: no translation “second” in passage “yoga-sutra/1.30”',
     )
   })
 
   it('is built once per source', async () => {
-    const source = sourceOf(...world)
+    const source = memorySource(...world)
     expect(await graphFor(source)).toBe(await graphFor(source))
     expect(await contentGraph()).toBe(await contentGraph())
   })
 })
 
 describe('feature flags (D16, D20)', () => {
-  const allOn = { questionnairePreview: true, conceptMap: true, devanagariFirst: true }
-  const allOff = { questionnairePreview: false, conceptMap: false, devanagariFirst: false }
+  const allOn = {
+    questionnairePreview: true,
+    conceptMap: true,
+    devanagariFirst: true,
+    startHere: true,
+  }
+  const allOff = {
+    questionnairePreview: false,
+    conceptMap: false,
+    devanagariFirst: false,
+    startHere: false,
+  }
 
   it('switches every flag on in local runs and Vercel previews, and off in production', () => {
     expect(readFeatures({})).toEqual(allOn)
@@ -533,6 +564,10 @@ describe('feature flags (D16, D20)', () => {
       ...allOff,
       devanagariFirst: true,
     })
+    expect(readFeatures({ ...production, FEATURE_START_HERE: '1' })).toEqual({
+      ...allOff,
+      startHere: true,
+    })
   })
 
   it('lets each flag’s own variable force it off anywhere else', () => {
@@ -548,6 +583,7 @@ describe('feature flags (D16, D20)', () => {
       ...allOn,
       devanagariFirst: false,
     })
+    expect(readFeatures({ FEATURE_START_HERE: '0' })).toEqual({ ...allOn, startHere: false })
   })
 
   it('refuses an override that is neither 1 nor 0', () => {
@@ -558,7 +594,8 @@ describe('feature flags (D16, D20)', () => {
     expect(proposalsPageOn(allOn)).toBe(true)
     expect(proposalsPageOn({ ...allOff, conceptMap: true })).toBe(true)
     expect(proposalsPageOn({ ...allOff, devanagariFirst: true })).toBe(true)
-    expect(proposalsPageOn({ ...allOn, conceptMap: false, devanagariFirst: false })).toBe(false)
+    expect(proposalsPageOn({ ...allOff, startHere: true })).toBe(true)
+    expect(proposalsPageOn(allOff)).toBe(false)
   })
 
   it('reads the flags once, from this process’s environment', () => {

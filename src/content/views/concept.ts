@@ -5,7 +5,6 @@ import type { Block, ConceptRecord, Slug } from '../schema'
 import {
   RELATION_STRENGTH,
   type ConceptCard,
-  type ConceptRef,
   type ConceptView,
   type LinkedWork,
   type QuestionnaireCard,
@@ -82,7 +81,7 @@ function linkedWorks(record: ConceptRecord, graph: ContentGraph): LinkedWork[] {
   })
 }
 
-/** Its own Questionnaire first, then every other that lists the Concept, in source order. */
+/** Its own Questionnaire first, then every other that lists the Concept, in id order. */
 function linkedQuestionnaires(
   record: ConceptRecord,
   graph: ContentGraph,
@@ -105,9 +104,9 @@ function neighbours(record: ConceptRecord, graph: ContentGraph) {
     .primary.map((slug) => must(graph, 'concept', slug))
     .sort((a, b) => byName(displayName(a.name), displayName(b.name)))
   const at = inTopic.findIndex((concept) => concept.slug === record.slug)
-  const ref = (concept: ConceptRecord | undefined): ConceptRef | undefined =>
-    concept && conceptRef(concept)
-  return present({ previous: ref(inTopic[at - 1]), next: ref(inTopic[at + 1]) })
+  const card = (concept: ConceptRecord | undefined): ConceptCard | undefined =>
+    concept && conceptCard(concept, graph)
+  return present({ previous: card(inTopic[at - 1]), next: card(inTopic[at + 1]) })
 }
 
 /** The topics whose shared introduction a list of blocks shows. */

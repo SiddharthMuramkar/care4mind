@@ -98,7 +98,7 @@ const IAST_NAME = new RegExp(`^[${IAST_LETTERS} \\-’']+$`, 'u')
 /** A transliterated verse line may also keep the verse's own punctuation. */
 const IAST_LINE = new RegExp(`^[${IAST_LETTERS} \\-’'.,;:!?|]+$`, 'u')
 /** Devanagari, the dandas, Vedic signs and the joiners, with spaces and line-end hyphens. */
-const DEVANAGARI = /^[\u0900-\u097F\u1CD0-\u1CFF\uA8E0-\uA8FF\u200C\u200D \-]+$/u
+const DEVANAGARI = /^[\u0900-\u097F\u1CD0-\u1CFF\uA8E0-\uA8FF\u200C\u200D -]+$/u
 const ASCII = /^[\x20-\x7E]+$/
 
 describe('scripts', () => {

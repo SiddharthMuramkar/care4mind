@@ -7,6 +7,7 @@
  */
 import type {
   ContentKind,
+  HomepageHero,
   Inline,
   Provenance,
   QuestionnaireStatus,
@@ -17,7 +18,7 @@ import type {
 } from './schema'
 
 /** The record schema's plain types that views use, for pages to name. */
-export type { Inline, QuestionnaireStatus, ReferenceType, SanskritName, Slug }
+export type { HomepageHero, Inline, QuestionnaireStatus, ReferenceType, SanskritName, Slug }
 
 // Links and names
 
@@ -32,6 +33,7 @@ export type FixedPage =
   | 'references'
   | 'search'
   | 'proposals'
+  | 'start'
 
 /**
  * What `hrefFor` turns into a path: a record (by its kind and id, with an anchor inside it where
@@ -276,8 +278,8 @@ export interface ConceptView extends ConceptCard, CarriedOver {
     }[]
   }
   /** The Concepts before and after it in its primary topic, alphabetically for now. */
-  previous?: ConceptRef
-  next?: ConceptRef
+  previous?: ConceptCard
+  next?: ConceptCard
   /** Links that leave the site, such as its own DharmaWiki article. */
   external: readonly { label: string; url: string }[]
 }
@@ -306,11 +308,14 @@ export interface TopicView extends TopicCard {
   concepts: readonly ConceptCard[]
   /** The Concepts that are also in it, by name. */
   secondaryConcepts: readonly ConceptCard[]
-  /** The works its Concepts quote. */
-  works: readonly WorkRef[]
-  /** The verses its Concepts quote, by work, then in each work's order. */
-  verses: readonly PassageView[]
+  /** The works its Concepts quote, each with the verses quoted from it, in the work's order. */
+  works: readonly QuotedWork[]
   intro?: TopicIntroView
+}
+
+/** A work, with the verses a page's Concepts quote from it. */
+export interface QuotedWork extends WorkRef {
+  verses: readonly PassageView[]
 }
 
 // Traditional texts
@@ -392,6 +397,8 @@ export interface QuestionnaireCard {
  * and its sources. Nothing held back and no scoring reach a view.
  */
 export interface QuestionnaireView extends QuestionnaireCard, CarriedOver {
+  /** Its Concepts as cards, by name. */
+  concepts: readonly ConceptCard[]
   purpose?: readonly Inline[]
   format?: readonly Inline[]
   limitations?: {
@@ -459,7 +466,10 @@ export interface PageView extends CarriedOver {
 
 /** The homepage: its own text, each area linking to its new page where it has one. */
 export interface HomepageView extends CarriedOver {
+  tagline: string
   shloka: { devanagari: string; iast: string; translation: string }
+  hero: HomepageHero
+  sectionIntros: { concepts: string; questionnaires: string }
   intro: Inline
   areas: readonly { title: string; text: Inline; href?: string }[]
   closing: Inline
@@ -486,6 +496,7 @@ export type RouteKind =
   | 'page'
   | 'search'
   | 'proposals'
+  | 'start'
 
 /** One public page in the route registry. */
 export interface RouteEntry {

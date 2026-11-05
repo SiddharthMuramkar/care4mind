@@ -10,7 +10,7 @@ import {
 } from './drawings'
 import { expect, gotoReady, test } from './fixtures'
 import { focusRingContrast } from './focus-ring'
-import { moving } from './lotuses'
+import { isBreath } from './lotuses'
 import { placeOnScreen, scrollPath } from './scrolling'
 
 const section = (page: Page, name: string) => page.getByRole('region', { name, exact: true })
@@ -20,14 +20,14 @@ const heroFleuron = (page: Page) => openingFolio(page).locator('svg')
 
 /**
  * What has started on a drawing or any part of it since the page began: how long after being
- * set going each began and how long it runs, in ms, and whether it loops. Call
+ * set going each began and how long it runs, in ms, its name and whether it loops. Call
  * recordAnimationStarts before loading the page.
  */
 const startsIn = (drawing: Locator) =>
   drawing.evaluate((svg) =>
     (window as unknown as { __animationStarts: Start[] }).__animationStarts
       .filter(({ target }) => svg.contains(target))
-      .map(({ delay, duration, loops }) => ({ delay, duration, loops })),
+      .map(({ name, delay, duration, loops }) => ({ name, delay, duration, loops })),
   )
 
 /** The one ornament in the gap between two sections: its outermost element hidden from assistive technology. */
@@ -64,7 +64,7 @@ function rulesOf(ornament: Locator) {
 }
 
 test.describe('the opening folio', () => {
-  test('its lotus Fleuron draws itself once on load, stroke by stroke, ends complete, then breathes', async ({
+  test('its lotus Fleuron draws itself once on load, stroke by stroke, ends complete, then breathes once', async ({
     page,
   }) => {
     await recordAnimationStarts(page)
@@ -95,17 +95,17 @@ test.describe('the opening folio', () => {
     const delays = await Promise.all(strokes.map((stroke) => delaysStartedOn(stroke)))
     expect(new Set(delays.flat()).size).toBeGreaterThan(1)
 
-    // Then it breathes: each loop sets off as the drawing ends, never while it is still drawing.
+    // Then it breathes once: the breath sets off as the drawing ends, never while it is still drawing.
     await expect
-      .poll(async () => (await startsIn(fleuron)).some(({ loops }) => loops), 'it breathes')
+      .poll(async () => (await startsIn(fleuron)).some(({ name }) => isBreath(name)), 'it breathes')
       .toBe(true)
     const starts = await startsIn(fleuron)
-    const drawing = starts.filter(({ loops }) => !loops)
+    const drawing = starts.filter(({ name }) => !isBreath(name))
     const drawnBy = Math.max(...drawing.map(({ delay, duration }) => delay + (duration ?? 0)))
-    for (const { delay } of starts.filter(({ loops }) => loops)) {
-      expect(delay, 'a loop sets off once the drawing is done').toBeGreaterThanOrEqual(drawnBy)
+    for (const { delay, loops } of starts.filter(({ name }) => isBreath(name))) {
+      expect(delay, 'the breath sets off once the drawing is done').toBeGreaterThanOrEqual(drawnBy)
+      expect(loops, 'and breathes once').toBe(false)
     }
-    expect(await moving(fleuron), 'and it breathes on').toBe(true)
   })
 
   test('never makes the verse wait: the heading and translation are never hidden or faded in', async ({
@@ -221,35 +221,52 @@ test('each Contents numeral is its Devanagari digit as plain text, with nothing 
   }
 })
 
-// The header's Concepts opens the Concepts page since front-end-site ticket 04 (D01), so only the
-// opening folio's calls to action glide down this page.
-for (const { from, name, to } of [
-  { from: 'main', name: 'Explore Concepts', to: 'Concepts' },
-  { from: 'main', name: 'Questionnaires', to: 'Questionnaires' },
-] as const) {
-  test(`"${name}" in the ${from === 'main' ? 'opening folio' : 'header'} glides down to the ${to} section, its heading in full view`, async ({
+test.describe('the opening folio says what the site is', () => {
+  test('its H1 is the promise, and the motto is a small label above it', async ({ page }) => {
+    await gotoReady(page, '/')
+    const folio = openingFolio(page)
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText(
+      'Indian psychology, explained simply.',
+    )
+    await expect(folio.locator('h1 [lang]')).toHaveCount(0)
+    await expect(folio.locator('[lang="sa-Deva"]')).toHaveText('यद् भावं तद् भवति')
+    await expect(folio.locator('[lang="sa-Latn"]')).toHaveText('yad bhāvaṃ tad bhavati')
+  })
+
+  test('leads to Start here, with Browse concepts beside it, and nothing else', async ({
     page,
   }) => {
     await gotoReady(page, '/')
-    const around =
-      from === 'main' ? page.getByRole('main') : page.getByRole('navigation', { name: 'Main' })
-    const link = around.getByRole('link', { name, exact: true })
-    const heading = page.getByRole('heading', { name: to, level: 2 })
-    await link.scrollIntoViewIfNeeded()
-    const path = await scrollPath(page, async () => {
-      await link.click()
-      await expect(heading).toBeInViewport()
-    })
-    expect(path.length, 'a glide passes through many positions').toBeGreaterThan(4)
-    await expect(heading).toBeInViewport({ ratio: 1 })
-    // Not under the header, wherever the header is.
-    const [title, header] = await Promise.all([
-      heading.boundingBox(),
-      page.getByRole('banner').boundingBox(),
-    ])
-    expect(title?.y).toBeGreaterThanOrEqual(Math.max(0, (header?.y ?? 0) + (header?.height ?? 0)))
+    const folio = openingFolio(page)
+    await expect(folio.getByRole('link')).toHaveCount(2)
+    await expect(folio.getByRole('link', { name: 'Start here' })).toHaveAttribute('href', '/start/')
+    await expect(folio.getByRole('link', { name: 'Browse concepts' })).toHaveAttribute(
+      'href',
+      '/concepts/',
+    )
   })
-}
+
+  for (const viewport of [
+    { width: 1366, height: 768 },
+    { width: 390, height: 844 },
+  ]) {
+    test(`at ${viewport.width}×${viewport.height}, the H1, the subhead and the primary button show without scrolling`, async ({
+      page,
+    }) => {
+      await page.setViewportSize(viewport)
+      await gotoReady(page, '/')
+      const folio = openingFolio(page)
+      for (const part of [
+        page.getByRole('heading', { level: 1 }),
+        folio.getByText(/^Ideas about the mind from India’s traditional texts/),
+        // The primary button, whichever the Start here flag makes it.
+        folio.getByRole('link').first(),
+      ]) {
+        await expect(part).toBeInViewport({ ratio: 1 })
+      }
+    })
+  }
+})
 
 test('links to another page open it at once, without gliding from where you were', async ({
   page,

@@ -2,7 +2,7 @@ import Link from 'next/link'
 
 import { siteNav } from '@/components/nav/site-nav'
 import { ProposalNote } from '@/components/proposals/ProposalNote'
-import { site } from '@/config/site'
+import { home } from '@/content'
 
 import { Fleuron } from './Fleuron'
 import { HelpLine } from './HelpLine'
@@ -15,7 +15,7 @@ import styles from './SiteFooter.module.css'
  * and the preview notice. Without JavaScript, the header's Menu leads here.
  */
 export async function SiteFooter() {
-  const nav = await siteNav()
+  const [nav, { tagline }] = await Promise.all([siteNav(), home.get()])
   const [concepts, texts, questionnaires, library] = nav.sections
   return (
     // Its own transition name keeps it still while the page turns (globals.css).
@@ -24,7 +24,7 @@ export async function SiteFooter() {
       <div className={styles.inner}>
         <div className={styles.colophon}>
           <Logo />
-          <p className={styles.tagline}>{site.tagline}</p>
+          <p className={styles.tagline}>{tagline}</p>
         </div>
         <nav id="site-nav" aria-label="All sections" className={styles.index}>
           <ul className={styles.groups}>

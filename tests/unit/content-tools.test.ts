@@ -590,6 +590,15 @@ describe('verify', () => {
   it('checks the homepage shloka’s translation, which is the English line', () => {
     const record: HomepageRecord = {
       kind: 'home',
+      tagline: 'A drafted tagline.',
+      hero: {
+        promise: 'Drafted.',
+        subhead: 'Drafted.',
+        startHere: 'Drafted.',
+        browseConcepts: 'Drafted.',
+        exploreConcepts: 'Drafted.',
+      },
+      sectionIntros: { concepts: 'Drafted.', questionnaires: 'Drafted.' },
       shloka: {
         devanagari: 'उदाहरणम् इदम् ।',
         iast: 'udāharaṇam idam |',
@@ -599,7 +608,12 @@ describe('verify', () => {
       areas: [{ title: 'Introduction', text: 'Every rule needs an example.' }],
       closing: 'Every rule needs an example.',
       helpLine: 'Every rule needs an example.',
-      provenance: { sources: [{ url: PAGE, retrieved: '2026-10-27' }], edits: [], flags: [] },
+      provenance: {
+        sources: [{ url: PAGE, retrieved: '2026-10-27' }],
+        edits: [],
+        flags: [],
+        drafted: ['tagline', 'hero', 'sectionIntros'],
+      },
     }
     expect(verify.checkRecord(record, site).misses.map((miss) => miss.path)).toEqual([
       'shloka.translation',

@@ -18,9 +18,8 @@
   user-select: none;
 }
 
-/* The glow and the ripples show only as the lotus breathes. */
-.halo,
-.ripple {
+/* The glow shows only as the hero breathes. */
+.halo {
   opacity: 0;
 }
 
@@ -34,19 +33,6 @@
   transform-origin: 80px 18px;
 }
 
-/* Finer than the rule above it, each ripple stretches out from its end by the flower. */
-.ripple {
-  stroke-width: 1;
-}
-
-.rippleLeft {
-  transform-origin: 40px 33.5px;
-}
-
-.rippleRight {
-  transform-origin: 120px 33.5px;
-}
-
 /*
  * The opening draw, as a pen would make it: the middle petal, then the two
  * beside it, then the rules running out from the flower, and last the dot set
@@ -55,7 +41,7 @@
  * no dash ends exactly where the line starts: a round cap would show it there
  * as a dot. The dash is there only while it draws: a browser's dash can stop
  * just short of a closed petal's end, leaving a gap. The finished ornament is
- * the default, so reduced motion, and a visitor who paused the lotus, see it whole.
+ * the default, so reduced motion sees it whole.
  */
 @keyframes draw {
   from {
@@ -74,31 +60,30 @@
   }
 }
 
-/* Without JavaScript it still draws in: it ends within 5 s, so needs no pause (WCAG 2.2.2). */
 @media (prefers-reduced-motion: no-preference) {
-  :root:not([data-lotus-motion='still']) .draw .centre,
-  :root:not([data-lotus-motion='still']) .draw .side,
-  :root:not([data-lotus-motion='still']) .draw .rule {
+  .draw .centre,
+  .draw .side,
+  .draw .rule {
     animation: draw var(--duration-stroke) var(--ease-in-out) backwards;
   }
 
-  :root:not([data-lotus-motion='still']) .draw .side {
+  .draw .side {
     animation-delay: calc(var(--duration-stroke) / 3);
   }
 
-  :root:not([data-lotus-motion='still']) .draw .rule {
+  .draw .rule {
     animation-delay: calc(var(--duration-stroke) * 2 / 3);
     animation-timing-function: var(--ease-out);
   }
 
-  :root:not([data-lotus-motion='still']) .draw .dot {
+  .draw .dot {
     transform-box: fill-box;
     transform-origin: center;
     animation: set-down var(--duration-quick) var(--ease-out) var(--duration-stroke) backwards;
   }
 }
 
-/* The breath. Each part rests at 0% and 100%, so a lotus starts and stops without a jump. */
+/* The breath. Each part rests at 0% and 100%, so the hero starts and stops without a jump. */
 @keyframes breathe-left {
   0%,
   100% {
@@ -167,90 +152,34 @@
   }
 }
 
-/* A ripple runs two at once: this fade, and the drift out along its own side. */
-@keyframes ripple {
-  0%,
-  55%,
-  96%,
-  100% {
-    opacity: 0;
-  }
-  68% {
-    opacity: 0.6;
-  }
-}
-
-@keyframes ripple-left {
-  0%,
-  100% {
-    transform: none;
-  }
-  55% {
-    transform: translateX(0) scaleX(0.4);
-  }
-  96% {
-    transform: translateX(-14px) scaleX(1.2);
-  }
-}
-
-@keyframes ripple-right {
-  0%,
-  100% {
-    transform: none;
-  }
-  55% {
-    transform: translateX(0) scaleX(0.4);
-  }
-  96% {
-    transform: translateX(14px) scaleX(1.2);
-  }
-}
-
-/* Only on a page the head script marked breathing: without JavaScript, nothing could pause it. */
+/* Only the hero breathes, once, after it draws in: draw-in and breath end within 5 s (WCAG 2.2.2). */
 @media (prefers-reduced-motion: no-preference) {
-  :root[data-lotus-motion='breathing'] .breath,
-  :root[data-lotus-motion='breathing'] .heart,
-  :root[data-lotus-motion='breathing'] .halo,
-  :root[data-lotus-motion='breathing'] .ripple {
+  .draw .breath,
+  .draw .heart,
+  .draw .halo {
     animation-duration: var(--duration-breath);
     animation-timing-function: var(--ease-breath);
-    animation-iteration-count: infinite;
+    animation-delay: calc(var(--duration-stroke) * 5 / 3);
   }
 
-  :root[data-lotus-motion='breathing'] .breathLeft {
+  .draw .breathLeft {
     animation-name: breathe-left;
   }
 
-  :root[data-lotus-motion='breathing'] .breathRight {
+  .draw .breathRight {
     animation-name: breathe-right;
   }
 
-  :root[data-lotus-motion='breathing'] .breathCentre {
+  .draw .breathCentre {
     animation-name: breathe-centre;
   }
 
-  :root[data-lotus-motion='breathing'] .heart {
+  .draw .heart {
     animation-name: heartbeat;
   }
 
-  :root[data-lotus-motion='breathing'] .halo {
+  .draw .halo {
     animation-name: glow;
-  }
-
-  :root[data-lotus-motion='breathing'] .rippleLeft {
-    animation-name: ripple, ripple-left;
-  }
-
-  :root[data-lotus-motion='breathing'] .rippleRight {
-    animation-name: ripple, ripple-right;
-  }
-
-  /* The hero breathes once it has drawn itself in: its rules finish at 5/3 of a stroke. */
-  :root[data-lotus-motion='breathing'] .draw .breath,
-  :root[data-lotus-motion='breathing'] .draw .heart,
-  :root[data-lotus-motion='breathing'] .draw .halo,
-  :root[data-lotus-motion='breathing'] .draw .ripple {
-    animation-delay: calc(var(--duration-stroke) * 5 / 3);
   }
 }
 
@@ -283,18 +212,18 @@
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  :root:not([data-lotus-motion='still']) .lean,
-  :root:not([data-lotus-motion='still']) .open,
-  :root:not([data-lotus-motion='still']) .bloom {
+  .lean,
+  .open,
+  .bloom {
     transform-origin: 80px 36px;
   }
 
-  :root:not([data-lotus-motion='still']) .lean {
+  .lean {
     transform: rotate(calc(var(--lotus-lean, 0) * 5deg));
   }
 
-  :root:not([data-lotus-motion='still']) .lean,
-  :root:not([data-lotus-motion='still']) .open {
+  .lean,
+  .open {
     transition: transform var(--duration-slow) var(--ease-out);
   }
 
@@ -306,33 +235,27 @@
     --bloom-turn: 1;
   }
 
-  :root:not([data-lotus-motion='still']) :is(.petalLeft, .petalRight) .open {
+  :is(.petalLeft, .petalRight) .open {
     transform: rotate(calc(var(--bloom-turn) * var(--lotus-near, 0) * 5deg));
   }
 
-  :root:not([data-lotus-motion='still']) .petalCentre .open {
+  .petalCentre .open {
     transform: scale(calc(1 + var(--lotus-near, 0) * 0.03));
   }
 
-  :root:not([data-lotus-motion='still'])
-    [data-lotus-bloom='a']
-    :is(.petalLeft, .petalRight)
-    .bloom {
+  [data-lotus-bloom='a'] :is(.petalLeft, .petalRight) .bloom {
     animation: bloom-side-a var(--duration-bloom) var(--ease-in-out);
   }
 
-  :root:not([data-lotus-motion='still'])
-    [data-lotus-bloom='b']
-    :is(.petalLeft, .petalRight)
-    .bloom {
+  [data-lotus-bloom='b'] :is(.petalLeft, .petalRight) .bloom {
     animation: bloom-side-b var(--duration-bloom) var(--ease-in-out);
   }
 
-  :root:not([data-lotus-motion='still']) [data-lotus-bloom='a'] .petalCentre .bloom {
+  [data-lotus-bloom='a'] .petalCentre .bloom {
     animation: bloom-centre-a var(--duration-bloom) var(--ease-in-out);
   }
 
-  :root:not([data-lotus-motion='still']) [data-lotus-bloom='b'] .petalCentre .bloom {
+  [data-lotus-bloom='b'] .petalCentre .bloom {
     animation: bloom-centre-b var(--duration-bloom) var(--ease-in-out);
   }
 }

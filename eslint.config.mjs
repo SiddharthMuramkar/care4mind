@@ -1,3 +1,4 @@
+import js from '@eslint/js'
 import { defineConfig, globalIgnores } from 'eslint/config'
 import nextVitals from 'eslint-config-next/core-web-vitals'
 import nextTypescript from 'eslint-config-next/typescript'
@@ -134,6 +135,44 @@ const internalLinks = {
 }
 
 export default defineConfig([
+  js.configs.recommended,
+  {
+    rules: {
+      // Sanskrit character classes list combining marks and joiners on purpose, one code point each.
+      'no-misleading-character-class': 'off',
+    },
+  },
+  {
+    files: ['**/*.cjs'],
+    languageOptions: {
+      sourceType: 'commonjs',
+      globals: {
+        module: 'readonly',
+        require: 'readonly',
+        process: 'readonly',
+        __dirname: 'readonly',
+      },
+    },
+  },
+  {
+    files: ['scripts/**/*.mjs', '*.mjs'],
+    languageOptions: {
+      globals: {
+        process: 'readonly',
+        console: 'readonly',
+        URL: 'readonly',
+        fetch: 'readonly',
+        setTimeout: 'readonly',
+        clearTimeout: 'readonly',
+        Buffer: 'readonly',
+      },
+    },
+  },
+  {
+    // The workflow runtime supplies agent(), log() and the other script globals.
+    files: ['.claude/workflows/**/*.js'],
+    rules: { 'no-undef': 'off' },
+  },
   ...nextVitals,
   ...nextTypescript,
   // The jsx-a11y plugin is already registered by eslint-config-next; add its full recommended rule set.

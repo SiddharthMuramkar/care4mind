@@ -42,7 +42,7 @@ export default async function TextsPage() {
             <p className={styles.facts}>
               {verses} verses from {shelf.length} works
             </p>
-            <Fleuron draw className={styles.fleuron} />
+            <Fleuron className={styles.fleuron} />
           </header>
 
           <ul className={styles.shelf}>
