@@ -71,6 +71,16 @@
 .topic {
   grid-area: topic;
   justify-self: start;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.75rem;
+  margin: 0;
+}
+
+.reading {
+  color: var(--color-surface-muted);
+  font-size: 1rem;
 }
 
 .summary {

@@ -56,6 +56,11 @@ export default defineHome({
       target: { kind: 'resource-list', id: 'courses' },
     },
   ],
+  featured: ['vikshepa', 'chittabhumi', 'sthitaprajna'],
+  howItWorks:
+    'Pick a topic, read the plain summary, then go deeper with the traditional texts and References.',
+  whoBehind:
+    'Behind this site are IIT Bombay’s SJMSOM and HUA. Every page lists its References and where its words came from.',
   closing: 'Open the doors to your inner potential.',
   helpLine:
     'Care4Mind is for learning and reflection, not treatment. To talk to someone now, call Tele-MANAS on 14416 or 1-800-891-4416 (free, 24×7, in about 20 languages). In an emergency, call 112. Outside India, call your local emergency number.',
@@ -82,6 +87,7 @@ export default defineHome({
       'Area links set for the new site (D11): Concepts leads to the Concepts index (it linked /concepts/), Techniques to Methods (it linked /methods/), Resources to the Library home (it linked /resources/, an empty page), Tradition and Texts to Text Books (it linked /text-books-2-2/, merged into Text Books) and Research to Courses (it linked /institutes/, now Courses). Applications linked to the current site’s questionnaire app, which no longer works, and has no link.',
       // Listed by the fidelity sweep: the headings of the cards left out above.
       'Headings left out with their cards, as the page writes them: “Questionnaires & Surveys” over all of them; “Questionaire”, “Questionaire -02” (twice) and “Questionaire - 03”, whose “Click to begin....” links go to the questionnaire app; and “Dosha”, “Survey -02”, “survey -03” and “Survey -04”, whose “Survey...” links go to the Dosha Survey page. The Dosha card’s description is quoted in a flag on the Dosha Survey.',
+      'Areas kept in the record unused: the homepage no longer shows the six areas. Their words are unchanged.',
     ],
     flags: [
       {
@@ -99,7 +105,20 @@ export default defineHome({
         note: 'The homepage’s Research area linked to /institutes/, so it now leads to Courses, where that page went. Its text is about opportunities in Indian psychology research, which no page of the new site covers as such. Confirm, or choose another destination.',
         decidedBy: 'site-map',
       },
+      {
+        for: 'project-owner',
+        note: 'Drafted for approval: the featured Concepts (Vikṣepa, Citta-bhūmi and Sthitaprajña) and the How it works and Who’s behind this words. The Who’s behind this words name IIT Bombay’s SJMSOM and HUA only as the ticket named them; confirm the names in full and the wording.',
+        decidedBy: 'client-questions',
+      },
     ],
-    drafted: ['tagline', 'hero', 'sectionIntros', 'helpLine'],
+    drafted: [
+      'tagline',
+      'hero',
+      'sectionIntros',
+      'featured',
+      'howItWorks',
+      'whoBehind',
+      'helpLine',
+    ],
   },
 })

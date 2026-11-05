@@ -1,3 +1,4 @@
+import { openingFolio } from './drawings'
 import { expect, test } from './fixtures'
 import { latencyOf, openOnSlowPhone, recordEventTimings, visitLatency } from './latency'
 
@@ -16,7 +17,8 @@ test(`pressing "Start here" answers within ${BUDGET} ms on a slow phone`, async 
   page,
   context,
 }) => {
-  const cta = page.getByRole('main').getByRole('link', { name: 'Start here', exact: true })
+  // The hero's "Start here": the closing button at the foot of the page repeats its label.
+  const cta = openingFolio(page).getByRole('link', { name: 'Start here', exact: true })
   const { quickest, visits } = await visitLatency(BUDGET, async () => {
     await openOnSlowPhone(page, '/')
     const opened = context.waitForEvent('page')

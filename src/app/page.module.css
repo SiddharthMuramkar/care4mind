@@ -90,6 +90,11 @@
   margin: 1.5rem 0 0;
 }
 
+/* An empty slot takes no room until its own work fills it. */
+.slot:empty {
+  display: none;
+}
+
 /* Sections on the indigo ground */
 .section {
   display: grid;
@@ -122,63 +127,25 @@
   margin-inline: auto;
 }
 
-/* Contents: a book's table of contents, Western numerals beside the Devanagari, with dotted leaders. */
-.contents {
+/* The five topics, as the cards the Concepts page shows. */
+.topics {
   list-style: none;
   margin: 0;
   padding: 0;
   display: grid;
-  gap: 1.25rem;
+  gap: 0.75rem;
 }
 
-.entry {
+@media (min-width: 40rem) {
+  .topics {
+    grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr));
+    gap: 1rem;
+  }
+}
+
+.topics > li {
   display: grid;
-  grid-template-columns: 4rem auto 1fr auto;
-  grid-template-areas:
-    'number title leader status'
-    '. text text text';
-  align-items: baseline;
-  column-gap: 0.75rem;
-  row-gap: 0.25rem;
-}
-
-/* Set at the title's size, on its baseline, as a book's contents number their chapters. */
-.entryNumber {
-  grid-area: number;
-  text-align: center;
-  color: var(--color-link);
-  font-size: clamp(1.5rem, 3.5vw, 1.875rem);
-  line-height: 1.2;
-}
-
-.entryTitle {
-  grid-area: title;
-  font-family: var(--font-display);
-  font-size: clamp(1.5rem, 3.5vw, 1.875rem);
-  line-height: 1.2;
-}
-
-.entryTitle a {
-  color: var(--color-link);
-}
-
-.entryLeader {
-  grid-area: leader;
-  align-self: end;
-  margin-bottom: 0.4rem;
-  border-bottom: 2px dotted var(--color-line);
-}
-
-.entryStatus {
-  grid-area: status;
-  color: var(--color-ink-muted);
-  font-size: 1.0625rem;
-}
-
-.entryText {
-  grid-area: text;
-  max-width: 56ch;
-  color: var(--color-ink-muted);
+  min-width: 0;
 }
 
 .cards {
@@ -190,38 +157,31 @@
   grid-template-columns: repeat(auto-fill, minmax(min(100%, 26rem), 1fr));
 }
 
-.note {
-  margin: 0;
-  max-width: 56ch;
-  color: var(--color-ink-muted);
-  font-style: italic;
+.closingSection {
+  display: grid;
+  gap: 1.5rem;
+  justify-items: center;
+  width: 100%;
+  max-width: 60rem;
+  margin-inline: auto;
+  padding-inline: clamp(1rem, 4vw, 3rem);
+  text-align: center;
 }
 
-/* A link in a note takes the surface's one style, not the note's italic. */
-.note a {
-  font-style: normal;
+/* The primary's ground is this section's ground, so here the button takes the paper. */
+.closingButton {
+  background: var(--color-surface);
+  color: var(--color-surface-ink);
 }
 
 .closing {
-  margin: 0 auto;
-  padding-inline: 1rem;
+  margin: 0;
   max-width: 24ch;
-  text-align: center;
   font-family: var(--font-display);
   font-size: clamp(1.75rem, 5vw, 2.75rem);
   line-height: 1.2;
 }
 
-@media (max-width: 36rem) {
-  .entry {
-    grid-template-columns: 4rem 1fr;
-    grid-template-areas:
-      'number title'
-      '. status'
-      '. text';
-  }
-
-  .entryLeader {
-    display: none;
-  }
+.closingCta {
+  margin: 0;
 }

@@ -8,6 +8,8 @@ import {
   recordAnimationStarts,
   type Start,
 } from './drawings'
+import { home, topics } from '@/content'
+
 import { expect, gotoReady, test } from './fixtures'
 import { focusRingContrast } from './focus-ring'
 import { isBreath } from './lotuses'
@@ -167,8 +169,9 @@ test('an OrnamentRule between each pair of sections inks in from the centre as i
 }) => {
   await gotoReady(page, '/')
   const neighbours: [string, string][] = [
-    ['Contents', 'Concepts'],
-    ['Concepts', 'Questionnaires'],
+    ['Explore by topic', 'Start with these'],
+    ['Start with these', 'How it works'],
+    ['How it works', 'Who’s behind this'],
   ]
   for (const [above, below] of neighbours) {
     await page.evaluate(() => window.scrollTo({ top: 0, behavior: 'instant' }))
@@ -203,22 +206,53 @@ test('an OrnamentRule between each pair of sections inks in from the centre as i
   }
 })
 
-test('each Contents numeral is its Devanagari digit as plain text, with nothing drawn round it', async ({
+test('below the hero it shows topics, featured Concepts, how it works and who is behind it, in order', async ({
   page,
 }) => {
   await gotoReady(page, '/')
-  const entries = section(page, 'Contents').getByRole('listitem')
-  const numerals = ['१', '२', '३', '४', '५', '६']
-  await expect(entries).toHaveCount(numerals.length)
-  for (const [index, entry] of (await entries.all()).entries()) {
-    const numeral = entry.getByText(numerals[index] ?? '', { exact: true })
-    await expect(numeral).toBeVisible()
-    expect(
-      await numeral.evaluate((element) => element.children.length),
-      'the numeral is text alone',
-    ).toBe(0)
-    await expect(entry.locator('svg, img, canvas'), 'nothing drawn in the entry').toHaveCount(0)
+  const main = page.getByRole('main')
+  await expect(main.getByRole('heading', { level: 2 })).toHaveText([
+    'Explore by topic',
+    'Start with these',
+    'How it works',
+    'Who’s behind this',
+  ])
+  await expect(section(page, 'Contents')).toHaveCount(0)
+  await expect(section(page, 'Questionnaires')).toHaveCount(0)
+  await expect(main).not.toContainText('›')
+
+  const topicCards = await topics.list()
+  const byTopic = section(page, 'Explore by topic')
+  await expect(byTopic.getByRole('listitem')).toHaveCount(topicCards.length)
+  for (const topic of topicCards) {
+    const card = byTopic.getByRole('listitem').filter({ hasText: topic.name })
+    await expect(card.getByRole('link', { name: topic.name })).toHaveAttribute('href', topic.href)
+    await expect(card).toContainText(
+      `${topic.conceptCount} ${topic.conceptCount === 1 ? 'Concept' : 'Concepts'}`,
+    )
   }
+
+  const { featured, closing } = await home.get()
+  const startWith = section(page, 'Start with these')
+  await expect(startWith.getByRole('listitem')).toHaveCount(featured.length)
+  for (const concept of featured) {
+    const card = startWith.getByRole('listitem').filter({ hasText: concept.name })
+    await expect(card.getByRole('link', { name: `Read about ${concept.name}` })).toHaveAttribute(
+      'href',
+      concept.href,
+    )
+    await expect(card).toContainText(concept.topic.name)
+    await expect(card).toContainText(`${concept.readingMinutes} min read`)
+  }
+
+  await expect(section(page, 'How it works')).not.toBeEmpty()
+  await expect(section(page, 'Who’s behind this')).not.toBeEmpty()
+  await expect(main).toContainText(closing)
+  // While Start here is on, the closing button is Start here, as in the hero.
+  await expect(main.getByRole('link', { name: 'Start here' }).last()).toHaveAttribute(
+    'href',
+    '/start/',
+  )
 })
 
 test.describe('the opening folio says what the site is', () => {
@@ -336,26 +370,19 @@ test('the homepage card opens the Concept page', async ({ page }) => {
   expect(errors).toEqual([])
 })
 
-test('the homepage leads on to every Concept and every Questionnaire', async ({ page }) => {
+test('the homepage leads on through a topic card to its topic', async ({ page }) => {
   await gotoReady(page, '/')
-  const main = page.getByRole('main')
-  await main.getByRole('link', { name: /^All \d+ Concepts, from A to Z$/ }).click()
-  await expect(page).toHaveURL('/concepts/')
-  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Concepts')
-  await page.goBack()
-  await main.getByRole('link', { name: /more Questionnaires from the current site/ }).click()
-  await expect(page).toHaveURL('/questionnaires/')
-  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Questionnaires')
+  const [firstTopic] = await topics.list()
+  if (!firstTopic) throw new Error('the site has a topic')
+  await section(page, 'Explore by topic').getByRole('link', { name: firstTopic.name }).click()
+  await expect(page).toHaveURL(firstTopic.href)
+  await expect(page.getByRole('heading', { level: 1 })).toContainText(firstTopic.name)
 })
 
-test("a Concept or Questionnaire card's focus ring contrasts with the colour behind it", async ({
+test("a featured Concept card's focus ring contrasts with the colour behind it", async ({
   page,
 }) => {
   await gotoReady(page, '/')
   const concept = page.getByRole('link', { name: 'Read about Vikṣepa' })
   expect(await focusRingContrast(page, concept)).toBeGreaterThanOrEqual(3)
-  const questionnaire = section(page, 'Questionnaires')
-    .getByRole('link', { name: /^About the/ })
-    .first()
-  expect(await focusRingContrast(page, questionnaire)).toBeGreaterThanOrEqual(3)
 })

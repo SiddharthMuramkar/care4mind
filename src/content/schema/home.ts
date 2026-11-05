@@ -1,4 +1,4 @@
-import type { Inline, Provenance, Target } from './common'
+import type { Inline, Provenance, Slug, Target } from './common'
 
 /** The hero's words. Start here and Browse concepts show while Start here is on. */
 export interface HomepageHero {
@@ -23,6 +23,12 @@ export interface HomepageRecord {
   intro: Inline
   /** Each area leads to a target; one with no real destination has none (and is flagged). */
   areas: readonly { title: string; text: Inline; target?: Target }[]
+  /** The Concepts the homepage features, by slug, in the order it shows them. */
+  featured: readonly Slug[]
+  /** Drafted: how a reader goes from a topic to the texts and References behind it. */
+  howItWorks: Inline
+  /** Drafted: who is behind the site, and that every page lists its References and sources. */
+  whoBehind: Inline
   closing: Inline
   /** Where to call for help now, shown in every page's footer and on each Questionnaire page. */
   helpLine: Inline

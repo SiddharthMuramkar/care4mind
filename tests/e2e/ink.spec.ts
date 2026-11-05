@@ -1,5 +1,6 @@
 import type { Locator, Page } from '@playwright/test'
 
+import { openingFolio } from './drawings'
 import { expect, gotoReady, test } from './fixtures'
 import { centre, inkSpreadsOn, recordInkSpreads } from './presses'
 import { MISSING } from './routes'
@@ -8,24 +9,29 @@ test.beforeEach(async ({ page }) => {
   await recordInkSpreads(page)
 })
 
-// The ink never holds up a press: each call to action still takes you where it says.
+// The ink never holds up a press: each call to action still takes you where it says. The
+// homepage's two are the hero's — the closing button repeats "Start here", so the hero's is
+// found in the opening folio.
 const CALLS_TO_ACTION = [
   {
     from: '/',
     name: 'Start here',
     to: '/start/',
+    in: openingFolio,
     heading: (page: Page) => page.getByRole('heading', { level: 1 }),
   },
   {
     from: '/',
     name: 'Browse concepts',
     to: '/concepts/',
+    in: openingFolio,
     heading: (page: Page) => page.getByRole('heading', { name: 'Concepts', level: 1 }),
   },
   {
     from: MISSING,
     name: 'Go to the homepage',
     to: '/',
+    in: (page: Page) => page.getByRole('main'),
     heading: (page: Page) => page.getByRole('heading', { level: 1 }),
   },
 ]
@@ -41,11 +47,11 @@ const PRESSES: Record<string, (cta: Locator) => Promise<void>> = {
   },
 }
 
-for (const { from, name, to, heading } of CALLS_TO_ACTION) {
+for (const { from, name, to, in: around, heading } of CALLS_TO_ACTION) {
   for (const [how, press] of Object.entries(PRESSES)) {
     test(`${how} "${name}" takes you where it says`, { tag: '@one-width' }, async ({ page }) => {
       await gotoReady(page, from)
-      await press(page.getByRole('main').getByRole('link', { name, exact: true }))
+      await press(around(page).getByRole('link', { name, exact: true }))
       await expect(page).toHaveURL(to)
       await expect(heading(page)).toBeInViewport()
     })
@@ -58,7 +64,7 @@ test(
   { tag: '@one-width' },
   async ({ page, context }) => {
     await gotoReady(page, '/')
-    const cta = page.getByRole('main').getByRole('link', { name: 'Start here', exact: true })
+    const cta = openingFolio(page).getByRole('link', { name: 'Start here', exact: true })
     const opened = context.waitForEvent('page')
     await cta.click({ modifiers: ['ControlOrMeta'], position: { x: 14, y: 9 } })
     await (await opened).close()
@@ -75,7 +81,7 @@ test(
   { tag: '@one-width' },
   async ({ page, context }) => {
     await gotoReady(page, '/')
-    const cta = page.getByRole('main').getByRole('link', { name: 'Start here', exact: true })
+    const cta = openingFolio(page).getByRole('link', { name: 'Start here', exact: true })
     for (const position of [
       { x: 10, y: 10 },
       { x: 40, y: 30 },
@@ -117,7 +123,7 @@ test(
   { tag: '@one-width' },
   async ({ page, context }) => {
     await gotoReady(page, '/')
-    const cta = page.getByRole('main').getByRole('link', { name: 'Start here', exact: true })
+    const cta = openingFolio(page).getByRole('link', { name: 'Start here', exact: true })
     await cta.focus()
     const opened = context.waitForEvent('page')
     await page.keyboard.press('ControlOrMeta+Enter')

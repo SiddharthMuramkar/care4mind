@@ -609,6 +609,9 @@ describe('verify', () => {
       },
       intro: 'Every rule needs an example.',
       areas: [{ title: 'Introduction', text: 'Every rule needs an example.' }],
+      featured: [],
+      howItWorks: 'Every rule needs an example.',
+      whoBehind: 'Every rule needs an example.',
       closing: 'Every rule needs an example.',
       helpLine: 'Every rule needs an example.',
       provenance: {
