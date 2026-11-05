@@ -14,11 +14,13 @@ const ON: Features = {
   questionnairePreview: true,
   conceptMap: true,
   startHere: true,
+  whatsOnYourMind: true,
 }
 const OFF: Features = {
   questionnairePreview: false,
   conceptMap: false,
   startHere: false,
+  whatsOnYourMind: false,
 }
 
 const site = createContent(localSource, ON)

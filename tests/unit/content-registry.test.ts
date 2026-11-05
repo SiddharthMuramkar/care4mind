@@ -134,6 +134,7 @@ describe('record schema', () => {
         intro: '',
         areas: [],
         featured: [],
+        onYourMind: [],
         howItWorks: '',
         whoBehind: '',
         closing: '',
@@ -537,11 +538,13 @@ describe('feature flags', () => {
     questionnairePreview: true,
     conceptMap: true,
     startHere: true,
+    whatsOnYourMind: true,
   }
   const allOff = {
     questionnairePreview: false,
     conceptMap: false,
     startHere: false,
+    whatsOnYourMind: false,
   }
 
   it('switches every flag on in local runs and Vercel previews, and off in production', () => {
@@ -565,6 +568,10 @@ describe('feature flags', () => {
       ...allOff,
       startHere: true,
     })
+    expect(readFeatures({ ...production, FEATURE_WHATS_ON_YOUR_MIND: '1' })).toEqual({
+      ...allOff,
+      whatsOnYourMind: true,
+    })
   })
 
   it('lets each flag’s own variable force it off anywhere else', () => {
@@ -577,16 +584,21 @@ describe('feature flags', () => {
       conceptMap: false,
     })
     expect(readFeatures({ FEATURE_START_HERE: '0' })).toEqual({ ...allOn, startHere: false })
+    expect(readFeatures({ FEATURE_WHATS_ON_YOUR_MIND: '0' })).toEqual({
+      ...allOn,
+      whatsOnYourMind: false,
+    })
   })
 
   it('refuses an override that is neither 1 nor 0', () => {
     expect(() => readFeatures({ FEATURE_CONCEPT_MAP: 'true' })).toThrow('FEATURE_CONCEPT_MAP')
   })
 
-  it('shows the proposals page while either proposal is on, with no flag of its own', () => {
+  it('shows the proposals page while any proposal is on, with no flag of its own', () => {
     expect(proposalsPageOn(allOn)).toBe(true)
     expect(proposalsPageOn({ ...allOff, conceptMap: true })).toBe(true)
     expect(proposalsPageOn({ ...allOff, startHere: true })).toBe(true)
+    expect(proposalsPageOn({ ...allOff, whatsOnYourMind: true })).toBe(true)
     expect(proposalsPageOn(allOff)).toBe(false)
   })
 

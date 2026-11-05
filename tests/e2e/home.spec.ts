@@ -169,6 +169,7 @@ test('an OrnamentRule between each pair of sections inks in from the centre as i
 }) => {
   await gotoReady(page, '/')
   const neighbours: [string, string][] = [
+    ['What’s on your mind?', 'Explore by topic'],
     ['Explore by topic', 'Start with these'],
     ['Start with these', 'How it works'],
     ['How it works', 'Who’s behind this'],
@@ -206,12 +207,13 @@ test('an OrnamentRule between each pair of sections inks in from the centre as i
   }
 })
 
-test('below the hero it shows topics, featured Concepts, how it works and who is behind it, in order', async ({
+test('below the hero it shows what is on your mind, topics, featured Concepts, how it works and who is behind it, in order', async ({
   page,
 }) => {
   await gotoReady(page, '/')
   const main = page.getByRole('main')
   await expect(main.getByRole('heading', { level: 2 })).toHaveText([
+    'What’s on your mind?',
     'Explore by topic',
     'Start with these',
     'How it works',
@@ -358,6 +360,28 @@ test('nothing shifts while the ornaments draw and ink in, from load to the foot 
     (window as unknown as { __layoutShifts: number[] }).__layoutShifts.reduce((a, b) => a + b, 0),
   )
   expect(shift).toBeLessThan(0.01)
+})
+
+test('under the hero, six everyday starting points each lead to their Concept page', async ({
+  page,
+}) => {
+  await gotoReady(page, '/')
+  const { onYourMind } = await home.get()
+  const mind = section(page, 'What’s on your mind?')
+  await expect(mind.getByRole('listitem')).toHaveCount(6)
+  await expect(mind.getByRole('link')).toHaveText(onYourMind.map(({ label }) => label))
+  for (const { label, concept } of onYourMind) {
+    await expect(mind.getByRole('link', { name: label, exact: true })).toHaveAttribute(
+      'href',
+      concept.href,
+    )
+    expect((await page.request.get(concept.href)).status(), label).toBe(200)
+  }
+  const [first] = onYourMind
+  if (!first) throw new Error('the homepage has a starting point')
+  await mind.getByRole('link', { name: first.label, exact: true }).click()
+  await expect(page).toHaveURL(first.concept.href)
+  await expect(page.getByRole('heading', { level: 1 })).toContainText(first.concept.name)
 })
 
 test('the homepage card opens the Concept page', async ({ page }) => {

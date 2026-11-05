@@ -486,6 +486,12 @@ export interface FeaturedConceptCard extends ConceptCard {
   readingMinutes: number
 }
 
+/** An everyday starting point: its words, and the Concept it leads to. */
+export interface StartingPoint {
+  label: string
+  concept: ConceptRef
+}
+
 /** The homepage: its own text, each area linking to its new page where it has one. */
 export interface HomepageView extends CarriedOver {
   tagline: string
@@ -496,6 +502,11 @@ export interface HomepageView extends CarriedOver {
   areas: readonly { title: string; text: Inline; href?: string }[]
   /** The featured Concepts, in the home record's order, with every id resolved. */
   featured: readonly FeaturedConceptCard[]
+  /**
+   * The "What's on your mind?" starting points, in the home record's order, each resolved;
+   * empty while their proposal flag is off, so no chip shows.
+   */
+  onYourMind: readonly StartingPoint[]
   howItWorks: Inline
   whoBehind: Inline
   closing: Inline

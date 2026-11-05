@@ -194,7 +194,7 @@ export function createContent(source: ContentSource, flags: Features) {
         const read = await graph()
         const record = read.record('home', 'home')
         if (!record) throw new Error('The content has no homepage record (data/home/home.ts).')
-        return homepageView(record, read)
+        return homepageView(record, read, flags)
       },
     },
 

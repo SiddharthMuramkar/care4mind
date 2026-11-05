@@ -14,12 +14,15 @@ export interface Features {
   conceptMap: boolean
   /** Proposal: the Start here page at /start/. */
   startHere: boolean
+  /** Proposal: the "What's on your mind?" chips under the homepage hero. */
+  whatsOnYourMind: boolean
 }
 
 const VARIABLES = {
   questionnairePreview: 'FEATURE_QUESTIONNAIRE_PREVIEW',
   conceptMap: 'FEATURE_CONCEPT_MAP',
   startHere: 'FEATURE_START_HERE',
+  whatsOnYourMind: 'FEATURE_WHATS_ON_YOUR_MIND',
 } as const satisfies Record<keyof Features, string>
 
 type Environment = Readonly<Record<string, string | undefined>>
@@ -38,6 +41,7 @@ export function readFeatures(env: Environment): Features {
     questionnairePreview: flag(VARIABLES.questionnairePreview),
     conceptMap: flag(VARIABLES.conceptMap),
     startHere: flag(VARIABLES.startHere),
+    whatsOnYourMind: flag(VARIABLES.whatsOnYourMind),
   }
 }
 
@@ -46,5 +50,5 @@ export const features: Features = readFeatures(process.env)
 
 /** The proposals page is on while any built proposal is: it has no flag of its own. */
 export function proposalsPageOn(flags: Features = features): boolean {
-  return flags.conceptMap || flags.startHere
+  return flags.conceptMap || flags.startHere || flags.whatsOnYourMind
 }

@@ -30,11 +30,13 @@ const ON: Features = {
   questionnairePreview: true,
   conceptMap: true,
   startHere: true,
+  whatsOnYourMind: true,
 }
 const OFF: Features = {
   questionnairePreview: false,
   conceptMap: false,
   startHere: false,
+  whatsOnYourMind: false,
 }
 
 const provenance = {
@@ -1575,6 +1577,7 @@ describe('the homepage', () => {
       { title: 'Nowhere', text: 'Made-up text.' },
     ],
     featured: [],
+    onYourMind: [],
     howItWorks: 'Made up.',
     whoBehind: 'Made up.',
     closing: 'A made-up closing.',
@@ -1602,6 +1605,7 @@ describe('the homepage', () => {
         { title: 'Nowhere', text: 'Made-up text.' },
       ],
       featured: [],
+      onYourMind: [],
       howItWorks: 'Made up.',
       whoBehind: 'Made up.',
       closing: 'A made-up closing.',
@@ -1739,6 +1743,7 @@ describe('every view', () => {
       intro: 'Made up.',
       areas: [{ title: 'Made up', text: 'Made up.', target: { kind: 'concept', id: 'obstacles' } }],
       featured: ['obstacles'],
+      onYourMind: [],
       howItWorks: 'Made up.',
       whoBehind: 'Made up.',
       closing: 'Made up.',
@@ -1789,6 +1794,28 @@ describe('the feature flags, from the environment to the interface', () => {
       reviewStatus: 'carried-over-not-reviewed',
       provenance,
     }),
+    defineHome({
+      kind: 'home',
+      tagline: 'A made-up tagline.',
+      hero: {
+        promise: 'Made up.',
+        subhead: 'Made up.',
+        startHere: 'Start',
+        browseConcepts: 'Browse',
+        exploreConcepts: 'Explore',
+      },
+      sectionIntros: { concepts: 'Made up.', questionnaires: 'Made up.' },
+      shloka: { devanagari: 'उदाहरणम्', iast: 'udāharaṇam', translation: 'Made up.' },
+      intro: 'Made up.',
+      areas: [],
+      featured: [],
+      onYourMind: [{ label: 'Made up.', concept: 'obstacles' }],
+      howItWorks: 'Made up.',
+      whoBehind: 'Made up.',
+      closing: 'Made up.',
+      helpLine: 'Made up.',
+      provenance,
+    }),
   ]
   /** What a build in this environment offers: the preview's form, and the flagged routes. */
   const offered = async (env: Record<string, string>) => {
@@ -1800,10 +1827,18 @@ describe('the feature flags, from the environment to the interface', () => {
       map: paths.includes('/concepts/map/'),
       proposals: paths.includes('/proposals/'),
       start: paths.includes('/start/'),
+      mind: (await content.home.get()).onYourMind.length > 0,
     }
   }
-  const everything = { form: true, flow: true, map: true, proposals: true, start: true }
-  const nothing = { form: false, flow: false, map: false, proposals: false, start: false }
+  const everything = { form: true, flow: true, map: true, proposals: true, start: true, mind: true }
+  const nothing = {
+    form: false,
+    flow: false,
+    map: false,
+    proposals: false,
+    start: false,
+    mind: false,
+  }
 
   it('offers everything in local runs and Vercel previews, and none of it in production', async () => {
     expect(await offered({})).toEqual(everything)
@@ -1833,6 +1868,11 @@ describe('the feature flags, from the environment to the interface', () => {
       form: false,
       flow: false,
     })
+    expect(await offered({ ...production, FEATURE_WHATS_ON_YOUR_MIND: '1' })).toEqual({
+      ...nothing,
+      proposals: true,
+      mind: true,
+    })
     expect(await offered({ FEATURE_CONCEPT_MAP: '0' })).toEqual({
       ...everything,
       map: false,
@@ -1842,6 +1882,13 @@ describe('the feature flags, from the environment to the interface', () => {
         FEATURE_CONCEPT_MAP: '0',
         FEATURE_START_HERE: '0',
       }),
-    ).toEqual({ ...everything, map: false, proposals: false, start: false })
+    ).toEqual({ ...everything, map: false, start: false })
+    expect(
+      await offered({
+        FEATURE_CONCEPT_MAP: '0',
+        FEATURE_START_HERE: '0',
+        FEATURE_WHATS_ON_YOUR_MIND: '0',
+      }),
+    ).toEqual({ ...everything, map: false, proposals: false, start: false, mind: false })
   })
 })

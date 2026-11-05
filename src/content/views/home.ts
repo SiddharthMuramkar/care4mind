@@ -1,9 +1,12 @@
+import type { Features } from '@/config/features'
+
 import type { ContentGraph } from '../graph'
 import type { HomepageRecord, Target } from '../schema'
 import type { HomepageView } from '../types'
 import { carriedOver, must } from './common'
 import { conceptCard, readingMinutes } from './concept'
 import { hrefFor } from './href'
+import { conceptRef } from './refs'
 
 /** The path a record's target names. A Questionnaire's depends on its status. */
 export function targetHref(target: Target, graph: ContentGraph): string {
@@ -29,8 +32,15 @@ export function targetHref(target: Target, graph: ContentGraph): string {
   }
 }
 
-/** The homepage, each area's target turned into a path; an area without a real one has none. */
-export function homepageView(record: HomepageRecord, graph: ContentGraph): HomepageView {
+/**
+ * The homepage, each area's target turned into a path; an area without a real one has none.
+ * The "What's on your mind?" starting points reach the view only while their flag is on.
+ */
+export function homepageView(
+  record: HomepageRecord,
+  graph: ContentGraph,
+  flags: Features,
+): HomepageView {
   return {
     tagline: record.tagline,
     shloka: { ...record.shloka },
@@ -46,6 +56,12 @@ export function homepageView(record: HomepageRecord, graph: ContentGraph): Homep
       const concept = must(graph, 'concept', slug)
       return { ...conceptCard(concept, graph), readingMinutes: readingMinutes(concept) }
     }),
+    onYourMind: flags.whatsOnYourMind
+      ? record.onYourMind.map(({ label, concept }) => ({
+          label,
+          concept: conceptRef(must(graph, 'concept', concept)),
+        }))
+      : [],
     howItWorks: record.howItWorks,
     whoBehind: record.whoBehind,
     closing: record.closing,

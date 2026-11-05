@@ -6,7 +6,7 @@
 import type { Features } from '@/config/features'
 
 export interface Proposal {
-  key: 'concept-map' | 'start-here' | 'audio-pronunciation'
+  key: 'concept-map' | 'start-here' | 'whats-on-your-mind' | 'audio-pronunciation'
   name: string
   built: boolean
   adds: string
@@ -37,6 +37,17 @@ const START_HERE: Proposal = {
   off: 'One setting, FEATURE_START_HERE=0, with no code change: the page and its header link go. The live site leaves it off until you approve it.',
 }
 
+const WHATS_ON_YOUR_MIND: Proposal = {
+  key: 'whats-on-your-mind',
+  name: 'What’s on your mind?',
+  built: true,
+  adds: 'Six chips under the homepage hero, in everyday words — “I can’t focus”, “My mind feels scattered” and the like — each leading to the Concept that speaks to it, for a visitor who doesn’t yet know which Sanskrit name to look for. Each names an everyday experience, never a condition or a diagnosis. The wording is drafted for the Project owner, and which Concept each chip leads to for the Research editor.',
+  speed: 'No page of its own: six links on the homepage, and nothing runs in the browser.',
+  upkeep:
+    'The six chips and their Concepts are written by hand in the home record, so a renamed Concept or a changed starting point means editing it.',
+  off: 'One setting, FEATURE_WHATS_ON_YOUR_MIND=0, with no code change: the chips go. The live site leaves it off until you approve it.',
+}
+
 const AUDIO: Proposal = {
   key: 'audio-pronunciation',
   name: 'Audio pronunciation',
@@ -45,7 +56,7 @@ const AUDIO: Proposal = {
   speed: 'Nothing until it is pressed: each recording would load only when played.',
   upkeep:
     'A recording of every Sanskrit word on the site, made and checked by someone who knows the pronunciation, and another for each word added later.',
-  off: 'Nothing to switch off: it is described, not built. Built, it would get a setting of its own, like the two above.',
+  off: 'Nothing to switch off: it is described, not built. Built, it would get a setting of its own, like the ones above.',
 }
 
 /** The proposals this build lists, in order. */
@@ -53,6 +64,7 @@ export function proposalsFor(flags: Features): Proposal[] {
   return [
     ...(flags.conceptMap ? [CONCEPT_MAP] : []),
     ...(flags.startHere ? [START_HERE] : []),
+    ...(flags.whatsOnYourMind ? [WHATS_ON_YOUR_MIND] : []),
     AUDIO,
   ]
 }

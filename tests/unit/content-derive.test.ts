@@ -28,11 +28,13 @@ const ON: Features = {
   questionnairePreview: true,
   conceptMap: true,
   startHere: true,
+  whatsOnYourMind: true,
 }
 const OFF: Features = {
   questionnairePreview: false,
   conceptMap: false,
   startHere: false,
+  whatsOnYourMind: false,
 }
 
 const provenance = {
@@ -215,6 +217,7 @@ const home = defineHome({
   intro: 'Made up.',
   areas: [],
   featured: ['obstacles'],
+  onYourMind: [],
   howItWorks: 'Made up.',
   whoBehind: 'Made up.',
   closing: 'Made up.',
