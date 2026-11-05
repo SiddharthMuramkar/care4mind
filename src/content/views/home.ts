@@ -29,6 +29,10 @@ export function targetHref(target: Target, graph: ContentGraph): string {
     case 'reference':
       // The graph refuses an anchor these pages don't have, so the id alone names the place.
       return hrefFor({ kind: target.kind, id: target.id })
+    default: {
+      const kind: never = target.kind
+      throw new Error(`No address for a record of kind “${kind}”.`)
+    }
   }
 }
 
