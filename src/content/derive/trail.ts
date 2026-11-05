@@ -4,6 +4,7 @@
 import type { Features } from '@/config/features'
 
 import type { ContentGraph } from '../graph'
+import { displayName } from '../names'
 import type { Crumb } from '../types'
 import { hrefFor } from '../views/href'
 import { pageRoutes, type PageRoute } from './routes'
@@ -21,8 +22,12 @@ function pathsAbove(path: string): string[] {
   return segments.map((_, depth) => (depth === 0 ? '/' : `/${segments.slice(0, depth).join('/')}/`))
 }
 
-function crumb({ entry, lang }: PageRoute): Crumb {
-  return { label: entry.title, href: entry.path, ...(lang ? { lang } : {}) }
+function crumb(route: PageRoute, graph: ContentGraph): Crumb {
+  const { entry, lang, gloss, record } = route
+  // A Concept's crumb keeps its IAST label and gloss apart, though its route title joins them.
+  const concept = record?.kind === 'concept' ? graph.record('concept', record.id) : undefined
+  const label = concept && gloss ? displayName(concept.name) : entry.title
+  return { label, href: entry.path, ...(lang ? { lang } : {}), ...(gloss ? { gloss } : {}) }
 }
 
 /**
@@ -47,5 +52,5 @@ export function trail(graph: ContentGraph, flags: Features, path: string): Crumb
     const topic = graph.record('concept', id)?.topics.primary
     if (topic !== undefined) add(hrefFor({ kind: 'topic', id: topic }))
   }
-  return [...above, page].map(crumb)
+  return [...above, page].map((route) => crumb(route, graph))
 }

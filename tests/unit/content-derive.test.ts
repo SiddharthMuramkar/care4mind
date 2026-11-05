@@ -262,7 +262,7 @@ describe('site.routes', () => {
         path: '/concepts/obstacles/',
         kind: 'concept',
         pattern: '/concepts/[slug]/',
-        title: 'Vighna',
+        title: 'Vighna · Obstacle',
         record: { kind: 'concept', id: 'obstacles' },
       },
       {
@@ -475,7 +475,7 @@ describe('site.trail', () => {
       homeCrumb,
       concepts,
       { label: 'Mind', href: '/topics/mind/' },
-      { label: 'Vighna', href: '/concepts/obstacles/', lang: 'sa-Latn' },
+      { label: 'Vighna', href: '/concepts/obstacles/', lang: 'sa-Latn', gloss: 'Obstacle' },
     ])
     expect(await trail('/concepts/refuge/')).toEqual([
       homeCrumb,
@@ -546,7 +546,11 @@ describe('site.trail', () => {
     const content = createContent(memorySource(...world), ON)
     for (const route of await content.site.routes()) {
       const crumbs = await content.site.trail(route.path)
-      expect(crumbs.at(-1)).toMatchObject({ label: route.title, href: route.path })
+      const last = crumbs.at(-1)
+      // A Concept crumb's label and gloss apart compose its route's title.
+      const named = last?.gloss ? `${last.label} · ${last.gloss}` : last?.label
+      expect(named).toBe(route.title)
+      expect(last?.href).toBe(route.path)
     }
   })
 
@@ -678,7 +682,13 @@ describe('site.azIndex', () => {
       href: '/concepts/obstacles/#samsaya',
       external: false,
       anchors: [],
-      concept: { slug: 'obstacles', name: 'Vighna', lang: 'sa-Latn', href: '/concepts/obstacles/' },
+      concept: {
+        slug: 'obstacles',
+        name: 'Vighna',
+        lang: 'sa-Latn',
+        gloss: 'Obstacle',
+        href: '/concepts/obstacles/',
+      },
       topics: ['mind'],
       works: ['yoga-sutra'],
     })
@@ -864,7 +874,7 @@ describe('site.searchDocuments', () => {
       gloss: 'Doubt',
       lang: 'sa-Latn',
       href: '/concepts/obstacles/#samsaya',
-      parent: 'Vighna',
+      parent: 'Vighna · Obstacle',
       names: ['saṃśaya', 'संशय', 'samsaya', 'Sanshay'],
       keywords: ['Doubt'],
       people: [],
@@ -1035,6 +1045,7 @@ describe('site.graph', () => {
           slug: 'obstacles',
           name: 'Vighna',
           lang: 'sa-Latn',
+          gloss: 'Obstacle',
           href: '/concepts/obstacles/',
           topic: 'mind',
           topics: ['mind'],
@@ -1171,11 +1182,12 @@ describe('the derivations, on the site’s own content', () => {
   })
 
   it('end every route’s trail with the page itself', async () => {
-    for (const route of await own.site.routes())
-      expect((await own.site.trail(route.path)).at(-1)).toMatchObject({
-        label: route.title,
-        href: route.path,
-      })
+    for (const route of await own.site.routes()) {
+      const last = (await own.site.trail(route.path)).at(-1)
+      const named = last?.gloss ? `${last.label} · ${last.gloss}` : last?.label
+      expect(named).toBe(route.title)
+      expect(last?.href).toBe(route.path)
+    }
   })
 
   it('link only to pages in the route registry', async () => {

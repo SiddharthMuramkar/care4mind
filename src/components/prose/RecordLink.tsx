@@ -11,6 +11,7 @@ export function RecordLink({ record }: { record: RecordRef }) {
     // The record's path, made by hrefFor() in the content module.
     <Link href={record.href as Route} transitionTypes={turnForward}>
       <span lang={record.lang}>{record.title}</span>
+      {record.gloss ? <> · {record.gloss}</> : null}
     </Link>
   )
 }

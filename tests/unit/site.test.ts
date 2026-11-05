@@ -8,7 +8,7 @@ import robots from '@/app/robots'
 import sitemap from '@/app/sitemap'
 import { redirects } from '@/config/redirects'
 import { siteConfig as config } from '@/config/site'
-import { concepts, site, topics } from '@/content'
+import { site, topics } from '@/content'
 import { customProperties, resolveColour } from '@/styles/contrast'
 import { metadataFor, shareCardText } from '@/lib/metadata'
 import { CARD_COLOURS } from '@/lib/share-card'
@@ -55,7 +55,7 @@ describe('a page’s metadata', () => {
   it('names a Concept by its term and gloss, describes it by its summary and gives its address', async () => {
     expect(await metadataFor('/concepts/vikshepa/')).toEqual(
       withShareTags({
-        title: { absolute: 'Vikṣepa (Distraction) · Care4Mind' },
+        title: { absolute: 'Vikṣepa · Distraction · Care4Mind' },
         description:
           'The challenges a seeker encounters on the path to liberation. The Yoga Sūtra names nine obstacles, or diversions, on the yoga path.',
         alternates: { canonical: `${ORIGIN}/concepts/vikshepa/` },
@@ -152,10 +152,8 @@ describe('a page’s metadata', () => {
   })
 
   it('names a Concept on its share card as it is named everywhere, and the homepage by the site', async () => {
-    const concept = await concepts.get('vikshepa')
-    const route = (await site.routes()).find((entry) => entry.path === '/concepts/vikshepa/')
     expect(await shareCardText('/concepts/vikshepa/')).toMatchObject({
-      title: `${route?.title} · ${concept?.english}`,
+      title: 'Vikṣepa · Distraction',
     })
     expect(await shareCardText('/')).toEqual({
       title: config.name,
@@ -223,7 +221,7 @@ describe('breadcrumbs', () => {
       { label: 'Home', href: '/' },
       { label: 'Concepts', href: '/concepts/' },
       { label: 'Mind: states and obstacles', href: '/topics/mind/' },
-      { label: 'Vikṣepa', href: '/concepts/vikshepa/', lang: 'sa-Latn' },
+      { label: 'Vikṣepa', href: '/concepts/vikshepa/', lang: 'sa-Latn', gloss: 'Distraction' },
     ])
   })
 

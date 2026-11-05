@@ -46,6 +46,7 @@ export default async function NotFound() {
                   transitionTypes={turnForward}
                 >
                   Read about&nbsp;<span lang={start.lang}>{start.name}</span>
+                  {start.gloss ? <> · {start.gloss}</> : null}
                 </Link>
               </li>
             ) : null}

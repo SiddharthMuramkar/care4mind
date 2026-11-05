@@ -43,11 +43,6 @@ function recordId(route: RouteEntry): string {
   return route.record.id
 }
 
-/** A Concept as it is named everywhere: "Vikṣepa · Distraction". Kept here until the shared naming function exists. */
-function conceptName(name: string, english: string | undefined): string {
-  return english ? `${name} · ${english}` : name
-}
-
 /** "1 entry", "20 entries". */
 function count(n: number, one: string, many: string): string {
   return `${n} ${n === 1 ? one : many}`
@@ -57,9 +52,7 @@ function count(n: number, one: string, many: string): string {
  * The name the page goes by in its title, and the sentence that describes it: its summary where
  * it has one, otherwise one plain sentence about what the page holds.
  */
-async function describe(
-  route: RouteEntry,
-): Promise<{ name: string; description: string; card?: string }> {
+async function describe(route: RouteEntry): Promise<{ name: string; description: string }> {
   const name = route.title
   switch (route.kind) {
     case 'home':
@@ -67,10 +60,8 @@ async function describe(
     case 'concept': {
       const concept = await concepts.get(recordId(route))
       if (!concept) notFound()
-      // A Sanskrit headword is named with its gloss, as the Concept page sets them.
-      const named = concept.term && concept.english ? `${name} (${concept.english})` : name
-      const card = concept.term ? conceptName(name, concept.english) : name
-      return { name: named, description: concept.summary, card }
+      // The route title already names the Concept in full ("Vikṣepa · Distraction").
+      return { name, description: concept.summary }
     }
     case 'topic': {
       const topic = await topics.get(recordId(route))
@@ -139,8 +130,8 @@ export async function metadataFor(path: string): Promise<Metadata> {
 export async function shareCardText(path: string): Promise<{ title: string; description: string }> {
   const route = await routeAt(path)
   if (route.kind === 'home') return { title: config.name, description: (await home.get()).tagline }
-  const { name, description, card } = await describe(route)
-  return { title: card ?? name, description }
+  const { name, description } = await describe(route)
+  return { title: name, description }
 }
 
 /** The public page at a path, or not found. */

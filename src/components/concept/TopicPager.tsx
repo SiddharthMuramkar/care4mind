@@ -21,8 +21,9 @@ function Turn({ concept, rel }: { concept: ConceptCard; rel: 'prev' | 'next' }) 
         data-ink
       >
         <span className={styles.direction}>{rel === 'next' ? 'Next' : 'Previous'}</span>
-        <span className={styles.name} {...(concept.lang ? { lang: concept.lang } : {})}>
-          {concept.name}
+        <span className={styles.name}>
+          <span {...(concept.lang ? { lang: concept.lang } : {})}>{concept.name}</span>
+          {concept.gloss ? <span className={styles.gloss}> · {concept.gloss}</span> : null}
         </span>
       </Link>
     </LinkPreview>

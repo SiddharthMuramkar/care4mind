@@ -154,7 +154,9 @@ test.describe('a work’s page', () => {
     for (const verse of gita.passages) {
       const region = passage(page, nameOf(gita, verse))
       const chips = region.getByRole('list', { name: 'Quoted in' }).getByRole('link')
-      await expect(chips).toHaveText(verse.quotedIn.map(({ title }) => title))
+      await expect(chips).toHaveText(
+        verse.quotedIn.map(({ title, gloss }) => (gloss ? `${title} · ${gloss}` : title)),
+      )
       expect(await hrefs(chips)).toEqual(verse.quotedIn.map(({ href }) => href))
 
       const translations = region.getByRole('figure')
@@ -319,7 +321,10 @@ test('a “quoted in” chip leads to a Concept page that shows the verse', asyn
   await gotoReady(page, yogaSutra.href)
   const chip = passage(page, 'Sutra 1.30')
     .getByRole('list', { name: 'Quoted in' })
-    .getByRole('link', { name: vikshepa.title, exact: true })
+    .getByRole('link', {
+      name: vikshepa.gloss ? `${vikshepa.title} · ${vikshepa.gloss}` : vikshepa.title,
+      exact: true,
+    })
   await prefetched(chip)
   await chip.click()
   await expect(page).toHaveURL(new RegExp(`${vikshepa.href}$`))

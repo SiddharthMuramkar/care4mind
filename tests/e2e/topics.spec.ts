@@ -22,6 +22,10 @@ const conceptsOf = (topic: NonNullable<typeof mind>) => [
   ...topic.secondaryConcepts,
 ]
 
+/** A Concept as the plate names it: its Sanskrit name, then its gloss where it has one. */
+const plateName = (concept: { name: string; gloss?: string }) =>
+  concept.gloss ? `${concept.name} · ${concept.gloss}` : concept.name
+
 const plate = (page: Page) => page.getByRole('navigation', { name: 'Contents' })
 const row = (page: Page, name: string) =>
   plate(page)
@@ -55,11 +59,11 @@ test('lists its Concepts as cards, and as contents rows that are links to them',
   await gotoReady(page, hrefFor({ kind: 'topic', id: 'mind' }))
   const concepts = conceptsOf(mind)
   const links = plate(page).getByRole('link')
-  await expect(links).toHaveText(concepts.map(({ name }) => name))
+  await expect(links).toHaveText(concepts.map(plateName))
   for (const [index, concept] of concepts.entries())
     await expect(links.nth(index)).toHaveAttribute('href', concept.href)
   for (const concept of concepts) await expect(card(page, concept.name)).toBeVisible()
-  // The numerals and leaders are decoration: each row's link is named by its Concept alone.
+  // The numerals and leaders are decoration: each row's link is named by its Concept's name and gloss.
   await expect(plate(page).locator('[aria-hidden="true"]').first()).toBeAttached()
 })
 
@@ -114,29 +118,31 @@ test('focusing a card lights its row and inks in the row’s leader', async ({ p
   await gotoReady(page, hrefFor({ kind: 'topic', id: 'mind' }))
   const [first, second] = conceptsOf(mind)
   if (!first || !second) throw new Error('The mind topic has two Concepts.')
-  const before = await looks(row(page, first.name))
+  const before = await looks(row(page, plateName(first)))
   expect(before.ink, 'a leader is plain dots until its row lights').toBe(UNINKED)
 
   await card(page, first.name).focus()
-  await expect.poll(async () => (await looks(row(page, first.name))).ink).toBe(INKED)
-  expect((await looks(row(page, first.name))).color, 'the lit row changes colour').not.toBe(
+  await expect.poll(async () => (await looks(row(page, plateName(first)))).ink).toBe(INKED)
+  expect((await looks(row(page, plateName(first)))).color, 'the lit row changes colour').not.toBe(
     before.color,
   )
-  expect((await looks(row(page, second.name))).ink, 'only its own row lights').toBe(UNINKED)
+  expect((await looks(row(page, plateName(second)))).ink, 'only its own row lights').toBe(UNINKED)
 
   // Pointing at another card moves the light to its row.
   await page.locator(':focus').blur()
   await card(page, second.name).hover()
-  await expect.poll(async () => (await looks(row(page, second.name))).ink).toBe(INKED)
-  await expect.poll(async () => (await looks(row(page, first.name))).ink).toBe(UNINKED)
+  await expect.poll(async () => (await looks(row(page, plateName(second)))).ink).toBe(INKED)
+  await expect.poll(async () => (await looks(row(page, plateName(first)))).ink).toBe(UNINKED)
 })
 
 test('focusing a row lights it too', async ({ page }) => {
   await gotoReady(page, hrefFor({ kind: 'topic', id: 'mind' }))
   const [first] = conceptsOf(mind)
   if (!first) throw new Error('The mind topic has a Concept.')
-  await plate(page).getByRole('link', { name: first.name, exact: true }).focus()
-  await expect.poll(async () => (await looks(row(page, first.name))).ink).toBe(INKED)
+  await plate(page)
+    .getByRole('link', { name: plateName(first), exact: true })
+    .focus()
+  await expect.poll(async () => (await looks(row(page, plateName(first)))).ink).toBe(INKED)
 })
 
 test('under reduced motion a row lights at once, with nothing inking in', async ({ page }) => {
@@ -145,7 +151,7 @@ test('under reduced motion a row lights at once, with nothing inking in', async 
   const [first] = conceptsOf(mind)
   if (!first) throw new Error('The mind topic has a Concept.')
   await card(page, first.name).focus()
-  expect((await looks(row(page, first.name))).ink).toBe(INKED)
+  expect((await looks(row(page, plateName(first)))).ink).toBe(INKED)
   const long = await page.evaluate(
     () =>
       document

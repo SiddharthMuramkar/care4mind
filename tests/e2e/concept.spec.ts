@@ -577,9 +577,11 @@ test.describe('Concept page v2: linked knowledge', () => {
     const related = (await concepts.get('vikshepa'))?.linked.related ?? []
     expect(related.length).toBeGreaterThan(0)
     for (const other of related) {
+      // A Related Concept's link names it in full: Sanskrit name, then gloss.
+      const named = other.gloss ? `${other.name} · ${other.gloss}` : other.name
       const row = linked(page)
         .getByRole('listitem')
-        .filter({ has: page.getByRole('link', { name: other.name, exact: true }) })
+        .filter({ has: page.getByRole('link', { name: named, exact: true }) })
       const minutes = other.readingMinutes
       await expect(row.locator(`[data-topic="${other.topic.slug}"]`)).toHaveText(other.topic.name)
       await expect(row).toContainText(

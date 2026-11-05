@@ -12,7 +12,14 @@ import { conceptQuotes, termsIn } from '../views/blocks'
 import { must } from '../views/common'
 import { hrefFor } from '../views/href'
 import { latinScript } from '../views/passage'
-import { asciiSpellings, authorNames, displayName, passageLabel, referenceLabel } from '../names'
+import {
+  asciiSpellings,
+  authorNames,
+  conceptName,
+  displayName,
+  passageLabel,
+  referenceLabel,
+} from '../names'
 import { questionnaireHref } from '../views/refs'
 
 const EXCERPT = 300
@@ -108,7 +115,7 @@ function conceptDocuments(concept: ConceptRecord, graph: ContentGraph): SearchDo
       ...(block.gloss ? { gloss: block.gloss } : {}),
       lang: 'sa-Latn',
       href: hrefFor({ kind: 'concept', id: concept.slug, anchor: block.id }),
-      parent: title,
+      parent: conceptName(concept.name),
       names: spellingsOf(block.term),
       keywords: unique([block.gloss]),
       people: [],
