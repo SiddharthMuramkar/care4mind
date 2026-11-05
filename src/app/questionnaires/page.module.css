@@ -1,3 +1,10 @@
+/* What a page holds, counted: "5 Concepts · 12 verses". */
+.facts {
+  margin: 0;
+  font-size: 1.0625rem;
+  color: var(--color-surface-muted);
+}
+
 .featured {
   display: grid;
   gap: 1.5rem;

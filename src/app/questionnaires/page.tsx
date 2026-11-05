@@ -9,7 +9,6 @@ import { StatusBadge } from '@/components/StatusBadge'
 import { hrefFor, questionnaires, topics, type QuestionnaireCard as Card } from '@/content'
 import { metadataFor } from '@/lib/metadata'
 
-import listing from '../listing.module.css'
 import reading from '../reading.module.css'
 import styles from './page.module.css'
 
@@ -77,7 +76,7 @@ export default async function QuestionnairesPage() {
           <p className={reading.summary}>
             Each one sets out what it is for, and its limits, before you start.
           </p>
-          <p className={listing.facts}>
+          <p className={styles.facts}>
             {featured.length} with a page of {featured.length === 1 ? 'its' : 'their'} own ·{' '}
             {later.length} in preparation
           </p>
