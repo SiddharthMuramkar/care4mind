@@ -161,9 +161,9 @@ The notice on every page that the site is for learning and reflection, not treat
 _Avoid_: disclaimer, crisis banner
 
 **Proposal**:
-A feature switched on only in previews for the Project owner to try before it's approved for launch.
+A feature put to the Project owner for sign-off before launch: built ones are switched on only in previews, behind their own flag, and one is described but not built. Not every flag is a Proposal.
 _Avoid_: experiment, beta
-_In code_: one of the flags in `src/config/features.ts`, its routes marked `proposal`; `/proposals` lists them
+_In code_: `Proposal`, listed by `proposalsFor()` for `/proposals`; a built Proposal's routes are marked `proposal`
 
 **Current site**:
 The WordPress site at care4mind.org, which stays live until launch and is where the carried-over content comes from.
