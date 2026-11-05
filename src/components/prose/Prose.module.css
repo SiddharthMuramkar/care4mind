@@ -251,8 +251,8 @@
   }
 }
 
-/* A stacked table's head row carries sr-only on a phone; above one it is itself again. */
-@media screen and (min-width: 40.01rem) {
+/* A stacked table's head row carries sr-only on a phone; above one, and on paper, it is itself again. */
+@media print, (min-width: 40.01rem) {
   .stackedHead {
     position: static;
     width: auto;

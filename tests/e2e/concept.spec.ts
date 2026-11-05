@@ -113,7 +113,7 @@ test.describe('Concept page', () => {
     const frame = page.getByRole('region', { name: /Comparison between Indian and Western/ })
     await expect(frame).toBeVisible()
     await expect(frame).toHaveAttribute('tabindex', '0')
-    await expect(frame.locator('tr')).toHaveCount(10)
+    await expect(frame.getByRole('row')).toHaveCount(10)
   })
 })
 
@@ -906,6 +906,17 @@ test.describe('Concept page v2: print', () => {
       ),
     ).toBe(true)
     await expect(page.locator('blockquote [lang="sa-Deva"]').first()).toBeVisible()
+    // The comparison table prints its head row: sr-only on a phone screen, itself again on paper.
+    const head = page
+      .getByRole('region', { name: /Comparison between Indian and Western/ })
+      .locator('thead')
+    const headStyle = await head.evaluate((element) => {
+      const style = getComputedStyle(element)
+      return { position: style.position, clipPath: style.clipPath }
+    })
+    expect(headStyle.position, 'the printed head row is not taken out of flow').toBe('static')
+    expect(headStyle.clipPath, 'the printed head row is not clipped away').toBe('none')
+    await expect(head.locator('th').first()).toBeVisible()
   })
 })
 
