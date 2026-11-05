@@ -54,6 +54,16 @@ test('fails unsettled text over a covering gradient whose colours are no reviewe
   await expect(expectNoAxeViolations(page)).rejects.toThrow(/color-contrast/)
 })
 
+test('fails unsettled text under a full-covering scroll shadow below 4.5:1', async ({ page }) => {
+  // surface-link on surface is a reviewed pair at rest, but under the full scroll-shadow shade it falls to about 2.5:1; only an edge sliver of that shade may pass.
+  await page.setContent(
+    html(
+      '<main style="background: #eadbb6"><h1>Title</h1><p style="color: #9c2a1f; background: linear-gradient(rgba(11, 13, 31, 0.35), rgba(11, 13, 31, 0.35))">Shaded link text</p></main>',
+    ),
+  )
+  await expect(expectNoAxeViolations(page)).rejects.toThrow(/color-contrast/)
+})
+
 test('fails a page with two unnamed main landmarks', async ({ page }) => {
   await page.setContent(
     html('<main><h1>Title</h1><p>Text.</p></main><div role="main"><p>More.</p></div>'),

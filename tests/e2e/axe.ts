@@ -224,8 +224,11 @@ function tileOffset(token: string, area: number, tile: number): number | undefin
   return undefined
 }
 
-/** Whether one background layer paints under the node's glyphs at all, by its tile's size, place and repetition; unreadable geometry counts as covering. */
-function paintsUnder(layer: PaintedLayer, index: number, glyphs: Box[]): boolean {
+/** One background layer's tile as painted: its box and whether it repeats to fill each axis of its painting area; `zero` paints nothing, unreadable geometry is undefined. */
+function tilePaint(
+  layer: PaintedLayer,
+  index: number,
+): { box: Box; repeatsX: boolean; repeatsY: boolean } | 'zero' | undefined {
   const sizes = splitLayers(layer.backgroundSize)
   const positions = splitLayers(layer.backgroundPosition)
   const repeats = splitLayers(layer.backgroundRepeat)
@@ -237,30 +240,66 @@ function paintsUnder(layer: PaintedLayer, index: number, glyphs: Box[]): boolean
   const repeat = pick(repeats, 'repeat')
   const width = tileLength(size[0] ?? 'auto', layer.box.width)
   const height = tileLength(size[1] ?? size[0] ?? 'auto', layer.box.height)
-  if (width === undefined || height === undefined || width === 0 || height === 0)
-    return width === 0 || height === 0 ? false : true
+  if (width === 0 || height === 0) return 'zero'
+  if (width === undefined || height === undefined) return undefined
   const offsetX = tileOffset(position[0] ?? '0%', layer.box.width, width)
   const offsetY = tileOffset(position[1] ?? position[0] ?? '0%', layer.box.height, height)
-  if (offsetX === undefined || offsetY === undefined) return true
+  if (offsetX === undefined || offsetY === undefined) return undefined
   const local = pick(attachments, 'scroll') === 'local'
-  const left = layer.box.left + offsetX - (local ? layer.scrollLeft : 0)
-  const top = layer.box.top + offsetY - (local ? layer.scrollTop : 0)
-  const repeatsX = repeat === 'repeat' || repeat.includes('repeat-x')
-  const repeatsY = repeat === 'repeat' || repeat.includes('repeat-y')
+  return {
+    box: {
+      left: layer.box.left + offsetX - (local ? layer.scrollLeft : 0),
+      top: layer.box.top + offsetY - (local ? layer.scrollTop : 0),
+      width,
+      height,
+    },
+    repeatsX: repeat === 'repeat' || repeat.includes('repeat-x'),
+    repeatsY: repeat === 'repeat' || repeat.includes('repeat-y'),
+  }
+}
+
+/** Whether one background layer paints under the node's glyphs at all, by its tile's size, place and repetition; unreadable geometry counts as covering. */
+function paintsUnder(layer: PaintedLayer, index: number, glyphs: Box[]): boolean {
+  const tile = tilePaint(layer, index)
+  if (tile === 'zero') return false
+  if (tile === undefined) return true
+  const { box, repeatsX, repeatsY } = tile
   return glyphs.some(
     (glyph) =>
-      (repeatsX || (left < glyph.left + glyph.width && glyph.left < left + width)) &&
-      (repeatsY || (top < glyph.top + glyph.height && glyph.top < top + height)),
+      (repeatsX || (box.left < glyph.left + glyph.width && glyph.left < box.left + box.width)) &&
+      (repeatsY || (box.top < glyph.top + glyph.height && glyph.top < box.top + box.height)),
   )
 }
 
-/** The backgrounds a node may sit on — its solid ground, and each covering gradient's stops over it in turn; undefined when a layer can't be settled here either. */
+/** The share of the glyphs' area one background layer's painted tile covers; unreadable geometry counts as covering all of it. */
+function tileCoverage(layer: PaintedLayer, index: number, glyphs: Box[]): number {
+  const tile = tilePaint(layer, index)
+  if (tile === 'zero') return 0
+  if (tile === undefined) return 1
+  const left = tile.repeatsX ? layer.box.left : tile.box.left
+  const right = tile.repeatsX ? layer.box.left + layer.box.width : tile.box.left + tile.box.width
+  const top = tile.repeatsY ? layer.box.top : tile.box.top
+  const bottom = tile.repeatsY ? layer.box.top + layer.box.height : tile.box.top + tile.box.height
+  let covered = 0
+  let total = 0
+  for (const glyph of glyphs) {
+    total += glyph.width * glyph.height
+    covered +=
+      Math.max(0, Math.min(glyph.left + glyph.width, right) - Math.max(glyph.left, left)) *
+      Math.max(0, Math.min(glyph.top + glyph.height, bottom) - Math.max(glyph.top, top))
+  }
+  return total > 0 ? covered / total : 1
+}
+
+type Candidate = { background: string; coverage: number }
+
+/** The backgrounds a node may sit on — its solid ground, and each covering gradient's stops over it in turn, each with the glyph share its altering tiles cover; undefined when a layer can't be settled here either. */
 function candidateBackgrounds(
   layers: PaintedLayer[],
   glyphs: Box[],
-): { solid: string; candidates: string[] } | undefined {
+): { solid: string; candidates: Candidate[] } | undefined {
   const translucent: ParsedColour[] = []
-  const gradients: ParsedColour[][] = []
+  const gradients: { stops: ParsedColour[]; coverage: number }[] = []
   let base: string | undefined
   for (const layer of layers) {
     // A covering pseudo-element, as a chosen pill's indigo, is a background only where its box meets the glyphs.
@@ -285,7 +324,7 @@ function candidateBackgrounds(
         ([raw]) => parseColour(raw) ?? [],
       )
       if (stops.length === 0) return undefined
-      gradients.push(stops)
+      gradients.push({ stops, coverage: tileCoverage(layer, index, glyphs) })
     }
     const solid = parseColour(layer.backgroundColor)
     if (solid && solid.alpha > 0) {
@@ -296,18 +335,39 @@ function candidateBackgrounds(
       translucent.push(solid)
     }
   }
-  let candidates = [base ?? '#ffffff']
+  let grounds = [base ?? '#ffffff']
   for (let index = translucent.length - 1; index >= 0; index -= 1) {
     const over = translucent[index]
-    if (over) candidates = candidates.map((under) => seen(over, under))
+    if (over) grounds = grounds.map((under) => seen(over, under))
   }
-  const solid = candidates[0] ?? '#ffffff'
+  const solid = grounds[0] ?? '#ffffff'
+  let candidates: Candidate[] = grounds.map((background) => ({ background, coverage: 0 }))
   for (let index = gradients.length - 1; index >= 0; index -= 1) {
-    const stops = gradients[index] ?? []
-    candidates = stops.flatMap((stop) => candidates.map((under) => seen(stop, under)))
+    const gradient = gradients[index] ?? { stops: [], coverage: 1 }
+    // A stop that changes the colour under it lends the candidate its tile's glyph share; a stop that leaves it, as a fade to transparent, lends none.
+    candidates = gradient.stops.flatMap((stop) =>
+      candidates.map((under) => {
+        const background = seen(stop, under.background)
+        return {
+          background,
+          coverage: nearColour(background, under.background)
+            ? under.coverage
+            : Math.max(under.coverage, gradient.coverage),
+        }
+      }),
+    )
     if (candidates.length > 16) return undefined
   }
-  return { solid, candidates: [...new Set(candidates)] }
+  const widest = new Map<string, number>()
+  for (const candidate of candidates)
+    widest.set(
+      candidate.background,
+      Math.max(widest.get(candidate.background) ?? 0, candidate.coverage),
+    )
+  return {
+    solid,
+    candidates: [...widest].map(([background, coverage]) => ({ background, coverage })),
+  }
 }
 
 /**
@@ -460,19 +520,20 @@ export async function expectNoAxeViolations(page: Page, where?: string) {
           unsettled.map((node) => node.target),
         )
   const pairs = reviewedPairs()
-  // One reviewed shade beside the pairs: a table frame's scroll shadow over a reviewed solid pair — an edge shade, strongest where the frame clips the glyphs.
+  // One reviewed shade beside the pairs: a table frame's scroll shadow over a reviewed solid pair. It passes only at 4.5:1 of its own, or as an edge sliver: the frame's radial shade tile is 0.875rem wide and fades across it, so a fifth of the glyphs' area under the whole tile is a conservative bound on the glyphs its strongest stop could reach — glyphs at the frame's edge, which scroll onto the solid pair.
   const shade = palette()['scroll-shadow']
+  const shadeSliver = 0.2
   const unreviewed: string[] = []
   for (const [index, node] of unsettled.entries()) {
     const reviewed = UNSETTLED_CONTRAST.find((entry) => entry.why === node.why)
     const own = painted[index]
     const foreground = node.axeForeground ?? parseColour(own?.color)
-    let backgrounds: string[] | undefined
+    let backgrounds: Candidate[] | undefined
     let solid: string | undefined
     let opacity = 1
     if (node.axeForeground && node.axeBackground) {
       solid = seen(node.axeBackground, '#ffffff')
-      backgrounds = [solid]
+      backgrounds = [{ background: solid, coverage: 0 }]
     } else if (own) {
       const found = candidateBackgrounds(own.layers, own.glyphs)
       backgrounds = found?.candidates
@@ -503,20 +564,22 @@ export async function expectNoAxeViolations(page: Page, where?: string) {
       solid && shade && /^#[0-9a-f]{8}$/.test(shade)
         ? [composite(shade, solid), composite(shade, composite(shade, solid))]
         : []
-    const checks = (backgrounds ?? []).map((background) => {
+    const checks = (backgrounds ?? []).map(({ background, coverage }) => {
       const text = textOn(background)
       const pair = text ? pairName(pairs, text, background) : undefined
       const ratio = text ? contrastRatio(text, background) : undefined
       const byPair = pair !== undefined && ratio !== undefined && ratio >= 4.5
-      const byShade =
+      const isShade =
         node.why === 'bgGradient' &&
         solidPasses &&
         shaded.some((expected) => nearColour(expected, background))
+      const byShade = isShade && ratio !== undefined && (ratio >= 4.5 || coverage <= shadeSliver)
       return {
         background,
         text,
         pair: pair ?? (byShade ? `scroll-shadow over ${solidPair}` : undefined),
         ratio,
+        shadeCoverage: isShade ? coverage : undefined,
         passes: byPair || byShade,
       }
     })
@@ -525,7 +588,7 @@ export async function expectNoAxeViolations(page: Page, where?: string) {
     const evidence = checks
       .map(
         (check) =>
-          `${check.text ?? 'unknown text'} on ${check.background}${check.pair ? ` (${check.pair})` : ' (no reviewed pair)'}${check.ratio !== undefined ? ` ${check.ratio.toFixed(2)}:1` : ''}`,
+          `${check.text ?? 'unknown text'} on ${check.background}${check.pair ? ` (${check.pair})` : ' (no reviewed pair)'}${check.ratio !== undefined ? ` ${check.ratio.toFixed(2)}:1` : ''}${check.shadeCoverage !== undefined ? ` shade-cover ${(check.shadeCoverage * 100).toFixed(1)}%` : ''}`,
       )
       .join(', ')
     console.log(
