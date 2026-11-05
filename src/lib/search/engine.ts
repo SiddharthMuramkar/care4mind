@@ -4,7 +4,7 @@
  * in it, in this order: exact, prefix, phonetic, then fuzzy. Pages reach it only through
  * `search()` (./search.ts), so a content back end can answer in its place.
  */
-import type { SearchDocument, SearchKind } from '@/content'
+import type { LatinScript, SearchDocument, SearchKind } from '@/content'
 
 import { editDistance, fold, isLatin, phoneticKey, words, writtenWords } from './normalise'
 
@@ -16,6 +16,8 @@ export interface SearchHit {
   id: string
   kind: SearchKind
   title: string
+  /** The language tag of its title where the title is a transliteration. */
+  lang?: LatinScript
   href: string
   matched: { field: SearchField; variant: string }
   /** What it sits in: a term's Concept, a passage's work. */
@@ -24,8 +26,9 @@ export interface SearchHit {
 }
 
 /**
- * One document, packed: id, kind, title, href, parent (or null), names, keywords, people, and the
- * excerpt's own words (those no other field has), space-separated.
+ * One document, packed: id, kind, title, href, parent (or null), names, keywords, people, the
+ * excerpt's own words (those no other field has), space-separated, and the title's language tag
+ * (or null).
  */
 type Row = [
   id: string,
@@ -37,11 +40,12 @@ type Row = [
   keywords: string[],
   people: string[],
   excerpt: string,
+  lang: LatinScript | null,
 ]
 
 /** The packed index: plain JSON, so it can be sent to a browser as it is. */
 export interface SearchIndex {
-  version: 1
+  version: 2
   rows: Row[]
 }
 
@@ -98,9 +102,9 @@ const COMMON = new Set(
 /** Packs the search documents into the index: compact JSON, built once with the site. */
 export function buildIndex(documents: readonly SearchDocument[]): SearchIndex {
   return {
-    version: 1,
+    version: 2,
     rows: documents.map((document): Row => {
-      const { id, kind, title, href, parent, names, keywords, people, excerpt } = document
+      const { id, kind, title, href, parent, names, keywords, people, excerpt, lang } = document
       // The excerpt counts only for words no other field has, each once, and no common ones.
       const known = new Set([title, ...names, ...keywords, ...people].flatMap(words))
       const own: string[] = []
@@ -120,6 +124,7 @@ export function buildIndex(documents: readonly SearchDocument[]): SearchIndex {
         [...keywords],
         [...people],
         own.join(' '),
+        lang ?? null,
       ]
     }),
   }
@@ -345,6 +350,8 @@ export function query(index: SearchIndex, q: string): SearchHit[] {
       matched: { field, variant: values[field][value] ?? title },
       score: Math.round(score * 100) / 100,
     }
+    const lang = row[9]
+    if (lang !== null) hit.lang = lang
     if (parent !== null) hit.parent = parent
     return hit
   })

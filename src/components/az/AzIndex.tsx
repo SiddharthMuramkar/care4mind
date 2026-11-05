@@ -18,9 +18,10 @@ import { cx } from '@/lib/cx'
 
 import styles from './AzIndex.module.css'
 import {
+  DEFAULT_KINDS,
   fromChips,
   GROUPS,
-  isEmpty,
+  isDefault,
   readSelection,
   type Selection,
   shownEntries,
@@ -58,8 +59,12 @@ const search = () => window.location.search
 const noSearch = () => ''
 
 /** Move to a new address, and let the filters read it at once. */
-function go(selection: Selection) {
-  window.history.pushState(null, '', `${window.location.pathname}${writeSelection(selection)}`)
+function go(selection: Selection, defaultKinds: readonly string[]) {
+  window.history.pushState(
+    null,
+    '',
+    `${window.location.pathname}${writeSelection(selection, defaultKinds)}`,
+  )
   for (const listener of listeners) listener()
 }
 
@@ -151,7 +156,7 @@ function matcher(selection: Selection, query: string) {
 
 /** Which entries and letters a selection and a search leave showing, read from the server-rendered list. */
 function showingFor(list: HTMLElement | null, selection: Selection, query: string) {
-  if ((isEmpty(selection) && fold(query) === '') || !list) return null
+  if (!list) return null
   const shows = matcher(selection, query)
   return {
     count: [...list.querySelectorAll('[data-entry]')].filter(shows).length,
@@ -214,7 +219,7 @@ function PlainChips({ groups, pressed, onPress }: ChipsProps) {
           role="group"
           aria-labelledby={`chips-${group}`}
           className={styles.chipGroup}
-          // On a phone each group scrolls sideways: no Tab stop of its own, its chips have them.
+          // A group is no Tab stop of its own: its chips have them.
           tabIndex={-1}
         >
           <span id={`chips-${group}`} className={styles.groupLabel}>
@@ -248,7 +253,10 @@ function PlainChips({ groups, pressed, onPress }: ChipsProps) {
 interface Props {
   letters: readonly RailLetter[]
   groups: readonly ChipGroup[]
+  /** How many entries the plain address shows, before the list is read. */
   total: number
+  /** The kinds a plain address shows: the Concept pages, unless the page opens on its own (none: every kind). */
+  defaultKinds?: readonly string[]
   /** The search box's label, where the list has one: it narrows the entries to those holding its words. */
   search?: string
   /** The entries, by letter, as the server renders them. */
@@ -260,10 +268,17 @@ interface Props {
  * filter chips whose state lives in the address. A filter hides the entries whose attributes
  * don't match it, so the list itself never re-renders. Base UI's Toolbar and ToggleGroup (one Tab
  * stop each, arrow keys between) load when the browser is idle or a pointer or focus comes near;
- * until then the letters are plain links and the chips plain toggle buttons. Without JavaScript
- * the chips are hidden and the whole list shows.
+ * until then the letters are plain links and the chips plain toggle buttons. A plain address
+ * shows the page's opening kinds. Without JavaScript the chips are hidden and the whole list shows.
  */
-export function AzIndex({ letters, groups, total, search: searchLabel, children }: Props) {
+export function AzIndex({
+  letters,
+  groups,
+  total,
+  defaultKinds = DEFAULT_KINDS,
+  search: searchLabel,
+  children,
+}: Props) {
   const known = useMemo(
     () =>
       Object.fromEntries(
@@ -275,9 +290,14 @@ export function AzIndex({ letters, groups, total, search: searchLabel, children 
     [groups],
   )
   const address = useSyncExternalStore(subscribe, search, noSearch)
-  const selection = useMemo(() => readSelection(address, known), [address, known])
+  const selection = useMemo(
+    () => readSelection(address, known, defaultKinds),
+    [address, known, defaultKinds],
+  )
   const [typed, setTyped] = useState('')
   const query = useDeferredValue(typed)
+  // The anchor reveal below runs outside the filter's commit: it reads the search as it stands.
+  const latestQuery = useRef('')
   const [showing, setShowing] = useState<ReturnType<typeof showingFor>>(null)
   const [parts, setParts] = useState<KeyboardParts>()
   const controls = useRef<HTMLDivElement>(null)
@@ -338,9 +358,44 @@ export function AzIndex({ letters, groups, total, search: searchLabel, children 
   // The list is rendered below, so a client mount (Back) can't count it during render. Reading
   // it here keeps the count and the rail in the same commit as the chips.
   useLayoutEffect(() => {
+    latestQuery.current = query
     filterList(selection, query)
     setShowing(showingFor(listRef.current, selection, query))
   }, [selection, query])
+
+  // An anchor in the address (an old glossary link) may name an entry the filter hides: let its
+  // kind in, then take the reader to it, as the browser could not while it was hidden.
+  useEffect(() => {
+    const reveal = () => {
+      const id = decodeURIComponent(window.location.hash.slice(1))
+      const target = id ? document.getElementById(id) : null
+      const entry = target?.closest<HTMLElement>('[data-entry]')
+      const kind = entry?.dataset.kind
+      if (!entry || !kind || !listRef.current?.contains(entry) || !entry.hidden) return
+      const now = readSelection(window.location.search, known, defaultKinds)
+      // Hidden by the search or another group, not by its kind: letting the kind in shows nothing.
+      if (now.kind.includes(kind)) return
+      const next = { ...now, kind: [...now.kind, kind] }
+      window.history.replaceState(
+        null,
+        '',
+        `${window.location.pathname}${writeSelection(next, defaultKinds)}${window.location.hash}`,
+      )
+      flushSync(() => {
+        for (const listener of listeners) listener()
+      })
+      // Show it now (the layout effect repeats this), then jump: a smooth scroll started mid-load is left behind as the list settles.
+      filterList(next, latestQuery.current)
+      const jump = () => target?.scrollIntoView({ block: 'start', behavior: 'instant' })
+      jump()
+      // The entries above are first drawn at a guessed height (content-visibility), so that jump
+      // can land short of the entry or past it, under the rail: jump again once they are real.
+      requestAnimationFrame(() => requestAnimationFrame(jump))
+    }
+    reveal()
+    window.addEventListener('hashchange', reveal)
+    return () => window.removeEventListener('hashchange', reveal)
+  }, [known, defaultKinds])
 
   useEffect(() => {
     const key = handoff.current
@@ -352,8 +407,8 @@ export function AzIndex({ letters, groups, total, search: searchLabel, children 
   }, [parts])
 
   const press = (pressed: string[]) => {
-    const next = fromChips(pressed)
-    reorder(selection, next, () => flushSync(() => go(next)))
+    const next = fromChips(pressed, defaultKinds)
+    reorder(selection, next, () => flushSync(() => go(next, defaultKinds)))
   }
 
   const Rail = parts?.Rail ?? PlainRail
@@ -406,7 +461,7 @@ export function AzIndex({ letters, groups, total, search: searchLabel, children 
           <p tabIndex={-1} className={styles.count} aria-live="polite" aria-atomic="true">
             {entries(count)}
           </p>
-          {isEmpty(selection) && typed === '' ? null : (
+          {isDefault(selection, defaultKinds) && typed === '' ? null : (
             <button
               type="button"
               className={styles.clear}

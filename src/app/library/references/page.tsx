@@ -103,6 +103,7 @@ export default async function ReferencesPage() {
               letters={rail}
               groups={groups}
               total={all.length}
+              defaultKinds={[]}
               search="Search by author, title or year"
             >
               {letters

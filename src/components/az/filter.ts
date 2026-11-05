@@ -12,7 +12,24 @@ export const GROUPS: readonly FilterGroup[] = ['topic', 'text', 'kind', 'concept
 /** The values pressed in each group: an entry shows if it has one of each group's, or the group has none. */
 export type Selection = Readonly<Record<FilterGroup, readonly string[]>>
 
-export const NOTHING: Selection = { topic: [], text: [], kind: [], concept: [] }
+/**
+ * What a plain address shows, by kind: the Concept pages. A list that opens on other kinds, or on
+ * every kind, passes its own; none pressed reads as these, so the plain address stays plain.
+ */
+export const DEFAULT_KINDS: readonly string[] = ['concept']
+
+export const DEFAULT_SELECTION: Selection = {
+  topic: [],
+  text: [],
+  kind: DEFAULT_KINDS,
+  concept: [],
+}
+
+const sameKinds = (kinds: readonly string[], defaultKinds: readonly string[]) =>
+  kinds.length === defaultKinds.length && defaultKinds.every((kind) => kinds.includes(kind))
+
+const withKinds = (kinds: readonly string[], defaultKinds: readonly string[]) =>
+  kinds.length > 0 ? kinds : defaultKinds
 
 const ATTRIBUTE: Readonly<Record<FilterGroup, string>> = {
   topic: 'data-topics',
@@ -24,13 +41,17 @@ const ATTRIBUTE: Readonly<Record<FilterGroup, string>> = {
 /** A chip's value in the ToggleGroup, which holds every group's: `topic:mind`. */
 export const chipValue = (group: FilterGroup, value: string) => `${group}:${value}`
 
-export const isEmpty = (selection: Selection) =>
-  GROUPS.every((group) => selection[group].length === 0)
+/** Whether a selection is the plain address's: nothing pressed but the kinds it opens on. */
+export const isDefault = (selection: Selection, defaultKinds: readonly string[] = DEFAULT_KINDS) =>
+  GROUPS.every((group) =>
+    group === 'kind' ? sameKinds(selection.kind, defaultKinds) : selection[group].length === 0,
+  )
 
 /** The selection an address asks for, keeping only the values this page has chips for. */
 export function readSelection(
   search: string,
   known: Readonly<Record<FilterGroup, ReadonlySet<string>>>,
+  defaultKinds: readonly string[] = DEFAULT_KINDS,
 ): Selection {
   const params = new URLSearchParams(search)
   const read = (group: FilterGroup) => [
@@ -40,19 +61,30 @@ export function readSelection(
         .filter((value) => value !== '' && known[group].has(value)),
     ),
   ]
-  return { topic: read('topic'), text: read('text'), kind: read('kind'), concept: read('concept') }
+  return {
+    topic: read('topic'),
+    text: read('text'),
+    kind: withKinds(read('kind'), defaultKinds),
+    concept: read('concept'),
+  }
 }
 
-/** The query string that keeps a selection: `?topic=mind,self&kind=concept`, or none. */
-export function writeSelection(selection: Selection): string {
-  const parts = GROUPS.filter((group) => selection[group].length > 0).map(
-    (group) => `${group}=${selection[group].join(',')}`,
-  )
+/** The query string that keeps a selection: `?topic=mind,self&kind=concept,term`, or none. */
+export function writeSelection(
+  selection: Selection,
+  defaultKinds: readonly string[] = DEFAULT_KINDS,
+): string {
+  const kept = (group: FilterGroup) =>
+    selection[group].length > 0 && !(group === 'kind' && sameKinds(selection.kind, defaultKinds))
+  const parts = GROUPS.filter(kept).map((group) => `${group}=${selection[group].join(',')}`)
   return parts.length > 0 ? `?${parts.join('&')}` : ''
 }
 
 /** The selection a ToggleGroup's pressed values make. */
-export function fromChips(values: readonly string[]): Selection {
+export function fromChips(
+  values: readonly string[],
+  defaultKinds: readonly string[] = DEFAULT_KINDS,
+): Selection {
   const selection = {
     topic: [] as string[],
     text: [] as string[],
@@ -64,7 +96,7 @@ export function fromChips(values: readonly string[]): Selection {
     const group = value.slice(0, at) as FilterGroup
     if (GROUPS.includes(group)) selection[group].push(value.slice(at + 1))
   }
-  return selection
+  return { ...selection, kind: withKinds(selection.kind, defaultKinds) }
 }
 
 export const toChips = (selection: Selection) =>
