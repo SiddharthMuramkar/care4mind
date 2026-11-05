@@ -13,6 +13,7 @@ import { pageTurns, prefetched, recordPageTurns } from './page-turns'
 import { inkSpreadsOn, recordInkSpreads } from './presses'
 import { READING_PAGES, readingThread, readTo } from './reading'
 import { at, MISSING, ROUTES_IN_SCOPE } from './routes'
+import { scrollPath } from './scrolling'
 
 /** Animations still moving: anything running longer than the 1 ms the reduced-motion rule allows. */
 async function movingAnimations(page: Page) {
@@ -59,8 +60,13 @@ for (const route of ROUTES_IN_SCOPE) {
       .soft(await unfinishedRules(page), `${where}: rules short of full width on load`)
       .toEqual([])
 
-    await page.mouse.wheel(0, 4000)
-    await page.waitForTimeout(100)
+    // The wheel doesn't wait for the scroll; a page shorter than the screen doesn't scroll at all.
+    if (await page.evaluate(() => document.documentElement.scrollHeight > window.innerHeight)) {
+      await scrollPath(page, async () => {
+        await page.mouse.wheel(0, 4000)
+        await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(0)
+      })
+    }
     expect.soft(await movingAnimations(page), `${where}: moving after a scroll`).toEqual([])
     expect.soft(await unfinishedDrawings(page), `${where}: unfinished after a scroll`).toEqual([])
     expect
