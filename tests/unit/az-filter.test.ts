@@ -16,6 +16,7 @@ const KNOWN = {
   topic: new Set(['mind', 'self']),
   text: new Set(['gita']),
   kind: new Set(['concept', 'term', 'glossary']),
+  concept: new Set(['atman']),
 }
 
 describe('the A–Z filter', () => {
@@ -33,16 +34,16 @@ describe('the A–Z filter', () => {
   it('writes the default as the plain address, and any other choice in full', () => {
     expect(writeSelection(DEFAULT_SELECTION)).toBe('')
     expect(writeSelection({ ...DEFAULT_SELECTION, topic: ['mind'] })).toBe('?topic=mind')
-    expect(writeSelection({ topic: [], text: [], kind: ['concept', 'term', 'glossary'] })).toBe(
-      '?kind=concept,term,glossary',
-    )
+    expect(
+      writeSelection({ topic: [], text: [], kind: ['concept', 'term', 'glossary'], concept: [] }),
+    ).toBe('?kind=concept,term,glossary')
   })
 
   it('round-trips every choice of kinds through the address', () => {
     const kinds = ['concept', 'term', 'glossary']
     for (let mask = 1; mask < 8; mask += 1) {
       const kind = kinds.filter((_, at) => mask & (1 << at))
-      const selection = { topic: ['self'], text: [], kind }
+      const selection = { topic: ['self'], text: [], kind, concept: [] }
       expect(readSelection(writeSelection(selection), KNOWN)).toEqual(selection)
     }
   })
@@ -60,5 +61,17 @@ describe('the A–Z filter', () => {
 
   it('shows only the kinds chosen', () => {
     expect(shownEntries(DEFAULT_SELECTION)).toBe('[data-entry]:is([data-kind~="concept"])')
+  })
+
+  it('a list that opens on every kind passes none, and its plain address presses nothing', () => {
+    const plain = { topic: [], text: [], kind: [], concept: [] }
+    expect(readSelection('', KNOWN, [])).toEqual(plain)
+    expect(readSelection('?kind=term', KNOWN, []).kind).toEqual(['term'])
+    expect(fromChips([], [])).toEqual(plain)
+    expect(writeSelection(plain, [])).toBe('')
+    expect(writeSelection({ ...plain, kind: ['term'] }, [])).toBe('?kind=term')
+    expect(isDefault(plain, [])).toBe(true)
+    expect(isDefault(fromChips(['concept:atman'], []), [])).toBe(false)
+    expect(shownEntries(plain)).toBe('[data-entry]')
   })
 })

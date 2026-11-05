@@ -1,13 +1,16 @@
 import type { Metadata } from 'next'
-import Link from 'next/link'
 
 import { Breadcrumbs } from '@/components/Breadcrumbs'
 import { Folio } from '@/components/Folio'
-import { PageTurn, turnForward } from '@/components/PageTurn'
-import { hrefFor, library, references } from '@/content'
+import { counted, holdingsOf } from '@/components/library/catalogue'
+import styles from '@/components/library/library.module.css'
+import { Holds, Shelf, Spine } from '@/components/library/Shelf'
+import { PageTurn } from '@/components/PageTurn'
+import { hrefFor, library, type LibraryCard, references } from '@/content'
+import { cx } from '@/lib/cx'
 import { metadataFor } from '@/lib/metadata'
+import { toDevanagariDigits } from '@/lib/text'
 
-import listing from '../listing.module.css'
 import reading from '../reading.module.css'
 
 const PATH = hrefFor({ page: 'library' })
@@ -16,38 +19,45 @@ export function generateMetadata(): Promise<Metadata> {
   return metadataFor(PATH)
 }
 
+async function holdings(card: LibraryCard) {
+  const view = await library.get(card.slug)
+  if (!view) throw new Error(`The Library lists ${card.slug}, which has no page.`)
+  return holdingsOf(view)
+}
+
+/** How thick a volume stands: the more it holds, the thicker, a little less each time. */
+const thickness = (count: number) => Math.min(1, Math.log(count + 1) / Math.log(200))
+
 /**
- * The Library (D13): every Reference the site cites, its reading lists and its pages.
+ * The Library: its five sections standing as volumes on a shelf, each as thick as what it holds,
+ * with its count on the spine. On a phone the shelf is a book's contents. It shows no images:
+ * they wait for a later phase.
  */
 export default async function LibraryPage() {
   const [pages, all] = await Promise.all([library.list(), references.list()])
-  const count = (n: number, one: string, many: string) => `${n} ${n === 1 ? one : many}`
-  // What each holds: a reading list its entries, a page its sections.
-  const holds = await Promise.all(
-    pages.map(async (page) => {
-      if (page.kind === 'resource-list') return count(page.itemCount, 'entry', 'entries')
-      const view = await library.get(page.slug)
-      return view?.kind === 'page' ? count(view.sections.length, 'section', 'sections') : ''
-    }),
-  )
-  const shelf = [
+  const volumes = [
     {
       key: 'references',
       title: 'References',
       href: hrefFor({ page: 'references' }),
-      holds: count(all.length, 'Reference', 'References'),
+      holds: { count: all.length, unit: all.length === 1 ? 'source' : 'sources' },
     },
-    ...pages.map((page, index) => ({
-      key: page.slug,
-      title: page.title,
-      href: hrefFor({ kind: page.kind, id: page.slug }),
-      holds: holds[index],
-    })),
+    ...(await Promise.all(
+      pages.map(async (card) => ({
+        key: card.slug,
+        title: card.title,
+        href: hrefFor({ kind: card.kind, id: card.slug }),
+        holds: await holdings(card),
+      })),
+    )),
   ]
+  const books = volumes
+    .filter(({ holds }) => holds.unit.startsWith('book'))
+    .reduce((sum, { holds }) => sum + holds.count, 0)
 
   return (
     <PageTurn>
-      <main id="main" className={reading.page}>
+      <main id="main" className={cx(reading.page, styles.page)}>
         <Breadcrumbs path={PATH} />
         <Folio as="article" className={reading.article} aria-labelledby="library-title">
           <header className={reading.titlePage}>
@@ -57,19 +67,25 @@ export default async function LibraryPage() {
             <p className={reading.summary}>
               Every source the site cites, its reading lists, and the methods it describes.
             </p>
+            <p className={styles.facts}>
+              {counted(all.length, 'source', 'sources')} · {counted(books, 'book', 'books')} to read
+            </p>
           </header>
 
-          <ul className={listing.contents}>
-            {shelf.map((item) => (
-              <li key={item.key}>
-                <Link href={item.href} transitionTypes={turnForward}>
-                  {item.title}
-                </Link>
-                <span className={listing.leader} aria-hidden />
-                <span className={listing.count}>{item.holds}</span>
-              </li>
+          <Shelf label="The Library’s sections" kind="volumes">
+            {volumes.map(({ key, title, href, holds }, index) => (
+              <Spine
+                key={key}
+                href={href}
+                name={key}
+                index={index}
+                head={toDevanagariDigits(String(index + 1))}
+                title={title}
+                foot={<Holds {...holds} />}
+                thickness={thickness(holds.count)}
+              />
             ))}
-          </ul>
+          </Shelf>
         </Folio>
       </main>
     </PageTurn>

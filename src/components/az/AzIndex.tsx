@@ -18,6 +18,7 @@ import { cx } from '@/lib/cx'
 
 import styles from './AzIndex.module.css'
 import {
+  DEFAULT_KINDS,
   fromChips,
   GROUPS,
   isDefault,
@@ -58,8 +59,12 @@ const search = () => window.location.search
 const noSearch = () => ''
 
 /** Move to a new address, and let the filters read it at once. */
-function go(selection: Selection) {
-  window.history.pushState(null, '', `${window.location.pathname}${writeSelection(selection)}`)
+function go(selection: Selection, defaultKinds: readonly string[]) {
+  window.history.pushState(
+    null,
+    '',
+    `${window.location.pathname}${writeSelection(selection, defaultKinds)}`,
+  )
   for (const listener of listeners) listener()
 }
 
@@ -114,32 +119,119 @@ function reorder(from: Selection, to: Selection, change: () => void) {
 }
 
 /**
+ * Take the reader to an entry and keep it there until the page settles. The browser's own glide
+ * to the entry may still be under way when this runs, and a jump made mid-glide is carried past
+ * it, so aim again each frame until the scroll rests with the entry in place. A wheel, touch,
+ * press or key gives the scroll back to the reader at once.
+ */
+function settleOn(target: HTMLElement) {
+  const inputs = ['wheel', 'touchmove', 'pointerdown', 'keydown'] as const
+  let [last, still, frames] = [-1, 0, 0]
+  let stopped = false
+  const stop = () => {
+    stopped = true
+    for (const type of inputs) window.removeEventListener(type, stop)
+  }
+  for (const type of inputs) window.addEventListener(type, stop, { passive: true })
+  const frame = () => {
+    if (stopped) return
+    target.scrollIntoView({ block: 'start', behavior: 'instant' as ScrollBehavior })
+    still = window.scrollY === last ? still + 1 : 0
+    last = window.scrollY
+    frames += 1
+    if (still >= 3 || frames >= 600) stop()
+    else requestAnimationFrame(frame)
+  }
+  frame()
+  return stop
+}
+
+/**
+ * Once the scroll rests, put an entry or a letter where its link's glide should have left it,
+ * if it is not there. A glide already under way when the link is pressed — Tab taking focus
+ * into the list glides too, the page being smooth-scrolling — can run to its own end and drop
+ * the link's glide, and a long list can still be taking its true heights as the glide is
+ * aimed, so the scroll can come to rest far from its mark. Waiting for the rest first leaves
+ * a glide that lands true untouched. A wheel, touch, press or key gives the scroll back to
+ * the reader at once.
+ */
+function correctWhenRested(target: HTMLElement) {
+  const inputs = ['wheel', 'touchmove', 'pointerdown', 'keydown'] as const
+  let stopped = false
+  let settle: (() => void) | undefined
+  const stop = () => {
+    stopped = true
+    settle?.()
+    for (const type of inputs) window.removeEventListener(type, stop)
+  }
+  for (const type of inputs) window.addEventListener(type, stop, { passive: true })
+  const started = performance.now()
+  let [last, resting] = [window.scrollY, started]
+  const frame = () => {
+    if (stopped) return
+    const now = performance.now()
+    if (window.scrollY !== last) [last, resting] = [window.scrollY, now]
+    if (now - resting < 200 && now - started < 10_000) return requestAnimationFrame(frame)
+    // At rest: the mark is the line a glide to the target leaves it on, below the page's
+    // scroll padding and the target's own scroll margin — unless the page cannot scroll
+    // far enough to bring it there, as with the last letters.
+    const line =
+      (parseFloat(getComputedStyle(document.documentElement).scrollPaddingTop) || 0) +
+      (parseFloat(getComputedStyle(target).scrollMarginTop) || 0)
+    const { top } = target.getBoundingClientRect()
+    const atEnd = window.scrollY + window.innerHeight >= document.documentElement.scrollHeight - 1
+    if (Math.abs(top - line) <= 1 || (atEnd && top > line)) stop()
+    else settle = settleOn(target)
+  }
+  requestAnimationFrame(frame)
+  return stop
+}
+
+/**
  * Hide the entries, and the letters, a selection leaves out. Only the elements whose state
  * changes are touched, which keeps a press quick on a slow phone (a stylesheet would restyle
  * the whole page).
  */
-function filterList(selection: Selection) {
+function filterList(selection: Selection, query: string) {
   const list = document.getElementById(LIST)
   if (!list) return
-  const shown = shownEntries(selection)
+  const shows = matcher(selection, query)
   const hide = (element: HTMLElement, hidden: boolean) => {
     if (element.hidden !== hidden) element.hidden = hidden
   }
-  for (const entry of list.querySelectorAll<HTMLElement>('[data-entry]'))
-    hide(entry, !entry.matches(shown))
+  for (const entry of list.querySelectorAll<HTMLElement>('[data-entry]')) hide(entry, !shows(entry))
   for (const section of list.querySelectorAll<HTMLElement>('[data-letter]'))
-    hide(section, !section.querySelector(shown))
+    hide(section, ![...section.querySelectorAll('[data-entry]')].some(shows))
 }
 
-/** Which entries and letters a selection leaves showing, read from the list once it is mounted. */
-function showingFor(list: HTMLElement | null, selection: Selection) {
-  if (!list) return null
+/** Words as a search compares them: without case or diacritics, so "manas" finds "Manas" and "mānas". */
+const fold = (text: string) =>
+  text.normalize('NFD').replace(/\p{M}/gu, '').toLowerCase().replace(/\s+/g, ' ').trim()
+
+const folded = new WeakMap<Element, string>()
+const wordsOf = (entry: Element) => {
+  let words = folded.get(entry)
+  if (words === undefined) folded.set(entry, (words = fold(entry.textContent ?? '')))
+  return words
+}
+
+/** Whether an entry shows: it matches the chips, and holds the searched words. */
+function matcher(selection: Selection, query: string) {
   const shown = shownEntries(selection)
+  const words = fold(query)
+  return (entry: Element) =>
+    entry.matches(shown) && (words === '' || wordsOf(entry).includes(words))
+}
+
+/** Which entries and letters a selection and a search leave showing, read from the server-rendered list. */
+function showingFor(list: HTMLElement | null, selection: Selection, query: string) {
+  if (!list) return null
+  const shows = matcher(selection, query)
   return {
-    count: list.querySelectorAll(shown).length,
+    count: [...list.querySelectorAll('[data-entry]')].filter(shows).length,
     letters: new Set(
       [...list.querySelectorAll<HTMLElement>('[data-letter]')]
-        .filter((section) => section.querySelector(shown))
+        .filter((section) => [...section.querySelectorAll('[data-entry]')].some(shows))
         .map(({ id }) => id),
     ),
   }
@@ -232,6 +324,10 @@ interface Props {
   groups: readonly ChipGroup[]
   /** How many entries the plain address shows, before the list is read. */
   total: number
+  /** The kinds a plain address shows: the Concept pages, unless the page opens on its own (none: every kind). */
+  defaultKinds?: readonly string[]
+  /** The search box's label, where the list has one: it narrows the entries to those holding its words. */
+  search?: string
   /** The entries, by letter, as the server renders them. */
   children: ReactNode
 }
@@ -242,9 +338,16 @@ interface Props {
  * don't match it, so the list itself never re-renders. Base UI's Toolbar and ToggleGroup (one Tab
  * stop each, arrow keys between) load when the browser is idle or a pointer or focus comes near;
  * until then the letters are plain links and the chips plain toggle buttons. A plain address
- * shows the Concept pages. Without JavaScript the chips are hidden and the whole list shows.
+ * shows the page's opening kinds. Without JavaScript the chips are hidden and the whole list shows.
  */
-export function AzIndex({ letters, groups, total, children }: Props) {
+export function AzIndex({
+  letters,
+  groups,
+  total,
+  defaultKinds = DEFAULT_KINDS,
+  search: searchLabel,
+  children,
+}: Props) {
   const known = useMemo(
     () =>
       Object.fromEntries(
@@ -256,7 +359,14 @@ export function AzIndex({ letters, groups, total, children }: Props) {
     [groups],
   )
   const address = useSyncExternalStore(subscribe, search, noSearch)
-  const selection = useMemo(() => readSelection(address, known), [address, known])
+  const selection = useMemo(
+    () => readSelection(address, known, defaultKinds),
+    [address, known, defaultKinds],
+  )
+  const [typed, setTyped] = useState('')
+  const query = useDeferredValue(typed)
+  // The anchor reveal below runs outside the filter's commit: it reads the search as it stands.
+  const latestQuery = useRef('')
   const [showing, setShowing] = useState<ReturnType<typeof showingFor>>(null)
   const [parts, setParts] = useState<KeyboardParts>()
   const controls = useRef<HTMLDivElement>(null)
@@ -299,12 +409,31 @@ export function AzIndex({ letters, groups, total, children }: Props) {
 
   useEffect(() => whenIdle(upgrade), [upgrade])
 
+  // The browser aims its glide to a named entry before the fonts arrive and the list takes its
+  // true heights, so a long list's entry can come to rest under the rail: aim again once they
+  // have, and keep aiming until the scroll settles (settleOn), as the glide may still be running.
+  useEffect(() => {
+    const id = window.location.hash.slice(1)
+    if (!id) return
+    let stop: (() => void) | undefined
+    let cancelled = false
+    void document.fonts.ready.then(() => {
+      const target = document.getElementById(id)
+      if (!cancelled && target) stop = settleOn(target)
+    })
+    return () => {
+      cancelled = true
+      stop?.()
+    }
+  }, [])
+
   // The list is rendered below, so a client mount (Back) can't count it during render. Reading
   // it here keeps the count and the rail in the same commit as the chips.
   useLayoutEffect(() => {
-    filterList(selection)
-    setShowing(showingFor(listRef.current, selection))
-  }, [selection])
+    latestQuery.current = query
+    filterList(selection, query)
+    setShowing(showingFor(listRef.current, selection, query))
+  }, [selection, query])
 
   // An anchor in the address (an old glossary link) may name an entry the filter hides: let its
   // kind in, then take the reader to it, as the browser could not while it was hidden.
@@ -314,29 +443,50 @@ export function AzIndex({ letters, groups, total, children }: Props) {
       const target = id ? document.getElementById(id) : null
       const entry = target?.closest<HTMLElement>('[data-entry]')
       const kind = entry?.dataset.kind
-      if (!entry || !kind || !listRef.current?.contains(entry) || !entry.hidden) return
-      const now = readSelection(window.location.search, known)
+      if (!target || !entry || !kind || !listRef.current?.contains(entry) || !entry.hidden) return
+      const now = readSelection(window.location.search, known, defaultKinds)
+      // Hidden by the search or another group, not by its kind: letting the kind in shows nothing.
+      if (now.kind.includes(kind)) return
       const next = { ...now, kind: [...now.kind, kind] }
       window.history.replaceState(
         null,
         '',
-        `${window.location.pathname}${writeSelection(next)}${window.location.hash}`,
+        `${window.location.pathname}${writeSelection(next, defaultKinds)}${window.location.hash}`,
       )
       flushSync(() => {
         for (const listener of listeners) listener()
       })
-      // Show it now (the layout effect repeats this), then jump: a smooth scroll started mid-load is left behind as the list settles.
-      filterList(next)
-      const jump = () => target?.scrollIntoView({ block: 'start', behavior: 'instant' })
-      jump()
-      // The entries above are first drawn at a guessed height (content-visibility), so that jump
-      // can land short of the entry or past it, under the rail: jump again once they are real.
-      requestAnimationFrame(() => requestAnimationFrame(jump))
+      // Show it now (the layout effect repeats this), then settle on it: the entries above are
+      // first drawn at a guessed height (content-visibility), so a single jump can land short of
+      // the entry or past it, under the rail.
+      filterList(next, latestQuery.current)
+      settleOn(target)
     }
     reveal()
     window.addEventListener('hashchange', reveal)
     return () => window.removeEventListener('hashchange', reveal)
-  }, [known])
+  }, [known, defaultKinds])
+
+  // A letter's own link glides to its section, but that glide can be dropped by one already
+  // under way, or land where the list's heights put the section when it was aimed: when the
+  // scroll rests, correct a landing that missed (correctWhenRested). An entry the filter
+  // hides is the reveal above's to take the reader to, not this one's.
+  useEffect(() => {
+    let stop: (() => void) | undefined
+    const correct = () => {
+      stop?.()
+      stop = undefined
+      const id = decodeURIComponent(window.location.hash.slice(1))
+      const target = id ? document.getElementById(id) : null
+      if (!target || !listRef.current?.contains(target) || target.closest('[hidden]')) return
+      stop = correctWhenRested(target)
+    }
+    window.addEventListener('hashchange', correct)
+    return () => {
+      window.removeEventListener('hashchange', correct)
+      stop?.()
+    }
+  }, [])
 
   useEffect(() => {
     const key = handoff.current
@@ -348,8 +498,8 @@ export function AzIndex({ letters, groups, total, children }: Props) {
   }, [parts])
 
   const press = (pressed: string[]) => {
-    const next = fromChips(pressed)
-    reorder(selection, next, () => flushSync(() => go(next)))
+    const next = fromChips(pressed, defaultKinds)
+    reorder(selection, next, () => flushSync(() => go(next, defaultKinds)))
   }
 
   const Rail = parts?.Rail ?? PlainRail
@@ -384,18 +534,32 @@ export function AzIndex({ letters, groups, total, children }: Props) {
     >
       <style>{`${FLIGHTS}${ALONE}${CURRENT}`}</style>
       <div className={styles.filters}>
+        {searchLabel ? (
+          <label className={styles.search}>
+            <span className={styles.groupLabel}>{searchLabel}</span>
+            <input
+              type="search"
+              className={styles.searchBox}
+              value={typed}
+              onChange={(event) => setTyped(event.currentTarget.value)}
+              autoComplete="off"
+              spellCheck={false}
+            />
+          </label>
+        ) : null}
         <Chips groups={groups} pressed={pressed} onPress={press} />
         <div className={styles.tally}>
           <p tabIndex={-1} className={styles.count} aria-live="polite" aria-atomic="true">
             {entries(count)}
           </p>
-          {isDefault(selection) ? null : (
+          {isDefault(selection, defaultKinds) && typed === '' ? null : (
             <button
               type="button"
               className={styles.clear}
               data-ink
               onClick={() => {
                 focusBeforeClear(controls.current)
+                setTyped('')
                 press([])
               }}
             >
@@ -409,8 +573,8 @@ export function AzIndex({ letters, groups, total, children }: Props) {
       </nav>
       {count === 0 ? (
         <p className={styles.none}>
-          No entry has all of these. Press a chip again to let its entries back in, or clear the
-          filters.
+          No entry has all of these. Press a chip again or shorten the search to let its entries
+          back in, or clear the filters.
         </p>
       ) : null}
       <div id={LIST} ref={listRef}>
