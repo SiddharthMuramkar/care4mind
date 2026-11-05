@@ -3,6 +3,7 @@ import type { Locator, Page } from '@playwright/test'
 import { expectNoAxeViolations } from './axe'
 import { unfinishedRules } from './drawings'
 import { expect, gotoReady, test } from './fixtures'
+import { expectPaperFocusRing } from './paper'
 
 // Front-end-site ticket 10: taking the KarmaYoga Scale (C4, D16). Local runs and CI build with the
 // preview flag on, so the flow exists. What is checked is what a visitor sees and does: parts,
@@ -405,6 +406,15 @@ test.describe('the KarmaYoga flow', () => {
     await expect(page).toHaveURL(`${FLOW}?step=part-1`)
     await expect(page.getByRole('radio', { checked: true })).toHaveCount(0)
     await expect(progress(page)).toHaveAttribute('aria-valuetext', 'Part 1 of 4 · 0 of 45 answered')
+  })
+
+  test('rings a focused control in the Retake dialog in paper’s focus colour', async ({ page }) => {
+    await gotoReady(page, FLOW)
+    await toEnd(page)
+    await page.getByRole('button', { name: 'Retake' }).click()
+    const dialog = page.getByRole('alertdialog', { name: 'Start again?' })
+    await expect(dialog).toBeVisible()
+    await expectPaperFocusRing(dialog.getByRole('button', { name: 'Clear and start again' }))
   })
 
   test('stores nothing and sends nothing: no answer leaves the page', async ({ page, context }) => {

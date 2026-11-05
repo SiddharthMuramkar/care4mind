@@ -49,7 +49,8 @@ These are judgement calls, so review checks them against the diff, in the codeba
 | `--color-surface-rule` is a rule, never text | contrast test |
 | Icon and manifest colours equal their tokens | icons test |
 | Lotus motion is CSS only, transform and opacity: only the hero moves on its own, once, ending within 5 s of load; every lotus answers the pointer; nothing moves under reduced motion; no pause control | lotus and motion specs |
-| A `styles.x` lookup names a class its CSS module defines | nothing yet (#67) |
+| A `styles.x` lookup names a class its CSS module defines, and markup reads every class a module defines | CSS module classes test |
+| A focused link on a paper surface, marked `data-paper`, rings in paper's focus colour | paper spec |
 | IAST and Devanagari carry `lang` | components, for name fields, the verse-copied toast and Devanagari runs. IAST inside running text is untagged (#76) |
 | Carried-over text changes only to fix a listed error | `verify.mjs`, which runs only on a machine with the captures; nothing in CI (#48) |
 | Comments state reasons, not ticket numbers or decision codes | nothing yet (#38) |
@@ -75,7 +76,7 @@ These are judgement calls, so review checks them against the diff, in the codeba
   7. The tools behind `content:new` and `verify`.
   8. GLOSSARY.md.
 - **A page:** a route that reads `@/content`. Its address is an `hrefFor()` target, and its entry in `site.routes()` puts it in the sitemap, breadcrumbs and crawler.
-- **A topic:** its record, plus its colour token, its `[data-topic]` rule and its contrast pair. Nothing checks the last three yet (#81).
+- **A topic:** its record, plus its colour token, its `[data-topic]` rule and its contrast pair; the token keys test checks the last three, and the same for a Questionnaire status.
 - **A colour, duration or easing:** a token in the global stylesheet. A new colour value is a `--press-*` primitive, and the `--color-*` token that names its role aliases or mixes it. A colour pair that carries text, mixed ones included, joins the contrast list.
 - **A feature awaiting the Project owner's approval:** a flag in `features`.
 - **A moved address:** a row in the redirect table. Its destination is written as `hrefFor()` would make it, and it answers in one hop.

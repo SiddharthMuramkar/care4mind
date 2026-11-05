@@ -9,8 +9,6 @@
     inset 0 0 0 15px var(--color-surface),
     inset 0 0 0 16px color-mix(in srgb, var(--color-surface-ink) 35%, transparent),
     0 30px 60px -20px rgb(0 0 0 / 0.55);
-  --color-focus: var(--color-surface-focus);
-  --color-link: var(--color-surface-link);
   --rule-colour: var(--color-highlight);
 }
 
