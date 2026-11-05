@@ -174,7 +174,8 @@ test('pressing a call to action spreads no ink and moves nothing, with reduced m
 }) => {
   await recordInkSpreads(page)
   await gotoReady(page, '/')
-  const cta = page.getByRole('main').getByRole('link', { name: 'Start here', exact: true })
+  // The hero's call to action: the closing button repeats its "Start here" label.
+  const cta = openingFolio(page).getByRole('link', { name: 'Start here', exact: true })
   const opened = context.waitForEvent('page')
   await cta.click({ modifiers: ['ControlOrMeta'] })
   await (await opened).close()
