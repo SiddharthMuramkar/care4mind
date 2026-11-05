@@ -1,12 +1,9 @@
 import type { Metadata } from 'next'
 
-import { Breadcrumbs } from '@/components/Breadcrumbs'
 import { Fleuron } from '@/components/Fleuron'
-import { Folio } from '@/components/Folio'
-import { PageTurn } from '@/components/PageTurn'
+import { ReadingPage } from '@/components/ReadingPage'
 import { TextCard } from '@/components/texts'
 import { hrefFor, works, type WorkView } from '@/content'
-import { cx } from '@/lib/cx'
 import { metadataFor } from '@/lib/metadata'
 
 import reading from '../reading.module.css'
@@ -29,30 +26,29 @@ export default async function TextsPage() {
   const verses = shelf.reduce((sum, work) => sum + work.passageCount, 0)
 
   return (
-    <PageTurn>
-      <main id="main" className={cx(reading.page, styles.page)}>
-        <Breadcrumbs path={PATH} />
-        <Folio className={reading.article}>
-          <header className={reading.titlePage}>
-            <h1 className={reading.title}>Traditional texts</h1>
-            <p className={reading.summary}>
-              The works the site quotes, each with every verse it quotes from them.
-            </p>
-            <p className={styles.facts}>
-              {verses} verses from {shelf.length} works
-            </p>
-            <Fleuron className={styles.fleuron} />
-          </header>
-
-          <ul className={styles.shelf}>
-            {shelf.map((work) => (
-              <li key={work.slug} className={styles.item}>
-                <TextCard work={work} />
-              </li>
-            ))}
-          </ul>
-        </Folio>
-      </main>
-    </PageTurn>
+    <ReadingPage
+      path={PATH}
+      width="shelf"
+      title="Traditional texts"
+      afterTitle={
+        <>
+          <p className={reading.summary}>
+            The works the site quotes, each with every verse it quotes from them.
+          </p>
+          <p className={styles.facts}>
+            {verses} verses from {shelf.length} works
+          </p>
+          <Fleuron className={styles.fleuron} />
+        </>
+      }
+    >
+      <ul className={styles.shelf}>
+        {shelf.map((work) => (
+          <li key={work.slug} className={styles.item}>
+            <TextCard work={work} />
+          </li>
+        ))}
+      </ul>
+    </ReadingPage>
   )
 }

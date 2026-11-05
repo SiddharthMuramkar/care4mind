@@ -1,12 +1,11 @@
 import type { Metadata, Route } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { Fragment, ViewTransition, type ReactNode } from 'react'
+import { Fragment, type ReactNode } from 'react'
 
-import { Breadcrumbs } from '@/components/Breadcrumbs'
 import { ConceptCard } from '@/components/ConceptCard'
-import { Folio } from '@/components/Folio'
-import { PageTurn, turnForward } from '@/components/PageTurn'
+import { turnForward } from '@/components/PageTurn'
+import { ReadingPage } from '@/components/ReadingPage'
 import { citationLinks, Provenance, Sections } from '@/components/prose'
 import { ReferenceList } from '@/components/ReferenceList'
 import { ScriptPair } from '@/components/script'
@@ -97,142 +96,139 @@ export default async function TopicPage({ params }: PageProps<'/topics/[slug]'>)
   )
 
   return (
-    <PageTurn>
-      <main id="main" className={cx(reading.page, styles.page)}>
-        <Breadcrumbs path={hrefFor({ kind: 'topic', id: topic.slug })} />
-        <Folio as="article" className={reading.article} aria-labelledby="topic-title">
-          <header className={reading.titlePage}>
-            <p className={reading.kicker}>
-              Topic{' '}
-              <span className={styles.order} aria-hidden>
-                {toDevanagariDigits(String(topic.order))}
-              </span>
-            </p>
-            <ViewTransition name={`topic-title-${topic.slug}`} share="morph" default="none">
-              <h1 id="topic-title" className={cx(reading.title, reading.titleLong)}>
-                {topic.name}
-              </h1>
-            </ViewTransition>
-            {topic.term ? (
-              <p className={styles.term}>
-                <ScriptPair
-                  iast={topic.term.iast}
-                  {...(topic.term.devanagari ? { devanagari: topic.term.devanagari } : {})}
-                />
-              </p>
-            ) : null}
-            <p className={styles.facts}>
-              {plural(topic.conceptCount, 'Concept')}
-              {topic.secondaryConcepts.length > 0
-                ? ` · ${topic.secondaryConcepts.length} more also here`
-                : null}{' '}
-              · {plural(verseCount, 'verse')} quoted
-              {works.length > 0 ? (
-                <>
-                  , from{' '}
-                  {inWords(
-                    works.map((work) => (
-                      <cite key={work.slug} lang={work.lang} className={styles.workName}>
-                        {work.title}
-                      </cite>
-                    )),
-                  )}
-                </>
-              ) : null}
-            </p>
-          </header>
-
-          {topic.intro ? (
-            <div className={styles.prose}>
-              <Sections sections={topic.intro.sections} citations={citations} />
-            </div>
-          ) : null}
-
-          <section className={reading.section} aria-labelledby="concepts-title">
-            <h2 id="concepts-title" className={reading.sectionTitle}>
-              Its Concepts
-            </h2>
-            <div className={cx(plateScope, styles.spread)}>
-              <ContentsPlate
-                label="Contents"
-                className={styles.plate}
-                groups={[
-                  { rows: topic.concepts.map(rowOf) },
-                  ...(topic.secondaryConcepts.length > 0
-                    ? [{ title: 'Also in this topic', rows: topic.secondaryConcepts.map(rowOf) }]
-                    : []),
-                ]}
+    <ReadingPage
+      path={hrefFor({ kind: 'topic', id: topic.slug })}
+      titleId="topic-title"
+      width="plate"
+      kicker={
+        <>
+          Topic{' '}
+          <span className={styles.order} aria-hidden>
+            {toDevanagariDigits(String(topic.order))}
+          </span>
+        </>
+      }
+      title={topic.name}
+      longTitle
+      titleTransition={`topic-title-${topic.slug}`}
+      afterTitle={
+        <>
+          {topic.term ? (
+            <p className={styles.term}>
+              <ScriptPair
+                iast={topic.term.iast}
+                {...(topic.term.devanagari ? { devanagari: topic.term.devanagari } : {})}
               />
-              <div className={styles.cards}>
-                <ul className={styles.cardList}>{topic.concepts.map(card)}</ul>
-                {topic.secondaryConcepts.length > 0 ? (
-                  <>
-                    <h3 className={styles.also}>Also in this topic</h3>
-                    <ul className={styles.cardList}>{topic.secondaryConcepts.map(card)}</ul>
-                  </>
-                ) : null}
-              </div>
-            </div>
-          </section>
+            </p>
+          ) : null}
+          <p className={styles.facts}>
+            {plural(topic.conceptCount, 'Concept')}
+            {topic.secondaryConcepts.length > 0
+              ? ` · ${topic.secondaryConcepts.length} more also here`
+              : null}{' '}
+            · {plural(verseCount, 'verse')} quoted
+            {works.length > 0 ? (
+              <>
+                , from{' '}
+                {inWords(
+                  works.map((work) => (
+                    <cite key={work.slug} lang={work.lang} className={styles.workName}>
+                      {work.title}
+                    </cite>
+                  )),
+                )}
+              </>
+            ) : null}
+          </p>
+        </>
+      }
+    >
+      {topic.intro ? (
+        <div className={styles.prose}>
+          <Sections sections={topic.intro.sections} citations={citations} />
+        </div>
+      ) : null}
 
-          {works.length > 0 ? (
-            <section className={reading.section} aria-labelledby="verses-title">
-              <h2 id="verses-title" className={reading.sectionTitle}>
-                Verses its Concepts quote
-              </h2>
-              {works.map((work) => (
-                <div key={work.slug} className={styles.work}>
-                  <h3 className={styles.workTitle}>
+      <section className={reading.section} aria-labelledby="concepts-title">
+        <h2 id="concepts-title" className={reading.sectionTitle}>
+          Its Concepts
+        </h2>
+        <div className={cx(plateScope, styles.spread)}>
+          <ContentsPlate
+            label="Contents"
+            className={styles.plate}
+            groups={[
+              { rows: topic.concepts.map(rowOf) },
+              ...(topic.secondaryConcepts.length > 0
+                ? [{ title: 'Also in this topic', rows: topic.secondaryConcepts.map(rowOf) }]
+                : []),
+            ]}
+          />
+          <div className={styles.cards}>
+            <ul className={styles.cardList}>{topic.concepts.map(card)}</ul>
+            {topic.secondaryConcepts.length > 0 ? (
+              <>
+                <h3 className={styles.also}>Also in this topic</h3>
+                <ul className={styles.cardList}>{topic.secondaryConcepts.map(card)}</ul>
+              </>
+            ) : null}
+          </div>
+        </div>
+      </section>
+
+      {works.length > 0 ? (
+        <section className={reading.section} aria-labelledby="verses-title">
+          <h2 id="verses-title" className={reading.sectionTitle}>
+            Verses its Concepts quote
+          </h2>
+          {works.map((work) => (
+            <div key={work.slug} className={styles.work}>
+              <h3 className={styles.workTitle}>
+                <Link href={hrefFor({ kind: 'work', id: work.slug })} transitionTypes={turnForward}>
+                  <span lang={work.lang}>{work.title}</span>
+                </Link>
+              </h3>
+              <ol className={styles.verses}>
+                {work.verses.map((verse) => (
+                  <li key={verse.id} className={styles.verseItem}>
+                    {/* A passage's anchor on its work's page, made by hrefFor() in the content module. */}
                     <Link
-                      href={hrefFor({ kind: 'work', id: work.slug })}
+                      href={verse.href as Route}
+                      className={styles.verse}
                       transitionTypes={turnForward}
                     >
-                      <span lang={work.lang}>{work.title}</span>
+                      <span className={styles.opening}>
+                        <Opening verse={verse} />
+                      </span>
+                      <span className={styles.verseLeader} aria-hidden />
+                      <span className={styles.locator}>{verse.locator}</span>
                     </Link>
-                  </h3>
-                  <ol className={styles.verses}>
-                    {work.verses.map((verse) => (
-                      <li key={verse.id} className={styles.verseItem}>
-                        {/* A passage's anchor on its work's page, made by hrefFor() in the content module. */}
-                        <Link
-                          href={verse.href as Route}
-                          className={styles.verse}
-                          transitionTypes={turnForward}
-                        >
-                          <span className={styles.opening}>
-                            <Opening verse={verse} />
-                          </span>
-                          <span className={styles.verseLeader} aria-hidden />
-                          <span className={styles.locator}>{verse.locator}</span>
-                        </Link>
-                        {verse.quotedIn.length > 0 ? (
-                          <p className={styles.quotedIn}>
-                            Quoted in{' '}
-                            {inWords(
-                              verse.quotedIn.map((record) => (
-                                <span key={`${record.kind}:${record.id}`} {...langOf(record.lang)}>
-                                  {record.title}
-                                </span>
-                              )),
-                            )}
-                          </p>
-                        ) : null}
-                      </li>
-                    ))}
-                  </ol>
-                </div>
-              ))}
-            </section>
-          ) : null}
+                    {verse.quotedIn.length > 0 ? (
+                      <p className={styles.quotedIn}>
+                        Quoted in{' '}
+                        {inWords(
+                          verse.quotedIn.map((record) => (
+                            <span key={`${record.kind}:${record.id}`} {...langOf(record.lang)}>
+                              {record.title}
+                            </span>
+                          )),
+                        )}
+                      </p>
+                    ) : null}
+                  </li>
+                ))}
+              </ol>
+            </div>
+          ))}
+        </section>
+      ) : null}
 
-          {topic.intro ? (
-            <>
-              <ReferenceList references={topic.intro.references} />
-              <Provenance of={topic.intro} />
-            </>
-          ) : null}
-        </Folio>
-      </main>
-    </PageTurn>
+      {topic.intro ? (
+        <>
+          <ReferenceList references={topic.intro.references} />
+          <Provenance of={topic.intro} />
+        </>
+      ) : null}
+    </ReadingPage>
   )
 }

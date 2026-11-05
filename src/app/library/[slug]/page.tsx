@@ -2,9 +2,7 @@ import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import type { CSSProperties } from 'react'
 
-import { Breadcrumbs } from '@/components/Breadcrumbs'
 import { Contents } from '@/components/concept'
-import { Folio } from '@/components/Folio'
 import {
   BookGroup,
   counted,
@@ -13,10 +11,9 @@ import {
   libraryStyles as styles,
 } from '@/components/library'
 import { OrnamentRule } from '@/components/OrnamentRule'
-import { PageTurn } from '@/components/PageTurn'
 import { Provenance, Sections, Text } from '@/components/prose'
+import { ReadingPage } from '@/components/ReadingPage'
 import { library, site, type PageView, type ResourceListView } from '@/content'
-import { cx } from '@/lib/cx'
 import { metadataFor } from '@/lib/metadata'
 
 import reading from '../../reading.module.css'
@@ -82,40 +79,33 @@ export default async function LibraryItemPage({ params }: PageProps<'/library/[s
   const { count, unit } = holdingsOf(page)
 
   return (
-    <PageTurn>
-      <main
-        id="main"
-        className={cx(reading.page, styles.page, page.kind === 'page' && styles.wide)}
-      >
-        <Breadcrumbs path={page.href} />
-        <Folio as="article" className={reading.article} aria-labelledby="page-title">
-          <header className={reading.titlePage}>
-            <p className={reading.kicker}>Library</p>
-            <h1 id="page-title" className={reading.title}>
-              {page.title}
-            </h1>
-            {page.kind === 'page' ? (
-              <p className={reading.summary}>
-                <Text text={page.summary} />
-              </p>
-            ) : (
-              <p className={styles.facts}>
-                {`${count} ${unit}`}
-                {page.groups.length > 1
-                  ? unit.startsWith('book')
-                    ? ` on ${counted(page.groups.length, 'shelf', 'shelves')}`
-                    : ` in ${counted(page.groups.length, 'group', 'groups')}`
-                  : null}
-              </p>
-            )}
-          </header>
+    <ReadingPage
+      path={page.href}
+      titleId="page-title"
+      width={page.kind === 'page' ? 'libraryContents' : 'library'}
+      kicker="Library"
+      title={page.title}
+      afterTitle={
+        page.kind === 'page' ? (
+          <p className={reading.summary}>
+            <Text text={page.summary} />
+          </p>
+        ) : (
+          <p className={styles.facts}>
+            {`${count} ${unit}`}
+            {page.groups.length > 1
+              ? unit.startsWith('book')
+                ? ` on ${counted(page.groups.length, 'shelf', 'shelves')}`
+                : ` in ${counted(page.groups.length, 'group', 'groups')}`
+              : null}
+          </p>
+        )
+      }
+    >
+      {page.kind === 'page' ? <TextPage page={page} /> : <ReadingList list={page} />}
 
-          {page.kind === 'page' ? <TextPage page={page} /> : <ReadingList list={page} />}
-
-          <OrnamentRule className={styles.rule} />
-          <Provenance of={page} />
-        </Folio>
-      </main>
-    </PageTurn>
+      <OrnamentRule className={styles.rule} />
+      <Provenance of={page} />
+    </ReadingPage>
   )
 }

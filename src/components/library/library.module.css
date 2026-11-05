@@ -1,9 +1,4 @@
-/* What every Library page shares: its width, its facts line, links to other sites that say so. */
-
-/* Wider than a reading page, so a shelf of books stands on one board. */
-main.page {
-  max-width: 64rem;
-}
+/* What every Library page shares: its facts line, links to other sites that say so. */
 
 .facts {
   margin: 0;
@@ -34,12 +29,6 @@ main.page {
 }
 
 /* A page of text with its contents beside it, as a Concept page sets them. */
-@media (min-width: 64rem) {
-  main.wide {
-    max-width: 78rem;
-  }
-}
-
 .body {
   display: grid;
   gap: 2.5rem;
