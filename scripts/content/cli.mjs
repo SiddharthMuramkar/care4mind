@@ -1,3 +1,4 @@
+// @ts-check
 // What every content tool shares on the command line: the error a person can fix, the runner
 // that turns it into exit code 2, and the --root option.
 

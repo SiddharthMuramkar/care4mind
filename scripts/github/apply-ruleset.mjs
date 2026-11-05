@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+// @ts-check
 // Makes the ruleset GitHub enforces on main match .github/rulesets/main.json.
 //
 //   pnpm ruleset:apply --commit <sha>
@@ -72,7 +73,8 @@ if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1]
   try {
     main(process.argv.slice(2))
   } catch (error) {
-    console.error(`ruleset:apply: ${error.message}`)
+    const message = error instanceof Error ? error.message : String(error)
+    console.error(`ruleset:apply: ${message}`)
     process.exitCode = 1
   }
 }
