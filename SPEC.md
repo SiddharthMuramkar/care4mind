@@ -55,7 +55,11 @@ These are judgement calls, so review checks them against the diff, in the codeba
 | Lotus motion is CSS only, transform and opacity: only the hero moves on its own, once, ending within 5 s of load; every lotus answers the pointer; nothing moves under reduced motion; no pause control | lotus and motion specs |
 | A `styles.x` lookup names a class its CSS module defines, and markup reads every class a module defines | CSS module classes test |
 | A focused link on a paper surface, marked `data-paper`, rings in paper's focus colour | paper spec |
-| IAST and Devanagari carry `lang` | components, for name fields, the verse-copied toast and Devanagari runs. IAST inside running text is untagged (#76) |
+| Until launch every page says noindex: the robots and googlebot meta from the root layout, and the X-Robots-Tag header (`siteConfig.indexable` is the switch) | keep-list test; browser: pages. The global error page's own meta: error-pages test |
+| The skip link is the first thing in the body and leads to `main#main` | keep-list test; browser: pages. The global error page's own skip link: error-pages test |
+| Keyboard focus draws a 3 px solid outline in the gold focus colour | keep-list test; browser: pages, paper |
+| A Library link to another site says so in words ("another site", the arrow decoration) | keep-list test, over every Reference read elsewhere; browser: library |
+| IAST and Devanagari carry `lang` | script-pair test for name fields, keep-list test for Devanagari runs in running text and the document's own `lang`; components, for the verse-copied toast and the rest. IAST inside running text is untagged (#76) |
 | The migration's records, counts and derived pages stay as carried over, until the client signs it off | the fidelity suite in `tests/fidelity`, which `verify.mjs` runs after checking every record (or `pnpm content:fidelity` alone); not in `pnpm check`, so new content needs no test edit |
 | Carried-over text changes only to fix a listed error | `verify.mjs`, which runs only on a machine with the captures; nothing in CI (#48) |
 | Comments and test titles state reasons, not ticket numbers or decision codes | comment-codes test, over every tracked `.ts`, `.tsx`, `.mjs`, `.cjs`, `.js`, `.css` and `.yml` file |
