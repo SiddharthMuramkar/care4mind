@@ -9,10 +9,18 @@ export type FilterGroup = 'topic' | 'text' | 'kind'
 
 export const GROUPS: readonly FilterGroup[] = ['topic', 'text', 'kind']
 
-/** The values pressed in each group: an entry shows if it has one of each group's, or the group has none. */
+/** The values pressed in each group: an entry shows if it has one of each group's, or the group has none (kind always has some). */
 export type Selection = Readonly<Record<FilterGroup, readonly string[]>>
 
-export const NOTHING: Selection = { topic: [], text: [], kind: [] }
+/** What a plain address shows: the Concept pages. A kind group is never empty; none pressed is this. */
+export const DEFAULT_KINDS: readonly string[] = ['concept']
+
+export const DEFAULT_SELECTION: Selection = { topic: [], text: [], kind: DEFAULT_KINDS }
+
+const sameKinds = (kinds: readonly string[]) =>
+  kinds.length === DEFAULT_KINDS.length && DEFAULT_KINDS.every((kind) => kinds.includes(kind))
+
+const withKinds = (kinds: readonly string[]) => (kinds.length > 0 ? kinds : DEFAULT_KINDS)
 
 const ATTRIBUTE: Readonly<Record<FilterGroup, string>> = {
   topic: 'data-topics',
@@ -23,8 +31,9 @@ const ATTRIBUTE: Readonly<Record<FilterGroup, string>> = {
 /** A chip's value in the ToggleGroup, which holds every group's: `topic:mind`. */
 export const chipValue = (group: FilterGroup, value: string) => `${group}:${value}`
 
-export const isEmpty = (selection: Selection) =>
-  GROUPS.every((group) => selection[group].length === 0)
+/** Whether a selection is the plain address's: no topic or text, and only the Concept pages. */
+export const isDefault = (selection: Selection) =>
+  selection.topic.length === 0 && selection.text.length === 0 && sameKinds(selection.kind)
 
 /** The selection an address asks for, keeping only the values this page has chips for. */
 export function readSelection(
@@ -39,14 +48,14 @@ export function readSelection(
         .filter((value) => value !== '' && known[group].has(value)),
     ),
   ]
-  return { topic: read('topic'), text: read('text'), kind: read('kind') }
+  return { topic: read('topic'), text: read('text'), kind: withKinds(read('kind')) }
 }
 
-/** The query string that keeps a selection: `?topic=mind,self&kind=concept`, or none. */
+/** The query string that keeps a selection: `?topic=mind,self&kind=concept,term`, or none. */
 export function writeSelection(selection: Selection): string {
-  const parts = GROUPS.filter((group) => selection[group].length > 0).map(
-    (group) => `${group}=${selection[group].join(',')}`,
-  )
+  const kept = (group: FilterGroup) =>
+    selection[group].length > 0 && !(group === 'kind' && sameKinds(selection.kind))
+  const parts = GROUPS.filter(kept).map((group) => `${group}=${selection[group].join(',')}`)
   return parts.length > 0 ? `?${parts.join('&')}` : ''
 }
 
@@ -58,7 +67,7 @@ export function fromChips(values: readonly string[]): Selection {
     const group = value.slice(0, at) as FilterGroup
     if (GROUPS.includes(group)) selection[group].push(value.slice(at + 1))
   }
-  return selection
+  return { ...selection, kind: withKinds(selection.kind) }
 }
 
 export const toChips = (selection: Selection) =>

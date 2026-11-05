@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 
-import { AzIndex, AzLetter, type ChipGroup, type RailLetter } from '@/components/az'
+import { AzIndex, AzLetter, DEFAULT_KINDS, type ChipGroup, type RailLetter } from '@/components/az'
 import { Breadcrumbs } from '@/components/Breadcrumbs'
 import { Folio } from '@/components/Folio'
 import { PageTurn, turnForward } from '@/components/PageTurn'
@@ -23,11 +23,11 @@ export function generateMetadata(): Promise<Metadata> {
 /** A letter's anchor on the page: `#letter-a`, and `#letter-other` for names starting otherwise. */
 const letterId = (letter: string) => `letter-${letter === '#' ? 'other' : letter.toLowerCase()}`
 
-const KINDS = [
+const KINDS: readonly { value: Entry['kind']; label: string }[] = [
   { value: 'concept', label: 'Concept pages' },
   { value: 'term', label: 'Terms' },
   { value: 'glossary', label: 'Glossary' },
-] as const
+]
 
 const counted = (count: number, one: string, many: string) => `${count} ${count === 1 ? one : many}`
 
@@ -63,7 +63,11 @@ export default async function ConceptsPage() {
         .filter(({ slug }) => quoted.has(slug))
         .map(({ slug, title, lang }) => ({ value: slug, label: title, lang })),
     },
-    { group: 'kind', label: 'Show', chips: KINDS },
+    {
+      group: 'kind',
+      label: 'Show',
+      chips: KINDS.map(({ value, label }) => ({ value, label: `${label} (${count(value)})` })),
+    },
   ]
   const rail: RailLetter[] = letters.map(({ letter, entries }) => ({
     letter,
@@ -147,7 +151,11 @@ export default async function ConceptsPage() {
             <h2 id="az-title" className={reading.sectionTitle}>
               From A to Z
             </h2>
-            <AzIndex letters={rail} groups={groups} total={all.length}>
+            <AzIndex
+              letters={rail}
+              groups={groups}
+              total={all.filter(({ kind }) => DEFAULT_KINDS.includes(kind)).length}
+            >
               {sections.map(({ letter, entries }) => (
                 <AzLetter
                   key={letter}

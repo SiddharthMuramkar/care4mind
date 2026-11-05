@@ -65,23 +65,6 @@
   }
 }
 
-/* A phone: each group is one row of chips that scrolls sideways under its label. */
-@media (max-width: 39.99rem) {
-  .chipGroup {
-    flex-wrap: nowrap;
-    overflow-x: auto;
-    margin: -6px;
-    padding: 6px;
-    scrollbar-width: none;
-    mask-image: linear-gradient(to right, #000 88%, transparent);
-  }
-
-  .chip {
-    flex: none;
-    white-space: nowrap;
-  }
-}
-
 /* A chip is a slip of type: outlined while off, inked solid while pressed, pressed into the paper. */
 .chip {
   position: relative;
@@ -260,7 +243,9 @@ a.letter:focus-visible {
   .rail {
     justify-content: flex-start;
     gap: 0.25rem;
-    mask-image: linear-gradient(to right, #000 85%, transparent);
+    /* The fade at the edge, and the next letter cut by it, say the bar scrolls. */
+    padding-inline-end: 1.5rem;
+    mask-image: linear-gradient(to right, #000 80%, transparent);
   }
 
   .letter {
