@@ -48,13 +48,25 @@ for (const route of ROUTES_IN_SCOPE) {
       .soft(canonical.first(), `${where}: canonical address ends in /`)
       .toHaveAttribute('href', /\/$/)
 
-    // FR-01: every page below the homepage shows its trail, ending at itself.
+    // FR-01: every page below the homepage shows its trail, ending at itself. A Concept on a
+    // phone shows one line of it instead: the link back to its topic.
     if (route.kind !== 'home') {
       const trail = page.getByRole('navigation', { name: 'Breadcrumb', exact: true })
       await expect.soft(trail, `${where}: one Breadcrumb landmark`).toHaveCount(1)
-      const home = trail.getByRole('link', { name: 'Home', exact: true })
-      await expect.soft(home, `${where}: Breadcrumb links to Home`).toBeVisible()
-      await expect.soft(home, `${where}: Breadcrumb’s Home link`).toHaveAttribute('href', '/')
+      if (route.kind === 'concept' && (page.viewportSize()?.width ?? 0) <= 640) {
+        const topic = trail.getByRole('link')
+        await expect
+          .soft(topic, `${where}: Breadcrumb’s one phone link, to its topic`)
+          .toHaveCount(1)
+        await expect.soft(topic, `${where}: Breadcrumb links to its topic`).toBeVisible()
+        await expect
+          .soft(topic, `${where}: Breadcrumb’s topic link`)
+          .toHaveAttribute('href', /^\/topics\/[^/]+\/$/)
+      } else {
+        const home = trail.getByRole('link', { name: 'Home', exact: true })
+        await expect.soft(home, `${where}: Breadcrumb links to Home`).toBeVisible()
+        await expect.soft(home, `${where}: Breadcrumb’s Home link`).toHaveAttribute('href', '/')
+      }
       const current = trail.locator('[aria-current="page"]')
       await expect.soft(current, `${where}: one aria-current="page" crumb`).toHaveCount(1)
       await expect

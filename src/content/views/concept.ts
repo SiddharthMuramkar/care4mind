@@ -4,13 +4,14 @@ import type { ContentGraph, Relation } from '../graph'
 import type { Block, ConceptRecord, Slug } from '../schema'
 import {
   RELATION_STRENGTH,
+  type BlockView,
   type ConceptCard,
   type ConceptView,
   type LinkedWork,
   type QuestionnaireCard,
   type RelatedConcept,
 } from '../types'
-import { conceptQuotes, sectionViews, tocOf, topicRef, type Owner } from './blocks'
+import { conceptQuotes, glanceOf, sectionViews, tocOf, topicRef, type Owner } from './blocks'
 import { byName, carriedOver, must, nameCopy, present } from './common'
 import { hrefFor } from './href'
 import { asciiSpellings, displayName, passageLabel } from '../names'
@@ -189,6 +190,40 @@ function citationsOnPage(record: ConceptRecord, graph: ContentGraph) {
   ]
 }
 
+const WORDS_PER_MINUTE = 200
+
+/** The words in a list of blocks' body text, nested terms and shared introductions included. */
+function wordsInBlocks(blocks: readonly BlockView[]): number {
+  const count = (texts: readonly string[]) =>
+    texts.reduce((words, text) => words + text.split(/\s+/).filter(Boolean).length, 0)
+  return blocks.reduce((words, block) => {
+    switch (block.kind) {
+      case 'paragraph':
+        return words + count([block.text])
+      case 'list':
+        return words + count(block.items)
+      case 'term':
+        return words + wordsInBlocks(block.blocks)
+      case 'table':
+        return (
+          words +
+          block.rows.reduce(
+            (rowWords, row) =>
+              rowWords + count(row.cells) + count(typeof row.head === 'string' ? [row.head] : []),
+            0,
+          )
+        )
+      case 'verse':
+        return words + count([block.verse.translation, block.verse.meaning ?? ''])
+      case 'topic-intro':
+        return (
+          words +
+          block.sections.reduce((sectionWords, s) => sectionWords + wordsInBlocks(s.blocks), 0)
+        )
+    }
+  }, 0)
+}
+
 /** A Concept's page: the record with every id resolved. */
 export function conceptView(
   record: ConceptRecord,
@@ -196,12 +231,25 @@ export function conceptView(
   flags: Features,
 ): ConceptView {
   const owner: Owner = { kind: 'concept', id: record.slug }
+  const sections = sectionViews(record.sections, owner, graph)
+  const verses = record.verses.map((quote) => verseView(quote, graph))
+  const words =
+    [record.summary, record.whyItMatters ?? ''].join(' ').split(/\s+/).filter(Boolean).length +
+    sections.reduce((total, section) => total + wordsInBlocks(section.blocks), 0) +
+    verses.reduce(
+      (total, verse) =>
+        total + `${verse.translation} ${verse.meaning ?? ''}`.split(/\s+/).filter(Boolean).length,
+      0,
+    )
   return {
     ...conceptCard(record, graph),
     spellings: record.name.term ? asciiSpellings(record.name.term) : [],
+    ...present({ whyItMatters: record.whyItMatters }),
+    readingMinutes: Math.max(1, Math.ceil(words / WORDS_PER_MINUTE)),
+    glance: glanceOf(record.sections, owner),
     secondaryTopics: (record.topics.also ?? []).map((slug) => topicRef(must(graph, 'topic', slug))),
-    verses: record.verses.map((quote) => verseView(quote, graph)),
-    sections: sectionViews(record.sections, owner, graph),
+    verses,
+    sections,
     toc: tocOf(record.sections, owner),
     references: numberedReferences(record.references, graph),
     citations: citationMap(citationsOnPage(record, graph)),

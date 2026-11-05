@@ -408,6 +408,13 @@ describe('a Concept’s sections', () => {
     ])
   })
 
+  it('lists each Term once, with its gloss and its anchor, for the at-a-glance grid', async () => {
+    const view = await createContent(memorySource(...records), ON).concepts.get('obstacles')
+    expect(view?.glance).toEqual([
+      { id: 'samsaya', name: 'Saṃśaya', gloss: 'Doubt', href: '/concepts/obstacles/#samsaya' },
+    ])
+  })
+
   it('resolves a topic-intro block to the topic’s introduction, stored once', async () => {
     const view = await createContent(memorySource(...records), ON).concepts.get('obstacles')
     expect(view?.sections[3]).toEqual({
@@ -455,6 +462,34 @@ describe('a Concept’s sections', () => {
       },
       { id: 'shared', heading: 'Shared', href: '/concepts/obstacles/#shared', terms: [] },
     ])
+  })
+})
+
+describe('a Concept’s head', () => {
+  it('passes a why-it-matters line through, and leaves it out where the record has none', async () => {
+    const withWhy = defineConcept({ ...concept, whyItMatters: 'It names what practice removes.' })
+    const content = createContent(memorySource(mind, withWhy), ON)
+    expect((await content.concepts.get('obstacles'))?.whyItMatters).toBe(
+      'It names what practice removes.',
+    )
+    const bare = createContent(memorySource(mind, defineConcept(concept)), ON)
+    expect(await bare.concepts.get('obstacles')).not.toHaveProperty('whyItMatters')
+    expect((await bare.concepts.get('obstacles'))?.glance).toEqual([])
+  })
+
+  it('reads its body text at 200 words a minute, never under a minute', async () => {
+    const words = (count: number) => Array.from({ length: count }, () => 'word').join(' ')
+    const long = defineConcept({
+      ...concept,
+      sections: [
+        { id: 'body', heading: 'Body', blocks: [{ kind: 'paragraph', text: words(397) }] },
+      ],
+    })
+    // The summary's three words over the paragraph's 397 make 400: two minutes.
+    const content = createContent(memorySource(mind, long), ON)
+    expect((await content.concepts.get('obstacles'))?.readingMinutes).toBe(2)
+    const short = createContent(memorySource(mind, defineConcept(concept)), ON)
+    expect((await short.concepts.get('obstacles'))?.readingMinutes).toBe(1)
   })
 })
 

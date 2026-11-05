@@ -51,3 +51,43 @@
 .source {
   font-size: 1rem;
 }
+
+/* The folded original: its disclosure's control, set like the cards' other text controls. */
+.showOriginal {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 0.5rem;
+  color: var(--color-surface-link);
+  cursor: pointer;
+}
+
+.original .verse {
+  margin-top: 0.5rem;
+}
+
+/* On a wide screen the original stands open and its control is left off. */
+@media (min-width: 64rem) {
+  .original::details-content {
+    content-visibility: visible;
+  }
+
+  .showOriginal {
+    display: none;
+  }
+
+  .original .verse {
+    margin-top: 0;
+  }
+}
+
+/* On paper the original always prints, with the control that opens it left off. */
+@media print {
+  .original::details-content {
+    content-visibility: visible;
+  }
+
+  .showOriginal {
+    display: none;
+  }
+}
