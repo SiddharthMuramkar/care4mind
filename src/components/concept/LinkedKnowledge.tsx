@@ -3,10 +3,12 @@ import Link from 'next/link'
 import { ViewTransition, type CSSProperties, type ReactNode } from 'react'
 
 import { hrefFor, type ConceptView, type VerseView } from '@/content'
+import { readingTimeWords } from '@/lib/text'
 
 import { turnForward } from '../PageTurn'
 import { LinkPreview } from '../preview'
 import { statusWords } from '../StatusBadge'
+import { TopicChip } from '../topics'
 import { Text } from '../prose'
 import { conceptPreview, passagePreview } from './previews'
 import styles from './LinkedKnowledge.module.css'
@@ -80,6 +82,10 @@ export function LinkedKnowledge({
                     {other.name}
                   </Link>
                 </LinkPreview>
+                <span className={styles.meta}>
+                  <TopicChip topic={other.topic} />
+                  <span>{readingTimeWords(other.readingMinutes)}</span>
+                </span>
                 <Leader />
                 <span className={styles.note}>
                   {other.reasons.map((reason) => reason.text).join(' · ')}

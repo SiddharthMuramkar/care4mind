@@ -1,5 +1,5 @@
 import type { PreviewPayload } from '@/components/preview'
-import type { AzEntry as Entry } from '@/content'
+import type { AzEntry as Entry, ConceptCard as Card } from '@/content'
 
 import styles from './az.module.css'
 import { AzEntry } from './AzEntry'
@@ -12,12 +12,14 @@ export function AzLetter({
   entries,
   topicNames,
   previewOf,
+  cardOf,
 }: {
   letter: string
   id: string
   entries: readonly { entry: Entry; index: number }[]
   topicNames: ReadonlyMap<string, string>
   previewOf: (entry: Entry) => PreviewPayload | undefined
+  cardOf: (entry: Entry) => Card | undefined
 }) {
   // The server renders the plain address's list, so it paints without a flash of every entry.
   const shown = (entry: Entry) => DEFAULT_KINDS.includes(entry.kind)
@@ -32,6 +34,7 @@ export function AzLetter({
       <ul className={styles.entries}>
         {entries.map(({ entry, index }) => {
           const preview = previewOf(entry)
+          const card = cardOf(entry)
           return (
             <AzEntry
               key={index}
@@ -39,6 +42,7 @@ export function AzLetter({
               topicNames={topicNames}
               hidden={!shown(entry)}
               {...(preview ? { preview } : {})}
+              {...(card ? { card } : {})}
             />
           )
         })}

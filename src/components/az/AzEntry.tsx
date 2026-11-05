@@ -5,7 +5,9 @@ import { turnForward } from '@/components/PageTurn'
 import { LinkPreview, type PreviewPayload } from '@/components/preview'
 import { Text } from '@/components/prose'
 import { ScriptPair } from '@/components/script'
-import type { AzEntry as Entry } from '@/content'
+import { TopicChip } from '@/components/topics'
+import type { AzEntry as Entry, ConceptCard as Card } from '@/content'
+import { readingTimeWords } from '@/lib/text'
 
 import styles from './az.module.css'
 
@@ -57,12 +59,15 @@ export function AzEntry({
   entry,
   topicNames,
   preview,
+  card,
   hidden = false,
 }: {
   entry: Entry
   topicNames: ReadonlyMap<string, string>
   /** The preview a Concept's link shows (a LinkPreview). */
   preview?: PreviewPayload
+  /** A Concept entry's card, for its topic chip and reading time. */
+  card?: Pick<Card, 'topic' | 'readingMinutes'>
   /** Left out of the plain address's list, until a filter lets it in. */
   hidden?: boolean
 }) {
@@ -117,6 +122,12 @@ export function AzEntry({
         {entry.gloss ? <span className={styles.gloss}>{entry.gloss} · </span> : null}
         <Kind entry={entry} topicNames={topicNames} />
       </p>
+      {card ? (
+        <p className={styles.conceptMeta}>
+          <TopicChip topic={card.topic} />
+          <span>{readingTimeWords(card.readingMinutes)}</span>
+        </p>
+      ) : null}
       {entry.definition ? (
         <p className={styles.definition}>
           <Text text={entry.definition} />

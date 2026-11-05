@@ -6,7 +6,15 @@ import { turnForward } from '@/components/PageTurn'
 import { ReadingPage } from '@/components/ReadingPage'
 import type { PreviewPayload } from '@/components/preview'
 import { TopicCard } from '@/components/topics'
-import { concepts, hrefFor, site, topics, works, type AzEntry as Entry } from '@/content'
+import {
+  concepts,
+  hrefFor,
+  site,
+  topics,
+  works,
+  type AzEntry as Entry,
+  type ConceptCard as Card,
+} from '@/content'
 import { metadataFor } from '@/lib/metadata'
 
 import reading from '../reading.module.css'
@@ -46,7 +54,7 @@ export default async function ConceptsPage() {
   const count = (kind: Entry['kind']) => all.filter((entry) => entry.kind === kind).length
   const quoted = new Set(all.flatMap((entry) => entry.works))
   const topicNames = new Map(topicCards.map(({ slug, name }) => [slug, name]))
-  const summaries = new Map(conceptCards.map(({ href, summary }) => [href, summary]))
+  const cards = new Map(conceptCards.map((card) => [card.href, card]))
 
   const groups: ChipGroup[] = [
     {
@@ -73,14 +81,20 @@ export default async function ConceptsPage() {
     filled: entries.length > 0,
   }))
 
-  /** A Concept's link shows its preview: its names and its summary. */
+  /** A Concept entry's card, for its topic chip, its reading time and its preview's summary. */
+  const cardOf = (entry: Entry): Card | undefined =>
+    entry.kind === 'concept' && entry.href !== undefined ? cards.get(entry.href) : undefined
+
+  /** A Concept's link shows its preview: its names, its topic and reading time, and its summary. */
   const previewOf = (entry: Entry): PreviewPayload | undefined => {
-    const text = entry.href === undefined ? undefined : summaries.get(entry.href)
-    if (entry.kind !== 'concept' || text === undefined) return undefined
+    const card = cardOf(entry)
+    if (card === undefined) return undefined
     return {
       kind: 'concept',
       name: entry.name,
-      text,
+      text: card.summary,
+      topic: card.topic,
+      readingMinutes: card.readingMinutes,
       ...(entry.lang ? { lang: entry.lang } : {}),
       ...(entry.devanagari ? { devanagari: entry.devanagari } : {}),
       ...(entry.gloss ? { gloss: entry.gloss } : {}),
@@ -162,6 +176,7 @@ export default async function ConceptsPage() {
               entries={entries}
               topicNames={topicNames}
               previewOf={previewOf}
+              cardOf={cardOf}
             />
           ))}
         </AzIndex>

@@ -1,3 +1,8 @@
+/** How a reading time reads, the same on a card, a result and the page itself. */
+export function readingTimeWords(minutes: number): string {
+  return `About ${minutes} ${minutes === 1 ? 'minute' : 'minutes'} to read`
+}
+
 /** Capitalise the first letter, keeping diacritics: ālasya → Ālasya. */
 export function capitalise(text: string): string {
   const [first = '', ...rest] = Array.from(text)

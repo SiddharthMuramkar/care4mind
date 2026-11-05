@@ -572,6 +572,22 @@ test.describe('Concept page v2: linked knowledge', () => {
     expect(turn?.flights.map(({ name }) => name)).toContain('questionnaire-title-karmayoga-scale')
   })
 
+  test('every Related Concept shows its topic chip and reading time', async ({ page }) => {
+    await gotoReady(page, '/concepts/vikshepa/')
+    const related = (await concepts.get('vikshepa'))?.linked.related ?? []
+    expect(related.length).toBeGreaterThan(0)
+    for (const other of related) {
+      const row = linked(page)
+        .getByRole('listitem')
+        .filter({ has: page.getByRole('link', { name: other.name, exact: true }) })
+      const minutes = other.readingMinutes
+      await expect(row.locator(`[data-topic="${other.topic.slug}"]`)).toHaveText(other.topic.name)
+      await expect(row).toContainText(
+        `About ${minutes} ${minutes === 1 ? 'minute' : 'minutes'} to read`,
+      )
+    }
+  })
+
   test('leaves empty groups out', async ({ page }) => {
     await gotoReady(page, '/concepts/atman/')
     const panel = linked(page)
@@ -666,6 +682,14 @@ test.describe('Concept page v2: previews', () => {
     const card = previewCard(page)
     await expect(card).toContainText('Concept')
     await expect(card).toContainText('Citta-bhūmi')
+    const previewed = (await concepts.get('vikshepa'))?.linked.related.find(
+      ({ slug }) => slug === 'chittabhumi',
+    )
+    if (!previewed) throw new Error('Citta-bhūmi is related to Vikṣepa.')
+    await expect(card.locator(`[data-topic="${previewed.topic.slug}"]`)).toHaveText(
+      previewed.topic.name,
+    )
+    await expect(card).toContainText(/About \d+ minutes? to read/)
     await expect
       .poll(async () => overlap(await card.boundingBox(), await link.boundingBox()))
       .toBe(0)

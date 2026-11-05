@@ -490,6 +490,10 @@ describe('a Concept’s head', () => {
     // The summary's three words over the paragraph's 397 make 400: two minutes.
     const content = createContent(memorySource(mind, long), ON)
     expect((await content.concepts.get('obstacles'))?.readingMinutes).toBe(2)
+    // A card carries the same count, so a list and the page it leads to agree.
+    expect((await content.concepts.list()).find(({ slug }) => slug === 'obstacles')).toMatchObject({
+      readingMinutes: 2,
+    })
     const short = createContent(memorySource(mind, defineConcept(concept)), ON)
     expect((await short.concepts.get('obstacles'))?.readingMinutes).toBe(1)
   })
@@ -969,6 +973,7 @@ describe('concepts.list', () => {
       term: { iast: 'ahiṃsā', ascii: ['Ahimsa'] },
       summary: 'A made-up summary.',
       topic: { slug: 'values', name: 'Values', href: '/topics/values/' },
+      readingMinutes: 1,
     })
   })
 
