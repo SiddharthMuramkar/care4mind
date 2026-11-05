@@ -380,7 +380,7 @@ export function checkRecord(record, captures) {
       : [record.provenance, record, '']
   if (!provenance)
     return { record: name, status: 'structure', checked: 0, misses: [], drafted: [], notSaved: [] }
-  // A written record's words are its author's: no saved page holds them, so none is consulted.
+  // Written records are unchecked against captures by design: no saved page holds their words.
   if (provenance.origin === 'written')
     return { record: name, status: 'written', checked: 0, misses: [], drafted: [], notSaved: [] }
 
