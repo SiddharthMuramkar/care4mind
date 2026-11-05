@@ -397,7 +397,7 @@ describe('each Concept’s coming-later Questionnaire', () => {
       'A Triguna Profile Questionnaire is a tool to estimate the characteristics of Trigunas in a person.',
     ])
     expect(
-      questionnaire?.provenance.flags.filter(
+      questionnaireRecord('triguna')?.provenance.flags.filter(
         (flag) => flag.for === 'psychology-expert' && /purpose/.test(flag.note),
       ),
     ).toHaveLength(1)
@@ -409,7 +409,7 @@ describe('each Concept’s coming-later Questionnaire', () => {
       const questionnaire = await questionnaires.get(slug)
       expect(questionnaire?.purpose).toBeUndefined()
       expect(
-        questionnaire?.provenance.flags.filter(
+        questionnaireRecord(slug)?.provenance.flags.filter(
           (flag) => flag.for === 'psychology-expert' && /no purpose/.test(flag.note),
         ),
       ).toHaveLength(1)

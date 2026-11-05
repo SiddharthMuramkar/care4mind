@@ -301,9 +301,10 @@ function onCurrentSite(url) {
  * Checks one record against the saved copies of its source pages.
  *
  * @returns {{ record, status, checked, misses, drafted, notSaved }} where `status` is "passed",
- *   "failed" (a string is on none of its pages), "unchecked" (no source has a saved copy) or
- *   "structure" (a topic with nothing carried over), and each miss gives the string's field
- *   path, the string, and the closest text on its pages.
+ *   "failed" (a string is on none of its pages), "unchecked" (no source has a saved copy),
+ *   "written" (written for the new site, so no page holds its words) or "structure" (a topic
+ *   with nothing carried over), and each miss gives the string's field path, the string, and
+ *   the closest text on its pages.
  */
 export function checkRecord(record, captures) {
   const name = `${record.kind}/${idOf(record)}`
@@ -315,6 +316,9 @@ export function checkRecord(record, captures) {
       : [record.provenance, record, '']
   if (!provenance)
     return { record: name, status: 'structure', checked: 0, misses: [], drafted: [], notSaved: [] }
+  // A written record's words are its author's: no saved page holds them, so none is consulted.
+  if (provenance.origin === 'written')
+    return { record: name, status: 'written', checked: 0, misses: [], drafted: [], notSaved: [] }
 
   const drafted = [...(provenance.drafted ?? [])]
   const skip = new Set([...NOT_TEXT, ...(NOT_TEXT_IN[record.kind] ?? [])])
@@ -423,14 +427,17 @@ function formatResults(results) {
       out.push(`${tag('drafted')}${result.record}: ${result.drafted.join(', ')} (not checked)`)
   for (const result of of('unchecked'))
     out.push(`${tag('unchecked')}${result.record}: no saved copy of ${result.notSaved.join(', ')}`)
+  const written = of('written').map((result) => result.record)
+  if (written.length > 0)
+    out.push(`${tag('written')}${written.join(', ')}: written for the new site (not checked)`)
   const structure = of('structure').map((result) => result.record)
   if (structure.length > 0)
     out.push(`${tag('structure')}${structure.join(', ')}: no introduction, nothing carried over`)
   out.push(
     '',
     `verify: ${results.length} records · ${of('passed').length} passed · ` +
-      `${of('unchecked').length} unchecked · ${structure.length} structure only · ` +
-      `${of('failed').length} failed`,
+      `${of('unchecked').length} unchecked · ${written.length} written · ` +
+      `${structure.length} structure only · ${of('failed').length} failed`,
   )
   return `${out.join('\n')}\n`
 }

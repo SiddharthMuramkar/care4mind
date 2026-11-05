@@ -46,26 +46,31 @@ export function byName(a: string, b: string): number {
   return a < b ? -1 : a > b ? 1 : 0
 }
 
-/** A record's provenance as its view carries it: a copy, with nothing left undefined. */
+/** A record's provenance as its view carries it: a copy, with its flags left out. */
 export function provenanceView(provenance: Provenance): ProvenanceView {
   return {
+    ...present({
+      origin: provenance.origin,
+      writtenBy: provenance.writtenBy,
+      writtenOn: provenance.writtenOn,
+    }),
     sources: provenance.sources.map((source) => ({ ...source })),
     edits: [...provenance.edits],
-    flags: provenance.flags.map((flag) => ({ ...flag })),
     ...(provenance.drafted === undefined ? {} : { drafted: [...provenance.drafted] }),
   }
 }
 
 /**
- * What every view of a carried-over record carries: its provenance and its review status. A kind
- * that stores no status hasn't been reviewed: it is "drafted, not reviewed" if it declares
- * drafted fields, else "carried over, not reviewed".
+ * What every view of a record carries: its provenance and its review status. A kind that stores
+ * no status hasn't been reviewed: it is "drafted, not reviewed" if it was written here or
+ * declares drafted fields, else "carried over, not reviewed".
  */
 export function carriedOver(record: {
   provenance: Provenance
   reviewStatus?: ReviewStatus
 }): CarriedOver {
-  const drafted = (record.provenance.drafted ?? []).length > 0
+  const drafted =
+    record.provenance.origin === 'written' || (record.provenance.drafted ?? []).length > 0
   return {
     provenance: provenanceView(record.provenance),
     reviewStatus:

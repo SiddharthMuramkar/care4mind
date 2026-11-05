@@ -76,7 +76,7 @@ These are judgement calls, so review checks them against the diff, in the codeba
 
 ## Where a change goes
 
-- **A record of an existing kind:** `pnpm content:new <kind> <id>` writes a template that compiles. Fill it in, then run `pnpm check`: no test needs an edit. `pnpm content:fidelity`, and so `verify.mjs`, will then fail, since it pins what the migration carried over; update it only for a change to that migration.
+- **A record of an existing kind:** `pnpm content:new <kind> <id>` writes a template that compiles; with `--written` it writes one for a record written for the new site, whose provenance names its author and day instead of a source page, and which `verify.mjs` doesn't check against the saved pages. Fill it in, then run `pnpm check`: no test needs an edit. `pnpm content:fidelity`, and so `verify.mjs`, will then fail, since it pins what the migration carried over; update it only for a change to that migration.
 - **A link field:** the record schema, the graph's link check, then the view that shows it.
 - **A content kind:** the compiler finds only some of these places, so work through every step:
   1. The record schema: its type, its `define…` helper and its kind's folder.
