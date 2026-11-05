@@ -53,7 +53,17 @@ export function idOf(record: ContentRecord): string {
       return record.id
     case 'home':
       return 'home'
-    default:
+    case 'concept':
+    case 'topic':
+    case 'work':
+    case 'questionnaire':
+    case 'glossary':
+    case 'resource-list':
+    case 'page':
       return record.slug
+    default: {
+      const unreachable: never = record
+      throw new Error(`No id for a record of kind “${(unreachable as ContentRecord).kind}”.`)
+    }
   }
 }

@@ -1,4 +1,4 @@
-import type { HrefTarget } from '../types'
+import type { FixedPage, HrefTarget } from '../types'
 
 /** The site map's fixed pages, each at its own path. */
 const FIXED_PAGES = {
@@ -12,7 +12,7 @@ const FIXED_PAGES = {
   search: '/search/',
   proposals: '/proposals/',
   start: '/start/',
-} as const
+} as const satisfies Record<FixedPage, string>
 
 const withAnchor = (path: string, anchor: string | undefined) =>
   anchor === undefined ? path : `${path}#${anchor}`
@@ -55,5 +55,11 @@ export function hrefFor(target: HrefTarget): string {
     case 'resource-list':
     case 'page':
       return withAnchor(`/library/${target.id}/`, target.anchor)
+    default: {
+      const unreachable: never = target
+      throw new Error(
+        `No address for a record of kind “${(unreachable as { kind: string }).kind}”.`,
+      )
+    }
   }
 }
