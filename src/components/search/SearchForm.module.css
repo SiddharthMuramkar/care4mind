@@ -1,0 +1,44 @@
+/* The query, set like a line ruled for writing on, and its button pressed into the paper. */
+.form {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas:
+    'label label'
+    'input button';
+  align-items: end;
+  gap: 0.5rem 0.75rem;
+  width: min(32rem, 100%);
+  text-align: start;
+}
+
+.label {
+  grid-area: label;
+  font-size: 1.0625rem;
+  color: var(--color-surface-muted);
+}
+
+.input {
+  grid-area: input;
+  min-width: 0;
+  min-height: 48px;
+  padding: 0 0.25rem;
+  border: none;
+  border-bottom: 2px solid var(--color-surface-ink);
+  border-radius: 0;
+  background: transparent;
+  color: var(--color-surface-ink);
+  font: inherit;
+  font-size: 1.375rem;
+}
+
+.input:focus-visible {
+  outline-offset: 2px;
+}
+
+/* Its place in the form; its look is the call to action it is handed. */
+.button {
+  grid-area: button;
+  justify-content: center;
+  border: 0;
+  cursor: pointer;
+}

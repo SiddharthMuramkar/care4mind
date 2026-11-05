@@ -615,6 +615,8 @@ export interface SearchDocument {
   id: string
   kind: SearchKind
   title: string
+  /** The English gloss its page gives, where it has one: a Concept's, a term's or a work's. */
+  gloss?: string
   /** The language tag of its title where the title is a transliteration: Sanskrit, or Pali. */
   lang?: LatinScript
   href: string
