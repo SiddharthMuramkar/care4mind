@@ -1,7 +1,7 @@
-import type { ContentGraph } from '../graph'
+import { quotesOf, type ContentGraph } from '../graph'
 import type { TopicRecord } from '../schema'
 import type { QuotedWork, TopicCard, TopicView } from '../types'
-import { conceptQuotes, sectionViews, tocOf, topicRef, type Owner } from './blocks'
+import { sectionViews, tocOf, topicRef, type Owner } from './blocks'
 import { byName, carriedOver, must, nameCopy, present } from './common'
 import { conceptCard } from './concept'
 import { inReadingOrder, passageView, workRef } from './passage'
@@ -26,9 +26,7 @@ export function topicView(record: TopicRecord, graph: ContentGraph): TopicView {
       .map((slug) => conceptCard(must(graph, 'concept', slug), graph))
       .sort((a, b) => byName(a.name, b.name))
   const quoted = new Set(
-    primary.flatMap((slug) =>
-      conceptQuotes(must(graph, 'concept', slug)).map(({ passage }) => passage),
-    ),
+    primary.flatMap((slug) => quotesOf(must(graph, 'concept', slug)).map(({ passage }) => passage)),
   )
   const passages = inReadingOrder(
     [...quoted].map((id) => must(graph, 'passage', id)),

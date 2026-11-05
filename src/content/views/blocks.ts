@@ -1,13 +1,5 @@
-import type { ContentGraph } from '../graph'
-import type {
-  Block,
-  ConceptRecord,
-  PassageQuote,
-  Section,
-  TableRowHead,
-  TermBlock,
-  TopicRecord,
-} from '../schema'
+import { termsIn, type ContentGraph } from '../graph'
+import type { Block, Section, TableRowHead, TopicRecord } from '../schema'
 import type { BlockView, SectionView, TableRowView, TocEntry, TopicRef } from '../types'
 import { must, nameCopy, present } from './common'
 import { hrefFor } from './href'
@@ -89,11 +81,6 @@ export function sectionViews(
   }))
 }
 
-/** Every term block in a list of blocks, nested ones included, in reading order. */
-export function termsIn(blocks: readonly Block[]): TermBlock[] {
-  return blocks.flatMap((block) => (block.kind === 'term' ? [block, ...termsIn(block.blocks)] : []))
-}
-
 /** Every term a page's sections explain, in page order, each with its anchor on the page. */
 export function glanceOf(sections: readonly Section[], owner: Owner) {
   return sections.flatMap((section) =>
@@ -119,16 +106,4 @@ export function tocOf(sections: readonly Section[], owner: Owner): TocEntry[] {
       href: anchorOn(owner, term.id),
     })),
   }))
-}
-
-/**
- * Every verse a Concept quotes, in reading order: those at the top of its page, then those in its
- * sections, term blocks included. A shared topic introduction's verses are its topic's.
- */
-export function conceptQuotes(concept: ConceptRecord): PassageQuote[] {
-  const inBlocks = (blocks: readonly Block[]): PassageQuote[] =>
-    blocks.flatMap((block) =>
-      block.kind === 'verse' ? [block.quote] : block.kind === 'term' ? inBlocks(block.blocks) : [],
-    )
-  return [...concept.verses, ...concept.sections.flatMap((section) => inBlocks(section.blocks))]
 }

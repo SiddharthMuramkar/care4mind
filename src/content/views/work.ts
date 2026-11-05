@@ -1,14 +1,14 @@
 import type { ContentGraph } from '../graph'
 import type { WorkRecord } from '../schema'
 import type { WorkCard, WorkView } from '../types'
-import { carriedOver, nameCopy, present } from './common'
+import { carriedOver, must, nameCopy, present } from './common'
 import { compareOrder, passageView, workRef } from './passage'
 
 /** The passages of a work, in its own order. */
 function passagesOf(work: WorkRecord, graph: ContentGraph) {
   return graph
-    .records('passage')
-    .filter((passage) => passage.work === work.slug)
+    .passagesInWork(work.slug)
+    .map((id) => must(graph, 'passage', id))
     .sort((a, b) => compareOrder(a.order, b.order))
 }
 

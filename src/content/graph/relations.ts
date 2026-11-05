@@ -3,9 +3,9 @@
  * topics they share.
  */
 import { displayName, passageLabel, referenceLabel } from '../names'
-import type { RecordOf, Slug } from '../schema'
+import type { PassageQuote, RecordOf, Slug } from '../schema'
 import { RELATION_STRENGTH, type RelationKind } from '../types'
-import { lookup, quotesOf, type Index, type RecordKey } from './links'
+import { lookup, type Index, type RecordKey } from './links'
 
 /** One fact that relates a Concept to another. */
 export interface Relation {
@@ -45,13 +45,14 @@ export function relationsOf(
   concepts: readonly RecordOf<'concept'>[],
   index: Index,
   citedBy: ReadonlyMap<string, readonly RecordKey[]>,
+  quotes: ReadonlyMap<Slug, readonly PassageQuote[]>,
 ): Map<Slug, Relation[]> {
   const rare = (reference: string) =>
     !NEVER_RELATES.has(reference) &&
     (citedBy.get(reference) ?? []).filter((key) => key.kind === 'concept').length <= RARELY_CITED
   const workOf = (passage: string) => lookup(index, 'passage', passage)?.work
   const shared = concepts.map((concept): Shared => {
-    const passages = [...new Set(quotesOf(concept).map((quote) => quote.passage))]
+    const passages = [...new Set((quotes.get(concept.slug) ?? []).map((quote) => quote.passage))]
     return {
       slug: concept.slug,
       passages,

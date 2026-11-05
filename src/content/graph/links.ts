@@ -16,6 +16,7 @@ import {
   type Section,
   type Target,
 } from '../schema'
+import { anchorsInSections, quotesInSections, walkBlocksAt } from './walk'
 
 /** A record named by its kind and id (ids are unique within a kind, not across kinds). */
 export interface RecordKey {
@@ -61,33 +62,6 @@ interface LinksOf<K extends ContentKind> {
   references(record: RecordOf<K>): string[]
   quotes(record: RecordOf<K>): PassageQuote[]
   anchors(record: RecordOf<K>): string[]
-}
-
-/** Every quote in a list of blocks, term blocks included, in reading order. */
-function quotesIn(list: readonly Block[]): PassageQuote[] {
-  return list.flatMap((block) =>
-    block.kind === 'verse' ? [block.quote] : block.kind === 'term' ? quotesIn(block.blocks) : [],
-  )
-}
-
-/** The quotes in a list of sections, in reading order. */
-const quotesInSections = (sections: readonly Section[]): PassageQuote[] =>
-  sections.flatMap((s) => quotesIn(s.blocks))
-
-/** Every anchor in a list of sections: section, term and table ids. */
-function anchorsInSections(sections: readonly Section[]): string[] {
-  const anchors: string[] = []
-  const addBlocks = (blocks: readonly Block[]) => {
-    for (const block of blocks) {
-      if (block.kind === 'term' || block.kind === 'table') anchors.push(block.id)
-      if (block.kind === 'term') addBlocks(block.blocks)
-    }
-  }
-  for (const section of sections) {
-    anchors.push(section.id)
-    addBlocks(section.blocks)
-  }
-  return anchors
 }
 
 /** A kind that links nowhere: no ids to check, nothing cited or quoted, no anchors. */
@@ -230,18 +204,17 @@ export function danglingLinks(record: ContentRecord, index: Index): string[] {
         `${where(`${field}.translation`)}: no translation “${translation}” in passage “${passage}”`,
       )
   }
-  const blocks = (field: string, list: readonly Block[]) =>
-    list.forEach((block, i) => {
-      const at = `${field}[${i}]`
+  const blocks = (field: string, list: readonly Block[]) => {
+    for (const { block, at } of walkBlocksAt(list, field)) {
       if (block.kind === 'verse') quote(`${at}.quote`, block.quote)
-      if (block.kind === 'term') blocks(`${at}.blocks`, block.blocks)
       if (block.kind === 'topic-intro') {
         need(`${at}.topic`, 'topic', block.topic)
         const topic = lookup(index, 'topic', block.topic)
         if (topic && !topic.intro)
           problems.push(`${where(`${at}.topic`)}: topic “${block.topic}” has no introduction`)
       }
-    })
+    }
+  }
   const sections = (field: string, list: readonly Section[]) =>
     list.forEach((section, i) => blocks(`${field}[${i}].blocks`, section.blocks))
   const target = (field: string, to: Target) => {
