@@ -57,6 +57,14 @@ export default defineHome({
     },
   ],
   featured: ['vikshepa', 'chittabhumi', 'sthitaprajna'],
+  onYourMind: [
+    { label: 'I can’t focus', concept: 'vikshepa' },
+    { label: 'My mind feels scattered', concept: 'chittabhumi' },
+    { label: 'Anger, fear and clinging', concept: 'panch-klesha' },
+    { label: 'Staying steady under pressure', concept: 'sthitaprajna' },
+    { label: 'Am I my own friend or foe?', concept: 'atma-bandhu' },
+    { label: 'Being kinder, to others and myself', concept: 'brahma-vihara' },
+  ],
   howItWorks:
     'Pick a topic, read the plain summary, then go deeper with the traditional texts and References.',
   whoBehind:
@@ -110,12 +118,22 @@ export default defineHome({
         note: 'Drafted for approval: the featured Concepts (Vikṣepa, Citta-bhūmi and Sthitaprajña) and the How it works and Who’s behind this words. The Who’s behind this words name IIT Bombay’s SJMSOM and HUA only as the ticket named them; confirm the names in full and the wording.',
         decidedBy: 'client-questions',
       },
+      {
+        for: 'project-owner',
+        note: 'Drafted for approval: the six “What’s on your mind?” starting points under the hero (“I can’t focus”, “My mind feels scattered”, “Anger, fear and clinging”, “Staying steady under pressure”, “Am I my own friend or foe?” and “Being kinder, to others and myself”). Confirm the wording; each names an everyday experience, never a condition or a diagnosis.',
+        decidedBy: 'client-questions',
+      },
+      {
+        for: 'research-editor',
+        note: 'Drafted for approval: which Concept each “What’s on your mind?” starting point leads to — “I can’t focus” to Vikṣepa, “My mind feels scattered” to Citta-bhūmi, “Anger, fear and clinging” to Pañca kleśa, “Staying steady under pressure” to Sthitaprajña, “Am I my own friend or foe?” to Ātma-bandhu and “Being kinder, to others and myself” to Brahmavihāra. Confirm the mapping.',
+      },
     ],
     drafted: [
       'tagline',
       'hero',
       'sectionIntros',
       'featured',
+      'onYourMind',
       'howItWorks',
       'whoBehind',
       'helpLine',

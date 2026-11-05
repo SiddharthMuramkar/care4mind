@@ -190,6 +190,7 @@ ${PROVENANCE}
   intro: '',
   areas: [], // { title, text, target? }
   featured: [],
+  onYourMind: [], // { label, concept }
   howItWorks: '',
   whoBehind: '',
   closing: '',

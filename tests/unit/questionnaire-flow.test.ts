@@ -28,6 +28,7 @@ const ON: Features = {
   questionnairePreview: true,
   conceptMap: true,
   startHere: true,
+  whatsOnYourMind: true,
 }
 const OFF: Features = { ...ON, questionnairePreview: false }
 

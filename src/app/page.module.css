@@ -95,6 +95,34 @@
   display: none;
 }
 
+/* The "What's on your mind?" chips: slips of type on the indigo ground. */
+.mindChips {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.mindChip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 3rem;
+  padding: 0.5rem 1rem;
+  border: 1px solid color-mix(in srgb, var(--color-ink) 45%, transparent);
+  border-radius: 2px;
+  color: var(--color-ink);
+  font-size: 1.0625rem;
+  line-height: 1.3;
+  text-decoration: none;
+}
+
+.mindChip:hover {
+  border-color: var(--color-ink);
+  color: var(--color-link);
+}
+
 /* Sections on the indigo ground */
 .section {
   display: grid;

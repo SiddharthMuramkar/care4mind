@@ -63,8 +63,35 @@ export default async function HomePage() {
           </Folio>
         </section>
 
-        {/* The slot its own piece of work fills; it holds nothing until then. */}
-        <section id="on-your-mind" className={styles.slot} />
+        {page.onYourMind.length > 0 ? (
+          <>
+            <section
+              id="on-your-mind"
+              className={styles.section}
+              aria-labelledby="on-your-mind-title"
+            >
+              <h2 id="on-your-mind-title" className={styles.sectionTitle}>
+                What’s on your mind?
+              </h2>
+              <ul className={styles.mindChips}>
+                {page.onYourMind.map(({ label, concept }) => (
+                  <li key={label}>
+                    <Link
+                      href={hrefFor({ kind: 'concept', id: concept.slug })}
+                      transitionTypes={turnForward}
+                      className={styles.mindChip}
+                    >
+                      {label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </section>
+            <OrnamentRule className={styles.rule} />
+          </>
+        ) : (
+          <section id="on-your-mind" className={styles.slot} />
+        )}
 
         <section id="topics" className={styles.section} aria-labelledby="topics-title">
           <h2 id="topics-title" className={styles.sectionTitle}>

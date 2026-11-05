@@ -5,15 +5,15 @@ import { expect, gotoReady, test } from './fixtures'
 import { expectPageTurned, pageTurns, prefetched, recordPageTurns } from './page-turns'
 
 // The proposals page: what the design suggests beyond the brief, for the Project owner's
-// sign-off. Local runs and CI build with both proposal flags on, so the two built proposals are
+// sign-off. Local runs and CI build with every proposal flag on, so the built proposals are
 // listed, with audio pronunciation, described only, and nothing else.
 
 const PATH = hrefFor({ page: 'proposals' })
-const ENTRIES = ['Concept map', 'Start here', 'Audio pronunciation']
+const ENTRIES = ['Concept map', 'Start here', 'What’s on your mind?', 'Audio pronunciation']
 
 test.describe('the proposals page', () => {
   test(
-    'lists the three proposals and no others, each with its status, gains, costs and switch',
+    'lists the four proposals and no others, each with its status, gains, costs and switch',
     { tag: '@one-width' },
     async ({ page }) => {
       await gotoReady(page, PATH)
@@ -21,7 +21,7 @@ test.describe('the proposals page', () => {
       await expect(entries.getByRole('heading', { level: 2 })).toHaveText(ENTRIES)
       await expect(
         entries.getByRole('paragraph').filter({ hasText: /^(Built|Described, not built)$/ }),
-      ).toHaveText(['Built', 'Built', 'Described, not built'])
+      ).toHaveText(['Built', 'Built', 'Built', 'Described, not built'])
       for (const entry of await entries.all())
         await expect(entry.getByRole('term')).toHaveText([
           'What it adds',
@@ -43,6 +43,7 @@ test.describe('the proposals page', () => {
     await expect(answers.getByRole('code')).toHaveText([
       'FEATURE_CONCEPT_MAP=0',
       'FEATURE_START_HERE=0',
+      'FEATURE_WHATS_ON_YOUR_MIND=0',
     ])
     for (const answer of await answers.all()) {
       await expect(answer).toContainText(/One setting, FEATURE_\w+=0, with no code change/)

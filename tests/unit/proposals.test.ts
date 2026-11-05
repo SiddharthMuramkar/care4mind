@@ -4,22 +4,24 @@ import type { Features } from '@/config/features'
 import { proposalsFor } from '@/components/proposals'
 
 // What /proposals/ lists for the Project owner's sign-off. The
-// two built proposals show only while their flags are on; audio pronunciation is described, not
+// built proposals show only while their flags are on; audio pronunciation is described, not
 // built; the reading-path idea was dropped when the site became Press only.
 
 const ON: Features = {
   questionnairePreview: true,
   conceptMap: true,
   startHere: true,
+  whatsOnYourMind: true,
 }
 
 const listed = (flags: Features) => proposalsFor(flags).map(({ name, built }) => ({ name, built }))
 
 describe('proposalsFor', () => {
-  it('lists the map, Start here and audio pronunciation, and nothing else', () => {
+  it('lists the map, Start here, What’s on your mind? and audio pronunciation, and nothing else', () => {
     expect(listed(ON)).toEqual([
       { name: 'Concept map', built: true },
       { name: 'Start here', built: true },
+      { name: 'What’s on your mind?', built: true },
       { name: 'Audio pronunciation', built: false },
     ])
   })
@@ -27,10 +29,17 @@ describe('proposalsFor', () => {
   it('leaves out a built proposal whose flag is off', () => {
     expect(listed({ ...ON, conceptMap: false })).toEqual([
       { name: 'Start here', built: true },
+      { name: 'What’s on your mind?', built: true },
       { name: 'Audio pronunciation', built: false },
     ])
     expect(listed({ ...ON, startHere: false })).toEqual([
       { name: 'Concept map', built: true },
+      { name: 'What’s on your mind?', built: true },
+      { name: 'Audio pronunciation', built: false },
+    ])
+    expect(listed({ ...ON, whatsOnYourMind: false })).toEqual([
+      { name: 'Concept map', built: true },
+      { name: 'Start here', built: true },
       { name: 'Audio pronunciation', built: false },
     ])
   })

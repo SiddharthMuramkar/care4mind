@@ -25,6 +25,8 @@ export interface HomepageRecord {
   areas: readonly { title: string; text: Inline; target?: Target }[]
   /** The Concepts the homepage features, by slug, in the order it shows them. */
   featured: readonly Slug[]
+  /** Drafted: everyday starting points under the hero, each leading to the Concept that speaks to it. */
+  onYourMind: readonly { label: string; concept: Slug }[]
   /** Drafted: how a reader goes from a topic to the texts and References behind it. */
   howItWorks: Inline
   /** Drafted: who is behind the site, and that every page lists its References and sources. */
