@@ -1,7 +1,7 @@
 import type { Route } from 'next'
 
-/** The four sections the header links to, besides Search (D01). */
-export type SectionId = 'concepts' | 'texts' | 'questionnaires' | 'library'
+/** The three sections the header links to, besides Search (D01). */
+export type SectionId = 'concepts' | 'texts' | 'library'
 
 /** The two sections whose header item opens a panel on a computer, and a list in the Drawer. */
 export type PanelId = 'concepts' | 'library'
@@ -50,6 +50,8 @@ export interface SiteNav {
   concepts: { index: NavLink; topics: readonly TopicLink[]; map?: NavLink }
   /** The Library panel: References, then the reading lists from the fullest, then its pages. */
   library: { index: NavLink; pages: readonly LibraryLink[] }
+  /** The footer's plain link to the Questionnaires page; the header and the phone menu do not list it. */
+  questionnaires: NavLink
   search: NavLink
   proposals?: NavLink
   /** Start here, while its proposal is on: the header shows it after the wordmark. */

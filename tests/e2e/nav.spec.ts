@@ -4,16 +4,15 @@ import { expectNoAxeViolations } from './axe'
 import { expect, gotoReady, test } from './fixtures'
 import { ROUTES } from './routes'
 
-// The navigation shell (front-end-site ticket 04): the header's five sections, the panels a
-// computer opens from two of them, the Drawer a phone opens from Menu, and the footer.
+// The navigation shell (front-end-site ticket 04): the header's sections and Search, the panels
+// a computer opens from two of them, the Drawer a phone opens from Menu, and the footer.
 
-/** From 72rem (1152 px) the five sections fit on one line; below it the Menu takes over. */
+/** From 72rem (1152 px) the sections and Search fit on one line; below it the Menu takes over. */
 const WIDE = 1152
 
 const SECTIONS = [
   { name: 'Concepts', path: '/concepts/' },
   { name: 'Traditional texts', path: '/texts/' },
-  { name: 'Questionnaires', path: '/questionnaires/' },
   { name: 'Library', path: '/library/' },
   { name: 'Search', path: '/search/' },
 ] as const
@@ -87,7 +86,7 @@ const settled = (page: Page) =>
 test.describe('without JavaScript', () => {
   test.use({ javaScriptEnabled: false })
 
-  test('the header shows the logo, then the five sections in order, or the Menu', async ({
+  test('the header shows the logo, then the sections and Search in order, or the Menu', async ({
     page,
   }) => {
     await page.goto('/concepts/vikshepa/')
@@ -109,6 +108,8 @@ test.describe('without JavaScript', () => {
       await expect(menu).toHaveAttribute('href', '#site-nav')
       expect(await pathOf(banner(page).getByRole('link', { name: 'Search' }))).toBe('/search/')
     }
+    // The header does not list Questionnaires; the footer keeps its link.
+    await expect(banner(page).locator('a[href$="/questionnaires/"]')).toHaveCount(0)
     // Panels need JavaScript, so their toggles don't show without it.
     await expect(banner(page).getByRole('button')).toHaveCount(0)
   })
@@ -172,6 +173,10 @@ test.describe('without JavaScript', () => {
     for (const { name, path } of SECTIONS) {
       expect(await pathOf(nav.getByRole('link', { name, exact: true }))).toBe(path)
     }
+    // The footer keeps Questionnaires as a plain link, though the header does not list it.
+    expect(await pathOf(nav.getByRole('link', { name: 'Questionnaires', exact: true }))).toBe(
+      '/questionnaires/',
+    )
     // "All concepts A–Z" would repeat "Concepts", so the footer leaves it out.
     await expect(nav.getByRole('link', { name: 'All concepts A–Z' })).toHaveCount(0)
     await expect(nav.getByRole('link', { name: 'About' })).toHaveCount(0)
@@ -202,7 +207,7 @@ test.describe('the section you are in', () => {
     { path: '/concepts/vikshepa/', current: { Concepts: 'true' } },
     { path: '/topics/mind/', current: { Concepts: 'true' } },
     { path: '/texts/yoga-sutra/', current: { 'Traditional texts': 'true' } },
-    { path: '/questionnaires/karmayoga-scale/', current: { Questionnaires: 'true' } },
+    { path: '/questionnaires/karmayoga-scale/', current: {} },
     { path: '/library/', current: { Library: 'page' } },
     { path: '/library/references/', current: { Library: 'true' } },
     { path: '/search/', current: { Search: 'page' } },
@@ -547,6 +552,8 @@ test.describe('the Drawer, on a phone', () => {
     expect(await pathOf(drawer(page).getByRole('link', { name: 'Search' }))).toBe('/search/')
     // The menu opens with Search, before the sections.
     expect(await pathOf(drawer(page).getByRole('link').first())).toBe('/search/')
+    // The phone menu does not list Questionnaires either.
+    await expect(drawer(page).locator('a[href$="/questionnaires/"]')).toHaveCount(0)
     // Under Concepts the five topics come first, then "All concepts A–Z" and the map.
     const conceptsList = nav.locator('ul', { hasText: 'All concepts A–Z' })
     const listed = await conceptsList.getByRole('link').all()

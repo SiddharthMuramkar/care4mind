@@ -74,11 +74,6 @@ async function build(): Promise<SiteNav> {
         within: [hrefFor({ page: 'texts' })],
       },
       {
-        id: 'questionnaires',
-        ...link('Questionnaires', hrefFor({ page: 'questionnaires' })),
-        within: [hrefFor({ page: 'questionnaires' })],
-      },
-      {
         id: 'library',
         ...link('Library', hrefFor({ page: 'library' })),
         within: [hrefFor({ page: 'library' })],
@@ -90,6 +85,7 @@ async function build(): Promise<SiteNav> {
       ...(has('concept-map') ? { map: link('Concept map', hrefFor({ page: 'concept-map' })) } : {}),
     },
     library: { index: link('Library', hrefFor({ page: 'library' })), pages: libraryPages },
+    questionnaires: link('Questionnaires', hrefFor({ page: 'questionnaires' })),
     search: link('Search', hrefFor({ page: 'search' })),
     ...(has('start') ? { start: link('Start here', hrefFor({ page: 'start' })) } : {}),
     ...(has('proposals') ? { proposals: link('Proposals', hrefFor({ page: 'proposals' })) } : {}),
