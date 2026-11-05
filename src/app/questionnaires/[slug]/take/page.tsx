@@ -88,7 +88,7 @@ export default async function TakeQuestionnairePage({
                   transitionTypes={turnForward}
                 >
                   <span lang={concept.lang}>{concept.name}</span>
-                  {concept.term && concept.english ? ` (${concept.english})` : null}
+                  {concept.gloss ? <> · {concept.gloss}</> : null}
                 </Link>
               </li>
             ))}

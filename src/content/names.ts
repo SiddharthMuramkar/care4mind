@@ -19,6 +19,19 @@ export function displayName(name: {
 }
 
 /**
+ * A Concept named in full, for plain text: its Sanskrit name, then its gloss
+ * ("Vikṣepa · Distraction"). A Concept with an English title is named by that
+ * title alone, and one with no gloss yet by its Sanskrit name alone.
+ */
+export function conceptName(name: {
+  term?: { iast: string; devanagari?: string; ascii?: readonly string[] }
+  english?: string
+}): string {
+  const leading = displayName(name)
+  return name.term && name.english ? `${leading} · ${name.english}` : leading
+}
+
+/**
  * Every plain-keyboard spelling of a term: its IAST with diacritics removed
  * (NFR-03's minimum), then the spellings stored with it, without repeats.
  */

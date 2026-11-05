@@ -40,6 +40,7 @@ function Later({ questionnaire }: { questionnaire: Card }) {
                 transitionTypes={turnForward}
               >
                 <span lang={concept.lang}>{concept.name}</span>
+                {concept.gloss ? <> · {concept.gloss}</> : null}
               </Link>
             </span>
           ))}

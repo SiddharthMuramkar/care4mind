@@ -44,11 +44,16 @@ function inWords(items: readonly ReactNode[]) {
   ))
 }
 
-/** A Concept's row in the plate: its name, and its Devanagari where a book has its page number. */
+/** A Concept's row in the plate: its name and gloss, and its Devanagari where a book has its page number. */
 const rowOf = (concept: Concept): PlateRow => ({
   key: concept.slug,
   href: hrefFor({ kind: 'concept', id: concept.slug }),
-  name: <span {...langOf(concept.lang)}>{concept.name}</span>,
+  name: (
+    <>
+      <span {...langOf(concept.lang)}>{concept.name}</span>
+      {concept.gloss ? <> · {concept.gloss}</> : null}
+    </>
+  ),
   ...(concept.term?.devanagari
     ? { trailing: concept.term.devanagari, trailingLang: 'sa-Deva' as const }
     : {}),
@@ -208,8 +213,9 @@ export default async function TopicPage({ params }: PageProps<'/topics/[slug]'>)
                         Quoted in{' '}
                         {inWords(
                           verse.quotedIn.map((record) => (
-                            <span key={`${record.kind}:${record.id}`} {...langOf(record.lang)}>
-                              {record.title}
+                            <span key={`${record.kind}:${record.id}`}>
+                              <span {...langOf(record.lang)}>{record.title}</span>
+                              {record.gloss ? <> · {record.gloss}</> : null}
                             </span>
                           )),
                         )}

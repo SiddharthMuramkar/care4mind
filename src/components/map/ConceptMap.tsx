@@ -21,6 +21,7 @@ function ConceptLink({ point }: { point: MapPoint | undefined }) {
       prefetch={false}
     >
       <span {...(point.lang ? { lang: point.lang } : {})}>{point.name}</span>
+      {point.gloss ? <> · {point.gloss}</> : null}
     </Link>
   )
 }

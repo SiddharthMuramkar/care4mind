@@ -8,7 +8,7 @@ import type { ContentGraph, RecordKey } from '../graph'
 import type { FixedPage, LatinScript, RouteEntry, RouteKind } from '../types'
 import { byName } from '../views/common'
 import { hrefFor } from '../views/href'
-import { displayName } from '../names'
+import { conceptName, displayName } from '../names'
 import { latinScript } from '../views/passage'
 import { canTake } from '../views/questionnaire'
 
@@ -17,6 +17,8 @@ export interface PageRoute {
   entry: RouteEntry
   record?: RecordKey
   lang?: LatinScript
+  /** A Concept title's gloss, kept apart so its crumb tags only the IAST. */
+  gloss?: string
 }
 
 /** A fixed page's route: its path is its pattern. Titles are the site map's own labels. */
@@ -38,10 +40,11 @@ export function pageRoutes(graph: ContentGraph, flags: Features): PageRoute[] {
       path: hrefFor({ kind: 'concept', id: concept.slug }),
       kind: 'concept',
       pattern: '/concepts/[slug]/',
-      title: displayName(concept.name),
+      title: conceptName(concept.name),
     },
     record: { kind: 'concept', id: concept.slug },
     ...(concept.name.term ? { lang: 'sa-Latn' as const } : {}),
+    ...(concept.name.term && concept.name.english ? { gloss: concept.name.english } : {}),
   }))
 
   const topics: PageRoute[] = [...graph.records('topic')]

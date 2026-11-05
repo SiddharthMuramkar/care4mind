@@ -33,7 +33,7 @@ describe('the search engine, on the real corpus', () => {
       kind: 'term',
       title: expect.stringMatching(/^Saṃśaya/),
       href: '/concepts/vikshepa/#samsaya',
-      parent: 'Vikṣepa',
+      parent: 'Vikṣepa · Distraction',
       matched: { field: 'names', variant: 'Sanshay' },
     })
   })

@@ -29,6 +29,7 @@ function CitedChip({ record, concept }: { record: RecordRef; concept?: CitingCon
       {...(concept ? { 'data-topic': concept.topic } : {})}
     >
       <span {...(record.lang ? { lang: record.lang } : {})}>{record.title}</span>
+      {record.gloss ? <> · {record.gloss}</> : null}
     </Link>
   )
   return concept ? <LinkPreview preview={concept.preview}>{link}</LinkPreview> : link
