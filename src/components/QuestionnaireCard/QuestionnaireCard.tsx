@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { ViewTransition } from 'react'
 
+import { FrameCorners } from '@/components/Folio'
 import { hrefFor, type QuestionnaireCard as Card } from '@/content'
 import { cx } from '@/lib/cx'
 
@@ -14,10 +15,18 @@ import { StatusBadge } from '../StatusBadge'
  * A Questionnaire in brief, with its status. Shares the Concept card's press style, and its
  * title morphs into the Questionnaire page's heading as the card is followed.
  */
-export function QuestionnaireCard({ questionnaire }: { questionnaire: Card }) {
+export function QuestionnaireCard({
+  questionnaire,
+  featured = false,
+}: {
+  questionnaire: Card
+  /** A featured card takes the printer's double frame; the rest keep a single thin rule. */
+  featured?: boolean
+}) {
   const { slug, title, status, shownStatus, summary } = questionnaire
   return (
-    <article className={cx(styles.card, own.card)} data-paper>
+    <article className={cx(styles.card, featured && styles.featured, own.card)} data-paper>
+      {featured ? <FrameCorners /> : null}
       <ViewTransition name={`questionnaire-title-${slug}`} share="morph" default="none">
         <h3 className={styles.title}>{title}</h3>
       </ViewTransition>

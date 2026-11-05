@@ -16,7 +16,7 @@ export default function ErrorPage({
 }) {
   return (
     <main id="main" className={reading.page}>
-      <Folio className={styles.folio}>
+      <Folio variant="page" className={styles.folio}>
         <p className={reading.kicker}>Error · Page not shown</p>
         <h1 className={styles.title}>This page couldn’t be set</h1>
         <p className={styles.text}>

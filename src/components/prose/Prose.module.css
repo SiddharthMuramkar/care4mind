@@ -196,15 +196,21 @@
 }
 
 /*
- * A verse card: the verse between rules, centred like a manuscript leaf, its source a chip that
- * leads to the passage, and "Copy verse" beneath.
+ * A verse card: the verse in the printer's double frame, centred like a manuscript leaf, its
+ * source a chip that leads to the passage, and "Copy verse" beneath. The frame's measures are
+ * the Folio's own, without its drop shadow: a leaf on the page, not lifted off it.
  */
 .verseCard {
+  position: relative;
   display: grid;
   justify-items: center;
   gap: 0.875rem;
-  padding: clamp(1.25rem, 4vw, 2rem) 0;
-  border-block: 1px solid var(--color-surface-rule);
+  padding: clamp(1.25rem, 4vw, 2rem) clamp(1rem, 4vw, 2rem);
+  box-shadow:
+    inset 0 0 0 10px var(--color-surface),
+    inset 0 0 0 11px color-mix(in srgb, var(--color-surface-ink) 60%, transparent),
+    inset 0 0 0 15px var(--color-surface),
+    inset 0 0 0 16px color-mix(in srgb, var(--color-surface-ink) 35%, transparent);
 }
 
 .verse {

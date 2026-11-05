@@ -85,6 +85,7 @@ export function ReadingPage({
         {beforeTrail}
         <Breadcrumbs path={path} />
         <Folio
+          variant="page"
           {...(titleId ? { as: 'article' as const, 'aria-labelledby': titleId } : {})}
           className={cx(styles.article, articleClassName)}
         >

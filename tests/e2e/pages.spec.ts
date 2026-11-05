@@ -142,6 +142,89 @@ test.describe('404 page', () => {
   })
 })
 
+// The double frame marks only the hero, verse cards and featured cards; a reading page is a
+// paper panel with one thin rule, and below 640 px no frame and 16 px side margins (@self-width).
+test.describe('the double frame', { tag: '@self-width' }, () => {
+  const folio = (page: import('@playwright/test').Page) => page.locator('main [data-paper]').first()
+
+  test('a reading page below 640 px has no frame and its text runs to 16 px', async ({ page }) => {
+    await page.setViewportSize({ width: 360, height: 800 })
+    await gotoReady(page, '/concepts/')
+    const panel = folio(page)
+    await expect(panel.locator('[data-corner]')).toHaveCount(0)
+    const box = await panel.evaluate((element) => {
+      const style = getComputedStyle(element)
+      const rect = element.getBoundingClientRect()
+      return {
+        shadow: style.boxShadow,
+        textLeft: rect.left + parseFloat(style.paddingLeft),
+        textRight: rect.right - parseFloat(style.paddingRight),
+      }
+    })
+    expect(box.shadow).toBe('none')
+    expect(box.textLeft).toBeGreaterThanOrEqual(16)
+    expect(box.textLeft).toBeLessThanOrEqual(17)
+    expect(360 - box.textRight).toBeGreaterThanOrEqual(16)
+    expect(360 - box.textRight).toBeLessThanOrEqual(17)
+  })
+
+  test('a reading page on a wide screen keeps one thin rule and no corners', async ({ page }) => {
+    await page.setViewportSize({ width: 768, height: 1024 })
+    await gotoReady(page, '/concepts/')
+    const panel = folio(page)
+    await expect(panel.locator('[data-corner]')).toHaveCount(0)
+    const shadow = await panel.evaluate((element) => getComputedStyle(element).boxShadow)
+    expect(shadow).not.toBe('none')
+    expect(shadow.match(/inset/g)).toHaveLength(1)
+  })
+
+  test('the 404 page below 640 px has no frame either', async ({ page }) => {
+    await page.setViewportSize({ width: 360, height: 800 })
+    await gotoReady(page, MISSING)
+    const panel = folio(page)
+    await expect(panel.locator('[data-corner]')).toHaveCount(0)
+    expect(await panel.evaluate((element) => getComputedStyle(element).boxShadow)).toBe('none')
+  })
+
+  test('the hero and the featured cards keep the frame', async ({ page }) => {
+    await page.setViewportSize({ width: 1440, height: 900 })
+    await gotoReady(page, '/')
+    const hero = page.getByRole('heading', { level: 1 }).locator('..')
+    await expect(hero.locator('[data-corner]')).toHaveCount(4)
+    const cards = page.locator('main ul li article[data-paper]')
+    expect(await cards.count()).toBeGreaterThan(0)
+    for (const card of await cards.all()) {
+      await expect.soft(card.locator('[data-corner]')).toHaveCount(4)
+    }
+  })
+
+  test('verse cards keep the frame, the reading panel around them does not', async ({ page }) => {
+    await page.setViewportSize({ width: 1440, height: 900 })
+    await gotoReady(page, '/concepts/karta/')
+    const verses = page.locator('main figure:has(blockquote)')
+    expect(await verses.count()).toBeGreaterThan(0)
+    const panel = folio(page)
+    // Every corner on the page belongs to a verse card: four each, none to the panel itself.
+    const verseCorners = await page
+      .locator('main [data-corner]')
+      .evaluateAll(
+        (corners) =>
+          corners.filter((corner) => corner.parentElement?.querySelector('figure, blockquote'))
+            .length,
+      )
+    expect(await page.locator('main [data-corner]').count()).toBe(verseCorners)
+    expect(verseCorners).toBeGreaterThan(0)
+    expect(verseCorners % 4).toBe(0)
+    await expect(panel).toBeVisible()
+  })
+
+  test('cards the homepage does not feature keep a single rule', async ({ page }) => {
+    await page.setViewportSize({ width: 1440, height: 900 })
+    await gotoReady(page, '/questionnaires/')
+    await expect(page.locator('main [data-corner]')).toHaveCount(0)
+  })
+})
+
 test('the skip link is the first thing keyboard focus reaches, and it works', async ({ page }) => {
   await gotoReady(page, '/concepts/vikshepa/')
   await page.keyboard.press('Tab')
