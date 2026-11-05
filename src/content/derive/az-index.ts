@@ -6,18 +6,9 @@
 import { stripDiacritics } from '@/lib/sanskrit'
 import { capitalise } from '@/lib/text'
 
-import type { ContentGraph } from '../graph'
-import type {
-  Block,
-  ConceptRecord,
-  GlossaryEntryRecord,
-  PassageQuote,
-  Slug,
-  TermBlock,
-  TopicRecord,
-} from '../schema'
+import { quotesInSections, quotesOf, termsInSections, type ContentGraph } from '../graph'
+import type { ConceptRecord, GlossaryEntryRecord, Slug, TermBlock, TopicRecord } from '../schema'
 import type { AzEntry, AzLetter } from '../types'
-import { conceptQuotes, termsIn } from '../views/blocks'
 import { byName, must, present } from '../views/common'
 import { hrefFor } from '../views/href'
 import { asciiSpellings, displayName } from '../names'
@@ -40,7 +31,7 @@ function spellings(name: string, candidates: readonly (string | undefined)[]): s
 
 /** The topics and works a Concept's entries are filtered by. */
 function facets(concept: ConceptRecord, graph: ContentGraph) {
-  const works = conceptQuotes(concept).map(({ passage }) => must(graph, 'passage', passage).work)
+  const works = quotesOf(concept).map(({ passage }) => must(graph, 'passage', passage).work)
   return {
     topics: [concept.topics.primary, ...(concept.topics.also ?? [])],
     works: [...new Set(works)],
@@ -67,29 +58,20 @@ function termEntry(
   }
 }
 
-/** The verses quoted anywhere in some blocks, a term's own blocks included. */
-function quotesIn(blocks: readonly Block[]): PassageQuote[] {
-  return blocks.flatMap((block) =>
-    block.kind === 'verse' ? [block.quote] : block.kind === 'term' ? quotesIn(block.blocks) : [],
-  )
-}
-
 /**
  * The terms a topic's introduction explains (the values topic's yama and niyama), at their
  * anchors on the topic's page, where the introduction is stored once.
  */
 function introEntries(topic: TopicRecord, graph: ContentGraph): AzEntry[] {
   const sections = topic.intro?.sections ?? []
-  const quoted = sections.flatMap((section) => quotesIn(section.blocks))
+  const quoted = quotesInSections(sections)
   const filters = {
     topics: [topic.slug],
     works: [...new Set(quoted.map(({ passage }) => must(graph, 'passage', passage).work))],
   }
-  return sections
-    .flatMap((section) => termsIn(section.blocks))
-    .map((block) =>
-      termEntry(block, hrefFor({ kind: 'topic', id: topic.slug, anchor: block.id }), filters),
-    )
+  return termsInSections(sections).map((block) =>
+    termEntry(block, hrefFor({ kind: 'topic', id: topic.slug, anchor: block.id }), filters),
+  )
 }
 
 function conceptEntries(
@@ -119,16 +101,10 @@ function conceptEntries(
     anchors: glossary.map((entry) => entry.slug),
     ...filters,
   }
-  const terms = concept.sections
-    .flatMap((section) => termsIn(section.blocks))
-    .map((block): AzEntry => ({
-      ...termEntry(
-        block,
-        hrefFor({ kind: 'concept', id: concept.slug, anchor: block.id }),
-        filters,
-      ),
-      concept: conceptRef(concept),
-    }))
+  const terms = termsInSections(concept.sections).map((block): AzEntry => ({
+    ...termEntry(block, hrefFor({ kind: 'concept', id: concept.slug, anchor: block.id }), filters),
+    concept: conceptRef(concept),
+  }))
   return [own, ...terms]
 }
 

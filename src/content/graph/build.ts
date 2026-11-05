@@ -11,15 +11,9 @@ import {
   type Slug,
 } from '../schema'
 import { localSource, type ContentSource } from '../source'
-import { citationsIn, textsIn, type Citation } from './citations'
-import {
-  DanglingIdError,
-  danglingLinks,
-  lookup,
-  quotesOf,
-  referencesOf,
-  type RecordKey,
-} from './links'
+import { citationsIn, type Citation } from './citations'
+import { DanglingIdError, danglingLinks, lookup, referencesOf, type RecordKey } from './links'
+import { quotesOf, textsIn } from './walk'
 import { relationsOf, type Relation } from './relations'
 
 /** A place a passage is quoted, with the translation the quote shows. */
@@ -40,6 +34,10 @@ export interface ContentGraph {
   conceptsInTopic(topic: Slug): { primary: readonly Slug[]; also: readonly Slug[] }
   /** The Concepts that quote any passage of a work. */
   conceptsQuotingWork(work: Slug): readonly Slug[]
+  /** The passages of a work, by id, in id order. */
+  passagesInWork(work: Slug): readonly string[]
+  /** The Questionnaires that list a Concept, by slug, in id order. */
+  questionnairesListing(concept: Slug): readonly Slug[]
   /** The in-text citations in a Concept, or in a topic's introduction, in reading order. */
   citations(kind: 'concept' | 'topic', id: string): readonly Citation[]
   /**
@@ -96,14 +94,24 @@ export async function buildGraph(source: ContentSource): Promise<ContentGraph> {
   const citedBy = new Map<string, RecordKey[]>()
   const quotedIn = new Map<string, Quotation[]>()
   const quotingWork = new Map<string, Slug[]>()
+  const passagesByWork = new Map<string, string[]>()
+  const questionnairesByConcept = new Map<string, Slug[]>()
   const inTopic = new Map<string, { primary: Slug[]; also: Slug[] }>()
   const citations = new Map<string, Citation[]>()
+  const conceptQuotes = new Map<Slug, ReturnType<typeof quotesOf>>()
+
+  for (const passage of recordsOf('passage')) add(passagesByWork, passage.work, passage.id)
+  for (const questionnaire of recordsOf('questionnaire'))
+    for (const concept of questionnaire.concepts)
+      add(questionnairesByConcept, concept, questionnaire.slug)
 
   for (const record of all) {
     for (const reference of new Set(referencesOf(record))) add(citedBy, reference, keyOf(record))
 
+    const quotes = quotesOf(record)
+    if (record.kind === 'concept') conceptQuotes.set(record.slug, quotes)
     const seen = new Set<string>()
-    for (const { passage, translation } of quotesOf(record)) {
+    for (const { passage, translation } of quotes) {
       if (seen.has(`${passage} ${translation}`)) continue
       seen.add(`${passage} ${translation}`)
       const by = keyOf(record)
@@ -123,7 +131,9 @@ export async function buildGraph(source: ContentSource): Promise<ContentGraph> {
 
   for (const concept of recordsOf('concept')) {
     const works = new Set(
-      quotesOf(concept).map(({ passage }) => lookup(index, 'passage', passage)?.work),
+      (conceptQuotes.get(concept.slug) ?? []).map(
+        ({ passage }) => lookup(index, 'passage', passage)?.work,
+      ),
     )
     for (const work of works) if (work !== undefined) add(quotingWork, work, concept.slug)
 
@@ -145,7 +155,7 @@ export async function buildGraph(source: ContentSource): Promise<ContentGraph> {
     citations.set(`topic/${topic.slug}`, citationsIn(textsIn(topic.intro.sections), own))
   }
 
-  const related = relationsOf(recordsOf('concept'), index, citedBy)
+  const related = relationsOf(recordsOf('concept'), index, citedBy, conceptQuotes)
 
   return {
     records: recordsOf,
@@ -154,6 +164,8 @@ export async function buildGraph(source: ContentSource): Promise<ContentGraph> {
     quotedIn: (passage) => quotedIn.get(passage) ?? [],
     conceptsInTopic: (topic) => inTopic.get(topic) ?? { primary: [], also: [] },
     conceptsQuotingWork: (work) => quotingWork.get(work) ?? [],
+    passagesInWork: (work) => passagesByWork.get(work) ?? [],
+    questionnairesListing: (concept) => questionnairesByConcept.get(concept) ?? [],
     citations: (kind, id) => citations.get(`${kind}/${id}`) ?? [],
     related: (concept) => related.get(concept) ?? [],
   }

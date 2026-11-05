@@ -6,4 +6,12 @@
 export { buildGraph, contentGraph, graphFor, type ContentGraph, type Quotation } from './build'
 export type { Citation } from './citations'
 export { DanglingIdError, type RecordKey } from './links'
+export {
+  firstTextIn,
+  introTopicsInSections,
+  quotesInSections,
+  quotesOf,
+  termsIn,
+  termsInSections,
+} from './walk'
 export type { Relation } from './relations'

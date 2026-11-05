@@ -12,6 +12,7 @@ import {
   type Section,
   type Target,
 } from '../schema'
+import { anchorsOf, walkBlocksAt } from './walk'
 
 /** A record named by its kind and id (ids are unique within a kind, not across kinds). */
 export interface RecordKey {
@@ -37,27 +38,6 @@ export class DanglingIdError extends Error {
   }
 }
 
-/** Every anchor a link may target inside a record: section, term, table and group ids. */
-function anchorsOf(record: ContentRecord): Set<string> {
-  const anchors = new Set<string>()
-  const addBlocks = (blocks: readonly Block[]) => {
-    for (const block of blocks) {
-      if (block.kind === 'term' || block.kind === 'table') anchors.add(block.id)
-      if (block.kind === 'term') addBlocks(block.blocks)
-    }
-  }
-  const addSections = (sections: readonly Section[]) => {
-    for (const section of sections) {
-      anchors.add(section.id)
-      addBlocks(section.blocks)
-    }
-  }
-  if (record.kind === 'concept' || record.kind === 'page') addSections(record.sections)
-  if (record.kind === 'topic' && record.intro) addSections(record.intro.sections)
-  if (record.kind === 'resource-list') for (const group of record.groups) anchors.add(group.id)
-  return anchors
-}
-
 /** Every link in a record that names a missing id, as one line each. */
 export function danglingLinks(record: ContentRecord, index: Index): string[] {
   const problems: string[] = []
@@ -73,18 +53,17 @@ export function danglingLinks(record: ContentRecord, index: Index): string[] {
         `${where(`${field}.translation`)}: no translation “${translation}” in passage “${passage}”`,
       )
   }
-  const blocks = (field: string, list: readonly Block[]) =>
-    list.forEach((block, i) => {
-      const at = `${field}[${i}]`
+  const blocks = (field: string, list: readonly Block[]) => {
+    for (const { block, at } of walkBlocksAt(list, field)) {
       if (block.kind === 'verse') quote(`${at}.quote`, block.quote)
-      if (block.kind === 'term') blocks(`${at}.blocks`, block.blocks)
       if (block.kind === 'topic-intro') {
         need(`${at}.topic`, 'topic', block.topic)
         const topic = lookup(index, 'topic', block.topic)
         if (topic && !topic.intro)
           problems.push(`${where(`${at}.topic`)}: topic “${block.topic}” has no introduction`)
       }
-    })
+    }
+  }
   const sections = (field: string, list: readonly Section[]) =>
     list.forEach((section, i) => blocks(`${field}[${i}].blocks`, section.blocks))
   const target = (field: string, to: Target) => {
@@ -171,22 +150,6 @@ export function danglingLinks(record: ContentRecord, index: Index): string[] {
       break
   }
   return problems
-}
-
-/** Every quote in a list of blocks, term blocks included, in reading order. */
-function quotesIn(list: readonly Block[]): PassageQuote[] {
-  return list.flatMap((block) =>
-    block.kind === 'verse' ? [block.quote] : block.kind === 'term' ? quotesIn(block.blocks) : [],
-  )
-}
-
-/** The passages a record quotes, in reading order. */
-export function quotesOf(record: ContentRecord): PassageQuote[] {
-  const inSections = (sections: readonly Section[]) => sections.flatMap((s) => quotesIn(s.blocks))
-  if (record.kind === 'concept') return [...record.verses, ...inSections(record.sections)]
-  if (record.kind === 'topic') return inSections(record.intro?.sections ?? [])
-  if (record.kind === 'page') return inSections(record.sections)
-  return []
 }
 
 /** The References a record cites, in its own order. */

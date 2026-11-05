@@ -5,10 +5,9 @@
  */
 import { capitalise } from '@/lib/text'
 
-import type { ContentGraph } from '../graph'
-import type { Block, ConceptRecord, PassageRecord, SanskritName, WorkRecord } from '../schema'
+import { firstTextIn, quotesOf, termsInSections, type ContentGraph } from '../graph'
+import type { ConceptRecord, PassageRecord, SanskritName, WorkRecord } from '../schema'
 import type { SearchDocument } from '../types'
-import { conceptQuotes, termsIn } from '../views/blocks'
 import { must } from '../views/common'
 import { hrefFor } from '../views/href'
 import { latinScript } from '../views/passage'
@@ -59,23 +58,10 @@ function locatorForms(passage: PassageRecord, work: WorkRecord): string[] {
   ])
 }
 
-/** The first running text in a list of blocks: a paragraph, or a list's first item. */
-function firstText(blocks: readonly Block[]): string | undefined {
-  for (const block of blocks) {
-    if (block.kind === 'paragraph') return block.text
-    if (block.kind === 'list' && block.items[0] !== undefined) return block.items[0]
-    if (block.kind === 'term') {
-      const inner = firstText(block.blocks)
-      if (inner !== undefined) return inner
-    }
-  }
-  return undefined
-}
-
 function conceptDocuments(concept: ConceptRecord, graph: ContentGraph): SearchDocument[] {
   const title = displayName(concept.name)
   const { term, english } = concept.name
-  const passages = unique(conceptQuotes(concept).map((quote) => quote.passage)).map((id) =>
+  const passages = unique(quotesOf(concept).map((quote) => quote.passage)).map((id) =>
     must(graph, 'passage', id),
   )
   const works = unique(passages.map((passage) => passage.work)).map((slug) =>
@@ -106,21 +92,19 @@ function conceptDocuments(concept: ConceptRecord, graph: ContentGraph): SearchDo
     excerpt: excerpt(concept.summary),
   }
 
-  const terms = concept.sections
-    .flatMap((section) => termsIn(section.blocks))
-    .map((block): SearchDocument => ({
-      id: `term:${concept.slug}#${block.id}`,
-      kind: 'term',
-      title: displayName(block),
-      ...(block.gloss ? { gloss: block.gloss } : {}),
-      lang: 'sa-Latn',
-      href: hrefFor({ kind: 'concept', id: concept.slug, anchor: block.id }),
-      parent: conceptName(concept.name),
-      names: spellingsOf(block.term),
-      keywords: unique([block.gloss]),
-      people: [],
-      excerpt: excerpt(firstText(block.blocks)),
-    }))
+  const terms = termsInSections(concept.sections).map((block): SearchDocument => ({
+    id: `term:${concept.slug}#${block.id}`,
+    kind: 'term',
+    title: displayName(block),
+    ...(block.gloss ? { gloss: block.gloss } : {}),
+    lang: 'sa-Latn',
+    href: hrefFor({ kind: 'concept', id: concept.slug, anchor: block.id }),
+    parent: conceptName(concept.name),
+    names: spellingsOf(block.term),
+    keywords: unique([block.gloss]),
+    people: [],
+    excerpt: excerpt(firstTextIn(block.blocks)),
+  }))
   return [own, ...terms]
 }
 
@@ -242,21 +226,19 @@ function documentsOf(graph: ContentGraph): SearchDocument[] {
   })
 
   const topicTerms = graph.records('topic').flatMap((topic) =>
-    (topic.intro?.sections ?? [])
-      .flatMap((section) => termsIn(section.blocks))
-      .map((block): SearchDocument => ({
-        id: `term:topic/${topic.slug}#${block.id}`,
-        kind: 'term',
-        title: displayName(block),
-        ...(block.gloss ? { gloss: block.gloss } : {}),
-        lang: 'sa-Latn',
-        href: hrefFor({ kind: 'topic', id: topic.slug, anchor: block.id }),
-        parent: topic.name.english,
-        names: spellingsOf(block.term),
-        keywords: unique([block.gloss]),
-        people: [],
-        excerpt: excerpt(firstText(block.blocks)),
-      })),
+    termsInSections(topic.intro?.sections ?? []).map((block): SearchDocument => ({
+      id: `term:topic/${topic.slug}#${block.id}`,
+      kind: 'term',
+      title: displayName(block),
+      ...(block.gloss ? { gloss: block.gloss } : {}),
+      lang: 'sa-Latn',
+      href: hrefFor({ kind: 'topic', id: topic.slug, anchor: block.id }),
+      parent: topic.name.english,
+      names: spellingsOf(block.term),
+      keywords: unique([block.gloss]),
+      people: [],
+      excerpt: excerpt(firstTextIn(block.blocks)),
+    })),
   )
 
   const topics = graph.records('topic').map((topic): SearchDocument => ({
@@ -268,7 +250,7 @@ function documentsOf(graph: ContentGraph): SearchDocument[] {
     keywords: [],
     people: [],
     excerpt: excerpt(
-      topic.intro?.sections.map((section) => firstText(section.blocks)).find(Boolean),
+      topic.intro?.sections.map((section) => firstTextIn(section.blocks)).find(Boolean),
     ),
   }))
 

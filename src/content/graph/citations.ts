@@ -4,7 +4,7 @@
  */
 import { stripDiacritics } from '@/lib/sanskrit'
 
-import type { Block, Inline, ReferenceRecord, Section } from '../schema'
+import type { Inline, ReferenceRecord } from '../schema'
 
 /** An in-text citation, "(Tomar, 2024)", and the Reference it resolves to, if exactly one fits. */
 export interface Citation {
@@ -12,34 +12,6 @@ export interface Citation {
   text: string
   /** One of the citing record's own References. */
   reference?: string
-}
-
-/** The running text of a list of sections, in reading order, where citations can appear. */
-export function textsIn(sections: readonly Section[]): Inline[] {
-  const fromBlocks = (blocks: readonly Block[]): Inline[] =>
-    blocks.flatMap((block) => {
-      switch (block.kind) {
-        case 'paragraph':
-          return [block.text]
-        case 'list':
-          return [...block.items]
-        case 'term':
-          return fromBlocks(block.blocks)
-        case 'table':
-          return [
-            block.caption,
-            ...block.rows.flatMap((row) => [
-              ...(typeof row.head === 'string' ? [row.head] : []),
-              ...row.cells,
-            ]),
-          ]
-        case 'verse':
-          return block.quote.meaning === undefined ? [] : [block.quote.meaning]
-        case 'topic-intro':
-          return []
-      }
-    })
-  return sections.flatMap((section) => [section.heading, ...fromBlocks(section.blocks)])
 }
 
 /** For matching: no diacritics, lower case, one kind of dash, single spaces. */

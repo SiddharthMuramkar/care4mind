@@ -1,7 +1,7 @@
 import type { Features } from '@/config/features'
 
-import type { ContentGraph, Relation } from '../graph'
-import type { Block, ConceptRecord, Slug } from '../schema'
+import { introTopicsInSections, quotesOf, type ContentGraph, type Relation } from '../graph'
+import type { ConceptRecord, Slug } from '../schema'
 import {
   RELATION_STRENGTH,
   type BlockView,
@@ -13,7 +13,7 @@ import {
   type SectionView,
   type VerseView,
 } from '../types'
-import { conceptQuotes, glanceOf, sectionViews, tocOf, topicRef, type Owner } from './blocks'
+import { glanceOf, sectionViews, tocOf, topicRef, type Owner } from './blocks'
 import { byName, carriedOver, must, nameCopy, present } from './common'
 import { hrefFor } from './href'
 import { asciiSpellings, displayName, passageLabel } from '../names'
@@ -94,7 +94,7 @@ function relatedConcepts(record: ConceptRecord, graph: ContentGraph): RelatedCon
 /** The works a Concept quotes, in the order it first quotes each, with their passages in order. */
 function linkedWorks(record: ConceptRecord, graph: ContentGraph): LinkedWork[] {
   const quoted = new Map<Slug, Set<string>>()
-  for (const { passage } of conceptQuotes(record)) {
+  for (const { passage } of quotesOf(record)) {
     const work = must(graph, 'passage', passage).work
     const passages = quoted.get(work) ?? new Set<string>()
     quoted.set(work, passages.add(passage))
@@ -123,10 +123,7 @@ function linkedQuestionnaires(
   flags: Features,
 ): QuestionnaireCard[] {
   const own = record.questionnaire === undefined ? [] : [record.questionnaire]
-  const listing = graph
-    .records('questionnaire')
-    .filter((questionnaire) => questionnaire.concepts.includes(record.slug))
-    .map((questionnaire) => questionnaire.slug)
+  const listing = graph.questionnairesListing(record.slug)
   return [...new Set([...own, ...listing])].map((slug) =>
     questionnaireCard(must(graph, 'questionnaire', slug), graph, flags),
   )
@@ -144,20 +141,9 @@ function neighbours(record: ConceptRecord, graph: ContentGraph) {
   return present({ previous: card(inTopic[at - 1]), next: card(inTopic[at + 1]) })
 }
 
-/** The topics whose shared introduction a list of blocks shows. */
-function introTopicsIn(blocks: readonly Block[]): string[] {
-  return blocks.flatMap((block) =>
-    block.kind === 'topic-intro'
-      ? [block.topic]
-      : block.kind === 'term'
-        ? introTopicsIn(block.blocks)
-        : [],
-  )
-}
-
 /** The in-text citations on a Concept's page: its own, then those of any introduction it shows. */
 function citationsOnPage(record: ConceptRecord, graph: ContentGraph) {
-  const topics = record.sections.flatMap((section) => introTopicsIn(section.blocks))
+  const topics = introTopicsInSections(record.sections)
   return [
     ...graph.citations('concept', record.slug),
     ...topics.flatMap((topic) => graph.citations('topic', topic)),
