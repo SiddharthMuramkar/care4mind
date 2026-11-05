@@ -4,6 +4,7 @@ import { beforeAll, describe, expect, it } from 'vitest'
 
 import { concepts, site, type SearchDocument } from '@/content'
 import { buildIndex, query, type SearchHit, type SearchIndex } from '@/lib/search/engine'
+import { resultGroups } from '@/lib/search/search'
 import { search } from '@/lib/search/server'
 
 let index: SearchIndex
@@ -139,6 +140,16 @@ describe('the search engine, on the real corpus', () => {
       variant: 'YS 1.30',
     })
   })
+
+  it('carries each result’s language: Pali for the Dhammapada, Sanskrit for Vikṣepa', () => {
+    expect(hit('Dhammapada', 'work:dhammapada')).toMatchObject({
+      title: 'Dhammapada',
+      lang: 'pi-Latn',
+    })
+    expect(hit('Dhammapada 160', 'passage:dhammapada/160')?.lang).toBe('pi-Latn')
+    expect(hit('vikshepa', 'concept:vikshepa')?.lang).toBe('sa-Latn')
+    expect(hit('Tomar', 'reference:tomar-2024')).not.toHaveProperty('lang')
+  })
 })
 
 describe('the matching order', () => {
@@ -207,5 +218,121 @@ describe('search(), as the results page calls it', () => {
 
   it.each(['anger', 'calm', 'meditation'])('finds at least one Concept for “%s”', async (q) => {
     expect((await conceptsFound(q)).length).toBeGreaterThan(0)
+  })
+})
+
+describe('the result groups', () => {
+  const hitOf = (kind: SearchHit['kind'], n: number): SearchHit => ({
+    id: `${kind}:${n}`,
+    kind,
+    title: `${kind} ${n}`,
+    href: `/${kind}/${n}/`,
+    matched: { field: 'title', variant: `${kind} ${n}` },
+    score: 0,
+  })
+
+  it('orders groups by their first hit, not by a fixed order of kinds', () => {
+    const groups = resultGroups([
+      hitOf('reference', 1),
+      hitOf('concept', 1),
+      hitOf('reference', 2),
+      hitOf('work', 1),
+    ])
+    expect(groups.map(({ kind, heading, total }) => ({ kind, heading, total }))).toEqual([
+      { kind: 'reference', heading: 'References', total: 2 },
+      { kind: 'concept', heading: 'Concepts', total: 1 },
+      { kind: 'work', heading: 'Traditional texts', total: 1 },
+    ])
+    expect(groups[0]?.results.map(({ id }) => id)).toEqual(['reference:1', 'reference:2'])
+  })
+
+  it('heads each kind as the results page has', () => {
+    const kinds = [
+      'concept',
+      'term',
+      'topic',
+      'glossary',
+      'work',
+      'passage',
+      'questionnaire',
+      'reference',
+      'library-item',
+      'page',
+    ] as const
+    expect(
+      resultGroups(kinds.map((kind, n) => hitOf(kind, n))).map(({ heading }) => heading),
+    ).toEqual([
+      'Concepts',
+      'Terms inside Concepts',
+      'Topics',
+      'Glossary',
+      'Traditional texts',
+      'Verses',
+      'Questionnaires',
+      'References',
+      'In the Library',
+      'Pages',
+    ])
+  })
+
+  it('shows at most 25 of a kind and counts the rest in its total', () => {
+    const hits = Array.from({ length: 30 }, (_, n) => hitOf('passage', n))
+    const [group] = resultGroups(hits)
+    expect(group).toMatchObject({ kind: 'passage', heading: 'Verses', total: 30 })
+    expect(group?.results).toHaveLength(25)
+    expect(group?.results.map(({ id }) => id)).toEqual(hits.slice(0, 25).map(({ id }) => id))
+  })
+
+  it('drops kinds with nothing found, and groups nothing from nothing', () => {
+    expect(resultGroups([])).toEqual([])
+    expect(resultGroups([hitOf('topic', 1)]).map(({ kind }) => kind)).toEqual(['topic'])
+  })
+})
+
+describe('the language a hit carries', () => {
+  it('passes a document’s language through the packed index to its hit', () => {
+    const documents: SearchDocument[] = [
+      {
+        id: 'work:pali-verses',
+        kind: 'work',
+        title: 'Pali Verses',
+        lang: 'pi-Latn',
+        href: '/texts/pali-verses/',
+        names: ['Pali Verses'],
+        keywords: [],
+        people: [],
+        excerpt: '',
+      },
+      {
+        id: 'concept:calm-term',
+        kind: 'concept',
+        title: 'Upekkha Term',
+        lang: 'sa-Latn',
+        href: '/concepts/calm-term/',
+        names: ['Upekkha Term'],
+        keywords: [],
+        people: [],
+        excerpt: '',
+      },
+      {
+        id: 'page:plain-guide',
+        kind: 'page',
+        title: 'Plain Guide',
+        href: '/library/plain-guide/',
+        names: [],
+        keywords: [],
+        people: [],
+        excerpt: '',
+      },
+    ]
+    // Through JSON, as the packed index travels.
+    const packed = JSON.parse(JSON.stringify(buildIndex(documents))) as SearchIndex
+    expect(query(packed, 'Pali')[0]).toMatchObject({ id: 'work:pali-verses', lang: 'pi-Latn' })
+    expect(query(packed, 'Upekkha')[0]).toMatchObject({
+      id: 'concept:calm-term',
+      lang: 'sa-Latn',
+    })
+    expect(query(packed, 'Plain')[0]).toMatchObject({ id: 'page:plain-guide' })
+    expect(query(packed, 'Plain')[0]).not.toHaveProperty('lang')
   })
 })
