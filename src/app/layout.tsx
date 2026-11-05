@@ -42,8 +42,6 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       // Smooth scrolling is for in-page links: with this, Next.js jumps on page changes.
       data-scroll-behavior="smooth"
       className={playfairText.variable}
-      // The head scripts mark <html> with the reader's choices before React hydrates.
-      suppressHydrationWarning
     >
       <head />
       <body>
