@@ -6,8 +6,6 @@
 /* What a page holds, counted: "5 Concepts · 12 verses". */
 .facts {
   margin: 0;
-  font-variant-caps: all-small-caps;
-  letter-spacing: 0.1em;
   font-size: 1.0625rem;
   color: var(--color-surface-muted);
 }
@@ -55,8 +53,6 @@
 }
 
 .meta {
-  font-variant-caps: all-small-caps;
-  letter-spacing: 0.08em;
   font-size: 1.0625rem;
   color: var(--color-surface-muted);
 }
@@ -64,6 +60,10 @@
 .note {
   color: var(--color-surface-muted);
   font-style: italic;
+}
+
+.note a {
+  font-style: normal;
 }
 
 /* A group of entries under its own heading: Questionnaires by topic, results by kind. */

@@ -13,8 +13,6 @@
 
 .label {
   grid-area: label;
-  font-variant-caps: all-small-caps;
-  letter-spacing: 0.1em;
   font-size: 1.0625rem;
   color: var(--color-surface-muted);
 }
@@ -37,23 +35,10 @@
   outline-offset: 2px;
 }
 
+/* Its place in the form; its look is the one primary button. */
 .button {
   grid-area: button;
-  min-height: 48px;
-  padding: 0 1.25rem;
-  border: none;
-  border-radius: 2px;
-  background: var(--color-ground);
-  color: var(--color-ink);
-  font: inherit;
-  font-variant-caps: all-small-caps;
-  letter-spacing: 0.12em;
-  font-size: 1.1875rem;
-  box-shadow: 0 3px 0 var(--color-surface-ink);
+  justify-content: center;
+  border: 0;
   cursor: pointer;
-}
-
-.button:active {
-  transform: translateY(2px);
-  box-shadow: 0 1px 0 var(--color-surface-ink);
 }

@@ -5,6 +5,7 @@
   grid-template-areas:
     'title deva'
     'gloss gloss'
+    'topic topic'
     'summary summary'
     'action action';
   align-items: baseline;
@@ -51,9 +52,12 @@
   grid-area: gloss;
   margin: 0;
   color: var(--color-surface-muted);
-  font-variant-caps: all-small-caps;
-  letter-spacing: 0.08em;
   font-size: 1.125rem;
+}
+
+.topic {
+  grid-area: topic;
+  justify-self: start;
 }
 
 .summary {
@@ -71,17 +75,10 @@
   display: inline-flex;
   align-items: center;
   min-height: 48px;
-  padding: 0 1.25rem;
-  background: var(--color-accent);
-  color: var(--color-accent-ink);
+  color: var(--color-link);
   font-weight: 600;
-  text-decoration: none;
-  border-radius: 2px;
-  box-shadow: 0 3px 0 var(--color-accent-shadow);
-}
-
-.action :is(a, button):active {
-  box-shadow: 0 1px 0 var(--color-accent-shadow);
+  text-decoration-line: underline;
+  text-underline-offset: 0.18em;
 }
 
 /* The action covers the whole card, so the card is one large target (WCAG 2.5.8). */
@@ -109,6 +106,7 @@
       'title'
       'deva'
       'gloss'
+      'topic'
       'summary'
       'action';
     padding: 1.5rem;

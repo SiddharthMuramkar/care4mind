@@ -1,0 +1,26 @@
+/* Ink on the paper, its mark alone in the topic's hue: the hue is a drawing, never text. */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  width: fit-content;
+  max-width: 100%;
+  padding: 0.2rem 0.8rem;
+  border: 1px solid var(--color-surface-rule);
+  border-radius: 999px;
+  background: var(--color-surface);
+  color: var(--color-surface-ink);
+  font-size: 1rem;
+  line-height: 1.35;
+  text-decoration: none;
+  overflow-wrap: anywhere;
+}
+
+.chip::before {
+  content: '';
+  flex: none;
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background: var(--topic, var(--color-highlight));
+}

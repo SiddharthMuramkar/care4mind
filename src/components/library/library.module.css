@@ -3,8 +3,6 @@
 .facts {
   margin: 0;
   max-width: 44ch;
-  font-variant-caps: all-small-caps;
-  letter-spacing: 0.1em;
   font-size: 1.0625rem;
   color: var(--color-surface-muted);
   text-wrap: balance;
@@ -12,8 +10,6 @@
 
 /* "archive.org, another site ↗": the words that say the link leaves, a size down. */
 .awayNote {
-  font-variant-caps: all-small-caps;
-  letter-spacing: 0.06em;
   white-space: nowrap;
 }
 

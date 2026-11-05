@@ -315,7 +315,7 @@ function overlap(
 }
 
 test.describe('Concept page v2: heading and blocks', () => {
-  test('leads with the capitalised IAST, the Devanagari beneath it and the gloss in small capitals', async ({
+  test('leads with the capitalised IAST, the Devanagari beneath it and the gloss in sentence case', async ({
     page,
   }) => {
     await gotoReady(page, '/concepts/vikshepa/')
@@ -326,7 +326,7 @@ test.describe('Concept page v2: heading and blocks', () => {
     const [above, below] = [await iast.boundingBox(), await deva.boundingBox()]
     expect(below?.y ?? 0).toBeGreaterThan(above?.y ?? 0)
     const gloss = page.locator('header p', { hasText: 'Distraction' })
-    await expect(gloss).toHaveCSS('font-variant-caps', 'all-small-caps')
+    await expect(gloss).toHaveCSS('font-variant-caps', 'normal')
   })
 
   test('a Concept with an English title leads with it', async ({ page }) => {

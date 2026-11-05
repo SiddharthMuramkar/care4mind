@@ -1,5 +1,5 @@
 /*
- * Courses as cards printed on the page: a ruled frame, the provider in small capitals over the
+ * Courses as cards printed on the page: a ruled frame, the provider set over the
  * course's name, its description, and its link, which covers the card. A card lifts under the
  * pointer and presses into the paper as it is followed.
  */
@@ -67,8 +67,6 @@
 }
 
 .provider {
-  font-variant-caps: all-small-caps;
-  letter-spacing: 0.1em;
   font-size: 1rem;
   line-height: 1.35;
   color: var(--color-surface-muted);

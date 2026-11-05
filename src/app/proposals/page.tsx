@@ -12,6 +12,8 @@ import { hrefFor, site, topics } from '@/content'
 import { toDevanagariDigits } from '@/lib/text'
 import { metadataFor } from '@/lib/metadata'
 
+import cta from '@/components/Cta'
+
 import listing from '../listing.module.css'
 import reading from '../reading.module.css'
 import styles from './page.module.css'
@@ -50,7 +52,7 @@ async function TryIt({ proposal }: { proposal: Proposal }) {
           <Link
             href={hrefFor({ page: 'concept-map' })}
             transitionTypes={turnForward}
-            className={styles.open}
+            className={cta.primary}
             data-ink
           >
             Open the Concept map
@@ -94,8 +96,9 @@ export default function ProposalsPage() {
           <li key={proposal.key}>
             <article className={styles.entry} aria-labelledby={`${proposal.key}-title`}>
               <header className={styles.head}>
-                <span className={styles.numeral} lang="sa-Deva" aria-hidden>
-                  {toDevanagariDigits(String(index + 1))}
+                <span className={styles.numeral} aria-hidden>
+                  <span>{index + 1}</span>{' '}
+                  <span lang="sa-Deva">{toDevanagariDigits(String(index + 1))}</span>
                 </span>
                 <h2 id={`${proposal.key}-title`} className={styles.name}>
                   {proposal.name}

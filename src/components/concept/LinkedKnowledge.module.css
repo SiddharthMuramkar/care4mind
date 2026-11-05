@@ -38,15 +38,12 @@
   gap: 0.5rem;
   font-family: var(--font-text);
   font-weight: 600;
-  font-variant-caps: all-small-caps;
-  letter-spacing: 0.14em;
   font-size: 1.125rem;
   color: var(--color-surface-muted);
 }
 
 .count {
   font-weight: 400;
-  letter-spacing: 0;
   font-variant-numeric: oldstyle-nums;
 }
 

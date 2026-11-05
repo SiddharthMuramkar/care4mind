@@ -47,7 +47,8 @@ export function Contents({ entries }: { entries: readonly ContentsEntry[] }) {
               style={{ '--timeline': `--section-${entry.id}` } as CSSProperties}
             >
               <span className={styles.numeral} aria-hidden>
-                {toDevanagariDigits(String(index + 1))}
+                <span>{index + 1}</span>{' '}
+                <span lang="sa-Deva">{toDevanagariDigits(String(index + 1))}</span>
               </span>
               <span>
                 {entry.role ? <span className={styles.role}>{ROLES[entry.role]}: </span> : null}
