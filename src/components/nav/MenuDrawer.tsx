@@ -55,7 +55,7 @@ export function MenuDrawer({
       <Drawer.Portal>
         <Drawer.Backdrop className={styles.backdrop} />
         <Drawer.Viewport className={styles.viewport}>
-          <Drawer.Popup className={styles.sheet} finalFocus={focusOnClose}>
+          <Drawer.Popup className={styles.sheet} data-paper finalFocus={focusOnClose}>
             {/* A link click closes the Drawer; a mouse drag selects text here instead of swiping the sheet. */}
             <Drawer.Content className={styles.body} onClick={closeOnLink}>
               <div className={styles.head}>
@@ -73,7 +73,7 @@ export function MenuDrawer({
                 </div>
               ) : null}
 
-              <nav aria-label="Main" className={styles.contents}>
+              <nav aria-label="Main">
                 {nav.start ? (
                   <Link
                     href={nav.start.href}

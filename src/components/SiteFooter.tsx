@@ -26,7 +26,7 @@ export async function SiteFooter() {
           <Logo />
           <p className={styles.tagline}>{tagline}</p>
         </div>
-        <nav id="site-nav" aria-label="All sections" className={styles.index}>
+        <nav id="site-nav" aria-label="All sections">
           <ul className={styles.groups}>
             {concepts ? (
               <li className={styles.group}>
