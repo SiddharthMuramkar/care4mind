@@ -5,12 +5,13 @@ import { must, present } from './common'
 import { hrefFor } from './href'
 import { displayName } from '../names'
 
-/** A link to a Concept's page, with its name's language where the name is IAST. */
+/** A link to a Concept's page, with its name's language where the name is IAST, and its gloss. */
 export function conceptRef(concept: ConceptRecord): ConceptRef {
   return {
     slug: concept.slug,
     name: displayName(concept.name),
     ...(concept.name.term ? { lang: 'sa-Latn' as const } : {}),
+    ...(concept.name.term && concept.name.english ? { gloss: concept.name.english } : {}),
     href: hrefFor({ kind: 'concept', id: concept.slug }),
   }
 }
@@ -24,8 +25,8 @@ export function questionnaireHref(questionnaire: QuestionnaireRecord): string {
 export function recordRef({ kind, id }: RecordKey, graph: ContentGraph): RecordRef {
   switch (kind) {
     case 'concept': {
-      const { name, lang, href } = conceptRef(must(graph, 'concept', id))
-      return { kind, id, title: name, ...present({ lang }), href }
+      const { name, lang, gloss, href } = conceptRef(must(graph, 'concept', id))
+      return { kind, id, title: name, ...present({ lang, gloss }), href }
     }
     case 'topic':
       return {

@@ -57,8 +57,14 @@
   line-height: 1.25;
 }
 
-.name[lang] {
+.name [lang] {
   font-style: italic;
+}
+
+/* Its gloss, plain at reading size after the name. */
+.gloss {
+  font-family: var(--font-text);
+  font-size: 1.0625rem;
 }
 
 @media (prefers-reduced-motion: no-preference) {

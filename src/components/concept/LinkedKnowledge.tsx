@@ -74,12 +74,9 @@ export function LinkedKnowledge({
               <li key={other.slug} className={styles.row}>
                 <LinkPreview preview={conceptPreview(other)}>
                   {/* The Concept's path, made by hrefFor() in the content module. */}
-                  <Link
-                    href={other.href as Route}
-                    transitionTypes={turnForward}
-                    {...(other.lang ? { lang: other.lang } : {})}
-                  >
-                    {other.name}
+                  <Link href={other.href as Route} transitionTypes={turnForward}>
+                    <span {...(other.lang ? { lang: other.lang } : {})}>{other.name}</span>
+                    {other.gloss ? <> · {other.gloss}</> : null}
                   </Link>
                 </LinkPreview>
                 <span className={styles.meta}>

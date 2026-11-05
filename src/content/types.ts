@@ -57,6 +57,8 @@ export interface ConceptRef {
   slug: Slug
   name: string
   lang?: 'sa-Latn'
+  /** Its English gloss, where its name is Sanskrit and its page gives one. */
+  gloss?: string
   href: string
 }
 
@@ -81,6 +83,8 @@ export interface RecordRef {
   id: string
   title: string
   lang?: 'sa-Latn'
+  /** A Concept's English gloss, where its title is Sanskrit and its page gives one. */
+  gloss?: string
   href: string
 }
 
@@ -543,7 +547,7 @@ export interface RouteEntry {
   kind: RouteKind
   /** Its page file's route pattern: `/concepts/[slug]/`. */
   pattern: string
-  /** The page's name, as the last crumb of its trail shows it. */
+  /** The page's full name in plain text (a Concept's is `conceptName`), as its title and trail show it. */
   title: string
   /** The record this page shows, when it shows one. */
   record?: { kind: ContentKind; id: string }
@@ -559,6 +563,8 @@ export interface Crumb {
   href: string
   /** Set when the label is a transliteration (a Concept's IAST name, a work's title). */
   lang?: LatinScript
+  /** A Concept label's English gloss, shown plain after it. */
+  gloss?: string
 }
 
 /** One entry of the Concepts A–Z: a Concept, a term inside one, or a glossary entry. */

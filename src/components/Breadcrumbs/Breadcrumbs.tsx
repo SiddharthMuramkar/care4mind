@@ -7,8 +7,17 @@ import { site, type Crumb } from '@/content'
 import styles from './Breadcrumbs.module.css'
 import { turnBack } from '../PageTurn'
 
-/** A transliterated crumb's language tag; none for an English one. */
-const langOf = (crumb: Crumb) => (crumb.lang ? { lang: crumb.lang } : {})
+/** A crumb's words: its label in its own language where it has one, its gloss plain after it. */
+function Words({ crumb }: { crumb: Crumb }) {
+  if (!crumb.gloss) return crumb.lang ? <span lang={crumb.lang}>{crumb.label}</span> : crumb.label
+  return (
+    <>
+      <span {...(crumb.lang ? { lang: crumb.lang } : {})}>{crumb.label}</span>
+      {' · '}
+      {crumb.gloss}
+    </>
+  )
+}
 
 /**
  * FR-01: every page below the homepage shows where it sits. The
@@ -27,14 +36,14 @@ export async function Breadcrumbs({ path }: { path: string }) {
         {trail.slice(0, -1).map((crumb) => (
           <li key={crumb.href}>
             {/* The registry's paths are made by hrefFor(). */}
-            <Link href={crumb.href as Route} {...langOf(crumb)} transitionTypes={turnBack}>
-              {crumb.label}
+            <Link href={crumb.href as Route} transitionTypes={turnBack}>
+              <Words crumb={crumb} />
             </Link>
           </li>
         ))}
         <li>
-          <span aria-current="page" {...langOf(here)}>
-            {here.label}
+          <span aria-current="page">
+            <Words crumb={here} />
           </span>
         </li>
       </ol>

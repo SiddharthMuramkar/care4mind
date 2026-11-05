@@ -37,6 +37,7 @@ function Kind({ entry, topicNames }: { entry: Entry; topicNames: ReadonlyMap<str
         >
           {entry.concept.name}
         </span>
+        {entry.concept.gloss ? <> · {entry.concept.gloss}</> : null}
       </>
     )
   const [topic] = entry.topics

@@ -16,6 +16,7 @@ function Listed({ records }: { records: readonly RecordRef[] }) {
     <span key={`${record.kind}/${record.id}`}>
       {index === 0 ? null : index === records.length - 1 ? ' and ' : ', '}
       <span {...(record.lang ? { lang: record.lang } : {})}>{record.title}</span>
+      {record.gloss ? <> · {record.gloss}</> : null}
     </span>
   ))
 }
@@ -128,6 +129,7 @@ export function Passage({ passage, unit }: { passage: PassageView; unit: string 
                     data-ink
                   >
                     <span {...(record.lang ? { lang: record.lang } : {})}>{record.title}</span>
+                    {record.gloss ? <> · {record.gloss}</> : null}
                   </Link>
                 </li>
               ))}

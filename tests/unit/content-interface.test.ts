@@ -20,7 +20,7 @@ import {
 } from '@/content/schema'
 import { memorySource } from '@/content/source'
 import { createContent } from '@/content/views'
-import { asciiSpellings, displayName } from '@/content/names'
+import { asciiSpellings, conceptName, displayName } from '@/content/names'
 
 // The content module's public interface, tested at its one
 // seam: each test builds a small made-up content source and reads it through the same
@@ -234,6 +234,13 @@ describe('the pure helpers', () => {
     expect(displayName({ term, english: 'Five afflictions' })).toBe('Pañca kleśa')
     expect(displayName({ term: { iast: 'ātman', ascii: ['Atman'] } })).toBe('Ātman')
     expect(displayName({ english: 'Five steps of perfection' })).toBe('Five steps of perfection')
+  })
+
+  it('names a Concept in full by its Sanskrit name, then its gloss (conceptName)', () => {
+    const term = { iast: 'vikṣepa', ascii: ['Vikshepa'] }
+    expect(conceptName({ term, english: 'Distraction' })).toBe('Vikṣepa · Distraction')
+    expect(conceptName({ english: 'Five steps of perfection' })).toBe('Five steps of perfection')
+    expect(conceptName({ term: { iast: 'ātman', ascii: ['Atman'] } })).toBe('Ātman')
   })
 
   it('lists every plain-keyboard spelling, starting with IAST minus diacritics (asciiSpellings)', () => {
@@ -547,6 +554,7 @@ describe('a Concept’s References', () => {
             id: 'obstacles',
             title: 'Vighna',
             lang: 'sa-Latn',
+            gloss: 'Obstacle',
             href: '/concepts/obstacles/',
           },
         ],
@@ -573,6 +581,7 @@ describe('a Concept’s References', () => {
             id: 'obstacles',
             title: 'Vighna',
             lang: 'sa-Latn',
+            gloss: 'Obstacle',
             href: '/concepts/obstacles/',
           },
           { kind: 'topic', id: 'values', title: 'Values', href: '/topics/values/' },
@@ -859,7 +868,13 @@ describe('the rest of a Concept’s page', () => {
         anchor: 'obstacles',
         href: '/questionnaires/#obstacles',
         concepts: [
-          { slug: 'obstacles', name: 'Vighna', lang: 'sa-Latn', href: '/concepts/obstacles/' },
+          {
+            slug: 'obstacles',
+            name: 'Vighna',
+            lang: 'sa-Latn',
+            gloss: 'Obstacle',
+            href: '/concepts/obstacles/',
+          },
         ],
         topics: [{ slug: 'mind', name: 'Mind', href: '/topics/mind/' }],
       },
@@ -874,7 +889,13 @@ describe('the rest of a Concept’s page', () => {
         href: '/questionnaires/work-scale/',
         concepts: [
           { slug: 'calm', name: 'Śānti', lang: 'sa-Latn', href: '/concepts/calm/' },
-          { slug: 'obstacles', name: 'Vighna', lang: 'sa-Latn', href: '/concepts/obstacles/' },
+          {
+            slug: 'obstacles',
+            name: 'Vighna',
+            lang: 'sa-Latn',
+            gloss: 'Obstacle',
+            href: '/concepts/obstacles/',
+          },
         ],
         topics: [{ slug: 'mind', name: 'Mind', href: '/topics/mind/' }],
       },
@@ -1075,6 +1096,7 @@ describe('topics', () => {
               id: 'obstacles',
               title: 'Vighna',
               lang: 'sa-Latn',
+              gloss: 'Obstacle',
               href: '/concepts/obstacles/',
             },
           ],
@@ -1101,6 +1123,7 @@ describe('topics', () => {
           id: 'obstacles',
           title: 'Vighna',
           lang: 'sa-Latn',
+          gloss: 'Obstacle',
           href: '/concepts/obstacles/',
         },
       ],

@@ -71,7 +71,11 @@ const IN_TEXT = [
     name: 'Mind: states and obstacles',
     in: (page: Page) => page.getByRole('navigation', { name: 'Breadcrumb' }),
   },
-  { page: MISSING, name: 'Read about Vikṣepa', in: (page: Page) => page.getByRole('main') },
+  {
+    page: MISSING,
+    name: 'Read about Vikṣepa · Distraction',
+    in: (page: Page) => page.getByRole('main'),
+  },
 ]
 
 for (const { page: path, name, in: around } of IN_TEXT) {
