@@ -28,7 +28,7 @@ interface Upgrade {
 }
 
 /**
- * The header's three sections as server-rendered links, each marked when you are in it. On a
+ * The header's sections as server-rendered links, each marked when you are in it. On a
  * computer, Concepts and Library also open panels: Base UI's NavigationMenu loads when the
  * browser is idle, or as soon as a pointer or focus comes near, and puts its toggles in place of
  * these. The links themselves stay as they are. A toggle pressed before then opens its panel as

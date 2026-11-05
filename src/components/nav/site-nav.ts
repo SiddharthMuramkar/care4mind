@@ -1,6 +1,6 @@
 import type { Route } from 'next'
 
-import { hrefFor, library, references, site, topics } from '@/content'
+import { home, hrefFor, library, questionnaires, references, site, topics } from '@/content'
 
 import type { Holding, LibraryLink, NavLink, SiteNav } from './types'
 
@@ -20,12 +20,15 @@ export function siteNav(): Promise<SiteNav> {
 }
 
 async function build(): Promise<SiteNav> {
-  const [routes, topicCards, libraryCards, allReferences] = await Promise.all([
-    site.routes(),
-    topics.list(),
-    library.list(),
-    references.list(),
-  ])
+  const [routes, topicCards, libraryCards, allReferences, anyTakeable, homeView] =
+    await Promise.all([
+      site.routes(),
+      topics.list(),
+      library.list(),
+      references.list(),
+      questionnaires.anyTakeable(),
+      home.get(),
+    ])
   const has = (kind: string) => routes.some((entry) => entry.kind === kind)
   const link = (label: string, path: string): NavLink => ({ label, href: route(path) })
 
@@ -73,6 +76,16 @@ async function build(): Promise<SiteNav> {
         ...link('Traditional texts', hrefFor({ page: 'texts' })),
         within: [hrefFor({ page: 'texts' })],
       },
+      // Listed only while one can be taken in this build; the footer keeps its link either way.
+      ...(anyTakeable
+        ? [
+            {
+              id: 'questionnaires' as const,
+              ...link('Questionnaires', hrefFor({ page: 'questionnaires' })),
+              within: [hrefFor({ page: 'questionnaires' })],
+            },
+          ]
+        : []),
       {
         id: 'library',
         ...link('Library', hrefFor({ page: 'library' })),
@@ -85,7 +98,10 @@ async function build(): Promise<SiteNav> {
       ...(has('concept-map') ? { map: link('Concept map', hrefFor({ page: 'concept-map' })) } : {}),
     },
     library: { index: link('Library', hrefFor({ page: 'library' })), pages: libraryPages },
-    questionnaires: link('Questionnaires', hrefFor({ page: 'questionnaires' })),
+    questionnaires: link(
+      anyTakeable ? 'Questionnaires' : homeView.footerQuestionnaires,
+      hrefFor({ page: 'questionnaires' }),
+    ),
     search: link('Search', hrefFor({ page: 'search' })),
     ...(has('start') ? { start: link('Start here', hrefFor({ page: 'start' })) } : {}),
     ...(has('proposals') ? { proposals: link('Proposals', hrefFor({ page: 'proposals' })) } : {}),

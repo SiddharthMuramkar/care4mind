@@ -21,8 +21,8 @@ export function generateMetadata(): Promise<Metadata> {
 
 /**
  * A Questionnaire coming later: a catalogue slip at its anchor (`#dosha-survey`), where the
- * current site's address for it now leads. It names the page it came from, says "Coming later"
- * in words, and links to its Concept.
+ * current site's address for it now leads. It names the page it came from, says
+ * "In preparation" in words, and links to its Concept.
  */
 function Later({ questionnaire }: { questionnaire: Card }) {
   const { anchor, sourceTitle, shownStatus, concepts } = questionnaire
@@ -79,7 +79,7 @@ export default async function QuestionnairesPage() {
           </p>
           <p className={listing.facts}>
             {featured.length} with a page of {featured.length === 1 ? 'its' : 'their'} own ·{' '}
-            {later.length} coming later
+            {later.length} in preparation
           </p>
         </>
       }
@@ -103,7 +103,7 @@ export default async function QuestionnairesPage() {
         <section className={reading.section} aria-labelledby="later-title">
           <OrnamentRule />
           <h2 id="later-title" className={reading.sectionTitle}>
-            Coming later
+            In preparation
           </h2>
           <p className={styles.note}>
             The current site describes these {later.length} Questionnaires. Each opens here once its
@@ -125,7 +125,7 @@ export default async function QuestionnairesPage() {
                     {topic.name}
                   </Link>
                 </h3>
-                <p className={styles.groupCount}>{questionnaires.length} coming later</p>
+                <p className={styles.groupCount}>{questionnaires.length} in preparation</p>
               </header>
               <ul className={styles.slips}>
                 {questionnaires.map((questionnaire) => (

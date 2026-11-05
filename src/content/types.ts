@@ -511,6 +511,7 @@ export interface HomepageView extends CarriedOver {
   whoBehind: Inline
   closing: Inline
   helpLine: Inline
+  footerQuestionnaires: string
 }
 
 // Site derivations (`site`)

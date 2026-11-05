@@ -34,6 +34,8 @@ export interface HomepageRecord {
   closing: Inline
   /** Where to call for help now, shown in every page's footer and on each Questionnaire page. */
   helpLine: Inline
+  /** Drafted: the footer's Questionnaires link while none can be taken. */
+  footerQuestionnaires: string
   provenance: Provenance
 }
 

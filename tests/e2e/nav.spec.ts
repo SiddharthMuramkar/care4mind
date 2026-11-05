@@ -10,9 +10,13 @@ import { ROUTES } from './routes'
 /** From 72rem (1152 px) the sections and Search fit on one line; below it the Menu takes over. */
 const WIDE = 1152
 
+/** A take page is a route only while its Questionnaire can be taken in this build. */
+const TAKEABLE = ROUTES.some(({ kind }) => kind === 'questionnaire-flow')
+
 const SECTIONS = [
   { name: 'Concepts', path: '/concepts/' },
   { name: 'Traditional texts', path: '/texts/' },
+  ...(TAKEABLE ? [{ name: 'Questionnaires', path: '/questionnaires/' }] : []),
   { name: 'Library', path: '/library/' },
   { name: 'Search', path: '/search/' },
 ] as const
@@ -108,8 +112,8 @@ test.describe('without JavaScript', () => {
       await expect(menu).toHaveAttribute('href', '#site-nav')
       expect(await pathOf(banner(page).getByRole('link', { name: 'Search' }))).toBe('/search/')
     }
-    // The header does not list Questionnaires; the footer keeps its link.
-    await expect(banner(page).locator('a[href$="/questionnaires/"]')).toHaveCount(0)
+    // The header lists Questionnaires only while one can be taken; the footer always does.
+    await expect(header(page).locator('a[href$="/questionnaires/"]')).toHaveCount(TAKEABLE ? 1 : 0)
     // Panels need JavaScript, so their toggles don't show without it.
     await expect(banner(page).getByRole('button')).toHaveCount(0)
   })
@@ -146,7 +150,10 @@ test.describe('without JavaScript', () => {
     expect(targets.length).toBeGreaterThanOrEqual(SECTIONS.length + TOPICS.length + LIBRARY.length)
     for (const { label, path } of targets) {
       await page.goto(path)
-      await expect(page.getByRole('heading', { level: 1 }), path).toHaveText(label)
+      // While none can be taken, the footer's Questionnaires link says so beside its name.
+      const heading =
+        label === 'Self-reflection questionnaires (in preparation)' ? 'Questionnaires' : label
+      await expect(page.getByRole('heading', { level: 1 }), path).toHaveText(heading)
     }
     // The one label that names part of a page: the Concepts page's A–Z list.
     await page.goto('/concepts/')
@@ -176,10 +183,15 @@ test.describe('without JavaScript', () => {
     for (const { name, path } of SECTIONS) {
       expect(await pathOf(nav.getByRole('link', { name, exact: true }))).toBe(path)
     }
-    // The footer keeps Questionnaires as a plain link, though the header does not list it.
-    expect(await pathOf(nav.getByRole('link', { name: 'Questionnaires', exact: true }))).toBe(
-      '/questionnaires/',
-    )
+    // The footer always keeps its Questionnaires link, saying so while none can be taken.
+    expect(
+      await pathOf(
+        nav.getByRole('link', {
+          name: TAKEABLE ? 'Questionnaires' : 'Self-reflection questionnaires (in preparation)',
+          exact: true,
+        }),
+      ),
+    ).toBe('/questionnaires/')
     // "All concepts A–Z" would repeat "Concepts", so the footer leaves it out.
     await expect(nav.getByRole('link', { name: 'All concepts A–Z' })).toHaveCount(0)
     await expect(nav.getByRole('link', { name: 'About' })).toHaveCount(0)
@@ -210,7 +222,10 @@ test.describe('the section you are in', () => {
     { path: '/concepts/vikshepa/', current: { Concepts: 'true' } },
     { path: '/topics/mind/', current: { Concepts: 'true' } },
     { path: '/texts/yoga-sutra/', current: { 'Traditional texts': 'true' } },
-    { path: '/questionnaires/karmayoga-scale/', current: {} },
+    {
+      path: '/questionnaires/karmayoga-scale/',
+      current: TAKEABLE ? { Questionnaires: 'true' } : {},
+    },
     { path: '/library/', current: { Library: 'page' } },
     { path: '/library/references/', current: { Library: 'true' } },
     { path: '/search/', current: { Search: 'page' } },
@@ -622,8 +637,8 @@ test.describe('the Drawer, on a phone', { tag: '@below-1440' }, () => {
     expect(await pathOf(drawer(page).getByRole('link', { name: 'Search' }))).toBe('/search/')
     // The menu opens with Search, before the sections.
     expect(await pathOf(drawer(page).getByRole('link').first())).toBe('/search/')
-    // The phone menu does not list Questionnaires either.
-    await expect(drawer(page).locator('a[href$="/questionnaires/"]')).toHaveCount(0)
+    // The phone menu lists Questionnaires only while one can be taken, like the header.
+    await expect(drawer(page).locator('a[href$="/questionnaires/"]')).toHaveCount(TAKEABLE ? 1 : 0)
     // Under Concepts the five topics come first, then "All concepts A–Z" and the map.
     const conceptsList = nav.locator('ul', { hasText: 'All concepts A–Z' })
     const listed = await conceptsList.getByRole('link').all()
