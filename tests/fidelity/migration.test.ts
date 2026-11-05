@@ -173,6 +173,29 @@ describe('the links the migration made', () => {
     expect(problems).toEqual([])
   })
 
+  it('reads exactly those 16 pages into both a Concept and a Questionnaire', () => {
+    const KEPT = ['concept', 'questionnaire', 'glossary', 'resource-list', 'page', 'home'] as const
+    const isKept = (record: ContentRecord): record is RecordOf<(typeof KEPT)[number]> =>
+      (KEPT as readonly string[]).includes(record.kind)
+    const byPage = new Map<string, ContentRecord[]>()
+    for (const record of records.filter(isKept))
+      for (const { url } of record.provenance.sources) {
+        const { hostname, pathname } = new URL(url)
+        if (hostname === 'care4mind.org')
+          byPage.set(pathname, [...(byPage.get(pathname) ?? []), record])
+      }
+    const both = [...byPage]
+      .filter(
+        ([, heirs]) =>
+          heirs.some(({ kind }) => kind === 'concept') &&
+          heirs.some(({ kind }) => kind === 'questionnaire'),
+      )
+      .map(([pathname]) => pathname)
+    expect(both.toSorted()).toEqual(
+      DESCRIPTION_PAGES.map((url) => new URL(url).pathname).toSorted(),
+    )
+  })
+
   it('links the Atman, Jiva, Jagat and Chitta Bhumis entries to their Concepts', () => {
     const problems = ['Atman', 'Jiva', 'Jagat', 'Chitta Bhumis'].flatMap((name) => {
       const entry = ofKind('glossary').find((glossary) => glossary.name.ascii === name)
