@@ -6,12 +6,10 @@ import { InkSpread } from '@/components/InkSpread'
 import { LateFonts } from '@/components/LateFonts'
 import { LotusPointer } from '@/components/LotusPointer'
 import { LinkPreviewRoot } from '@/components/preview/LinkPreviewRoot'
-import { HeadScript } from '@/components/script/HeadScript'
 import { SiteFooter } from '@/components/SiteFooter'
 import { SiteHeader } from '@/components/SiteHeader'
 import { Toaster } from '@/components/toast/Toaster'
-import { features } from '@/config/features'
-import { site } from '@/config/site'
+import { siteConfig } from '@/config/site'
 import { home } from '@/content'
 import { playfairDisplay, playfairText, playfairTextStyles } from '@/fonts/playfair'
 import { tiroDevanagariSanskrit } from '@/fonts/tiro-devanagari-sanskrit'
@@ -22,10 +20,10 @@ import '@/styles/globals.css'
 export async function generateMetadata(): Promise<Metadata> {
   return {
     // Share-card URLs are absolute and name the production host, even on a preview.
-    metadataBase: new URL(site.url),
-    title: { default: `${site.name}: Indian psychology`, template: `%s · ${site.name}` },
+    metadataBase: new URL(siteConfig.url),
+    title: `${siteConfig.name}: Indian psychology`,
     description: (await home.get()).tagline,
-    robots: site.indexable
+    robots: siteConfig.indexable
       ? undefined
       : { index: false, follow: false, googleBot: { index: false, follow: false } },
   }
@@ -44,10 +42,8 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       // Smooth scrolling is for in-page links: with this, Next.js jumps on page changes.
       data-scroll-behavior="smooth"
       className={playfairText.variable}
-      // The head scripts mark <html> with the reader's choices before React hydrates.
-      suppressHydrationWarning
     >
-      <head>{features.devanagariFirst ? <HeadScript /> : null}</head>
+      <head />
       <body>
         <a href="#main" className="skip-link">
           Skip to content

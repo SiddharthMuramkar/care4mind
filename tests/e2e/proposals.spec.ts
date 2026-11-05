@@ -4,20 +4,15 @@ import { expectNoAxeViolations } from './axe'
 import { expect, gotoReady, test } from './fixtures'
 import { expectPageTurned, pageTurns, prefetched, recordPageTurns } from './page-turns'
 
-// The proposals page (front-end-site ticket 12): what the design suggests beyond the brief, for
-// the Project owner's sign-off. Local runs and CI build with both proposal flags on (D20), so
-// the three built proposals are listed, with audio pronunciation, described only, and nothing else.
+// The proposals page: what the design suggests beyond the brief, for the Project owner's
+// sign-off. Local runs and CI build with both proposal flags on, so the two built proposals are
+// listed, with audio pronunciation, described only, and nothing else.
 
 const PATH = hrefFor({ page: 'proposals' })
-const ENTRIES = [
-  'Concept map',
-  'Devanagari first, on every page',
-  'Start here',
-  'Audio pronunciation',
-]
+const ENTRIES = ['Concept map', 'Start here', 'Audio pronunciation']
 
 test.describe('the proposals page', () => {
-  test('lists the four proposals and no others, each with its status, gains, costs and switch', async ({
+  test('lists the three proposals and no others, each with its status, gains, costs and switch', async ({
     page,
   }) => {
     await gotoReady(page, PATH)
@@ -25,7 +20,7 @@ test.describe('the proposals page', () => {
     await expect(entries.getByRole('heading', { level: 2 })).toHaveText(ENTRIES)
     await expect(
       entries.getByRole('paragraph').filter({ hasText: /^(Built|Described, not built)$/ }),
-    ).toHaveText(['Built', 'Built', 'Built', 'Described, not built'])
+    ).toHaveText(['Built', 'Built', 'Described, not built'])
     for (const entry of await entries.all())
       await expect(entry.getByRole('term')).toHaveText([
         'What it adds',
@@ -45,7 +40,6 @@ test.describe('the proposals page', () => {
       .filter({ has: page.getByRole('code') })
     await expect(answers.getByRole('code')).toHaveText([
       'FEATURE_CONCEPT_MAP=0',
-      'FEATURE_DEVANAGARI_FIRST=0',
       'FEATURE_START_HERE=0',
     ])
     for (const answer of await answers.all()) {
@@ -74,14 +68,9 @@ test.describe('the proposals page', () => {
     await expect(crumbs).toHaveText(['Home', 'Proposals'])
   })
 
-  test('leads to the Concept map with a forward page turn, and to the A–Z to try Devanagari first', async ({
-    page,
-  }) => {
+  test('leads to the Concept map with a forward page turn', async ({ page }) => {
     await recordPageTurns(page)
     await gotoReady(page, PATH)
-    await expect(
-      page.getByRole('main').getByRole('link', { name: 'Concepts A–Z' }),
-    ).toHaveAttribute('href', hrefFor({ page: 'concepts' }))
     const open = page.getByRole('link', { name: 'Open the Concept map' })
     await prefetched(open)
     await open.click()

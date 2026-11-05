@@ -27,13 +27,11 @@ import { createContent } from '@/content/views'
 const ON: Features = {
   questionnairePreview: true,
   conceptMap: true,
-  devanagariFirst: true,
   startHere: true,
 }
 const OFF: Features = {
   questionnairePreview: false,
   conceptMap: false,
-  devanagariFirst: false,
   startHere: false,
 }
 
@@ -405,9 +403,6 @@ describe('site.routes', () => {
       without('/questionnaires/work-scale/take/'),
     )
     expect(await paths({ ...ON, conceptMap: false })).toEqual(without('/concepts/map/'))
-    expect(await paths({ ...OFF, devanagariFirst: true })).toEqual(
-      without('/start/', '/concepts/map/', '/questionnaires/work-scale/take/'),
-    )
     expect(await paths({ ...ON, startHere: false })).toEqual(without('/start/'))
   })
 

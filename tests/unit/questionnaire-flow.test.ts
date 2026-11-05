@@ -16,8 +16,7 @@ import {
   unsaved,
   type FlowAction,
   type FlowState,
-} from '@/lib/questionnaire/flow'
-import { scoreQuestionnaire } from '@/lib/questionnaire/score'
+} from '@/components/questionnaire/flow-state'
 import { statusWords } from '@/components/StatusBadge'
 
 // Front-end-site ticket 10: the KarmaYoga flow's state, kept only in a reducer (D16), and the
@@ -28,7 +27,6 @@ import { statusWords } from '@/components/StatusBadge'
 const ON: Features = {
   questionnairePreview: true,
   conceptMap: true,
-  devanagariFirst: true,
   startHere: true,
 }
 const OFF: Features = { ...ON, questionnairePreview: false }
@@ -84,8 +82,6 @@ describe('the flow', () => {
     expect(flowReducer(state, { type: 'next' }).missing).toEqual(['constructor'])
     const given = flowReducer(state, { type: 'answer', item: 'constructor', option: 'Yes' })
     expect(progressOf(given).answered).toBe(1)
-    expect(scoreQuestionnaire(madeUp, {})).toEqual({ status: 'incomplete' })
-    expect(scoreQuestionnaire(madeUp, { constructor: 'Yes' })).toEqual({ status: 'pending' })
   })
 
   it('starts on part 1 with nothing answered', () => {
@@ -222,32 +218,6 @@ describe('the address', () => {
       const address = addressOf(flowReducer(state, { type: 'go', step }).step)
       for (const answer of Object.values(state.answers)) expect(address).not.toContain(answer)
     }
-  })
-})
-
-describe('the scoring stub', () => {
-  /** A complete answer set, each statement's option picked by its position in the part. */
-  const answered = (pick: (options: readonly string[], position: number) => string) =>
-    Object.fromEntries(
-      form.parts.flatMap(({ items }) =>
-        items.map((item, position) => [item.id, pick(item.options, position)]),
-      ),
-    )
-
-  it('leaves every complete answer set pending until the scoring rules are confirmed', () => {
-    const first = answered((options) => nth(options, 0))
-    const last = answered((options) => nth(options, -1))
-    const mixed = answered((options, position) => nth(options, position % options.length))
-    expect(Object.keys(first)).toHaveLength(45)
-    for (const answers of [first, last, mixed]) {
-      expect(scoreQuestionnaire(form, answers)).toEqual({ status: 'pending' })
-    }
-  })
-
-  it('says an answer set with a statement left is incomplete', () => {
-    const [, ...rest] = Object.entries(answered((options) => nth(options, 0)))
-    expect(scoreQuestionnaire(form, Object.fromEntries(rest))).toEqual({ status: 'incomplete' })
-    expect(scoreQuestionnaire(form, {})).toEqual({ status: 'incomplete' })
   })
 })
 

@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 
 import { home } from '@/content'
 import { localSource } from '@/content/source'
-import { helpLineParts } from '@/lib/help-line'
+import { helpLineParts } from '@/components/help-line'
 
 describe('the help line', () => {
   it('turns each phone number into a tel: link on its digits, and leaves the rest as text', () => {

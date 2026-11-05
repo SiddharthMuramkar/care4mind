@@ -7,7 +7,7 @@
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 
-import { site as config } from '@/config/site'
+import { siteConfig as config } from '@/config/site'
 import { concepts, home, library, questionnaires, site, topics, type RouteEntry } from '@/content'
 
 /** The homepage keeps the site's own title. */

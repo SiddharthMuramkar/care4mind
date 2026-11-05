@@ -1,7 +1,7 @@
 'use client'
 
 import { Folio } from '@/components/Folio'
-import { site } from '@/config/site'
+import { siteConfig } from '@/config/site'
 import { playfairText } from '@/fonts/playfair'
 import { cx } from '@/lib/cx'
 
@@ -21,9 +21,9 @@ export default function GlobalError({
   return (
     <html lang="en" className={playfairText.variable}>
       <head>
-        <title>{`Page not shown · ${site.name}`}</title>
+        <title>{`Page not shown · ${siteConfig.name}`}</title>
         {/* The root layout's robots meta fails with it. */}
-        {site.indexable ? null : <meta name="robots" content="noindex, nofollow" />}
+        {siteConfig.indexable ? null : <meta name="robots" content="noindex, nofollow" />}
       </head>
       <body>
         <a href="#main" className="skip-link">

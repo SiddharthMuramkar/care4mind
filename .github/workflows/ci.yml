@@ -179,7 +179,6 @@ jobs:
     env:
       FEATURE_QUESTIONNAIRE_PREVIEW: '0'
       FEATURE_CONCEPT_MAP: '0'
-      FEATURE_DEVANAGARI_FIRST: '0'
       FEATURE_START_HERE: '0'
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
