@@ -11,12 +11,12 @@ import styles from './SiteFooter.module.css'
 
 /**
  * The colophon every page ends with: the wordmark and tagline, the full navigation (every
- * section, the topics and every Library page, and the proposals while one is on), the credit
- * and the preview notice. Without JavaScript, the header's Menu leads here.
+ * section, Questionnaires, the topics and every Library page, and the proposals while one is
+ * on), the credit and the preview notice. Without JavaScript, the header's Menu leads here.
  */
 export async function SiteFooter() {
   const [nav, { tagline }] = await Promise.all([siteNav(), home.get()])
-  const [concepts, texts, questionnaires, library] = nav.sections
+  const [concepts, texts, library] = nav.sections
   return (
     // Its own transition name keeps it still while the page turns (globals.css).
     <footer className={styles.footer} style={{ viewTransitionName: 'site-footer' }}>
@@ -34,9 +34,6 @@ export async function SiteFooter() {
                   {concepts.label}
                 </Link>
                 <ul className={styles.pages}>
-                  <li>
-                    <Link href={nav.concepts.index.href}>{nav.concepts.index.label}</Link>
-                  </li>
                   {nav.concepts.topics.map((topic) => (
                     <li key={topic.slug} className={styles.topic} data-topic={topic.slug}>
                       <Link href={topic.href}>{topic.label}</Link>
@@ -51,15 +48,6 @@ export async function SiteFooter() {
                 </ul>
               </li>
             ) : null}
-            {[texts, questionnaires].map((section) =>
-              section ? (
-                <li key={section.id} className={styles.group}>
-                  <Link href={section.href} className={styles.head}>
-                    {section.label}
-                  </Link>
-                </li>
-              ) : null,
-            )}
             {library ? (
               <li className={styles.group}>
                 <Link href={library.href} className={styles.head}>
@@ -75,9 +63,19 @@ export async function SiteFooter() {
               </li>
             ) : null}
             <li className={styles.group}>
-              <Link href={nav.search.href} className={styles.head}>
-                {nav.search.label}
-              </Link>
+              <ul className={styles.pages}>
+                {texts ? (
+                  <li>
+                    <Link href={texts.href}>{texts.label}</Link>
+                  </li>
+                ) : null}
+                <li>
+                  <Link href={nav.questionnaires.href}>{nav.questionnaires.label}</Link>
+                </li>
+                <li>
+                  <Link href={nav.search.href}>{nav.search.label}</Link>
+                </li>
+              </ul>
             </li>
             {nav.proposals ? (
               <li className={styles.group}>

@@ -24,7 +24,7 @@ const KINDS: readonly { kind: SearchKind; heading: string }[] = [
   { kind: 'term', heading: 'Terms inside Concepts' },
   { kind: 'topic', heading: 'Topics' },
   { kind: 'glossary', heading: 'Glossary' },
-  { kind: 'work', heading: 'Texts' },
+  { kind: 'work', heading: 'Traditional texts' },
   { kind: 'passage', heading: 'Verses' },
   { kind: 'questionnaire', heading: 'Questionnaires' },
   { kind: 'reference', heading: 'References' },

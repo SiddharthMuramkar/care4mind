@@ -70,13 +70,8 @@ async function build(): Promise<SiteNav> {
       },
       {
         id: 'texts',
-        ...link('Texts', hrefFor({ page: 'texts' })),
+        ...link('Traditional texts', hrefFor({ page: 'texts' })),
         within: [hrefFor({ page: 'texts' })],
-      },
-      {
-        id: 'questionnaires',
-        ...link('Questionnaires', hrefFor({ page: 'questionnaires' })),
-        within: [hrefFor({ page: 'questionnaires' })],
       },
       {
         id: 'library',
@@ -85,11 +80,12 @@ async function build(): Promise<SiteNav> {
       },
     ],
     concepts: {
-      index: link('Concepts A–Z', hrefFor({ page: 'concepts' })),
+      index: link('All concepts A–Z', hrefFor({ page: 'concepts' })),
       topics: topicLinks,
       ...(has('concept-map') ? { map: link('Concept map', hrefFor({ page: 'concept-map' })) } : {}),
     },
     library: { index: link('Library', hrefFor({ page: 'library' })), pages: libraryPages },
+    questionnaires: link('Questionnaires', hrefFor({ page: 'questionnaires' })),
     search: link('Search', hrefFor({ page: 'search' })),
     ...(has('start') ? { start: link('Start here', hrefFor({ page: 'start' })) } : {}),
     ...(has('proposals') ? { proposals: link('Proposals', hrefFor({ page: 'proposals' })) } : {}),

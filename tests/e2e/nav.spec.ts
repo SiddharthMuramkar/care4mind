@@ -4,16 +4,15 @@ import { expectNoAxeViolations } from './axe'
 import { expect, gotoReady, test } from './fixtures'
 import { ROUTES } from './routes'
 
-// The navigation shell (front-end-site ticket 04): the header's five sections, the panels a
-// computer opens from two of them, the Drawer a phone opens from Menu, and the footer.
+// The navigation shell (front-end-site ticket 04): the header's sections and Search, the panels
+// a computer opens from two of them, the Drawer a phone opens from Menu, and the footer.
 
-/** From 72rem (1152 px) the five sections fit on one line; below it the Menu takes over. */
+/** From 72rem (1152 px) the sections and Search fit on one line; below it the Menu takes over. */
 const WIDE = 1152
 
 const SECTIONS = [
   { name: 'Concepts', path: '/concepts/' },
-  { name: 'Texts', path: '/texts/' },
-  { name: 'Questionnaires', path: '/questionnaires/' },
+  { name: 'Traditional texts', path: '/texts/' },
   { name: 'Library', path: '/library/' },
   { name: 'Search', path: '/search/' },
 ] as const
@@ -23,7 +22,7 @@ const TOPICS = [
   { name: /^Mind: states and obstacles/, path: '/topics/mind/', count: 5 },
   { name: /^Practice and progress/, path: '/topics/practice/', count: 4 },
   { name: /^Values: yama and niyama/, path: '/topics/values/', count: 4 },
-  { name: /^Guṇa and temperament/, path: '/topics/temperament/', count: 2 },
+  { name: /^Temperament \(guṇa\)/, path: '/topics/temperament/', count: 2 },
 ] as const
 
 // In the Library page's order, each with what it holds, counted as the Library page counts it.
@@ -87,7 +86,7 @@ const settled = (page: Page) =>
 test.describe('without JavaScript', () => {
   test.use({ javaScriptEnabled: false })
 
-  test('the header shows the logo, then the five sections in order, or the Menu', async ({
+  test('the header shows the logo, then the sections and Search in order, or the Menu', async ({
     page,
   }) => {
     await page.goto('/concepts/vikshepa/')
@@ -109,6 +108,8 @@ test.describe('without JavaScript', () => {
       await expect(menu).toHaveAttribute('href', '#site-nav')
       expect(await pathOf(banner(page).getByRole('link', { name: 'Search' }))).toBe('/search/')
     }
+    // The header does not list Questionnaires; the footer keeps its link.
+    await expect(banner(page).locator('a[href$="/questionnaires/"]')).toHaveCount(0)
     // Panels need JavaScript, so their toggles don't show without it.
     await expect(banner(page).getByRole('button')).toHaveCount(0)
   })
@@ -131,6 +132,27 @@ test.describe('without JavaScript', () => {
     }
   })
 
+  test('each navigation label is the heading of the page it opens', async ({ page }) => {
+    await page.goto('/')
+    // The footer holds every page the header, its panels and the phone menu open.
+    const links = await footerNav(page).getByRole('link').all()
+    const targets: { label: string; path: string }[] = []
+    for (const link of links) {
+      const label = (await link.innerText()).trim()
+      // The proposal note is a marker beside a link, not a navigation label.
+      if (label === 'Proposal') continue
+      targets.push({ label, path: await pathOf(link) })
+    }
+    expect(targets.length).toBeGreaterThanOrEqual(SECTIONS.length + TOPICS.length + LIBRARY.length)
+    for (const { label, path } of targets) {
+      await page.goto(path)
+      await expect(page.getByRole('heading', { level: 1 }), path).toHaveText(label)
+    }
+    // The one label that names part of a page: the Concepts page's A–Z list.
+    await page.goto('/concepts/')
+    await expect(page.getByRole('heading', { level: 2, name: 'From A to Z' })).toBeVisible()
+  })
+
   test('Menu leads to the full navigation in the footer', async ({ page }) => {
     test.skip(isWide(page), 'the sections show in the header at this width')
     await page.goto('/concepts/vikshepa/')
@@ -151,7 +173,13 @@ test.describe('without JavaScript', () => {
     for (const { name, path } of SECTIONS) {
       expect(await pathOf(nav.getByRole('link', { name, exact: true }))).toBe(path)
     }
-    expect(await pathOf(nav.getByRole('link', { name: 'Concepts A–Z' }))).toBe('/concepts/')
+    // The footer keeps Questionnaires as a plain link, though the header does not list it.
+    expect(await pathOf(nav.getByRole('link', { name: 'Questionnaires', exact: true }))).toBe(
+      '/questionnaires/',
+    )
+    // "All concepts A–Z" would repeat "Concepts", so the footer leaves it out.
+    await expect(nav.getByRole('link', { name: 'All concepts A–Z' })).toHaveCount(0)
+    await expect(nav.getByRole('link', { name: 'About' })).toHaveCount(0)
     for (const { name, path } of [...TOPICS, ...LIBRARY]) {
       expect(await pathOf(nav.getByRole('link', { name }))).toBe(path)
     }
@@ -178,8 +206,8 @@ test.describe('the section you are in', () => {
     { path: '/concepts/', current: { Concepts: 'page' } },
     { path: '/concepts/vikshepa/', current: { Concepts: 'true' } },
     { path: '/topics/mind/', current: { Concepts: 'true' } },
-    { path: '/texts/yoga-sutra/', current: { Texts: 'true' } },
-    { path: '/questionnaires/karmayoga-scale/', current: { Questionnaires: 'true' } },
+    { path: '/texts/yoga-sutra/', current: { 'Traditional texts': 'true' } },
+    { path: '/questionnaires/karmayoga-scale/', current: {} },
     { path: '/library/', current: { Library: 'page' } },
     { path: '/library/references/', current: { Library: 'true' } },
     { path: '/search/', current: { Search: 'page' } },
@@ -225,9 +253,9 @@ test.describe('the section you are in', () => {
       'aria-current',
       'true',
     )
-    await expect(drawer.getByRole('link', { name: 'Texts', exact: true })).not.toHaveAttribute(
-      'aria-current',
-    )
+    await expect(
+      drawer.getByRole('link', { name: 'Traditional texts', exact: true }),
+    ).not.toHaveAttribute('aria-current')
   })
 })
 
@@ -256,8 +284,15 @@ test.describe('panels, on a computer', () => {
       await expect(link).toContainText(`${count} Concepts`)
       expect(await pathOf(link)).toBe(path)
     }
-    expect(await pathOf(concepts.getByRole('link', { name: 'Concepts A–Z' }))).toBe('/concepts/')
+    expect(await pathOf(concepts.getByRole('link', { name: 'All concepts A–Z' }))).toBe(
+      '/concepts/',
+    )
     expect(await pathOf(concepts.getByRole('link', { name: 'Concept map' }))).toBe('/concepts/map/')
+    // The five topics come first, then "All concepts A–Z" and the map.
+    const inOrder = await concepts.getByRole('link').all()
+    expect(
+      await Promise.all(inOrder.slice(0, TOPICS.length + 2).map((link) => pathOf(link))),
+    ).toEqual([...TOPICS.map(({ path }) => path), '/concepts/', '/concepts/map/'])
     await expect(concepts.getByRole('link', { name: 'Proposal', exact: true })).toBeVisible()
 
     await page.keyboard.press('Escape')
@@ -296,7 +331,7 @@ test.describe('panels, on a computer', () => {
     await toggle(page, 'Concepts').focus()
     await page.keyboard.press('Enter')
     const concepts = panel(page, 'Concepts')
-    await expect(concepts.getByRole('link', { name: 'Concepts A–Z' })).toBeVisible()
+    await expect(concepts.getByRole('link', { name: 'All concepts A–Z' })).toBeVisible()
     const links = await concepts.getByRole('link').count()
     expect(links).toBeGreaterThanOrEqual(TOPICS.length + 2)
     for (let step = 0; step < links; step += 1) {
@@ -304,7 +339,9 @@ test.describe('panels, on a computer', () => {
       await expect(concepts.locator(':focus')).toHaveCount(1)
     }
     await page.keyboard.press('Tab')
-    await expect(header(page).getByRole('link', { name: 'Texts', exact: true })).toBeFocused()
+    await expect(
+      header(page).getByRole('link', { name: 'Traditional texts', exact: true }),
+    ).toBeFocused()
     await expect(concepts).toBeHidden()
   })
 
@@ -422,7 +459,7 @@ test.describe('panels, on a computer', () => {
     await gotoReady(page, '/')
     await toggle(page, 'Concepts').focus()
     await page.keyboard.press('Enter')
-    await panel(page, 'Concepts').getByRole('link', { name: 'Concepts A–Z' }).click()
+    await panel(page, 'Concepts').getByRole('link', { name: 'All concepts A–Z' }).click()
     await expect(page).toHaveURL(atPath('/concepts/'))
     await expect(panel(page, 'Concepts')).toBeHidden()
   })
@@ -463,6 +500,14 @@ test.describe('panels, on a computer', () => {
       }).observe({ type: 'layout-shift', buffered: true })
     })
     await gotoReady(page, '/concepts/vikshepa/')
+    // Shifts as the page's fonts arrive are not the panels' doing; count from a settled page.
+    await page.evaluate(async () => {
+      await document.fonts.ready
+      await new Promise<void>((resolve) =>
+        requestAnimationFrame(() => requestAnimationFrame(() => resolve())),
+      )
+      ;(window as unknown as { __shifts: number[] }).__shifts.length = 0
+    })
     // The panels arrive when the browser is idle, or as a pointer comes near.
     await header(page).hover()
     await toggle(page, 'Library').hover()
@@ -505,6 +550,16 @@ test.describe('the Drawer, on a phone', () => {
       await expect(nav.getByRole('link', { name })).toHaveAccessibleName(new RegExp(`${holds}$`))
     }
     expect(await pathOf(drawer(page).getByRole('link', { name: 'Search' }))).toBe('/search/')
+    // The menu opens with Search, before the sections.
+    expect(await pathOf(drawer(page).getByRole('link').first())).toBe('/search/')
+    // The phone menu does not list Questionnaires either.
+    await expect(drawer(page).locator('a[href$="/questionnaires/"]')).toHaveCount(0)
+    // Under Concepts the five topics come first, then "All concepts A–Z" and the map.
+    const conceptsList = nav.locator('ul', { hasText: 'All concepts A–Z' })
+    const listed = await conceptsList.getByRole('link').all()
+    expect(
+      await Promise.all(listed.slice(0, TOPICS.length + 2).map((link) => pathOf(link))),
+    ).toEqual([...TOPICS.map(({ path }) => path), '/concepts/', '/concepts/map/'])
 
     // Focus is inside, and Tab keeps it there, forwards and back.
     await expect.poll(() => focusInDrawer(page)).toBe(true)
@@ -621,7 +676,7 @@ test.describe('the Drawer, on a phone', () => {
   test('following a link closes it and opens the page', async ({ page }) => {
     await gotoReady(page, '/concepts/vikshepa/')
     await menu(page).click()
-    await drawer(page).getByRole('link', { name: 'Texts', exact: true }).click()
+    await drawer(page).getByRole('link', { name: 'Traditional texts', exact: true }).click()
     await expect(page).toHaveURL(atPath('/texts/'))
     await expect(drawer(page)).toBeHidden()
   })
@@ -653,7 +708,7 @@ test('with reduced motion, a section link changes the page at once', async ({ pa
   if (!isWide(page)) await banner(page).getByRole('button', { name: 'Menu' }).click()
   await page
     .getByRole('navigation', { name: 'Main' })
-    .getByRole('link', { name: 'Texts', exact: true })
+    .getByRole('link', { name: 'Traditional texts', exact: true })
     .click()
   await expect(page).toHaveURL(atPath('/texts/'))
   expect(await moving(page)).toEqual([])

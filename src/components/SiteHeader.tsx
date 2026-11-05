@@ -17,10 +17,10 @@ import styles from './SiteHeader.module.css'
 
 /**
  * The header every page shares, stuck to the top of the screen: the lotus and the wordmark,
- * leading home, then Concepts · Texts · Questionnaires · Library · Search, each a server-rendered
- * link that works without JavaScript. On a computer Concepts and Library open panels; on a
- * narrow screen the sections move into the Menu's Drawer, and Search stays. While its proposal is on, Start here follows the wordmark from 30rem
- * up, and below that it heads the Drawer's list.
+ * leading home, then the section links and Search, each a server-rendered link that works
+ * without JavaScript. On a computer Concepts and Library open panels; on a narrow screen the
+ * sections move into the Menu's Drawer, and Search stays. While its proposal is on, Start here
+ * follows the wordmark from 30rem up, and below that it heads the Drawer's list.
  */
 export async function SiteHeader() {
   const nav = await siteNav()
