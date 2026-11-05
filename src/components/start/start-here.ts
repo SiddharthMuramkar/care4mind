@@ -30,7 +30,7 @@ export const startHere: StartHere = {
     },
     {
       title: 'Concepts explain Terms',
-      text: 'A Concept is one idea, named by its Sanskrit term, and explains the terms it uses.',
+      text: 'A Concept is one idea, named by its Sanskrit name, and explains the terms it uses.',
     },
     {
       title: 'Texts and the Library beside them',

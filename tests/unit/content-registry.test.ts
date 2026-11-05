@@ -156,7 +156,7 @@ describe('record schema', () => {
     // Each line below must fail `pnpm typecheck`; the directive fails it if a line ever passes.
     // @ts-expect-error a Concept needs a summary
     defineConcept(without(concept, 'summary'))
-    // @ts-expect-error a Concept is named by a Sanskrit term, an English name or both
+    // @ts-expect-error a Concept is named by a Sanskrit name, an English name or both
     defineConcept({ ...concept, name: {} })
     // @ts-expect-error a record's kind matches its helper
     defineConcept({ ...concept, kind: 'topic' })

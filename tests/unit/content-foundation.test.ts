@@ -145,7 +145,7 @@ function foundationHomepage(view: HomepageView) {
   }
 }
 
-/** Every Sanskrit term inside a value: anything with an IAST form and its ASCII spellings. */
+/** Every Sanskrit name inside a value: anything with an IAST form and its ASCII spellings. */
 function termsIn(value: unknown): SanskritName[] {
   if (Array.isArray(value)) return value.flatMap(termsIn)
   if (value && typeof value === 'object') {

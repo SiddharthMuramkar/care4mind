@@ -3,7 +3,7 @@ import { capitalise } from '@/lib/text'
 
 import { cx } from '@/lib/cx'
 
-import styles from './SanskritTerm.module.css'
+import styles from './SanskritName.module.css'
 
 interface Props {
   term: SanskritName
@@ -15,10 +15,10 @@ interface Props {
 }
 
 /**
- * A Sanskrit term in IAST, optionally with its Devanagari form and English
+ * A Sanskrit name in IAST, optionally with its Devanagari form and English
  * gloss. Each script carries its own lang tag (WCAG 3.1.2, Language of Parts).
  */
-export function SanskritTerm({
+export function SanskritName({
   term,
   gloss,
   devanagari = true,

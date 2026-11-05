@@ -123,7 +123,7 @@ export interface VerseView {
   href: string
 }
 
-/** A table row's heading cell: plain text, or a Sanskrit term with its display name and gloss. */
+/** A table row's heading cell: plain text, or a Sanskrit name with its display name and gloss. */
 export type TableRowView = {
   head?: Inline | { term: SanskritName; name: string; gloss?: string }
   cells: readonly Inline[]
@@ -262,7 +262,8 @@ export interface ConceptView extends ConceptCard, CarriedOver {
   linked: {
     /**
      * Related Concepts (D06): those sharing a passage, then a work, then a rarely cited
-     * Reference, then only a topic, each group by name.
+     * Reference, then only a topic, each group by name. A shared work alone doesn't relate two
+     * Concepts, unless the Concept would otherwise have fewer than three related.
      */
     related: readonly RelatedConcept[]
     /** The works it quotes, in the order the page first quotes each. */
