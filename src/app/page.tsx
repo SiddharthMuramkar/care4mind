@@ -9,7 +9,7 @@ import { PageTurn, turnForward } from '@/components/PageTurn'
 import { Text } from '@/components/prose'
 import { QuestionnaireCard } from '@/components/QuestionnaireCard'
 import { concepts, home, hrefFor, questionnaires, site } from '@/content'
-import { heroLinks } from '@/lib/hero-links'
+import { heroLinks } from './hero-links'
 import { metadataFor } from '@/lib/metadata'
 import { toDevanagariDigits } from '@/lib/text'
 
