@@ -5,12 +5,14 @@
 //
 //   node scripts/content/verify.mjs                      every record, then the fidelity suite
 //   node scripts/content/verify.mjs concept work/...    records of a kind, or one by kind/id
+//   node scripts/content/verify.mjs --changed <ref>     only the records changed since a ref
 //
 // It reads the saved copies only from $CARE4MIND_CAPTURES, never writes into the repo and never
 // touches the network. Exit code 0 when nothing is missing, 1 when a string is on none of its
 // pages or a fidelity pin fails, 2 when it can't run. What it checks and skips is the "verify"
 // block of tests/unit/content-tools.test.ts. A miss is fixed by matching the page's text, or by
-// listing the edit that explains it.
+// listing the edit that explains it. With --changed and no record file changed, it passes at
+// once without the saved copies: a branch that touches no record has nothing to check.
 
 import { spawnSync } from 'node:child_process'
 import { existsSync, readFileSync } from 'node:fs'
@@ -19,7 +21,7 @@ import { dirname, join } from 'node:path'
 
 import { openCaptures } from './captures.mjs'
 import { rootFrom, runTool, ToolError } from './cli.mjs'
-import { idOf, KIND_FOLDERS, loadRecords, sortRecords } from './records.mjs'
+import { idOf, KIND_FOLDERS, loadEntries, sortRecords } from './records.mjs'
 
 const FIDELITY_CONFIG = 'vitest.fidelity.config.ts'
 
@@ -42,6 +44,68 @@ function selectRecords(records, selectors) {
     matching.forEach((record) => chosen.add(record))
   }
   return records.filter((record) => chosen.has(record))
+}
+
+/** The ref `--changed` names, if any, and the arguments left over. */
+function changedFrom(args) {
+  const at = args.indexOf('--changed')
+  if (at === -1) return { changedRef: undefined, rest: args }
+  const ref = args[at + 1]
+  if (!ref || ref.startsWith('--'))
+    throw new ToolError('--changed needs a ref, such as origin/main.')
+  return { changedRef: ref, rest: [...args.slice(0, at), ...args.slice(at + 2)] }
+}
+
+const DATA_FOLDER = 'src/content/data'
+
+/** One git command in `root`, its output trimmed; a failure is the caller's to name. */
+function git(root, ...args) {
+  const run = spawnSync('git', ['-C', root, ...args], { encoding: 'utf8' })
+  if (run.error) throw new ToolError(`git could not run: ${run.error.message}`)
+  return run
+}
+
+/**
+ * The record files changed in the working tree since `ref`, as registry paths: the ones still
+ * present, and the deleted ones, which leave no record to check. Compared from where the
+ * branch left the ref, so the ref moving on does not pull its own changes in.
+ */
+export function changedRecordPaths(root, ref) {
+  const base = git(root, 'merge-base', ref, 'HEAD')
+  if (base.status !== 0)
+    throw new ToolError(
+      `--changed ${ref}: git found no common ground with HEAD. ${
+        base.stderr.trim() || 'Check the ref exists and is fetched.'
+      }`,
+    )
+  const pathOf = (file) =>
+    file.startsWith(`${DATA_FOLDER}/`) && file.endsWith('.ts')
+      ? file.slice(DATA_FOLDER.length + 1, -'.ts'.length)
+      : undefined
+  const present = new Set()
+  const deleted = new Set()
+  const diff = git(root, 'diff', '--name-status', base.stdout.trim(), '--', DATA_FOLDER)
+  if (diff.status !== 0)
+    throw new ToolError(`--changed ${ref}: git diff failed. ${diff.stderr.trim()}`)
+  for (const line of diff.stdout.split('\n')) {
+    const [status, ...files] = line.split('\t')
+    const file = files.at(-1)
+    if (!status || !file) continue
+    const path = pathOf(file)
+    if (path) (status.startsWith('D') ? deleted : present).add(path)
+    // A rename also leaves its old path behind, with no record of that name left.
+    const from = status.startsWith('R') && files[0] ? pathOf(files[0]) : undefined
+    if (from && from !== path) deleted.add(from)
+  }
+  const untracked = git(root, 'ls-files', '--others', '--exclude-standard', '--', DATA_FOLDER)
+  if (untracked.status !== 0)
+    throw new ToolError(`--changed ${ref}: git ls-files failed. ${untracked.stderr.trim()}`)
+  for (const file of untracked.stdout.split('\n')) {
+    const path = pathOf(file.trim())
+    if (path) present.add(path)
+  }
+  for (const path of present) deleted.delete(path)
+  return { present: [...present].sort(), deleted: [...deleted].sort() }
 }
 // ---------------------------------------------------------------------------------------------
 // Normalising: both a record's strings and its pages are compared in one form, so the check
@@ -316,7 +380,7 @@ export function checkRecord(record, captures) {
       : [record.provenance, record, '']
   if (!provenance)
     return { record: name, status: 'structure', checked: 0, misses: [], drafted: [], notSaved: [] }
-  // A written record's words are its author's: no saved page holds them, so none is consulted.
+  // Written records are unchecked against captures by design: no saved page holds their words.
   if (provenance.origin === 'written')
     return { record: name, status: 'written', checked: 0, misses: [], drafted: [], notSaved: [] }
 
@@ -463,27 +527,62 @@ function runFidelity(root) {
   return held ? 0 : 1
 }
 
-const USAGE = `Usage: node scripts/content/verify.mjs [kind | kind/id ...]
+const USAGE = `Usage: node scripts/content/verify.mjs [kind | kind/id ...] [--changed <ref>]
 
 Checks every string in the records named (all of them when none is) against the saved copies
-of their source pages, read from $CARE4MIND_CAPTURES. With no record named, it then runs the
-fidelity suite (${FIDELITY_CONFIG}), which pins what the migration carried over. Exit code 0
-when every string is found and every pin holds, 1 when a string is on none of its pages or a
-pin fails, 2 when it can't run. Kinds: ${Object.keys(KIND_FOLDERS).join(', ')}.`
+of their source pages, read from $CARE4MIND_CAPTURES. --changed <ref> instead checks only the
+records whose files changed in the working tree since that ref (from where the branch left
+it); with none changed it passes at once, without the saved copies. With every record checked
+and none named, it then runs the fidelity suite (${FIDELITY_CONFIG}), which pins what the
+migration carried over. Exit code 0 when every string is found and every pin holds, 1 when a
+string is on none of its pages or a pin fails, 2 when it can't run. Kinds: ${Object.keys(KIND_FOLDERS).join(', ')}.`
 
 async function main(args) {
   if (args.includes('--help') || args.includes('-h')) {
     process.stdout.write(`${USAGE}\n`)
     return 0
   }
+  const { root, rest: afterRoot } = rootFrom(args)
+  const { changedRef, rest } = changedFrom(afterRoot)
+  let changed
+  if (changedRef !== undefined) {
+    changed = changedRecordPaths(root, changedRef)
+    if (changed.present.length === 0) {
+      // Nothing carried over changed, so nothing needs the saved copies.
+      process.stdout.write(
+        changed.deleted.length === 0
+          ? `verify: no record files changed since ${changedRef}\n`
+          : `verify: only deleted record files since ${changedRef}: ${changed.deleted.join(', ')} (no record left to check)\n`,
+      )
+      return 0
+    }
+  }
   const captures = openCaptures()
-  const { root, rest } = rootFrom(args)
-  const records = sortRecords(selectRecords(await loadRecords(root), rest))
+  const entries = await loadEntries(root)
+  const inScope = changed
+    ? entries.filter((entry) => changed.present.includes(entry.path))
+    : entries
+  if (changed && inScope.length === 0)
+    throw new ToolError(
+      `Changed record files are not in the registry: ${changed.present.join(', ')}. ` +
+        'Write it with: node scripts/content/registry.mjs',
+    )
+  const records = sortRecords(
+    selectRecords(
+      inScope.map((entry) => entry.record),
+      rest,
+    ),
+  )
   const results = records.map((record) => checkRecord(record, captures))
   process.stdout.write(formatResults(results))
+  if (changed && changed.deleted.length > 0)
+    process.stdout.write(
+      `${'deleted'.padEnd(11)}${changed.deleted.join(', ')}: no record left to check\n`,
+    )
   const missing = results.some((result) => result.status === 'failed') ? 1 : 0
   // A partial check leaves the counts unchecked, so only a full one asks the pins.
-  return rest.length === 0 ? Math.max(missing, runFidelity(root)) : missing
+  const partial = rest.length > 0 || changed !== undefined
+  return partial ? missing : Math.max(missing, runFidelity(root))
 }
 
 await runTool(import.meta, main)

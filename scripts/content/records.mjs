@@ -50,8 +50,11 @@ export function sortRecords(records) {
 
 let hooked = false
 
-/** Every record the registry under `root` lists, in its order. Throws if the registry is stale. */
-export async function loadRecords(root) {
+/**
+ * Every registry entry under `root`, in its order: each record with its path under the data
+ * folder (no extension), which is how a changed file is matched to its record.
+ */
+export async function loadEntries(root) {
   const check = spawnSync(process.execPath, [REGISTRY_SCRIPT, '--check', '--root', root], {
     encoding: 'utf8',
   })
@@ -62,7 +65,12 @@ export async function loadRecords(root) {
     hooked = true
   }
   const { registry } = await import(pathToFileURL(join(root, REGISTRY)).href)
-  return registry.map((entry) => entry.record)
+  return registry
+}
+
+/** Every record the registry under `root` lists, in its order. Throws if the registry is stale. */
+export async function loadRecords(root) {
+  return (await loadEntries(root)).map((entry) => entry.record)
 }
 
 function typeScriptHooks(root, ts) {

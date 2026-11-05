@@ -164,7 +164,7 @@ export default definePage({
     sources: [{ url: 'https://care4mind.org/methods/', retrieved: '2026-10-27' }],
     edits: [
       'Renamed: the page is titled “Therapy approaches”, not “Methods”. Its address is unchanged.',
-      'Fixed: the first section’s paragraph opened with the page’s first paragraph again, word for word (“Psychotherapy, also known as talk therapy, involves various techniques to help individuals enhance their mental and emotional well-being.”). The repeat is dropped, and the next sentence’s “It focuses on” reads “Psychotherapy focuses on”.',
+      'Fixed: the first section’s paragraph opened with the page’s first paragraph again, word for word (“Psychotherapy, also known as talk therapy, involves various techniques to help individuals enhance their mental and emotional well-being.”). The repeat is dropped: “It focuses on” → “Psychotherapy focuses on”.',
       'Fixed: the first table’s caption, taken from its section’s heading, named only the first of the five approaches it lists. It reads “Five approaches to psychotherapy”.',
       'Each of the page’s four tabs is a section, headed by the tab’s title.',
       'The two tables have no caption on the page, so the second takes the heading above it, its tab’s title: “Specific Types of Psychotherapy”.',

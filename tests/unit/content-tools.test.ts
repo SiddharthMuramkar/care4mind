@@ -13,7 +13,7 @@ import { join, resolve } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 
 import ts from 'typescript'
-import { afterAll, beforeAll, describe, expect, it } from 'vitest'
+import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 
 import {
   CONTENT_KINDS,
@@ -939,6 +939,100 @@ describe('the verify command', { timeout: 30_000 }, () => {
       const result = run('verify', ['--root', pinning('fidelity-named', 2), 'concept'], env)
       expect(result.stdout).not.toContain('fidelity:')
       expect(result.status).toBe(0)
+    })
+  })
+
+  describe('with --changed', () => {
+    let changedRoot = ''
+
+    const gitIn = (...args: string[]) =>
+      spawnSync(
+        'git',
+        ['-C', changedRoot, '-c', 'user.email=test@example.org', '-c', 'user.name=Test', ...args],
+        { encoding: 'utf8' },
+      )
+
+    const writeConcept = (slug: string, record: object) => {
+      writeFileSync(
+        join(changedRoot, 'src/content/data/concepts', `${slug}.ts`),
+        recordFile(record),
+      )
+      expect(run('registry', ['--root', changedRoot]).status).toBe(0)
+    }
+
+    const changedIn = (env: Record<string, string | undefined> = { CARE4MIND_CAPTURES: site }) =>
+      run('verify', ['--root', changedRoot, '--changed', 'HEAD'], env)
+
+    beforeAll(() => {
+      changedRoot = repo('verify-changed-repo', {
+        'concepts/udaharana.ts': recordFile(concept(paragraphs('Every rule needs an example.'))),
+        'concepts/broken.ts': recordFile(
+          concept(paragraphs('Every rule needs an exemplar.'), { slug: 'broken' }),
+        ),
+      })
+      expect(gitIn('init').status).toBe(0)
+      expect(gitIn('add', '-A').status).toBe(0)
+      expect(gitIn('commit', '-m', 'base').status).toBe(0)
+    })
+
+    beforeEach(() => {
+      gitIn('checkout', '--', '.')
+      gitIn('clean', '-fd', '--', 'src/content/data')
+      expect(run('registry', ['--root', changedRoot]).status).toBe(0)
+      gitIn('checkout', '--', 'src/content/generated')
+    })
+
+    it('passes at once without the captures when no record file changed', () => {
+      const result = changedIn({ CARE4MIND_CAPTURES: undefined })
+      expect(result.status).toBe(0)
+      expect(result.stdout).toContain('verify: no record files changed since HEAD')
+    })
+
+    it('checks only the changed records, and a listed edit passes', () => {
+      writeConcept(
+        'udaharana',
+        concept(paragraphs('Every rule needs a law.'), editedBy('“an example” → “a law”')),
+      )
+      const result = changedIn()
+      expect(result.status).toBe(0)
+      expect(result.stdout).toContain('concept/udaharana')
+      expect(result.stdout).not.toContain('concept/broken')
+      expect(result.stdout).toContain('verify: 1 records')
+    })
+
+    it('fails a changed record whose new text no listed edit explains', () => {
+      writeConcept('udaharana', concept(paragraphs('Every rule needs an exemplar.')))
+      const result = changedIn()
+      expect(result.status).toBe(1)
+      expect(result.stdout).toMatch(/FAILED\s+concept\/udaharana/)
+      expect(result.stdout).not.toContain('concept/broken')
+    })
+
+    it('never fails a changed record written for the new site, which has no source page', () => {
+      const written = JSON.parse(
+        JSON.stringify(
+          concept(paragraphs('A sentence written here, on no saved page.'), { slug: 'written' }),
+        ),
+      ) as { provenance: Record<string, unknown> }
+      written.provenance = { origin: 'written', sources: [], edits: [], flags: [] }
+      writeConcept('written', written)
+      const result = changedIn()
+      expect(result.status).toBe(0)
+      expect(result.stdout).toContain('concept/written')
+      expect(result.stdout).not.toContain('FAILED')
+    })
+
+    it('exits 2 for a ref git cannot use, and for --changed with no ref', () => {
+      const unknown = run('verify', ['--root', changedRoot, '--changed', 'no-such-ref'], {
+        CARE4MIND_CAPTURES: site,
+      })
+      expect(unknown.status).toBe(2)
+      expect(unknown.stderr).toContain('--changed no-such-ref')
+      const missing = run('verify', ['--root', changedRoot, '--changed'], {
+        CARE4MIND_CAPTURES: site,
+      })
+      expect(missing.status).toBe(2)
+      expect(missing.stderr).toContain('--changed needs a ref')
     })
   })
 })
