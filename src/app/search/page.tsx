@@ -1,17 +1,16 @@
 import type { Metadata, Route } from 'next'
 import Link from 'next/link'
 
+import { HelpLine } from '@/components/HelpLine'
 import { turnForward } from '@/components/PageTurn'
 import { ReadingPage } from '@/components/ReadingPage'
+import { SearchForm, StartingPoints } from '@/components/search'
 import { TopicChip } from '@/components/topics'
 import { concepts, hrefFor } from '@/content'
 import { metadataFor } from '@/lib/metadata'
 import { readingTimeWords } from '@/lib/text'
-import { resultGroups } from '@/lib/search/search'
+import { isSearchGroupKind, resultGroups } from '@/lib/search/search'
 import { search } from '@/lib/search/server'
-
-import cta from '@/components/Cta'
-import { cx } from '@/lib/cx'
 
 import listing from '../listing.module.css'
 import reading from '../reading.module.css'
@@ -23,15 +22,20 @@ export function generateMetadata(): Promise<Metadata> {
   return metadataFor(PATH)
 }
 
+const firstOf = (value: string | string[] | undefined) => (Array.isArray(value) ? value[0] : value)
+
 /**
  * Search, rendered on the server for each query, so it works without JavaScript. It finds any
- * spelling of a name, a typo or a match by sound included.
+ * spelling of a name, a typo or a match by sound included, and groups what it finds; a group
+ * shows its five strongest results until its “Show all” address asks for the rest.
  */
 export default async function SearchPage({ searchParams }: PageProps<'/search'>) {
-  const { q } = await searchParams
-  const query = (Array.isArray(q) ? q[0] : q)?.trim() ?? ''
+  const { q, all } = await searchParams
+  const query = firstOf(q)?.trim() ?? ''
+  const expandedWord = firstOf(all) ?? ''
+  const expanded = isSearchGroupKind(expandedWord) ? expandedWord : undefined
   const found = query === '' ? [] : await search(query)
-  const groups = resultGroups(found)
+  const groups = resultGroups(found, expanded)
   // A Concept result shows its card's chip and reading time, as every Concept card does.
   const cards = new Map(
     (query === '' ? [] : await concepts.list()).map((card) => [card.href, card]),
@@ -44,25 +48,24 @@ export default async function SearchPage({ searchParams }: PageProps<'/search'>)
       path={PATH}
       titleId="search-title"
       title="Search"
-      afterTitle={
-        <form action={PATH} role="search" className={styles.form}>
-          <label htmlFor="search-query" className={styles.label}>
-            A Concept, a term, a verse, a text or an author
-          </label>
-          <input
-            id="search-query"
-            name="q"
-            type="search"
-            defaultValue={query}
-            className={styles.input}
-          />
-          <button type="submit" className={cx(cta.primary, styles.button)}>
-            Search
-          </button>
-        </form>
-      }
+      afterTitle={<SearchForm query={query} />}
     >
-      {query === '' ? null : (
+      {query === '' ? (
+        <StartingPoints />
+      ) : found.length === 0 ? (
+        <section className={reading.section} aria-labelledby="results-title">
+          <h2 id="results-title" className={reading.sectionTitle}>
+            No results for “{query}”
+          </h2>
+          <StartingPoints />
+          <p className={styles.browse}>
+            <Link href={hrefFor({ page: 'concepts' })} transitionTypes={turnForward}>
+              Browse all concepts
+            </Link>
+          </p>
+          <HelpLine className={styles.help} />
+        </section>
+      ) : (
         <section className={reading.section} aria-labelledby="results-title">
           <h2 id="results-title" className={reading.sectionTitle}>
             {found.length} {found.length === 1 ? 'result' : 'results'} for “{query}”
@@ -84,6 +87,9 @@ export default async function SearchPage({ searchParams }: PageProps<'/search'>)
                         >
                           {result.title}
                         </Link>
+                        {result.gloss ? (
+                          <span className={styles.gloss}> · {result.gloss}</span>
+                        ) : null}
                       </p>
                       {card ? (
                         <p className={styles.conceptMeta}>
@@ -97,7 +103,14 @@ export default async function SearchPage({ searchParams }: PageProps<'/search'>)
                 })}
               </ul>
               {total > results.length ? (
-                <p className={listing.note}>And {total - results.length} more.</p>
+                <p className={listing.note}>
+                  <Link
+                    href={`${PATH}?q=${encodeURIComponent(query)}&all=${kind}` as Route}
+                    transitionTypes={turnForward}
+                  >
+                    Show all {total}
+                  </Link>
+                </p>
               ) : null}
             </div>
           ))}

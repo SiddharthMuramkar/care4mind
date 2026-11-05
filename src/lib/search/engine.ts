@@ -16,6 +16,8 @@ export interface SearchHit {
   id: string
   kind: SearchKind
   title: string
+  /** The English gloss its page gives, where it has one. */
+  gloss?: string
   /** The language tag of its title where the title is a transliteration. */
   lang?: LatinScript
   href: string
@@ -27,8 +29,8 @@ export interface SearchHit {
 
 /**
  * One document, packed: id, kind, title, href, parent (or null), names, keywords, people, the
- * excerpt's own words (those no other field has), space-separated, and the title's language tag
- * (or null).
+ * excerpt's own words (those no other field has), space-separated, the title's language tag
+ * (or null) and its gloss (or null).
  */
 type Row = [
   id: string,
@@ -41,21 +43,25 @@ type Row = [
   people: string[],
   excerpt: string,
   lang: LatinScript | null,
+  gloss: string | null,
 ]
 
 /** The packed index: plain JSON, so it can be sent to a browser as it is. */
 export interface SearchIndex {
-  version: 2
+  version: 3
   rows: Row[]
 }
 
-/** Each kind in the order a tie is broken, and the order groups of equal weight are shown. */
+/**
+ * Each kind in the order a score tie is broken: the thing itself before a glossary entry that
+ * only defines its name, so “gita” leads with the Bhagavad Gītā, not its glossary entry.
+ */
 export const KIND_ORDER: readonly SearchKind[] = [
   'concept',
   'term',
   'topic',
-  'glossary',
   'work',
+  'glossary',
   'passage',
   'questionnaire',
   'reference',
@@ -73,6 +79,13 @@ const WEIGHT: Record<SearchField, number> = {
 
 /** How well a word matched, before its field's weight. */
 const EXACT = 1
+
+/**
+ * The most one excerpt word can score (its weight, exact, whole: an excerpt's values are single
+ * words). A hit matched only in excerpts must beat it — one word in a 300-character excerpt is
+ * not evidence a page is about it, where two of the query's words there are.
+ */
+const EXCERPT_ONLY_FLOOR = WEIGHT.excerpt * EXACT
 const PHONETIC = 0.6
 const PHONETIC_PREFIX = 0.45
 /** One typo, or two. */
@@ -102,9 +115,10 @@ const COMMON = new Set(
 /** Packs the search documents into the index: compact JSON, built once with the site. */
 export function buildIndex(documents: readonly SearchDocument[]): SearchIndex {
   return {
-    version: 2,
+    version: 3,
     rows: documents.map((document): Row => {
-      const { id, kind, title, href, parent, names, keywords, people, excerpt, lang } = document
+      const { id, kind, title, href, parent, names, keywords, people, excerpt, lang, gloss } =
+        document
       // The excerpt counts only for words no other field has, each once, and no common ones.
       const known = new Set([title, ...names, ...keywords, ...people].flatMap(words))
       const own: string[] = []
@@ -125,6 +139,7 @@ export function buildIndex(documents: readonly SearchDocument[]): SearchIndex {
         [...people],
         own.join(' '),
         lang ?? null,
+        gloss ?? null,
       ]
     }),
   }
@@ -276,18 +291,23 @@ function lookUp(
 const bestOf = (values: Map<string, Match>): Match =>
   [...values.values()].reduce((a, b) => (b.score > a.score ? b : a))
 
-/** Hits by kind, the kind with the best hit first; within a kind, best first. */
-function grouped(hits: SearchHit[]): SearchHit[] {
+/**
+ * Hits best first: a name or title the query matches whole, ignoring diacritics, before every
+ * other hit; then by score, a tie by kind, then by title. Grouping is `resultGroups`' work.
+ */
+function ranked(hits: SearchHit[], exact: ReadonlySet<string>): SearchHit[] {
   const rank = (hit: SearchHit) => KIND_ORDER.indexOf(hit.kind)
-  const byScore = (a: SearchHit, b: SearchHit) =>
-    b.score - a.score || rank(a) - rank(b) || a.title.localeCompare(b.title)
-  const sorted = hits.toSorted(byScore)
-  const order = [...new Set(sorted.map(({ kind }) => kind))]
-  return sorted.toSorted((a, b) => order.indexOf(a.kind) - order.indexOf(b.kind))
+  return hits.toSorted(
+    (a, b) =>
+      Number(exact.has(b.id)) - Number(exact.has(a.id)) ||
+      b.score - a.score ||
+      rank(a) - rank(b) ||
+      a.title.localeCompare(b.title),
+  )
 }
 
 /**
- * The documents a query finds, grouped by kind. Every word of the query must match
+ * The documents a query finds, best first. Every word of the query must match
  * one of a document's fields; a query or a name written as one word or as several finds the same.
  */
 export function query(index: SearchIndex, q: string): SearchHit[] {
@@ -297,7 +317,7 @@ export function query(index: SearchIndex, q: string): SearchHit[] {
   if (typed.length === 0) return []
   const { documents, postings, words: vocabulary, phrases, runs } = prepare(index)
   const count = typed.length
-  const scores = new Map<number, Match>()
+  const scores = new Map<number, Match & { named: boolean }>()
 
   // Word by word: a document must match every word, and scores the sum of its best matches.
   // It shows the value that matched the most words, the best scoring of those.
@@ -323,7 +343,10 @@ export function query(index: SearchIndex, q: string): SearchHit[] {
       (sum, values) => sum + bestOf(values).score,
       0,
     )
-    scores.set(doc, { score, posting: shown.match.posting })
+    const named = (all as Map<string, Match>[]).some((values) =>
+      [...values.values()].some(({ posting }) => posting.field !== 'excerpt'),
+    )
+    scores.set(doc, { score, posting: shown.match.posting, named })
   }
 
   // The query run together, against names written in more than one word, and the other way.
@@ -334,8 +357,28 @@ export function query(index: SearchIndex, q: string): SearchHit[] {
     for (const [doc, values] of found) {
       const best = bestOf(values)
       const score = best.score * count
-      if ((scores.get(doc)?.score ?? 0) < score) scores.set(doc, { score, posting: best.posting })
+      const named = best.posting.field !== 'excerpt'
+      const known = scores.get(doc)
+      if ((known?.score ?? 0) < score)
+        scores.set(doc, { score, posting: best.posting, named: named || (known?.named ?? false) })
+      else if (known && named) scores.set(doc, { ...known, named: true })
     }
+  }
+
+  for (const [doc, { score, named }] of scores) {
+    if (!named && score <= EXCERPT_ONLY_FLOOR) scores.delete(doc)
+  }
+
+  // A name or title the folded query matches whole, as written or run together, leads.
+  const exact = new Set<string>()
+  const wholeQuery = typed.join(' ')
+  for (const doc of scores.keys()) {
+    const { row, values } = documents[doc] as Document
+    const named = [...values.names, ...values.title]
+    if (
+      named.some((text) => words(text).join(' ') === wholeQuery || words(text).join('') === joined)
+    )
+      exact.add(row[0])
   }
 
   const hits = [...scores].map(([doc, { score, posting }]): SearchHit => {
@@ -352,8 +395,10 @@ export function query(index: SearchIndex, q: string): SearchHit[] {
     }
     const lang = row[9]
     if (lang !== null) hit.lang = lang
+    const gloss = row[10]
+    if (gloss !== null) hit.gloss = gloss
     if (parent !== null) hit.parent = parent
     return hit
   })
-  return grouped(hits)
+  return ranked(hits, exact)
 }

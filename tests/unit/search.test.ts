@@ -3,6 +3,7 @@ import { gzipSync } from 'node:zlib'
 import { beforeAll, describe, expect, it } from 'vitest'
 
 import { concepts, site, type SearchDocument } from '@/content'
+import { stripDiacritics } from '@/lib/sanskrit'
 import { buildIndex, query, type SearchHit, type SearchIndex } from '@/lib/search/engine'
 import { resultGroups } from '@/lib/search/search'
 import { search } from '@/lib/search/server'
@@ -118,15 +119,14 @@ describe('the search engine, on the real corpus', () => {
     expect(query(index, q)).toEqual([])
   })
 
-  it('groups hits by kind, the kind holding the best hit first', () => {
+  it('ranks hits best first, and within a kind the scores never rise', () => {
     const hits = query(index, 'vikshepa')
-    const kinds = hits.map(({ kind }) => kind)
-    const groups = kinds.filter((kind, at) => kind !== kinds[at - 1])
-    expect(new Set(groups).size).toBe(groups.length)
-    expect(groups[0]).toBe('concept')
-    for (const group of new Set(groups)) {
-      const scores = hits.filter(({ kind }) => kind === group).map(({ score }) => score)
-      expect(scores).toEqual(scores.toSorted((a, b) => b - a))
+    expect(hits[0]?.id).toBe('concept:vikshepa')
+    const scores = hits.map(({ score }) => score)
+    expect(scores).toEqual(scores.toSorted((a, b) => b - a))
+    for (const kind of new Set(hits.map((hit) => hit.kind))) {
+      const within = hits.filter((hit) => hit.kind === kind).map(({ score }) => score)
+      expect(within).toEqual(within.toSorted((a, b) => b - a))
     }
   })
 
@@ -179,6 +179,57 @@ describe('the matching order', () => {
       'concept:typo',
     ])
   })
+
+  it('puts a whole name or title first, over a higher-scoring start of another name', () => {
+    const titled = (id: string, title: string, names: readonly string[]): SearchDocument => ({
+      id: `concept:${id}`,
+      kind: 'concept',
+      title,
+      href: `/concepts/${id}/`,
+      names: [...names],
+      keywords: [],
+      people: [],
+      excerpt: '',
+    })
+    const small = buildIndex([
+      // Its names prefix scores above a title's 8; only the whole-title match leads.
+      titled('prefix', 'Something else', ['kalpas']),
+      titled('whole', 'Kalpa', []),
+    ])
+    expect(query(small, 'kalpa')[0]?.id).toBe('concept:whole')
+    // Diacritics ignored: the same whole name, typed either way.
+    expect(query(buildIndex([named('accented', 'kalpā')]), 'kalpa')[0]?.id).toBe('concept:accented')
+  })
+
+  it('never makes a result of one word in an excerpt alone, and still finds two of them there', () => {
+    const small = buildIndex([
+      {
+        id: 'concept:excerpted',
+        kind: 'concept',
+        title: 'Excerpted',
+        href: '/concepts/excerpted/',
+        names: ['Excerpted'],
+        keywords: [],
+        people: [],
+        excerpt: 'Restlessness and wandering thoughts, described at length.',
+      },
+      {
+        id: 'concept:keyed',
+        kind: 'concept',
+        title: 'Keyed',
+        href: '/concepts/keyed/',
+        names: ['Keyed'],
+        keywords: ['restlessness'],
+        people: [],
+        excerpt: '',
+      },
+    ])
+    // A name, title, keyword or person match always counts, an excerpt-only one needs more
+    // than one excerpt word can score.
+    expect(ids(query(small, 'restlessness'))).toEqual(['concept:keyed'])
+    expect(ids(query(small, 'wandering'))).toEqual([])
+    expect(ids(query(small, 'restlessness wandering'))).toContain('concept:excerpted')
+  })
 })
 
 describe('what search never finds', () => {
@@ -219,6 +270,58 @@ describe('search(), as the results page calls it', () => {
   it.each(['anger', 'calm', 'meditation'])('finds at least one Concept for “%s”', async (q) => {
     expect((await conceptsFound(q)).length).toBeGreaterThan(0)
   })
+
+  it('finds the same Concept page for every spelling of Vikṣepa', async () => {
+    const firstHref = new Set<string>()
+    for (const q of ['vikshepa', 'viksepa', 'vikṣepa', 'विक्षेप']) {
+      const [first] = await search(q)
+      expect(first?.id).toBe('concept:vikshepa')
+      firstHref.add(first?.href as string)
+    }
+    expect(firstHref.size).toBe(1)
+  })
+
+  it('leads with the Bhagavad Gītā itself for “gita”, ahead of Concepts and glossary entries', async () => {
+    const found = await search('gita')
+    expect(found[0]).toMatchObject({ id: 'work:bhagavad-gita', href: '/texts/bhagavad-gita/' })
+  })
+
+  it('leads with every Concept for its own name, diacritics or none', async () => {
+    for (const card of await concepts.list()) {
+      for (const q of new Set([card.name, stripDiacritics(card.name)])) {
+        expect((await search(q))[0]?.id, `${card.slug} for “${q}”`).toBe(`concept:${card.slug}`)
+      }
+    }
+  }, 60_000)
+
+  it.each(['anxiety', 'self-worth'])(
+    'finds nothing at all for “%s”, so the page reaches its no-results state',
+    async (q) => {
+      expect(await search(q)).toEqual([])
+    },
+  )
+
+  it('finds no Concept for “stress”, and leads with the References whose titles name it', async () => {
+    // No Concept keyword names the construct. Two References carry “stress” in their titles —
+    // records the site has held since before this ticket was written — and a title match is a
+    // real result, so “stress” does not reach the no-results state.
+    const found = await search('stress')
+    expect(found.map(({ id }) => id)).toEqual([
+      'reference:sivakumar-rajini-2022',
+      'reference:matko-2021',
+    ])
+    expect(await conceptsFound('stress')).toEqual([])
+  })
+
+  it('carries a Concept’s and a term’s gloss, and none where the page gives none', async () => {
+    const vikshepa = (await concepts.list()).find(({ slug }) => slug === 'vikshepa')
+    const onConcept = (await search('vikshepa')).find(({ id }) => id === 'concept:vikshepa')
+    expect(onConcept?.gloss).toBe(vikshepa?.english)
+    const onTerm = (await search('samsaya')).find(({ id }) => id === 'term:vikshepa#samsaya')
+    expect(onTerm?.gloss).toBe('Doubt')
+    const onReference = (await search('Tomar')).find(({ id }) => id === 'reference:tomar-2024')
+    expect(onReference).not.toHaveProperty('gloss')
+  })
 })
 
 describe('the result groups', () => {
@@ -231,7 +334,7 @@ describe('the result groups', () => {
     score: 0,
   })
 
-  it('orders groups by their first hit, not by a fixed order of kinds', () => {
+  it('orders groups as the page has them, however the hits rank', () => {
     const groups = resultGroups([
       hitOf('reference', 1),
       hitOf('concept', 1),
@@ -239,54 +342,78 @@ describe('the result groups', () => {
       hitOf('work', 1),
     ])
     expect(groups.map(({ kind, heading, total }) => ({ kind, heading, total }))).toEqual([
-      { kind: 'reference', heading: 'References', total: 2 },
       { kind: 'concept', heading: 'Concepts', total: 1 },
       { kind: 'work', heading: 'Traditional texts', total: 1 },
+      { kind: 'reference', heading: 'References', total: 2 },
     ])
-    expect(groups[0]?.results.map(({ id }) => id)).toEqual(['reference:1', 'reference:2'])
+    // Within a group the hits keep their ranked order.
+    expect(groups.at(-1)?.results.map(({ id }) => id)).toEqual(['reference:1', 'reference:2'])
   })
 
-  it('heads each kind as the results page has', () => {
+  it('heads each group as the results page has, Library items and pages together last', () => {
     const kinds = [
-      'concept',
-      'term',
-      'topic',
-      'glossary',
-      'work',
-      'passage',
-      'questionnaire',
-      'reference',
-      'library-item',
       'page',
+      'library-item',
+      'reference',
+      'questionnaire',
+      'passage',
+      'work',
+      'glossary',
+      'topic',
+      'term',
+      'concept',
     ] as const
-    expect(
-      resultGroups(kinds.map((kind, n) => hitOf(kind, n))).map(({ heading }) => heading),
-    ).toEqual([
-      'Concepts',
-      'Terms inside Concepts',
-      'Topics',
-      'Glossary',
-      'Traditional texts',
-      'Verses',
-      'Questionnaires',
-      'References',
-      'In the Library',
-      'Pages',
+    const groups = resultGroups(kinds.map((kind, n) => hitOf(kind, n)))
+    expect(groups.map(({ kind, heading }) => ({ kind, heading }))).toEqual([
+      { kind: 'concept', heading: 'Concepts' },
+      { kind: 'term', heading: 'Terms' },
+      { kind: 'topic', heading: 'Topics' },
+      { kind: 'glossary', heading: 'Glossary entries' },
+      { kind: 'work', heading: 'Traditional texts' },
+      { kind: 'passage', heading: 'Passages' },
+      { kind: 'questionnaire', heading: 'Questionnaires' },
+      { kind: 'reference', heading: 'References' },
+      { kind: 'library-and-pages', heading: 'Library and other pages' },
     ])
+    const merged = groups.at(-1)
+    expect(merged?.total).toBe(2)
+    expect(merged?.results.map(({ kind }) => kind)).toEqual(['page', 'library-item'])
   })
 
-  it('shows at most 25 of a kind and counts the rest in its total', () => {
+  it('shows at most 5 of a group, counts the rest, and shows all of the expanded group', () => {
     const hits = Array.from({ length: 30 }, (_, n) => hitOf('passage', n))
     const [group] = resultGroups(hits)
-    expect(group).toMatchObject({ kind: 'passage', heading: 'Verses', total: 30 })
-    expect(group?.results).toHaveLength(25)
-    expect(group?.results.map(({ id }) => id)).toEqual(hits.slice(0, 25).map(({ id }) => id))
+    expect(group).toMatchObject({ kind: 'passage', heading: 'Passages', total: 30 })
+    expect(group?.results).toHaveLength(5)
+    expect(group?.results.map(({ id }) => id)).toEqual(hits.slice(0, 5).map(({ id }) => id))
+    const [expanded] = resultGroups(hits, 'passage')
+    expect(expanded?.results).toHaveLength(30)
+    expect(expanded?.total).toBe(30)
   })
 
-  it('drops kinds with nothing found, and groups nothing from nothing', () => {
+  it('drops groups with nothing found, and groups nothing from nothing', () => {
     expect(resultGroups([])).toEqual([])
     expect(resultGroups([hitOf('topic', 1)]).map(({ kind }) => kind)).toEqual(['topic'])
   })
+
+  it('shows no group over 5 before “Show all” on the real corpus, and counts every hit once', async () => {
+    const names = (await concepts.list()).slice(0, 5).map(({ name }) => name)
+    for (const q of [...names, 'gita', 'a', 'yoga']) {
+      const hits = query(index, q)
+      const groups = resultGroups(hits)
+      expect(
+        groups.reduce((sum, { total }) => sum + total, 0),
+        q,
+      ).toBe(hits.length)
+      for (const group of groups) {
+        expect(group.results.length, `${q} ${group.kind}`).toBeLessThanOrEqual(5)
+        // “Show all n” stands exactly where the cap holds results back.
+        expect(group.total > group.results.length, `${q} ${group.kind}`).toBe(group.total > 5)
+        const scores = group.results.map(({ score }) => score)
+        expect(scores, `${q} ${group.kind}`).toEqual(scores.toSorted((a, b) => b - a))
+      }
+    }
+  }, 60_000)
 })
 
 describe('the language a hit carries', () => {
