@@ -79,6 +79,13 @@ const WEIGHT: Record<SearchField, number> = {
 
 /** How well a word matched, before its field's weight. */
 const EXACT = 1
+
+/**
+ * The most one excerpt word can score (its weight, exact, whole: an excerpt's values are single
+ * words). A hit matched only in excerpts must beat it — one word in a 300-character excerpt is
+ * not evidence a page is about it, where two of the query's words there are.
+ */
+const EXCERPT_ONLY_FLOOR = WEIGHT.excerpt * EXACT
 const PHONETIC = 0.6
 const PHONETIC_PREFIX = 0.45
 /** One typo, or two. */
@@ -310,7 +317,7 @@ export function query(index: SearchIndex, q: string): SearchHit[] {
   if (typed.length === 0) return []
   const { documents, postings, words: vocabulary, phrases, runs } = prepare(index)
   const count = typed.length
-  const scores = new Map<number, Match>()
+  const scores = new Map<number, Match & { named: boolean }>()
 
   // Word by word: a document must match every word, and scores the sum of its best matches.
   // It shows the value that matched the most words, the best scoring of those.
@@ -336,7 +343,10 @@ export function query(index: SearchIndex, q: string): SearchHit[] {
       (sum, values) => sum + bestOf(values).score,
       0,
     )
-    scores.set(doc, { score, posting: shown.match.posting })
+    const named = (all as Map<string, Match>[]).some((values) =>
+      [...values.values()].some(({ posting }) => posting.field !== 'excerpt'),
+    )
+    scores.set(doc, { score, posting: shown.match.posting, named })
   }
 
   // The query run together, against names written in more than one word, and the other way.
@@ -347,8 +357,16 @@ export function query(index: SearchIndex, q: string): SearchHit[] {
     for (const [doc, values] of found) {
       const best = bestOf(values)
       const score = best.score * count
-      if ((scores.get(doc)?.score ?? 0) < score) scores.set(doc, { score, posting: best.posting })
+      const named = best.posting.field !== 'excerpt'
+      const known = scores.get(doc)
+      if ((known?.score ?? 0) < score)
+        scores.set(doc, { score, posting: best.posting, named: named || (known?.named ?? false) })
+      else if (known && named) scores.set(doc, { ...known, named: true })
     }
+  }
+
+  for (const [doc, { score, named }] of scores) {
+    if (!named && score <= EXCERPT_ONLY_FLOOR) scores.delete(doc)
   }
 
   // A name or title the folded query matches whole, as written or run together, leads.

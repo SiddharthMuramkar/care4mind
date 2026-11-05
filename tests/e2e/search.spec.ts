@@ -86,10 +86,15 @@ test.describe('the search page, without JavaScript', () => {
   test('no results offers the starting points, the Concepts and the help line', async ({
     page,
   }) => {
-    const response = await page.goto('/search/?q=self-worth')
-    expect(response?.status()).toBe(200)
+    for (const q of ['self-worth', 'anxiety']) {
+      const response = await page.goto(`/search/?q=${q}`)
+      expect(response?.status()).toBe(200)
+      await expect(page.getByRole('main').getByRole('heading', { level: 2 })).toHaveText(
+        `No results for “${q}”`,
+      )
+    }
+    await page.goto('/search/?q=self-worth')
     const main = page.getByRole('main')
-    await expect(main.getByRole('heading', { level: 2 })).toHaveText('No results for “self-worth”')
     const { onYourMind } = await home.get()
     for (const { label, concept } of onYourMind) {
       await expect(main.getByRole('link', { name: label, exact: true })).toHaveAttribute(

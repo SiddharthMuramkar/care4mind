@@ -200,6 +200,36 @@ describe('the matching order', () => {
     // Diacritics ignored: the same whole name, typed either way.
     expect(query(buildIndex([named('accented', 'kalpā')]), 'kalpa')[0]?.id).toBe('concept:accented')
   })
+
+  it('never makes a result of one word in an excerpt alone, and still finds two of them there', () => {
+    const small = buildIndex([
+      {
+        id: 'concept:excerpted',
+        kind: 'concept',
+        title: 'Excerpted',
+        href: '/concepts/excerpted/',
+        names: ['Excerpted'],
+        keywords: [],
+        people: [],
+        excerpt: 'Restlessness and wandering thoughts, described at length.',
+      },
+      {
+        id: 'concept:keyed',
+        kind: 'concept',
+        title: 'Keyed',
+        href: '/concepts/keyed/',
+        names: ['Keyed'],
+        keywords: ['restlessness'],
+        people: [],
+        excerpt: '',
+      },
+    ])
+    // A name, title, keyword or person match always counts, an excerpt-only one needs more
+    // than one excerpt word can score.
+    expect(ids(query(small, 'restlessness'))).toEqual(['concept:keyed'])
+    expect(ids(query(small, 'wandering'))).toEqual([])
+    expect(ids(query(small, 'restlessness wandering'))).toContain('concept:excerpted')
+  })
 })
 
 describe('what search never finds', () => {
@@ -264,15 +294,23 @@ describe('search(), as the results page calls it', () => {
     }
   }, 60_000)
 
-  it.each(['stress', 'anxiety'])(
-    'finds no Concept for the construct “%s”: no keyword names it',
+  it.each(['anxiety', 'self-worth'])(
+    'finds nothing at all for “%s”, so the page reaches its no-results state',
     async (q) => {
-      expect(await conceptsFound(q)).toEqual([])
+      expect(await search(q)).toEqual([])
     },
   )
 
-  it('finds nothing at all for “self-worth”, so the page reaches its no-results state', async () => {
-    expect(await search('self-worth')).toEqual([])
+  it('finds no Concept for “stress”, and leads with the References whose titles name it', async () => {
+    // No Concept keyword names the construct. Two References carry “stress” in their titles —
+    // records the site has held since before this ticket was written — and a title match is a
+    // real result, so “stress” does not reach the no-results state.
+    const found = await search('stress')
+    expect(found.map(({ id }) => id)).toEqual([
+      'reference:sivakumar-rajini-2022',
+      'reference:matko-2021',
+    ])
+    expect(await conceptsFound('stress')).toEqual([])
   })
 
   it('carries a Concept’s and a term’s gloss, and none where the page gives none', async () => {
