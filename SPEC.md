@@ -53,6 +53,7 @@ These are judgement calls, so review checks them against the diff, in the codeba
 | A `styles.x` lookup names a class its CSS module defines, and markup reads every class a module defines | CSS module classes test |
 | A focused link on a paper surface, marked `data-paper`, rings in paper's focus colour | paper spec |
 | IAST and Devanagari carry `lang` | components, for name fields, the verse-copied toast and Devanagari runs. IAST inside running text is untagged (#76) |
+| The migration's records, counts and derived pages stay as carried over, until the client signs it off | the fidelity suite in `tests/fidelity`, which `verify.mjs` runs after checking every record (or `pnpm content:fidelity` alone); not in `pnpm check`, so new content needs no test edit |
 | Carried-over text changes only to fix a listed error | `verify.mjs`, which runs only on a machine with the captures; nothing in CI (#48) |
 | Comments state reasons, not ticket numbers or decision codes | nothing yet (#38) |
 | A backticked repo path, a `pnpm` script or a section of a doc named in a doc or a comment exists | pointers test |
@@ -65,7 +66,7 @@ These are judgement calls, so review checks them against the diff, in the codeba
 
 ## Where a change goes
 
-- **A record of an existing kind:** `pnpm content:new <kind> <id>` writes a template that compiles. Fill it in, then run `pnpm check`. Today that check fails on tests that pin record counts (#45).
+- **A record of an existing kind:** `pnpm content:new <kind> <id>` writes a template that compiles. Fill it in, then run `pnpm check`: no test needs an edit. `pnpm content:fidelity`, and so `verify.mjs`, will then fail, since it pins what the migration carried over; update it only for a change to that migration.
 - **A link field:** the record schema, the graph's link check, then the view that shows it.
 - **A content kind:** the compiler finds only some of these places, so work through every step:
   1. The record schema: its type, its `define…` helper and its kind's folder.
@@ -109,7 +110,6 @@ The planning map, issue #6, lists them. Until each is decided, the code leaves i
 The code still holds these patterns, and new code doesn't copy them. Each line names the ticket that removes the pattern, and the PR that closes that ticket deletes the line.
 
 - Comments that cite ticket numbers, decision codes (D01–D21), design codes (such as B6) or spec names. The documents they point at were deleted in `bfdbff0`. State the reason instead (#38).
-- Tests that pin how many records exist (#45).
 - A setting that looks load-bearing but does nothing here: `typedRoutes`, which can't check paths that end in a slash (#55). The checks that do hold links true are the `hrefFor()` lint rule and the browser crawler.
 
 ## Changing this file

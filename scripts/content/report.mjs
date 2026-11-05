@@ -12,8 +12,9 @@
 import { mkdirSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 
-import { openCaptures, runTool, ToolError } from './extract.mjs'
-import { idOf, loadRecords, rootFrom, sortRecords } from './verify.mjs'
+import { openCaptures } from './captures.mjs'
+import { rootFrom, runTool, ToolError } from './cli.mjs'
+import { idOf, loadRecords, sortRecords } from './records.mjs'
 
 /** The schema module that holds the planning issues table: this repo's, whatever --root says. */
 const SCHEMA = new URL('../../src/content/schema/common.ts', import.meta.url)
