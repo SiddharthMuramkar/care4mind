@@ -4,7 +4,7 @@ import type { CSSProperties } from 'react'
 import { hrefFor, type BlockView, type SectionView, type TopicRef } from '@/content'
 
 import { turnForward } from '../PageTurn'
-import { SanskritTerm } from '../SanskritTerm'
+import { SanskritName } from '../SanskritName'
 import styles from './Prose.module.css'
 import { standingIn } from './standing-in'
 import { Text, type CitationLinks } from './Text'
@@ -68,7 +68,7 @@ function DataTable({ table, citations }: { table: Table; citations?: CitationLin
                     {typeof row.head === 'string' ? (
                       <Text text={row.head} citations={citations} />
                     ) : (
-                      <SanskritTerm
+                      <SanskritName
                         term={row.head.term}
                         gloss={row.head.gloss}
                         devanagari={false}
@@ -125,7 +125,7 @@ function Block({
         <div id={block.id} className={styles.term}>
           <div className={styles.termHead}>
             <Heading className={styles.termTitle}>
-              <SanskritTerm term={block.term} gloss={block.gloss} capitalised />
+              <SanskritName term={block.term} gloss={block.gloss} capitalised />
             </Heading>
             <a href={`#${block.id}`} className={styles.anchor}>
               <span aria-hidden>¶</span>

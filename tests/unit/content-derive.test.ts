@@ -800,6 +800,47 @@ describe('site.searchDocuments', () => {
     expect(long.startsWith(concept?.excerpt.slice(0, -1) ?? '')).toBe(true)
   })
 
+  it('gives a term in a topic introduction its topic as its parent', async () => {
+    const withIntro = records.map((record) =>
+      record === self
+        ? defineTopic({
+            ...self,
+            intro: {
+              sections: [
+                {
+                  id: 'restraints',
+                  heading: 'Restraints',
+                  blocks: [
+                    {
+                      kind: 'term',
+                      id: 'yama',
+                      term: { iast: 'yama', devanagari: 'यम', ascii: [] },
+                      gloss: 'Restraint',
+                      blocks: [{ kind: 'paragraph', text: 'Made-up text about restraint.' }],
+                    },
+                  ],
+                },
+              ],
+              references: [],
+              provenance,
+            },
+          })
+        : record,
+    )
+    const all = await createContent(memorySource(...withIntro), ON).site.searchDocuments()
+    expect(all.find((document) => document.id === 'term:topic/self#yama')).toEqual({
+      id: 'term:topic/self#yama',
+      kind: 'term',
+      title: 'Yama',
+      href: '/topics/self/#yama',
+      parent: 'Self',
+      names: ['yama', 'यम'],
+      keywords: ['Restraint'],
+      people: [],
+      excerpt: 'Made-up text about restraint.',
+    })
+  })
+
   it('gives a term its Concept as its parent', async () => {
     expect(await find('term:obstacles#samsaya')).toEqual({
       id: 'term:obstacles#samsaya',

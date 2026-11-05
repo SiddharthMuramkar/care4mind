@@ -9,7 +9,7 @@ import type { ContentKind } from './kinds'
 /** Lowercase ASCII words joined by hyphens (D02): `vikshepa`, `five-steps-of-perfection`. */
 export type Slug = string
 
-/** A Sanskrit term in each stored form (NFR-03). */
+/** A Sanskrit name in each stored form (NFR-03). */
 export interface SanskritName {
   /** IAST. */
   iast: string
@@ -78,7 +78,7 @@ export interface PassageQuote {
   meaning?: Inline
 }
 
-/** A table row's heading cell: plain text, or a Sanskrit term with its gloss. */
+/** A table row's heading cell: plain text, or a Sanskrit name with its gloss. */
 export type TableRowHead = Inline | { term: SanskritName; gloss?: string }
 
 export interface TableRow {

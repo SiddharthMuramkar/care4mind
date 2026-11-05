@@ -32,6 +32,23 @@ export function conceptCard(record: ConceptRecord, graph: ContentGraph): Concept
   }
 }
 
+// Below this many, a Concept's page would look bare, so shared-text-only links fill it back up.
+const MIN_RELATED = 3
+
+/**
+ * Drops the Concepts whose only link is a shared traditional text, which is too weak on its own,
+ * unless that leaves fewer than MIN_RELATED: then the strongest of them come back up to it.
+ */
+function keepRelated<T extends { relations: readonly Relation[] }>(sorted: readonly T[]): T[] {
+  const workOnly = (group: T) => group.relations.every((relation) => relation.kind === 'work')
+  const kept = new Set(sorted.filter((group) => !workOnly(group)))
+  for (const group of sorted) {
+    if (kept.size >= MIN_RELATED) break
+    kept.add(group)
+  }
+  return sorted.filter((group) => kept.has(group))
+}
+
 /** The Concepts related to this one, strongest relation first, then by name. */
 function relatedConcepts(record: ConceptRecord, graph: ContentGraph): RelatedConcept[] {
   const byConcept = new Map<Slug, Relation[]>()
@@ -42,7 +59,7 @@ function relatedConcepts(record: ConceptRecord, graph: ContentGraph): RelatedCon
   }
   const strongest = (relations: readonly Relation[]) =>
     Math.min(...relations.map((relation) => RELATION_STRENGTH.indexOf(relation.kind)))
-  return [...byConcept]
+  const sorted = [...byConcept]
     .map(([slug, relations]) => ({
       card: conceptCard(must(graph, 'concept', slug), graph),
       relations,
@@ -50,10 +67,10 @@ function relatedConcepts(record: ConceptRecord, graph: ContentGraph): RelatedCon
     .sort(
       (a, b) => strongest(a.relations) - strongest(b.relations) || byName(a.card.name, b.card.name),
     )
-    .map(({ card, relations }) => ({
-      ...card,
-      reasons: relations.map((relation) => ({ kind: relation.kind, text: relation.reason })),
-    }))
+  return keepRelated(sorted).map(({ card, relations }) => ({
+    ...card,
+    reasons: relations.map((relation) => ({ kind: relation.kind, text: relation.reason })),
+  }))
 }
 
 /** The works a Concept quotes, in the order it first quotes each, with their passages in order. */
