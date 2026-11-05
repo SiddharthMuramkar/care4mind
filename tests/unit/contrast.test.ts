@@ -8,7 +8,7 @@ import {
   contrastRatio,
   customProperties,
   resolveColour,
-} from '@/lib/contrast'
+} from '@/styles/contrast'
 
 describe('contrastRatio', () => {
   it('matches the WCAG reference values', () => {

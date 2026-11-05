@@ -1,5 +1,5 @@
 import { home } from '@/content'
-import { helpLineParts } from '@/lib/help-line'
+import { helpLineParts } from './help-line'
 
 import styles from './HelpLine.module.css'
 

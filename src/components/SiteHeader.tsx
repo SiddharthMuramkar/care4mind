@@ -6,9 +6,7 @@ import { SearchGlyph } from '@/components/nav/glyphs'
 import { SectionNav } from '@/components/nav/SectionNav'
 import { siteNav } from '@/components/nav/site-nav'
 import { ProposalNote } from '@/components/proposals/ProposalNote'
-import { ScriptPreference } from '@/components/script/ScriptPreference'
 import { SearchTrigger } from '@/components/search/SearchTrigger'
-import { features } from '@/config/features'
 import { cx } from '@/lib/cx'
 
 import { LotusMark } from './Fleuron'
@@ -45,11 +43,6 @@ export async function SiteHeader() {
             <span className={cx('sr-only', styles.searchLabel)}>Search</span>
           </SearchTrigger>
         </nav>
-        {features.devanagariFirst ? (
-          <div className={styles.script}>
-            <ScriptPreference placement="header" />
-          </div>
-        ) : null}
         <MenuButton
           nav={nav}
           search={
@@ -58,7 +51,6 @@ export async function SiteHeader() {
               Search
             </SearchTrigger>
           }
-          script={features.devanagariFirst ? <ScriptPreference placement="drawer" /> : null}
           mapNote={mapNote}
         />
       </div>

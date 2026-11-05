@@ -17,11 +17,11 @@ Each module is named by its capability, and outside code reaches it only through
 - **Pages**: App Router routes that read content only through `@/content`. `site.routes()` is the one list of public pages, and `site.route(path)` and `site.params(pattern)` read it. A dynamic page's `generateStaticParams` is `site.params` of its pattern. The sitemap, page metadata, the breadcrumb trail, the navigation, the links to optional pages and the link crawler read the list. A page never asks a flag whether it exists: its breadcrumb trail answers 404 for a path the registry doesn't list. _Tests: content-derive, routes, page-shell; browser: crawler._
 - **Page metadata and share cards**: `metadataFor(path)` in `@/lib/metadata` gives every page its title, description, canonical address and Open Graph and Twitter text. Images never go in metadata: each page's route segment has an `opengraph-image.tsx` that calls `shareCard()` (`@/lib/share-card`), which reads the WOFF twins of the font subsets through `@/fonts/card-faces`. _Tests: site; browser: share-card._
 - **Search**: the `Search` type in `@/lib/search/search`, a query in and hits grouped by kind out. Pages call `search()` from `@/lib/search/server`, which answers from the engine (`@/lib/search/engine`) over the site's search documents, so the Architecture review can put another engine behind it. _Tests: search (unit and browser)._
-- **Feature flags**: `features`, read once at build, on the server. A client component gets a flag as a prop. A feature that's built but not yet approved for launch is on in previews and off in production. The built proposals are the Concept map, Devanagari first and Start here (`/start/`, linked from the header and the Menu); with a flag off, its route leaves `site.routes()`, so its links go too. _Tests: features; browser: the crawler and pages specs on a build with every flag off, as production has. Review for the server-only reading._
+- **Feature flags**: `features`, read once at build, on the server. A client component gets a flag as a prop. A feature that's built but not yet approved for launch is on in previews and off in production. The built proposals are the Concept map and Start here (`/start/`, linked from the header and the Menu); with a flag off, its route leaves `site.routes()`, so its links go too. _Tests: features; browser: the crawler and pages specs on a build with every flag off, as production has. Review for the server-only reading._
 - **Redirects**: one table, each entry served as a 301. _Tests: redirects (unit and browser)._
 - **Questionnaire flow**: one reducer holds a person's answers, and nothing else does (no storage, cookies, address or request). No record stores scoring until the Psychology expert's rules arrive. _Types (`scoring.status` is `'pending'`), the content-integrity "held back" test, review._
+- **Script pair**: `script/ScriptPair` is the one drawer of a name's IAST and Devanagari set together, IAST first; a verse set as blocks goes through it with `as="div"`. A Concept card, a preview slip, a shloka, a contents-plate row, the hero and numerals keep their own markup: their layout differs, or they are not a name pair. _Browser: concept._
 - **Press**, the one design language. Colours, durations, easings and layers are tokens in the global stylesheet. Each component styles itself through its own CSS module, reading those tokens with `var()`. Tailwind supplies only the tokens and Preflight: the one global class markup uses from it is `sr-only`, and the site adds `skip-link` of its own. A colour chosen by content (a topic, a Questionnaire status) is mapped from a data attribute in the global stylesheet. Only the hero lotus moves on its own: it draws in and breathes once, by CSS alone, moving transform and opacity, and ends within 5 s of load, so there is no pause control. Every lotus leans toward the pointer and blooms when pressed, and nothing moves under reduced motion. _Browser: lotus, motion._ _The class-name test keeps markup to those two global classes; the Tailwind output test keeps the compiled utilities to `sr-only`; the contrast test checks the listed colour pairs; review checks the rest._
-- **The agent guard**: `.claude/hooks/guard.mjs`, which Claude Code runs before every Bash, Edit and Write call in this repo, subagents included (`.claude/settings.json`). One pure `decide()` reads the command the way the shell would and answers deny, ask or nothing. _Tests: guard._
 - **The ruleset as code**: `.github/rulesets/main.json`, compared with GitHub by `pnpm ruleset:check` and applied by `pnpm ruleset:apply --commit <sha>`. _Tests: ruleset._
 
 ## Standards a reviewer applies
@@ -43,7 +43,7 @@ These are judgement calls, so review checks them against the diff, in the codeba
 | Internal links come from `hrefFor()` | lint (`care4mind/href-from-hreffor`) |
 | Every link between records resolves | the graph, at build and in every content test |
 | Sanskrit is NFC with ṃ; each name field holds one script, in characters the fonts cover | content-integrity test |
-| The registry is generated, not edited | git ignores it, `pnpm check` and every test run write it afresh, and the guard refuses edits under `src/content/generated/` |
+| The registry is generated, not edited | git ignores it, and `pnpm check` and every test run write it afresh |
 | No record stores scoring | types and the content-integrity test |
 | Press colour pairs meet contrast, each primitive colour is written once, and colour tokens alias or mix the primitives | contrast test, for the pairs it lists, resolving `var()` and `color-mix()`. A mix that carries text is a token, so it can be listed; review keeps modules from mixing their own |
 | `--color-surface-rule` is a rule, never text | contrast test |
@@ -56,10 +56,10 @@ These are judgement calls, so review checks them against the diff, in the codeba
 | Carried-over text changes only to fix a listed error | `verify.mjs`, which runs only on a machine with the captures; nothing in CI (#48) |
 | Comments state reasons, not ticket numbers or decision codes | nothing yet (#38) |
 | A backticked repo path, a `pnpm` script or a section of a doc named in a doc or a comment exists | pointers test |
-| Agents never merge a PR, turn on auto-merge, push to `main` or delete a branch | the guard and its test (guard). It reads commands, not intent: a script it can't read makes it ask, and review covers the rest |
+| An agent squash-merges only a PR whose `ci` passed on an up-to-date branch, with a review posted and every thread answered; nobody uses auto-merge or `--admin` | the ruleset (squash, up-to-date, threads resolved, `ci`, no bypass) and the ship test, which lets only its land step merge, after review |
 | `main` changes only through a squashed PR whose required check passed on an up-to-date branch | the ruleset on GitHub, whose file the ruleset test checks; `pnpm ruleset:check` compares the two |
-| Nobody commits to `main` or pushes to it, the developer included | the git hooks in `.githooks/`, installed by `prepare` (githooks test). `--no-verify` skips them, and the guard refuses that to agents |
-| `ship` opens PRs, has a reviewer agent review each and its builder answer the review, then stops; its agents run light | ship test |
+| Nobody commits to `main` or pushes to it, the developer included | the ruleset: `main` takes a pull request only, never a direct push |
+| `ship` opens PRs, has a reviewer agent review each and its builder answer the review, then squash-merges each and builds what was waiting; its agents run light | ship test |
 | Each "Code that misleads" line names an open ticket | review |
 | Names use glossary terms; comments say why; Press only; depth; tests at the seam | review |
 
@@ -73,22 +73,23 @@ These are judgement calls, so review checks them against the diff, in the codeba
   3. The view types and views: Ref, Card and View, plus `hrefFor()`'s target.
   4. Its namespace on `@/content`.
   5. The derivations: routes, and search documents. Nothing fails if you miss search (#49).
-  6. The pages, the navigation, Linked knowledge and the search page's headings.
+  6. The pages, the navigation, Linked knowledge and search's result headings.
   7. The tools behind `content:new` and `verify`.
   8. GLOSSARY.md.
 - **A page:** a route that reads `@/content`. Its address is an `hrefFor()` target, and its entry in `site.routes()` puts it in the sitemap, breadcrumbs and crawler.
 - **A topic:** its record, plus its colour token, its `[data-topic]` rule and its contrast pair; the token keys test checks the last three, and the same for a Questionnaire status.
+- **A helper:** `src/lib` holds pure helpers with no domain knowledge that two or more areas use (`cx`, `text`, `sanskrit`), beside the metadata, share-card and search modules above. Code with one home lives beside it: the Questionnaire flow reducer with the Questionnaire components, the contrast arithmetic with the tokens in `src/styles`.
 - **A colour, duration or easing:** a token in the global stylesheet. A new colour value is a `--press-*` primitive, and the `--color-*` token that names its role aliases or mixes it. A colour pair that carries text, mixed ones included, joins the contrast list.
 - **A feature awaiting the Project owner's approval:** a flag in `features`.
 - **A moved address:** a row in the redirect table. Its destination is written as `hrefFor()` would make it, and it answers in one hop.
-- **Something agents may or may not do:** a rule in the guard's `decide()` with a row in its test, and a line in CLAUDE.md's Delivery section when it changes what agents are told.
+- **Something agents may or may not do:** a line in CLAUDE.md's Delivery section, the ship workflow's prompts with a row in its test, and the ruleset when GitHub can hold it.
 - **A required check or a ruleset rule:** `.github/rulesets/main.json`, applied with `pnpm ruleset:apply --commit <sha>` once the check has completed on that commit, so a misspelt name can't lock `main`.
 
 ## The feedback loop
 
 `pnpm check` is the one local signal that a change is done. CI runs it on every PR and every push to `main`, then the browser tests in parallel shards and Lighthouse on the build it made. Beside them, one job builds with every `FEATURE_*` variable at `0`, as production has, and runs the crawler and the pages spec on that build. The job named `ci`, which `.github/rulesets/main.json` requires, waits for all of them, and GitHub won't merge a PR until it passes on a branch that's up to date with `main`. Also run the browser tests you touched, against the build `pnpm check` made: `E2E_ONLY=<spec names> pnpm check:e2e`, where the names are file names in `tests/e2e` without `.spec.ts`.
 
-An agent's PR is done when it's open, green and every review thread is answered. In `ship`, a reviewer agent posts that review and the PR's builder answers it. `ship` stops there, and the developer reviews, merges and deletes the branch.
+An agent's PR is done when it's merged: green, reviewed, every review thread answered, then squash-merged. In `ship`, a reviewer agent posts that review, the PR's builder answers it, and ship's land step merges it; GitHub deletes the branch.
 
 The content registry is rewritten by `dev`, `build`, `typecheck`, `test`, `test:e2e`, `check` and every Vitest run. A running `next dev` sees a new record file only once the registry is rewritten: rerun the registry script, or restart.
 
@@ -108,8 +109,7 @@ The planning map, issue #6, lists them. Until each is decided, the code leaves i
 The code still holds these patterns, and new code doesn't copy them. Each line names the ticket that removes the pattern, and the PR that closes that ticket deletes the line.
 
 - Comments that cite ticket numbers, decision codes (D01–D21), design codes (such as B6) or spec names. The documents they point at were deleted in `bfdbff0`. State the reason instead (#38).
-- The "Devanagari first" stubs, which render nothing, though the proposals page calls the feature built (#43).
-- Settings that look load-bearing but do nothing here: the root layout's `title.template`, since every page sets an absolute title (#64), and `typedRoutes`, which can't check paths that end in a slash (#55). The checks that do hold links true are the `hrefFor()` lint rule and the browser crawler.
+- A setting that looks load-bearing but does nothing here: `typedRoutes`, which can't check paths that end in a slash (#55). The checks that do hold links true are the `hrefFor()` lint rule and the browser crawler.
 
 ## Changing this file
 

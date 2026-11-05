@@ -579,6 +579,8 @@ export interface SearchDocument {
   id: string
   kind: SearchKind
   title: string
+  /** The language tag of its title where the title is a transliteration: Sanskrit, or Pali. */
+  lang?: LatinScript
   href: string
   /** What it sits in: a term's Concept, a passage's work, a library item's list. */
   parent?: string

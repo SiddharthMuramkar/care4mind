@@ -5,7 +5,7 @@
   }
 }
 
-/* "Also spelled" and the "Devanagari first" switch, side by side when they fit. */
+/* "Also spelled", centred under the title. */
 .spellingTools {
   display: flex;
   flex-wrap: wrap;
