@@ -1,3 +1,4 @@
+// @ts-check
 // The records as the content tools see them: the kinds and their folders, each record's id and
 // order, and every record the generated registry lists, read with the repo's own TypeScript
 // compiler. Plain Node, no new dependency.
