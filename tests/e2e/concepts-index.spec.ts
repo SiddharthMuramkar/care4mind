@@ -16,6 +16,15 @@ const mind = (await topics.list()).find(({ slug }) => slug === 'mind')
 if (!mind) throw new Error('The mind topic is in the content.')
 const filled = letters.filter(({ entries }) => entries.length > 0).map(({ letter }) => letter)
 const blank = letters.filter(({ entries }) => entries.length === 0).map(({ letter }) => letter)
+const concepts = all.filter(({ kind }) => kind === 'concept')
+const ofKind = (kind: string) => all.filter((entry) => entry.kind === kind).length
+// A plain address shows the Concept pages; its rail links the letters that have one.
+const conceptLetters = letters
+  .filter(({ entries }) => entries.some(({ kind }) => kind === 'concept'))
+  .map(({ letter }) => letter)
+const EVERYTHING = `${PATH}?kind=concept,term,glossary`
+const kindChip = (page: Page, label: string, kind: string) =>
+  chip(page, `${label} (${ofKind(kind)})`)
 const entries = (count: number) => `${count} ${count === 1 ? 'entry' : 'entries'}`
 
 const list = (page: Page) => page.getByRole('region', { name: 'From A to Z' })
@@ -50,7 +59,7 @@ test.describe('without JavaScript', () => {
 test('lists every Concept, term and glossary entry, names in both scripts with their tags', async ({
   page,
 }) => {
-  await gotoReady(page, PATH)
+  await gotoReady(page, EVERYTHING)
   await expect(list(page).getByRole('listitem')).toHaveCount(all.length)
   const vikshepa = list(page).getByRole('link', { name: 'Vikṣepa विक्षेप', exact: true })
   await expect(vikshepa).toHaveAttribute('href', hrefFor({ kind: 'concept', id: 'vikshepa' }))
@@ -66,7 +75,7 @@ test('lists every Concept, term and glossary entry, names in both scripts with t
 test('glossary entries lead to their Concept, to DharmaWiki in words, or nowhere', async ({
   page,
 }) => {
-  await gotoReady(page, PATH)
+  await gotoReady(page, EVERYTHING)
   const glossary = all.filter(({ kind }) => kind === 'glossary')
   const external = glossary.find(({ external }) => external)
   const plain = glossary.find(({ href }) => href === undefined)
@@ -89,7 +98,8 @@ test('a glossary anchor reached from the old address shows its entry, clear of t
   page,
 }) => {
   await gotoReady(page, '/anubandha-chatushtaya/')
-  await expect(page).toHaveURL(/\/concepts\/#anubandha-chatushtaya$/)
+  // The entry is a glossary one, so the address lets the Glossary in to show it.
+  await expect(page).toHaveURL(/\/concepts\/\?kind=concept,glossary#anubandha-chatushtaya$/)
   const entry = page.locator('#anubandha-chatushtaya')
   await expect(entry).toBeInViewport()
   const top = (await entry.boundingBox())?.y ?? -1
@@ -104,8 +114,8 @@ test.describe('the letter rail', () => {
     await gotoReady(page, PATH)
     await expect(toolbar(page)).toBeVisible()
     const links = toolbar(page).getByRole('link')
-    await expect(links).toHaveText(filled)
-    const [first, second] = filled
+    await expect(links).toHaveText(conceptLetters)
+    const [first, second] = conceptLetters
     const a = toolbar(page).getByRole('link', { name: first, exact: true })
     const b = toolbar(page).getByRole('link', { name: second, exact: true })
     await a.focus()
@@ -125,7 +135,7 @@ test.describe('the letter rail', () => {
   })
 
   test('marks the letter whose section is in view, with CSS alone', async ({ page }) => {
-    await gotoReady(page, PATH)
+    await gotoReady(page, EVERYTHING)
     await expect(toolbar(page)).toBeVisible()
     const first = filled[0] ?? 'A'
     // Chrome marks the next letter when a section is shorter than the band it reads by, so
@@ -154,32 +164,76 @@ test.describe('the letter rail', () => {
 })
 
 test.describe('the filter chips', () => {
-  const inMind = all.filter(({ topics }) => topics.includes('mind'))
-  const mindConcepts = inMind.filter(({ kind }) => kind === 'concept')
+  const mindConcepts = concepts.filter(({ topics }) => topics.includes('mind'))
+  const mindConceptsAndTerms = all.filter(
+    ({ topics, kind }) => topics.includes('mind') && (kind === 'concept' || kind === 'term'),
+  )
+
+  test('a plain address shows the Concept pages, and each label counts its kind', async ({
+    page,
+  }) => {
+    await gotoReady(page, PATH)
+    await expect(count(page)).toHaveText(entries(concepts.length))
+    await expect(shown(page)).toHaveCount(concepts.length)
+    expect(
+      await list(page)
+        .locator('[data-entry]:not([hidden])')
+        .evaluateAll((items) => items.map((item) => item.getAttribute('data-kind'))),
+    ).toEqual(concepts.map(() => 'concept'))
+    for (const kind of ['concept', 'term', 'glossary']) {
+      const label = await page.locator(`[data-chip="kind:${kind}"]`).textContent()
+      const inDom = await list(page).locator(`[data-entry][data-kind="${kind}"]`).count()
+      expect(Number(/\((\d+)\)$/.exec(label ?? '')?.[1])).toBe(inDom)
+    }
+    await expect(kindChip(page, 'Concept pages', 'concept')).toHaveAttribute('aria-pressed', 'true')
+    await expect(page.getByRole('button', { name: 'Clear filters' })).toHaveCount(0)
+
+    await kindChip(page, 'Terms', 'term').click()
+    await expect(page).toHaveURL(/\?kind=concept,term$/)
+    await expect(shown(page)).toHaveCount(concepts.length + ofKind('term'))
+    await page.reload()
+    await expect(shown(page)).toHaveCount(concepts.length + ofKind('term'))
+    await expect(kindChip(page, 'Terms', 'term')).toHaveAttribute('aria-pressed', 'true')
+  })
+
+  test('on a phone the chip rows wrap, and the A–Z bar fades at its edge', async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 800 })
+    await gotoReady(page, PATH)
+    const groups = page.getByRole('group', { name: 'Filter the entries' }).getByRole('group')
+    await expect(groups).toHaveCount(3)
+    for (const group of await groups.all())
+      expect(
+        await group.evaluate((row) => row.scrollWidth <= row.clientWidth + 1),
+        'the row wraps instead of scrolling',
+      ).toBe(true)
+    const bar = rail(page).locator(':scope > div').first()
+    expect(await bar.evaluate((row) => row.scrollWidth > row.clientWidth)).toBe(true)
+    expect(await bar.evaluate((row) => getComputedStyle(row).maskImage)).toContain('gradient')
+  })
 
   test('filter by mouse, announce the count, keep it in the address, and Back undoes it', async ({
     page,
   }) => {
     await gotoReady(page, PATH)
-    await expect(count(page)).toHaveText(entries(all.length))
+    await expect(count(page)).toHaveText(entries(concepts.length))
     await chip(page, mind.name).click()
     await expect(chip(page, mind.name)).toHaveAttribute('aria-pressed', 'true')
-    await expect(count(page)).toHaveText(entries(inMind.length))
-    await expect(shown(page)).toHaveCount(inMind.length)
-    await expect(page).toHaveURL(/\?topic=mind$/)
-
-    await chip(page, 'Concept pages').click()
     await expect(count(page)).toHaveText(entries(mindConcepts.length))
     await expect(shown(page)).toHaveCount(mindConcepts.length)
-    await expect(page).toHaveURL(/\?topic=mind&kind=concept$/)
+    await expect(page).toHaveURL(/\?topic=mind$/)
+
+    await kindChip(page, 'Terms', 'term').click()
+    await expect(count(page)).toHaveText(entries(mindConceptsAndTerms.length))
+    await expect(shown(page)).toHaveCount(mindConceptsAndTerms.length)
+    await expect(page).toHaveURL(/\?topic=mind&kind=concept,term$/)
 
     await page.goBack()
     await expect(page).toHaveURL(/\?topic=mind$/)
-    await expect(shown(page)).toHaveCount(inMind.length)
-    await expect(chip(page, 'Concept pages')).toHaveAttribute('aria-pressed', 'false')
+    await expect(shown(page)).toHaveCount(mindConcepts.length)
+    await expect(kindChip(page, 'Terms', 'term')).toHaveAttribute('aria-pressed', 'false')
     await page.goBack()
     await expect(page).toHaveURL(new RegExp(`${PATH}$`))
-    await expect(shown(page)).toHaveCount(all.length)
+    await expect(shown(page)).toHaveCount(concepts.length)
   })
 
   test('keeps the filtered count and rail after an entry and Back', async ({ page }) => {
@@ -187,8 +241,8 @@ test.describe('the filter chips', () => {
     // still says the total and the rail still links letters whose sections are hidden.
     await gotoReady(page, PATH)
     await chip(page, mind.name).click()
-    await expect(count(page)).toHaveText(entries(inMind.length))
-    await expect(shown(page)).toHaveCount(inMind.length)
+    await expect(count(page)).toHaveText(entries(mindConcepts.length))
+    await expect(shown(page)).toHaveCount(mindConcepts.length)
     const hidden = await list(page)
       .locator('[data-letter][hidden]')
       .evaluateAll((sections) => sections.map((section) => section.id))
@@ -201,8 +255,8 @@ test.describe('the filter chips', () => {
     await page.goBack()
     await expect(page).toHaveURL(/\?topic=mind$/)
     await expect(chip(page, mind.name)).toHaveAttribute('aria-pressed', 'true')
-    await expect(count(page)).toHaveText(entries(inMind.length))
-    await expect(shown(page)).toHaveCount(inMind.length)
+    await expect(count(page)).toHaveText(entries(mindConcepts.length))
+    await expect(shown(page)).toHaveCount(mindConcepts.length)
     for (const id of hidden) await expect(rail(page).locator(`a[href="#${id}"]`)).toHaveCount(0)
   })
 
@@ -213,7 +267,7 @@ test.describe('the filter chips', () => {
     await page.getByRole('button', { name: 'Clear filters' }).focus()
     await page.keyboard.press('Enter')
     await expect(page).toHaveURL(new RegExp(`${PATH}$`))
-    await expect(count(page)).toHaveText(entries(all.length))
+    await expect(count(page)).toHaveText(entries(concepts.length))
     const first = page
       .getByRole('group', { name: 'Filter the entries' })
       .getByRole('button')
@@ -235,7 +289,7 @@ test.describe('the filter chips', () => {
     await page.keyboard.press('Space')
     await expect(second).toHaveAttribute('aria-pressed', 'true')
     const topic = (await topics.list())[1]
-    const expected = all.filter(({ topics }) => topics.includes(topic?.slug ?? '')).length
+    const expected = concepts.filter(({ topics }) => topics.includes(topic?.slug ?? '')).length
     await expect(count(page)).toHaveText(entries(expected))
     await page.keyboard.press('Tab')
     expect(
@@ -249,7 +303,7 @@ test.describe('the filter chips', () => {
   }) => {
     await gotoReady(page, `${PATH}?topic=mind&kind=concept`)
     await expect(chip(page, mind.name)).toHaveAttribute('aria-pressed', 'true')
-    await expect(chip(page, 'Concept pages')).toHaveAttribute('aria-pressed', 'true')
+    await expect(kindChip(page, 'Concept pages', 'concept')).toHaveAttribute('aria-pressed', 'true')
     await expect(shown(page)).toHaveCount(mindConcepts.length)
     const initials = new Set(mindConcepts.map(({ name }) => name.normalize('NFD').charAt(0)))
     for (const letter of filled.filter((letter) => !initials.has(letter)))
@@ -281,9 +335,20 @@ test.describe('the filter chips', () => {
       }
     })
     await recordPageTurns(page)
-    await gotoReady(page, PATH)
-    await chip(page, mind.name).click()
-    await expect(shown(page)).toHaveCount(inMind.length)
+    // From the whole list, read into it, so entries on screen have somewhere to glide from.
+    const size = page.viewportSize()
+    await page.setViewportSize({ width: size?.width ?? 1440, height: 1600 })
+    await gotoReady(page, EVERYTHING)
+    const deep = filled[Math.floor(filled.length / 2)] ?? 'S'
+    await rail(page).getByRole('link', { name: deep, exact: true }).click()
+    await expect(
+      page.locator(`#letter-${deep === '#' ? 'other' : deep.toLowerCase()}`),
+    ).toBeInViewport()
+    await chip(page, mind.name).evaluate((button) => button.focus({ preventScroll: true }))
+    await page.keyboard.press('Space')
+    await expect(shown(page)).toHaveCount(
+      all.filter(({ topics }) => topics.includes('mind')).length,
+    )
     await expect.poll(async () => (await inPageTransitions(page)).length).toBe(1)
     const [reorder] = await inPageTransitions(page)
     const entriesFlying = (reorder?.flights ?? []).filter(({ name }) => name.startsWith('az-'))
@@ -303,14 +368,14 @@ test.describe('the filter chips', () => {
     await recordPageTurns(page)
     await gotoReady(page, PATH)
     await chip(page, mind.name).click()
-    await expect(shown(page)).toHaveCount(inMind.length)
+    await expect(shown(page)).toHaveCount(mindConcepts.length)
     expect(await inPageTransitions(page)).toEqual([])
   })
 
   test('has no accessibility violations with a filter applied', async ({ page }) => {
     await gotoReady(page, PATH)
     await chip(page, mind.name).click()
-    await expect(count(page)).toHaveText(entries(inMind.length))
+    await expect(count(page)).toHaveText(entries(mindConcepts.length))
     // The click scrolls a Topic card under the sticky header, where axe counts the header's links as overlapping it.
     await page.evaluate(() => window.scrollTo(0, 0))
     await expectNoAxeViolations(page, 'filtered A–Z')

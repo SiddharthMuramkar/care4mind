@@ -120,6 +120,8 @@ export const CONTRAST_PAIRS = [
   { foreground: 'surface-link', background: 'surface', minimum: 4.5 },
   { foreground: 'accent-ink', background: 'accent', minimum: 4.5 },
   { foreground: 'highlight-ink', background: 'highlight', minimum: 4.5 },
+  // The wordmark's 4: white inside its vermilion ring, on the indigo ground the ring sits on.
+  { foreground: 'highlight-ink', background: 'ground', minimum: 4.5 },
   { foreground: 'focus', background: 'ground', minimum: 3 },
   { foreground: 'surface-focus', background: 'surface', minimum: 3 },
   { foreground: 'accent', background: 'ground', minimum: 3 },

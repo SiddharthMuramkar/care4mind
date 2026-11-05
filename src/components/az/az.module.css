@@ -40,6 +40,16 @@
   }
 }
 
+/* Without JavaScript the whole list shows: the server's hidden entries and letters stand again. In base, where Preflight hides [hidden]. */
+@media (scripting: none) {
+  @layer base {
+    .section[hidden],
+    .entry[hidden] {
+      display: grid !important;
+    }
+  }
+}
+
 .entry {
   display: grid;
   gap: 0.2rem;
