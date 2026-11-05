@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { Fleuron } from '@/components/Fleuron'
 import { Folio } from '@/components/Folio'
 import { PageTurn, turnForward } from '@/components/PageTurn'
+import { SearchForm, StartingPoints } from '@/components/search'
 import { concepts, hrefFor } from '@/content'
 import { notFoundMetadata } from '@/lib/metadata'
 
@@ -28,6 +29,10 @@ export default async function NotFound() {
             The address may be mistyped, or the page may not have moved across yet: the new site is
             still being built from the current one.
           </p>
+          <div className={styles.search}>
+            <SearchForm variant="secondary" id="not-found-search-query" />
+            <StartingPoints />
+          </div>
           <ul className={styles.links}>
             <li>
               <Link href={hrefFor({ page: 'home' })} className={cta.primary} data-ink>
