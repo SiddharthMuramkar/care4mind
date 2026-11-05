@@ -99,10 +99,10 @@ test('links in the header change page at once, without turning it', async ({ pag
   }
   const link = page
     .getByRole('navigation', { name: 'Main' })
-    .getByRole('link', { name: 'Questionnaires', exact: true })
+    .getByRole('link', { name: 'Traditional texts', exact: true })
   // An untyped link has no turn to lose, so it needn't wait for its page to be prefetched.
   await link.click()
-  await expect(page).toHaveURL(/\/questionnaires\/?$/)
+  await expect(page).toHaveURL(/\/texts\/?$/)
   await expect(page.getByRole('heading', { level: 1 })).toBeVisible()
   for (const change of await pageTurns(page)) {
     expect(change.leaving).toBeNull()

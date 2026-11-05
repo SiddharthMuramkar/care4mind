@@ -34,8 +34,7 @@ export default async function TextsPage() {
         <Breadcrumbs path={PATH} />
         <Folio className={reading.article}>
           <header className={reading.titlePage}>
-            <p className={reading.kicker}>Traditional texts</p>
-            <h1 className={reading.title}>Texts</h1>
+            <h1 className={reading.title}>Traditional texts</h1>
             <p className={reading.summary}>
               The works the site quotes, each with every verse it quotes from them.
             </p>

@@ -2,7 +2,7 @@ import { useSyncExternalStore } from 'react'
 
 import type { PanelId } from './types'
 
-/** The width from which the header shows its five sections on one line (SiteHeader.module.css). */
+/** The width from which the header shows its sections and Search on one line (SiteHeader.module.css). */
 export const WIDE = '(min-width: 72rem)'
 
 const PANELS: readonly string[] = ['concepts', 'library'] satisfies PanelId[]
