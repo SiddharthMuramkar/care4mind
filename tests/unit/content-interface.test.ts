@@ -1852,7 +1852,7 @@ describe('the feature flags, from the environment to the interface', () => {
   /** What a build in this environment offers: the preview's form, and the flagged routes. */
   const offered = async (env: Record<string, string>) => {
     const content = createContent(memorySource(...records), readFeatures(env))
-    const paths = (await content.site.routes()).map(({ path }) => path)
+    const paths: readonly string[] = (await content.site.routes()).map(({ path }) => path)
     return {
       form: (await content.questionnaires.form('work-scale')) !== null,
       flow: paths.includes('/questionnaires/work-scale/take/'),

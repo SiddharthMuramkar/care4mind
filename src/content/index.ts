@@ -5,24 +5,17 @@
  * `data/`; later a CMS) and the graph resolves every link between them once. Pages get views:
  * plain, serialisable data shaped for a page.
  */
-import type { Route } from 'next'
-
 import { features } from '@/config/features'
 
 import { localSource } from './source'
-import type { HrefTarget } from './types'
 import { createContent } from './views'
-import { hrefFor as pathFor } from './views/href'
+import { hrefFor as makeHref } from './views/href'
 
 export type * from './types'
 export { RELATION_STRENGTH } from './types'
 
-/**
- * The path of a page, or of an anchor on one, with its trailing slash: every internal link on
- * the site is made here. Typed as a route for Next's Link, whose own route types know no
- * trailing slashes.
- */
-export const hrefFor = pathFor as (target: HrefTarget) => Route
+/** The path of a page, or of an anchor on one, with its trailing slash: every internal link is made here. */
+export const hrefFor = makeHref
 
 /** The site's own content: the local source's records, with this build's feature flags. */
 const content = createContent(localSource, features)

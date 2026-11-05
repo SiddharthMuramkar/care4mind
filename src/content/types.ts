@@ -5,6 +5,8 @@
  * every link already a path. It holds no `undefined`, Map, Date or function, so it survives a
  * JSON round trip unchanged and a server component can hand it to a client island as it is.
  */
+import type { Route } from 'next'
+
 import type {
   ContentKind,
   HomepageHero,
@@ -59,14 +61,14 @@ export interface ConceptRef {
   lang?: 'sa-Latn'
   /** Its English gloss, where its name is Sanskrit and its page gives one. */
   gloss?: string
-  href: string
+  href: Route
 }
 
 /** A link to a topic's page, named by its English name. */
 export interface TopicRef {
   slug: Slug
   name: string
-  href: string
+  href: Route
 }
 
 /** A link to a work's page, named by its title in IAST. */
@@ -74,7 +76,7 @@ export interface WorkRef {
   slug: Slug
   title: string
   lang: LatinScript
-  href: string
+  href: Route
 }
 
 /** A link to a record that cites a Reference or quotes a passage, named as its page names it. */
@@ -85,7 +87,7 @@ export interface RecordRef {
   lang?: 'sa-Latn'
   /** A Concept's English gloss, where its title is Sanskrit and its page gives one. */
   gloss?: string
-  href: string
+  href: Route
 }
 
 /** Where a carried-over record's text came from, the old address included, and every change made. */
@@ -124,7 +126,7 @@ export interface VerseView {
   passage: string
   work: WorkRef
   /** The verse's anchor on its work's page: `/texts/yoga-sutra/#1-30`. */
-  href: string
+  href: Route
 }
 
 /** A table row's heading cell: plain text, or a Sanskrit name with its display name and gloss. */
@@ -142,7 +144,7 @@ export type BlockView =
       kind: 'term'
       id: Slug
       /** Its anchor on the page. */
-      href: string
+      href: Route
       /** The capitalised IAST term. */
       name: string
       term: SanskritName
@@ -172,7 +174,7 @@ export interface SectionView {
   /** Applications and "Indian vs Western" comparisons are roles of a section. */
   role?: 'applications' | 'comparison'
   /** Its anchor on the page. */
-  href: string
+  href: Route
   blocks: readonly BlockView[]
 }
 
@@ -181,8 +183,8 @@ export interface TocEntry {
   id: Slug
   heading: Inline
   role?: 'applications' | 'comparison'
-  href: string
-  terms: readonly { id: Slug; name: string; href: string }[]
+  href: Route
+  terms: readonly { id: Slug; name: string; href: Route }[]
 }
 
 // References
@@ -211,7 +213,7 @@ export interface ReferenceView extends CarriedOver {
   /** Its anchor, `ref-<id>`, on the References page and on every page that lists it. */
   anchor: string
   /** Its entry on the References page. */
-  href: string
+  href: Route
   citedIn: readonly RecordRef[]
 }
 
@@ -247,7 +249,7 @@ export interface RelatedConcept extends ConceptCard {
 
 /** A work a Concept quotes, with the passages it quotes from it, in the work's order. */
 export interface LinkedWork extends WorkRef {
-  passages: readonly { id: string; locator: string; label: string; href: string }[]
+  passages: readonly { id: string; locator: string; label: string; href: Route }[]
 }
 
 /** A Concept, as a page shows it. */
@@ -257,7 +259,7 @@ export interface ConceptView extends ConceptCard, CarriedOver {
   /** One line on why the Concept matters, where the Research editor has supplied it. */
   whyItMatters?: Inline
   /** Every Term its sections explain, in page order, for the page's at-a-glance grid. */
-  glance: readonly { id: Slug; name: string; gloss?: string; href: string }[]
+  glance: readonly { id: Slug; name: string; gloss?: string; href: Route }[]
   /** The topics it is also in. */
   secondaryTopics: readonly TopicRef[]
   /** The verses it quotes ahead of its sections, in source order. */
@@ -285,7 +287,7 @@ export interface ConceptView extends ConceptCard, CarriedOver {
       id: Slug
       heading: Inline
       role: 'applications' | 'comparison'
-      href: string
+      href: Route
     }[]
   }
   /** The Concepts before and after it in its primary topic, alphabetically for now. */
@@ -350,7 +352,7 @@ export interface PassageView extends CarriedOver {
   label: string
   /** Its anchor on the work's page: the locator with dots as hyphens, `1-30`. */
   anchor: string
-  href: string
+  href: Route
   /** Lines as a page gives them; empty, and flagged, when no page gives any. */
   devanagari: readonly string[]
   transliteration?: { lines: readonly string[]; scheme: 'iast' | 'informal' }
@@ -392,12 +394,12 @@ export interface QuestionnaireCard {
   /** The status a visitor sees in this build: a preview is coming soon while its flag is off. */
   shownStatus: QuestionnaireStatus
   /** Its flow, present only where it can be taken in this build. */
-  takeHref?: string
+  takeHref?: Route
   summary?: Inline
   /** Its anchor on the Questionnaires page, which lists the coming-later ones. */
   anchor: string
   /** Its own page, or its anchor on the Questionnaires page when it is coming later. */
-  href: string
+  href: Route
   concepts: readonly ConceptRef[]
   /** The primary topics of its Concepts, for grouping. */
   topics: readonly TopicRef[]
@@ -441,8 +443,8 @@ export interface QuestionnaireFormView {
 
 /** A Library page in brief: a reading list with how many items it holds, or a page of text. */
 export type LibraryCard =
-  | { kind: 'resource-list'; slug: Slug; title: string; href: string; itemCount: number }
-  | { kind: 'page'; slug: Slug; title: string; href: string; summary: Inline }
+  | { kind: 'resource-list'; slug: Slug; title: string; href: Route; itemCount: number }
+  | { kind: 'page'; slug: Slug; title: string; href: Route; summary: Inline }
 
 /** An item on a reading list: a book, resolved to its Reference, or a course. */
 export type ResourceItemView =
@@ -463,12 +465,12 @@ export interface ResourceListView extends CarriedOver {
   kind: 'resource-list'
   slug: Slug
   title: string
-  href: string
+  href: Route
   groups: readonly {
     id: Slug
     heading: string
     /** The group's anchor on the list's page. */
-    href: string
+    href: Route
     items: readonly ResourceItemView[]
   }[]
 }
@@ -479,7 +481,7 @@ export interface PageView extends CarriedOver {
   slug: Slug
   title: string
   summary: Inline
-  href: string
+  href: Route
   sections: readonly SectionView[]
   toc: readonly TocEntry[]
 }
@@ -503,7 +505,7 @@ export interface HomepageView extends CarriedOver {
   hero: HomepageHero
   sectionIntros: { concepts: string; questionnaires: string }
   intro: Inline
-  areas: readonly { title: string; text: Inline; href?: string }[]
+  areas: readonly { title: string; text: Inline; href?: Route }[]
   /** The featured Concepts, in the home record's order, with every id resolved. */
   featured: readonly FeaturedConceptCard[]
   /**
@@ -543,7 +545,7 @@ export type RouteKind =
 /** One public page in the route registry. */
 export interface RouteEntry {
   /** Its address, with its trailing slash. */
-  path: string
+  path: Route
   kind: RouteKind
   /** Its page file's route pattern: `/concepts/[slug]/`. */
   pattern: string
@@ -560,7 +562,7 @@ export interface RouteEntry {
 /** One step of a page's breadcrumb trail. The last is the page itself. */
 export interface Crumb {
   label: string
-  href: string
+  href: Route
   /** Set when the label is a transliteration (a Concept's IAST name, a work's title). */
   lang?: LatinScript
   /** A Concept label's English gloss, shown plain after it. */
@@ -581,10 +583,10 @@ export interface AzEntry {
   gloss?: string
   /** A glossary entry's own description. */
   definition?: Inline
-  /** Its page or anchor, or a glossary entry's article; none for an entry with neither. */
-  href?: string
-  /** Whether the link leaves the site (a DharmaWiki article). */
-  external: boolean
+  /** Its page or anchor on this site; none for an entry with neither. */
+  href?: Route
+  /** A glossary entry's article, on another site (DharmaWiki). */
+  url?: string
   /** The glossary anchors the entry carries on the A–Z page (`/concepts/#<slug>`). */
   anchors: readonly string[]
   /** A term's Concept. */
@@ -626,7 +628,7 @@ export interface SearchDocument {
   gloss?: string
   /** The language tag of its title where the title is a transliteration: Sanskrit, or Pali. */
   lang?: LatinScript
-  href: string
+  href: Route
   /** What it sits in: a term's Concept, a passage's work, a library item's list. */
   parent?: string
   /** Every spelling of its name, Devanagari included. */

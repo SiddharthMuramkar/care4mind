@@ -1,4 +1,4 @@
-import type { Metadata, Route } from 'next'
+import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { ViewTransition } from 'react'
@@ -135,7 +135,7 @@ export default async function QuestionnairePage({ params }: PageProps<'/question
         {takeHref ? (
           <>
             <Link
-              href={takeHref as Route}
+              href={takeHref}
               className={cta.primary}
               transitionTypes={turnForward}
               data-ink

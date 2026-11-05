@@ -1,4 +1,4 @@
-import type { Metadata, Route } from 'next'
+import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { Fragment, type ReactNode } from 'react'
@@ -196,12 +196,7 @@ export default async function TopicPage({ params }: PageProps<'/topics/[slug]'>)
               <ol className={styles.verses}>
                 {work.verses.map((verse) => (
                   <li key={verse.id} className={styles.verseItem}>
-                    {/* A passage's anchor on its work's page, made by hrefFor() in the content module. */}
-                    <Link
-                      href={verse.href as Route}
-                      className={styles.verse}
-                      transitionTypes={turnForward}
-                    >
+                    <Link href={verse.href} className={styles.verse} transitionTypes={turnForward}>
                       <span className={styles.opening}>
                         <Opening verse={verse} />
                       </span>

@@ -660,7 +660,6 @@ describe('site.azIndex', () => {
         gloss: 'Obstacle',
         definition: 'A made-up definition.',
         href: '/concepts/obstacles/',
-        external: false,
         anchors: ['vighna'],
         topics: ['mind'],
         works: ['yoga-sutra'],
@@ -680,7 +679,6 @@ describe('site.azIndex', () => {
       devanagari: 'संशय',
       gloss: 'Doubt',
       href: '/concepts/obstacles/#samsaya',
-      external: false,
       anchors: [],
       concept: {
         slug: 'obstacles',
@@ -699,8 +697,7 @@ describe('site.azIndex', () => {
       spellings: ['Avarana'],
       devanagari: 'आवरण',
       definition: 'A made-up covering.',
-      href: 'https://dharmawiki.org/index.php/Avarana',
-      external: true,
+      url: 'https://dharmawiki.org/index.php/Avarana',
       anchors: ['avarana'],
       topics: [],
       works: [],
@@ -709,7 +706,6 @@ describe('site.azIndex', () => {
       kind: 'glossary',
       name: 'Bhakti',
       spellings: [],
-      external: false,
       anchors: ['bhakti'],
       topics: [],
       works: [],
@@ -719,7 +715,6 @@ describe('site.azIndex', () => {
       name: 'Refuge of the self',
       spellings: [],
       href: '/concepts/refuge/',
-      external: false,
       anchors: [],
       topics: ['self', 'mind'],
       works: ['dhammapada'],
@@ -1156,7 +1151,7 @@ async function internalLinks(site: ReturnType<typeof createContent>) {
 describe('the derivations together', () => {
   it('link only to pages in the route registry (made-up content)', async () => {
     const site = createContent(memorySource(...world), ON)
-    const paths = new Set((await site.site.routes()).map(({ path }) => path))
+    const paths = new Set<string>((await site.site.routes()).map(({ path }) => path))
     const outside = (await internalLinks(site)).filter(
       (href) => !paths.has(href.replace(/#.*$/, '')),
     )
@@ -1191,7 +1186,7 @@ describe('the derivations, on the site’s own content', () => {
   })
 
   it('link only to pages in the route registry', async () => {
-    const paths = new Set((await own.site.routes()).map(({ path }) => path))
+    const paths = new Set<string>((await own.site.routes()).map(({ path }) => path))
     const outside = (await internalLinks(own)).filter(
       (href) => !paths.has(href.replace(/#.*$/, '')),
     )

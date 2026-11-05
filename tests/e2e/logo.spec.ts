@@ -2,9 +2,11 @@ import type { Locator, Page } from '@playwright/test'
 
 import { recordAnimationStarts } from './drawings'
 import { expect, gotoReady, test } from './fixtures'
+import { hrefFor } from '@/content'
+
 import { MISSING, PAGES, ROUTES } from './routes'
 
-const PAGES_HAVE_START = ROUTES.some(({ path }) => path === '/start/')
+const PAGES_HAVE_START = ROUTES.some(({ path }) => path === hrefFor({ page: 'start' }))
 
 const homeLink = (page: Page) =>
   page.getByRole('banner').getByRole('link', { name: 'Care4Mind home', exact: true })

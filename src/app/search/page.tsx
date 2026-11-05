@@ -1,4 +1,4 @@
-import type { Metadata, Route } from 'next'
+import type { Metadata } from 'next'
 import Link from 'next/link'
 
 import { HelpLine } from '@/components/HelpLine'
@@ -78,12 +78,7 @@ export default async function SearchPage({ searchParams }: PageProps<'/search'>)
                   return (
                     <li key={result.id} className={styles.entry}>
                       <p className={styles.entryName}>
-                        {/* Each result's path, made by hrefFor() in the content module. */}
-                        <Link
-                          href={result.href as Route}
-                          lang={result.lang}
-                          transitionTypes={turnForward}
-                        >
+                        <Link href={result.href} lang={result.lang} transitionTypes={turnForward}>
                           {result.title}
                         </Link>
                         {result.gloss ? (
@@ -104,7 +99,7 @@ export default async function SearchPage({ searchParams }: PageProps<'/search'>)
               {total > results.length ? (
                 <p className={styles.note}>
                   <Link
-                    href={`${PATH}?q=${encodeURIComponent(query)}&all=${kind}` as Route}
+                    href={{ pathname: PATH, query: { q: query, all: kind } }}
                     transitionTypes={turnForward}
                   >
                     Show all {total}

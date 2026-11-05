@@ -1,4 +1,3 @@
-import type { Route } from 'next'
 import Link from 'next/link'
 
 import { turnForward } from '@/components/PageTurn'
@@ -38,8 +37,7 @@ function BookEntry({ book, index, headed }: { book: Book; index: number; headed:
       ) : null}
       <p className={styles.links}>
         <SourceLink reference={reference} />
-        {/* The Reference's entry, made by hrefFor() in the content module. */}
-        <Link href={reference.href as Route} transitionTypes={[...turnForward]} data-ink>
+        <Link href={reference.href} transitionTypes={[...turnForward]} data-ink>
           In References
         </Link>
       </p>

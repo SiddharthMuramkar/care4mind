@@ -1,9 +1,11 @@
+import type { Route } from 'next'
+
 import { hrefFor, type HomepageHero } from '@/content'
 
 /** One of the opening folio's links; the first is the primary button. */
 export interface HeroLink {
   label: string
-  href: string
+  href: Route
 }
 
 /** The opening folio's links: Start here and Browse concepts while Start here is on, else Explore concepts. */

@@ -2,7 +2,7 @@ import { gzipSync } from 'node:zlib'
 
 import { beforeAll, describe, expect, it } from 'vitest'
 
-import { concepts, site, type SearchDocument } from '@/content'
+import { concepts, hrefFor, site, type SearchDocument } from '@/content'
 import { stripDiacritics } from '@/lib/sanskrit'
 import { buildIndex, query, type SearchHit, type SearchIndex } from '@/lib/search/engine'
 import { resultGroups } from '@/lib/search/search'
@@ -77,7 +77,7 @@ describe('the search engine, on the real corpus', () => {
       id: 'concept:made-up',
       kind: 'concept',
       title: 'Made up',
-      href: '/concepts/made-up/',
+      href: hrefFor({ kind: 'concept', id: 'made-up' }),
       names: ['पञ्च क्लेश'],
       keywords: [],
       people: [],
@@ -157,7 +157,7 @@ describe('the matching order', () => {
     id: `concept:${id}`,
     kind: 'concept',
     title: id,
-    href: `/concepts/${id}/`,
+    href: hrefFor({ kind: 'concept', id }),
     names: [name],
     keywords: [],
     people: [],
@@ -185,7 +185,7 @@ describe('the matching order', () => {
       id: `concept:${id}`,
       kind: 'concept',
       title,
-      href: `/concepts/${id}/`,
+      href: hrefFor({ kind: 'concept', id }),
       names: [...names],
       keywords: [],
       people: [],
@@ -207,7 +207,7 @@ describe('the matching order', () => {
         id: 'concept:excerpted',
         kind: 'concept',
         title: 'Excerpted',
-        href: '/concepts/excerpted/',
+        href: hrefFor({ kind: 'concept', id: 'excerpted' }),
         names: ['Excerpted'],
         keywords: [],
         people: [],
@@ -217,7 +217,7 @@ describe('the matching order', () => {
         id: 'concept:keyed',
         kind: 'concept',
         title: 'Keyed',
-        href: '/concepts/keyed/',
+        href: hrefFor({ kind: 'concept', id: 'keyed' }),
         names: ['Keyed'],
         keywords: ['restlessness'],
         people: [],
@@ -329,7 +329,7 @@ describe('the result groups', () => {
     id: `${kind}:${n}`,
     kind,
     title: `${kind} ${n}`,
-    href: `/${kind}/${n}/`,
+    href: hrefFor({ kind: 'concept', id: `${kind}-${n}` }),
     matched: { field: 'title', variant: `${kind} ${n}` },
     score: 0,
   })
@@ -424,7 +424,7 @@ describe('the language a hit carries', () => {
         kind: 'work',
         title: 'Pali Verses',
         lang: 'pi-Latn',
-        href: '/texts/pali-verses/',
+        href: hrefFor({ kind: 'work', id: 'pali-verses' }),
         names: ['Pali Verses'],
         keywords: [],
         people: [],
@@ -435,7 +435,7 @@ describe('the language a hit carries', () => {
         kind: 'concept',
         title: 'Upekkha Term',
         lang: 'sa-Latn',
-        href: '/concepts/calm-term/',
+        href: hrefFor({ kind: 'concept', id: 'calm-term' }),
         names: ['Upekkha Term'],
         keywords: [],
         people: [],
@@ -445,7 +445,7 @@ describe('the language a hit carries', () => {
         id: 'page:plain-guide',
         kind: 'page',
         title: 'Plain Guide',
-        href: '/library/plain-guide/',
+        href: hrefFor({ kind: 'page', id: 'plain-guide' }),
         names: [],
         keywords: [],
         people: [],

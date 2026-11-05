@@ -2,6 +2,8 @@ import type { Locator, Page } from '@playwright/test'
 
 import { expectNoAxeViolations } from './axe'
 import { expect, gotoReady, test } from './fixtures'
+import { hrefFor } from '@/content'
+
 import { ROUTES } from './routes'
 
 // The navigation shell: the header's sections and Search, the panels
@@ -39,7 +41,9 @@ const LIBRARY = [
 ] as const
 
 /** Start here follows the wordmark from 30rem (480 px), while its proposal's route exists. */
-const START_LINK = ROUTES.some(({ path }) => path === '/start/') ? ['Start here'] : []
+const START_LINK = ROUTES.some(({ path }) => path === hrefFor({ page: 'start' }))
+  ? ['Start here']
+  : []
 
 const isWide = (page: Page) => (page.viewportSize()?.width ?? 0) >= WIDE
 const banner = (page: Page) => page.getByRole('banner')
