@@ -19,6 +19,17 @@ export function displayName(name: {
 }
 
 /**
+ * A name's gloss: its English rendering, only under a Sanskrit headword. Without a term
+ * the English is the title itself, so there is no gloss to set beside it.
+ */
+export function glossOf(name: {
+  term?: { iast: string; devanagari?: string; ascii?: readonly string[] }
+  english?: string
+}): string | undefined {
+  return name.term && name.english ? name.english : undefined
+}
+
+/**
  * A Concept named in full, for plain text: its Sanskrit name, then its gloss
  * ("Vikṣepa · Distraction"). A Concept with an English title is named by that
  * title alone, and one with no gloss yet by its Sanskrit name alone.
@@ -28,7 +39,8 @@ export function conceptName(name: {
   english?: string
 }): string {
   const leading = displayName(name)
-  return name.term && name.english ? `${leading} · ${name.english}` : leading
+  const gloss = glossOf(name)
+  return gloss ? `${leading} · ${gloss}` : leading
 }
 
 /**

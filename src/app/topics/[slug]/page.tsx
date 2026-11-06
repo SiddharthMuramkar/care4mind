@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 
+import { Numeral } from '@/components/Numeral'
 import { ReadingPage } from '@/components/ReadingPage'
 import { citationLinks, Provenance, Sections } from '@/components/prose'
 import { ReferenceList } from '@/components/ReferenceList'
@@ -8,7 +9,7 @@ import { ScriptPair } from '@/components/script'
 import { ConceptSpread, inWords, VerseIndex } from '@/components/topics'
 import { hrefFor, site, topics } from '@/content'
 import { metadataFor } from '@/lib/metadata'
-import { toDevanagariDigits } from '@/lib/text'
+import { count } from '@/lib/text'
 
 import reading from '../../reading.module.css'
 import styles from './page.module.css'
@@ -22,8 +23,6 @@ export const generateStaticParams = () => site.params(PATTERN)
 export async function generateMetadata({ params }: PageProps<'/topics/[slug]'>): Promise<Metadata> {
   return metadataFor(PATTERN.replace('[slug]', (await params).slug))
 }
-
-const plural = (count: number, one: string) => `${count} ${count === 1 ? one : `${one}s`}`
 
 /**
  * A topic: its Concepts as cards beside a contents plate, set like a book's, whose rows
@@ -45,9 +44,7 @@ export default async function TopicPage({ params }: PageProps<'/topics/[slug]'>)
       kicker={
         <>
           Topic {topic.order}
-          <span className={styles.order} lang="sa-Deva" aria-hidden>
-            {toDevanagariDigits(String(topic.order))}
-          </span>
+          <Numeral value={topic.order} className={styles.order} decorative />
         </>
       }
       title={topic.name}
@@ -64,11 +61,11 @@ export default async function TopicPage({ params }: PageProps<'/topics/[slug]'>)
             </p>
           ) : null}
           <p className={styles.facts}>
-            {plural(topic.conceptCount, 'Concept')}
+            {count(topic.conceptCount, 'Concept', 'Concepts')}
             {topic.secondaryConcepts.length > 0
               ? ` · ${topic.secondaryConcepts.length} more also here`
               : null}{' '}
-            · {plural(verseCount, 'verse')} quoted
+            · {count(verseCount, 'verse', 'verses')} quoted
             {works.length > 0 ? (
               <>
                 , from{' '}

@@ -25,6 +25,7 @@ export default defineReference({
       {
         for: 'research-editor',
         note: 'No publisher is given on the current site; not looked up.',
+        missing: ['container-or-publisher'],
         decidedBy: 'references',
       },
     ],

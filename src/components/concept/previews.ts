@@ -12,7 +12,7 @@ export function conceptPreview(concept: ConceptCard): PreviewPayload {
     name: concept.name,
     ...(concept.lang ? { lang: concept.lang } : {}),
     ...(concept.term?.devanagari ? { devanagari: concept.term.devanagari } : {}),
-    ...(concept.english && concept.term ? { gloss: concept.english } : {}),
+    ...(concept.gloss ? { gloss: concept.gloss } : {}),
     topic: concept.topic,
     readingMinutes: concept.readingMinutes,
     text: concept.summary,
