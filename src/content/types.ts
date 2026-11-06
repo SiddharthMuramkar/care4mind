@@ -569,6 +569,16 @@ export interface RouteEntry {
   proposal?: true
 }
 
+/** A public page's name and the sentence that describes it, for its title and share card. */
+export interface PageDescription {
+  /** Its address as the route registry writes it, with its trailing slash. */
+  path: Route
+  kind: RouteKind
+  /** The name the page goes by: its route title, or "Take the …" for a Questionnaire flow. */
+  name: string
+  description: string
+}
+
 /** One step of a page's breadcrumb trail. The last is the page itself. */
 export interface Crumb {
   label: string

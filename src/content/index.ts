@@ -38,6 +38,6 @@ export const library = content.library
 export const home = content.home
 /**
  * What the site derives from its content, one derivation file each: the route registry, the
- * breadcrumb trail, the A–Z, the search documents and the Concept map's data.
+ * breadcrumb trail, page descriptions, the A–Z, the search documents and the Concept map's data.
  */
 export const site = content.site

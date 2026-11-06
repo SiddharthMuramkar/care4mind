@@ -13,6 +13,13 @@ import { conceptName, displayName } from '../names'
 import { latinScript } from '../views/refs'
 import { canTake } from '../views/questionnaire'
 
+/** A path as the route registry writes it: no query or fragment, with its trailing slash. */
+export function normalisePath(path: string): string {
+  const bare = path.replace(/[?#].*$/, '')
+  const rooted = bare.startsWith('/') ? bare : `/${bare}`
+  return rooted.endsWith('/') ? rooted : `${rooted}/`
+}
+
 /** A route, with the record its page shows and the language of its title where that is IAST. */
 export interface RecordRoute {
   entry: RouteEntry

@@ -7,14 +7,7 @@ import type { ContentGraph } from '../graph'
 import { displayName } from '../names'
 import type { Crumb } from '../types'
 import { hrefFor } from '../views/href'
-import { recordRoutes, type RecordRoute } from './routes'
-
-/** A path as the route registry writes it: no query or fragment, with its trailing slash. */
-function normalise(path: string): string {
-  const bare = path.replace(/[?#].*$/, '')
-  const rooted = bare.startsWith('/') ? bare : `/${bare}`
-  return rooted.endsWith('/') ? rooted : `${rooted}/`
-}
+import { normalisePath, recordRoutes, type RecordRoute } from './routes'
 
 /** The paths above a path, shortest first: `/a/b/` → `/`, `/a/`. */
 function pathsAbove(path: string): string[] {
@@ -39,7 +32,7 @@ export function trail(graph: ContentGraph, flags: Features, path: string): Crumb
   const routes = new Map<string, RecordRoute>(
     recordRoutes(graph, flags).map((route) => [route.entry.path, route]),
   )
-  const page = routes.get(normalise(path))
+  const page = routes.get(normalisePath(path))
   if (!page) return []
 
   const above: RecordRoute[] = []
