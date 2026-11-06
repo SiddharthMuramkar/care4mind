@@ -11,8 +11,10 @@ import {
   isSlug,
   type Block,
   type ContentRecord,
+  type FlagMissing,
   type Provenance,
   type RecordOf,
+  type ReferenceRecord,
   type SanskritName,
   type Section,
   localSource,
@@ -415,10 +417,28 @@ describe('links', () => {
 
 describe('References (FR-03)', () => {
   const PAPER_OR_BOOK = new Set(['journal-article', 'chapter', 'book'])
-  const MISSING_WORDS = {
-    authors: /author/i,
-    year: /\byear|\bdate/i,
-    'container or publisher': /container|publisher|journal|publication/i,
+  const FIELD_WORDS: Record<FlagMissing, string> = {
+    authors: 'authors',
+    year: 'year',
+    'container-or-publisher': 'container or publisher',
+  }
+
+  /** A paper or book's gaps that no Research-editor flag's `missing` key names. */
+  function unflaggedGaps(reference: ReferenceRecord): string[] {
+    if (!PAPER_OR_BOOK.has(reference.type)) return []
+    const gaps: Record<FlagMissing, boolean> = {
+      authors: !reference.authors,
+      year: !reference.year,
+      'container-or-publisher': !reference.container && !reference.publisher,
+    }
+    const flagged = reference.provenance.flags
+      .filter((flag) => flag.for === 'research-editor')
+      .flatMap((flag) => flag.missing ?? [])
+    return (Object.keys(gaps) as FlagMissing[])
+      .filter((field) => gaps[field] && !flagged.includes(field))
+      .map(
+        (field) => `${reference.id}: no ${FIELD_WORDS[field]}, and no Research-editor flag says so`,
+      )
   }
 
   it('gives every Reference a title and a DOI or URL, or says why it has none', () => {
@@ -431,26 +451,42 @@ describe('References (FR-03)', () => {
     expect(problems).toEqual([])
   })
 
+  it('reads the flag’s missing key, not its note’s wording, in made-up examples', () => {
+    const book: ReferenceRecord = {
+      kind: 'reference',
+      id: 'example-2020',
+      type: 'book',
+      title: 'An Example',
+      publisher: 'A Publisher',
+      asCited: [],
+      provenance: { sources: [], edits: [], flags: [] },
+    }
+    const noAuthors = 'example-2020: no authors, and no Research-editor flag says so'
+    const noYear = 'example-2020: no year, and no Research-editor flag says so'
+    const flagBook = (flags: ReferenceRecord['provenance']['flags']): ReferenceRecord => ({
+      ...book,
+      provenance: { ...book.provenance, flags },
+    })
+    expect(unflaggedGaps({ ...book, authors: 'Example, A.', year: '2020' })).toEqual([])
+    expect(unflaggedGaps(book)).toEqual([noAuthors, noYear])
+    expect(
+      unflaggedGaps(flagBook([{ for: 'research-editor', note: 'No author or year is given.' }])),
+    ).toEqual([noAuthors, noYear])
+    expect(
+      unflaggedGaps(
+        flagBook([{ for: 'research-editor', note: 'See the key.', missing: ['authors'] }]),
+      ),
+    ).toEqual([noYear])
+    expect(
+      unflaggedGaps(
+        flagBook([{ for: 'project-owner', note: 'See the key.', missing: ['authors', 'year'] }]),
+      ),
+    ).toEqual([noAuthors, noYear])
+    expect(unflaggedGaps({ ...book, type: 'web-page' })).toEqual([])
+  })
+
   it('gives a paper or book its authors, container or publisher and year, or flags the gap', () => {
-    const problems = ofKind('reference')
-      .filter((reference) => PAPER_OR_BOOK.has(reference.type))
-      .flatMap((reference) => {
-        const gaps = {
-          authors: !reference.authors,
-          year: !reference.year,
-          'container or publisher': !reference.container && !reference.publisher,
-        }
-        const notes = reference.provenance.flags
-          .filter((flag) => flag.for === 'research-editor')
-          .map((flag) => flag.note)
-        return Object.entries(gaps)
-          .filter(([, missing]) => missing)
-          .filter(
-            ([field]) =>
-              !notes.some((note) => MISSING_WORDS[field as keyof typeof MISSING_WORDS].test(note)),
-          )
-          .map(([field]) => `${reference.id}: no ${field}, and no Research-editor flag says so`)
-      })
+    const problems = ofKind('reference').flatMap(unflaggedGaps)
     expect(problems).toEqual([])
   })
 })

@@ -29,11 +29,13 @@ export default defineReference({
       {
         for: 'research-editor',
         note: 'Its “More Info” link on Text Books and Indian Philosophy points nowhere (“#”) and is dropped. No other link is given; nothing was looked up. Add a stable link if the work has one (FR-03).',
+        citation: 'no-link',
         decidedBy: 'references',
       },
       {
         for: 'research-editor',
         note: 'No publisher is given on the current site; not looked up.',
+        missing: ['container-or-publisher'],
         decidedBy: 'references',
       },
     ],

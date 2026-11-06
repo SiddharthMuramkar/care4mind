@@ -21,6 +21,7 @@ export default defineReference({
       {
         for: 'research-editor',
         note: 'No author, year or publisher is given on the current site; not looked up.',
+        missing: ['authors', 'year', 'container-or-publisher'],
         decidedBy: 'references',
       },
     ],
