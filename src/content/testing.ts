@@ -27,6 +27,8 @@ export {
   type ConceptRecord,
   type ContentRecord,
   type Flag,
+  type FlagCitation,
+  type FlagMissing,
   type FlagRole,
   type GlossaryEntryRecord,
   type HomepageRecord,
