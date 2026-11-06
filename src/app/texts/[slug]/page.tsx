@@ -5,7 +5,7 @@ import type { CSSProperties } from 'react'
 import { Fleuron } from '@/components/Fleuron'
 import { OrnamentRule } from '@/components/OrnamentRule'
 import { ReadingPage } from '@/components/ReadingPage'
-import { Provenance } from '@/components/prose'
+import { Provenance, Text } from '@/components/prose'
 import { ReadingThread } from '@/components/ReadingThread'
 import { Passage, VerseRail, VerseTally, WorkTitle } from '@/components/texts'
 import { hrefFor, site, works } from '@/content'
@@ -55,6 +55,11 @@ export default async function WorkPage({ params }: PageProps<'/texts/[slug]'>) {
         <>
           {work.english ? <p className={reading.gloss}>{work.english}</p> : null}
           {work.attribution ? <p className={styles.attribution}>{work.attribution}</p> : null}
+          {work.blurb ? (
+            <p className={styles.blurb}>
+              <Text text={work.blurb} />
+            </p>
+          ) : null}
           <p className={styles.count}>
             <VerseTally locators={work.passages.map(({ locator }) => locator)} ink />
             <span>
