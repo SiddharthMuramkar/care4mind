@@ -652,7 +652,7 @@ export interface SearchDocument {
 }
 
 /** A Concept on the Concept map. */
-export interface ConceptGraphNode extends ConceptRef {
+export interface ConceptMapNode extends ConceptRef {
   /** Its primary topic: the map's sector it sits in. */
   topic: Slug
   /** Every topic it is in, the primary first. */
@@ -660,7 +660,7 @@ export interface ConceptGraphNode extends ConceptRef {
 }
 
 /** A connection on the Concept map, with the fact behind it. */
-export interface ConceptGraphEdge {
+export interface ConceptMapEdge {
   source: Slug
   target: Slug
   /** A shared passage, a shared work, or a rarely cited shared Reference. */
@@ -672,7 +672,7 @@ export interface ConceptGraphEdge {
 }
 
 /** The Concept map's data: its nodes by topic and name, and its edges. */
-export interface ConceptGraph {
-  nodes: readonly ConceptGraphNode[]
-  edges: readonly ConceptGraphEdge[]
+export interface ConceptMap {
+  nodes: readonly ConceptMapNode[]
+  edges: readonly ConceptMapEdge[]
 }

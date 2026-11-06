@@ -1,23 +1,16 @@
 import { termsIn, type ContentGraph } from '../graph'
-import type { Block, Section, TableRowHead, TopicRecord } from '../schema'
-import type { BlockView, SectionView, TableRowView, TocEntry, TopicRef } from '../types'
+import type { Block, Section, TableRowHead } from '../schema'
+import type { BlockView, SectionView, TableRowView, TocEntry } from '../types'
 import { must, nameCopy, present } from './common'
 import { hrefFor } from './href'
 import { asciiSpellings, displayName } from '../names'
 import { verseView } from './passage'
+import { topicRef } from './refs'
 
 /** The page a record's sections are shown on, whose anchors their links point at. */
 export type Owner = { kind: 'concept' | 'topic' | 'resource-list' | 'page'; id: string }
 
 const anchorOn = (owner: Owner, anchor: string) => hrefFor({ ...owner, anchor })
-
-export function topicRef(topic: TopicRecord): TopicRef {
-  return {
-    slug: topic.slug,
-    name: topic.name.english,
-    href: hrefFor({ kind: 'topic', id: topic.slug }),
-  }
-}
 
 function rowHead(head: TableRowHead): TableRowView['head'] {
   if (typeof head === 'string') return head

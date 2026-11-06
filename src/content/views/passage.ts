@@ -1,10 +1,10 @@
 import type { ContentGraph } from '../graph'
-import type { PassageQuote, PassageRecord, WorkRecord } from '../schema'
-import type { LatinScript, PassageView, VerseView, WorkRef } from '../types'
+import type { PassageQuote, PassageRecord } from '../schema'
+import type { PassageView, VerseView } from '../types'
 import { byName, carriedOver, must, present } from './common'
 import { hrefFor, passageAnchor } from './href'
 import { displayName, passageLabel } from '../names'
-import { recordRef } from './refs'
+import { recordRef, workRef } from './refs'
 
 /** Reading order of two locators as numbers: 1.2 before 1.20 before 2.3. */
 export function compareOrder(a: readonly number[], b: readonly number[]): number {
@@ -20,20 +20,6 @@ export function inReadingOrder(passages: readonly PassageRecord[], graph: Conten
   const title = (passage: PassageRecord) =>
     displayName({ term: must(graph, 'work', passage.work).title })
   return [...passages].sort((a, b) => byName(title(a), title(b)) || compareOrder(a.order, b.order))
-}
-
-/** The language tag of a work's transliterated text: Sanskrit unless the work says Pali. */
-export function latinScript(work: WorkRecord): LatinScript {
-  return work.language === 'pi' ? 'pi-Latn' : 'sa-Latn'
-}
-
-export function workRef(work: WorkRecord): WorkRef {
-  return {
-    slug: work.slug,
-    title: displayName({ term: work.title }),
-    lang: latinScript(work),
-    href: hrefFor({ kind: 'work', id: work.slug }),
-  }
 }
 
 /** A verse as a record quotes it: the foundation's Shloka, with its work and its passage's link. */

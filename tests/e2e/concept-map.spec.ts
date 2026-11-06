@@ -8,24 +8,24 @@ import { expectPageTurned, pageTurns, prefetched, recordPageTurns } from './page
 
 // The Concept map (a Proposal): the Concepts round a circle on a
 // printed plate, joined by hairline curves, with the same connections listed in words. Expected
-// values come from site.graph(): one curve, and one row, for each pair of Concepts and kind.
+// values come from site.conceptMap(): one curve, and one row, for each pair of Concepts and kind.
 
 const PATH = hrefFor({ page: 'concept-map' })
-const graph = await site.graph()
-const nameOf = new Map(graph.nodes.map(({ slug, name }) => [slug, name]))
+const conceptMap = await site.conceptMap()
+const nameOf = new Map(conceptMap.nodes.map(({ slug, name }) => [slug, name]))
 const named = (slug: string) => nameOf.get(slug) ?? slug
 /** A Concept as the connections list names it: its Sanskrit name, then its gloss where it has one. */
 const inFull = new Map(
-  graph.nodes.map(({ slug, name, gloss }) => [slug, gloss ? `${name} · ${gloss}` : name]),
+  conceptMap.nodes.map(({ slug, name, gloss }) => [slug, gloss ? `${name} · ${gloss}` : name]),
 )
 const namedInFull = (slug: string) => inFull.get(slug) ?? slug
 const connections = [
-  ...new Set(graph.edges.map(({ source, target, kind }) => `${kind} ${source} ${target}`)),
+  ...new Set(conceptMap.edges.map(({ source, target, kind }) => `${kind} ${source} ${target}`)),
 ]
 const ofKind = (kind: string) => connections.filter((key) => key.startsWith(`${kind} `))
 const neighbours = (slug: string) =>
   new Set(
-    graph.edges.flatMap(({ source, target }) =>
+    conceptMap.edges.flatMap(({ source, target }) =>
       source === slug ? [target] : target === slug ? [source] : [],
     ),
   )
@@ -92,7 +92,7 @@ test.describe('the Concept map', () => {
         text: item.textContent ?? '',
       })),
     )
-    for (const { source, target, reason } of graph.edges) {
+    for (const { source, target, reason } of conceptMap.edges) {
       const row = shown.find(
         ({ names, text }) =>
           names.join(' | ') === `${namedInFull(source)} | ${namedInFull(target)}` &&
@@ -100,7 +100,7 @@ test.describe('the Concept map', () => {
       )
       expect(row, `${named(source)} and ${named(target)}: ${reason}`).toBeDefined()
     }
-    const shared = graph.edges.filter(
+    const shared = conceptMap.edges.filter(
       (edge) =>
         (edge.source === 'brahmacharya' && edge.target === 'sthitaprajna') ||
         (edge.source === 'sthitaprajna' && edge.target === 'brahmacharya'),
@@ -118,10 +118,12 @@ test.describe('the Concept map', () => {
       expect(text).toContain(`${left} · ${right}`)
     }
 
-    const link = list(page).getByRole('link', { name: namedInFull(graph.edges[0]?.source ?? '') })
+    const link = list(page).getByRole('link', {
+      name: namedInFull(conceptMap.edges[0]?.source ?? ''),
+    })
     await expect(link.first()).toHaveAttribute(
       'href',
-      hrefFor({ kind: 'concept', id: graph.edges[0]?.source ?? '' }),
+      hrefFor({ kind: 'concept', id: conceptMap.edges[0]?.source ?? '' }),
     )
   })
 
@@ -131,7 +133,7 @@ test.describe('the Concept map', () => {
     async ({ page }) => {
       await gotoReady(page, PATH)
       const points = plate(page).getByRole('link')
-      await expect(points).toHaveText(graph.nodes.map(({ name }) => name))
+      await expect(points).toHaveText(conceptMap.nodes.map(({ name }) => name))
       const layers = page.locator('[data-map] svg')
       for (const layer of await layers.all())
         await expect(layer).toHaveAttribute('aria-hidden', 'true')
@@ -158,7 +160,7 @@ test.describe('the Concept map', () => {
 
       await point(page, slug).focus()
       expect(await point(page, slug).evaluate((link) => link.matches(':focus-visible'))).toBe(true)
-      for (const node of graph.nodes) {
+      for (const node of conceptMap.nodes) {
         if (node.slug === slug) continue
         const expected = near.has(node.slug) ? lit : muted
         expect(await colourOf(point(page, node.slug)), node.name).toEqual(expected)
@@ -177,7 +179,7 @@ test.describe('the Concept map', () => {
 
       // Moving on lights the next Concept's neighbours instead.
       await page.keyboard.press('Tab')
-      const next = graph.nodes[graph.nodes.findIndex((node) => node.slug === slug) + 1]
+      const next = conceptMap.nodes[conceptMap.nodes.findIndex((node) => node.slug === slug) + 1]
       expect(await colourOf(point(page, slug))).toEqual(
         neighbours(next?.slug ?? '').has(slug) ? lit : muted,
       )
@@ -234,7 +236,7 @@ test.describe('the Concept map', () => {
     await page.keyboard.press('Space')
     await expect(page).toHaveURL(/\?kind=reference&topic=self$/)
     const self = new Set(
-      graph.nodes.filter(({ topics }) => topics.includes('self')).map(({ slug }) => slug),
+      conceptMap.nodes.filter(({ topics }) => topics.includes('self')).map(({ slug }) => slug),
     )
     const touching = ofKind('reference').filter((key) =>
       key.split(' ').some((slug) => self.has(slug)),
@@ -289,7 +291,9 @@ test.describe('the Concept map', () => {
     async ({ page }) => {
       await gotoReady(page, `${PATH}?topic=temperament`)
       const inTopic = new Set(
-        graph.nodes.filter(({ topics }) => topics.includes('temperament')).map(({ slug }) => slug),
+        conceptMap.nodes
+          .filter(({ topics }) => topics.includes('temperament'))
+          .map(({ slug }) => slug),
       )
       const touching = connections.filter((key) =>
         key
@@ -303,7 +307,7 @@ test.describe('the Concept map', () => {
       ).toHaveCount(touching.length)
       const muted = await token(page, '--color-surface-muted')
       const ink = await token(page, '--color-surface-ink')
-      for (const node of graph.nodes)
+      for (const node of conceptMap.nodes)
         expect(await colourOf(point(page, node.slug)), node.name).toEqual(
           inTopic.has(node.slug) ? ink : muted,
         )

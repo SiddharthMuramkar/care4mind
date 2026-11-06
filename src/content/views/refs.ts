@@ -1,6 +1,6 @@
 import type { ContentGraph, RecordKey } from '../graph'
-import type { ConceptRecord, QuestionnaireRecord } from '../schema'
-import type { ConceptRef, RecordRef } from '../types'
+import type { ConceptRecord, QuestionnaireRecord, TopicRecord, WorkRecord } from '../schema'
+import type { ConceptRef, LatinScript, RecordRef, TopicRef, WorkRef } from '../types'
 import { must, present } from './common'
 import { hrefFor } from './href'
 import { displayName } from '../names'
@@ -13,6 +13,30 @@ export function conceptRef(concept: ConceptRecord): ConceptRef {
     ...(concept.name.term ? { lang: 'sa-Latn' as const } : {}),
     ...(concept.name.term && concept.name.english ? { gloss: concept.name.english } : {}),
     href: hrefFor({ kind: 'concept', id: concept.slug }),
+  }
+}
+
+/** A link to a topic's page, with its English name. */
+export function topicRef(topic: TopicRecord): TopicRef {
+  return {
+    slug: topic.slug,
+    name: topic.name.english,
+    href: hrefFor({ kind: 'topic', id: topic.slug }),
+  }
+}
+
+/** The language tag of a work's transliterated text: Sanskrit unless the work says Pali. */
+export function latinScript(work: WorkRecord): LatinScript {
+  return work.language === 'pi' ? 'pi-Latn' : 'sa-Latn'
+}
+
+/** A link to a work's page, with its title and its transliteration's language. */
+export function workRef(work: WorkRecord): WorkRef {
+  return {
+    slug: work.slug,
+    title: displayName({ term: work.title }),
+    lang: latinScript(work),
+    href: hrefFor({ kind: 'work', id: work.slug }),
   }
 }
 

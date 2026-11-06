@@ -10,11 +10,11 @@ import type { FixedPage, LatinScript, RouteEntry, RouteKind } from '../types'
 import { byName } from '../views/common'
 import { hrefFor } from '../views/href'
 import { conceptName, displayName } from '../names'
-import { latinScript } from '../views/passage'
+import { latinScript } from '../views/refs'
 import { canTake } from '../views/questionnaire'
 
 /** A route, with the record its page shows and the language of its title where that is IAST. */
-export interface PageRoute {
+export interface RecordRoute {
   entry: RouteEntry
   record?: RecordKey
   lang?: LatinScript
@@ -23,19 +23,19 @@ export interface PageRoute {
 }
 
 /** A fixed page's route: its path is its pattern. Titles are the site map's own labels. */
-function fixed(page: FixedPage, kind: RouteKind, title: string, proposal = false): PageRoute {
+function fixed(page: FixedPage, kind: RouteKind, title: string, proposal = false): RecordRoute {
   const path = hrefFor({ page })
   return { entry: { path, kind, pattern: path, title, ...(proposal ? { proposal: true } : {}) } }
 }
 
-const byPath = (a: PageRoute, b: PageRoute) => byName(a.entry.path, b.entry.path)
+const byPath = (a: RecordRoute, b: RecordRoute) => byName(a.entry.path, b.entry.path)
 
 /** The pages of one kind of record: each record's route, its title and its address. */
-type PageBuilder = (graph: ContentGraph, flags: Features) => PageRoute[]
+type RecordRouteBuilder = (graph: ContentGraph, flags: Features) => RecordRoute[]
 
 /**
  * Each kind's pages, declared once; a kind with no page of its own says so, so a new kind
- * fails to compile until its pages are decided here. `pageRoutes` puts them in site-map order.
+ * fails to compile until its pages are decided here. `recordRoutes` puts them in site-map order.
  */
 const PAGES = {
   concept: (graph) =>
@@ -83,7 +83,7 @@ const PAGES = {
       .sort((a, b) => byName(a.slug, b.slug))
       .flatMap((questionnaire) => {
         const target = { kind: 'questionnaire', id: questionnaire.slug } as const
-        const intro: PageRoute = {
+        const intro: RecordRoute = {
           entry: {
             path: hrefFor({ ...target, status: questionnaire.status }),
             kind: 'questionnaire',
@@ -93,7 +93,7 @@ const PAGES = {
           record: target,
         }
         if (!canTake(questionnaire, flags)) return [intro]
-        const flow: PageRoute = {
+        const flow: RecordRoute = {
           entry: {
             path: hrefFor({ ...target, status: questionnaire.status, flow: true }),
             kind: 'questionnaire-flow',
@@ -128,22 +128,22 @@ const PAGES = {
     })),
   // The homepage is the fixed page at `/`, not one page per record.
   home: null,
-} as const satisfies { [K in ContentKind]: PageBuilder | null }
+} as const satisfies { [K in ContentKind]: RecordRouteBuilder | null }
 
 /**
  * Every public page, in the site map's order, each kind's first marked as its sample. A route
  * whose feature flag is off is left out, a Questionnaire coming later has none
  * (it is an anchor on the Questionnaires page), and `/topics/` is a redirect, not a route.
  */
-export function pageRoutes(graph: ContentGraph, flags: Features): PageRoute[] {
-  const pagesOf = (kind: ContentKind): PageRoute[] => PAGES[kind]?.(graph, flags) ?? []
+export function recordRoutes(graph: ContentGraph, flags: Features): RecordRoute[] {
+  const pagesOf = (kind: ContentKind): RecordRoute[] => PAGES[kind]?.(graph, flags) ?? []
   const concepts = pagesOf('concept')
   const topics = pagesOf('topic')
   const works = pagesOf('work')
   const questionnaires = pagesOf('questionnaire')
   const library = [...pagesOf('resource-list'), ...pagesOf('page')]
 
-  const routes: PageRoute[] = [
+  const routes: RecordRoute[] = [
     fixed('home', 'home', 'Home'),
     ...(flags.startHere ? [fixed('start', 'start', 'Start here', true)] : []),
     fixed('concepts', 'concepts', 'Concepts'),
@@ -189,7 +189,7 @@ export function routes(graph: ContentGraph, flags: Features): RouteEntry[] {
   const key = flagsKey(flags)
   const cached = byFlags.get(key)
   if (cached) return cached
-  const built = pageRoutes(graph, flags).map(({ entry, record }) =>
+  const built = recordRoutes(graph, flags).map(({ entry, record }) =>
     record ? { ...entry, record } : entry,
   )
   byFlags.set(key, built)

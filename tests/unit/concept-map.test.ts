@@ -3,11 +3,11 @@ import { describe, expect, it } from 'vitest'
 import { countText, NOTHING, readSelection, shows, stands, writeSelection } from '@/components/map'
 import { KINDS } from '@/components/map'
 import { layoutMap, type MapLayout } from '@/components/map'
-import { hrefFor, RELATION_STRENGTH, type ConceptGraph, type ConceptGraphEdge } from '@/content'
+import { hrefFor, RELATION_STRENGTH, type ConceptMap, type ConceptMapEdge } from '@/content'
 
 // The Concept map's layout, worked out while the site builds (the
-// browser runs none). The seam is the pure layout module: a graph and its topics in, the plate's
-// points, sectors and curves out. A small graph made here keeps the expected values independent.
+// browser runs none). The seam is the pure layout module: a Concept map and its topics in, the plate's
+// points, sectors and curves out. A small map made here keeps the expected values independent.
 
 const TOPICS = [
   { slug: 'self', name: 'Self', order: 1 },
@@ -26,12 +26,12 @@ const node = (slug: string, topic: string, also: string[] = []) => ({
 const edge = (
   source: string,
   target: string,
-  kind: ConceptGraphEdge['kind'],
+  kind: ConceptMapEdge['kind'],
   via: string,
   reason: string,
-): ConceptGraphEdge => ({ source, target, kind, via, reason })
+): ConceptMapEdge => ({ source, target, kind, via, reason })
 
-const GRAPH: ConceptGraph = {
+const CONCEPT_MAP: ConceptMap = {
   nodes: [
     node('atman', 'self'),
     node('jiva', 'self'),
@@ -65,11 +65,11 @@ describe('the map’s kind order', () => {
 })
 
 describe('layoutMap', () => {
-  const map: MapLayout = layoutMap(GRAPH, TOPICS)
+  const map: MapLayout = layoutMap(CONCEPT_MAP, TOPICS)
 
-  it('sets every Concept on one circle, in the graph’s order, so the tab order follows the topics', () => {
+  it('sets every Concept on one circle, in the map’s order, so the tab order follows the topics', () => {
     expect(map.size).toBe(1000)
-    expect(map.points.map(({ slug }) => slug)).toEqual(GRAPH.nodes.map(({ slug }) => slug))
+    expect(map.points.map(({ slug }) => slug)).toEqual(CONCEPT_MAP.nodes.map(({ slug }) => slug))
     const [first = 0, ...rest] = map.points.map(radius)
     for (const r of rest) expect(r).toBeCloseTo(first, 0)
     expect(first).toBeGreaterThan(200)
@@ -86,7 +86,9 @@ describe('layoutMap', () => {
         return at >= sector.from && at <= sector.to
       })
       expect(inside.map(({ topic }) => topic)).toEqual(inside.map(() => sector.topic))
-      expect(inside.length).toBe(GRAPH.nodes.filter(({ topic }) => topic === sector.topic).length)
+      expect(inside.length).toBe(
+        CONCEPT_MAP.nodes.filter(({ topic }) => topic === sector.topic).length,
+      )
     }
     map.sectors.reduce((before, after) => {
       expect(after.from).toBeGreaterThan(before.to)
@@ -170,7 +172,7 @@ describe('layoutMap', () => {
     // One topic, so every Concept is on the right half, top to bottom. Only the middle name is
     // too long for the room beside the circle and is set in more than one line.
     const long = { ...node('momentum', 'self'), name: 'Momentum of Spiritual Practice' }
-    const graph: ConceptGraph = {
+    const conceptMap: ConceptMap = {
       nodes: [
         node('atman', 'self'),
         node('jiva', 'self'),
@@ -180,7 +182,9 @@ describe('layoutMap', () => {
       ],
       edges: [],
     }
-    const [a = 0, b = 0, c = 0, d = 0, e = 0] = layoutMap(graph, TOPICS).points.map(({ y }) => y)
+    const [a = 0, b = 0, c = 0, d = 0, e = 0] = layoutMap(conceptMap, TOPICS).points.map(
+      ({ y }) => y,
+    )
     const short = b - a
     expect(e - d).toBeCloseTo(short, 0)
     expect(c - b).toBeGreaterThan(short * 1.4)

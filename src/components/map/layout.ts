@@ -1,12 +1,12 @@
 /**
  * The Concept map's layout, worked out while the site builds so the browser runs
  * no layout code. The Concepts sit on one circle, one sector per topic, clockwise from the top in
- * the graph's order (so the tab order follows the topics). The topics are split between the
+ * the map's order (so the tab order follows the topics). The topics are split between the
  * circle's right and left halves, and each half spaces its Concepts from top to bottom: their
  * names are set across, so spacing them down the page, a long name by its lines, keeps them apart.
  * Coordinates are in a square of SIZE units, its centre at the middle.
  */
-import type { ConceptGraph, ConceptGraphNode } from '@/content'
+import type { ConceptMap, ConceptMapNode } from '@/content'
 
 import { KINDS, type ConnectionKind } from './kinds'
 
@@ -45,7 +45,7 @@ export interface MapTopic {
   order: number
 }
 
-export interface MapPoint extends ConceptGraphNode {
+export interface MapPoint extends ConceptMapNode {
   x: number
   y: number
   /** Clockwise from the top, in degrees. */
@@ -54,7 +54,7 @@ export interface MapPoint extends ConceptGraphNode {
   side: 'right' | 'left'
   /** How wide its name may run outward before the plate's edge, as a share of the plate (0 to 1). */
   room: number
-  /** The Concepts it shares a connection with, of any kind, in the graph's order. */
+  /** The Concepts it shares a connection with, of any kind, in the map's order. */
   near: string[]
 }
 
@@ -110,7 +110,7 @@ const bearingOf = (x: number, y: number) =>
   ((Math.atan2(x - CENTRE, CENTRE - y) * 180) / Math.PI + 360) % 360
 
 /** The topics on the right half, the rest on the left: as near an even split as the topics allow. */
-function split(groups: readonly ConceptGraphNode[][]) {
+function split(groups: readonly ConceptMapNode[][]) {
   const total = groups.reduce((sum, group) => sum + group.length, 0)
   let best = groups.length
   let gap = Infinity
@@ -136,7 +136,7 @@ function linesOf({ name, room }: MapPoint) {
  * Where a Concept sits sets its room, and its room its lines: a few passes settle both, a name's
  * lines only ever growing.
  */
-function placeHalf(groups: readonly ConceptGraphNode[][], side: 'right' | 'left'): MapPoint[] {
+function placeHalf(groups: readonly ConceptMapNode[][], side: 'right' | 'left'): MapPoint[] {
   let lines = groups.flat().map(() => 1)
   let points = spaceHalf(groups, side, lines)
   for (let pass = 0; pass < 4; pass++) {
@@ -149,7 +149,7 @@ function placeHalf(groups: readonly ConceptGraphNode[][], side: 'right' | 'left'
 }
 
 function spaceHalf(
-  groups: readonly ConceptGraphNode[][],
+  groups: readonly ConceptMapNode[][],
   side: 'right' | 'left',
   lines: readonly number[],
 ): MapPoint[] {
@@ -186,9 +186,9 @@ function arcPath(from: number, to: number) {
 }
 
 /** The plate: where each Concept sits and each topic's sector. */
-export function layoutMap(graph: ConceptGraph, topics: readonly MapTopic[]): MapLayout {
-  const used = topics.filter((topic) => graph.nodes.some((node) => node.topic === topic.slug))
-  const groups = used.map((topic) => graph.nodes.filter((node) => node.topic === topic.slug))
+export function layoutMap(map: ConceptMap, topics: readonly MapTopic[]): MapLayout {
+  const used = topics.filter((topic) => map.nodes.some((node) => node.topic === topic.slug))
+  const groups = used.map((topic) => map.nodes.filter((node) => node.topic === topic.slug))
   const [right, left] = split(groups)
   const points = [...placeHalf(right, 'right'), ...placeHalf(left, 'left')]
 
@@ -213,15 +213,15 @@ export function layoutMap(graph: ConceptGraph, topics: readonly MapTopic[]): Map
     view: { top, height: SIZE - 2 * top },
     points,
     sectors,
-    connections: connect(graph, points),
+    connections: connect(map, points),
   }
 }
 
-/** The graph's facts as curves: one for each pair and kind, strongest kind first, then in the graph's order. */
-function connect(graph: ConceptGraph, points: MapPoint[]): MapConnection[] {
+/** The map's facts as curves: one for each pair and kind, strongest kind first, then in the map's order. */
+function connect(map: ConceptMap, points: MapPoint[]): MapConnection[] {
   const place = new Map(points.map((point) => [point.slug, point]))
   const byId = new Map<string, MapConnection>()
-  for (const { source, target, kind, reason } of graph.edges) {
+  for (const { source, target, kind, reason } of map.edges) {
     const from = place.get(source)
     const to = place.get(target)
     if (!from || !to) continue

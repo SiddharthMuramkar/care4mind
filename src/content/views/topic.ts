@@ -1,10 +1,11 @@
 import { quotesOf, type ContentGraph } from '../graph'
 import type { TopicRecord } from '../schema'
 import type { QuotedWork, TopicCard, TopicView } from '../types'
-import { sectionViews, tocOf, topicRef, type Owner } from './blocks'
+import { sectionViews, tocOf, type Owner } from './blocks'
 import { byName, carriedOver, must, nameCopy, present } from './common'
 import { conceptCard } from './concept'
-import { inReadingOrder, passageView, workRef } from './passage'
+import { inReadingOrder, passageView } from './passage'
+import { topicRef, workRef } from './refs'
 import { citationMap, numberedReferences } from './reference'
 
 /** A topic in brief: its name, its place among the topics and how many Concepts it has. */

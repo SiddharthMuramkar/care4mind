@@ -13,14 +13,14 @@ import {
   type SectionView,
   type VerseView,
 } from '../types'
-import { glanceOf, sectionViews, tocOf, topicRef, type Owner } from './blocks'
+import { glanceOf, sectionViews, tocOf, type Owner } from './blocks'
 import { byName, carriedOver, must, nameCopy, present } from './common'
 import { hrefFor } from './href'
 import { asciiSpellings, displayName, passageLabel } from '../names'
-import { compareOrder, verseView, workRef } from './passage'
+import { compareOrder, verseView } from './passage'
 import { questionnaireCard } from './questionnaire'
 import { citationMap, numberedReferences } from './reference'
-import { conceptRef } from './refs'
+import { conceptRef, topicRef, workRef } from './refs'
 
 /** A Concept in brief, its reading time already counted from its page's sections and verses. */
 function cardWith(record: ConceptRecord, graph: ContentGraph, readingMinutes: number): ConceptCard {

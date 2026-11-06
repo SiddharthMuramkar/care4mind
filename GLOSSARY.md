@@ -16,6 +16,11 @@ A single idea from Indian psychology, such as guṇa or citta, usually named by 
 _Avoid_: knowledge concept, knowledge page
 _In code_: `concept` (`ConceptRecord`, `/concepts/`)
 
+**Concept map**:
+A proposed page that sets the Concepts round a circle by topic and draws what joins them — a verse, a text or a rarely cited Reference they share — with every connection in words beside it.
+_Avoid_: graph
+_In code_: `ConceptMap`, from `site.conceptMap()` (`/concepts/map/`)
+
 **Section**:
 One headed part of a Concept, a topic's introduction or a Text page, made of blocks. Applications and comparisons are roles a section can carry.
 _Avoid_: chapter

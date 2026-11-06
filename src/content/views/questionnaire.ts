@@ -8,12 +8,11 @@ import type {
   QuestionnaireView,
   TopicRef,
 } from '../types'
-import { topicRef } from './blocks'
 import { byName, carriedOver, must, present } from './common'
 import { conceptCard } from './concept'
 import { hrefFor } from './href'
 import { referenceView } from './reference'
-import { conceptRef, questionnaireHref } from './refs'
+import { conceptRef, questionnaireHref, topicRef } from './refs'
 
 /**
  * Whether a Questionnaire can be taken in this build: a live one always, a preview one only

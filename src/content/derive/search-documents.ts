@@ -17,7 +17,7 @@ import {
 import type { SearchDocument } from '../types'
 import { must } from '../views/common'
 import { hrefFor } from '../views/href'
-import { latinScript } from '../views/passage'
+import { latinScript } from '../views/refs'
 import {
   asciiSpellings,
   authorNames,

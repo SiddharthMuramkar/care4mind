@@ -1025,9 +1025,9 @@ describe('site.searchDocuments', () => {
   })
 })
 
-describe('site.graph', () => {
+describe('site.conceptMap', () => {
   it('gives the Concepts as nodes with their topics, and an edge per shared passage or rare Reference', async () => {
-    expect(await createContent(memorySource(...world), ON).site.graph()).toEqual({
+    expect(await createContent(memorySource(...world), ON).site.conceptMap()).toEqual({
       nodes: [
         {
           slug: 'calm',
@@ -1086,7 +1086,7 @@ describe('site.graph', () => {
       references: [],
     })
     const records = [...world.filter((record) => record !== calm), ys230, apart]
-    const { edges } = await createContent(memorySource(...records), ON).site.graph()
+    const { edges } = await createContent(memorySource(...records), ON).site.conceptMap()
     expect(edges.filter(({ kind }) => kind === 'work')).toEqual([
       {
         source: 'calm',
@@ -1114,7 +1114,7 @@ describe('site.graph', () => {
       citing('three', 'yoga-sutra/1.30', ['popular-2010']),
       citing('four', 'dhammapada/160', ['popular-2010']),
     ]
-    const { edges } = await createContent(memorySource(...records), ON).site.graph()
+    const { edges } = await createContent(memorySource(...records), ON).site.conceptMap()
     expect(edges.filter(({ kind }) => kind === 'reference')).toEqual([])
     expect(edges.map(({ via }) => via).sort()).toEqual(['dhammapada/160', 'yoga-sutra/1.30'])
   })
@@ -1144,7 +1144,7 @@ async function internalLinks(site: ReturnType<typeof createContent>) {
     await site.home.get(),
     await site.site.azIndex(),
     await site.site.searchDocuments(),
-    await site.site.graph(),
+    await site.site.conceptMap(),
   ]
   return hrefsIn(views).filter((href) => href.startsWith('/'))
 }
@@ -1213,7 +1213,7 @@ describe('the derivations, on the site’s own content', () => {
   })
 
   it('make no Concept-map edge through Tomar (2024)', async () => {
-    const { nodes, edges } = await content.site.graph()
+    const { nodes, edges } = await content.site.conceptMap()
     expect(nodes).toHaveLength((await content.concepts.list()).length)
     expect(edges.filter(({ via }) => via === 'tomar-2024')).toEqual([])
   })

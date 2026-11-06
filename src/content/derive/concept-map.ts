@@ -4,7 +4,7 @@
  * are the map's sectors. The map's layout is the front end's to add.
  */
 import type { ContentGraph } from '../graph'
-import { RELATION_STRENGTH, type ConceptGraph, type ConceptGraphEdge } from '../types'
+import { RELATION_STRENGTH, type ConceptMap, type ConceptMapEdge } from '../types'
 import { byName } from '../views/common'
 import { displayName } from '../names'
 import { conceptRef } from '../views/refs'
@@ -12,7 +12,7 @@ import { conceptRef } from '../views/refs'
 const EDGE_KINDS = RELATION_STRENGTH.filter((kind) => kind !== 'topic')
 
 /** The Concept map's nodes, by topic then name, and its edges, each pair's facts once. */
-export function conceptGraph(graph: ContentGraph): ConceptGraph {
+export function conceptMap(graph: ContentGraph): ConceptMap {
   const order = new Map(graph.records('topic').map((topic) => [topic.slug, topic.order]))
   const concepts = [...graph.records('concept')].sort(
     (a, b) =>
@@ -23,7 +23,7 @@ export function conceptGraph(graph: ContentGraph): ConceptGraph {
   const position = new Map(concepts.map((concept, index) => [concept.slug, index]))
   const at = (slug: string) => position.get(slug) ?? -1
 
-  const edges: ConceptGraphEdge[] = []
+  const edges: ConceptMapEdge[] = []
   for (const concept of concepts)
     for (const relation of graph.related(concept.slug)) {
       if (relation.kind === 'topic' || at(relation.concept) <= at(concept.slug)) continue
