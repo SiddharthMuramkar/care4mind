@@ -20,23 +20,15 @@ import {
   createContent,
 } from '@/content/testing'
 
+import { flagsOff, flagsOn } from '../flags'
+
 // The site derivations: the routes, the
 // breadcrumb trail, page descriptions, the A–Z, the search documents and the Concept-map data, each computed from
 // whatever records a source holds. Each test builds a made-up source and reads `site` through
 // the same interface the pages use. Every record and string here is made up for the test.
 
-const ON: Features = {
-  questionnairePreview: true,
-  conceptMap: true,
-  startHere: true,
-  whatsOnYourMind: true,
-}
-const OFF: Features = {
-  questionnairePreview: false,
-  conceptMap: false,
-  startHere: false,
-  whatsOnYourMind: false,
-}
+const ON = flagsOn()
+const OFF = flagsOff()
 
 const provenance = {
   sources: [{ url: 'https://example.org/page/', retrieved: '2026-10-27' }],
