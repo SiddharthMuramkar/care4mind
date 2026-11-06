@@ -3,7 +3,7 @@
  * sentence about what the page holds. Page metadata and share cards read only this.
  */
 import type { Features } from '@/config/features'
-import { count } from '@/lib/text'
+import { count, wordList } from '@/lib/text'
 
 import type { ContentGraph } from '../graph'
 import type { PageDescription, RouteEntry } from '../types'
@@ -68,8 +68,7 @@ function described(graph: ContentGraph, route: RouteEntry): { name: string; desc
           (page) => page.title,
         ),
       ]
-      const listed = `${titles.slice(0, -1).join(', ')} and ${titles.at(-1)}`
-      return { name, description: `The Care4Mind Library: ${listed}.` }
+      return { name, description: `The Care4Mind Library: ${wordList(titles)}.` }
     }
     case 'page':
       return { name, description: must(graph, 'page', shownId()).summary }

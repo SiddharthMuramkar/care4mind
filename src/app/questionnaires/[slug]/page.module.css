@@ -40,5 +40,5 @@
   margin: 0;
   padding-top: 1rem;
   border-top: 1px solid var(--color-line);
-  font-size: 0.9375rem;
+  font-size: var(--text-small);
 }

@@ -4,7 +4,7 @@
   align-items: center;
   gap: 0.5rem 0.75rem;
   margin: 0;
-  font-size: 1rem;
+  font-size: var(--text-base);
   color: var(--color-surface-muted);
 }
 
@@ -16,12 +16,12 @@
 /* The way back into the Concepts when nothing matched. */
 .browse {
   margin: 0;
-  font-size: 1.125rem;
+  font-size: var(--text-large);
 }
 
 .help {
   margin: 0;
-  font-size: 1.0625rem;
+  font-size: var(--text-body);
 }
 
 /* Entries set like a dictionary's: a name, what it is, then its text. */
@@ -56,7 +56,7 @@
   margin: 0;
   font-family: var(--font-display);
   font-weight: 500;
-  font-size: 1.375rem;
+  font-size: var(--text-title);
   line-height: 1.3;
 }
 
@@ -67,7 +67,7 @@
 }
 
 .meta {
-  font-size: 1.0625rem;
+  font-size: var(--text-body);
   color: var(--color-surface-muted);
 }
 
@@ -92,6 +92,6 @@
   margin: 0;
   font-family: var(--font-display);
   font-weight: 500;
-  font-size: 1.5rem;
+  font-size: var(--text-heading);
   line-height: 1.25;
 }

@@ -285,6 +285,24 @@ test.describe('the Concept map', () => {
     await expect(page.locator('body')).not.toBeFocused()
   })
 
+  test('a chip focused before the keyboard arrives keeps focus, and the page stays put', async ({
+    page,
+  }) => {
+    // Without an idle moment the keyboard loads only when focus comes near, so the swap follows it.
+    await page.addInitScript(() => {
+      ;(window as { requestIdleCallback?: unknown }).requestIdleCallback = () => 0
+    })
+    await gotoReady(page, PATH)
+    const first = group(page, 'Lines').getByRole('button').first()
+    await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight))
+    await expect(first).not.toBeInViewport()
+    await first.evaluate((button) => button.focus({ preventScroll: true }))
+    const before = await page.evaluate(() => window.scrollY)
+    await keyboardReady(page)
+    await expect(first).toBeFocused()
+    expect(await page.evaluate(() => window.scrollY)).toBe(before)
+  })
+
   test(
     'an address with a topic opens filtered, the Concepts outside it in a lighter ink',
     { tag: '@from-768' },

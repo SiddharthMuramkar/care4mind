@@ -12,13 +12,13 @@
 }
 
 /* Three cards: one row of three where they fit, otherwise one column, never two and a stray. */
-@media (min-width: 48rem) {
+@media (width >= 48rem) {
   .cards {
     grid-template-columns: repeat(3, 1fr);
   }
 }
 
-@media (max-width: 47.99rem) {
+@media (width < 48rem) {
   .cards {
     grid-template-columns: 1fr;
   }
@@ -36,7 +36,7 @@
 .cardTitle {
   margin: 0 0 0.5rem;
   font-family: var(--font-display);
-  font-size: 1.125rem;
+  font-size: var(--text-large);
 }
 
 .card p {

@@ -37,7 +37,7 @@
 }
 
 /* Wide: each group's label in a margin of its own, its buttons wrapping beside it. */
-@media (min-width: 40rem) {
+@media (width >= 40rem) {
   .group {
     position: relative;
     padding-inline-start: 5rem;
@@ -51,7 +51,7 @@
 }
 
 /* A phone: each group is one row of buttons that scrolls sideways under its label, as the A–Z's do. */
-@media (max-width: 39.99rem) {
+@media (width < 40rem) {
   .group {
     flex-wrap: nowrap;
     overflow-x: auto;
@@ -71,54 +71,14 @@
   }
 }
 
-/* A button is a slip of type: outlined while off, inked solid while pressed, pressed into the paper. */
+/* The map's chip, over the shared one (filterStyles.chip): room for its swatch. */
 .chip {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
   gap: 0.55rem;
-  min-height: 2.25rem;
-  padding: 0.2rem 0.85rem;
-  border: 1px solid color-mix(in srgb, var(--color-surface-ink) 45%, transparent);
-  border-radius: 2px;
-  background: transparent;
-  color: var(--color-surface-ink);
-  font: inherit;
-  font-size: 1rem;
-  line-height: 1.3;
-  text-align: start;
-  cursor: pointer;
-  overflow: hidden;
-}
-
-.chip:hover {
-  border-color: var(--color-surface-ink);
-}
-
-.chip[aria-pressed='true'] {
-  background: var(--color-ground);
-  border-color: var(--color-ground);
-  color: var(--color-ink);
-}
-
-/* Windows' contrast themes repaint the pressed chip's ground: draw it in the theme's selection colours. */
-@media (forced-colors: active) {
-  .chip[aria-pressed='true'] {
-    forced-color-adjust: none;
-    background: Highlight;
-    border-color: Highlight;
-    color: HighlightText;
-  }
 }
 
 /* A topic's button carries its hue as a rule along its foot. */
 .chip[data-topic] {
   box-shadow: inset 0 -3px 0 var(--topic);
-}
-
-.chip:focus-visible {
-  outline: 3px solid var(--color-focus);
-  outline-offset: 2px;
 }
 
 .swatch {
@@ -140,25 +100,6 @@
   flex-wrap: wrap;
   align-items: baseline;
   gap: 0.25rem 1.25rem;
-}
-
-.count {
-  margin: 0;
-  font-size: 1.125rem;
-  color: var(--color-surface-muted);
-}
-
-.clear {
-  position: relative;
-  min-height: 2.25rem;
-  padding: 0 0.25rem;
-  border: 0;
-  background: none;
-  color: var(--color-link);
-  font: inherit;
-  text-decoration: underline;
-  text-underline-offset: 0.2em;
-  cursor: pointer;
 }
 
 .clear:focus-visible {

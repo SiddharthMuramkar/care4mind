@@ -295,6 +295,24 @@ test.describe('the filter chips', () => {
     await expect(page.locator('body')).not.toBeFocused()
   })
 
+  test('a chip focused before the keyboard arrives keeps focus, and the page stays put', async ({
+    page,
+  }) => {
+    // Without an idle moment the keyboard loads only when focus comes near, so the swap follows it.
+    await page.addInitScript(() => {
+      ;(window as { requestIdleCallback?: unknown }).requestIdleCallback = () => 0
+    })
+    await gotoReady(page, PATH)
+    const first = chip(page, mind.name)
+    await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight))
+    await expect(first).not.toBeInViewport()
+    await first.evaluate((button) => button.focus({ preventScroll: true }))
+    const before = await page.evaluate(() => window.scrollY)
+    await expect(toolbar(page)).toBeVisible()
+    await expect(first).toBeFocused()
+    expect(await page.evaluate(() => window.scrollY)).toBe(before)
+  })
+
   test('filter by keyboard: one Tab stop, arrows between chips, Space to press', async ({
     page,
   }) => {
