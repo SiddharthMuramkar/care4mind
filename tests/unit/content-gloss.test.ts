@@ -1,7 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { CONTENT_KINDS } from '@/content/schema'
-import { localSource } from '@/content/source'
+import { CONTENT_KINDS, localSource } from '@/content/testing'
 
 /** Every `gloss` field anywhere in a record, its blocks and table rows included. */
 function glossesOf(value: unknown, path: string, out: { path: string; text: string }[]) {

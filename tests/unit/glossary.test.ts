@@ -3,7 +3,7 @@ import { readFileSync } from 'node:fs'
 
 import { describe, expect, it } from 'vitest'
 
-import { CONTENT_KINDS } from '@/content/schema'
+import { CONTENT_KINDS } from '@/content/testing'
 
 const glossary = readFileSync('GLOSSARY.md', 'utf8')
 

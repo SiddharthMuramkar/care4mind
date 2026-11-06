@@ -5,6 +5,7 @@
  * `data/`; later a CMS) and the graph resolves every link between them once. Pages get views:
  * plain, serialisable data shaped for a page.
  */
+import 'server-only'
 import type { Route } from 'next'
 
 import { features } from '@/config/features'

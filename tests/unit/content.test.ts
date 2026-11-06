@@ -8,7 +8,7 @@ import {
   type ConceptView,
   type QuestionnaireView,
 } from '@/content'
-import { asciiSpellings } from '@/content/names'
+import { asciiSpellings } from '@/content/testing'
 import { isNormalisedSanskrit } from '@/lib/sanskrit'
 
 /** Every string anywhere inside a value. */

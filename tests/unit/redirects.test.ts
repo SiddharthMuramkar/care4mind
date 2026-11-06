@@ -3,8 +3,7 @@ import { beforeAll, describe, expect, it } from 'vitest'
 
 import { redirects } from '@/config/redirects'
 import { hrefFor, site } from '@/content'
-import { CONTENT_KINDS, type ContentRecord, type RecordOf } from '@/content/schema'
-import { localSource } from '@/content/source'
+import { CONTENT_KINDS, type ContentRecord, type RecordOf, localSource } from '@/content/testing'
 
 import nextConfig from '../../next.config'
 

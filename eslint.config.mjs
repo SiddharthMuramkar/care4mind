@@ -8,13 +8,33 @@ import tseslint from 'typescript-eslint'
 
 // The content module's boundary. Outside src/content, code
 // reads content only through its public interface, `@/content`: never an internal, and never
-// the module by a relative path. A 'use client' file may import the interface for types only,
-// with `import type`, so no content reaches the browser bundle. Tests are outside src and may
-// also use the seam and the record schema to build made-up sources.
-const inClientFile = (node) => ({
-  selector: `Program:has(> ExpressionStatement[directive="use client"]) ${node}[source.value="@/content"]`,
-  message: "A 'use client' file may import @/content for types only: use `import type`.",
+// the module by a relative path — statically, by re-export, by dynamic `import()` or by
+// `typeof import()`. A 'use client' file may import the interface, and `@/config/features`,
+// for types only, with `import type`, so no content reaches the browser bundle and no flag is
+// read where `VERCEL_ENV` can't be seen (there every flag would read on). Tests are outside
+// src and reach internals only through the one testing entry, `@/content/testing`.
+const CONTENT_PUBLIC_SOURCE = String.raw`/^(?:@\/content|\.{1,2}\/(?:.+\/)?content)$/`
+const FEATURES_SOURCE = String.raw`/^(?:@\/config\/features|\.{1,2}\/(?:.+\/)?config\/features)$/`
+const CONTENT_REACH_SOURCE = String.raw`/^(?:@\/content\/|\.{1,2}\/(?:.+\/)?content(?:\/|$))/`
+
+const inClientFile = (node, source, message) => ({
+  selector: `Program:has(> ExpressionStatement[directive="use client"]) ${node}[source.value=${source}]`,
+  message,
 })
+
+const clientTypesOnly = (source, message) => [
+  inClientFile('ImportDeclaration[importKind!="type"]', source, message),
+  inClientFile('ExportNamedDeclaration[exportKind!="type"]', source, message),
+  inClientFile('ExportAllDeclaration[exportKind!="type"]', source, message),
+  inClientFile('ImportExpression', source, message),
+]
+
+// A dynamic `import()` (string or template) or a `typeof import()` of a matching source.
+const dynamicImportOf = (source, message) => [
+  { selector: `ImportExpression[source.value=${source}]`, message },
+  { selector: `ImportExpression TemplateElement[value.cooked=${source}]`, message },
+  { selector: `TSImportType[source.value=${source}]`, message },
+]
 
 const contentBoundary = {
   files: ['src/**/*.{ts,tsx}'],
@@ -39,10 +59,18 @@ const contentBoundary = {
     ],
     'no-restricted-syntax': [
       'error',
-      inClientFile('ImportDeclaration[importKind!="type"]'),
-      inClientFile('ExportNamedDeclaration[exportKind!="type"]'),
-      inClientFile('ExportAllDeclaration[exportKind!="type"]'),
-      inClientFile('ImportExpression'),
+      ...clientTypesOnly(
+        CONTENT_PUBLIC_SOURCE,
+        "A 'use client' file may import @/content for types only: use `import type`.",
+      ),
+      ...clientTypesOnly(
+        FEATURES_SOURCE,
+        "A 'use client' file may import @/config/features for types only: flags are read on the server and handed down as props.",
+      ),
+      ...dynamicImportOf(
+        CONTENT_REACH_SOURCE,
+        'Content internals are private, dynamically too: import the public interface, @/content.',
+      ),
     ],
   },
 }
@@ -63,6 +91,13 @@ const graphBelowViews = {
           },
         ],
       },
+    ],
+    'no-restricted-syntax': [
+      'error',
+      ...dynamicImportOf(
+        String.raw`/^(?:@\/content|\.\.)\/(?:views|derive)(?:\/|$)/`,
+        'The graph is below the views and the derivations, dynamically too: never import from them.',
+      ),
     ],
   },
 }
@@ -187,7 +222,33 @@ const componentStructure = [
   {
     files: ['tests/**/*.{ts,tsx}'],
     rules: {
-      'no-restricted-imports': ['error', { patterns: componentPatterns }],
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            ...componentPatterns,
+            {
+              regex: '^@/content/(?!testing$)',
+              caseSensitive: true,
+              message:
+                'Tests reach content internals only through the testing entry, @/content/testing.',
+            },
+            {
+              regex: '^\\.{1,2}/(?:.+/)?content(?:/|$)',
+              caseSensitive: true,
+              message:
+                'Tests reach content through @/content or @/content/testing, never by a relative path.',
+            },
+          ],
+        },
+      ],
+      'no-restricted-syntax': [
+        'error',
+        ...dynamicImportOf(
+          String.raw`/^(?:@\/content\/(?!testing$)|\.{1,2}\/(?:.+\/)?content(?:\/|$))/`,
+          'Tests reach content internals only through the testing entry, @/content/testing, dynamically too.',
+        ),
+      ],
     },
   },
 ]
