@@ -8,6 +8,7 @@ import {
   type ContentGraph,
   CONTENT_KINDS,
   idOf,
+  isSlug,
   type Block,
   type ContentRecord,
   type Provenance,
@@ -375,7 +376,6 @@ describe('links', () => {
   })
 
   it('give every anchor in a record a slug of its own', () => {
-    const SLUG = /^[a-z0-9]+(?:-[a-z0-9]+)*$/
     const anchorsIn = (blocks: readonly Block[]): string[] =>
       blocks.flatMap((block) =>
         block.kind === 'term'
@@ -396,7 +396,7 @@ describe('links', () => {
               ? record.groups.map((group) => group.id)
               : []
       return [
-        ...anchors.filter((a) => !SLUG.test(a)).map((a) => `${nameOf(record)}: “${a}”`),
+        ...anchors.filter((a) => !isSlug(a)).map((a) => `${nameOf(record)}: “${a}”`),
         ...anchors
           .filter((a, i) => anchors.indexOf(a) !== i)
           .map((a) => `${nameOf(record)}: “${a}” twice`),

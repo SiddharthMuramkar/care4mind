@@ -19,9 +19,11 @@ import { existsSync, readFileSync } from 'node:fs'
 import { createRequire } from 'node:module'
 import { dirname, join } from 'node:path'
 
+import { idOf, KIND_FOLDERS, nonTextFields } from '../../src/content/schema/kinds.ts'
+import { normaliseSanskrit, stripDiacritics } from '../../src/lib/sanskrit.ts'
 import { openCaptures } from './captures.mjs'
 import { rootFrom, runTool, ToolError } from './cli.mjs'
-import { idOf, KIND_FOLDERS, loadEntries, sortRecords } from './records.mjs'
+import { loadEntries, sortRecords } from './records.mjs'
 
 const FIDELITY_CONFIG = 'vitest.fidelity.config.ts'
 
@@ -114,15 +116,16 @@ export function changedRecordPaths(root, ref) {
 // before punctuation.
 
 // ‘ ’ ‚ ‛ ′ ` ´ are one quote; “ ” „ ‟ ″ « » another; and every hyphen, dash and minus is “-”.
+/** @type {[RegExp, string]} */
 const QUOTES = [/[\u2018\u2019\u201a\u201b\u2032`\u00b4]/g, "'"]
+/** @type {[RegExp, string]} */
 const DOUBLE_QUOTES = [/[\u201c\u201d\u201e\u201f\u2033\u00ab\u00bb]/g, '"']
+/** @type {[RegExp, string]} */
 const DASHES = [/[\u2010-\u2015\u2212\ufe58\ufe63\uff0d]/g, '-']
 
 function normalise(text) {
-  return text
-    .normalize('NFC')
+  const cleaned = normaliseSanskrit(text)
     .toLowerCase()
-    .replaceAll('ṁ', 'ṃ')
     .replace(...QUOTES)
     .replace(...DOUBLE_QUOTES)
     .replace(...DASHES)
@@ -131,7 +134,7 @@ function normalise(text) {
     .replace(/ (?=[,.;:!?)\]}])/g, '')
     .replace(/(?<=[([{]) /g, '')
     .trim()
-    .normalize('NFC')
+  return normaliseSanskrit(cleaned)
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -271,49 +274,6 @@ function closestText(string, pages) {
 // A record's strings: everything carried over from a page. Ids, links between records, URLs and
 // fields that describe the record rather than carry its content are skipped.
 
-/** Fields that are never carried-over text, wherever they appear in a record. */
-const NOT_TEXT = new Set([
-  // ids and anchors
-  'kind',
-  'slug',
-  'id',
-  'anchor',
-  'locator',
-  // links between records
-  'topics',
-  'references',
-  'passage',
-  'questionnaire',
-  'concepts',
-  'candidateSource',
-  'concept',
-  'work',
-  'topic',
-  'reference',
-  'target',
-  'responseSet',
-  // URLs
-  'url',
-  'doi',
-  // kinds of thing and statuses
-  'type',
-  'scheme',
-  'role',
-  'style',
-  'language',
-  'status',
-  'reviewStatus',
-  // meta fields
-  'provenance',
-  'heldBack',
-  'scoring',
-  'rights',
-  'noStableLink',
-])
-
-/** Fields skipped in one kind of record only: a Questionnaire's `source` names a Reference. */
-const NOT_TEXT_IN = { questionnaire: new Set(['source']) }
-
 /**
  * Every string in a value, with its field path, as { path, text }. An ASCII spelling of a
  * Sanskrit name (an `ascii` beside an `iast`) also carries the name's IAST.
@@ -339,9 +299,7 @@ function stringsOf(value, skip, path = '', iast = undefined) {
 
 /** The IAST without diacritics, case, spaces or hyphens: what NFR-03 says an ASCII form may be. */
 function bareSpelling(text) {
-  return text
-    .normalize('NFD')
-    .replace(/\p{M}/gu, '')
+  return stripDiacritics(text)
     .toLowerCase()
     .replace(/[\s-]+/g, '')
 }
@@ -385,7 +343,7 @@ export function checkRecord(record, captures) {
     return { record: name, status: 'written', checked: 0, misses: [], drafted: [], notSaved: [] }
 
   const drafted = [...(provenance.drafted ?? [])]
-  const skip = new Set([...NOT_TEXT, ...(NOT_TEXT_IN[record.kind] ?? [])])
+  const skip = nonTextFields(record.kind)
   const strings = stringsOf(content, skip, prefix).filter(
     ({ path, text }) => normalise(text) !== '' && !isDrafted(path, drafted),
   )

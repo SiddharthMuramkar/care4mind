@@ -1,7 +1,7 @@
 // @ts-check
-// The records as the content tools see them: the kinds and their folders, each record's id and
-// order, and every record the generated registry lists, read with the repo's own TypeScript
-// compiler. Plain Node, no new dependency.
+// The records as the content tools see them: each record's order, and every record the
+// generated registry lists, read with the repo's own TypeScript compiler. Plain Node, no
+// new dependency.
 
 import { spawnSync } from 'node:child_process'
 import { existsSync, readFileSync, statSync } from 'node:fs'
@@ -9,37 +9,19 @@ import { registerHooks } from 'node:module'
 import { dirname, join } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 
+import { CONTENT_KINDS, idOf } from '../../src/content/schema/kinds.ts'
 import { ToolError } from './cli.mjs'
 
 const HERE = dirname(fileURLToPath(import.meta.url))
 const REGISTRY_SCRIPT = join(HERE, 'registry.mjs')
 const REGISTRY = 'src/content/generated/registry.ts'
 
-/** The kinds of record, in the order tools list them, and each kind's folder (as the schema). */
-export const KIND_FOLDERS = {
-  concept: 'concepts',
-  topic: 'topics',
-  work: 'works',
-  passage: 'passages',
-  reference: 'references',
-  questionnaire: 'questionnaires',
-  glossary: 'glossary',
-  'resource-list': 'resource-lists',
-  page: 'pages',
-  home: 'home',
-}
-
-export function idOf(record) {
-  if (record.kind === 'passage' || record.kind === 'reference') return record.id
-  if (record.kind === 'home') return 'home'
-  return record.slug
-}
-
 /** Records in the order tools list them: by kind, then by id. */
 export function sortRecords(records) {
-  const kinds = Object.keys(KIND_FOLDERS)
   return [...records].sort(
-    (a, b) => kinds.indexOf(a.kind) - kinds.indexOf(b.kind) || idOf(a).localeCompare(idOf(b)),
+    (a, b) =>
+      CONTENT_KINDS.indexOf(a.kind) - CONTENT_KINDS.indexOf(b.kind) ||
+      idOf(a).localeCompare(idOf(b)),
   )
 }
 

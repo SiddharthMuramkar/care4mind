@@ -42,6 +42,56 @@ export const KIND_FOLDERS = {
 
 export const CONTENT_KINDS = Object.keys(KIND_FOLDERS) as readonly ContentKind[]
 
+const NON_TEXT_FIELDS: ReadonlySet<string> = new Set([
+  // ids and anchors
+  'kind',
+  'slug',
+  'id',
+  'anchor',
+  'locator',
+  // links between records
+  'topics',
+  'references',
+  'passage',
+  'questionnaire',
+  'concepts',
+  'candidateSource',
+  'concept',
+  'work',
+  'topic',
+  'reference',
+  'target',
+  'responseSet',
+  // URLs
+  'url',
+  'doi',
+  // kinds of thing and statuses
+  'type',
+  'scheme',
+  'role',
+  'style',
+  'language',
+  'status',
+  'reviewStatus',
+  // meta fields
+  'provenance',
+  'heldBack',
+  'scoring',
+  'rights',
+  'noStableLink',
+])
+
+// A Questionnaire's `source` names a Reference; a translation's `source` is carried-over text.
+const NON_TEXT_FIELDS_IN: Partial<Record<ContentKind, readonly string[]>> = {
+  questionnaire: ['source'],
+}
+
+/** The fields that never hold carried-over text in a record of this kind, wherever they appear. */
+export function nonTextFields(kind: ContentKind): ReadonlySet<string> {
+  const extra = NON_TEXT_FIELDS_IN[kind]
+  return extra ? new Set([...NON_TEXT_FIELDS, ...extra]) : NON_TEXT_FIELDS
+}
+
 /**
  * A record's id, unique within its kind: its slug, a passage's `work/locator`,
  * a Reference's id, or `home`. Its file name, under its kind's folder, is the same.

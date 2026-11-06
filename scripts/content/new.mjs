@@ -18,13 +18,12 @@ import { existsSync, mkdirSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
+import { isSlug } from '../../src/content/schema/common.ts'
+import { KIND_FOLDERS } from '../../src/content/schema/kinds.ts'
 import { rootFrom, runTool, ToolError } from './cli.mjs'
-import { KIND_FOLDERS } from './records.mjs'
 
 const USAGE = `Usage: pnpm content:new <kind> <id> [--written]
 Kinds: ${Object.keys(KIND_FOLDERS).join(', ')}. --written writes a record written for the new site, with no source page.`
-
-const SLUG = /^[a-z0-9]+(?:-[a-z0-9]+)*$/
 // No leading zeros: the locator becomes the number literals of `order`, where 05 is not a number.
 const LOCATOR = /^(?:0|[1-9]\d*)(?:\.(?:0|[1-9]\d*))*$/
 
@@ -33,10 +32,10 @@ function idProblem(kind, id) {
   if (kind === 'home') return id === 'home' ? undefined : 'The homepage’s id is always “home”.'
   if (kind === 'passage') {
     const [work = '', locator = '', ...rest] = id.split('/')
-    if (rest.length === 0 && SLUG.test(work) && LOCATOR.test(locator)) return undefined
+    if (rest.length === 0 && isSlug(work) && LOCATOR.test(locator)) return undefined
     return `“${id}” is not a passage id: its work’s slug and its locator, as in yoga-sutra/1.30.`
   }
-  if (SLUG.test(id)) return undefined
+  if (isSlug(id)) return undefined
   return kind === 'reference'
     ? `“${id}” is not a Reference id: lowercase ASCII words joined by hyphens, as in tomar-2024 or jain-diwakar-2019.`
     : `“${id}” is not a slug: lowercase ASCII words joined by hyphens, as in vikshepa or five-steps-of-perfection.`
