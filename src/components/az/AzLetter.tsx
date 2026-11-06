@@ -1,9 +1,9 @@
-import type { PreviewPayload } from '@/components/preview'
-import type { AzEntry as Entry, ConceptCard as Card } from '@/content'
+import type { AzEntry as Entry } from '@/content'
 
 import styles from './az.module.css'
 import { AzEntry } from './AzEntry'
 import { DEFAULT_KINDS } from './filter'
+import type { AzListEntry } from './model'
 
 /** A letter's section of the A–Z: its capital, then its entries, numbered across the whole list. */
 export function AzLetter({
@@ -11,15 +11,11 @@ export function AzLetter({
   id,
   entries,
   topicNames,
-  previewOf,
-  cardOf,
 }: {
   letter: string
   id: string
-  entries: readonly { entry: Entry; index: number }[]
+  entries: readonly AzListEntry[]
   topicNames: ReadonlyMap<string, string>
-  previewOf: (entry: Entry) => PreviewPayload | undefined
-  cardOf: (entry: Entry) => Card | undefined
 }) {
   // The server renders the plain address's list, so it paints without a flash of every entry.
   const shown = (entry: Entry) => DEFAULT_KINDS.includes(entry.kind)
@@ -32,20 +28,16 @@ export function AzLetter({
     >
       <h3 className={styles.letterTitle}>{letter}</h3>
       <ul className={styles.entries}>
-        {entries.map(({ entry, index }) => {
-          const preview = previewOf(entry)
-          const card = cardOf(entry)
-          return (
-            <AzEntry
-              key={index}
-              entry={entry}
-              topicNames={topicNames}
-              hidden={!shown(entry)}
-              {...(preview ? { preview } : {})}
-              {...(card ? { card } : {})}
-            />
-          )
-        })}
+        {entries.map(({ entry, index, preview, card }) => (
+          <AzEntry
+            key={index}
+            entry={entry}
+            topicNames={topicNames}
+            hidden={!shown(entry)}
+            {...(preview ? { preview } : {})}
+            {...(card ? { card } : {})}
+          />
+        ))}
       </ul>
     </section>
   )
