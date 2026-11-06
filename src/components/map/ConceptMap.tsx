@@ -1,7 +1,8 @@
 import Link from 'next/link'
-import { type CSSProperties, ViewTransition } from 'react'
+import type { CSSProperties } from 'react'
 
-import { turnForward } from '@/components/PageTurn'
+import { Numeral } from '@/components/Numeral'
+import { TitleMorph, turnForward } from '@/components/PageTurn'
 import { hrefFor } from '@/content'
 import { toDevanagariDigits } from '@/lib/text'
 
@@ -129,18 +130,14 @@ export function ConceptMap({ layout }: { layout: MapLayout }) {
                           }
                         >
                           <span className={styles.mark} aria-hidden />
-                          <ViewTransition
-                            name={`concept-title-${point.slug}`}
-                            share="morph"
-                            default="none"
-                          >
+                          <TitleMorph kind="concept" slug={point.slug}>
                             <span
                               className={styles.label}
                               {...(point.lang ? { lang: point.lang } : {})}
                             >
                               {point.name}
                             </span>
-                          </ViewTransition>
+                          </TitleMorph>
                         </Link>
                       </li>
                     ))}
@@ -166,8 +163,7 @@ export function ConceptMap({ layout }: { layout: MapLayout }) {
                 {layout.sectors.map((sector) => (
                   <li key={sector.topic} data-topic={sector.topic}>
                     <span className={styles.topicKey} aria-hidden>
-                      <span>{sector.order}</span>{' '}
-                      <span lang="sa-Deva">{toDevanagariDigits(String(sector.order))}</span>
+                      <span>{sector.order}</span> <Numeral value={sector.order} />
                     </span>
                     <span>{sector.name}</span>
                   </li>

@@ -11,7 +11,7 @@ import type { ConceptRecord, GlossaryEntryRecord, Slug, TermBlock, TopicRecord }
 import type { AzEntry, AzLetter } from '../types'
 import { byName, must, present } from '../views/common'
 import { hrefFor } from '../views/href'
-import { asciiSpellings, displayName } from '../names'
+import { asciiSpellings, displayName, glossOf } from '../names'
 import { conceptRef } from '../views/refs'
 
 const LETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
@@ -78,7 +78,7 @@ function conceptEntries(
   glossary: readonly GlossaryEntryRecord[],
   graph: ContentGraph,
 ): AzEntry[] {
-  const { term, english } = concept.name
+  const { term } = concept.name
   const name = displayName(concept.name)
   const filters = facets(concept, graph)
   const own: AzEntry = {
@@ -92,7 +92,7 @@ function conceptEntries(
     ...present({
       devanagari:
         term?.devanagari ?? glossary.find((entry) => entry.name.devanagari)?.name.devanagari,
-      gloss: term ? english : undefined,
+      gloss: glossOf(concept.name),
       definition: glossary.find((entry) => entry.definition)?.definition,
     }),
     href: hrefFor({ kind: 'concept', id: concept.slug }),

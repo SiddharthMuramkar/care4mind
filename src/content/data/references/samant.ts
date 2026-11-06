@@ -23,11 +23,13 @@ export default defineReference({
       {
         for: 'research-editor',
         note: 'The reference line gives no year; the page’s in-text citation reads “(Samant, 2023)”. The year is left empty; nothing was looked up.',
+        missing: ['year'],
         decidedBy: 'references',
       },
       {
         for: 'research-editor',
         note: 'No year or journal (container) is given on the current site; not looked up.',
+        missing: ['year', 'container-or-publisher'],
         decidedBy: 'references',
       },
     ],

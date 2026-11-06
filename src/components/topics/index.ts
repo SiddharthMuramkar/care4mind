@@ -1,9 +1,4 @@
-export {
-  ContentsPlate,
-  MOST_LIT_ROWS,
-  plateCard,
-  plateScope,
-  type PlateGroup,
-  type PlateRow,
-} from './ContentsPlate'
+export { ConceptSpread } from './ConceptSpread'
 export { TopicCard } from './TopicCard'
+export { VerseIndex } from './VerseIndex'
+export { inWords } from './names'

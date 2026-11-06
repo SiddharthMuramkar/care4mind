@@ -27,6 +27,8 @@ export {
   type ConceptRecord,
   type ContentRecord,
   type Flag,
+  type FlagCitation,
+  type FlagMissing,
   type FlagRole,
   type GlossaryEntryRecord,
   type HomepageRecord,
@@ -45,5 +47,5 @@ export {
 } from './schema'
 export { localSource, memorySource, registrySource, type ContentSource } from './source'
 export { buildGraph, contentGraph, DanglingIdError, graphFor, type ContentGraph } from './graph'
-export { asciiSpellings, conceptName, displayName } from './names'
+export { asciiSpellings, conceptName, displayName, glossOf } from './names'
 export { createContent } from './views'

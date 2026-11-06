@@ -386,6 +386,56 @@ test('under the hero, six everyday starting points each lead to their Concept pa
   await expect(page.getByRole('heading', { level: 1 })).toContainText(first.concept.name)
 })
 
+test(
+  'at 390×844, the What’s on your mind? chips are within one viewport height of scroll from the top',
+  { tag: '@self-width' },
+  async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 })
+    await gotoReady(page, '/')
+    // This build has the chips' flag on; with it off the section goes too, and there is nothing to reach.
+    const { onYourMind } = await home.get()
+    const chips = section(page, 'What’s on your mind?').getByRole('link')
+    await expect(chips).toHaveCount(onYourMind.length)
+    expect(onYourMind.length, 'the homepage has chips to reach').toBeGreaterThan(0)
+
+    const hero = page.getByRole('region').filter({ has: page.getByRole('heading', { level: 1 }) })
+    const viewportHeight = await page.evaluate(() => window.innerHeight)
+    const scrollAtTop = await page.evaluate(() => window.scrollY)
+    expect(viewportHeight).toBe(844)
+
+    // boundingBox reads against the viewport, so add the scroll to place each chip on the page.
+    const heroBox = await hero.boundingBox()
+    if (!heroBox) throw new Error('the hero must be on the page')
+    const chipBoxes = []
+    for (const chip of await chips.all()) {
+      const box = await chip.boundingBox()
+      if (!box) throw new Error('every chip must be on the page')
+      chipBoxes.push({ top: box.y + scrollAtTop, bottom: box.y + box.height + scrollAtTop })
+    }
+    const firstChipTop = Math.min(...chipBoxes.map(({ top }) => top))
+    const lastChipBottom = Math.max(...chipBoxes.map(({ bottom }) => bottom))
+    expect(firstChipTop, 'the chips start below the hero').toBeGreaterThanOrEqual(
+      heroBox.y + heroBox.height + scrollAtTop,
+    )
+    // The scroll that shows the last chip whole: its foot's page position less one screenful.
+    const scrollToShowAllChips = lastChipBottom - viewportHeight
+    expect(
+      scrollToShowAllChips,
+      `the chips take ${Math.round(scrollToShowAllChips)} px of scroll to show whole, within one viewport height (${viewportHeight} px)`,
+    ).toBeLessThanOrEqual(viewportHeight)
+
+    // One viewport height of scroll from the top, and every chip is whole on screen.
+    await page.evaluate(
+      (top) => window.scrollTo({ top, behavior: 'instant' }),
+      scrollAtTop + viewportHeight,
+    )
+    await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(scrollAtTop + viewportHeight)
+    for (const chip of await chips.all()) {
+      await expect(chip).toBeInViewport({ ratio: 1 })
+    }
+  },
+)
+
 test('the homepage card opens the Concept page', async ({ page }) => {
   const errors: string[] = []
   page.on('pageerror', (error) => errors.push(error.message))

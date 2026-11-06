@@ -1,20 +1,18 @@
 import type { CSSProperties } from 'react'
 
+import { Numeral } from '@/components/Numeral'
 import type { Inline } from '@/content'
-import { toDevanagariDigits } from '@/lib/text'
 
-import { Text } from '../prose'
+import { SECTION_ROLES, Text, type SectionRole } from '../prose'
 import styles from './Contents.module.css'
 
 /** A line of the contents: a section of the page, and the terms set inside it. */
 export interface ContentsEntry {
   id: string
   heading: Inline
-  role?: 'applications' | 'comparison'
+  role?: SectionRole
   terms?: readonly { id: string; name: string }[]
 }
-
-const ROLES = { applications: 'Applications', comparison: 'Comparison' } as const
 
 /*
  * The scroll marker for the section in view, set in ink with its lozenge shown. Written here,
@@ -47,11 +45,12 @@ export function Contents({ entries }: { entries: readonly ContentsEntry[] }) {
               style={{ '--timeline': `--section-${entry.id}` } as CSSProperties}
             >
               <span className={styles.numeral} aria-hidden>
-                <span>{index + 1}</span>{' '}
-                <span lang="sa-Deva">{toDevanagariDigits(String(index + 1))}</span>
+                <span>{index + 1}</span> <Numeral value={index + 1} />
               </span>
               <span>
-                {entry.role ? <span className={styles.role}>{ROLES[entry.role]}: </span> : null}
+                {entry.role ? (
+                  <span className={styles.role}>{SECTION_ROLES[entry.role]}: </span>
+                ) : null}
                 <Text text={entry.heading} />
               </span>
             </a>

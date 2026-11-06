@@ -2,9 +2,9 @@ import type { Route } from 'next'
 import Link from 'next/link'
 import type { ReactNode } from 'react'
 
+import { Numeral } from '@/components/Numeral'
 import { turnForward } from '@/components/PageTurn'
 import { cx } from '@/lib/cx'
-import { toDevanagariDigits } from '@/lib/text'
 
 import styles from './ContentsPlate.module.css'
 
@@ -41,8 +41,7 @@ export const plateCard = (row: number) => ({ 'data-plate-card': row })
  * The Topics contents plate: rows set like a book's contents, each a Western numeral beside
  * its Devanagari one, a name and a dotted leader running out to what the row holds. Pointing at or focusing a row,
  * or the card it stands for, lights it, and its leader inks in from the centre. Finished and
- * still by default and in print; the numerals and leaders are decoration. The homepage sets its
- * five topics with it too.
+ * still by default and in print; the numerals and leaders are decoration.
  */
 export function ContentsPlate({
   label,
@@ -79,8 +78,7 @@ export function ContentsPlate({
               return (
                 <li key={row.key} className={styles.row} data-plate-row={number}>
                   <span className={styles.numeral} aria-hidden>
-                    <span>{number}</span>{' '}
-                    <span lang="sa-Deva">{toDevanagariDigits(String(number))}</span>
+                    <span>{number}</span> <Numeral value={number} />
                   </span>
                   <Link
                     href={row.href}

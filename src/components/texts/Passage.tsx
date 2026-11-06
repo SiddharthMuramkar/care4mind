@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import type { CSSProperties } from 'react'
 
+import { Numeral } from '@/components/Numeral'
 import { turnForward } from '@/components/PageTurn'
 import { Text } from '@/components/prose'
 import { ScriptPair } from '@/components/script'
@@ -66,9 +67,7 @@ export function Passage({ passage, unit }: { passage: PassageView; unit: string 
         <h2 id={`verse-${anchor}`} className={styles.locator}>
           {unit} {passage.locator}
         </h2>
-        <span lang="sa-Deva" className={styles.numeral} aria-hidden>
-          {deva}
-        </span>
+        <Numeral value={passage.locator} className={styles.numeral} decorative />
       </header>
 
       {transliterationLines ? (

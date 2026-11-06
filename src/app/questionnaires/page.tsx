@@ -9,7 +9,7 @@ import { StatusBadge } from '@/components/StatusBadge'
 import { hrefFor, questionnaires, topics, type QuestionnaireCard as Card } from '@/content'
 import { metadataFor } from '@/lib/metadata'
 
-import reading from '../reading.module.css'
+import reading from '@/styles/reading.module.css'
 import styles from './page.module.css'
 
 const PATH = hrefFor({ page: 'questionnaires' })

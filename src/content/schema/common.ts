@@ -47,12 +47,22 @@ export const PLANNING_ISSUES = {
 /** A key of `PLANNING_ISSUES`. */
 export type PlanningIssue = keyof typeof PLANNING_ISSUES
 
+/** A Reference field a flag says is missing, so a test needn't read the note's wording. */
+export type FlagMissing = 'authors' | 'year' | 'container-or-publisher'
+
+/** What a flag says about a Reference's link: it has none to give, or only a retailer's. */
+export type FlagCitation = 'no-link' | 'retailer-link'
+
 /** A question for a person, raised by an agent that noticed something it may not decide. */
 export interface Flag {
   for: FlagRole
   note: string
   /** The planning issue that decides it. */
   decidedBy?: PlanningIssue
+  /** The Reference fields this flag says are missing. */
+  missing?: readonly FlagMissing[]
+  /** What this flag says about a Reference's link. */
+  citation?: FlagCitation
 }
 
 /** Where a record came from, and every change made on the way. */
