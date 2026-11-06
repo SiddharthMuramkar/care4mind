@@ -9,7 +9,7 @@ import { hrefFor } from './href'
 import { conceptRef } from './refs'
 
 /** The path a record's target names. A Questionnaire's depends on its status. */
-export function targetHref(target: Target, graph: ContentGraph): string {
+export function targetHref(target: Target, graph: ContentGraph) {
   if ('index' in target) return hrefFor({ page: target.index })
   switch (target.kind) {
     case 'concept':

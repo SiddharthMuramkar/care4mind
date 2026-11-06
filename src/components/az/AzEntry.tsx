@@ -1,4 +1,3 @@
-import type { Route } from 'next'
 import Link from 'next/link'
 
 import { turnForward } from '@/components/PageTurn'
@@ -83,22 +82,21 @@ export function AzEntry({
     ) : (
       <span>{entry.name}</span>
     )
-  const href = entry.href
+  const { href, url } = entry
   let heading = name
-  if (href && entry.external)
+  if (url)
     heading = (
-      <a href={href} className={styles.link}>
+      <a href={url} className={styles.link}>
         {name}{' '}
         <span className={styles.away}>
-          on {siteOf(href)}
+          on {siteOf(url)}
           <span aria-hidden> ↗</span>
         </span>
       </a>
     )
   else if (href) {
-    // An A–Z entry's page or anchor, made by hrefFor() in the content module.
     const link = (
-      <Link href={href as Route} className={styles.link} transitionTypes={turnForward}>
+      <Link href={href} className={styles.link} transitionTypes={turnForward}>
         {name}
       </Link>
     )

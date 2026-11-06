@@ -1,4 +1,3 @@
-import type { Route } from 'next'
 import Link from 'next/link'
 
 import type { ConceptCard, TopicRef } from '@/content'
@@ -12,9 +11,8 @@ import styles from './TopicPager.module.css'
 function Turn({ concept, rel }: { concept: ConceptCard; rel: 'prev' | 'next' }) {
   return (
     <LinkPreview preview={conceptPreview(concept)}>
-      {/* The Concept's path, made by hrefFor() in the content module. */}
       <Link
-        href={concept.href as Route}
+        href={concept.href}
         rel={rel}
         transitionTypes={rel === 'next' ? turnForward : turnBack}
         className={rel === 'next' ? styles.next : styles.previous}

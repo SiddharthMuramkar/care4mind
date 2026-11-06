@@ -1,4 +1,3 @@
-import type { Route } from 'next'
 import Link from 'next/link'
 import type { CSSProperties } from 'react'
 
@@ -122,8 +121,7 @@ export function Passage({ passage, unit }: { passage: PassageView; unit: string 
               {quotedIn.map((record) => (
                 <li key={`${record.kind}/${record.id}`}>
                   <Link
-                    // The record's path, made by hrefFor() in the content module.
-                    href={record.href as Route}
+                    href={record.href}
                     className={styles.chip}
                     transitionTypes={turnForward}
                     data-ink

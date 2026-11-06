@@ -1,4 +1,3 @@
-import type { Route } from 'next'
 import Link from 'next/link'
 import type { ReactNode } from 'react'
 
@@ -34,9 +33,8 @@ export function SearchTrigger({
   className,
 }: SearchTriggerProps) {
   const search = hrefFor({ page: 'search' })
-  const href = (
-    initialQuery === undefined ? search : `${search}?q=${encodeURIComponent(initialQuery)}`
-  ) as Route
+  const href =
+    initialQuery === undefined ? search : { pathname: search, query: { q: initialQuery } }
   const label = children ?? 'Search'
   if (placement === 'page') {
     return (

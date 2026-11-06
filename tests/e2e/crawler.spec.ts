@@ -174,7 +174,7 @@ test.describe('the crawl from the homepage', () => {
   test.describe.configure({ mode: 'default' })
 
   let crawled: Crawl
-  const registered = new Set(ROUTES.map(({ path }) => path))
+  const registered = new Set<string>(ROUTES.map(({ path }) => path))
   /** The paths of every page the crawl reached. */
   const reached = () =>
     new Set([...crawled.answers].filter(([, { page }]) => page).map(([address]) => pathOf(address)))

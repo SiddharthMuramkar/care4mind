@@ -36,7 +36,9 @@ function crumb(route: PageRoute, graph: ContentGraph): Crumb {
  * under its primary topic. A path that isn't a public page in this build has no trail.
  */
 export function trail(graph: ContentGraph, flags: Features, path: string): Crumb[] {
-  const routes = new Map(pageRoutes(graph, flags).map((route) => [route.entry.path, route]))
+  const routes = new Map<string, PageRoute>(
+    pageRoutes(graph, flags).map((route) => [route.entry.path, route]),
+  )
   const page = routes.get(normalise(path))
   if (!page) return []
 

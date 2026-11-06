@@ -5,6 +5,7 @@ import { siteConfig } from './src/config/site'
 
 const nextConfig: NextConfig = {
   poweredByHeader: false,
+  // Next generates typedRoutes without trailing slashes despite trailingSlash, so it cannot check slashed paths.
   typedRoutes: true,
   // Every address ends with a slash, as the current site's do; the bare one redirects to it.
   trailingSlash: true,

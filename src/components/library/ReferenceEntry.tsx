@@ -1,4 +1,3 @@
-import type { Route } from 'next'
 import Link from 'next/link'
 
 import { Citation } from '@/components/Citation'
@@ -20,9 +19,8 @@ export interface CitingConcept {
 /** A record citing a Reference, as a chip: a Concept's shows its preview. */
 function CitedChip({ record, concept }: { record: RecordRef; concept?: CitingConcept }) {
   const link = (
-    // The record's path, made by hrefFor() in the content module.
     <Link
-      href={record.href as Route}
+      href={record.href}
       className={styles.chip}
       // A fresh array: one shared by every chip is sent as a long path to its first use.
       transitionTypes={[...turnForward]}
