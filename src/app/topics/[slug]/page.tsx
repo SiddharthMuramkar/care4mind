@@ -16,7 +16,7 @@ import { metadataFor } from '@/lib/metadata'
 import { openingLine } from '@/lib/sanskrit'
 import { toDevanagariDigits } from '@/lib/text'
 
-import reading from '../../reading.module.css'
+import reading from '@/styles/reading.module.css'
 import styles from './page.module.css'
 
 export const dynamicParams = false

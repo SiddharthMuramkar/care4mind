@@ -24,7 +24,7 @@ import {
 import { capitalise, readingTimeWords } from '@/lib/text'
 import { metadataFor } from '@/lib/metadata'
 
-import reading from '../../reading.module.css'
+import reading from '@/styles/reading.module.css'
 import styles from './page.module.css'
 
 export const dynamicParams = false

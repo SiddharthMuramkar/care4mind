@@ -16,7 +16,7 @@ import { ReadingPage } from '@/components/ReadingPage'
 import { library, site, type PageView, type ResourceListView } from '@/content'
 import { metadataFor } from '@/lib/metadata'
 
-import reading from '../../reading.module.css'
+import reading from '@/styles/reading.module.css'
 
 export const dynamicParams = false
 

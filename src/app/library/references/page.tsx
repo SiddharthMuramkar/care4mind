@@ -15,7 +15,7 @@ import { ReadingPage } from '@/components/ReadingPage'
 import { concepts, hrefFor } from '@/content'
 import { metadataFor } from '@/lib/metadata'
 
-import reading from '../../reading.module.css'
+import reading from '@/styles/reading.module.css'
 
 const PATH = hrefFor({ page: 'references' })
 

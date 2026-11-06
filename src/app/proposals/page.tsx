@@ -14,7 +14,7 @@ import { metadataFor } from '@/lib/metadata'
 
 import cta from '@/components/Cta'
 
-import reading from '../reading.module.css'
+import reading from '@/styles/reading.module.css'
 import styles from './page.module.css'
 
 const PATH = hrefFor({ page: 'proposals' })

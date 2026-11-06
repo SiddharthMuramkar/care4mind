@@ -5,7 +5,7 @@ import { cx } from '@/lib/cx'
 
 import cta from '@/components/Cta'
 import styles from './error-page.module.css'
-import reading from './reading.module.css'
+import reading from '@/styles/reading.module.css'
 
 /** A page that failed to render, set inside the site's own header and footer, which lead back in. */
 export default function ErrorPage({
