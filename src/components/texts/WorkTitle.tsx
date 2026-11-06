@@ -1,5 +1,4 @@
-import { ViewTransition } from 'react'
-
+import { TitleMorph } from '@/components/PageTurn'
 import { ScriptPair } from '@/components/script'
 import type { WorkCard } from '@/content'
 
@@ -25,10 +24,10 @@ export function WorkTitle({
       lang={work.lang}
       className={className}
       iast={
-        <ViewTransition name={`work-title-${work.slug}`} share="morph" default="none">
+        <TitleMorph kind="work" slug={work.slug}>
           {/* Whole: a title broken over two lines can't fly. */}
           <span className={styles.whole}>{work.title}</span>
-        </ViewTransition>
+        </TitleMorph>
       }
       {...(work.term.devanagari ? { devanagari: work.term.devanagari } : {})}
       {...(iastClassName ? { iastClassName } : {})}

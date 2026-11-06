@@ -1,29 +1,28 @@
-import { ViewTransition } from 'react'
-
+import { TitleMorph } from '../PageTurn'
 import { ScriptPair } from '../script'
 import styles from './TitleSpellings.module.css'
 
 /**
  * A Concept heading's two spellings: the capitalised IAST, the Devanagari beside it, set
  * through ScriptPair so each carries its language tag. A Concept card's title flies into the
- * IAST (`name`).
+ * IAST, for the Concept named by `slug`.
  */
 export function TitleSpellings({
   iast,
   devanagari,
-  name,
+  slug,
 }: {
   iast: string
   devanagari: string
-  name: string
+  slug: string
 }) {
   return (
     <ScriptPair
       className={styles.pair}
       iast={
-        <ViewTransition name={name} share="morph" default="none">
+        <TitleMorph kind="concept" slug={slug}>
           <span>{iast}</span>
-        </ViewTransition>
+        </TitleMorph>
       }
       devanagari={devanagari}
     />
