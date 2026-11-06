@@ -1,17 +1,11 @@
 import type { Metadata } from 'next'
 
+import { Numeral } from '@/components/Numeral'
 import { ReadingPage } from '@/components/ReadingPage'
-import {
-  counted,
-  Holds,
-  holdingsOf,
-  libraryStyles as styles,
-  Shelf,
-  Spine,
-} from '@/components/library'
+import { Holds, holdingsOf, libraryStyles as styles, Shelf, Spine } from '@/components/library'
 import { hrefFor, library, type LibraryCard, references } from '@/content'
 import { metadataFor } from '@/lib/metadata'
-import { toDevanagariDigits } from '@/lib/text'
+import { count } from '@/lib/text'
 
 import reading from '@/styles/reading.module.css'
 
@@ -69,7 +63,7 @@ export default async function LibraryPage() {
             Every source the site cites, its reading lists, and the methods it describes.
           </p>
           <p className={styles.facts}>
-            {counted(all.length, 'source', 'sources')} · {counted(books, 'book', 'books')} to read
+            {count(all.length, 'source', 'sources')} · {count(books, 'book', 'books')} to read
           </p>
         </>
       }
@@ -81,7 +75,7 @@ export default async function LibraryPage() {
             href={href}
             name={key}
             index={index}
-            head={toDevanagariDigits(String(index + 1))}
+            head={<Numeral value={index + 1} />}
             title={title}
             foot={<Holds {...holds} />}
             thickness={thickness(holds.count)}

@@ -7,9 +7,9 @@ import { proposalsPageOn, type Features } from '@/config/features'
 import type { ContentGraph, RecordKey } from '../graph'
 import type { ContentKind } from '../schema'
 import type { FixedPage, LatinScript, RouteEntry, RouteKind } from '../types'
-import { byName } from '../views/common'
+import { byName, present } from '../views/common'
 import { hrefFor } from '../views/href'
-import { conceptName, displayName } from '../names'
+import { conceptName, displayName, glossOf } from '../names'
 import { latinScript } from '../views/refs'
 import { canTake } from '../views/questionnaire'
 
@@ -55,7 +55,7 @@ const PAGES = {
       },
       record: { kind: 'concept' as const, id: concept.slug },
       ...(concept.name.term ? { lang: 'sa-Latn' as const } : {}),
-      ...(concept.name.term && concept.name.english ? { gloss: concept.name.english } : {}),
+      ...present({ gloss: glossOf(concept.name) }),
     })),
   topic: (graph) =>
     [...graph.records('topic')]

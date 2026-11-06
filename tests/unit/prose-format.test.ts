@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
 import { citationParts } from '@/components/Citation'
-import { citedIn, parenthesised } from '@/components/prose'
+import { citedIn, parenthesised, SECTION_ROLES } from '@/components/prose'
 import { provenanceSentence } from '@/components/prose'
 import { standingIn } from '@/components/prose'
 import { verseAsText } from '@/components/prose'
@@ -265,5 +265,11 @@ describe('standingIn', () => {
     expect(
       standingIn({ ...section, blocks: [...section.blocks, { kind: 'paragraph' } as never] }),
     ).toBeUndefined()
+  })
+})
+
+describe('SECTION_ROLES', () => {
+  it('names each role a section can carry', () => {
+    expect(SECTION_ROLES).toEqual({ applications: 'Applications', comparison: 'Comparison' })
   })
 })

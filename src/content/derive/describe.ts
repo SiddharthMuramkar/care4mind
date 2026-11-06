@@ -3,6 +3,7 @@
  * sentence about what the page holds. Page metadata and share cards read only this.
  */
 import type { Features } from '@/config/features'
+import { count } from '@/lib/text'
 
 import type { ContentGraph } from '../graph'
 import type { PageDescription, RouteEntry } from '../types'
@@ -23,11 +24,6 @@ const ABOUT: Partial<Record<RouteEntry['kind'], string>> = {
   start:
     'A proposal: what Indian psychology is, how Care4Mind is organised, how to read Sanskrit names and where to begin.',
   proposals: 'Features proposed beyond the brief, for the Project owner to accept or refuse.',
-}
-
-/** "1 entry", "20 entries". */
-function count(n: number, one: string, many: string): string {
-  return `${n} ${n === 1 ? one : many}`
 }
 
 function described(graph: ContentGraph, route: RouteEntry): { name: string; description: string } {

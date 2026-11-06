@@ -15,7 +15,7 @@ import {
   type WorkRecord,
 } from '../schema'
 import type { SearchDocument } from '../types'
-import { must } from '../views/common'
+import { must, present } from '../views/common'
 import { hrefFor } from '../views/href'
 import { latinScript } from '../views/refs'
 import {
@@ -23,6 +23,7 @@ import {
   authorNames,
   conceptName,
   displayName,
+  glossOf,
   passageLabel,
   referenceLabel,
 } from '../names'
@@ -81,7 +82,7 @@ function conceptDocuments(concept: ConceptRecord, graph: ContentGraph): SearchDo
     id: `concept:${concept.slug}`,
     kind: 'concept',
     title,
-    ...(term && english ? { gloss: english } : {}),
+    ...present({ gloss: glossOf(concept.name) }),
     ...(term ? { lang: 'sa-Latn' as const } : {}),
     href: hrefFor({ kind: 'concept', id: concept.slug }),
     names: term ? spellingsOf(term) : unique([english]),

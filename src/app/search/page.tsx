@@ -8,7 +8,7 @@ import { SearchForm, StartingPoints } from '@/components/search'
 import { TopicChip } from '@/components/TopicChip'
 import { concepts, hrefFor } from '@/content'
 import { metadataFor } from '@/lib/metadata'
-import { readingTimeWords } from '@/lib/text'
+import { count, readingTimeWords } from '@/lib/text'
 import { isSearchGroupKind, resultGroups } from '@/lib/search/search'
 import { search } from '@/lib/search/server'
 
@@ -67,7 +67,7 @@ export default async function SearchPage({ searchParams }: PageProps<'/search'>)
       ) : (
         <section className={reading.section} aria-labelledby="results-title">
           <h2 id="results-title" className={reading.sectionTitle}>
-            {found.length} {found.length === 1 ? 'result' : 'results'} for “{query}”
+            {count(found.length, 'result', 'results')} for “{query}”
           </h2>
           {groups.map(({ kind, heading, results, total }) => (
             <div key={kind} className={styles.group}>

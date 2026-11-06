@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { turnForward } from '@/components/PageTurn'
 import { hrefFor, type WorkView } from '@/content'
 import { cx } from '@/lib/cx'
+import { count } from '@/lib/text'
 
 import styles from './TextCard.module.css'
 import { VerseTally } from './VerseTally'
@@ -63,9 +64,7 @@ export function TextCard({ work, className }: { work: WorkView; className?: stri
       ) : null}
       <p className={styles.count}>
         <VerseTally locators={work.passages.map(({ locator }) => locator)} />
-        <span>
-          {work.passageCount} {work.passageCount === 1 ? 'verse' : 'verses'} quoted
-        </span>
+        <span>{count(work.passageCount, 'verse', 'verses')} quoted</span>
       </p>
     </article>
   )

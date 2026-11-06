@@ -8,7 +8,7 @@ import { TitleMorph, turnForward } from '../PageTurn'
 import { LinkPreview } from '../preview'
 import { statusWords } from '../StatusBadge'
 import { TopicChip } from '../TopicChip'
-import { Text } from '../prose'
+import { SECTION_ROLES, Text } from '../prose'
 import { conceptPreview, passagePreview } from './previews'
 import styles from './LinkedKnowledge.module.css'
 
@@ -34,8 +34,6 @@ function Group({ title, count, children }: { title: string; count: number; child
     </div>
   )
 }
-
-const ROLES = { applications: 'Applications', comparison: 'Comparison' } as const
 
 /**
  * Linked knowledge (FR-01): everything a Concept connects to, each one link away. Related
@@ -136,7 +134,7 @@ export function LinkedKnowledge({
                   <Text text={section.heading} />
                 </a>
                 <Leader />
-                <span className={styles.note}>{ROLES[section.role]}</span>
+                <span className={styles.note}>{SECTION_ROLES[section.role]}</span>
               </li>
             ))}
           </ul>

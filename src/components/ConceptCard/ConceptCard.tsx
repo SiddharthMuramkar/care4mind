@@ -13,7 +13,7 @@ import { Text } from '../prose'
 interface Props {
   concept: Pick<
     Card,
-    'slug' | 'name' | 'lang' | 'term' | 'english' | 'summary' | 'topic' | 'readingMinutes'
+    'slug' | 'name' | 'lang' | 'term' | 'gloss' | 'summary' | 'topic' | 'readingMinutes'
   >
   /** The card's one action: a link or button, stretched to cover the whole card. */
   action: ReactNode
@@ -41,7 +41,7 @@ export function ConceptCard({ concept, action, className, featured = false }: Pr
         </p>
       ) : null}
       {/* The English gloss of a Sanskrit headword; a page with an English title has none. */}
-      {concept.term && concept.english ? <p className={styles.gloss}>{concept.english}</p> : null}
+      {concept.gloss ? <p className={styles.gloss}>{concept.gloss}</p> : null}
       <p className={styles.meta}>
         <TopicChip topic={concept.topic} />
         <span>{readingTimeWords(concept.readingMinutes)}</span>

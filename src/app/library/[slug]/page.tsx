@@ -3,18 +3,13 @@ import { notFound } from 'next/navigation'
 import type { CSSProperties } from 'react'
 
 import { Contents } from '@/components/concept'
-import {
-  BookGroup,
-  counted,
-  CourseGroup,
-  holdingsOf,
-  libraryStyles as styles,
-} from '@/components/library'
+import { BookGroup, CourseGroup, holdingsOf, libraryStyles as styles } from '@/components/library'
 import { OrnamentRule } from '@/components/OrnamentRule'
 import { Provenance, Sections, Text } from '@/components/prose'
 import { ReadingPage } from '@/components/ReadingPage'
 import { library, site, type PageView, type ResourceListView } from '@/content'
 import { metadataFor } from '@/lib/metadata'
+import { count } from '@/lib/text'
 
 import reading from '@/styles/reading.module.css'
 
@@ -76,7 +71,7 @@ function TextPage({ page }: { page: PageView }) {
 export default async function LibraryItemPage({ params }: PageProps<'/library/[slug]'>) {
   const page = await library.get((await params).slug)
   if (!page) notFound()
-  const { count, unit } = holdingsOf(page)
+  const { count: tally, unit } = holdingsOf(page)
 
   return (
     <ReadingPage
@@ -92,11 +87,11 @@ export default async function LibraryItemPage({ params }: PageProps<'/library/[s
           </p>
         ) : (
           <p className={styles.facts}>
-            {`${count} ${unit}`}
+            {`${tally} ${unit}`}
             {page.groups.length > 1
               ? unit.startsWith('book')
-                ? ` on ${counted(page.groups.length, 'shelf', 'shelves')}`
-                : ` in ${counted(page.groups.length, 'group', 'groups')}`
+                ? ` on ${count(page.groups.length, 'shelf', 'shelves')}`
+                : ` in ${count(page.groups.length, 'group', 'groups')}`
               : null}
           </p>
         )

@@ -20,11 +20,13 @@ export default defineReference({
       {
         for: 'project-owner',
         note: 'Its only link on the current site goes to a retailer (Amazon), kept as its URL. Decide whether the site links to retailers, or to another page for the book.',
+        citation: 'retailer-link',
         decidedBy: 'references',
       },
       {
         for: 'research-editor',
         note: 'No year or publisher is given on the current site; not looked up.',
+        missing: ['year', 'container-or-publisher'],
         decidedBy: 'references',
       },
     ],

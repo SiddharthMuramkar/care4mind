@@ -60,11 +60,17 @@ describe('isNormalisedSanskrit', () => {
 })
 
 describe('text helpers', async () => {
-  const { capitalise, toDevanagariDigits } = await import('@/lib/text')
+  const { capitalise, count, toDevanagariDigits } = await import('@/lib/text')
 
   it('capitalises IAST without losing marks', () => {
     expect(capitalise('ālasya')).toBe('Ālasya')
     expect(capitalise('ṛta')).toBe('Ṛta')
+  })
+
+  it('counts with its unit, singular for one alone', () => {
+    expect(count(1, 'entry', 'entries')).toBe('1 entry')
+    expect(count(0, 'entry', 'entries')).toBe('0 entries')
+    expect(count(20, 'entry', 'entries')).toBe('20 entries')
   })
 
   it('writes verse numbers in Devanagari digits', () => {

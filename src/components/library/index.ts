@@ -1,5 +1,5 @@
 export { BookGroup } from './Books'
-export { catalogue, counted, holdingsOf, TYPE_NAMES } from './catalogue'
+export { catalogue, holdingsOf, TYPE_NAMES } from './catalogue'
 export { CourseGroup } from './Courses'
 export { ReferenceEntry, type CitingConcept } from './ReferenceEntry'
 export { Holds, Shelf, Spine } from './Shelf'
