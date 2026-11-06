@@ -41,8 +41,7 @@ export const plateCard = (row: number) => ({ 'data-plate-card': row })
  * The Topics contents plate: rows set like a book's contents, each a Western numeral beside
  * its Devanagari one, a name and a dotted leader running out to what the row holds. Pointing at or focusing a row,
  * or the card it stands for, lights it, and its leader inks in from the centre. Finished and
- * still by default and in print; the numerals and leaders are decoration. The homepage sets its
- * five topics with it too.
+ * still by default and in print; the numerals and leaders are decoration.
  */
 export function ContentsPlate({
   label,

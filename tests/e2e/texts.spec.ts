@@ -51,8 +51,11 @@ test.describe('the shelf', () => {
         await expect(leaf.getByRole('heading').locator('[lang="sa-Deva"]')).toHaveText(
           entry.term.devanagari,
         )
+      // No original script in the record: the transliteration stands alone.
+      else await expect(leaf.getByRole('heading').locator('[lang="sa-Deva"]')).toHaveCount(0)
       if (entry.english) await expect(leaf).toContainText(entry.english)
       if (entry.attribution) await expect(leaf).toContainText(entry.attribution)
+      if (entry.blurb) await expect(leaf).toContainText(entry.blurb)
       await expect(leaf).toContainText(
         `${entry.passageCount} ${entry.passageCount === 1 ? 'verse' : 'verses'} quoted`,
       )
@@ -95,6 +98,26 @@ test.describe('the shelf', () => {
 })
 
 test.describe('a work’s page', () => {
+  test('heads every work the same way: its name in each script it has, who composed it, its blurb and how many verses it quotes', async ({
+    page,
+  }) => {
+    for (const view of views) {
+      await gotoReady(page, view.href)
+      const heading = page.getByRole('heading', { level: 1 })
+      await expect(heading.locator(`[lang="${view.lang}"]`).first()).toHaveText(view.title)
+      if (view.term.devanagari)
+        await expect(heading.locator('[lang="sa-Deva"]')).toHaveText(view.term.devanagari)
+      // No original script in the record: the transliteration stands alone.
+      else await expect(heading.locator('[lang="sa-Deva"]')).toHaveCount(0)
+      if (view.english) await expect(main(page)).toContainText(view.english)
+      if (view.attribution) await expect(main(page)).toContainText(view.attribution)
+      if (view.blurb) await expect(main(page)).toContainText(view.blurb)
+      await expect(main(page)).toContainText(
+        `${view.passageCount} ${view.passageCount === 1 ? 'verse' : 'verses'} quoted`,
+      )
+    }
+  })
+
   test('sets every verse the site quotes, in the work’s order, each at the anchor its locator makes, and nothing else', async ({
     page,
   }) => {

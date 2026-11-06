@@ -10,7 +10,7 @@ import { notFoundMetadata } from '@/lib/metadata'
 
 import cta from '@/components/Cta'
 import page from './error-page.module.css'
-import reading from './reading.module.css'
+import reading from '@/styles/reading.module.css'
 import styles from './not-found.module.css'
 
 export const metadata: Metadata = notFoundMetadata

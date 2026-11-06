@@ -7,7 +7,7 @@ import { cx } from '@/lib/cx'
 
 import cta from '@/components/Cta'
 import styles from './error-page.module.css'
-import reading from './reading.module.css'
+import reading from '@/styles/reading.module.css'
 
 import '@/styles/globals.css'
 
