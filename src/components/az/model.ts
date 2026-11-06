@@ -1,4 +1,4 @@
-import type { PreviewPayload } from '@/components/preview'
+import { conceptPreview, type PreviewPayload } from '@/components/preview'
 import type { AzEntry as Entry, AzLetter, ConceptCard as Card, LatinScript } from '@/content'
 
 import { DEFAULT_KINDS } from './filter'
@@ -50,18 +50,6 @@ export interface AzSource {
   concepts: readonly Card[]
 }
 
-/** A Concept's link shows its preview: its names, its topic and reading time, and its summary. */
-const previewOf = (entry: Entry, card: Card): PreviewPayload => ({
-  kind: 'concept',
-  name: entry.name,
-  text: card.summary,
-  topic: card.topic,
-  readingMinutes: card.readingMinutes,
-  ...(entry.lang ? { lang: entry.lang } : {}),
-  ...(entry.devanagari ? { devanagari: entry.devanagari } : {}),
-  ...(entry.gloss ? { gloss: entry.gloss } : {}),
-})
-
 /** The Concepts A–Z: its rail, its chips, its counts and its numbered sections. */
 export function azModel({ letters, topics, works, concepts }: AzSource): AzModel {
   const all = letters.flatMap(({ entries }) => entries)
@@ -102,7 +90,8 @@ export function azModel({ letters, topics, works, concepts }: AzSource): AzModel
         return {
           entry,
           index: index++,
-          ...(card ? { card, preview: previewOf(entry, card) } : {}),
+          // A Concept's link previews the Concept under the entry's own names.
+          ...(card ? { card, preview: conceptPreview(card, entry) } : {}),
         }
       }),
     }))

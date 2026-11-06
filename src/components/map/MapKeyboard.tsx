@@ -3,6 +3,7 @@
 import { Toggle } from '@base-ui/react/toggle'
 import { ToggleGroup } from '@base-ui/react/toggle-group'
 
+import { mapAttribute } from './attributes'
 import { KIND_WORDS, KINDS, type ConnectionKind } from './kinds'
 import { LineSwatch } from './LineSwatch'
 import type { ButtonsProps, KeyboardParts } from './MapFilters'
@@ -35,7 +36,7 @@ function Buttons({ topics, selection, onChange }: ButtonsProps) {
             key={kind}
             value={kind}
             className={styles.chip}
-            data-chip={`kind:${kind}`}
+            {...{ [mapAttribute.chip]: `kind:${kind}` }}
             data-ink
           >
             <LineSwatch kind={kind} className={styles.swatch} />
@@ -63,7 +64,7 @@ function Buttons({ topics, selection, onChange }: ButtonsProps) {
             key={slug}
             value={slug}
             className={styles.chip}
-            data-chip={`topic:${slug}`}
+            {...{ [mapAttribute.chip]: `topic:${slug}` }}
             data-topic={slug}
             data-ink
           >

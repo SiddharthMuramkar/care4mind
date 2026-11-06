@@ -1,0 +1,221 @@
+/* A statement: its number in the margin and its five options as pills pressed into the paper. */
+.statement {
+  position: relative;
+  display: grid;
+  gap: 0.85rem;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  scroll-margin-top: calc(var(--sticky-top) + 6rem);
+}
+
+/* Floated, the legend is laid out as the statement's first row, not in the fieldset's border. */
+.legend {
+  float: inline-start;
+  width: 100%;
+  padding: 0;
+  font-size: 1.1875rem;
+  line-height: 1.55;
+  text-wrap: pretty;
+}
+
+/* Its number, rubricated in the margin as a manuscript numbers its verses. */
+.number {
+  position: absolute;
+  inset-inline-end: calc(100% + 0.85rem);
+  top: 0;
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  line-height: 1.2;
+  font-variant-numeric: oldstyle-nums;
+  color: var(--color-surface-link);
+}
+
+.error {
+  display: flex;
+  align-items: baseline;
+  gap: 0.55rem;
+  margin: 0;
+  color: var(--color-surface-link);
+  font-weight: 600;
+}
+
+/* A vermilion diamond, as at the folio's corners. */
+.error::before {
+  content: '';
+  flex: none;
+  width: 0.5rem;
+  height: 0.5rem;
+  background: var(--color-highlight);
+  transform: rotate(45deg) translateY(-0.1rem);
+}
+
+/* An unanswered statement is marked by a vermilion rule in the margin as well as its words. */
+.statement[aria-invalid='true']::before {
+  content: '';
+  position: absolute;
+  inset-block: 0.35rem 0;
+  inset-inline-start: -0.6rem;
+  width: 3px;
+  background: var(--color-highlight);
+}
+
+.options {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.option {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-height: 48px;
+  padding: 0.45rem 1rem;
+  border: 1px solid color-mix(in srgb, var(--color-surface-ink) 45%, transparent);
+  border-radius: 1.5rem;
+  background: var(--color-surface-pale-45);
+  color: var(--color-surface-ink);
+  font-size: 1.125rem;
+  line-height: 1.15;
+  cursor: pointer;
+  transition: transform var(--duration-instant) var(--ease-press);
+}
+
+/* With room, the five options run in a row as a scale, each mark over its label. */
+@media (min-width: 46rem) {
+  .options {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+
+  /* Marks level across the row, labels hanging under them. */
+  .option {
+    flex-direction: column;
+    justify-content: flex-start;
+    gap: 0.45rem;
+    padding: 0.8rem 0.35rem 0.65rem;
+    border-radius: 1.25rem;
+    font-size: 1.0625rem;
+    text-align: center;
+  }
+}
+
+/* The ink a chosen answer takes, spreading from the middle of its pill. */
+.option::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: var(--color-ground);
+  border-radius: inherit;
+  opacity: 0;
+  transform: scale(0.85);
+}
+
+.option:hover {
+  border-color: var(--color-surface-ink);
+}
+
+.option:active {
+  transform: translateY(1px);
+}
+
+.option:has(.radio:checked) {
+  border-color: var(--color-ground);
+  color: var(--color-ink);
+}
+
+.option:has(.radio:checked)::before {
+  opacity: 1;
+  transform: none;
+}
+
+/* Windows' contrast themes repaint the chosen pill's ink: ring it instead (focus, below, still wins). */
+@media (forced-colors: active) {
+  .option:has(.radio:checked) {
+    outline: 2px solid CanvasText;
+    outline-offset: -4px;
+  }
+}
+
+.option:has(.radio:focus-visible) {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .option::before {
+    transition:
+      opacity var(--duration-quick) var(--ease-out),
+      transform var(--duration-quick) var(--ease-out);
+  }
+}
+
+/* The native radio button covers its pill, so the whole pill takes the press and the focus. */
+.radio {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+/* A hollow roundel, like the ring round the wordmark's 4; chosen, it fills with vermilion. */
+.mark {
+  position: relative;
+  flex: none;
+  width: 0.95rem;
+  height: 0.95rem;
+  border: 1.5px solid currentColor;
+  border-radius: 50%;
+}
+
+.mark::after {
+  content: '';
+  position: absolute;
+  inset: 2px;
+  border-radius: 50%;
+  background: var(--color-highlight);
+  transform: scale(0);
+}
+
+.option:has(.radio:checked) .mark {
+  border-color: var(--color-ink);
+}
+
+.option:has(.radio:checked) .mark::after {
+  transform: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .mark::after {
+    transition: transform var(--duration-quick) var(--ease-out);
+  }
+}
+
+.optionText {
+  min-width: 0;
+  text-wrap: balance;
+}
+
+@media print {
+  .mark::after {
+    print-color-adjust: exact;
+  }
+
+  .option:has(.radio:checked) {
+    color: inherit;
+    border-width: 2px;
+  }
+
+  .option:has(.radio:checked)::before {
+    display: none;
+  }
+
+  .option:has(.radio:checked) .mark {
+    border-color: currentColor;
+  }
+}

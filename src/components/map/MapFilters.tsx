@@ -22,6 +22,7 @@ import {
   stands,
   writeSelection,
 } from './filter'
+import { mapAttribute } from './attributes'
 import { KIND_WORDS, KINDS, type ConnectionKind } from './kinds'
 import { LineSwatch } from './LineSwatch'
 import styles from './MapFilters.module.css'
@@ -61,7 +62,7 @@ const noSearch = () => ''
 /** The clear button unmounts with the filter, which would drop focus on the page. */
 function focusBeforeClear(root: ParentNode | null) {
   const next =
-    root?.querySelector<HTMLElement>('[data-chip]') ??
+    root?.querySelector<HTMLElement>(`[${mapAttribute.chip}]`) ??
     root?.querySelector<HTMLElement>('[aria-live="polite"]')
   next?.focus()
 }
@@ -74,18 +75,19 @@ function go(selection: Selection) {
 }
 
 /** The map's elements a filter touches, as the server rendered them. */
-const map = () => (typeof document === 'undefined' ? null : document.querySelector('[data-map]'))
+const map = () =>
+  typeof document === 'undefined' ? null : document.querySelector(`[${mapAttribute.map}]`)
 const facts = (element: HTMLElement | SVGElement) => ({
-  kind: element.dataset.kind as ConnectionKind,
-  topics: (element.dataset.topics ?? '').split(' '),
+  kind: element.getAttribute(mapAttribute.kind) as ConnectionKind,
+  topics: (element.getAttribute(mapAttribute.topics) ?? '').split(' '),
 })
 
 /** How many curves a selection leaves showing. */
 function countShown(selection: Selection) {
   const root = map()
   if (!root) return null
-  return [...root.querySelectorAll<SVGPathElement>('path[data-c]')].filter((curve) =>
-    shows(facts(curve), selection),
+  return [...root.querySelectorAll<SVGPathElement>(`path[${mapAttribute.connection}]`)].filter(
+    (curve) => shows(facts(curve), selection),
   ).length
 }
 
@@ -102,22 +104,27 @@ function applySelection(selection: Selection) {
   const toggle = (element: Element, name: string, on: boolean) => {
     if (element.hasAttribute(name) !== on) element.toggleAttribute(name, on)
   }
-  for (const curve of root.querySelectorAll<SVGPathElement>('path[data-c]')) {
+  for (const curve of root.querySelectorAll<SVGPathElement>(`path[${mapAttribute.connection}]`)) {
     const on = shows(facts(curve), selection)
-    toggle(curve, 'data-off', !on)
+    toggle(curve, mapAttribute.off, !on)
     if (!on) continue
-    const [a = '', b = ''] = (curve.dataset.ends ?? '').split(' ')
+    const [a = '', b = ''] = (curve.getAttribute(mapAttribute.ends) ?? '').split(' ')
     join(a, b)
     join(b, a)
   }
-  for (const row of root.querySelectorAll<HTMLElement>('li[data-c]'))
+  for (const row of root.querySelectorAll<HTMLElement>(`li[${mapAttribute.connection}]`))
     toggle(row, 'hidden', !shows(facts(row), selection))
-  for (const part of root.querySelectorAll<HTMLElement>('[data-kind-section]'))
-    toggle(part, 'hidden', !part.querySelector('li[data-c]:not([hidden])'))
-  for (const point of root.querySelectorAll<HTMLElement>('[data-p]')) {
-    const neighbours = [...(near.get(point.dataset.p ?? '') ?? [])].join(' ')
-    if (point.dataset.near !== neighbours) point.dataset.near = neighbours
-    toggle(point, 'data-faint', !stands((point.dataset.topics ?? '').split(' '), selection))
+  for (const part of root.querySelectorAll<HTMLElement>(`[${mapAttribute.kindSection}]`))
+    toggle(part, 'hidden', !part.querySelector(`li[${mapAttribute.connection}]:not([hidden])`))
+  for (const point of root.querySelectorAll<HTMLElement>(`[${mapAttribute.point}]`)) {
+    const neighbours = [...(near.get(point.getAttribute(mapAttribute.point) ?? '') ?? [])].join(' ')
+    if (point.getAttribute(mapAttribute.near) !== neighbours)
+      point.setAttribute(mapAttribute.near, neighbours)
+    toggle(
+      point,
+      mapAttribute.faint,
+      !stands((point.getAttribute(mapAttribute.topics) ?? '').split(' '), selection),
+    )
   }
 }
 
@@ -137,7 +144,7 @@ function PlainButtons({ topics, selection, onChange }: ButtonsProps) {
               type="button"
               className={styles.chip}
               aria-pressed={on}
-              data-chip={`kind:${kind}`}
+              {...{ [mapAttribute.chip]: `kind:${kind}` }}
               data-ink
               onClick={() => onChange({ ...selection, kind: on ? null : kind })}
             >
@@ -159,7 +166,7 @@ function PlainButtons({ topics, selection, onChange }: ButtonsProps) {
               type="button"
               className={styles.chip}
               aria-pressed={on}
-              data-chip={`topic:${slug}`}
+              {...{ [mapAttribute.chip]: `topic:${slug}` }}
               data-topic={slug}
               data-ink
               onClick={() =>
@@ -224,7 +231,7 @@ export function MapFilters({ topics, total }: Props) {
       const swap = () => {
         const focused = document.activeElement
         if (focused instanceof HTMLElement && controls.current?.contains(focused))
-          handoff.current = focused.dataset.chip
+          handoff.current = focused.getAttribute(mapAttribute.chip) ?? undefined
         setParts(() => loaded)
       }
       if (pressing.current) waiting.current = swap
@@ -247,7 +254,7 @@ export function MapFilters({ topics, total }: Props) {
     const key = handoff.current
     if (!parts || !key) return
     handoff.current = undefined
-    controls.current?.querySelector<HTMLElement>(`[data-chip="${key}"]`)?.focus()
+    controls.current?.querySelector<HTMLElement>(`[${mapAttribute.chip}="${key}"]`)?.focus()
   }, [parts])
 
   const Buttons = parts?.Buttons ?? PlainButtons

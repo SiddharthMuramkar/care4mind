@@ -8,6 +8,7 @@
  */
 import type { ConceptMap, ConceptMapNode } from '@/content'
 
+import { mapAttribute } from './attributes'
 import { KINDS, type ConnectionKind } from './kinds'
 
 export const SIZE = 1000
@@ -262,19 +263,23 @@ function curve(from: MapPoint, to: MapPoint, kind: ConnectionKind) {
  * The plate's lighting, as CSS made while the site builds (no JavaScript): pointing at or focusing
  * a Concept lights its neighbours and its curves (and their rows in the list); pointing at or
  * focusing a row of the list lights its curve and its two Concepts. Lit elements take `--lit: 1`.
- * A point carries `data-p` and `data-near`; a curve and a row carry `data-c` and `data-ends`.
- * The filters rewrite `data-near` to the neighbours still shown.
+ * A point carries `mapAttribute.point` and `.near`; a curve and a row carry `.connection` and `.ends`.
+ * The filters rewrite `.near` to the neighbours still shown.
  */
-export function litRules({ points, connections }: MapLayout, anchor = '[data-map]'): string {
+export function litRules(
+  { points, connections }: MapLayout,
+  anchor = `[${mapAttribute.map}]`,
+): string {
   const lit = '{--lit:1}'
+  const { point: p, near, ends, connection: c } = mapAttribute
   return [
     ...points.map(
       ({ slug }) =>
-        `${anchor}:has([data-p="${slug}"]:is(:hover,:focus-visible)) :is([data-near~="${slug}"],[data-ends~="${slug}"])${lit}`,
+        `${anchor}:has([${p}="${slug}"]:is(:hover,:focus-visible)) :is([${near}~="${slug}"],[${ends}~="${slug}"])${lit}`,
     ),
     ...connections.map(
       ({ source, target }, index) =>
-        `${anchor}:has(li[data-c="c${index}"]:is(:hover,:focus-within)) :is(path[data-c="c${index}"],[data-p="${source}"],[data-p="${target}"])${lit}`,
+        `${anchor}:has(li[${c}="c${index}"]:is(:hover,:focus-within)) :is(path[${c}="c${index}"],[${p}="${source}"],[${p}="${target}"])${lit}`,
     ),
   ].join('\n')
 }
