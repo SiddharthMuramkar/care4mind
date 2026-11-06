@@ -377,6 +377,8 @@ export interface WorkCard extends WorkRef {
   english?: string
   /** Who the pages say composed it, as they say it. */
   attribution?: string
+  /** One plain line on what the text is and why it matters here, where the Research editor has supplied it. */
+  blurb?: Inline
   /** Sanskrit, or Pali for the Dhammapada. */
   language: 'sa' | 'pi'
   /** How many of its verses the site quotes: one passage each. */

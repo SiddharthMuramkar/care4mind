@@ -129,6 +129,7 @@ ${provenanceOf(written)}
   title: { iast: '', ascii: [] }, // devanagari: '', english: ''
   // language: 'pi', // Sanskrit unless stated
   // attribution: '',
+  // blurb: '',
   locatorLabel: '',
   // editions: [],
 ${provenanceOf(written)}

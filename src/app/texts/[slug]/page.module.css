@@ -21,6 +21,12 @@
   color: var(--color-surface-muted);
 }
 
+.blurb {
+  margin: 0;
+  font-size: 1.125rem;
+  line-height: 1.55;
+}
+
 .count {
   display: flex;
   flex-wrap: wrap;
