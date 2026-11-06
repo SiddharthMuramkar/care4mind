@@ -1,10 +1,15 @@
 import { beforeAll, describe, expect, it } from 'vitest'
 
 import type { Features } from '@/config/features'
-import { contentGraph, type ContentGraph } from '@/content/graph'
-import { CONTENT_KINDS, type ContentRecord, type RecordOf } from '@/content/schema'
-import { localSource } from '@/content/source'
-import { createContent } from '@/content/views'
+import {
+  contentGraph,
+  type ContentGraph,
+  CONTENT_KINDS,
+  type ContentRecord,
+  type RecordOf,
+  localSource,
+  createContent,
+} from '@/content/testing'
 
 // What the migration from the old site carried over, as counted when it landed. These pin
 // today's content, so they run apart from `pnpm check`: a new record must not need a test edit.

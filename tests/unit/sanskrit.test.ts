@@ -1,7 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import gita254 from '@/content/data/passages/bhagavad-gita/2.54'
-import gita255 from '@/content/data/passages/bhagavad-gita/2.55'
+import { localSource } from '@/content/testing'
 import {
   isNormalisedSanskrit,
   isSpeakerLine,
@@ -94,8 +93,11 @@ describe('isSpeakerLine', () => {
     expect(isSpeakerLine('prajahāti yadā kāmānsarvānpārtha manogatān')).toBe(false)
   })
 
-  it('takes 2.54 and 2.55’s speaker off the verse, in Devanagari and in IAST', () => {
-    for (const passage of [gita254, gita255]) {
+  it('takes 2.54 and 2.55’s speaker off the verse, in Devanagari and in IAST', async () => {
+    const passages = await localSource.records('passage')
+    for (const id of ['bhagavad-gita/2.54', 'bhagavad-gita/2.55']) {
+      const passage = passages.find((record) => record.id === id)
+      if (!passage) throw new Error(`${id} is in the local source.`)
       const iast = passage.transliteration
       if (!iast) throw new Error(`${passage.id} has a transliteration.`)
       expect(isSpeakerLine(passage.devanagari[0] ?? '')).toBe(true)

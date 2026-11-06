@@ -4,7 +4,7 @@ import { turnForward } from '@/components/PageTurn'
 import { LinkPreview, type PreviewPayload } from '@/components/preview'
 import { Text } from '@/components/prose'
 import { ScriptPair } from '@/components/script'
-import { TopicChip } from '@/components/topics'
+import { TopicChip } from '@/components/TopicChip'
 import type { AzEntry as Entry, ConceptCard as Card } from '@/content'
 import { readingTimeWords } from '@/lib/text'
 

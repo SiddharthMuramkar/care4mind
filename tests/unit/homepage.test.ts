@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
 import { concepts, home, topics } from '@/content'
-import { localSource } from '@/content/source'
+import { localSource } from '@/content/testing'
 
 describe('the homepage below the hero', () => {
   it('features the Concepts its record chooses, each resolved with its reading time', async () => {

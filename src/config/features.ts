@@ -7,6 +7,8 @@
  * the server: hand a flag to a client component as a prop rather than importing this there.
  * The content module reads them through createContent(), the shell through this module.
  */
+import 'server-only'
+
 export interface Features {
   /** A Questionnaire with status "preview" can be taken (the KarmaYoga flow). */
   questionnairePreview: boolean

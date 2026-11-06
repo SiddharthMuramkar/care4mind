@@ -11,7 +11,7 @@ import {
   type ReferenceView,
   type SanskritName,
 } from '@/content'
-import { asciiSpellings } from '@/content/names'
+import { asciiSpellings } from '@/content/testing'
 
 // What the foundation's pages showed of their three items (vikṣepa, the KarmaYoga Scale and the
 // homepage), recorded before the content module re-homed them. The pages moved
