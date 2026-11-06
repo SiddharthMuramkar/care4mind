@@ -1,4 +1,6 @@
 export { Flow } from './Flow'
+export { Limitations } from './Limitations'
+export { RelatedConcepts } from './RelatedConcepts'
 export {
   addressOf,
   entryAt,
