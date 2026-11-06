@@ -5,7 +5,6 @@ import { dirname, join, relative, resolve, sep } from 'node:path'
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
-import { features, proposalsPageOn, readFeatures } from '@/config/features'
 import {
   buildGraph,
   contentGraph,
@@ -36,8 +35,7 @@ import {
 // The storage layers of the content module: the record schema, the generated registry, the
 // content source (the seam) and the graph that resolves every link once. The graph has no public
 // interface of its own, so it is tested here, through its own seam, with
-// made-up sources. The feature flags the interface reads are tested here too; the flags
-// themselves are tested in features.test.ts.
+// made-up sources.
 
 const provenance = {
   sources: [{ url: 'https://example.org/page/', retrieved: '2026-10-27' }],
@@ -536,80 +534,6 @@ describe('the graph', () => {
     const source = memorySource(...world)
     expect(await graphFor(source)).toBe(await graphFor(source))
     expect(await contentGraph()).toBe(await contentGraph())
-  })
-})
-
-describe('feature flags', () => {
-  const allOn = {
-    questionnairePreview: true,
-    conceptMap: true,
-    startHere: true,
-    whatsOnYourMind: true,
-  }
-  const allOff = {
-    questionnairePreview: false,
-    conceptMap: false,
-    startHere: false,
-    whatsOnYourMind: false,
-  }
-
-  it('switches every flag on in local runs and Vercel previews, and off in production', () => {
-    expect(readFeatures({})).toEqual(allOn)
-    expect(readFeatures({ VERCEL_ENV: 'development' })).toEqual(allOn)
-    expect(readFeatures({ VERCEL_ENV: 'preview' })).toEqual(allOn)
-    expect(readFeatures({ VERCEL_ENV: 'production' })).toEqual(allOff)
-  })
-
-  it('lets each flag’s own variable force it on in production', () => {
-    const production = { VERCEL_ENV: 'production' }
-    expect(readFeatures({ ...production, FEATURE_QUESTIONNAIRE_PREVIEW: '1' })).toEqual({
-      ...allOff,
-      questionnairePreview: true,
-    })
-    expect(readFeatures({ ...production, FEATURE_CONCEPT_MAP: '1' })).toEqual({
-      ...allOff,
-      conceptMap: true,
-    })
-    expect(readFeatures({ ...production, FEATURE_START_HERE: '1' })).toEqual({
-      ...allOff,
-      startHere: true,
-    })
-    expect(readFeatures({ ...production, FEATURE_WHATS_ON_YOUR_MIND: '1' })).toEqual({
-      ...allOff,
-      whatsOnYourMind: true,
-    })
-  })
-
-  it('lets each flag’s own variable force it off anywhere else', () => {
-    expect(readFeatures({ FEATURE_QUESTIONNAIRE_PREVIEW: '0' })).toEqual({
-      ...allOn,
-      questionnairePreview: false,
-    })
-    expect(readFeatures({ VERCEL_ENV: 'preview', FEATURE_CONCEPT_MAP: '0' })).toEqual({
-      ...allOn,
-      conceptMap: false,
-    })
-    expect(readFeatures({ FEATURE_START_HERE: '0' })).toEqual({ ...allOn, startHere: false })
-    expect(readFeatures({ FEATURE_WHATS_ON_YOUR_MIND: '0' })).toEqual({
-      ...allOn,
-      whatsOnYourMind: false,
-    })
-  })
-
-  it('refuses an override that is neither 1 nor 0', () => {
-    expect(() => readFeatures({ FEATURE_CONCEPT_MAP: 'true' })).toThrow('FEATURE_CONCEPT_MAP')
-  })
-
-  it('shows the proposals page while any proposal is on, with no flag of its own', () => {
-    expect(proposalsPageOn(allOn)).toBe(true)
-    expect(proposalsPageOn({ ...allOff, conceptMap: true })).toBe(true)
-    expect(proposalsPageOn({ ...allOff, startHere: true })).toBe(true)
-    expect(proposalsPageOn({ ...allOff, whatsOnYourMind: true })).toBe(true)
-    expect(proposalsPageOn(allOff)).toBe(false)
-  })
-
-  it('reads the flags once, from this process’s environment', () => {
-    expect(features).toEqual(readFeatures(process.env))
   })
 })
 
