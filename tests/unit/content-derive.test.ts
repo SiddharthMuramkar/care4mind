@@ -21,7 +21,7 @@ import {
 } from '@/content/testing'
 
 // The site derivations: the routes, the
-// breadcrumb trail, the A–Z, the search documents and the Concept-map data, each computed from
+// breadcrumb trail, page descriptions, the A–Z, the search documents and the Concept-map data, each computed from
 // whatever records a source holds. Each test builds a made-up source and reads `site` through
 // the same interface the pages use. Every record and string here is made up for the test.
 
@@ -562,6 +562,113 @@ describe('site.trail', () => {
     expect(await trail('/nowhere/')).toEqual([])
     expect(await trail('/topics/')).toEqual([])
     expect(await trail('/concepts/map/', OFF)).toEqual([])
+  })
+})
+
+describe('site.describe', () => {
+  const describe = (path: string, flags: Features = ON, records = world) =>
+    createContent(memorySource(...records), flags).site.describe(path)
+
+  it('describes each kind of page by its summary, or by what its page holds', async () => {
+    expect(await describe('/concepts/obstacles/')).toEqual({
+      path: '/concepts/obstacles/',
+      kind: 'concept',
+      name: 'Vighna · Obstacle',
+      description: 'A made-up summary.',
+    })
+    expect(await describe('/')).toEqual({
+      path: '/',
+      kind: 'home',
+      name: 'Home',
+      description: 'A made-up tagline.',
+    })
+    expect(await describe('/topics/mind/')).toMatchObject({
+      name: 'Mind',
+      description: '2 Concepts in the topic “Mind”, and the verses they quote.',
+    })
+    expect(await describe('/topics/self/')).toMatchObject({
+      description: '1 Concept in the topic “Self”, and the verses it quotes.',
+    })
+    expect(await describe('/texts/yoga-sutra/')).toMatchObject({
+      name: 'Yoga Sūtra',
+      description:
+        'Every verse of the Yoga Sūtra that Care4Mind quotes, with its translations and the Concepts that quote it.',
+    })
+    expect(await describe('/questionnaires/work-scale/')).toMatchObject({
+      name: 'Work Scale',
+      description: 'What the Work Scale is for, and its limits.',
+    })
+    expect(await describe('/questionnaires/work-scale/take/')).toEqual({
+      path: '/questionnaires/work-scale/take/',
+      kind: 'questionnaire-flow',
+      name: 'Take the Work Scale',
+      description: 'The Work Scale, one part at a time.',
+    })
+    expect(await describe('/library/')).toMatchObject({
+      description: 'The Care4Mind Library: References, Reading List and Methods.',
+    })
+    expect(await describe('/library/methods/')).toMatchObject({
+      name: 'Methods',
+      description: 'A made-up summary of methods.',
+    })
+    expect(await describe('/library/reading/')).toMatchObject({
+      name: 'Reading List',
+      description: '1 entry on the Reading List list in the Care4Mind Library.',
+    })
+    expect(await describe('/search/')).toMatchObject({
+      name: 'Search',
+      description: 'Search Care4Mind for a Concept, a term, a verse, a text or a Reference.',
+    })
+  })
+
+  it('describes a Questionnaire by its summary where it has one', async () => {
+    const summarised = defineQuestionnaire({
+      ...live,
+      slug: 'summarised',
+      title: 'Summarised',
+      summary: 'A made-up Questionnaire summary.',
+    })
+    expect(await describe('/questionnaires/summarised/', ON, [...world, summarised])).toMatchObject(
+      { name: 'Summarised', description: 'A made-up Questionnaire summary.' },
+    )
+  })
+
+  it('gives every route a name and a description at its own path', async () => {
+    const content = createContent(memorySource(...world), ON)
+    for (const route of await content.site.routes()) {
+      const page = await content.site.describe(route.path)
+      expect(page?.path, route.path).toBe(route.path)
+      expect(page?.kind, route.path).toBe(route.kind)
+      expect(page?.name, route.path).toMatch(/\S/)
+      expect(page?.description, route.path).toMatch(/\S/)
+      // The flow alone is renamed after its Questionnaire; every other name is the route's title.
+      if (route.kind !== 'questionnaire-flow') expect(page?.name, route.path).toBe(route.title)
+    }
+  })
+
+  it('reads a path as the trail does, and answers for exactly the pages the trail answers for', async () => {
+    expect(await describe('/concepts/obstacles')).toEqual(await describe('/concepts/obstacles/'))
+    expect(await describe('concepts/obstacles')).toEqual(await describe('/concepts/obstacles/'))
+    expect(await describe('/search/?q=vighna')).toEqual(await describe('/search/'))
+    expect(await describe('/concepts/obstacles/#kinds')).toEqual(
+      await describe('/concepts/obstacles/'),
+    )
+    const content = createContent(memorySource(...world), ON)
+    for (const path of [
+      '/concepts/obstacles',
+      '/search/?q=vighna',
+      '/nowhere/',
+      '/topics/',
+      '/concepts/map/',
+    ]) {
+      const described = await content.site.describe(path)
+      const hasTrail = (await content.site.trail(path)).length > 0
+      expect(described !== null, path).toBe(hasTrail)
+    }
+    expect(await describe('/nowhere/')).toBeNull()
+    expect(await describe('/topics/')).toBeNull()
+    expect(await describe('/concepts/map/', OFF)).toBeNull()
+    expect(await describe('/questionnaires/work-scale/take/', OFF)).toBeNull()
   })
 })
 
