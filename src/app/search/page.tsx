@@ -12,7 +12,7 @@ import { count, readingTimeWords } from '@/lib/text'
 import { isSearchGroupKind, resultGroups } from '@/lib/search/search'
 import { search } from '@/lib/search/server'
 
-import reading from '../reading.module.css'
+import reading from '@/styles/reading.module.css'
 import styles from './page.module.css'
 
 const PATH = hrefFor({ page: 'search' })

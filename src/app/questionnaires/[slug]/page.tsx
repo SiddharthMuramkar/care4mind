@@ -14,7 +14,7 @@ import { hrefFor, questionnaires, site } from '@/content'
 import { metadataFor } from '@/lib/metadata'
 
 import cta from '@/components/Cta'
-import reading from '../../reading.module.css'
+import reading from '@/styles/reading.module.css'
 import styles from './page.module.css'
 
 export const dynamicParams = false

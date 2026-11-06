@@ -12,7 +12,7 @@ import { hrefFor, site, works } from '@/content'
 import { metadataFor } from '@/lib/metadata'
 import { count } from '@/lib/text'
 
-import reading from '../../reading.module.css'
+import reading from '@/styles/reading.module.css'
 import styles from './page.module.css'
 
 export const dynamicParams = false

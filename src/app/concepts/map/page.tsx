@@ -7,7 +7,7 @@ import { ReadingPage } from '@/components/ReadingPage'
 import { hrefFor, site, topics } from '@/content'
 import { metadataFor } from '@/lib/metadata'
 
-import reading from '../../reading.module.css'
+import reading from '@/styles/reading.module.css'
 import styles from './page.module.css'
 
 const PATH = hrefFor({ page: 'concept-map' })
