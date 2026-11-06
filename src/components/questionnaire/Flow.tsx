@@ -21,7 +21,7 @@ import {
 
 import cta from '@/components/Cta'
 import { Fleuron } from '@/components/Fleuron'
-import { turnBack } from '@/components/PageTurn'
+import { turnBack, type Turn } from '@/components/PageTurn'
 import type { QuestionnaireFormView } from '@/content'
 
 import {
@@ -108,7 +108,7 @@ export function Flow({ form, instructions, intro, limits, sources }: Props) {
   const place = useRef(0)
 
   /** Run a press: note the new step in history, and turn the page if the step changes. */
-  function press(action: FlowAction, then: Focus | null, turn?: 'turn-forward' | 'turn-back') {
+  function press(action: FlowAction, then: Focus | null, turn?: Turn) {
     const next = flowReducer(state, action)
     const moves = next.step !== state.step
     focus.current = next.refusals > state.refusals ? { to: 'summary' } : then

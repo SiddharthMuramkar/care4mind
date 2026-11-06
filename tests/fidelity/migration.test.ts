@@ -1,6 +1,5 @@
 import { beforeAll, describe, expect, it } from 'vitest'
 
-import type { Features } from '@/config/features'
 import {
   contentGraph,
   type ContentGraph,
@@ -11,22 +10,14 @@ import {
   createContent,
 } from '@/content/testing'
 
+import { flagsOff, flagsOn } from '../flags'
+
 // What the migration from the old site carried over, as counted when it landed. These pin
 // today's content, so they run apart from `pnpm check`: a new record must not need a test edit.
 // Until the client signs off the migration, they are what guards it.
 
-const ON: Features = {
-  questionnairePreview: true,
-  conceptMap: true,
-  startHere: true,
-  whatsOnYourMind: true,
-}
-const OFF: Features = {
-  questionnairePreview: false,
-  conceptMap: false,
-  startHere: false,
-  whatsOnYourMind: false,
-}
+const ON = flagsOn()
+const OFF = flagsOff()
 
 const site = createContent(localSource, ON)
 

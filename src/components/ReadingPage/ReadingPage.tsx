@@ -1,10 +1,10 @@
-import { ViewTransition, type ReactNode } from 'react'
+import type { ReactNode } from 'react'
 
 import { cx } from '@/lib/cx'
 
 import { Breadcrumbs } from '../Breadcrumbs'
 import { Folio } from '../Folio'
-import { PageTurn } from '../PageTurn'
+import { PageTurn, TitleMorph, type TitleMorphKind } from '../PageTurn'
 import styles from './ReadingPage.module.css'
 
 /** How wide the folio stands, named for what sits on it rather than for its measure. */
@@ -31,8 +31,8 @@ interface ReadingPageProps {
   /** A long name is set a size down. */
   longTitle?: boolean
   titleClassName?: string
-  /** The title flies in from its card under this shared-element name. */
-  titleTransition?: string
+  /** The title flies in from its card: the kind of thing it names, and its slug. */
+  titleMorph?: { kind: TitleMorphKind; slug: string }
   /** Set above the title, as the kicker is. */
   beforeTitle?: ReactNode
   kicker?: ReactNode
@@ -60,7 +60,7 @@ export function ReadingPage({
   title,
   longTitle = false,
   titleClassName,
-  titleTransition,
+  titleMorph,
   beforeTitle,
   kicker,
   afterTitle,
@@ -92,10 +92,10 @@ export function ReadingPage({
           <header className={cx(styles.titlePage, headerClassName)}>
             {beforeTitle}
             {kicker ? <p className={styles.kicker}>{kicker}</p> : null}
-            {titleTransition ? (
-              <ViewTransition name={titleTransition} share="morph" default="none">
+            {titleMorph ? (
+              <TitleMorph kind={titleMorph.kind} slug={titleMorph.slug}>
                 {heading}
-              </ViewTransition>
+              </TitleMorph>
             ) : (
               heading
             )}

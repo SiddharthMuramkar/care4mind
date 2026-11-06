@@ -1,13 +1,13 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { ViewTransition } from 'react'
 
 import { Citation } from '@/components/Citation'
 import { HelpLine } from '@/components/HelpLine'
-import { turnForward } from '@/components/PageTurn'
+import { TitleMorph, turnForward } from '@/components/PageTurn'
 import { ReadingPage } from '@/components/ReadingPage'
 import { Provenance, Text } from '@/components/prose'
+import { Limitations, RelatedConcepts } from '@/components/questionnaire'
 import { ReadingThread } from '@/components/ReadingThread'
 import { StatusBadge } from '@/components/StatusBadge'
 import { hrefFor, questionnaires, site } from '@/content'
@@ -50,9 +50,9 @@ export default async function QuestionnairePage({ params }: PageProps<'/question
       title={
         <>
           {/* The Questionnaires page's card flies into this heading. */}
-          <ViewTransition name={`questionnaire-title-${slug}`} share="morph" default="none">
+          <TitleMorph kind="questionnaire" slug={slug}>
             <span>{questionnaire.title}</span>
-          </ViewTransition>
+          </TitleMorph>
         </>
       }
       afterTitle={
@@ -95,27 +95,9 @@ export default async function QuestionnairePage({ params }: PageProps<'/question
       ) : null}
 
       {questionnaire.limitations ? (
-        <section
-          className={`${reading.section} ${styles.limitations}`}
-          aria-labelledby="limitations-title"
-        >
-          <h2 id="limitations-title" className={reading.sectionTitle}>
-            Before you start: its limits
-          </h2>
-          {questionnaire.limitations.status === 'draft-pending-psychology-expert' ? (
-            <p className={styles.draft}>
-              Draft wording. The Psychology expert has not reviewed these limitations yet.
-            </p>
-          ) : null}
-          <ul className={styles.list}>
-            {questionnaire.limitations.items.map((item) => (
-              <li key={item}>
-                <Text text={item} />
-              </li>
-            ))}
-          </ul>
+        <Limitations limitations={questionnaire.limitations}>
           <HelpLine className={styles.help} />
-        </section>
+        </Limitations>
       ) : (
         <HelpLine className={`${reading.section} ${styles.help}`} />
       )}
@@ -166,26 +148,7 @@ export default async function QuestionnairePage({ params }: PageProps<'/question
         )}
       </div>
 
-      {questionnaire.concepts.length > 0 ? (
-        <section className={reading.section} aria-labelledby="related-title">
-          <h2 id="related-title" className={reading.sectionTitle}>
-            Related Concepts
-          </h2>
-          <ul className={styles.list}>
-            {questionnaire.concepts.map((concept) => (
-              <li key={concept.slug}>
-                <Link
-                  href={hrefFor({ kind: 'concept', id: concept.slug })}
-                  transitionTypes={turnForward}
-                >
-                  <span lang={concept.lang}>{concept.name}</span>
-                  {concept.gloss ? <> · {concept.gloss}</> : null}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </section>
-      ) : null}
+      <RelatedConcepts concepts={questionnaire.concepts} />
 
       <Provenance of={questionnaire} />
     </ReadingPage>

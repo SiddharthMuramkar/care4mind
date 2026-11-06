@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest'
 
-import { type Features, proposalsPageOn, readFeatures } from '@/config/features'
+import { features, type Features, proposalsPageOn, readFeatures } from '@/config/features'
+
+import { flagsOff, flagsOn } from '../flags'
 
 // Each flag, the variable that forces it, and the other flags, which an override must leave alone.
 const FLAGS = [
@@ -86,16 +88,16 @@ describe('feature flags', () => {
   })
 
   it('shows the proposals page while any proposal is on, and the preview flag has no say', () => {
-    const off = {
-      questionnairePreview: false,
-      conceptMap: false,
-      startHere: false,
-      whatsOnYourMind: false,
-    }
+    const off = flagsOff()
     expect(proposalsPageOn(off)).toBe(false)
     expect(proposalsPageOn({ ...off, questionnairePreview: true })).toBe(false)
     expect(proposalsPageOn({ ...off, conceptMap: true })).toBe(true)
     expect(proposalsPageOn({ ...off, startHere: true })).toBe(true)
     expect(proposalsPageOn({ ...off, whatsOnYourMind: true })).toBe(true)
+    expect(proposalsPageOn(flagsOn())).toBe(true)
+  })
+
+  it('reads the flags once, from this process’s environment', () => {
+    expect(features).toEqual(readFeatures(process.env))
   })
 })
