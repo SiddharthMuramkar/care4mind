@@ -22,6 +22,7 @@ import {
   defineTopic,
   defineWork,
   idOf,
+  isSlug,
   KIND_FOLDERS,
   type ConceptRecord,
   type ContentRecord,
@@ -537,9 +538,21 @@ describe('the graph', () => {
   })
 })
 
+describe('the slug rule', () => {
+  it('takes lowercase ASCII words joined by hyphens, and nothing else', () => {
+    expect(['vikshepa', 'five-steps-of-perfection', 'tomar-2024'].map(isSlug)).toEqual([
+      true,
+      true,
+      true,
+    ])
+    expect(
+      ['', 'Vikshepa', 'vikṣepa', '-vikshepa', 'vikshepa-', 'vik--shepa', 'vik_shepa'].map(isSlug),
+    ).toEqual([false, false, false, false, false, false, false])
+  })
+})
+
 describe('the record files', () => {
   const DATA = 'src/content/data'
-  const SLUG = /^[a-z0-9]+(?:-[a-z0-9]+)*$/
 
   async function recordFiles() {
     const paths = globSync(`${DATA}/**/*.ts`).map((file) =>
@@ -574,8 +587,8 @@ describe('the record files', () => {
       seen.add(`${record.kind}:${id}`)
       const fits =
         record.kind === 'passage'
-          ? id === `${record.work}/${record.locator}` && SLUG.test(record.work)
-          : SLUG.test(id)
+          ? id === `${record.work}/${record.locator}` && isSlug(record.work)
+          : isSlug(id)
       if (!fits) problems.push(`${path}: “${id}” breaks the id rule for a ${record.kind}`)
     }
     expect(problems).toEqual([])

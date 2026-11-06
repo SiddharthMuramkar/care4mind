@@ -1,0 +1,71 @@
+.page {
+  display: grid;
+  gap: 1.25rem;
+  scroll-margin-top: 1.5rem;
+  padding: clamp(1.25rem, 4vw, 2rem);
+  border: 2px solid var(--color-highlight);
+  background: rgb(255 255 255 / 0.25);
+}
+
+.page > * {
+  min-width: 0;
+}
+
+/* Its limits, between two vermilion rules across the page. */
+.end {
+  display: grid;
+  gap: 1rem;
+  padding-block: 1.5rem;
+  border-block: 2px solid var(--color-highlight);
+}
+
+.pageTitle {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: clamp(1.75rem, 4.5vw, 2.25rem);
+  line-height: 1.15;
+}
+
+.endTitle {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: clamp(1.5rem, 4vw, 1.875rem);
+  line-height: 1.15;
+}
+
+.draft {
+  justify-self: start;
+  padding: 0.35rem 0.75rem;
+  border-inline-start: 4px solid var(--color-highlight);
+  font-style: italic;
+  font-size: 1rem;
+}
+
+.pageDraft {
+  background: var(--color-surface);
+  color: var(--color-surface-ink);
+}
+
+.endDraft {
+  margin: 0;
+  background: var(--color-surface-pale-45);
+}
+
+.list {
+  margin: 0;
+  padding-inline-start: 1.25rem;
+  display: grid;
+  gap: 0.6rem;
+}
+
+.list li::marker {
+  color: var(--color-highlight);
+}
+
+@media print {
+  .end {
+    break-inside: avoid;
+  }
+}

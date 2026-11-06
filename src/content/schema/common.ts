@@ -8,6 +8,13 @@ import type { ContentKind } from './kinds'
 /** Lowercase ASCII words joined by hyphens: `vikshepa`, `five-steps-of-perfection`. */
 export type Slug = string
 
+const SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/
+
+/** True when the value is a slug: lowercase ASCII words joined by hyphens. */
+export function isSlug(value: string): value is Slug {
+  return SLUG_PATTERN.test(value)
+}
+
 /** A Sanskrit name in each stored form (NFR-03). */
 export interface SanskritName {
   /** IAST. */
