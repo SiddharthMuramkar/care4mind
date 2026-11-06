@@ -63,38 +63,10 @@
   }
 }
 
-/* A chip is a slip of type: outlined while off, inked solid while pressed, pressed into the paper. */
-.chip {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  min-height: 2.25rem;
-  padding: 0.2rem 0.85rem;
-  border: 1px solid color-mix(in srgb, var(--color-surface-ink) 45%, transparent);
-  border-radius: 2px;
-  background: transparent;
-  color: var(--color-surface-ink);
-  font: inherit;
-  font-size: 1rem;
-  line-height: 1.3;
-  text-align: start;
-  cursor: pointer;
-  overflow: hidden;
-}
-
+/* The A–Z's chip, over the shared one (filterStyles.chip): a transliterated label in italic. */
 .chip :lang(sa-Latn),
 .chip :lang(pi-Latn) {
   font-style: italic;
-}
-
-.chip:hover {
-  border-color: var(--color-surface-ink);
-}
-
-.chip[aria-pressed='true'] {
-  background: var(--color-ground);
-  border-color: var(--color-ground);
-  color: var(--color-ink);
 }
 
 /* The pressed chip's vermilion mark, a lozenge before its name (::before is the ink's). */
@@ -109,23 +81,10 @@
   transform: rotate(45deg);
 }
 
-/* Windows' contrast themes repaint the pressed chip's ground: draw it in the theme's selection colours. */
 @media (forced-colors: active) {
-  .chip[aria-pressed='true'] {
-    forced-color-adjust: none;
-    background: Highlight;
-    border-color: Highlight;
-    color: HighlightText;
-  }
-
   .chip[aria-pressed='true']::after {
     background: HighlightText;
   }
-}
-
-.chip:focus-visible {
-  outline: 3px solid var(--color-focus);
-  outline-offset: 2px;
 }
 
 .tally {
@@ -135,23 +94,8 @@
   gap: 0.5rem 1.25rem;
 }
 
-.count {
-  margin: 0;
-  font-size: 1.125rem;
-  color: var(--color-surface-muted);
-}
-
+/* Clear filters carries the ink, which spreads inside it. */
 .clear {
-  position: relative;
-  min-height: 2.25rem;
-  padding: 0 0.25rem;
-  border: 0;
-  background: none;
-  color: var(--color-link);
-  font: inherit;
-  text-decoration: underline;
-  text-underline-offset: 0.2em;
-  cursor: pointer;
   overflow: hidden;
 }
 

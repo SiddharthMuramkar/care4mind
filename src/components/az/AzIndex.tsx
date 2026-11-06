@@ -2,18 +2,17 @@
 
 import {
   type ReactNode,
-  useCallback,
   useDeferredValue,
   useEffect,
   useLayoutEffect,
   useMemo,
   useRef,
   useState,
-  useSyncExternalStore,
 } from 'react'
 import { flushSync } from 'react-dom'
 
-import { whenIdle } from '@/components/browser'
+import { filterStyles, Tally } from '@/components/filters'
+import { pushAddress, replaceAddress, useAddressQuery, useKeyboardParts } from '@/components/island'
 import { cx } from '@/lib/cx'
 import { count } from '@/lib/text'
 
@@ -46,27 +45,9 @@ const NAMED = 40
 /** Set on the page while its list reorders. */
 const REORDERING = 'data-az-reorder'
 
-// The address is the filter's one source: a chip press pushes a new one, Back restores the last.
-const listeners = new Set<() => void>()
-function subscribe(listener: () => void) {
-  listeners.add(listener)
-  window.addEventListener('popstate', listener)
-  return () => {
-    listeners.delete(listener)
-    window.removeEventListener('popstate', listener)
-  }
-}
-const search = () => window.location.search
-const noSearch = () => ''
-
 /** Move to a new address, and let the filters read it at once. */
 function go(selection: Selection, defaultKinds: readonly string[]) {
-  window.history.pushState(
-    null,
-    '',
-    `${window.location.pathname}${writeSelection(selection, defaultKinds)}`,
-  )
-  for (const listener of listeners) listener()
+  pushAddress(`${window.location.pathname}${writeSelection(selection, defaultKinds)}`)
 }
 
 /** How many reorders are under way: the page stays out of their pictures until the last ends. */
@@ -238,14 +219,6 @@ function showingFor(list: HTMLElement | null, selection: Selection, query: strin
   }
 }
 
-/** The clear button unmounts with the filter, which would drop focus on the page. */
-function focusBeforeClear(root: ParentNode | null) {
-  const next =
-    root?.querySelector<HTMLElement>('[data-chip]') ??
-    root?.querySelector<HTMLElement>('[aria-live="polite"]')
-  next?.focus()
-}
-
 // The reordering list's flights, set here as the island is the only thing that starts them.
 const FLIGHTS = `::view-transition-group(.az-entry) { animation-duration: var(--duration-reorder); animation-timing-function: var(--ease-out); }`
 
@@ -300,7 +273,7 @@ function PlainChips({ groups, pressed, onPress }: ChipsProps) {
               <button
                 key={chip}
                 type="button"
-                className={styles.chip}
+                className={cx(filterStyles.chip, styles.chip)}
                 aria-pressed={on}
                 data-chip={chip}
                 data-ink
@@ -357,7 +330,7 @@ export function AzIndex({
       ) as Record<(typeof GROUPS)[number], Set<string>>,
     [groups],
   )
-  const address = useSyncExternalStore(subscribe, search, noSearch)
+  const address = useAddressQuery()
   const selection = useMemo(
     () => readSelection(address, known, defaultKinds),
     [address, known, defaultKinds],
@@ -367,46 +340,8 @@ export function AzIndex({
   // The anchor reveal below runs outside the filter's commit: it reads the search as it stands.
   const latestQuery = useRef('')
   const [showing, setShowing] = useState<ReturnType<typeof showingFor>>(null)
-  const [parts, setParts] = useState<KeyboardParts>()
-  const controls = useRef<HTMLDivElement>(null)
+  const { parts, controls, handlers } = useKeyboardParts(loadKeyboard)
   const listRef = useRef<HTMLDivElement>(null)
-  const handoff = useRef<string | undefined>(undefined)
-
-  // A press under way when Base UI arrives finishes on the plain chip first: swapping the
-  // button between its pointerdown and its click would lose the press.
-  const pressing = useRef(false)
-  const waiting = useRef<(() => void) | undefined>(undefined)
-  const release = () => {
-    setTimeout(() => {
-      pressing.current = false
-      waiting.current?.()
-      waiting.current = undefined
-    })
-  }
-  const holdSwap = () => {
-    pressing.current = true
-    // A press that ends outside the island (dragged away) lets go soon all the same.
-    setTimeout(release, 1000)
-  }
-  const holdSwapForKey = ({ key }: { key: string }) => {
-    if (key === ' ' || key === 'Enter') holdSwap()
-  }
-
-  const upgrade = useCallback(() => {
-    void loadKeyboard().then((loaded) => {
-      const swap = () => {
-        // A plain chip or letter with focus is about to be replaced: hand focus on to the new one.
-        const focused = document.activeElement
-        if (focused instanceof HTMLElement && controls.current?.contains(focused))
-          handoff.current = focused.dataset.chip ?? focused.dataset.rail
-        setParts(() => loaded)
-      }
-      if (pressing.current) waiting.current = swap
-      else swap()
-    })
-  }, [])
-
-  useEffect(() => whenIdle(upgrade), [upgrade])
 
   // The browser aims its glide to a named entry before the fonts arrive and the list takes its
   // true heights, so a long list's entry can come to rest under the rail: aim again once they
@@ -447,14 +382,11 @@ export function AzIndex({
       // Hidden by the search or another group, not by its kind: letting the kind in shows nothing.
       if (now.kind.includes(kind)) return
       const next = { ...now, kind: [...now.kind, kind] }
-      window.history.replaceState(
-        null,
-        '',
-        `${window.location.pathname}${writeSelection(next, defaultKinds)}${window.location.hash}`,
+      flushSync(() =>
+        replaceAddress(
+          `${window.location.pathname}${writeSelection(next, defaultKinds)}${window.location.hash}`,
+        ),
       )
-      flushSync(() => {
-        for (const listener of listeners) listener()
-      })
       // Show it now (the layout effect repeats this), then settle on it: the entries above are
       // first drawn at a guessed height (content-visibility), so a single jump can land short of
       // the entry or past it, under the rail.
@@ -487,15 +419,6 @@ export function AzIndex({
     }
   }, [])
 
-  useEffect(() => {
-    const key = handoff.current
-    if (!parts || !key) return
-    handoff.current = undefined
-    controls.current
-      ?.querySelector<HTMLElement>(`[data-chip="${key}"], [data-rail="${key}"]`)
-      ?.focus({ preventScroll: true })
-  }, [parts])
-
   const press = (pressed: string[]) => {
     const next = fromChips(pressed, defaultKinds)
     reorder(selection, next, () => flushSync(() => go(next, defaultKinds)))
@@ -520,17 +443,7 @@ export function AzIndex({
   const tally = showing?.count ?? total
 
   return (
-    <div
-      ref={controls}
-      className={styles.index}
-      onPointerEnter={parts ? undefined : upgrade}
-      onFocus={parts ? undefined : upgrade}
-      onPointerDown={parts ? undefined : holdSwap}
-      onKeyDown={parts ? undefined : holdSwapForKey}
-      onPointerUp={parts ? undefined : release}
-      onPointerCancel={parts ? undefined : release}
-      onKeyUp={parts ? undefined : release}
-    >
+    <div ref={controls} className={styles.index} {...handlers}>
       <style>{`${FLIGHTS}${ALONE}${CURRENT}`}</style>
       <div className={styles.filters}>
         {searchLabel ? (
@@ -547,25 +460,20 @@ export function AzIndex({
           </label>
         ) : null}
         <Chips groups={groups} pressed={pressed} onPress={press} />
-        <div className={styles.tally}>
-          <p tabIndex={-1} className={styles.count} aria-live="polite" aria-atomic="true">
-            {count(tally, 'entry', 'entries')}
-          </p>
-          {isDefault(selection, defaultKinds) && typed === '' ? null : (
-            <button
-              type="button"
-              className={styles.clear}
-              data-ink
-              onClick={() => {
-                focusBeforeClear(controls.current)
-                setTyped('')
-                press([])
-              }}
-            >
-              Clear filters
-            </button>
-          )}
-        </div>
+        <Tally
+          count={count(tally, 'entry', 'entries')}
+          onClear={
+            isDefault(selection, defaultKinds) && typed === ''
+              ? undefined
+              : () => {
+                  setTyped('')
+                  press([])
+                }
+          }
+          controls={controls}
+          className={styles.tally}
+          clearClassName={styles.clear}
+        />
       </div>
       <nav aria-label="Letters" className={styles.railBand}>
         {rail}

@@ -4,6 +4,7 @@ import { Toggle } from '@base-ui/react/toggle'
 import { ToggleGroup } from '@base-ui/react/toggle-group'
 import { Toolbar } from '@base-ui/react/toolbar'
 
+import { filterStyles } from '@/components/filters'
 import { cx } from '@/lib/cx'
 
 import styles from './AzIndex.module.css'
@@ -53,7 +54,13 @@ function Chips({ groups, pressed, onPress }: ChipsProps) {
           {chips.map(({ value, label: name, lang }) => {
             const chip = `${group}:${value}`
             return (
-              <Toggle key={chip} value={chip} className={styles.chip} data-chip={chip} data-ink>
+              <Toggle
+                key={chip}
+                value={chip}
+                className={cx(filterStyles.chip, styles.chip)}
+                data-chip={chip}
+                data-ink
+              >
                 <span {...(lang ? { lang } : {})}>{name}</span>
               </Toggle>
             )
