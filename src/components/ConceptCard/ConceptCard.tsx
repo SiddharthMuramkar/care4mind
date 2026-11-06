@@ -1,6 +1,7 @@
-import { ViewTransition, type ReactNode } from 'react'
+import type { ReactNode } from 'react'
 
 import { FrameCorners } from '@/components/Folio'
+import { TitleMorph } from '@/components/PageTurn'
 import { TopicChip } from '@/components/TopicChip'
 import type { ConceptCard as Card } from '@/content'
 import { cx } from '@/lib/cx'
@@ -29,11 +30,11 @@ export function ConceptCard({ concept, action, className, featured = false }: Pr
   return (
     <article className={cx(styles.card, featured && styles.featured, className)} data-paper>
       {featured ? <FrameCorners /> : null}
-      <ViewTransition name={`concept-title-${concept.slug}`} share="morph" default="none">
+      <TitleMorph kind="concept" slug={concept.slug}>
         <h3 className={styles.title}>
           <span lang={concept.lang}>{concept.name}</span>
         </h3>
-      </ViewTransition>
+      </TitleMorph>
       {concept.term?.devanagari ? (
         <p lang="sa-Deva" className={styles.deva}>
           {concept.term.devanagari}
