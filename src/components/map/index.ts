@@ -1,5 +1,6 @@
+export { mapAttribute } from './attributes'
 export { ConceptMap } from './ConceptMap'
 export { countText, NOTHING, readSelection, shows, stands, writeSelection } from './filter'
 export { KINDS } from './kinds'
-export { layoutMap, type MapLayout } from './layout'
+export { layoutMap, litRules, type MapLayout } from './layout'
 export { PlatePicture } from './PlatePicture'

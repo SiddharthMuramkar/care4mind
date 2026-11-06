@@ -2,7 +2,7 @@ import type { ReactNode } from 'react'
 
 import type { Inline, NumberedReference } from '@/content'
 
-import { LinkPreview, type PreviewPayload } from '../preview'
+import { LinkPreview, referencePreview, type PreviewPayload } from '../preview'
 import { citedIn } from './in-text-citations'
 
 /** A citation the page can link: its entry's anchor, and what its preview card shows. */
@@ -25,10 +25,7 @@ export function citationLinks(
   const entries = new Map(
     references.map((reference): [string, CitedEntry] => [
       reference.id,
-      {
-        anchor: reference.anchor,
-        preview: { kind: 'reference', name: reference.label, text: reference.title },
-      },
+      { anchor: reference.anchor, preview: referencePreview(reference) },
     ]),
   )
   return Object.fromEntries(
