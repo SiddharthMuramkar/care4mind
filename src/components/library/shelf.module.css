@@ -45,7 +45,7 @@
     inset 3px 0 0 color-mix(in srgb, var(--color-ink) 14%, transparent),
     inset -4px 0 0 color-mix(in srgb, var(--color-surface-ink) 24%, transparent);
   font-family: var(--font-display);
-  font-size: 1rem;
+  font-size: var(--text-base);
   line-height: 1.15;
   text-decoration: none;
   --color-focus: var(--color-surface-focus);
@@ -173,7 +173,7 @@
 }
 
 /* On a phone the books leave their shelf: the list below it names each of them. */
-@media (max-width: 47.99rem) {
+@media (width < 48rem) {
   .books {
     display: none;
   }
@@ -202,24 +202,24 @@
   writing-mode: horizontal-tb;
   max-inline-size: none;
   font-family: var(--font-display);
-  font-size: 1.375rem;
+  font-size: var(--text-title);
 }
 
 /* What a volume holds, as a number on its spine; in words to a screen reader and on a phone. */
 .unit {
   font-family: var(--font-text);
-  font-size: 1.0625rem;
+  font-size: var(--text-body);
 }
 
 /* On a wide screen the spine shows the number alone; the word stays for a screen reader. */
-@media (min-width: 40rem) {
+@media (width >= 40rem) {
   .volumes .unit {
     display: none;
   }
 }
 
 /* On a phone the volumes become a book's contents: numeral, title, dotted leader, what it holds. */
-@media (max-width: 39.99rem) {
+@media (width < 40rem) {
   .volumes .row {
     display: grid;
     row-gap: 0;
@@ -247,7 +247,7 @@
     color: var(--color-surface-ink);
     box-shadow: none;
     outline: 0;
-    font-size: 1.375rem;
+    font-size: var(--text-title);
   }
 
   .volumes .spine:hover,
@@ -264,7 +264,7 @@
     width: 1.5rem;
     /* The darker vermilion: on the paper the bright one does not read at this size. */
     color: var(--color-surface-link);
-    font-size: 1.125rem;
+    font-size: var(--text-large);
   }
 
   .volumes .gilt[data-gilt='head'] {
@@ -284,7 +284,7 @@
 
   .volumes .foot {
     order: 3;
-    font-size: 1.125rem;
+    font-size: var(--text-large);
   }
 }
 

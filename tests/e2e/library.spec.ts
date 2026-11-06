@@ -351,6 +351,30 @@ test.describe('References: the author rail', () => {
       await expect(toolbar(page).getByText(letter, { exact: true })).toHaveCount(1)
     }
   })
+  test(
+    'at 390 px, a letter tap reaches an entry from the first, middle and last letters',
+    { tag: '@self-width' },
+    async ({ page }) => {
+      await page.setViewportSize({ width: 390, height: 844 })
+      const initialOf = (r: (typeof all)[number]) =>
+        (r.authors ?? r.title).normalize('NFD').charAt(0).toUpperCase()
+      const filled = [...new Set(all.map(initialOf))].filter((l) => /^[A-Z]$/.test(l)).toSorted()
+      const sample = [...new Set([filled[0], filled[Math.floor(filled.length / 2)], filled.at(-1)])]
+      for (const letter of sample) {
+        await gotoReady(page, REFERENCES)
+        const target = all.find((r) => initialOf(r) === letter)
+        const link = toolbar(page).getByRole('link', { name: letter, exact: true })
+        const [rail, top] = await Promise.all([
+          toolbar(page).boundingBox(),
+          shown(page).first().boundingBox(),
+        ])
+        expect(rail?.y ?? Infinity, 'the rail comes before the list').toBeLessThan(top?.y ?? 0)
+        await link.click()
+        await expect(entry(page, target?.anchor ?? '?'), `${letter} in one tap`).toBeInViewport()
+        await expect(toolbar(page), 'the rail stays to hand for the next tap').toBeInViewport()
+      }
+    },
+  )
 })
 
 test.describe('References: a long list', () => {

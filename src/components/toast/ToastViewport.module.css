@@ -12,7 +12,7 @@
   margin-inline: auto;
 }
 
-@media (min-width: 40rem) {
+@media (width >= 40rem) {
   .viewport {
     inset-inline: auto 2rem;
     bottom: 2rem;
@@ -148,14 +148,14 @@
 
 .title {
   margin: 0;
-  font-size: 1.0625rem;
+  font-size: var(--text-body);
   line-height: 1.3;
 }
 
 .description {
   margin: 0;
   color: var(--color-toast-muted);
-  font-size: 0.9375rem;
+  font-size: var(--text-small);
   line-height: 1.35;
 }
 

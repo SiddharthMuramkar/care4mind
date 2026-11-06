@@ -42,7 +42,7 @@
   font-family: var(--font-text);
   font-variant-caps: all-small-caps;
   letter-spacing: 0.16em;
-  font-size: 1.0625rem;
+  font-size: var(--text-body);
   color: var(--color-surface-link);
 }
 
@@ -76,7 +76,7 @@
   margin: 0;
   font-family: var(--font-display);
   font-weight: 500;
-  font-size: 1.5rem;
+  font-size: var(--text-heading);
   line-height: 1.3;
 }
 
@@ -148,7 +148,7 @@
   width: 100%;
   min-width: calc(var(--columns, 4) * 11rem);
   border-collapse: collapse;
-  font-size: 1rem;
+  font-size: var(--text-base);
   line-height: 1.5;
 }
 
@@ -169,7 +169,7 @@
 }
 
 .table thead th {
-  font-size: 1.0625rem;
+  font-size: var(--text-body);
   font-weight: 600;
 }
 
@@ -197,7 +197,7 @@
 
 /* A comparison table on a phone: no frame to scroll; each row a card, each cell under its
    column's name, which the hidden head row still names for a screen reader. */
-@media screen and (max-width: 40rem) {
+@media screen and (width < 40rem) {
   .frameStacked {
     overflow: visible;
     border: 0;
@@ -245,14 +245,14 @@
 
   .tableStacked td::before {
     content: attr(data-label);
-    font-size: 0.9375rem;
+    font-size: var(--text-small);
     font-weight: 600;
     color: var(--color-surface-muted);
   }
 }
 
 /* A stacked table's head row carries sr-only on a phone; above one, and on paper, it is itself again. */
-@media print, (min-width: 40.01rem) {
+@media print, (width >= 40rem) {
   .stackedHead {
     position: static;
     width: auto;
@@ -338,7 +338,7 @@
   background: transparent;
   color: var(--color-surface-ink);
   font: inherit;
-  font-size: 1.0625rem;
+  font-size: var(--text-body);
   cursor: pointer;
 }
 
@@ -367,7 +367,7 @@
   margin: 0;
   color: var(--color-surface-muted);
   font-style: italic;
-  font-size: 1rem;
+  font-size: var(--text-base);
 }
 
 .provenance {
@@ -375,7 +375,7 @@
   padding-top: 1.25rem;
   border-top: 1px solid var(--color-surface-rule);
   color: var(--color-surface-muted);
-  font-size: 0.9375rem;
+  font-size: var(--text-small);
   line-height: 1.6;
   overflow-wrap: anywhere;
 }

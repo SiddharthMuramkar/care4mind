@@ -16,7 +16,7 @@
   border-radius: 2px;
   background: var(--color-proposal);
   color: var(--color-proposal-ink);
-  font-size: 0.9375rem;
+  font-size: var(--text-small);
   line-height: 1;
   text-decoration: none;
 }
@@ -28,5 +28,5 @@
 }
 
 .text {
-  font-size: 0.9375rem;
+  font-size: var(--text-small);
 }

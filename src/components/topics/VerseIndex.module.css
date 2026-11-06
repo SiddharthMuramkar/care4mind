@@ -7,7 +7,7 @@
   margin: 0 0 0.75rem;
   font-family: var(--font-display);
   font-weight: 500;
-  font-size: 1.5rem;
+  font-size: var(--text-heading);
 }
 
 .workTitle a {
@@ -60,7 +60,7 @@
 .locator {
   flex: none;
   font-family: var(--font-display);
-  font-size: 1.125rem;
+  font-size: var(--text-large);
   color: var(--color-link);
   font-variant-numeric: oldstyle-nums;
   text-decoration: underline;

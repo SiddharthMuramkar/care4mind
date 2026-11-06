@@ -2,8 +2,8 @@
 
 .facts {
   margin: 0;
-  max-width: 44ch;
-  font-size: 1.0625rem;
+  max-width: var(--measure-lede);
+  font-size: var(--text-body);
   color: var(--color-surface-muted);
   text-wrap: balance;
 }
@@ -19,7 +19,7 @@
 }
 
 .provenance {
-  font-size: 1rem;
+  font-size: var(--text-base);
   font-style: italic;
   color: var(--color-surface-muted);
 }
@@ -40,7 +40,7 @@
   gap: 2.5rem;
 }
 
-@media (min-width: 64rem) {
+@media (width >= 64rem) {
   .body {
     grid-template-columns: 14.5rem minmax(0, 1fr);
     column-gap: clamp(2rem, 4vw, 3.5rem);

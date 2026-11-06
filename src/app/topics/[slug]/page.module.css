@@ -10,7 +10,7 @@
 /* The topic's own Sanskrit word, in italic as transliteration always is, beside its Devanagari. */
 .term {
   margin: 0;
-  font-size: 1.375rem;
+  font-size: var(--text-title);
   color: var(--color-surface-muted);
 }
 
@@ -27,7 +27,7 @@
   margin: 0;
   max-width: 60ch;
   text-wrap: balance;
-  font-size: 1.125rem;
+  font-size: var(--text-large);
   color: var(--color-surface-muted);
 }
 
