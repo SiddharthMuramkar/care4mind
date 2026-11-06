@@ -37,7 +37,7 @@
 }
 
 /* Wide: each group's label in a margin of its own, its buttons wrapping beside it. */
-@media (min-width: 40rem) {
+@media (width >= 40rem) {
   .group {
     position: relative;
     padding-inline-start: 5rem;
@@ -51,7 +51,7 @@
 }
 
 /* A phone: each group is one row of buttons that scrolls sideways under its label, as the A–Z's do. */
-@media (max-width: 39.99rem) {
+@media (width < 40rem) {
   .group {
     flex-wrap: nowrap;
     overflow-x: auto;

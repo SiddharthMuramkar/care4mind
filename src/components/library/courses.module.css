@@ -67,7 +67,7 @@
 }
 
 .provider {
-  font-size: 1rem;
+  font-size: var(--text-base);
   line-height: 1.35;
   color: var(--color-surface-muted);
 }
@@ -85,13 +85,13 @@
 .name {
   font-family: var(--font-display);
   font-weight: 500;
-  font-size: 1.5rem;
+  font-size: var(--text-heading);
   line-height: 1.2;
   text-wrap: balance;
 }
 
 .description {
-  font-size: 1.0625rem;
+  font-size: var(--text-body);
   line-height: 1.6;
 }
 
@@ -99,7 +99,7 @@
   margin-top: 0.5rem;
   padding-top: 0.75rem;
   border-top: 1px solid color-mix(in srgb, var(--color-surface-rule) 50%, transparent);
-  font-size: 1rem;
+  font-size: var(--text-base);
 }
 
 /* Its link covers the card, so the whole card is one large target (WCAG 2.5.8). */

@@ -50,7 +50,7 @@
 }
 
 /* Wide: each group's label in a margin of its own, its chips wrapping beside it. */
-@media (min-width: 40rem) {
+@media (width >= 40rem) {
   .chipGroup {
     position: relative;
     padding-inline-start: 5rem;
@@ -235,7 +235,7 @@ a.letter:focus-visible {
   }
 }
 
-@media (max-width: 40rem) {
+@media (width < 40rem) {
   .rail {
     justify-content: flex-start;
     gap: 0.25rem;

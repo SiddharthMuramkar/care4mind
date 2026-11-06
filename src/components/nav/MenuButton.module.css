@@ -9,7 +9,7 @@
   border: 1px solid color-mix(in srgb, var(--color-ink-muted) 45%, transparent);
   border-radius: 2px;
   color: var(--color-ink);
-  font-size: 1.125rem;
+  font-size: var(--text-large);
   line-height: 1;
   text-decoration: none;
 }
@@ -25,15 +25,15 @@
   flex: none;
 }
 
-@media (max-width: 24rem) {
+@media (width < 24rem) {
   .menu {
     gap: 0.3rem;
     padding: 0 0.55rem 0 0.45rem;
-    font-size: 1.0625rem;
+    font-size: var(--text-body);
   }
 }
 
-@media (min-width: 72rem) {
+@media (width >= 72rem) {
   .menu {
     display: none;
   }

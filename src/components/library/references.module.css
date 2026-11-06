@@ -31,7 +31,7 @@
 }
 
 /* Wide: the capital stands in the margin and stays beside its entries as they pass. */
-@media (min-width: 48rem) {
+@media (width >= 48rem) {
   .letter {
     grid-template-columns: 3.5rem minmax(0, 1fr);
     gap: 0 1.25rem;
@@ -86,7 +86,7 @@
 .citation {
   padding-inline-start: 1.75rem;
   text-indent: -1.75rem;
-  font-size: 1.0625rem;
+  font-size: var(--text-body);
   line-height: 1.6;
 }
 
@@ -100,7 +100,7 @@
 }
 
 .type {
-  font-size: 1rem;
+  font-size: var(--text-base);
   color: var(--color-surface-muted);
 }
 
@@ -114,7 +114,7 @@
 
 .citedLabel {
   font-style: italic;
-  font-size: 0.9375rem;
+  font-size: var(--text-small);
   color: var(--color-surface-muted);
 }
 
@@ -137,7 +137,7 @@
   border: 1px solid color-mix(in srgb, var(--color-surface-ink) 35%, transparent);
   border-radius: 2px;
   color: var(--color-surface-ink);
-  font-size: 0.9375rem;
+  font-size: var(--text-small);
   line-height: 1.3;
   text-decoration: none;
   overflow-wrap: normal;
@@ -175,7 +175,7 @@
   background: none;
   color: var(--color-link);
   font: inherit;
-  font-size: 1.0625rem;
+  font-size: var(--text-body);
   cursor: pointer;
   overflow: hidden;
 }

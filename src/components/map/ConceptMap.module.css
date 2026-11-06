@@ -20,7 +20,7 @@
   margin: 0;
 }
 
-@media (max-width: 37.49rem) {
+@media (width < 37.5rem) {
   .toPlate,
   .toList {
     display: block;
@@ -40,7 +40,7 @@
  * Wide: the plate stays in view on the left while the filters and the list run beside it. The
  * filters come first in the page's order, so Tab reaches them before the Concepts.
  */
-@media (min-width: 64rem) {
+@media (width >= 64rem) {
   .spread {
     grid-template-columns: minmax(0, 3fr) minmax(19rem, 2fr);
     grid-template-areas:
@@ -83,7 +83,7 @@
 }
 
 /* Beside the list, the plate fits the screen's height with its legend under it. */
-@media (min-width: 64rem) {
+@media (width >= 64rem) {
   .plate {
     max-width: min(46rem, calc((100svh - var(--sticky-top) - 13rem) * 1.5));
   }
@@ -283,7 +283,7 @@
 
 .caption {
   max-width: 34rem;
-  font-size: 0.9375rem;
+  font-size: var(--text-small);
   line-height: 1.5;
   text-align: center;
   color: var(--color-surface-muted);
@@ -297,7 +297,7 @@
   width: 100%;
   padding-top: 1rem;
   border-top: 1px solid var(--color-surface-rule);
-  font-size: 0.9375rem;
+  font-size: var(--text-small);
   line-height: 1.4;
 }
 
@@ -352,7 +352,7 @@
 
 .listNote {
   margin: -1rem 0 0;
-  font-size: 1rem;
+  font-size: var(--text-base);
   color: var(--color-surface-muted);
 }
 
@@ -398,7 +398,7 @@
 
 .pair {
   margin: 0;
-  font-size: 1.0625rem;
+  font-size: var(--text-body);
   line-height: 1.45;
 }
 
@@ -410,7 +410,7 @@
   margin: 0.1rem 0 0;
   padding: 0;
   list-style: none;
-  font-size: 0.9375rem;
+  font-size: var(--text-small);
   line-height: 1.45;
   color: var(--color-surface-muted);
 }
