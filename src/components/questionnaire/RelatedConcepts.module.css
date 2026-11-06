@@ -1,0 +1,41 @@
+.page {
+  display: grid;
+  gap: 1.25rem;
+  scroll-margin-top: 1.5rem;
+}
+
+.page > * {
+  min-width: 0;
+}
+
+.end {
+  display: grid;
+  gap: 1rem;
+}
+
+.pageTitle {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: clamp(1.75rem, 4.5vw, 2.25rem);
+  line-height: 1.15;
+}
+
+.endTitle {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: clamp(1.5rem, 4vw, 1.875rem);
+  line-height: 1.15;
+}
+
+.list {
+  margin: 0;
+  padding-inline-start: 1.25rem;
+  display: grid;
+  gap: 0.6rem;
+}
+
+.list li::marker {
+  color: var(--color-highlight);
+}
