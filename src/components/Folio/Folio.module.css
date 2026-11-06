@@ -24,7 +24,7 @@
 }
 
 /* Below 640px a reading page has no frame: its text runs to the page's own 16px margins. */
-@media (max-width: 39.99rem) {
+@media (width < 40rem) {
   .page {
     padding-inline: 0;
     box-shadow: none;

@@ -4,11 +4,11 @@
   /* Its status's colour (globals.css), always beside the words. */
   background: var(--status);
   color: var(--status-ink);
-  font-size: 1.0625rem;
+  font-size: var(--text-body);
   white-space: nowrap;
 }
 
 .small {
   padding: 0.05rem 0.55rem;
-  font-size: 0.9375rem;
+  font-size: var(--text-small);
 }

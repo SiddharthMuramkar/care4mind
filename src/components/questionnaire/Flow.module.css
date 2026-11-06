@@ -90,7 +90,7 @@
   }
 }
 
-@media (max-width: 34rem) {
+@media (width < 34rem) {
   .progress {
     grid-template-columns: minmax(0, 1fr);
   }
@@ -250,7 +250,7 @@
 }
 
 /* With room, the five options run in a row as a scale, each mark over its label. */
-@media (min-width: 46rem) {
+@media (width >= 46rem) {
   .options {
     grid-template-columns: repeat(5, minmax(0, 1fr));
   }
@@ -381,7 +381,7 @@
 }
 
 /* On a phone the controls stand one under another, each the width of the page. */
-@media (max-width: 30rem) {
+@media (width < 30rem) {
   .controls > * {
     flex: 1 1 100%;
     justify-content: center;
@@ -501,7 +501,7 @@
   }
 }
 
-@media (max-width: 30rem) {
+@media (width < 30rem) {
   .answers {
     gap: 0.85rem;
   }
