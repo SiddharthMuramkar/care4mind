@@ -1,8 +1,10 @@
 import Link from 'next/link'
 
 import { turnForward } from '@/components/PageTurn'
+import { Text } from '@/components/prose'
 import { hrefFor, type WorkView } from '@/content'
 import { cx } from '@/lib/cx'
+import { count } from '@/lib/text'
 
 import styles from './TextCard.module.css'
 import { VerseTally } from './VerseTally'
@@ -24,9 +26,10 @@ function incipitOf(work: WorkView) {
 }
 
 /**
- * A work on the shelf, set like a catalogue card: its title in both scripts, who composed it, the
- * first line it is quoted from, and a tally of the verses quoted. The whole card leads to the
- * work's page, and its title flies into that page's heading as the page turns forward.
+ * A work on the shelf, set like a catalogue card: its title in both scripts, who composed it, its
+ * blurb where one is supplied, the first line it is quoted from, and a tally of the verses quoted.
+ * The whole card leads to the work's page, and its title flies into that page's heading as the
+ * page turns forward.
  */
 export function TextCard({ work, className }: { work: WorkView; className?: string }) {
   const incipit = incipitOf(work)
@@ -52,6 +55,11 @@ export function TextCard({ work, className }: { work: WorkView; className?: stri
           {[work.english, work.attribution].filter(Boolean).join(' · ')}
         </p>
       ) : null}
+      {work.blurb ? (
+        <p className={styles.blurb}>
+          <Text text={work.blurb} />
+        </p>
+      ) : null}
       {incipit ? (
         <p className={styles.incipit}>
           <span className={styles.at}>{incipit.at}</span>{' '}
@@ -63,9 +71,7 @@ export function TextCard({ work, className }: { work: WorkView; className?: stri
       ) : null}
       <p className={styles.count}>
         <VerseTally locators={work.passages.map(({ locator }) => locator)} />
-        <span>
-          {work.passageCount} {work.passageCount === 1 ? 'verse' : 'verses'} quoted
-        </span>
+        <span>{count(work.passageCount, 'verse', 'verses')} quoted</span>
       </p>
     </article>
   )

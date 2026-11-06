@@ -1,6 +1,11 @@
+/** A count with its unit, the unit singular for one: "1 entry", "20 entries". */
+export function count(n: number, one: string, many: string): string {
+  return `${n} ${n === 1 ? one : many}`
+}
+
 /** How a reading time reads, the same on a card, a result and the page itself. */
 export function readingTimeWords(minutes: number): string {
-  return `About ${minutes} ${minutes === 1 ? 'minute' : 'minutes'} to read`
+  return `About ${count(minutes, 'minute', 'minutes')} to read`
 }
 
 /** Capitalise the first letter, keeping diacritics: ālasya → Ālasya. */

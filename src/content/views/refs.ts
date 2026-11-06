@@ -3,7 +3,7 @@ import type { ConceptRecord, QuestionnaireRecord, TopicRecord, WorkRecord } from
 import type { ConceptRef, LatinScript, RecordRef, TopicRef, WorkRef } from '../types'
 import { must, present } from './common'
 import { hrefFor } from './href'
-import { displayName } from '../names'
+import { displayName, glossOf } from '../names'
 
 /** A link to a Concept's page, with its name's language where the name is IAST, and its gloss. */
 export function conceptRef(concept: ConceptRecord): ConceptRef {
@@ -11,7 +11,7 @@ export function conceptRef(concept: ConceptRecord): ConceptRef {
     slug: concept.slug,
     name: displayName(concept.name),
     ...(concept.name.term ? { lang: 'sa-Latn' as const } : {}),
-    ...(concept.name.term && concept.name.english ? { gloss: concept.name.english } : {}),
+    ...present({ gloss: glossOf(concept.name) }),
     href: hrefFor({ kind: 'concept', id: concept.slug }),
   }
 }

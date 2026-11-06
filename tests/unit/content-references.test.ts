@@ -98,9 +98,9 @@ function hostOf(url: string): string {
 }
 
 /**
- * How a Reference's links break the ticket's rules, if they do: a `#` link is dropped; with no
- * DOI or URL, `noStableLink` says why and a Research-editor flag asks for one; a retailer's link
- * is kept only with a Project-owner flag.
+ * How a Reference's links break the rules, if they do: a `#` link is dropped; with no
+ * DOI or URL, `noStableLink` says why and a Research-editor flag's `citation` key asks for
+ * one; a retailer's link is kept only with a Project-owner flag saying so in its key.
  */
 function linkProblems(view: ReferenceView, flags: readonly Flag[] = flagsOn(view.id)): string[] {
   const problems: string[] = []
@@ -108,11 +108,11 @@ function linkProblems(view: ReferenceView, flags: readonly Flag[] = flagsOn(view
     problems.push('keeps a link to nowhere')
   if (!view.doi && view.url === undefined) {
     if (!view.noStableLink?.trim()) problems.push('has no link and doesn’t say why')
-    if (!flags.some((flag) => flag.for === 'research-editor' && /\blink/i.test(flag.note)))
+    if (!flags.some((flag) => flag.for === 'research-editor' && flag.citation === 'no-link'))
       problems.push('has no link, and no Research-editor flag asks for one')
   }
   const retailer = view.url !== undefined && /(^|\.)amazon\./i.test(hostOf(view.url))
-  if (retailer && !flags.some((f) => f.for === 'project-owner' && /retailer/i.test(f.note)))
+  if (retailer && !flags.some((f) => f.for === 'project-owner' && f.citation === 'retailer-link'))
     problems.push('links a retailer, and no Project-owner flag says so')
   return problems
 }
@@ -243,13 +243,29 @@ describe('links', () => {
     provenance: { sources: [], edits: [] },
     ...fields,
   })
-  const asking = { for: 'research-editor' as const, note: 'No DOI or link is given; add one.' }
-  const retailer = { for: 'project-owner' as const, note: 'Its only link goes to a retailer.' }
+  const asking: Flag = {
+    for: 'research-editor',
+    note: 'No DOI or link is given; add one.',
+    citation: 'no-link',
+  }
+  const askingInWords: Flag = { for: 'research-editor', note: 'No DOI or link is given; add one.' }
+  const retailer: Flag = {
+    for: 'project-owner',
+    note: 'Its only link goes to a retailer.',
+    citation: 'retailer-link',
+  }
+  const retailerInWords: Flag = {
+    for: 'project-owner',
+    note: 'Its only link goes to a retailer.',
+  }
 
   it('finds a made-up link to nowhere, a missing link nobody asks for, and an unflagged retailer', () => {
     expect(linkProblems(made({ url: 'https://example.org/book' }))).toEqual([])
     expect(linkProblems(made({ url: '#' }))).toEqual(['keeps a link to nowhere'])
     expect(linkProblems(made({ noStableLink: 'none given' }), [asking])).toEqual([])
+    expect(linkProblems(made({ noStableLink: 'none given' }), [askingInWords])).toEqual([
+      'has no link, and no Research-editor flag asks for one',
+    ])
     expect(linkProblems(made({ noStableLink: 'none given' }))).toEqual([
       'has no link, and no Research-editor flag asks for one',
     ])
@@ -261,6 +277,9 @@ describe('links', () => {
       'links a retailer, and no Project-owner flag says so',
     ])
     expect(linkProblems(made({ url: 'https://www.amazon.com/dp/1' }), [retailer])).toEqual([])
+    expect(linkProblems(made({ url: 'https://www.amazon.com/dp/1' }), [retailerInWords])).toEqual([
+      'links a retailer, and no Project-owner flag says so',
+    ])
   })
 
   it('keeps no link to nowhere, says why a Reference has none and asks for it, and flags retailers', () => {
@@ -288,18 +307,17 @@ describe('links', () => {
 })
 
 describe('gaps the pages leave (FR-03)', () => {
-  /** The Research editor's notes on a Reference. */
-  const notesOn = (id: string) =>
+  /** The fields a Reference's Research-editor flags say are missing, in their `missing` keys. */
+  const missingOn = (id: string) =>
     flagsOn(id)
       .filter((flag) => flag.for === 'research-editor')
-      .map((flag) => flag.note)
-      .join(' ')
+      .flatMap((flag) => flag.missing ?? [])
 
   it('flags Sharma & Pareek’s missing year, and the Positive Psychology books’ year and publisher', () => {
-    expect(notesOn('sharma-pareek')).toMatch(/\byear\b/)
+    expect(missingOn('sharma-pareek')).toContain('year')
     for (const id of ['compton', 'boniwell']) {
-      expect(notesOn(id), id).toMatch(/\byear\b/)
-      expect(notesOn(id), id).toMatch(/\bpublisher\b/)
+      expect(missingOn(id), id).toContain('year')
+      expect(missingOn(id), id).toContain('container-or-publisher')
     }
   })
 })

@@ -1,7 +1,7 @@
 import type { CSSProperties } from 'react'
 
+import { Numeral } from '@/components/Numeral'
 import type { PassageView } from '@/content'
-import { toDevanagariDigits } from '@/lib/text'
 
 import styles from './VerseRail.module.css'
 
@@ -50,9 +50,7 @@ export function VerseRail({ passages }: { passages: readonly PassageView[] }) {
             >
               <span>{passage.locator}</span>
               <span className={styles.leader} aria-hidden />
-              <span lang="sa-Deva" className={styles.numeral} aria-hidden>
-                {toDevanagariDigits(passage.locator)}
-              </span>
+              <Numeral value={passage.locator} className={styles.numeral} decorative />
             </a>
           </li>
         ))}

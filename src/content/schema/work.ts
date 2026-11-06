@@ -1,4 +1,4 @@
-import type { Provenance, SanskritName, Slug } from './common'
+import type { Inline, Provenance, SanskritName, Slug } from './common'
 
 /** A traditional text the site quotes, made of passages. */
 export interface WorkRecord {
@@ -9,6 +9,8 @@ export interface WorkRecord {
   language?: 'sa' | 'pi'
   /** Who the pages say composed it, as they say it. */
   attribution?: string
+  /** One plain line on what the text is and why it matters here, once the Research editor supplies it. */
+  blurb?: Inline
   /** What the pages call one of its numbered units, such as "Sutra" or "Verse". */
   locatorLabel: string
   editions?: readonly string[]

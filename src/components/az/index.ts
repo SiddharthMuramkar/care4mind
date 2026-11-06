@@ -1,5 +1,6 @@
 export { AzIndex } from './AzIndex'
-export { AzLetter } from './AzLetter'
+export { ConceptsAz } from './ConceptsAz'
+export { azModel, type AzModel } from './model'
 export type { ChipGroup, RailLetter } from './types'
 export {
   DEFAULT_KINDS,

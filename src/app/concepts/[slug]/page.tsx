@@ -1,12 +1,13 @@
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
-import { ViewTransition, type CSSProperties } from 'react'
+import type { CSSProperties } from 'react'
 
 import { AtAGlance, Contents, type ContentsEntry } from '@/components/concept'
 import { LinkedKnowledge } from '@/components/concept'
 import { TitleSpellings } from '@/components/concept'
 import { TopicPager } from '@/components/concept'
 import { citationLinks, Provenance, Sections, Text } from '@/components/prose'
+import { TitleMorph } from '@/components/PageTurn'
 import { ReadingPage } from '@/components/ReadingPage'
 import { VerseCard } from '@/components/prose'
 import { ReadingThread } from '@/components/ReadingThread'
@@ -23,7 +24,7 @@ import {
 import { capitalise, readingTimeWords } from '@/lib/text'
 import { metadataFor } from '@/lib/metadata'
 
-import reading from '../../reading.module.css'
+import reading from '@/styles/reading.module.css'
 import styles from './page.module.css'
 
 export const dynamicParams = false
@@ -81,8 +82,6 @@ export default async function ConceptPage({ params }: PageProps<'/concepts/[slug
   const citations = citationLinks(concept.citations, concept.references)
   const { previous, next } = concept
   const contents = contentsOf(concept)
-  // A Concept card's title flies into the heading's IAST spelling, or its English title.
-  const morph = `concept-title-${concept.slug}`
 
   return (
     <ReadingPage
@@ -94,25 +93,24 @@ export default async function ConceptPage({ params }: PageProps<'/concepts/[slug
       beforeTrail={<ReadingThread />}
       longTitle={!concept.term}
       title={
+        // A Concept card's title flies into the heading's IAST spelling, or its English title.
         concept.term?.devanagari ? (
           <TitleSpellings
             iast={capitalise(concept.term.iast)}
             devanagari={concept.term.devanagari}
-            name={morph}
+            slug={concept.slug}
           />
         ) : (
-          <ViewTransition name={morph} share="morph" default="none">
+          <TitleMorph kind="concept" slug={concept.slug}>
             <span {...(concept.term ? { lang: 'sa-Latn' } : {})}>
               {concept.term ? capitalise(concept.term.iast) : concept.name}
             </span>
-          </ViewTransition>
+          </TitleMorph>
         )
       }
       afterTitle={
         <>
-          {concept.term && concept.english ? (
-            <p className={styles.gloss}>{concept.english}</p>
-          ) : null}
+          {concept.gloss ? <p className={styles.gloss}>{concept.gloss}</p> : null}
           <p className={styles.meta}>
             {[concept.topic, ...concept.secondaryTopics].map((topic) => (
               <TopicChip key={topic.slug} topic={topic} />

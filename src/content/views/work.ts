@@ -18,7 +18,11 @@ export function workCard(record: WorkRecord, graph: ContentGraph): WorkCard {
   return {
     ...workRef(record),
     term: nameCopy(record.title),
-    ...present({ english: record.title.english, attribution: record.attribution }),
+    ...present({
+      english: record.title.english,
+      attribution: record.attribution,
+      blurb: record.blurb,
+    }),
     language: record.language ?? 'sa',
     passageCount: passagesOf(record, graph).length,
   }

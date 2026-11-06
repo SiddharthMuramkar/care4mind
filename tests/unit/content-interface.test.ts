@@ -22,6 +22,7 @@ import {
   asciiSpellings,
   conceptName,
   displayName,
+  glossOf,
 } from '@/content/testing'
 
 import { flagsOff, flagsOn } from '../flags'
@@ -256,6 +257,13 @@ describe('the pure helpers', () => {
     expect(displayName({ term, english: 'Five afflictions' })).toBe('Pañca kleśa')
     expect(displayName({ term: { iast: 'ātman', ascii: ['Atman'] } })).toBe('Ātman')
     expect(displayName({ english: 'Five steps of perfection' })).toBe('Five steps of perfection')
+  })
+
+  it('gives a gloss only under a Sanskrit headword (glossOf)', () => {
+    const term = { iast: 'vikṣepa', ascii: ['Vikshepa'] }
+    expect(glossOf({ term, english: 'Distraction' })).toBe('Distraction')
+    expect(glossOf({ english: 'Five steps of perfection' })).toBeUndefined()
+    expect(glossOf({ term })).toBeUndefined()
   })
 
   it('names a Concept in full by its Sanskrit name, then its gloss (conceptName)', () => {
@@ -1229,6 +1237,28 @@ describe('works', () => {
         passageCount: 2,
       },
     ])
+  })
+
+  it('passes a blurb through, and leaves it out where the record has none', async () => {
+    const withBlurb = createContent(
+      memorySource(
+        mind,
+        defineWork({ ...attributed, blurb: 'A made-up line about the text.' }),
+        dhammapada,
+        ys130,
+        ys12,
+        dp160,
+      ),
+      ON,
+    )
+    expect((await withBlurb.works.get('yoga-sutra'))?.blurb).toBe('A made-up line about the text.')
+    expect((await withBlurb.works.list()).find(({ slug }) => slug === 'yoga-sutra')?.blurb).toBe(
+      'A made-up line about the text.',
+    )
+    expect(await content().works.get('yoga-sutra')).not.toHaveProperty('blurb')
+    expect(
+      (await content().works.list()).find(({ slug }) => slug === 'yoga-sutra'),
+    ).not.toHaveProperty('blurb')
   })
 
   it('gives a work its passages in order, and null for an unknown one', async () => {

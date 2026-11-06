@@ -15,6 +15,7 @@ import { flushSync } from 'react-dom'
 
 import { whenIdle } from '@/components/browser'
 import { cx } from '@/lib/cx'
+import { count } from '@/lib/text'
 
 import styles from './AzIndex.module.css'
 import {
@@ -236,8 +237,6 @@ function showingFor(list: HTMLElement | null, selection: Selection, query: strin
     ),
   }
 }
-
-const entries = (count: number) => `${count} ${count === 1 ? 'entry' : 'entries'}`
 
 /** The clear button unmounts with the filter, which would drop focus on the page. */
 function focusBeforeClear(root: ParentNode | null) {
@@ -518,7 +517,7 @@ export function AzIndex({
     [Rail, letters, shownLetters],
   )
   const pressed = useMemo(() => toChips(selection), [selection])
-  const count = showing?.count ?? total
+  const tally = showing?.count ?? total
 
   return (
     <div
@@ -550,7 +549,7 @@ export function AzIndex({
         <Chips groups={groups} pressed={pressed} onPress={press} />
         <div className={styles.tally}>
           <p tabIndex={-1} className={styles.count} aria-live="polite" aria-atomic="true">
-            {entries(count)}
+            {count(tally, 'entry', 'entries')}
           </p>
           {isDefault(selection, defaultKinds) && typed === '' ? null : (
             <button
@@ -571,7 +570,7 @@ export function AzIndex({
       <nav aria-label="Letters" className={styles.railBand}>
         {rail}
       </nav>
-      {count === 0 ? (
+      {tally === 0 ? (
         <p className={styles.none}>
           No entry has all of these. Press a chip again or shorten the search to let its entries
           back in, or clear the filters.

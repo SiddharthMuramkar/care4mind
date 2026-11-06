@@ -46,7 +46,7 @@ const PROVENANCE = `  provenance: {
     // saved copies were made.
     sources: [{ url: '', retrieved: '2026-10-27' }],
     edits: [], // one change each; a replacement is written “old” → “new”, a deletion “old” → “”
-    flags: [], // { for: 'research-editor' | 'psychology-expert' | 'project-owner', note, decidedBy? }
+    flags: [], // { for: 'research-editor' | 'psychology-expert' | 'project-owner', note, decidedBy?, missing?, citation? }
     // drafted: [], // fields written for the new site: never in a migration ticket
     // origin: 'written', writtenBy: '', writtenOn: '', // only a record made with --written
   },`
@@ -56,7 +56,7 @@ const PROVENANCE_WRITTEN = `  provenance: {
     origin: 'written',
     sources: [],
     edits: [],
-    flags: [], // { for: 'research-editor' | 'psychology-expert' | 'project-owner', note, decidedBy? }
+    flags: [], // { for: 'research-editor' | 'psychology-expert' | 'project-owner', note, decidedBy?, missing?, citation? }
     writtenBy: '', // who wrote this record
     writtenOn: '', // the day it was written, as 2026-11-06
   },`
@@ -129,6 +129,7 @@ ${provenanceOf(written)}
   title: { iast: '', ascii: [] }, // devanagari: '', english: ''
   // language: 'pi', // Sanskrit unless stated
   // attribution: '',
+  // blurb: '',
   locatorLabel: '',
   // editions: [],
 ${provenanceOf(written)}
