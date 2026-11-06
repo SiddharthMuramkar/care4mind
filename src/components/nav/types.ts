@@ -22,15 +22,16 @@ export interface TopicLink extends NavLink {
   /** The topic's own term in IAST, where it has one (citta for Mind). */
   term?: string
   /** How many Concepts have it as their primary topic. */
-  count: number
+  holds: Holding
 }
 
-/** What a Library page holds, counted as the Library page counts it: "188 References". */
+/** What a topic or a Library page holds, counted as its own page counts it: "188 References". */
 export interface Holding {
   count: number
-  /** The unit, singular then plural: entries for a reading list, sections for a page. */
-  one: string
-  many: string
+  /** The unit as the count takes it: Concepts for a topic, entries for a reading list, sections for a page. */
+  unit: string
+  /** The count and its unit in words, as a panel shows them. */
+  text: string
 }
 
 export interface LibraryLink extends NavLink {

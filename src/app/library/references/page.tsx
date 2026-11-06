@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 
 import { AzIndex, type ChipGroup, type RailLetter } from '@/components/az'
-import { conceptPreview } from '@/components/concept'
+import { conceptPreview } from '@/components/preview'
 import {
   catalogue,
   type CitingConcept,

@@ -6,6 +6,7 @@ import { TitleMorph, turnForward } from '@/components/PageTurn'
 import { hrefFor } from '@/content'
 import { toDevanagariDigits } from '@/lib/text'
 
+import { mapAttribute } from './attributes'
 import styles from './ConceptMap.module.css'
 import { KIND_WORDS, KINDS } from './kinds'
 import { litRules, type MapLayout, type MapPoint, RADIUS, SIZE } from './layout'
@@ -43,14 +44,14 @@ export function ConceptMap({ layout }: { layout: MapLayout }) {
   const ofKind = (kind: (typeof KINDS)[number]) =>
     layout.connections.filter((connection) => connection.kind === kind)
   const attributes = (connection: MapLayout['connections'][number]) => ({
-    'data-c': id.get(connection),
-    'data-kind': connection.kind,
-    'data-ends': `${connection.source} ${connection.target}`,
-    'data-topics': connection.topics.join(' '),
+    [mapAttribute.connection]: id.get(connection),
+    [mapAttribute.kind]: connection.kind,
+    [mapAttribute.ends]: `${connection.source} ${connection.target}`,
+    [mapAttribute.topics]: connection.topics.join(' '),
   })
 
   return (
-    <div className={styles.map} data-map>
+    <div className={styles.map} {...{ [mapAttribute.map]: true }}>
       <style>{litRules(layout)}</style>
       <div className={styles.spread}>
         <MapFilters
@@ -114,9 +115,11 @@ export function ConceptMap({ layout }: { layout: MapLayout }) {
                           href={hrefFor({ kind: 'concept', id: point.slug })}
                           transitionTypes={turnForward}
                           className={styles.point}
-                          data-p={point.slug}
-                          data-near={point.near.join(' ')}
-                          data-topics={point.topics.join(' ')}
+                          {...{
+                            [mapAttribute.point]: point.slug,
+                            [mapAttribute.near]: point.near.join(' '),
+                            [mapAttribute.topics]: point.topics.join(' '),
+                          }}
                           data-topic={point.topic}
                           data-side={point.side}
                           data-ink
@@ -192,7 +195,7 @@ export function ConceptMap({ layout }: { layout: MapLayout }) {
             <section
               key={kind}
               className={styles.kind}
-              data-kind-section={kind}
+              {...{ [mapAttribute.kindSection]: kind }}
               aria-labelledby={`kind-${kind}`}
             >
               <h3 id={`kind-${kind}`} className={styles.kindTitle}>

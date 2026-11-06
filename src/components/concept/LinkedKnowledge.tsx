@@ -5,11 +5,10 @@ import { hrefFor, type ConceptView, type VerseView } from '@/content'
 import { readingTimeWords } from '@/lib/text'
 
 import { TitleMorph, turnForward } from '../PageTurn'
-import { LinkPreview } from '../preview'
+import { conceptPreview, LinkPreview, passagePreview } from '../preview'
 import { statusWords } from '../StatusBadge'
 import { TopicChip } from '../TopicChip'
 import { SECTION_ROLES, Text } from '../prose'
-import { conceptPreview, passagePreview } from './previews'
 import styles from './LinkedKnowledge.module.css'
 
 /** A dotted leader joining an entry to what it says about it, inked in as it scrolls into view. */
