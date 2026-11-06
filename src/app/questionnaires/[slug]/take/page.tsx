@@ -1,13 +1,11 @@
 import type { Metadata } from 'next'
-import Link from 'next/link'
 import { notFound } from 'next/navigation'
 
 import { Citation } from '@/components/Citation'
-import { turnForward } from '@/components/PageTurn'
 import { ReadingPage } from '@/components/ReadingPage'
 import { Text } from '@/components/prose'
 import { StatusBadge } from '@/components/StatusBadge'
-import { Flow } from '@/components/questionnaire'
+import { Flow, Limitations, RelatedConcepts } from '@/components/questionnaire'
 import { hrefFor, questionnaires, site } from '@/content'
 import { metadataFor } from '@/lib/metadata'
 
@@ -43,25 +41,7 @@ export default async function TakeQuestionnairePage({
   const { title, status, shownStatus, limitations, source } = questionnaire
   const intro = hrefFor({ kind: 'questionnaire', id: slug, status })
 
-  const limits = limitations ? (
-    <section className={styles.limits} aria-labelledby="end-limits">
-      <h3 id="end-limits" className={styles.title}>
-        What this is not
-      </h3>
-      {limitations.status === 'draft-pending-psychology-expert' ? (
-        <p className={styles.draft}>
-          Draft wording. The Psychology expert has not reviewed these limitations yet.
-        </p>
-      ) : null}
-      <ul className={styles.list}>
-        {limitations.items.map((item) => (
-          <li key={item}>
-            <Text text={item} />
-          </li>
-        ))}
-      </ul>
-    </section>
-  ) : null
+  const limits = limitations ? <Limitations limitations={limitations} variant="end" /> : null
 
   const sources = (
     <>
@@ -75,26 +55,7 @@ export default async function TakeQuestionnairePage({
           </p>
         </section>
       ) : null}
-      {questionnaire.concepts.length > 0 ? (
-        <section className={styles.section} aria-labelledby="end-related">
-          <h3 id="end-related" className={styles.title}>
-            Related Concepts
-          </h3>
-          <ul className={styles.list}>
-            {questionnaire.concepts.map((concept) => (
-              <li key={concept.slug}>
-                <Link
-                  href={hrefFor({ kind: 'concept', id: concept.slug })}
-                  transitionTypes={turnForward}
-                >
-                  <span lang={concept.lang}>{concept.name}</span>
-                  {concept.gloss ? <> · {concept.gloss}</> : null}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </section>
-      ) : null}
+      <RelatedConcepts concepts={questionnaire.concepts} variant="end" />
     </>
   )
 

@@ -3,9 +3,11 @@ import { fileURLToPath } from 'node:url'
 
 import { beforeAll, describe, expect, it } from 'vitest'
 
-import { features, type Features } from '@/config/features'
+import { features } from '@/config/features'
 import { site, type RouteEntry } from '@/content'
 import { localSource, createContent } from '@/content/testing'
+
+import { flagsOn } from '../flags'
 
 // The page files in the app and the route registry agree. The
 // end-to-end suite tests the registry's routes, so a page the registry missed would go untested,
@@ -46,9 +48,7 @@ const patternsOf = (routes: readonly RouteEntry[]) =>
   [...new Set(routes.map(({ pattern }) => pattern))].sort()
 
 /** Every feature flag on, however many the site has. */
-const EVERY_FLAG_ON = Object.fromEntries(
-  Object.keys(features).map((flag) => [flag, true]),
-) as Record<keyof Features, boolean>
+const EVERY_FLAG_ON = flagsOn()
 
 describe('the route pattern of a page file', () => {
   it('follows its folders and ends in a slash', () => {
