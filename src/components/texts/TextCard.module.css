@@ -72,6 +72,12 @@
   color: var(--color-surface-muted);
 }
 
+.blurb {
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
 /* The first line it is quoted from, as a catalogue gives a manuscript's opening words. */
 .incipit {
   margin: 0;

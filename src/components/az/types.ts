@@ -12,18 +12,19 @@ export interface RailLetter {
   filled: boolean
 }
 
-export interface Chip {
-  value: string
+/** A chip; `V` names the values its row takes, such as an entry's kinds. */
+export interface Chip<V extends string = string> {
+  value: V
   label: string
   /** Set when the label is a transliteration, such as a work's title. */
   lang?: LatinScript
 }
 
 /** One row of chips: the topics, the works, or what kind of entry. */
-export interface ChipGroup {
+export interface ChipGroup<V extends string = string> {
   group: FilterGroup
   label: string
-  chips: readonly Chip[]
+  chips: readonly Chip<V>[]
 }
 
 export interface RailProps {

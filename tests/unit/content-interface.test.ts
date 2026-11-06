@@ -1239,6 +1239,28 @@ describe('works', () => {
     ])
   })
 
+  it('passes a blurb through, and leaves it out where the record has none', async () => {
+    const withBlurb = createContent(
+      memorySource(
+        mind,
+        defineWork({ ...attributed, blurb: 'A made-up line about the text.' }),
+        dhammapada,
+        ys130,
+        ys12,
+        dp160,
+      ),
+      ON,
+    )
+    expect((await withBlurb.works.get('yoga-sutra'))?.blurb).toBe('A made-up line about the text.')
+    expect((await withBlurb.works.list()).find(({ slug }) => slug === 'yoga-sutra')?.blurb).toBe(
+      'A made-up line about the text.',
+    )
+    expect(await content().works.get('yoga-sutra')).not.toHaveProperty('blurb')
+    expect(
+      (await content().works.list()).find(({ slug }) => slug === 'yoga-sutra'),
+    ).not.toHaveProperty('blurb')
+  })
+
   it('gives a work its passages in order, and null for an unknown one', async () => {
     expect(await content().works.get('nothing-here')).toBeNull()
     const view = await content().works.get('yoga-sutra')
