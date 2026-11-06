@@ -1,10 +1,11 @@
 import Link from 'next/link'
 
+import { Numeral } from '@/components/Numeral'
 import { TitleMorph, turnForward } from '@/components/PageTurn'
 import { ScriptPair } from '@/components/script'
 import { hrefFor, type TopicCard as Topic } from '@/content'
 import { cx } from '@/lib/cx'
-import { toDevanagariDigits } from '@/lib/text'
+import { count } from '@/lib/text'
 
 import styles from './TopicCard.module.css'
 
@@ -16,8 +17,7 @@ export function TopicCard({ topic, className }: { topic: Topic; className?: stri
   return (
     <article className={cx(styles.card, className)} data-topic={topic.slug}>
       <span className={styles.numeral} aria-hidden>
-        <span>{topic.order}</span>{' '}
-        <span lang="sa-Deva">{toDevanagariDigits(String(topic.order))}</span>
+        <span>{topic.order}</span> <Numeral value={topic.order} />
       </span>
       <h3 className={styles.title}>
         <Link
@@ -39,9 +39,7 @@ export function TopicCard({ topic, className }: { topic: Topic; className?: stri
           />
         </p>
       ) : null}
-      <p className={styles.count}>
-        {topic.conceptCount} {topic.conceptCount === 1 ? 'Concept' : 'Concepts'}
-      </p>
+      <p className={styles.count}>{count(topic.conceptCount, 'Concept', 'Concepts')}</p>
     </article>
   )
 }

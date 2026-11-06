@@ -13,7 +13,8 @@ import {
 } from 'react'
 import { createPortal } from 'react-dom'
 
-import { toDevanagariDigits } from '@/lib/text'
+import { Numeral } from '@/components/Numeral'
+import { count } from '@/lib/text'
 
 import { currentFor, panelOf } from './current'
 import { ArrowGlyph, ChevronGlyph } from '../glyphs'
@@ -228,8 +229,7 @@ function ConceptsPanel({ site, pathname, mapNote }: PanelProps & { mapNote?: Rea
           >
             <PanelLink href={topic.href} pathname={pathname} className={styles.entry}>
               <span className={styles.numeral} aria-hidden>
-                <span>{position + 1}</span>{' '}
-                <span lang="sa-Deva">{toDevanagariDigits(String(position + 1))}</span>
+                <span>{position + 1}</span> <Numeral value={position + 1} />
               </span>
               <span className={styles.name}>
                 {topic.label}
@@ -240,9 +240,7 @@ function ConceptsPanel({ site, pathname, mapNote }: PanelProps & { mapNote?: Rea
                 ) : null}
               </span>
               <span className={styles.leader} aria-hidden />
-              <span className={styles.count}>
-                {topic.count} {topic.count === 1 ? 'Concept' : 'Concepts'}
-              </span>
+              <span className={styles.count}>{count(topic.count, 'Concept', 'Concepts')}</span>
             </PanelLink>
           </li>
         ))}
@@ -281,7 +279,7 @@ function LibraryPanel({ site, pathname }: PanelProps) {
                 <>
                   <span className={styles.leader} aria-hidden />
                   <span className={styles.count}>
-                    {page.holds.count} {page.holds.count === 1 ? page.holds.one : page.holds.many}
+                    {count(page.holds.count, page.holds.one, page.holds.many)}
                   </span>
                 </>
               ) : null}

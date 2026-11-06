@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation'
 import { Fragment, type ReactNode } from 'react'
 
 import { ConceptCard } from '@/components/ConceptCard'
+import { Numeral } from '@/components/Numeral'
 import { turnForward } from '@/components/PageTurn'
 import { ReadingPage } from '@/components/ReadingPage'
 import { citationLinks, Provenance, Sections } from '@/components/prose'
@@ -14,7 +15,7 @@ import { hrefFor, site, topics, type ConceptCard as Concept, type PassageView } 
 import { cx } from '@/lib/cx'
 import { metadataFor } from '@/lib/metadata'
 import { openingLine } from '@/lib/sanskrit'
-import { toDevanagariDigits } from '@/lib/text'
+import { count } from '@/lib/text'
 
 import reading from '../../reading.module.css'
 import styles from './page.module.css'
@@ -31,8 +32,6 @@ export async function generateMetadata({ params }: PageProps<'/topics/[slug]'>):
 
 /** A `lang` attribute only where there is one: an undefined prop still travels with the page. */
 const langOf = (lang: string | undefined) => (lang ? { lang } : {})
-
-const plural = (count: number, one: string) => `${count} ${count === 1 ? one : `${one}s`}`
 
 /** Names in words: "A", "A and B", "A, B and C". */
 function inWords(items: readonly ReactNode[]) {
@@ -108,9 +107,7 @@ export default async function TopicPage({ params }: PageProps<'/topics/[slug]'>)
       kicker={
         <>
           Topic {topic.order}
-          <span className={styles.order} lang="sa-Deva" aria-hidden>
-            {toDevanagariDigits(String(topic.order))}
-          </span>
+          <Numeral value={topic.order} className={styles.order} decorative />
         </>
       }
       title={topic.name}
@@ -127,11 +124,11 @@ export default async function TopicPage({ params }: PageProps<'/topics/[slug]'>)
             </p>
           ) : null}
           <p className={styles.facts}>
-            {plural(topic.conceptCount, 'Concept')}
+            {count(topic.conceptCount, 'Concept', 'Concepts')}
             {topic.secondaryConcepts.length > 0
               ? ` · ${topic.secondaryConcepts.length} more also here`
               : null}{' '}
-            · {plural(verseCount, 'verse')} quoted
+            · {count(verseCount, 'verse', 'verses')} quoted
             {works.length > 0 ? (
               <>
                 , from{' '}

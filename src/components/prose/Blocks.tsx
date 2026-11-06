@@ -7,6 +7,7 @@ import { cx } from '@/lib/cx'
 import { turnForward } from '../PageTurn'
 import { SanskritName } from '../SanskritName'
 import styles from './Prose.module.css'
+import { SECTION_ROLES } from './section-role'
 import { standingIn } from './standing-in'
 import { Text, type CitationLinks } from './Text'
 import { VerseCard } from './VerseCard'
@@ -215,9 +216,6 @@ export function Blocks({
   ))
 }
 
-/** How a section's role is named above its heading. */
-const ROLES = { applications: 'Applications', comparison: 'Comparison' } as const
-
 /**
  * A record's sections in reading order, each anchored at its id under its own heading, an
  * applications or comparison section labelled as one. Each names a view timeline after its id,
@@ -240,7 +238,7 @@ export function Sections({
         style={{ '--timeline': `--section-${section.id}` } as CSSProperties}
       >
         <h2 className={styles.sectionTitle}>
-          {section.role ? <span className={styles.role}>{ROLES[section.role]}</span> : null}
+          {section.role ? <span className={styles.role}>{SECTION_ROLES[section.role]}</span> : null}
           <Text text={section.heading} citations={citations} />
         </h2>
         {shared ? (

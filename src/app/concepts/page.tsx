@@ -16,6 +16,7 @@ import {
   type ConceptCard as Card,
 } from '@/content'
 import { metadataFor } from '@/lib/metadata'
+import { count } from '@/lib/text'
 
 import reading from '../reading.module.css'
 import styles from './page.module.css'
@@ -35,8 +36,6 @@ const KINDS: readonly { value: Entry['kind']; label: string }[] = [
   { value: 'glossary', label: 'Glossary' },
 ]
 
-const counted = (count: number, one: string, many: string) => `${count} ${count === 1 ? one : many}`
-
 /**
  * The Concepts A–Z: the topics as cards, then every Concept, every term explained inside
  * one (or in a topic's introduction) and every glossary entry, by letter, under a rail of letters
@@ -51,7 +50,7 @@ export default async function ConceptsPage() {
     site.routes(),
   ])
   const all = letters.flatMap(({ entries }) => entries)
-  const count = (kind: Entry['kind']) => all.filter((entry) => entry.kind === kind).length
+  const ofKind = (kind: Entry['kind']) => all.filter((entry) => entry.kind === kind).length
   const quoted = new Set(all.flatMap((entry) => entry.works))
   const topicNames = new Map(topicCards.map(({ slug, name }) => [slug, name]))
   const cards = new Map(conceptCards.map((card) => [card.href, card]))
@@ -72,7 +71,7 @@ export default async function ConceptsPage() {
     {
       group: 'kind',
       label: 'Show',
-      chips: KINDS.map(({ value, label }) => ({ value, label: `${label} (${count(value)})` })),
+      chips: KINDS.map(({ value, label }) => ({ value, label: `${label} (${ofKind(value)})` })),
     },
   ]
   const rail: RailLetter[] = letters.map(({ letter, entries }) => ({
@@ -124,10 +123,10 @@ export default async function ConceptsPage() {
             Every Concept, every term explained inside one, and every glossary entry.
           </p>
           <p className={styles.facts}>
-            {counted(all.length, 'entry', 'entries')}:{' '}
-            {counted(count('concept'), 'Concept page', 'Concept pages')},{' '}
-            {counted(count('term'), 'term', 'terms')} and{' '}
-            {counted(count('glossary'), 'glossary entry', 'glossary entries')}
+            {count(all.length, 'entry', 'entries')}:{' '}
+            {count(ofKind('concept'), 'Concept page', 'Concept pages')},{' '}
+            {count(ofKind('term'), 'term', 'terms')} and{' '}
+            {count(ofKind('glossary'), 'glossary entry', 'glossary entries')}
           </p>
         </>
       }

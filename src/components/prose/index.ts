@@ -9,5 +9,6 @@ export { citationLinks, Text, type CitationLinks, type CitedEntry } from './Text
 export { VerseCard } from './VerseCard'
 export { citedIn, parenthesised } from './in-text-citations'
 export { provenanceSentence } from './provenance-sentence'
+export { SECTION_ROLES, type SectionRole } from './section-role'
 export { standingIn } from './standing-in'
 export { verseAsText } from './verse-text'

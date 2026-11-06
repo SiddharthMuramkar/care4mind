@@ -110,9 +110,7 @@ export default async function ConceptPage({ params }: PageProps<'/concepts/[slug
       }
       afterTitle={
         <>
-          {concept.term && concept.english ? (
-            <p className={styles.gloss}>{concept.english}</p>
-          ) : null}
+          {concept.gloss ? <p className={styles.gloss}>{concept.gloss}</p> : null}
           <p className={styles.meta}>
             {[concept.topic, ...concept.secondaryTopics].map((topic) => (
               <TopicChip key={topic.slug} topic={topic} />
