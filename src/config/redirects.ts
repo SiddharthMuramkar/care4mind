@@ -14,8 +14,10 @@
  * Each old page is declared once below. The feed the old site served under every page and
  * archive is derived from that declaration, and leads where its page leads, so it stays one
  * hop without a hand-copied row. Which old addresses there are is the checked-in inventory,
- * `src/config/old-site-urls.ts`.
+ * `src/config/old-site-urls.ts`, whose media addresses and shortlinks lead where their page leads.
  */
+
+import { oldMedia, oldShortlinks } from './old-site-urls'
 
 /**
  * One condition on a request beyond its path, as Next reads it: a header, cookie or query
@@ -113,6 +115,23 @@ const itsFeed = ({ source, destination }: Redirect): Redirect => ({
   destination,
 })
 
+/** Where an old page now leads: its declared row's page, or itself when the new site keeps it. */
+const newPageOf = (old: string) =>
+  movedPages.find(({ source }) => source === old)?.destination ?? old
+
+/** Each uploaded file, to where the first page that showed it now leads. */
+const media: readonly Redirect[] = oldMedia.map(({ address, shownOn }) => ({
+  source: address,
+  destination: newPageOf(shownOn[0] ?? '/'),
+}))
+
+/** Each post's `/?p=<id>`, to that post's new page; Next passes the query through. */
+const shortlinks: readonly Redirect[] = oldShortlinks.map(({ id, post }) => ({
+  source: '/',
+  has: [{ type: 'query', key: 'p', value: id }],
+  destination: newPageOf(post),
+}))
+
 export const redirects: readonly Redirect[] = [
   // Topics have pages of their own, but no index: the Concepts A–Z lists them.
   { source: '/topics/', destination: '/concepts/' },
@@ -130,4 +149,7 @@ export const redirects: readonly Redirect[] = [
   { source: '/author/:name*/', destination: '/' },
   // The front page's feed, the one feed the old site named at the top level.
   { source: '/feed/', destination: '/' },
+
+  ...media,
+  ...shortlinks,
 ]

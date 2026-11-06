@@ -1,7 +1,14 @@
 import { getPathMatch } from 'next/dist/shared/lib/router/utils/path-match'
 import { beforeAll, describe, expect, it } from 'vitest'
 
-import { feedOf, oldArchives, oldFeed, oldPagesAndPosts } from '@/config/old-site-urls'
+import {
+  feedOf,
+  oldArchives,
+  oldFeed,
+  oldMedia,
+  oldPagesAndPosts,
+  oldShortlinks,
+} from '@/config/old-site-urls'
 import { redirects, type Redirect } from '@/config/redirects'
 import { hrefFor, site } from '@/content'
 import { CONTENT_KINDS, type ContentRecord, type RecordOf, localSource } from '@/content/testing'
@@ -57,6 +64,22 @@ const PAGES_AND_POSTS: Readonly<Record<string, string>> = {
   '/frienorfoeofself/': '/concepts/atma-bandhu/',
   '/karta-2/': '/concepts/karta/',
   '/triguna/': '/concepts/triguna/',
+}
+
+/** Where an old page now leads: its row's page, or itself when the new site keeps it. */
+const newPageOf = (old: string) => PAGES_AND_POSTS[old] ?? old
+
+/** An old shortlink as a browser asks for it. */
+const shortlinkOf = (id: string) => `/?p=${id}`
+
+/** The six posts' WordPress ids, as the saved copies list them. */
+const POST_IDS: Readonly<Record<string, string>> = {
+  '431': '/karmayoga-scale/',
+  '353': '/anubandha-chatushtaya/',
+  '329': '/teertha-yatra-quiz/',
+  '300': '/jagat/',
+  '298': '/jiva/',
+  '296': '/atman/',
 }
 
 let records: ContentRecord[] = []
@@ -186,6 +209,7 @@ describe('the checked-in inventory of the old site’s addresses (FR-07)', () =>
       '/author/:name*/',
     ])
     expect(oldFeed).toBe('/feed/')
+    expect(Object.fromEntries(oldShortlinks.map(({ id, post }) => [id, post]))).toEqual(POST_IDS)
     // No address here is a username: the only author entry is the pattern itself.
     for (const address of [...oldPagesAndPosts, ...oldArchives, oldFeed])
       expect(address, address).toMatch(/^\/$|^\/(?:[a-z0-9:*-]+\/)+$/)
@@ -204,6 +228,8 @@ describe('the checked-in inventory of the old site’s addresses (FR-07)', () =>
       '/category/uncategorized/feed/',
       ...authorExamples,
       oldFeed,
+      ...oldMedia.map(({ address }) => address),
+      ...oldShortlinks.map(({ id }) => shortlinkOf(id)),
     ]
     for (const address of inventoried) {
       if (paths.has(address)) {
@@ -219,8 +245,45 @@ describe('the checked-in inventory of the old site’s addresses (FR-07)', () =>
   })
 })
 
+describe('the old site’s media and shortlinks', () => {
+  it('names the 52 media addresses the saved copies show, each once, with the pages that showed it', () => {
+    expect(oldMedia).toHaveLength(52)
+    const addresses = oldMedia.map(({ address }) => address.toLowerCase())
+    expect(new Set(addresses).size).toBe(addresses.length)
+    for (const { address, shownOn } of oldMedia) {
+      expect(address).toMatch(
+        /^\/wp-content\/uploads\/(?:[a-z0-9]+\/)+[A-Za-z0-9._-]+\.(?:png|jpe?g)$/,
+      )
+      expect(shownOn.length, address).toBeGreaterThan(0)
+      for (const page of shownOn) expect(oldPagesAndPosts, address).toContain(page)
+      // Shown on several pages, it goes where the first of them in the inventory goes.
+      const inInventoryOrder = [...shownOn].sort(
+        (a, b) => oldPagesAndPosts.indexOf(a) - oldPagesAndPosts.indexOf(b),
+      )
+      expect(shownOn, address).toEqual(inInventoryOrder)
+    }
+  })
+
+  it('sends each media address where the first page that showed it now leads, by one row', () => {
+    for (const { address, shownOn } of oldMedia)
+      expect(sends(address), address).toBe(newPageOf(shownOn[0] ?? ''))
+    // Capitals in a file name match as typed, and any other case too.
+    const named = oldMedia.find(({ address }) => /[A-Z]/.test(address))?.address ?? ''
+    expect(named).not.toBe('')
+    expect(sends(named.toLowerCase())).toBe(sends(named))
+  })
+
+  it('sends each post’s ?p= shortlink to that post’s new page, and leaves / alone without one', () => {
+    for (const [id, post] of Object.entries(POST_IDS))
+      expect(sends(shortlinkOf(id)), id).toBe(newPageOf(post))
+    expect(rowsCatching('/?p=1')).toEqual([])
+    expect(rowsCatching('/?p=4310')).toEqual([])
+    expect(rowsCatching('/')).toEqual([])
+  })
+})
+
 describe('the table (FR-07)', () => {
-  it('lists those old addresses, their feeds and /topics/, each once, and nothing else', () => {
+  it('lists those old addresses, their feeds, media and shortlinks, and /topics/, each once, and nothing else', () => {
     const sources = redirects.map(({ source }) => source)
     const moved = Object.keys(PAGES_AND_POSTS)
     const categories = ['/category/concepts/', '/category/uncategorized/']
@@ -234,16 +297,21 @@ describe('the table (FR-07)', () => {
         '/author/:name*/',
         '/feed/',
         '/topics/',
+        ...oldMedia.map(({ address }) => address),
+        ...oldShortlinks.map(() => '/'),
       ].sort(),
     )
     // Next matches sources ignoring case, so two differing only in case would share a source too.
-    expect(new Set(sources.map((source) => source.toLowerCase())).size).toBe(sources.length)
+    const keys = redirects.map(
+      ({ source, has }) => `${source.toLowerCase()} ${JSON.stringify(has)}`,
+    )
+    expect(new Set(keys).size).toBe(redirects.length)
   })
 
-  it('writes each old address as the current site served it: lower case, ending in its slash or a file name', () => {
+  it('writes each old address as the current site served it: lower case, ending in its slash or a file name as uploaded', () => {
     for (const { source } of redirects)
       expect(source).toMatch(
-        /^\/(?:[a-z0-9:*-]+\/)+$|^\/(?:[a-z0-9:*-]+\/)*[a-z0-9._-]+\.[a-z0-9]+$/,
+        /^\/(?:[a-z0-9:*-]+\/)*$|^\/(?:[a-z0-9:*-]+\/)*[A-Za-z0-9._-]+\.[a-z0-9]+$/,
       )
   })
 
