@@ -1,5 +1,7 @@
 import { Fragment, type ReactNode } from 'react'
 
+import { listSeparator } from '@/lib/text'
+
 /** A `lang` attribute only where there is one: an undefined prop still travels with the page. */
 export const langOf = (lang: string | undefined) => (lang ? { lang } : {})
 
@@ -7,7 +9,7 @@ export const langOf = (lang: string | undefined) => (lang ? { lang } : {})
 export function inWords(items: readonly ReactNode[]) {
   return items.map((item, index) => (
     <Fragment key={index}>
-      {index === 0 ? null : index === items.length - 1 ? ' and ' : ', '}
+      {listSeparator(index, items.length)}
       {item}
     </Fragment>
   ))
