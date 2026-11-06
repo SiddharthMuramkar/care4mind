@@ -16,8 +16,8 @@
 
 .text {
   margin: 0;
-  max-width: 44ch;
-  font-size: 1.125rem;
+  max-width: var(--measure-lede);
+  font-size: var(--text-large);
 }
 
 /* The call to action is a button here, so it drops the browser's own border and font. */

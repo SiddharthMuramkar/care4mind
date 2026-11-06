@@ -3,13 +3,13 @@
   display: grid;
   gap: 1.25rem;
   width: 100%;
-  max-width: 52rem;
+  max-width: var(--measure-page);
   margin-inline: auto;
   padding: clamp(1rem, 3vw, 2rem) clamp(1rem, 4vw, 3rem) 0;
 }
 
 /* Below 640px the folio carries no frame of its own, so this margin is the text's: 16px. */
-@media (max-width: 39.99rem) {
+@media (width < 40rem) {
   .page {
     padding-inline: 1rem;
   }
@@ -37,7 +37,7 @@
   max-width: 84rem;
 }
 
-@media (min-width: 64rem) {
+@media (width >= 64rem) {
   /* Wide enough on a large screen for three cards a row. */
   .shelf {
     max-width: 68rem;
@@ -62,7 +62,7 @@
 .article {
   display: grid;
   gap: 2.5rem;
-  font-size: 1.125rem;
+  font-size: var(--text-large);
   line-height: 1.7;
 }
 
@@ -86,7 +86,7 @@
   margin: 0;
   font-variant-caps: all-small-caps;
   letter-spacing: 0.16em;
-  font-size: 1.125rem;
+  font-size: var(--text-large);
   color: var(--color-surface-muted);
 }
 
@@ -100,7 +100,7 @@
 }
 
 /* At 320 px (400% zoom, WCAG 1.4.10) the longest one-word titles still fit their line. */
-@media (max-width: 21rem) {
+@media (width < 21rem) {
   .title {
     font-size: 2.375rem;
   }

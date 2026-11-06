@@ -6,13 +6,13 @@
   display: grid;
   gap: 1.25rem;
   width: 100%;
-  max-width: 52rem;
+  max-width: var(--measure-page);
   margin-inline: auto;
   padding: clamp(1rem, 3vw, 2rem) clamp(1rem, 4vw, 3rem) 0;
 }
 
 /* Below 640px the folio carries no frame of its own, so this margin is the text's: 16px. */
-@media (max-width: 39.99rem) {
+@media (width < 40rem) {
   .page {
     padding-inline: 1rem;
   }
@@ -22,7 +22,7 @@
   margin: 0;
   font-variant-caps: all-small-caps;
   letter-spacing: 0.16em;
-  font-size: 1.125rem;
+  font-size: var(--text-large);
   color: var(--color-surface-muted);
 }
 

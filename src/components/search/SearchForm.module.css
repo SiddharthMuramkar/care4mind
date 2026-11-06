@@ -13,7 +13,7 @@
 
 .label {
   grid-area: label;
-  font-size: 1.0625rem;
+  font-size: var(--text-body);
   color: var(--color-surface-muted);
 }
 
@@ -28,7 +28,7 @@
   background: transparent;
   color: var(--color-surface-ink);
   font: inherit;
-  font-size: 1.375rem;
+  font-size: var(--text-title);
 }
 
 .input:focus-visible {

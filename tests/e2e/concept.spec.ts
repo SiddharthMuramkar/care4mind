@@ -216,6 +216,14 @@ const linked = (page: Page) => page.getByRole('region', { name: 'Linked knowledg
 /** The open preview card: Base UI marks it open and the side it sits on. */
 const previewCard = (page: Page) => page.locator('[data-open][data-side]').last()
 
+/** Whether a popup has finished arriving: Base UI has let go of its starting style, and no transition runs. */
+const hasSettled = (popup: Locator) =>
+  popup.evaluate(
+    (element) =>
+      !element.hasAttribute('data-starting-style') &&
+      element.getAnimations().every((animation) => animation.playState !== 'running'),
+  )
+
 /** Wait two frames, for a scroll-driven style to catch up with the scroll. */
 const frames = (page: Page) =>
   page.evaluate(
@@ -692,6 +700,8 @@ test.describe('Concept page v2: previews', () => {
       previewed.topic.name,
     )
     await expect(card).toContainText(/About \d+ minutes? to read/)
+    // A card still rising in makes Playwright's hover retry and scroll, flipping the card away.
+    await expect.poll(() => hasSettled(card)).toBe(true)
     await expect
       .poll(async () => overlap(await card.boundingBox(), await link.boundingBox()))
       .toBe(0)

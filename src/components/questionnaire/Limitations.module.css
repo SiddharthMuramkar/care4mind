@@ -40,7 +40,7 @@
   padding: 0.35rem 0.75rem;
   border-inline-start: 4px solid var(--color-highlight);
   font-style: italic;
-  font-size: 1rem;
+  font-size: var(--text-base);
 }
 
 .pageDraft {

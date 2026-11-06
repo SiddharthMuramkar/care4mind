@@ -2,7 +2,7 @@
 
 import { memo } from 'react'
 
-import styles from './Flow.module.css'
+import styles from './Statement.module.css'
 
 interface Props {
   item: { id: string; text: string; options: readonly string[] }

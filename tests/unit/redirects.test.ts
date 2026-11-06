@@ -1,7 +1,15 @@
 import { getPathMatch } from 'next/dist/shared/lib/router/utils/path-match'
 import { beforeAll, describe, expect, it } from 'vitest'
 
-import { redirects } from '@/config/redirects'
+import {
+  feedOf,
+  oldArchives,
+  oldFeed,
+  oldMedia,
+  oldPagesAndPosts,
+  oldShortlinks,
+} from '@/config/old-site-urls'
+import { redirects, type Redirect } from '@/config/redirects'
 import { hrefFor, site } from '@/content'
 import { CONTENT_KINDS, type ContentRecord, type RecordOf, localSource } from '@/content/testing'
 
@@ -58,6 +66,22 @@ const PAGES_AND_POSTS: Readonly<Record<string, string>> = {
   '/triguna/': '/concepts/triguna/',
 }
 
+/** Where an old page now leads: its row's page, or itself when the new site keeps it. */
+const newPageOf = (old: string) => PAGES_AND_POSTS[old] ?? old
+
+/** An old shortlink as a browser asks for it. */
+const shortlinkOf = (id: string) => `/?p=${id}`
+
+/** The six posts' WordPress ids, as the saved copies list them. */
+const POST_IDS: Readonly<Record<string, string>> = {
+  '431': '/karmayoga-scale/',
+  '353': '/anubandha-chatushtaya/',
+  '329': '/teertha-yatra-quiz/',
+  '300': '/jagat/',
+  '298': '/jiva/',
+  '296': '/atman/',
+}
+
 let records: ContentRecord[] = []
 
 // Read once, with room for a busy machine.
@@ -94,11 +118,29 @@ function addressesOf(record: ContentRecord): string[] {
   }
 }
 
-/** The rows that catch a path, as Next matches a source: ignoring case, with the slash exact. */
-function rowsCatching(path: string) {
+/** Whether a row's conditions hold for a query, as Next reads a query condition. */
+function conditionsHold({ has }: Redirect, query: URLSearchParams) {
+  // Only query conditions can be judged from an address alone here; a header, cookie or
+  // host condition is left to the browser tests, and counts as not holding.
+  return (has ?? []).every((condition) => {
+    if (condition.type !== 'query') return false
+    const value = query.get(condition.key)
+    // Next reads a condition's value as a pattern the query value must match.
+    return (
+      value !== null &&
+      (condition.value === undefined || new RegExp(`^${condition.value}$`).test(value))
+    )
+  })
+}
+
+/** The rows that catch an address, as Next matches a source: ignoring case, with the slash exact. */
+function rowsCatching(address: string) {
+  const [path = '', query = ''] = address.split('?')
+  const search = new URLSearchParams(query)
   return redirects.filter(
-    ({ source }) =>
-      getPathMatch(source, { strict: true, removeUnnamedParams: true })(path) !== false,
+    (row) =>
+      getPathMatch(row.source, { strict: true, removeUnnamedParams: true })(path) !== false &&
+      conditionsHold(row, search),
   )
 }
 
@@ -137,6 +179,15 @@ describe('archives and the feed', () => {
     expect(sends('/feed/')).toBe('/')
   })
 
+  it('sends each page’s and archive’s feed where its page goes, in one hop', () => {
+    for (const [old, page] of Object.entries(PAGES_AND_POSTS))
+      expect(sends(feedOf(old)), feedOf(old)).toBe(page)
+    expect(sends('/category/concepts/feed/')).toBe('/concepts/')
+    expect(sends('/category/uncategorized/feed/')).toBe('/')
+    // The one kept page with a feed of its own: its feed leads back to it.
+    expect(sends(feedOf('/concepts/'))).toBe('/concepts/')
+  })
+
   it('sends any author’s archive and feed home by a pattern, never a username', () => {
     // Made-up names: the real ones never appear in the repo.
     for (const old of ['/author/any-name/', '/author/Another-Name/', '/author/any-name/feed/'])
@@ -146,25 +197,134 @@ describe('archives and the feed', () => {
   })
 })
 
+describe('the checked-in inventory of the old site’s addresses (FR-07)', () => {
+  it('names the 33 pages and 6 posts, the archives as a pattern, and the feed', () => {
+    expect(oldPagesAndPosts).toHaveLength(39)
+    expect([...oldPagesAndPosts].sort()).toEqual(
+      [...Object.keys(PAGES_AND_POSTS), '/', '/concepts/'].sort(),
+    )
+    expect(oldArchives).toEqual([
+      '/category/concepts/',
+      '/category/uncategorized/',
+      '/author/:name*/',
+    ])
+    expect(oldFeed).toBe('/feed/')
+    expect(Object.fromEntries(oldShortlinks.map(({ id, post }) => [id, post]))).toEqual(POST_IDS)
+    // No address here is a username: the only author entry is the pattern itself.
+    for (const address of [...oldPagesAndPosts, ...oldArchives, oldFeed])
+      expect(address, address).toMatch(/^\/$|^\/(?:[a-z0-9:*-]+\/)+$/)
+  })
+
+  it('lands every inventoried page, archive and feed address on a route in one hop', async () => {
+    const paths = new Set<string>((await site.routes()).map(({ path }) => path))
+    // The author archives under made-up names: the real ones never appear in the repo.
+    const authorExamples = ['/author/any-name/', '/author/any-name/feed/']
+    const inventoried = [
+      ...oldPagesAndPosts,
+      ...oldPagesAndPosts.map(feedOf),
+      '/category/concepts/',
+      '/category/uncategorized/',
+      '/category/concepts/feed/',
+      '/category/uncategorized/feed/',
+      ...authorExamples,
+      oldFeed,
+      ...oldMedia.map(({ address }) => address),
+      ...oldShortlinks.map(({ id }) => shortlinkOf(id)),
+    ]
+    for (const address of inventoried) {
+      if (paths.has(address)) {
+        expect(rowsCatching(address), `${address} is kept`).toEqual([])
+        continue
+      }
+      const destination = sends(address)
+      expect(typeof destination, `${address} is caught by exactly one row`).toBe('string')
+      const [path = ''] = (destination as string).split('#')
+      expect(paths, `${address} → ${destination}`).toContain(path)
+      expect(rowsCatching(path), `${address} → ${destination} is one hop`).toEqual([])
+    }
+  })
+})
+
+describe('the old site’s media and shortlinks', () => {
+  it('names the 52 media addresses the saved copies show, each once, with the pages that showed it', () => {
+    expect(oldMedia).toHaveLength(52)
+    const addresses = oldMedia.map(({ address }) => address.toLowerCase())
+    expect(new Set(addresses).size).toBe(addresses.length)
+    for (const { address, shownOn } of oldMedia) {
+      expect(address).toMatch(
+        /^\/wp-content\/uploads\/(?:[a-z0-9]+\/)+[A-Za-z0-9._-]+\.(?:png|jpe?g)$/,
+      )
+      expect(shownOn.length, address).toBeGreaterThan(0)
+      for (const page of shownOn) expect(oldPagesAndPosts, address).toContain(page)
+      // Shown on several pages, it goes where the first of them in the inventory goes.
+      const inInventoryOrder = [...shownOn].sort(
+        (a, b) => oldPagesAndPosts.indexOf(a) - oldPagesAndPosts.indexOf(b),
+      )
+      expect(shownOn, address).toEqual(inInventoryOrder)
+    }
+  })
+
+  it('sends each media address where the first page that showed it now leads, by one row', () => {
+    for (const { address, shownOn } of oldMedia)
+      expect(sends(address), address).toBe(newPageOf(shownOn[0] ?? ''))
+    // Capitals in a file name match as typed, and any other case too.
+    const named = oldMedia.find(({ address }) => /[A-Z]/.test(address))?.address ?? ''
+    expect(named).not.toBe('')
+    expect(sends(named.toLowerCase())).toBe(sends(named))
+  })
+
+  it('sends each post’s ?p= shortlink to that post’s new page, and leaves / alone without one', () => {
+    for (const [id, post] of Object.entries(POST_IDS))
+      expect(sends(shortlinkOf(id)), id).toBe(newPageOf(post))
+    expect(rowsCatching('/?p=1')).toEqual([])
+    expect(rowsCatching('/?p=4310')).toEqual([])
+    expect(rowsCatching('/')).toEqual([])
+  })
+})
+
 describe('the table (FR-07)', () => {
-  it('lists those old addresses and /topics/, each once, and nothing else', () => {
+  it('lists those old addresses, their feeds, media and shortlinks, and /topics/, each once, and nothing else', () => {
     const sources = redirects.map(({ source }) => source)
+    const moved = Object.keys(PAGES_AND_POSTS)
+    const categories = ['/category/concepts/', '/category/uncategorized/']
     expect([...sources].sort()).toEqual(
       [
-        ...Object.keys(PAGES_AND_POSTS),
-        '/category/concepts/',
-        '/category/uncategorized/',
+        ...moved,
+        ...moved.map(feedOf),
+        ...categories,
+        ...categories.map(feedOf),
+        feedOf('/concepts/'),
         '/author/:name*/',
         '/feed/',
         '/topics/',
+        ...oldMedia.map(({ address }) => address),
+        ...oldShortlinks.map(() => '/'),
       ].sort(),
     )
     // Next matches sources ignoring case, so two differing only in case would share a source too.
-    expect(new Set(sources.map((source) => source.toLowerCase())).size).toBe(sources.length)
+    const keys = redirects.map(
+      ({ source, has }) => `${source.toLowerCase()} ${JSON.stringify(has)}`,
+    )
+    expect(new Set(keys).size).toBe(redirects.length)
   })
 
-  it('writes each old address as the current site served it: lower case, with its slash', () => {
-    for (const { source } of redirects) expect(source).toMatch(/^\/(?:[a-z0-9:*-]+\/)+$/)
+  it('writes each old address as the current site served it: lower case, ending in its slash or a file name as uploaded', () => {
+    for (const { source } of redirects)
+      expect(source).toMatch(
+        /^\/(?:[a-z0-9:*-]+\/)*$|^\/(?:[a-z0-9:*-]+\/)*[A-Za-z0-9._-]+\.[a-z0-9]+$/,
+      )
+  })
+
+  it('can express a query-conditioned address, and serves the table to Next as 301s', async () => {
+    // An old shortlink is told apart by its query alone; the type has room for it.
+    const shortlink: Redirect = {
+      source: '/',
+      destination: '/',
+      has: [{ type: 'query', key: 'p' }],
+    }
+    expect(shortlink.has).toEqual([{ type: 'query', key: 'p' }])
+    const served = await nextConfig.redirects?.()
+    expect(served).toEqual(redirects.map((row) => ({ ...row, statusCode: 301 })))
   })
 
   it('sends every row to a route in the registry, or to an anchor hrefFor() makes on one', async () => {

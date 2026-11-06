@@ -31,7 +31,7 @@
   list-style: none;
 }
 
-@media (min-width: 52rem) {
+@media (width >= 52rem) {
   .books {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -84,7 +84,7 @@
 .title {
   font-family: var(--font-display);
   font-weight: 500;
-  font-size: 1.5rem;
+  font-size: var(--text-heading);
   line-height: 1.2;
   text-wrap: balance;
 }
@@ -94,18 +94,18 @@
 }
 
 .authors {
-  font-size: 1.125rem;
+  font-size: var(--text-large);
 }
 
 .details {
   color: var(--color-surface-muted);
-  font-size: 1rem;
+  font-size: var(--text-base);
 }
 
 .note {
   margin-top: 0.4rem;
   max-width: 60ch;
-  font-size: 1.0625rem;
+  font-size: var(--text-body);
   line-height: 1.6;
 }
 
@@ -115,7 +115,7 @@
   align-items: baseline;
   gap: 0.25rem 1.25rem;
   margin-top: 0.35rem;
-  font-size: 1rem;
+  font-size: var(--text-base);
 }
 
 /* The entry a spine leads to: a vermilion wash for a moment's reading, and its band set in it. */

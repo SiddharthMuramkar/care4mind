@@ -3,8 +3,7 @@ import Link from 'next/link'
 import type { ConceptCard, TopicRef } from '@/content'
 
 import { turnBack, turnForward } from '../PageTurn'
-import { LinkPreview } from '../preview'
-import { conceptPreview } from './previews'
+import { conceptPreview, LinkPreview } from '../preview'
 import styles from './TopicPager.module.css'
 
 /** One way through the topic, named by the Concept it leads to. */

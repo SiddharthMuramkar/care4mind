@@ -1,5 +1,6 @@
 import { cx } from '@/lib/cx'
 
+import { mapAttribute } from './attributes'
 import styles from './ConceptMap.module.css'
 import { KINDS } from './kinds'
 import { type MapLayout, RADIUS, SIZE } from './layout'
@@ -34,7 +35,7 @@ export function PlatePicture({ layout, className }: { layout: MapLayout; classNa
             <path
               key={connection.id}
               className={styles.line}
-              data-kind={kind}
+              {...{ [mapAttribute.kind]: kind }}
               d={connection.path}
             />
           )),

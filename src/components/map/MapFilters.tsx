@@ -1,17 +1,10 @@
 'use client'
 
-import {
-  type ComponentType,
-  useCallback,
-  useEffect,
-  useLayoutEffect,
-  useMemo,
-  useRef,
-  useState,
-  useSyncExternalStore,
-} from 'react'
+import { type ComponentType, useLayoutEffect, useMemo, useRef, useState } from 'react'
 
-import { whenIdle } from '@/components/browser'
+import { filterStyles, Tally } from '@/components/filters'
+import { pushAddress, useAddressQuery, useKeyboardParts } from '@/components/island'
+import { cx } from '@/lib/cx'
 
 import {
   countText,
@@ -22,6 +15,7 @@ import {
   stands,
   writeSelection,
 } from './filter'
+import { mapAttribute } from './attributes'
 import { KIND_WORDS, KINDS, type ConnectionKind } from './kinds'
 import { LineSwatch } from './LineSwatch'
 import styles from './MapFilters.module.css'
@@ -45,47 +39,26 @@ export interface KeyboardParts {
 let keyboard: Promise<KeyboardParts> | undefined
 const loadKeyboard = () => (keyboard ??= import('./MapKeyboard').then((module) => module.parts))
 
-// The address is the filters' one source: a press pushes a new one, Back restores the last.
-const listeners = new Set<() => void>()
-function subscribe(listener: () => void) {
-  listeners.add(listener)
-  window.addEventListener('popstate', listener)
-  return () => {
-    listeners.delete(listener)
-    window.removeEventListener('popstate', listener)
-  }
-}
-const search = () => window.location.search
-const noSearch = () => ''
-
-/** The clear button unmounts with the filter, which would drop focus on the page. */
-function focusBeforeClear(root: ParentNode | null) {
-  const next =
-    root?.querySelector<HTMLElement>('[data-chip]') ??
-    root?.querySelector<HTMLElement>('[aria-live="polite"]')
-  next?.focus()
-}
-
 /** Move to a new address, keeping its fragment (#plate on a phone), and let the filters read it. */
 function go(selection: Selection) {
   const { pathname, hash } = window.location
-  window.history.pushState(null, '', `${pathname}${writeSelection(selection)}${hash}`)
-  for (const listener of listeners) listener()
+  pushAddress(`${pathname}${writeSelection(selection)}${hash}`)
 }
 
 /** The map's elements a filter touches, as the server rendered them. */
-const map = () => (typeof document === 'undefined' ? null : document.querySelector('[data-map]'))
+const map = () =>
+  typeof document === 'undefined' ? null : document.querySelector(`[${mapAttribute.map}]`)
 const facts = (element: HTMLElement | SVGElement) => ({
-  kind: element.dataset.kind as ConnectionKind,
-  topics: (element.dataset.topics ?? '').split(' '),
+  kind: element.getAttribute(mapAttribute.kind) as ConnectionKind,
+  topics: (element.getAttribute(mapAttribute.topics) ?? '').split(' '),
 })
 
 /** How many curves a selection leaves showing. */
 function countShown(selection: Selection) {
   const root = map()
   if (!root) return null
-  return [...root.querySelectorAll<SVGPathElement>('path[data-c]')].filter((curve) =>
-    shows(facts(curve), selection),
+  return [...root.querySelectorAll<SVGPathElement>(`path[${mapAttribute.connection}]`)].filter(
+    (curve) => shows(facts(curve), selection),
   ).length
 }
 
@@ -102,22 +75,27 @@ function applySelection(selection: Selection) {
   const toggle = (element: Element, name: string, on: boolean) => {
     if (element.hasAttribute(name) !== on) element.toggleAttribute(name, on)
   }
-  for (const curve of root.querySelectorAll<SVGPathElement>('path[data-c]')) {
+  for (const curve of root.querySelectorAll<SVGPathElement>(`path[${mapAttribute.connection}]`)) {
     const on = shows(facts(curve), selection)
-    toggle(curve, 'data-off', !on)
+    toggle(curve, mapAttribute.off, !on)
     if (!on) continue
-    const [a = '', b = ''] = (curve.dataset.ends ?? '').split(' ')
+    const [a = '', b = ''] = (curve.getAttribute(mapAttribute.ends) ?? '').split(' ')
     join(a, b)
     join(b, a)
   }
-  for (const row of root.querySelectorAll<HTMLElement>('li[data-c]'))
+  for (const row of root.querySelectorAll<HTMLElement>(`li[${mapAttribute.connection}]`))
     toggle(row, 'hidden', !shows(facts(row), selection))
-  for (const part of root.querySelectorAll<HTMLElement>('[data-kind-section]'))
-    toggle(part, 'hidden', !part.querySelector('li[data-c]:not([hidden])'))
-  for (const point of root.querySelectorAll<HTMLElement>('[data-p]')) {
-    const neighbours = [...(near.get(point.dataset.p ?? '') ?? [])].join(' ')
-    if (point.dataset.near !== neighbours) point.dataset.near = neighbours
-    toggle(point, 'data-faint', !stands((point.dataset.topics ?? '').split(' '), selection))
+  for (const part of root.querySelectorAll<HTMLElement>(`[${mapAttribute.kindSection}]`))
+    toggle(part, 'hidden', !part.querySelector(`li[${mapAttribute.connection}]:not([hidden])`))
+  for (const point of root.querySelectorAll<HTMLElement>(`[${mapAttribute.point}]`)) {
+    const neighbours = [...(near.get(point.getAttribute(mapAttribute.point) ?? '') ?? [])].join(' ')
+    if (point.getAttribute(mapAttribute.near) !== neighbours)
+      point.setAttribute(mapAttribute.near, neighbours)
+    toggle(
+      point,
+      mapAttribute.faint,
+      !stands((point.getAttribute(mapAttribute.topics) ?? '').split(' '), selection),
+    )
   }
 }
 
@@ -135,9 +113,9 @@ function PlainButtons({ topics, selection, onChange }: ButtonsProps) {
             <button
               key={kind}
               type="button"
-              className={styles.chip}
+              className={cx(filterStyles.chip, styles.chip)}
               aria-pressed={on}
-              data-chip={`kind:${kind}`}
+              {...{ [mapAttribute.chip]: `kind:${kind}` }}
               data-ink
               onClick={() => onChange({ ...selection, kind: on ? null : kind })}
             >
@@ -157,9 +135,9 @@ function PlainButtons({ topics, selection, onChange }: ButtonsProps) {
             <button
               key={slug}
               type="button"
-              className={styles.chip}
+              className={cx(filterStyles.chip, styles.chip)}
               aria-pressed={on}
-              data-chip={`topic:${slug}`}
+              {...{ [mapAttribute.chip]: `topic:${slug}` }}
               data-topic={slug}
               data-ink
               onClick={() =>
@@ -195,44 +173,11 @@ interface Props {
  */
 export function MapFilters({ topics, total }: Props) {
   const known = useMemo(() => new Set(topics.map(({ slug }) => slug)), [topics])
-  const address = useSyncExternalStore(subscribe, search, noSearch)
+  const address = useAddressQuery()
   const selection = useMemo(() => readSelection(address, known), [address, known])
   const [shown, setShown] = useState<number | null>(null)
-  const [parts, setParts] = useState<KeyboardParts>()
-  const controls = useRef<HTMLDivElement>(null)
-  const handoff = useRef<string | undefined>(undefined)
+  const { parts, controls, handlers } = useKeyboardParts(loadKeyboard)
   const filtered = useRef(false)
-
-  // A press under way when Base UI arrives finishes on the plain button first: swapping the
-  // button between its pointerdown and its click would lose the press.
-  const pressing = useRef(false)
-  const waiting = useRef<(() => void) | undefined>(undefined)
-  const release = () => {
-    setTimeout(() => {
-      pressing.current = false
-      waiting.current?.()
-      waiting.current = undefined
-    })
-  }
-  const hold = () => {
-    pressing.current = true
-    setTimeout(release, 1000)
-  }
-
-  const upgrade = useCallback(() => {
-    void loadKeyboard().then((loaded) => {
-      const swap = () => {
-        const focused = document.activeElement
-        if (focused instanceof HTMLElement && controls.current?.contains(focused))
-          handoff.current = focused.dataset.chip
-        setParts(() => loaded)
-      }
-      if (pressing.current) waiting.current = swap
-      else swap()
-    })
-  }, [])
-
-  useEffect(() => whenIdle(upgrade), [upgrade])
 
   useLayoutEffect(() => {
     // The server's page is the unfiltered map: nothing to do until a filter is chosen.
@@ -243,49 +188,21 @@ export function MapFilters({ topics, total }: Props) {
     setShown(countShown(selection))
   }, [selection])
 
-  useEffect(() => {
-    const key = handoff.current
-    if (!parts || !key) return
-    handoff.current = undefined
-    controls.current?.querySelector<HTMLElement>(`[data-chip="${key}"]`)?.focus()
-  }, [parts])
-
   const Buttons = parts?.Buttons ?? PlainButtons
   const empty = selection.kind === null && selection.topic.length === 0
 
   return (
-    <div
-      ref={controls}
-      className={styles.filters}
-      onPointerEnter={parts ? undefined : upgrade}
-      onFocus={parts ? undefined : upgrade}
-      onPointerDown={parts ? undefined : hold}
-      onKeyDown={parts ? undefined : ({ key }) => (key === ' ' || key === 'Enter') && hold()}
-      onPointerUp={parts ? undefined : release}
-      onPointerCancel={parts ? undefined : release}
-      onKeyUp={parts ? undefined : release}
-    >
+    <div ref={controls} className={styles.filters} {...handlers}>
       <div className={styles.groups}>
         <Buttons topics={topics} selection={selection} onChange={go} />
       </div>
-      <div className={styles.tally}>
-        <p tabIndex={-1} className={styles.count} aria-live="polite" aria-atomic="true">
-          {countText(shown ?? total, total)}
-        </p>
-        {empty ? null : (
-          <button
-            type="button"
-            className={styles.clear}
-            data-ink
-            onClick={() => {
-              focusBeforeClear(controls.current)
-              go(NOTHING)
-            }}
-          >
-            Clear filters
-          </button>
-        )}
-      </div>
+      <Tally
+        count={countText(shown ?? total, total)}
+        onClear={empty ? undefined : () => go(NOTHING)}
+        controls={controls}
+        className={styles.tally}
+        clearClassName={styles.clear}
+      />
     </div>
   )
 }

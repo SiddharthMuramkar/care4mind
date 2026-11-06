@@ -1,6 +1,7 @@
 import type { Route } from 'next'
 
 import { home, hrefFor, library, questionnaires, references, site, topics } from '@/content'
+import { count } from '@/lib/text'
 
 import type { Holding, LibraryLink, NavLink, SiteNav } from './types'
 
@@ -29,7 +30,11 @@ async function build(): Promise<SiteNav> {
   const has = (kind: string) => routes.some((entry) => entry.kind === kind)
   const link = (label: string, href: Route): NavLink => ({ label, href })
 
-  const holds = (count: number, one: string, many: string): Holding => ({ count, one, many })
+  const holds = (n: number, one: string, many: string): Holding => ({
+    count: n,
+    unit: n === 1 ? one : many,
+    text: count(n, one, many),
+  })
   // In the Library page's order: References, then the Library's lists and pages as it lists them.
   const libraryPages: LibraryLink[] = [
     {
@@ -56,7 +61,7 @@ async function build(): Promise<SiteNav> {
       slug: topic.slug,
       ...link(topic.name, topic.href),
       ...(topic.term ? { term: topic.term.iast } : {}),
-      count: topic.conceptCount,
+      holds: holds(topic.conceptCount, 'Concept', 'Concepts'),
     }))
 
   return {

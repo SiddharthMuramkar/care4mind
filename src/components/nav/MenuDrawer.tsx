@@ -136,8 +136,8 @@ function ConceptsList({ nav, pathname, mapNote }: ListProps & { mapNote?: ReactN
             </span>
             <span className={styles.leader} aria-hidden />
             <span className={styles.count}>
-              {topic.count}
-              <span className="sr-only"> {topic.count === 1 ? 'Concept' : 'Concepts'}</span>
+              {topic.holds.count}
+              <span className="sr-only"> {topic.holds.unit}</span>
             </span>
           </Link>
         </li>
@@ -184,10 +184,7 @@ function LibraryList({ nav, pathname }: ListProps) {
                 <span className={styles.leader} aria-hidden />
                 <span className={styles.count}>
                   {page.holds.count}
-                  <span className="sr-only">
-                    {' '}
-                    {page.holds.count === 1 ? page.holds.one : page.holds.many}
-                  </span>
+                  <span className="sr-only"> {page.holds.unit}</span>
                 </span>
               </>
             ) : null}

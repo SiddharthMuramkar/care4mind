@@ -14,7 +14,6 @@ import {
 import { createPortal } from 'react-dom'
 
 import { Numeral } from '@/components/Numeral'
-import { count } from '@/lib/text'
 
 import { currentFor, panelOf } from './current'
 import { ArrowGlyph, ChevronGlyph } from '../glyphs'
@@ -240,7 +239,7 @@ function ConceptsPanel({ site, pathname, mapNote }: PanelProps & { mapNote?: Rea
                 ) : null}
               </span>
               <span className={styles.leader} aria-hidden />
-              <span className={styles.count}>{count(topic.count, 'Concept', 'Concepts')}</span>
+              <span className={styles.count}>{topic.holds.text}</span>
             </PanelLink>
           </li>
         ))}
@@ -278,9 +277,7 @@ function LibraryPanel({ site, pathname }: PanelProps) {
               {page.holds ? (
                 <>
                   <span className={styles.leader} aria-hidden />
-                  <span className={styles.count}>
-                    {count(page.holds.count, page.holds.one, page.holds.many)}
-                  </span>
+                  <span className={styles.count}>{page.holds.text}</span>
                 </>
               ) : null}
             </PanelLink>

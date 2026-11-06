@@ -1,5 +1,6 @@
 import { cx } from '@/lib/cx'
 
+import { mapAttribute } from './attributes'
 import styles from './ConceptMap.module.css'
 import type { ConnectionKind } from './kinds'
 
@@ -12,7 +13,7 @@ export function LineSwatch({ kind, className }: { kind: ConnectionKind; classNam
       aria-hidden="true"
       focusable="false"
     >
-      <path className={styles.line} data-kind={kind} d="M3 5H37" />
+      <path className={styles.line} {...{ [mapAttribute.kind]: kind }} d="M3 5H37" />
     </svg>
   )
 }

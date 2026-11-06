@@ -1,7 +1,7 @@
 /* What a page holds, counted: "5 Concepts · 12 verses". */
 .facts {
   margin: 0;
-  font-size: 1.0625rem;
+  font-size: var(--text-body);
   color: var(--color-surface-muted);
 }
 
@@ -40,14 +40,14 @@
   margin: 0;
   font-family: var(--font-display);
   font-weight: 500;
-  font-size: 1.5rem;
+  font-size: var(--text-heading);
   line-height: 1.2;
 }
 
 .groupCount {
   margin: 0;
   font-family: var(--font-text);
-  font-size: 1rem;
+  font-size: var(--text-base);
   color: var(--color-surface-muted);
 }
 
@@ -110,7 +110,7 @@
 
 .slipConcepts {
   margin: 0;
-  font-size: 1.0625rem;
+  font-size: var(--text-body);
 }
 
 .slipLabel {
