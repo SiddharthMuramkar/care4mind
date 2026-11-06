@@ -25,12 +25,16 @@ const isArchiveOrFeed = (source: string) => /^\/(?:category|author|feed)\//.test
  */
 const olds = (() => {
   const sampled = new Set<string>()
-  return redirects.flatMap(({ source, destination }) => {
+  return redirects.flatMap(({ source, destination, has }) => {
     const [path = '', anchor] = destination.split('#')
     const kind = `${routes.find((route) => route.path === path)?.kind}${anchor ? '#' : ''}`
     const sample = isArchiveOrFeed(source) || !sampled.has(kind)
     sampled.add(kind)
-    const addresses = source.includes(':') ? (PATTERN_EXAMPLES[source] ?? [source]) : [source]
+    // A shortlink row stands for its source with the query its condition asks for.
+    const query = (has ?? []).map(({ key, value }) => `${key}=${value}`).join('&')
+    const addresses = source.includes(':')
+      ? (PATTERN_EXAMPLES[source] ?? [source])
+      : [query ? `${source}?${query}` : source]
     return addresses.map((address) => ({ address, destination, ...(sample && { sample: true }) }))
   })
 })()
@@ -66,7 +70,11 @@ test.describe('every old address (FR-07)', () => {
     test(`${address} answers one 301 to ${destination}, which answers 200`, async ({ request }) => {
       const response = await request.get(address, { maxRedirects: 0 })
       expect(response.status(), 'a permanent redirect, not Next’s default 308').toBe(301)
-      expect(response.headers().location).toBe(destination)
+      // Next passes a request's query through to the destination, before any anchor.
+      const [, query] = address.split('?')
+      const [beforeAnchor = '', anchor] = destination.split('#')
+      const expected = query ? `${beforeAnchor}?${query}${anchor ? `#${anchor}` : ''}` : destination
+      expect(response.headers().location).toBe(expected)
 
       const [path = '', fragment] = destination.split('#')
       const page = await request.get(path, { maxRedirects: 0 })
@@ -79,23 +87,38 @@ test.describe('every old address (FR-07)', () => {
 test.describe('an old address typed another way', () => {
   // Next adds a missing trailing slash, with a 308 of its own, before it reads the redirect
   // table; it matches the table's sources ignoring case.
+  // A file's address has no slash to drop, and a query's key keeps its case.
   const VARIANTS = [
-    { name: 'without its slash', form: (old: string) => old.slice(0, -1), hops: [308, 301] },
-    { name: 'in capitals', form: (old: string) => old.toUpperCase(), hops: [301] },
+    {
+      name: 'without its slash',
+      form: (old: string) => old.slice(0, -1),
+      hops: [308, 301],
+      fits: (old: string) => old.endsWith('/'),
+    },
+    {
+      name: 'in capitals',
+      form: (old: string) => old.toUpperCase(),
+      hops: [301],
+      fits: (old: string) => !old.includes('?'),
+    },
     {
       name: 'in capitals, without its slash',
       form: (old: string) => old.slice(0, -1).toUpperCase(),
       hops: [308, 301],
+      fits: (old: string) => old.endsWith('/'),
     },
   ]
 
-  for (const { address, destination } of inScope(olds))
+  for (const { address, destination } of inScope(olds).filter(({ address }) =>
+    VARIANTS.some(({ fits }) => fits(address)),
+  ))
     test(`${address} still reaches ${destination}`, async ({ request }) => {
       const [path = ''] = destination.split('#')
-      for (const { name, form, hops } of VARIANTS) {
+      for (const { name, form, hops, fits } of VARIANTS) {
+        if (!fits(address)) continue
         const { statuses, at } = await follow(request, form(address))
         expect(statuses, `${form(address)}, ${name}`).toEqual([...hops, 200])
-        expect(at.split('#')[0], `${form(address)}, ${name}`).toBe(path)
+        expect(at.split(/[?#]/)[0], `${form(address)}, ${name}`).toBe(path)
       }
     })
 
