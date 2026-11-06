@@ -93,7 +93,7 @@
 }
 
 /* On a phone the controls stand one under another, each the width of the page. */
-@media (max-width: 30rem) {
+@media (width < 30rem) {
   .controls > * {
     flex: 1 1 100%;
     justify-content: center;
@@ -213,7 +213,7 @@
   }
 }
 
-@media (max-width: 30rem) {
+@media (width < 30rem) {
   .answers {
     gap: 0.85rem;
   }

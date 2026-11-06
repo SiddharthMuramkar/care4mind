@@ -1,0 +1,67 @@
+/*
+ * What the A–Z's and the Concept map's filters share: the chip, the count and Clear filters.
+ * Each island's own module adds what is its alone.
+ */
+
+/* A chip is a slip of type: outlined while off, inked solid while pressed, pressed into the paper. */
+.chip {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.25rem;
+  padding: 0.2rem 0.85rem;
+  border: 1px solid color-mix(in srgb, var(--color-surface-ink) 45%, transparent);
+  border-radius: 2px;
+  background: transparent;
+  color: var(--color-surface-ink);
+  font: inherit;
+  font-size: 1rem;
+  line-height: 1.3;
+  text-align: start;
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.chip:hover {
+  border-color: var(--color-surface-ink);
+}
+
+.chip[aria-pressed='true'] {
+  background: var(--color-ground);
+  border-color: var(--color-ground);
+  color: var(--color-ink);
+}
+
+/* Windows' contrast themes repaint the pressed chip's ground: draw it in the theme's selection colours. */
+@media (forced-colors: active) {
+  .chip[aria-pressed='true'] {
+    forced-color-adjust: none;
+    background: Highlight;
+    border-color: Highlight;
+    color: HighlightText;
+  }
+}
+
+.chip:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+.count {
+  margin: 0;
+  font-size: 1.125rem;
+  color: var(--color-surface-muted);
+}
+
+.clear {
+  position: relative;
+  min-height: 2.25rem;
+  padding: 0 0.25rem;
+  border: 0;
+  background: none;
+  color: var(--color-link);
+  font: inherit;
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+  cursor: pointer;
+}

@@ -85,7 +85,7 @@
 }
 
 /* With room, the five options run in a row as a scale, each mark over its label. */
-@media (min-width: 46rem) {
+@media (width >= 46rem) {
   .options {
     grid-template-columns: repeat(5, minmax(0, 1fr));
   }

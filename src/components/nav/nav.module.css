@@ -10,7 +10,7 @@
   padding: 0;
 }
 
-@media (min-width: 72rem) {
+@media (width >= 72rem) {
   .sections {
     display: flex;
     align-items: center;

@@ -14,7 +14,7 @@
   border: 1px solid var(--color-preview-line);
   border-top: 3px double var(--color-preview-line);
   box-shadow: 0 0.75rem 2rem -0.75rem var(--color-scroll-shadow);
-  font-size: 1rem;
+  font-size: var(--text-base);
   line-height: 1.5;
   transform-origin: var(--transform-origin);
 }
@@ -25,7 +25,7 @@
 
 .kind {
   color: var(--color-preview-muted);
-  font-size: 1rem;
+  font-size: var(--text-base);
 }
 
 .name {
@@ -34,7 +34,7 @@
   align-items: baseline;
   gap: 0 0.6rem;
   font-family: var(--font-display);
-  font-size: 1.375rem;
+  font-size: var(--text-title);
   line-height: 1.25;
 }
 
@@ -45,13 +45,13 @@
 
 .deva {
   font-family: var(--font-deva);
-  font-size: 1.125rem;
+  font-size: var(--text-large);
   font-style: normal;
 }
 
 .gloss {
   color: var(--color-preview-muted);
-  font-size: 1.0625rem;
+  font-size: var(--text-body);
 }
 
 .meta {
@@ -60,7 +60,7 @@
   align-items: center;
   gap: 0.5rem 0.75rem;
   color: var(--color-preview-muted);
-  font-size: 1rem;
+  font-size: var(--text-base);
 }
 
 /* A line or four of the content: the link's page has the rest. */

@@ -5,11 +5,11 @@
 }
 
 .promise {
-  max-width: 44ch;
+  max-width: var(--measure-lede);
   margin: 0;
   color: var(--color-surface-muted);
   font-style: italic;
-  font-size: 1.0625rem;
+  font-size: var(--text-body);
   line-height: 1.55;
 }
 

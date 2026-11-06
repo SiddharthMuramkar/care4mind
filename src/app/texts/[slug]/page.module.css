@@ -23,7 +23,7 @@
 
 .blurb {
   margin: 0;
-  font-size: 1.125rem;
+  font-size: var(--text-large);
   line-height: 1.55;
 }
 
@@ -63,7 +63,7 @@
   color: var(--color-surface-muted);
 }
 
-@media (min-width: 64rem) {
+@media (width >= 64rem) {
   .body {
     grid-template-columns: 10.5rem minmax(0, 1fr);
     column-gap: clamp(2rem, 4vw, 3.5rem);
