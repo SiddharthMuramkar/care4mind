@@ -6,7 +6,7 @@ import { turnForward } from '@/components/PageTurn'
 import { Text } from '@/components/prose'
 import { ScriptPair } from '@/components/script'
 import type { PassageView, RecordRef } from '@/content'
-import { toDevanagariDigits } from '@/lib/text'
+import { listSeparator, toDevanagariDigits } from '@/lib/text'
 
 import styles from './Passage.module.css'
 
@@ -14,7 +14,7 @@ import styles from './Passage.module.css'
 function Listed({ records }: { records: readonly RecordRef[] }) {
   return records.map((record, index) => (
     <span key={`${record.kind}/${record.id}`}>
-      {index === 0 ? null : index === records.length - 1 ? ' and ' : ', '}
+      {listSeparator(index, records.length)}
       <span {...(record.lang ? { lang: record.lang } : {})}>{record.title}</span>
       {record.gloss ? <> · {record.gloss}</> : null}
     </span>
