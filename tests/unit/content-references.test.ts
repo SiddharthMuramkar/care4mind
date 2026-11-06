@@ -1,7 +1,7 @@
 import { beforeAll, describe, expect, it } from 'vitest'
 
 import { references, type ReferenceView } from '@/content'
-import { type Flag, localSource } from '@/content/testing'
+import { type Flag, isSlug, localSource } from '@/content/testing'
 
 // The References census: every Reference the kept pages cite or list
 // exists once, with each way the pages wrote it. Read through the public interface, as the
@@ -66,9 +66,6 @@ function shared(views: readonly ReferenceView[], keyOf: (view: ReferenceView) =>
     .map(([key, holders]) => ({ key, holders }))
 }
 
-/** Lowercase ASCII words joined by hyphens. */
-const SLUG = /^[a-z0-9]+(?:-[a-z0-9]+)*$/
-
 /** A text's words, folded: "Rodríguez-Nieto, G." gives rodriguez, nieto and g. */
 const wordsOf = (text = '') => fold(text).split(' ').filter(Boolean)
 
@@ -79,7 +76,7 @@ const wordsOf = (text = '') => fold(text).split(' ').filter(Boolean)
  */
 function idProblems(view: ReferenceView): string[] {
   const problems: string[] = []
-  if (!SLUG.test(view.id)) problems.push('is not lowercase ASCII words joined by hyphens')
+  if (!isSlug(view.id)) problems.push('is not lowercase ASCII words joined by hyphens')
   const [name = ''] = view.id.split('-')
   const names = view.authors
     ? wordsOf(view.authors)

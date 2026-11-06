@@ -13,12 +13,11 @@
 import { mkdirSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 
+import { PLANNING_ISSUES } from '../../src/content/schema/common.ts'
+import { idOf } from '../../src/content/schema/kinds.ts'
 import { openCaptures } from './captures.mjs'
 import { rootFrom, runTool, ToolError } from './cli.mjs'
-import { idOf, loadRecords, sortRecords } from './records.mjs'
-
-/** The schema module that holds the planning issues table: this repo's, whatever --root says. */
-const SCHEMA = new URL('../../src/content/schema/common.ts', import.meta.url)
+import { loadRecords, sortRecords } from './records.mjs'
 
 /** Where --write saves the pack, relative to the repo root: a path git ignores. */
 export const FLAGS_PACK = '.scratch/content-flags.md'
@@ -157,8 +156,6 @@ async function main(args) {
   const unknown = rest.filter((arg) => arg !== '--write')
   if (unknown.length > 0) throw new ToolError(`Unknown argument: ${unknown[0]}\n${USAGE}`)
   const records = await loadRecords(root)
-  // Imported after loadRecords, which registers the hooks that let Node read TypeScript.
-  const { PLANNING_ISSUES } = await import(SCHEMA.href)
   const text = buildReport(records, captures, PLANNING_ISSUES)
   if (!write) {
     process.stdout.write(text)

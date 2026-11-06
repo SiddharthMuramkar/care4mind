@@ -20,6 +20,7 @@ export {
   defineTopic,
   defineWork,
   idOf,
+  isSlug,
   KIND_FOLDERS,
   PLANNING_ISSUES,
   type Block,
