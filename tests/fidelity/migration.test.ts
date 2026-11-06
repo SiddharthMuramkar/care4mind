@@ -273,7 +273,7 @@ describe('what the site derives from them', () => {
   })
 
   it('is a Concept map of the 19 Concepts', async () => {
-    const { nodes } = await site.site.graph()
+    const { nodes } = await site.site.conceptMap()
     expect(nodes.map(({ slug }) => slug).toSorted()).toEqual(CONCEPTS.toSorted())
   })
 

@@ -39,9 +39,9 @@ function withSettings(text: string) {
 /** What a built proposal offers to try, and where. */
 async function TryIt({ proposal }: { proposal: Proposal }) {
   if (proposal.key === 'concept-map') {
-    const [graph, topicCards] = await Promise.all([site.graph(), topics.list()])
+    const [map, topicCards] = await Promise.all([site.conceptMap(), topics.list()])
     const layout = layoutMap(
-      graph,
+      map,
       topicCards.map(({ slug, name, order }) => ({ slug, name, order })),
     )
     return (

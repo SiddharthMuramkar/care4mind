@@ -206,7 +206,7 @@ describe('the search documents, on the real content', () => {
 
 describe('the Concept map, on the real content', () => {
   it('has every Concept as a node', async () => {
-    const { nodes } = await site.site.graph()
+    const { nodes } = await site.site.conceptMap()
     expect(nodes.map(({ slug }) => slug).toSorted()).toEqual(
       ofKind('concept')
         .map(({ slug }) => slug)
@@ -215,7 +215,7 @@ describe('the Concept map, on the real content', () => {
   })
 
   it('makes no edge through Tomar (2024), or through any Reference four or more Concepts cite', async () => {
-    const { edges } = await site.site.graph()
+    const { edges } = await site.site.conceptMap()
     const common = (await site.references.list())
       .filter(({ citedIn }) => citedIn.filter(({ kind }) => kind === 'concept').length >= 4)
       .map(({ id }) => id)
@@ -224,7 +224,7 @@ describe('the Concept map, on the real content', () => {
   })
 
   it('joins the Concepts that quote the same verse, saying which', async () => {
-    const { edges } = await site.site.graph()
+    const { edges } = await site.site.conceptMap()
     const joined = (a: string, b: string, via: string) =>
       edges.some(
         (edge) =>

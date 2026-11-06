@@ -741,7 +741,7 @@ describe('a Concept’s related Concepts', () => {
       { kind: 'work', text: 'Both quote the Yoga Sūtra' },
     ])
     // The Concept map keeps the links the page leaves out: "alone" to each of the four.
-    const { edges } = await content.site.graph()
+    const { edges } = await content.site.conceptMap()
     expect(edges.filter(({ source, target }) => [source, target].includes('alone'))).toHaveLength(4)
 
     // No cap: with a fifth by verse, "kin-a" lists all four others.

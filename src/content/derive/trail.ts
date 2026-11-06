@@ -7,7 +7,7 @@ import type { ContentGraph } from '../graph'
 import { displayName } from '../names'
 import type { Crumb } from '../types'
 import { hrefFor } from '../views/href'
-import { pageRoutes, type PageRoute } from './routes'
+import { recordRoutes, type RecordRoute } from './routes'
 
 /** A path as the route registry writes it: no query or fragment, with its trailing slash. */
 function normalise(path: string): string {
@@ -22,7 +22,7 @@ function pathsAbove(path: string): string[] {
   return segments.map((_, depth) => (depth === 0 ? '/' : `/${segments.slice(0, depth).join('/')}/`))
 }
 
-function crumb(route: PageRoute, graph: ContentGraph): Crumb {
+function crumb(route: RecordRoute, graph: ContentGraph): Crumb {
   const { entry, lang, gloss, record } = route
   // A Concept's crumb keeps its IAST label and gloss apart, though its route title joins them.
   const concept = record?.kind === 'concept' ? graph.record('concept', record.id) : undefined
@@ -36,13 +36,13 @@ function crumb(route: PageRoute, graph: ContentGraph): Crumb {
  * under its primary topic. A path that isn't a public page in this build has no trail.
  */
 export function trail(graph: ContentGraph, flags: Features, path: string): Crumb[] {
-  const routes = new Map<string, PageRoute>(
-    pageRoutes(graph, flags).map((route) => [route.entry.path, route]),
+  const routes = new Map<string, RecordRoute>(
+    recordRoutes(graph, flags).map((route) => [route.entry.path, route]),
   )
   const page = routes.get(normalise(path))
   if (!page) return []
 
-  const above: PageRoute[] = []
+  const above: RecordRoute[] = []
   const add = (at: string) => {
     const route = routes.get(at)
     if (route) above.push(route)

@@ -8,7 +8,7 @@
 import type { Features } from '@/config/features'
 
 import { azIndex } from '../derive/az-index'
-import { conceptGraph } from '../derive/graph-data'
+import { conceptMap } from '../derive/concept-map'
 import { routes } from '../derive/routes'
 import { searchDocuments } from '../derive/search-documents'
 import { trail } from '../derive/trail'
@@ -18,7 +18,7 @@ import type { ContentSource } from '../source'
 import type {
   AzLetter,
   ConceptCard,
-  ConceptGraph,
+  ConceptMap,
   ConceptView,
   Crumb,
   HomepageView,
@@ -237,8 +237,8 @@ export function createContent(source: ContentSource, flags: Features) {
         return searchDocuments(await graph())
       },
       /** The Concept map's data: the Concepts and the facts that connect them. */
-      async graph(): Promise<ConceptGraph> {
-        return conceptGraph(await graph())
+      async conceptMap(): Promise<ConceptMap> {
+        return conceptMap(await graph())
       },
     },
   }

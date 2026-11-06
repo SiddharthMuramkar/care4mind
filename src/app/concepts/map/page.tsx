@@ -21,9 +21,9 @@ export function generateMetadata(): Promise<Metadata> {
  * every connection in words. Its layout is worked out here, while the site builds.
  */
 export default async function ConceptMapPage() {
-  const [graph, topicCards] = await Promise.all([site.graph(), topics.list()])
+  const [map, topicCards] = await Promise.all([site.conceptMap(), topics.list()])
   const layout = layoutMap(
-    graph,
+    map,
     topicCards.map(({ slug, name, order }) => ({ slug, name, order })),
   )
 

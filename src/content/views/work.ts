@@ -2,7 +2,8 @@ import type { ContentGraph } from '../graph'
 import type { WorkRecord } from '../schema'
 import type { WorkCard, WorkView } from '../types'
 import { carriedOver, must, nameCopy, present } from './common'
-import { compareOrder, passageView, workRef } from './passage'
+import { compareOrder, passageView } from './passage'
+import { workRef } from './refs'
 
 /** The passages of a work, in its own order. */
 function passagesOf(work: WorkRecord, graph: ContentGraph) {

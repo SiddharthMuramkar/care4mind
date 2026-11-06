@@ -1,6 +1,6 @@
-import type { ConceptGraphEdge } from '@/content'
+import type { ConceptMapEdge } from '@/content'
 
-export type ConnectionKind = ConceptGraphEdge['kind']
+export type ConnectionKind = ConceptMapEdge['kind']
 
 /**
  * The kinds of connection, strongest first: the list's order, and the plate's top layer first.
