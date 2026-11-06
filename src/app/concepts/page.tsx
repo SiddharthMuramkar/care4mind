@@ -1,20 +1,11 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 
-import { AzIndex, AzLetter, DEFAULT_KINDS, type ChipGroup, type RailLetter } from '@/components/az'
+import { azModel, ConceptsAz } from '@/components/az'
 import { turnForward } from '@/components/PageTurn'
 import { ReadingPage } from '@/components/ReadingPage'
-import type { PreviewPayload } from '@/components/preview'
 import { TopicCard } from '@/components/topics'
-import {
-  concepts,
-  hrefFor,
-  site,
-  topics,
-  works,
-  type AzEntry as Entry,
-  type ConceptCard as Card,
-} from '@/content'
+import { concepts, hrefFor, site, topics, works } from '@/content'
 import { metadataFor } from '@/lib/metadata'
 import { count } from '@/lib/text'
 
@@ -26,15 +17,6 @@ const PATH = hrefFor({ page: 'concepts' })
 export function generateMetadata(): Promise<Metadata> {
   return metadataFor(PATH)
 }
-
-/** A letter's anchor on the page: `#letter-a`, and `#letter-other` for names starting otherwise. */
-const letterId = (letter: string) => `letter-${letter === '#' ? 'other' : letter.toLowerCase()}`
-
-const KINDS: readonly { value: Entry['kind']; label: string }[] = [
-  { value: 'concept', label: 'Concept pages' },
-  { value: 'term', label: 'Terms' },
-  { value: 'glossary', label: 'Glossary' },
-]
 
 /**
  * The Concepts A–Z: the topics as cards, then every Concept, every term explained inside
@@ -49,66 +31,8 @@ export default async function ConceptsPage() {
     concepts.list(),
     site.routes(),
   ])
-  const all = letters.flatMap(({ entries }) => entries)
-  const ofKind = (kind: Entry['kind']) => all.filter((entry) => entry.kind === kind).length
-  const quoted = new Set(all.flatMap((entry) => entry.works))
-  const topicNames = new Map(topicCards.map(({ slug, name }) => [slug, name]))
-  const cards = new Map(conceptCards.map((card) => [card.href, card]))
-
-  const groups: ChipGroup[] = [
-    {
-      group: 'topic',
-      label: 'Topic',
-      chips: topicCards.map(({ slug, name }) => ({ value: slug, label: name })),
-    },
-    {
-      group: 'text',
-      label: 'Text',
-      chips: workCards
-        .filter(({ slug }) => quoted.has(slug))
-        .map(({ slug, title, lang }) => ({ value: slug, label: title, lang })),
-    },
-    {
-      group: 'kind',
-      label: 'Show',
-      chips: KINDS.map(({ value, label }) => ({ value, label: `${label} (${ofKind(value)})` })),
-    },
-  ]
-  const rail: RailLetter[] = letters.map(({ letter, entries }) => ({
-    letter,
-    id: letterId(letter),
-    filled: entries.length > 0,
-  }))
-
-  /** A Concept entry's card, for its topic chip, its reading time and its preview's summary. */
-  const cardOf = (entry: Entry): Card | undefined =>
-    entry.kind === 'concept' && entry.href !== undefined ? cards.get(entry.href) : undefined
-
-  /** A Concept's link shows its preview: its names, its topic and reading time, and its summary. */
-  const previewOf = (entry: Entry): PreviewPayload | undefined => {
-    const card = cardOf(entry)
-    if (card === undefined) return undefined
-    return {
-      kind: 'concept',
-      name: entry.name,
-      text: card.summary,
-      topic: card.topic,
-      readingMinutes: card.readingMinutes,
-      ...(entry.lang ? { lang: entry.lang } : {}),
-      ...(entry.devanagari ? { devanagari: entry.devanagari } : {}),
-      ...(entry.gloss ? { gloss: entry.gloss } : {}),
-    }
-  }
-
-  // Each entry's place in the whole list, which names it as the list reorders.
-  const filled = letters.filter(({ entries }) => entries.length > 0)
-  const starts = filled.map((_, at) =>
-    filled.slice(0, at).reduce((sum, { entries }) => sum + entries.length, 1),
-  )
-  const sections = filled.map(({ letter, entries }, at) => ({
-    letter,
-    entries: entries.map((entry, offset) => ({ entry, index: (starts[at] ?? 1) + offset })),
-  }))
+  const az = azModel({ letters, topics: topicCards, works: workCards, concepts: conceptCards })
+  const { counts } = az
 
   return (
     <ReadingPage
@@ -123,10 +47,10 @@ export default async function ConceptsPage() {
             Every Concept, every term explained inside one, and every glossary entry.
           </p>
           <p className={styles.facts}>
-            {count(all.length, 'entry', 'entries')}:{' '}
-            {count(ofKind('concept'), 'Concept page', 'Concept pages')},{' '}
-            {count(ofKind('term'), 'term', 'terms')} and{' '}
-            {count(ofKind('glossary'), 'glossary entry', 'glossary entries')}
+            {count(counts.all, 'entry', 'entries')}:{' '}
+            {count(counts.concept, 'Concept page', 'Concept pages')},{' '}
+            {count(counts.term, 'term', 'terms')} and{' '}
+            {count(counts.glossary, 'glossary entry', 'glossary entries')}
           </p>
         </>
       }
@@ -162,23 +86,7 @@ export default async function ConceptsPage() {
         <h2 id="az-title" className={reading.sectionTitle}>
           From A to Z
         </h2>
-        <AzIndex
-          letters={rail}
-          groups={groups}
-          total={all.filter(({ kind }) => DEFAULT_KINDS.includes(kind)).length}
-        >
-          {sections.map(({ letter, entries }) => (
-            <AzLetter
-              key={letter}
-              letter={letter}
-              id={letterId(letter)}
-              entries={entries}
-              topicNames={topicNames}
-              previewOf={previewOf}
-              cardOf={cardOf}
-            />
-          ))}
-        </AzIndex>
+        <ConceptsAz model={az} />
       </section>
     </ReadingPage>
   )
