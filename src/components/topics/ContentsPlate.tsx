@@ -2,9 +2,9 @@ import type { Route } from 'next'
 import Link from 'next/link'
 import type { ReactNode } from 'react'
 
+import { Numeral } from '@/components/Numeral'
 import { turnForward } from '@/components/PageTurn'
 import { cx } from '@/lib/cx'
-import { toDevanagariDigits } from '@/lib/text'
 
 import styles from './ContentsPlate.module.css'
 
@@ -79,8 +79,7 @@ export function ContentsPlate({
               return (
                 <li key={row.key} className={styles.row} data-plate-row={number}>
                   <span className={styles.numeral} aria-hidden>
-                    <span>{number}</span>{' '}
-                    <span lang="sa-Deva">{toDevanagariDigits(String(number))}</span>
+                    <span>{number}</span> <Numeral value={number} />
                   </span>
                   <Link
                     href={row.href}

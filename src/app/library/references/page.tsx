@@ -5,7 +5,6 @@ import { conceptPreview } from '@/components/concept'
 import {
   catalogue,
   type CitingConcept,
-  counted,
   libraryStyles as library,
   ReferenceEntry,
   referencesStyles as styles,
@@ -14,6 +13,7 @@ import {
 import { ReadingPage } from '@/components/ReadingPage'
 import { concepts, hrefFor } from '@/content'
 import { metadataFor } from '@/lib/metadata'
+import { count } from '@/lib/text'
 
 import reading from '../../reading.module.css'
 
@@ -87,10 +87,10 @@ export default async function ReferencesPage() {
         <>
           <p className={reading.summary}>Every source the site cites, once, filed by author.</p>
           <p className={library.facts}>
-            {counted(all.length, 'Reference', 'References')}:{' '}
+            {count(all.length, 'Reference', 'References')}:{' '}
             {byCount
-              .map(({ type, count }) =>
-                counted(count, TYPE_NAMES[type].one, TYPE_NAMES[type].many).toLowerCase(),
+              .map(({ type, count: tally }) =>
+                count(tally, TYPE_NAMES[type].one, TYPE_NAMES[type].many).toLowerCase(),
               )
               .join(', ')}
           </p>

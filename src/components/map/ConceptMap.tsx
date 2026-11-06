@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { type CSSProperties, ViewTransition } from 'react'
 
+import { Numeral } from '@/components/Numeral'
 import { turnForward } from '@/components/PageTurn'
 import { hrefFor } from '@/content'
 import { toDevanagariDigits } from '@/lib/text'
@@ -166,8 +167,7 @@ export function ConceptMap({ layout }: { layout: MapLayout }) {
                 {layout.sectors.map((sector) => (
                   <li key={sector.topic} data-topic={sector.topic}>
                     <span className={styles.topicKey} aria-hidden>
-                      <span>{sector.order}</span>{' '}
-                      <span lang="sa-Deva">{toDevanagariDigits(String(sector.order))}</span>
+                      <span>{sector.order}</span> <Numeral value={sector.order} />
                     </span>
                     <span>{sector.name}</span>
                   </li>

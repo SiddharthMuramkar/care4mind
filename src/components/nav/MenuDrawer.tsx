@@ -6,7 +6,7 @@ import { usePathname } from 'next/navigation'
 import type { CSSProperties, MouseEvent, ReactNode, RefObject } from 'react'
 
 import { Fleuron } from '@/components/Fleuron'
-import { toDevanagariDigits } from '@/lib/text'
+import { Numeral } from '@/components/Numeral'
 
 import { currentFor, panelOf } from './current'
 import { CloseGlyph } from '../glyphs'
@@ -86,8 +86,7 @@ export function MenuDrawer({
                         style={{ '--index': index } as CSSProperties}
                       >
                         <span className={styles.numeral} aria-hidden>
-                          <span>{index + 1}</span>{' '}
-                          <span lang="sa-Deva">{toDevanagariDigits(String(index + 1))}</span>
+                          <span>{index + 1}</span> <Numeral value={index + 1} />
                         </span>
                         <Link
                           href={section.href}

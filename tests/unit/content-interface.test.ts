@@ -22,6 +22,7 @@ import {
   asciiSpellings,
   conceptName,
   displayName,
+  glossOf,
 } from '@/content/testing'
 
 // The content module's public interface, tested at its one
@@ -264,6 +265,13 @@ describe('the pure helpers', () => {
     expect(displayName({ term, english: 'Five afflictions' })).toBe('Pañca kleśa')
     expect(displayName({ term: { iast: 'ātman', ascii: ['Atman'] } })).toBe('Ātman')
     expect(displayName({ english: 'Five steps of perfection' })).toBe('Five steps of perfection')
+  })
+
+  it('gives a gloss only under a Sanskrit headword (glossOf)', () => {
+    const term = { iast: 'vikṣepa', ascii: ['Vikshepa'] }
+    expect(glossOf({ term, english: 'Distraction' })).toBe('Distraction')
+    expect(glossOf({ english: 'Five steps of perfection' })).toBeUndefined()
+    expect(glossOf({ term })).toBeUndefined()
   })
 
   it('names a Concept in full by its Sanskrit name, then its gloss (conceptName)', () => {

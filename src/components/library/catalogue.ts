@@ -21,9 +21,6 @@ export const TYPE_NAMES: Readonly<Record<ReferenceType, { one: string; many: str
   other: { one: 'Other source', many: 'Other sources' },
 }
 
-export const counted = (count: number, one: string, many: string) =>
-  `${count} ${count === 1 ? one : many}`
-
 /** What a Library page holds, counted from its content: its books, courses, entries or sections. */
 export function holdingsOf(view: ResourceListView | PageView): { count: number; unit: string } {
   if (view.kind === 'page')
