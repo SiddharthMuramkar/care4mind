@@ -15,7 +15,7 @@ pnpm dev                            # http://localhost:3000
 pnpm check                          # lint, types, unit tests and the production build
 ```
 
-Every branch gets a Vercel preview, and `main` deploys production. Every page tells search engines not to index it until launch.
+`main` deploys production on Vercel; branch previews are off (`vercel.json`). Every page tells search engines not to index it until launch.
 
 ## Checks
 
