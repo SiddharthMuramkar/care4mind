@@ -161,6 +161,15 @@ describe('a page’s metadata', () => {
     })
   })
 
+  it('reads a path without its slash as the breadcrumb trail does, at the slashed address', async () => {
+    expect(await metadataFor('/concepts/vikshepa')).toEqual(
+      await metadataFor('/concepts/vikshepa/'),
+    )
+    expect((await metadataFor('/concepts/vikshepa')).alternates?.canonical).toBe(
+      `${ORIGIN}/concepts/vikshepa/`,
+    )
+  })
+
   it('answers 404 for a path that is no page in this build', async () => {
     await expect(metadataFor('/nowhere/')).rejects.toThrow('NEXT_HTTP_ERROR_FALLBACK;404')
     await expect(metadataFor('/topics/')).rejects.toThrow('NEXT_HTTP_ERROR_FALLBACK;404')
