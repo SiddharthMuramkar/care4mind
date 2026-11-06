@@ -18,7 +18,7 @@ import {
 import { metadataFor } from '@/lib/metadata'
 import { count } from '@/lib/text'
 
-import reading from '../reading.module.css'
+import reading from '@/styles/reading.module.css'
 import styles from './page.module.css'
 
 const PATH = hrefFor({ page: 'concepts' })
