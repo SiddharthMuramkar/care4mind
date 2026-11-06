@@ -24,22 +24,14 @@ import {
   displayName,
 } from '@/content/testing'
 
+import { flagsOff, flagsOn } from '../flags'
+
 // The content module's public interface, tested at its one
 // seam: each test builds a small made-up content source and reads it through the same
 // namespaces the pages use. Every record and string here is made up for the test.
 
-const ON: Features = {
-  questionnairePreview: true,
-  conceptMap: true,
-  startHere: true,
-  whatsOnYourMind: true,
-}
-const OFF: Features = {
-  questionnairePreview: false,
-  conceptMap: false,
-  startHere: false,
-  whatsOnYourMind: false,
-}
+const ON = flagsOn()
+const OFF = flagsOff()
 
 const provenance = {
   sources: [{ url: 'https://example.org/page/', retrieved: '2026-10-27' }],

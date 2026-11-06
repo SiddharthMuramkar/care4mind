@@ -1,7 +1,6 @@
 import Link from 'next/link'
-import { ViewTransition } from 'react'
 
-import { turnForward } from '@/components/PageTurn'
+import { TitleMorph, turnForward } from '@/components/PageTurn'
 import { ScriptPair } from '@/components/script'
 import { hrefFor, type TopicCard as Topic } from '@/content'
 import { cx } from '@/lib/cx'
@@ -27,9 +26,9 @@ export function TopicCard({ topic, className }: { topic: Topic; className?: stri
           transitionTypes={turnForward}
           data-ink
         >
-          <ViewTransition name={`topic-title-${topic.slug}`} share="morph" default="none">
+          <TitleMorph kind="topic" slug={topic.slug}>
             <span>{topic.name}</span>
-          </ViewTransition>
+          </TitleMorph>
         </Link>
       </h3>
       {topic.term ? (

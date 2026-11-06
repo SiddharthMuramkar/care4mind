@@ -3,16 +3,13 @@ import { describe, expect, it } from 'vitest'
 import type { Features } from '@/config/features'
 import { proposalsFor } from '@/components/proposals'
 
+import { flagsOn } from '../flags'
+
 // What /proposals/ lists for the Project owner's sign-off. The
 // built proposals show only while their flags are on; audio pronunciation is described, not
 // built; the reading-path idea was dropped when the site became Press only.
 
-const ON: Features = {
-  questionnairePreview: true,
-  conceptMap: true,
-  startHere: true,
-  whatsOnYourMind: true,
-}
+const ON = flagsOn()
 
 const listed = (flags: Features) => proposalsFor(flags).map(({ name, built }) => ({ name, built }))
 

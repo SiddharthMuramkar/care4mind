@@ -1,11 +1,10 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { ViewTransition } from 'react'
 
 import { Citation } from '@/components/Citation'
 import { HelpLine } from '@/components/HelpLine'
-import { turnForward } from '@/components/PageTurn'
+import { TitleMorph, turnForward } from '@/components/PageTurn'
 import { ReadingPage } from '@/components/ReadingPage'
 import { Provenance, Text } from '@/components/prose'
 import { Limitations, RelatedConcepts } from '@/components/questionnaire'
@@ -51,9 +50,9 @@ export default async function QuestionnairePage({ params }: PageProps<'/question
       title={
         <>
           {/* The Questionnaires page's card flies into this heading. */}
-          <ViewTransition name={`questionnaire-title-${slug}`} share="morph" default="none">
+          <TitleMorph kind="questionnaire" slug={slug}>
             <span>{questionnaire.title}</span>
-          </ViewTransition>
+          </TitleMorph>
         </>
       }
       afterTitle={

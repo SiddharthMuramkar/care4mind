@@ -1,12 +1,11 @@
 import Link from 'next/link'
-import { ViewTransition } from 'react'
 
 import { FrameCorners } from '@/components/Folio'
 import { hrefFor, type QuestionnaireCard as Card } from '@/content'
 import { cx } from '@/lib/cx'
 
 import { conceptCardStyles as styles } from '../ConceptCard'
-import { turnForward } from '../PageTurn'
+import { TitleMorph, turnForward } from '../PageTurn'
 import { Text } from '../prose'
 import own from './QuestionnaireCard.module.css'
 import { StatusBadge } from '../StatusBadge'
@@ -27,9 +26,9 @@ export function QuestionnaireCard({
   return (
     <article className={cx(styles.card, featured && styles.featured, own.card)} data-paper>
       {featured ? <FrameCorners /> : null}
-      <ViewTransition name={`questionnaire-title-${slug}`} share="morph" default="none">
+      <TitleMorph kind="questionnaire" slug={slug}>
         <h3 className={styles.title}>{title}</h3>
-      </ViewTransition>
+      </TitleMorph>
       <StatusBadge status={shownStatus} className={own.badge} />
       {summary ? (
         <p className={styles.summary}>

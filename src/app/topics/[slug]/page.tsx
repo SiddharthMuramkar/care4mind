@@ -115,7 +115,7 @@ export default async function TopicPage({ params }: PageProps<'/topics/[slug]'>)
       }
       title={topic.name}
       longTitle
-      titleTransition={`topic-title-${topic.slug}`}
+      titleMorph={{ kind: 'topic', slug: topic.slug }}
       afterTitle={
         <>
           {topic.term ? (
