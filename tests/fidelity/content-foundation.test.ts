@@ -182,6 +182,8 @@ describe('the foundation’s content, through the v1 interface', () => {
       href: view.href,
       term: view.term,
       english: view.english,
+      gloss: view.gloss,
+      readingMinutes: view.readingMinutes,
       summary: view.summary,
       topic: view.topic,
     })
