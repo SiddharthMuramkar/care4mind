@@ -63,7 +63,7 @@ interface Props {
   /** Each part's instructions, set on the server. */
   instructions: readonly ReactNode[]
   /** The Questionnaire's own page: its purpose and limitations. */
-  intro: string
+  intro: Route
   /** Set on the server for the end screen: its limitations ... */
   limits: ReactNode
   /** ... and, after the answers, its source and related Concepts. */
@@ -269,7 +269,7 @@ interface PartProps {
   index: number
   instructions: ReactNode
   state: FlowState
-  intro: string
+  intro: Route
   onAnswer: (item: string, option: string) => void
   onNext: () => void
   onBack: () => void
@@ -313,8 +313,7 @@ function PartStep({
       </div>
       <div className={styles.controls}>
         {index === 1 ? (
-          // The intro's address comes from hrefFor() on the server.
-          <Link href={intro as Route} className={cta.secondary} transitionTypes={turnBack} data-ink>
+          <Link href={intro} className={cta.secondary} transitionTypes={turnBack} data-ink>
             Back to its purpose and limits
           </Link>
         ) : (

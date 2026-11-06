@@ -1,3 +1,5 @@
+import type { Route } from 'next'
+
 import type { FixedPage, HrefTarget } from '../types'
 
 /** The site map's fixed pages, each at its own path. */
@@ -27,11 +29,7 @@ export function referenceAnchor(id: string): string {
   return `ref-${id}`
 }
 
-/**
- * The path of a page, or of an anchor on one, always with its trailing slash. Every
- * internal link on the site is made here, so an address changes in one place.
- */
-export function hrefFor(target: HrefTarget): string {
+function pathFor(target: HrefTarget): string {
   if ('page' in target) return FIXED_PAGES[target.page]
   switch (target.kind) {
     case 'concept':
@@ -62,4 +60,13 @@ export function hrefFor(target: HrefTarget): string {
       )
     }
   }
+}
+
+/**
+ * The path of a page, or of an anchor on one, always with its trailing slash. Every
+ * internal link on the site is made here, so an address changes in one place.
+ */
+export function hrefFor(target: HrefTarget): Route {
+  // Next's generated routes omit trailing slashes, so no slashed path is a Route to it.
+  return pathFor(target) as Route
 }

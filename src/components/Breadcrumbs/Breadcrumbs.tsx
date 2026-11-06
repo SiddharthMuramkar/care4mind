@@ -1,4 +1,3 @@
-import type { Route } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 
@@ -35,8 +34,7 @@ export async function Breadcrumbs({ path }: { path: string }) {
       <ol>
         {trail.slice(0, -1).map((crumb) => (
           <li key={crumb.href}>
-            {/* The registry's paths are made by hrefFor(). */}
-            <Link href={crumb.href as Route} transitionTypes={turnBack}>
+            <Link href={crumb.href} transitionTypes={turnBack}>
               <Words crumb={crumb} />
             </Link>
           </li>

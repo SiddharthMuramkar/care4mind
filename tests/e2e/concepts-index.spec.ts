@@ -96,11 +96,11 @@ test('glossary entries lead to their Concept, to DharmaWiki in words, or nowhere
 }) => {
   await gotoReady(page, EVERYTHING)
   const glossary = all.filter(({ kind }) => kind === 'glossary')
-  const external = glossary.find(({ external }) => external)
-  const plain = glossary.find(({ href }) => href === undefined)
-  if (!external?.href) throw new Error('The glossary has entries with a DharmaWiki article.')
+  const external = glossary.find(({ url }) => url !== undefined)
+  const plain = glossary.find(({ href, url }) => href === undefined && url === undefined)
+  if (!external?.url) throw new Error('The glossary has entries with a DharmaWiki article.')
   const away = list(page).locator(`[id="${external.anchors[0]}"]`).getByRole('link').first()
-  await expect(away).toHaveAttribute('href', external.href)
+  await expect(away).toHaveAttribute('href', external.url)
   await expect(away).toContainText('on DharmaWiki')
   // The content has no entry with neither today; one would show as text.
   if (plain)

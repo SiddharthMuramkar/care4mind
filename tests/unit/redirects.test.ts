@@ -168,7 +168,7 @@ describe('the table (FR-07)', () => {
   })
 
   it('sends every row to a route in the registry, or to an anchor hrefFor() makes on one', async () => {
-    const paths = new Set((await site.routes()).map(({ path }) => path))
+    const paths = new Set<string>((await site.routes()).map(({ path }) => path))
     const anchors = new Set(records.flatMap(addressesOf).filter((address) => address.includes('#')))
     expect(anchors.size, 'anchors hrefFor() makes').toBeGreaterThan(100)
     for (const { destination } of redirects) {
@@ -208,7 +208,7 @@ describe('the table, cross-checked with the content’s provenance', () => {
   }
 
   it('sends each address a kept record was read from into that record, by one row, unless kept', async () => {
-    const paths = new Set((await site.routes()).map(({ path }) => path))
+    const paths = new Set<string>((await site.routes()).map(({ path }) => path))
     const named = oldAddresses()
     expect(named.size, 'old addresses the kept records were read from').toBeGreaterThan(25)
     for (const [old, heirs] of named) {

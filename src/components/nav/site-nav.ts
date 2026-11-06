@@ -4,9 +4,6 @@ import { home, hrefFor, library, questionnaires, references, site, topics } from
 
 import type { Holding, LibraryLink, NavLink, SiteNav } from './types'
 
-// Views give their pages' paths as plain strings; Next's Link wants a Route.
-const route = (path: string) => path as Route
-
 let built: Promise<SiteNav> | undefined
 
 /**
@@ -30,7 +27,7 @@ async function build(): Promise<SiteNav> {
       home.get(),
     ])
   const has = (kind: string) => routes.some((entry) => entry.kind === kind)
-  const link = (label: string, path: string): NavLink => ({ label, href: route(path) })
+  const link = (label: string, href: Route): NavLink => ({ label, href })
 
   const holds = (count: number, one: string, many: string): Holding => ({ count, one, many })
   // In the Library page's order: References, then the Library's lists and pages as it lists them.

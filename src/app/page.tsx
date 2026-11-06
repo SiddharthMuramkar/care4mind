@@ -1,4 +1,4 @@
-import type { Metadata, Route } from 'next'
+import type { Metadata } from 'next'
 import Link from 'next/link'
 
 import { ConceptCard } from '@/components/ConceptCard'
@@ -46,11 +46,11 @@ export default async function HomePage() {
             <p className={styles.ctas}>
               {heroLinks(page.hero, startHereListed).map((link, i) =>
                 i === 0 ? (
-                  <Link key={link.href} href={link.href as Route} className={cta.primary} data-ink>
+                  <Link key={link.href} href={link.href} className={cta.primary} data-ink>
                     {link.label}
                   </Link>
                 ) : (
-                  <Link key={link.href} href={link.href as Route} className={styles.textLink}>
+                  <Link key={link.href} href={link.href} className={styles.textLink}>
                     {link.label}
                   </Link>
                 ),
@@ -161,7 +161,7 @@ export default async function HomePage() {
           {closingLink ? (
             <p className={styles.closingCta}>
               <Link
-                href={closingLink.href as Route}
+                href={closingLink.href}
                 className={cx(cta.primary, styles.closingButton)}
                 data-ink
               >

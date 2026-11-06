@@ -41,7 +41,7 @@ function facets(concept: ConceptRecord, graph: ContentGraph) {
 /** A term's entry, at its anchor on the page that explains it. */
 function termEntry(
   block: TermBlock,
-  href: string,
+  href: NonNullable<AzEntry['href']>,
   filters: Pick<AzEntry, 'topics' | 'works'>,
 ): Omit<AzEntry, 'concept'> {
   const name = displayName(block)
@@ -52,7 +52,6 @@ function termEntry(
     spellings: spellings(name, asciiSpellings(block.term)),
     ...present({ devanagari: block.term.devanagari, gloss: block.gloss }),
     href,
-    external: false,
     anchors: [],
     ...filters,
   }
@@ -97,7 +96,6 @@ function conceptEntries(
       definition: glossary.find((entry) => entry.definition)?.definition,
     }),
     href: hrefFor({ kind: 'concept', id: concept.slug }),
-    external: false,
     anchors: glossary.map((entry) => entry.slug),
     ...filters,
   }
@@ -116,8 +114,7 @@ function glossaryEntry(entry: GlossaryEntryRecord): AzEntry {
     name,
     ...(iast ? { lang: 'sa-Latn' as const } : {}),
     spellings: spellings(name, [ascii]),
-    ...present({ devanagari, definition: entry.definition, href: entry.url }),
-    external: entry.url !== undefined,
+    ...present({ devanagari, definition: entry.definition, url: entry.url }),
     anchors: [entry.slug],
     topics: [],
     works: [],

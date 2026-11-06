@@ -1,4 +1,3 @@
-import type { Route } from 'next'
 import Link from 'next/link'
 import { ViewTransition, type CSSProperties, type ReactNode } from 'react'
 
@@ -73,8 +72,7 @@ export function LinkedKnowledge({
             {related.map((other) => (
               <li key={other.slug} className={styles.row}>
                 <LinkPreview preview={conceptPreview(other)}>
-                  {/* The Concept's path, made by hrefFor() in the content module. */}
-                  <Link href={other.href as Route} transitionTypes={turnForward}>
+                  <Link href={other.href} transitionTypes={turnForward}>
                     <span {...(other.lang ? { lang: other.lang } : {})}>{other.name}</span>
                     {other.gloss ? <> · {other.gloss}</> : null}
                   </Link>
@@ -98,8 +96,7 @@ export function LinkedKnowledge({
           <ul className={styles.rows}>
             {works.map((work) => (
               <li key={work.slug} className={styles.row}>
-                {/* The work's path, made by hrefFor() in the content module. */}
-                <Link href={work.href as Route} transitionTypes={turnForward} lang={work.lang}>
+                <Link href={work.href} transitionTypes={turnForward} lang={work.lang}>
                   {work.title}
                 </Link>
                 <Leader />
@@ -111,9 +108,8 @@ export function LinkedKnowledge({
                         <LinkPreview
                           preview={passagePreview(passage.label, work.lang, verses.get(passage.id))}
                         >
-                          {/* The passage's anchor, made by hrefFor() in the content module. */}
                           <Link
-                            href={passage.href as Route}
+                            href={passage.href}
                             transitionTypes={turnForward}
                             aria-label={passage.label}
                             lang={work.lang}

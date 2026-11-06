@@ -5,7 +5,7 @@ import { pathToFileURL } from 'node:url'
 
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
-import { site, type RouteEntry } from '@/content'
+import { hrefFor, site, type RouteEntry } from '@/content'
 
 // `pnpm shots`, the parts with no browser: what the command line asks
 // for, which routes it picks from the registry and the file each shot lands in.
@@ -31,7 +31,7 @@ const shots = (await import(pathToFileURL(resolve('scripts/shots.mjs')).href)) a
   describeServer(port: number, buildId: string | null): Promise<string>
 }
 
-const route = (path: string, kind: RouteEntry['kind'], sample?: true): RouteEntry => ({
+const route = (path: RouteEntry['path'], kind: RouteEntry['kind'], sample?: true): RouteEntry => ({
   path,
   kind,
   pattern: path,
@@ -41,11 +41,15 @@ const route = (path: string, kind: RouteEntry['kind'], sample?: true): RouteEntr
 
 /** A registry in miniature: two kinds with a sample each, and pages that aren't samples. */
 const REGISTRY: readonly RouteEntry[] = [
-  route('/', 'home', true),
-  route('/concepts/', 'concepts', true),
-  route('/concepts/ahimsa/', 'concept', true),
-  route('/concepts/vikshepa/', 'concept'),
-  route('/questionnaires/karmayoga-scale/take/', 'questionnaire-flow', true),
+  route(hrefFor({ page: 'home' }), 'home', true),
+  route(hrefFor({ page: 'concepts' }), 'concepts', true),
+  route(hrefFor({ kind: 'concept', id: 'ahimsa' }), 'concept', true),
+  route(hrefFor({ kind: 'concept', id: 'vikshepa' }), 'concept'),
+  route(
+    hrefFor({ kind: 'questionnaire', id: 'karmayoga-scale', status: 'preview', flow: true }),
+    'questionnaire-flow',
+    true,
+  ),
 ]
 
 const plan = (...argv: string[]) => shots.planShots(shots.parseArgs(argv), REGISTRY)

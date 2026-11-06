@@ -258,7 +258,7 @@ describe('the gate', () => {
     const linked = (await concepts.get('vikshepa'))?.linked.questionnaires.find(
       ({ slug }) => slug === 'karmayoga-scale',
     )
-    const paths = (await site.routes()).map(({ path }) => path)
+    const paths: readonly string[] = (await site.routes()).map(({ path }) => path)
     const seen = ({ shownStatus, takeHref }: { shownStatus: string; takeHref?: string }) => ({
       shownStatus,
       takeHref,

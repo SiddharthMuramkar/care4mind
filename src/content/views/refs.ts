@@ -17,7 +17,7 @@ export function conceptRef(concept: ConceptRecord): ConceptRef {
 }
 
 /** Where a Questionnaire lives: its own page, or its anchor on the index when coming later. */
-export function questionnaireHref(questionnaire: QuestionnaireRecord): string {
+export function questionnaireHref(questionnaire: QuestionnaireRecord) {
   return hrefFor({ kind: 'questionnaire', id: questionnaire.slug, status: questionnaire.status })
 }
 

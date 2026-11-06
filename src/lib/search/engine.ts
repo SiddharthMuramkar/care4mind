@@ -4,6 +4,8 @@
  * in it, in this order: exact, prefix, phonetic, then fuzzy. Pages reach it only through
  * `search()` (./search.ts), so a content back end can answer in its place.
  */
+import type { Route } from 'next'
+
 import type { LatinScript, SearchDocument, SearchKind } from '@/content'
 
 import { editDistance, fold, isLatin, phoneticKey, words, writtenWords } from './normalise'
@@ -20,7 +22,7 @@ export interface SearchHit {
   gloss?: string
   /** The language tag of its title where the title is a transliteration. */
   lang?: LatinScript
-  href: string
+  href: Route
   matched: { field: SearchField; variant: string }
   /** What it sits in: a term's Concept, a passage's work. */
   parent?: string
@@ -36,7 +38,7 @@ type Row = [
   id: string,
   kind: SearchKind,
   title: string,
-  href: string,
+  href: Route,
   parent: string | null,
   names: string[],
   keywords: string[],

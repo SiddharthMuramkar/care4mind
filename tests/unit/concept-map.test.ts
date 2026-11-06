@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest'
 import { countText, NOTHING, readSelection, shows, stands, writeSelection } from '@/components/map'
 import { KINDS } from '@/components/map'
 import { layoutMap, type MapLayout } from '@/components/map'
-import { RELATION_STRENGTH, type ConceptGraph, type ConceptGraphEdge } from '@/content'
+import { hrefFor, RELATION_STRENGTH, type ConceptGraph, type ConceptGraphEdge } from '@/content'
 
 // The Concept map's layout, worked out while the site builds (the
 // browser runs none). The seam is the pure layout module: a graph and its topics in, the plate's
@@ -18,7 +18,7 @@ const TOPICS = [
 const node = (slug: string, topic: string, also: string[] = []) => ({
   slug,
   name: slug.charAt(0).toUpperCase() + slug.slice(1),
-  href: `/concepts/${slug}/`,
+  href: hrefFor({ kind: 'concept', id: slug }),
   topic,
   topics: [topic, ...also],
 })

@@ -71,7 +71,7 @@ export function Spine({ href, name, index, head, title, foot, thickness }: Spine
         </a>
       ) : (
         <Link
-          href={href as Route}
+          href={href}
           className={styles.spine}
           data-tone={toneAt(index)}
           transitionTypes={[...turnForward]}
