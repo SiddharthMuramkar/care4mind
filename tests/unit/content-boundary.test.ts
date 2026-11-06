@@ -2,9 +2,11 @@ import { ESLint } from 'eslint'
 import { describe, expect, it } from 'vitest'
 
 // The content module's interface is enforced by lint:
-// outside src/content, code imports content through @/content alone, and a 'use client' file
-// imports it for types only. Each fixture below is linted with the repo's own config, as if it
-// were the file at `path`.
+// outside src/content, code imports content through @/content alone (statically, dynamically
+// or by `typeof import()`), a 'use client' file imports it and the feature flags for types
+// only, and a test reaches internals only through @/content/testing. Each fixture below is
+// linted with the repo's own config, as if it were the file at `path`, and names only exports
+// that exist.
 
 const eslint = new ESLint({ cwd: process.cwd() })
 
@@ -21,7 +23,7 @@ const COMPONENT = 'src/components/Fixture.tsx'
 
 describe('the content boundary', { timeout: 30_000 }, () => {
   it('lets a page import the public interface', async () => {
-    const code = "import { getConcept } from '@/content'\nexport const load = getConcept\n"
+    const code = "import { concepts } from '@/content'\nexport const load = concepts\n"
     expect(await boundaryProblems(PAGE, code)).toEqual([])
   })
 
@@ -34,7 +36,7 @@ describe('the content boundary', { timeout: 30_000 }, () => {
   it('stops a component importing a content internal by relative path', async () => {
     const internal =
       "import { contentGraph } from '../content/graph'\nexport const g = contentGraph\n"
-    const index = "import { getConcept } from '../content'\nexport const load = getConcept\n"
+    const index = "import { concepts } from '../content'\nexport const load = concepts\n"
     expect(await boundaryProblems(COMPONENT, internal)).toHaveLength(1)
     expect(await boundaryProblems(COMPONENT, index)).toHaveLength(1)
   })
@@ -50,30 +52,90 @@ describe('the content boundary', { timeout: 30_000 }, () => {
 
   it("stops a 'use client' file importing a value from the public interface", async () => {
     const code =
-      "'use client'\nimport { getConcept } from '@/content'\nexport const load = getConcept\n"
+      "'use client'\nimport { concepts } from '@/content'\nexport const load = concepts\n"
     expect(await boundaryProblems(COMPONENT, code)).toHaveLength(1)
   })
 
   it("lets a 'use client' file import types from the public interface", async () => {
     const code =
-      "'use client'\nimport type { Reference } from '@/content'\nexport type R = Reference\n"
+      "'use client'\nimport type { ReferenceView } from '@/content'\nexport type R = ReferenceView\n"
     expect(await boundaryProblems(COMPONENT, code)).toEqual([])
   })
 
   it("asks a 'use client' file for `import type`, not inline type specifiers", async () => {
     // An inline `type` specifier still leaves an import of the module behind.
     const code =
-      "'use client'\nimport { type Reference } from '@/content'\nexport type R = Reference\n"
+      "'use client'\nimport { type ReferenceView } from '@/content'\nexport type R = ReferenceView\n"
     expect(await boundaryProblems(COMPONENT, code)).toHaveLength(1)
   })
 
   it('stops the graph importing from the views or the derivations above it', async () => {
-    const views = "import { displayName } from '../views/names'\nexport const name = displayName\n"
-    const derive = "import { siteRoutes } from '../derive/routes'\nexport const r = siteRoutes\n"
+    const views = "import { createContent } from '../views'\nexport const c = createContent\n"
+    const derive = "import { routes } from '../derive/routes'\nexport const r = routes\n"
     const names = "import { displayName } from '../names'\nexport const name = displayName\n"
     expect(await boundaryProblems('src/content/graph/fixture.ts', views)).toHaveLength(1)
     expect(await boundaryProblems('src/content/graph/fixture.ts', derive)).toHaveLength(1)
     expect(await boundaryProblems('src/content/graph/fixture.ts', names)).toEqual([])
+  })
+
+  it('stops a page dynamically importing a content internal, however the source is written', async () => {
+    const alias = "export const g = () => import('@/content/graph')\n"
+    const template = 'export const g = () => import(`@/content/graph`)\n'
+    const typeQuery = "export type G = typeof import('@/content/graph')\n"
+    expect(await boundaryProblems(PAGE, alias)).toHaveLength(1)
+    expect(await boundaryProblems(PAGE, template)).toHaveLength(1)
+    expect(await boundaryProblems(PAGE, typeQuery)).toHaveLength(1)
+  })
+
+  it('stops a component dynamically importing a content internal by relative path', async () => {
+    const code = "export const s = () => import('../content/source')\n"
+    expect(await boundaryProblems(COMPONENT, code)).toHaveLength(1)
+  })
+
+  it('lets a page dynamically import the public interface', async () => {
+    const code = "export const c = () => import('@/content')\n"
+    expect(await boundaryProblems(PAGE, code)).toEqual([])
+  })
+
+  it("stops a 'use client' file dynamically importing the public interface", async () => {
+    const code = "'use client'\nexport const c = () => import('@/content')\n"
+    expect(await boundaryProblems(COMPONENT, code)).toHaveLength(1)
+  })
+
+  it("stops a 'use client' file importing a feature-flag value, statically or dynamically", async () => {
+    const plain =
+      "'use client'\nimport { features } from '@/config/features'\nexport const f = features\n"
+    const dynamic = "'use client'\nexport const f = () => import('@/config/features')\n"
+    expect(await boundaryProblems(COMPONENT, plain)).toHaveLength(1)
+    expect(await boundaryProblems(COMPONENT, dynamic)).toHaveLength(1)
+  })
+
+  it("lets a 'use client' file import feature-flag types", async () => {
+    const code =
+      "'use client'\nimport type { Features } from '@/config/features'\nexport type F = Features\n"
+    expect(await boundaryProblems(COMPONENT, code)).toEqual([])
+  })
+
+  it('stops the graph dynamically importing from the views or the derivations above it', async () => {
+    const views = "export const v = () => import('../views')\n"
+    const derive = "export const r = () => import('../derive/routes')\n"
+    const names = "export const n = () => import('../names')\n"
+    expect(await boundaryProblems('src/content/graph/fixture.ts', views)).toHaveLength(1)
+    expect(await boundaryProblems('src/content/graph/fixture.ts', derive)).toHaveLength(1)
+    expect(await boundaryProblems('src/content/graph/fixture.ts', names)).toEqual([])
+  })
+
+  it('lets a test use the public interface and the testing entry, and no other internal', async () => {
+    const TEST = 'tests/unit/fixture.test.ts'
+    const pub = "import { concepts } from '@/content'\nexport const load = concepts\n"
+    const testing =
+      "import { createContent, localSource } from '@/content/testing'\nexport const t = [createContent, localSource]\n"
+    const graph = "import { contentGraph } from '@/content/graph'\nexport const g = contentGraph\n"
+    const dynamic = "export const v = () => import('@/content/views')\n"
+    expect(await boundaryProblems(TEST, pub)).toEqual([])
+    expect(await boundaryProblems(TEST, testing)).toEqual([])
+    expect(await boundaryProblems(TEST, graph)).toHaveLength(1)
+    expect(await boundaryProblems(TEST, dynamic)).toHaveLength(1)
   })
 
   it('lets files inside the content module import its internals', async () => {

@@ -3,7 +3,7 @@
 import { PreviewCard } from '@base-ui/react/preview-card'
 import { useEffect } from 'react'
 
-import { TopicChip } from '@/components/topics'
+import { TopicChip } from '@/components/TopicChip'
 import { readingTimeWords } from '@/lib/text'
 
 import type { PreviewPayload } from './LinkPreview'

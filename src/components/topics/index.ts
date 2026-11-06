@@ -7,4 +7,3 @@ export {
   type PlateRow,
 } from './ContentsPlate'
 export { TopicCard } from './TopicCard'
-export { TopicChip } from './TopicChip'

@@ -6,8 +6,11 @@ import { dirname, join, relative, resolve, sep } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
 import { features, proposalsPageOn, readFeatures } from '@/config/features'
-import { buildGraph, contentGraph, DanglingIdError, graphFor } from '@/content/graph'
 import {
+  buildGraph,
+  contentGraph,
+  DanglingIdError,
+  graphFor,
   CONTENT_KINDS,
   defineConcept,
   defineGlossaryEntry,
@@ -25,8 +28,10 @@ import {
   type ContentRecord,
   type QuestionnaireRecord,
   type ReferenceRecord,
-} from '@/content/schema'
-import { localSource, memorySource, registrySource } from '@/content/source'
+  localSource,
+  memorySource,
+  registrySource,
+} from '@/content/testing'
 
 // The storage layers of the content module: the record schema, the generated registry, the
 // content source (the seam) and the graph that resolves every link once. The graph has no public

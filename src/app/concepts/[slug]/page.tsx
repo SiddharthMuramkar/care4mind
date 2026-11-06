@@ -11,7 +11,7 @@ import { ReadingPage } from '@/components/ReadingPage'
 import { VerseCard } from '@/components/prose'
 import { ReadingThread } from '@/components/ReadingThread'
 import { ReferenceList } from '@/components/ReferenceList'
-import { TopicChip } from '@/components/topics'
+import { TopicChip } from '@/components/TopicChip'
 import {
   concepts,
   hrefFor,

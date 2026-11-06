@@ -1,8 +1,7 @@
 import { beforeAll, describe, expect, it } from 'vitest'
 
 import { references, type ReferenceView } from '@/content'
-import type { Flag } from '@/content/schema'
-import { localSource } from '@/content/source'
+import { type Flag, localSource } from '@/content/testing'
 
 // The References census: every Reference the kept pages cite or list
 // exists once, with each way the pages wrote it. Read through the public interface, as the

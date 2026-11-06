@@ -1,7 +1,7 @@
 import { ViewTransition, type ReactNode } from 'react'
 
 import { FrameCorners } from '@/components/Folio'
-import { TopicChip } from '@/components/topics'
+import { TopicChip } from '@/components/TopicChip'
 import type { ConceptCard as Card } from '@/content'
 import { cx } from '@/lib/cx'
 import { readingTimeWords } from '@/lib/text'

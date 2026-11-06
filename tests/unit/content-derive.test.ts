@@ -15,9 +15,10 @@ import {
   defineWork,
   type ConceptRecord,
   type QuestionnaireRecord,
-} from '@/content/schema'
-import { localSource, memorySource } from '@/content/source'
-import { createContent } from '@/content/views'
+  localSource,
+  memorySource,
+  createContent,
+} from '@/content/testing'
 
 // The site derivations: the routes, the
 // breadcrumb trail, the A–Z, the search documents and the Concept-map data, each computed from

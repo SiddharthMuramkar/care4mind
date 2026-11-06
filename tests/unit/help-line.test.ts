@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
 import { home } from '@/content'
-import { localSource } from '@/content/source'
+import { localSource } from '@/content/testing'
 import { helpLineParts } from '@/components/HelpLine'
 
 describe('the help line', () => {

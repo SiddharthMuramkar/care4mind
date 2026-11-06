@@ -3,8 +3,8 @@ import { describe, expect, it } from 'vitest'
 import { readFeatures, type Features } from '@/config/features'
 import * as ownContent from '@/content'
 import { hrefFor } from '@/content'
-import { DanglingIdError } from '@/content/graph'
 import {
+  DanglingIdError,
   defineConcept,
   defineHome,
   definePage,
@@ -17,10 +17,12 @@ import {
   type ConceptRecord,
   type QuestionnaireForm,
   type QuestionnaireRecord,
-} from '@/content/schema'
-import { memorySource } from '@/content/source'
-import { createContent } from '@/content/views'
-import { asciiSpellings, conceptName, displayName } from '@/content/names'
+  memorySource,
+  createContent,
+  asciiSpellings,
+  conceptName,
+  displayName,
+} from '@/content/testing'
 
 // The content module's public interface, tested at its one
 // seam: each test builds a small made-up content source and reads it through the same
