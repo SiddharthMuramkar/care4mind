@@ -7,6 +7,7 @@ export default defineResourceList({
   kind: 'resource-list',
   slug: 'courses',
   title: 'Courses in India',
+  summary: 'Psychology courses run by institutions in India, on campus and at a distance.',
   groups: [
     {
       id: 'top-universities-for-psychology',
@@ -89,6 +90,7 @@ export default defineResourceList({
     },
   ],
   provenance: {
+    drafted: ['summary'],
     sources: [
       { url: 'https://care4mind.org/institutes/', retrieved: '2026-10-27' },
       { url: 'https://care4mind.org/text-books/', retrieved: '2026-10-27' },

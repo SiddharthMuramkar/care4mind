@@ -140,3 +140,28 @@
   font-size: var(--text-small);
   color: var(--color-surface-muted);
 }
+
+/* The wrapped rail is taller, so a letter or entry it leads to lands further down. */
+@media (width < 40rem) {
+  .section,
+  .entry,
+  .anchor {
+    scroll-margin-top: calc(var(--sticky-top) + 8rem);
+  }
+}
+
+@media (width < 30rem) {
+  .section,
+  .entry,
+  .anchor {
+    scroll-margin-top: calc(var(--sticky-top) + 10rem);
+  }
+}
+
+@media (width < 24rem) {
+  .section,
+  .entry,
+  .anchor {
+    scroll-margin-top: calc(var(--sticky-top) + 12rem);
+  }
+}

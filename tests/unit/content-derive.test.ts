@@ -184,6 +184,7 @@ const reading = defineResourceList({
   kind: 'resource-list',
   slug: 'reading',
   title: 'Reading List',
+  summary: 'A made-up reading list.',
   groups: [{ id: 'core', heading: 'Core', items: [{ type: 'reference', reference: 'rao-2001' }] }],
   provenance,
 })

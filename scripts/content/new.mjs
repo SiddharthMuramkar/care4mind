@@ -200,6 +200,7 @@ ${provenanceOf(written)}
   kind: 'resource-list',
   slug: '${id}',
   title: '',
+  summary: '',
   groups: [], // { id, heading, items }: each item a Reference or a course (see the schema)
 ${provenanceOf(written)}
 })`,

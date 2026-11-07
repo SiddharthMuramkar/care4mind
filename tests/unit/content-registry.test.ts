@@ -118,6 +118,7 @@ describe('record schema', () => {
         kind: 'resource-list',
         slug: 'textbooks',
         title: 'Text Books',
+        summary: 'Made up.',
         groups: [],
         provenance,
       }),
@@ -350,6 +351,7 @@ describe('the graph', () => {
     kind: 'resource-list',
     slug: 'textbooks',
     title: 'Text Books',
+    summary: 'Made up.',
     groups: [
       { id: 'all', heading: 'All', items: [{ type: 'reference', reference: 'schleim-2025' }] },
     ],

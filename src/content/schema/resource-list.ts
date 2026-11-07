@@ -19,6 +19,8 @@ export interface ResourceListRecord {
   kind: 'resource-list'
   slug: Slug
   title: string
+  /** One line saying what the list holds, drafted for the Project owner's sign-off. */
+  summary: Inline
   groups: readonly { id: Slug; heading: string; items: readonly ResourceItem[] }[]
   provenance: Provenance
 }
