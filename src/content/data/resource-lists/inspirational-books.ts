@@ -7,6 +7,7 @@ export default defineResourceList({
   kind: 'resource-list',
   slug: 'inspirational-books',
   title: 'Inspirational books',
+  summary: 'Books chosen to inspire: spiritual classics, lives and reflections on living well.',
   groups: [
     {
       id: 'inspirational-books',
@@ -94,6 +95,7 @@ export default defineResourceList({
     },
   ],
   provenance: {
+    drafted: ['summary'],
     sources: [
       { url: 'https://care4mind.org/inspirational-books/', retrieved: '2026-10-27' },
       { url: 'https://care4mind.org/text-books/', retrieved: '2026-10-27' },

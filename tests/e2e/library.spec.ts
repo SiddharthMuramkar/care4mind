@@ -352,6 +352,31 @@ test.describe('References: the author rail', () => {
     }
   })
   test(
+    'at 390 px, every filled letter is on screen without swiping the rail',
+    { tag: '@self-width' },
+    async ({ page }) => {
+      await page.setViewportSize({ width: 390, height: 844 })
+      await gotoReady(page, REFERENCES)
+      await expect(toolbar(page)).toBeVisible()
+      const boxes = await toolbar(page)
+        .getByRole('link')
+        .evaluateAll((links) =>
+          links.map((link) => {
+            const { x, width } = link.getBoundingClientRect()
+            return { x, right: x + width }
+          }),
+        )
+      expect(boxes.length).toBeGreaterThan(0)
+      for (const { x, right } of boxes) {
+        expect(x).toBeGreaterThanOrEqual(0)
+        expect(right).toBeLessThanOrEqual(390)
+      }
+      expect(await toolbar(page).evaluate((rail) => rail.scrollWidth <= rail.clientWidth + 1)).toBe(
+        true,
+      )
+    },
+  )
+  test(
     'at 390 px, a letter tap reaches an entry from the first, middle and last letters',
     { tag: '@self-width' },
     async ({ page }) => {
@@ -567,6 +592,36 @@ for (const list of courseLists)
       } else await expect(card.getByRole('link')).toHaveCount(0)
     }
   })
+
+for (const list of lists)
+  test(`${list.title}: shows the one line that says what it holds`, async ({ page }) => {
+    await gotoReady(page, list.href)
+    await expect(page.getByRole('main').getByText(list.summary, { exact: false })).toHaveCount(1)
+  })
+
+test('the book lists switch between Inspirational and Academic, and Courses has no switch', async ({
+  page,
+}) => {
+  const inspirational = lists.find(({ slug }) => slug === 'inspirational-books')
+  const academic = lists.find(({ slug }) => slug === 'textbooks')
+  const courses = lists.find(({ slug }) => slug === 'courses')
+  if (!inspirational || !academic || !courses)
+    throw new Error('The Library has both book lists and Courses.')
+  for (const [list, other, otherLabel] of [
+    [inspirational, academic, 'Academic'],
+    [academic, inspirational, 'Inspirational'],
+  ] as const) {
+    await gotoReady(page, list.href)
+    const nav = page.getByRole('navigation', { name: 'Book lists' })
+    await expect(nav.getByRole('link')).toHaveCount(2)
+    await expect(nav.getByRole('link', { name: otherLabel })).toHaveAttribute('href', other.href)
+    expect(await nav.locator('[aria-current="page"]').innerText()).not.toBe(otherLabel)
+    await nav.getByRole('link', { name: otherLabel }).click()
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText(other.title)
+  }
+  await gotoReady(page, courses.href)
+  await expect(page.getByRole('navigation', { name: 'Book lists' })).toHaveCount(0)
+})
 
 for (const textPage of textPages)
   test(

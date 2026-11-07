@@ -1488,6 +1488,7 @@ describe('the Library', () => {
     kind: 'resource-list',
     slug: 'reading',
     title: 'Reading List',
+    summary: 'A made-up reading list.',
     groups: [
       {
         id: 'core',
@@ -1552,6 +1553,7 @@ describe('the Library', () => {
       kind: 'resource-list',
       slug: 'reading',
       title: 'Reading List',
+      summary: 'A made-up reading list.',
       href: '/library/reading/',
       groups: [
         {
@@ -1790,6 +1792,7 @@ describe('every view', () => {
       kind: 'resource-list',
       slug: 'reading',
       title: 'Reading',
+      summary: 'A made-up reading list.',
       groups: [
         {
           id: 'core',

@@ -215,7 +215,9 @@ test.describe('the filter chips', () => {
     await expect(kindChip(page, 'Terms', 'term')).toHaveAttribute('aria-pressed', 'true')
   })
 
-  test('on a phone the chip rows wrap, and the A–Z bar fades at its edge', async ({ page }) => {
+  test('on a phone the chip rows wrap, and the A–Z bar wraps with every letter on screen', async ({
+    page,
+  }) => {
     await page.setViewportSize({ width: 375, height: 800 })
     await gotoReady(page, PATH)
     const groups = page.getByRole('group', { name: 'Filter the entries' }).getByRole('group')
@@ -226,8 +228,11 @@ test.describe('the filter chips', () => {
         'the row wraps instead of scrolling',
       ).toBe(true)
     const bar = rail(page).locator(':scope > div').first()
-    expect(await bar.evaluate((row) => row.scrollWidth > row.clientWidth)).toBe(true)
-    expect(await bar.evaluate((row) => getComputedStyle(row).maskImage)).toContain('gradient')
+    expect(
+      await bar.evaluate((row) => row.scrollWidth <= row.clientWidth + 1),
+      'the bar wraps instead of scrolling',
+    ).toBe(true)
+    expect(await bar.evaluate((row) => getComputedStyle(row).maskImage)).not.toContain('gradient')
   })
 
   test('filter by mouse, announce the count, keep it in the address, and Back undoes it', async ({

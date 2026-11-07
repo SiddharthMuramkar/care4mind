@@ -1,13 +1,15 @@
 import type { Metadata } from 'next'
+import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import type { CSSProperties } from 'react'
 
 import { Contents } from '@/components/concept'
 import { BookGroup, CourseGroup, holdingsOf, libraryStyles as styles } from '@/components/library'
 import { OrnamentRule } from '@/components/OrnamentRule'
+import { turnForward } from '@/components/PageTurn'
 import { Provenance, Sections, Text } from '@/components/prose'
 import { ReadingPage } from '@/components/ReadingPage'
-import { library, site, type PageView, type ResourceListView } from '@/content'
+import { hrefFor, library, site, type PageView, type ResourceListView } from '@/content'
 import { metadataFor } from '@/lib/metadata'
 import { count } from '@/lib/text'
 
@@ -25,16 +27,43 @@ export async function generateMetadata({
   return metadataFor(PATTERN.replace('[slug]', (await params).slug))
 }
 
+/** The two book lists, as the review names them: Inspirational and Academic. */
+const BOOK_LISTS = [
+  { slug: 'inspirational-books', label: 'Inspirational' },
+  { slug: 'textbooks', label: 'Academic' },
+] as const
+
 /** A reading list: its books on their shelves, or its courses as cards, group by group. */
 function ReadingList({ list }: { list: ResourceListView }) {
   // One group's heading would only repeat the page's title.
   const headed = list.groups.length > 1
-  return list.groups.map((group) =>
-    group.items.every((item) => item.type === 'course') ? (
-      <CourseGroup key={group.id} group={group} headed={headed} />
-    ) : (
-      <BookGroup key={group.id} group={group} headed={headed} />
-    ),
+  const isBookList = BOOK_LISTS.some(({ slug }) => slug === list.slug)
+  return (
+    <>
+      {isBookList ? (
+        <nav aria-label="Book lists" className={styles.kinds}>
+          {BOOK_LISTS.map(({ slug, label }) => (
+            <Link
+              key={slug}
+              href={hrefFor({ kind: 'resource-list', id: slug })}
+              transitionTypes={[...turnForward]}
+              aria-current={slug === list.slug ? 'page' : undefined}
+              className={slug === list.slug ? styles.kindCurrent : styles.kind}
+              data-ink
+            >
+              {label}
+            </Link>
+          ))}
+        </nav>
+      ) : null}
+      {list.groups.map((group) =>
+        group.items.every((item) => item.type === 'course') ? (
+          <CourseGroup key={group.id} group={group} headed={headed} />
+        ) : (
+          <BookGroup key={group.id} group={group} headed={headed} />
+        ),
+      )}
+    </>
   )
 }
 
@@ -86,14 +115,19 @@ export default async function LibraryItemPage({ params }: PageProps<'/library/[s
             <Text text={page.summary} />
           </p>
         ) : (
-          <p className={styles.facts}>
-            {`${tally} ${unit}`}
-            {page.groups.length > 1
-              ? unit.startsWith('book')
-                ? ` on ${count(page.groups.length, 'shelf', 'shelves')}`
-                : ` in ${count(page.groups.length, 'group', 'groups')}`
-              : null}
-          </p>
+          <>
+            <p className={reading.summary}>
+              <Text text={page.summary} />
+            </p>
+            <p className={styles.facts}>
+              {`${tally} ${unit}`}
+              {page.groups.length > 1
+                ? unit.startsWith('book')
+                  ? ` on ${count(page.groups.length, 'shelf', 'shelves')}`
+                  : ` in ${count(page.groups.length, 'group', 'groups')}`
+                : null}
+            </p>
+          </>
         )
       }
     >

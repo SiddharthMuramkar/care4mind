@@ -18,6 +18,51 @@
   color: var(--color-surface-muted);
 }
 
+/* The two book lists switch: Inspirational and Academic, the current one inked solid. */
+.kinds {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-block-end: 1.5rem;
+}
+
+.kind,
+.kindCurrent {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.25rem;
+  padding: 0.2rem 0.85rem;
+  border: 1px solid color-mix(in srgb, var(--color-surface-ink) 45%, transparent);
+  border-radius: 2px;
+  color: var(--color-surface-ink);
+  text-decoration: none;
+}
+
+.kind:hover {
+  border-color: var(--color-surface-ink);
+}
+
+.kindCurrent {
+  background: var(--color-ground);
+  border-color: var(--color-ground);
+  color: var(--color-ink);
+}
+
+.kind:focus-visible,
+.kindCurrent:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+@media (forced-colors: active) {
+  .kindCurrent {
+    forced-color-adjust: none;
+    background: Highlight;
+    border-color: Highlight;
+    color: HighlightText;
+  }
+}
+
 .provenance {
   font-size: var(--text-base);
   font-style: italic;

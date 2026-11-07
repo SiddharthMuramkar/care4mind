@@ -29,6 +29,7 @@ export function resourceListView(
     kind: 'resource-list',
     slug: record.slug,
     title: record.title,
+    summary: record.summary,
     href: hrefFor({ kind: 'resource-list', id: record.slug }),
     groups: record.groups.map((group) => ({
       id: group.id,

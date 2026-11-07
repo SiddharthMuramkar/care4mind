@@ -477,6 +477,7 @@ export interface ResourceListView extends CarriedOver {
   kind: 'resource-list'
   slug: Slug
   title: string
+  summary: Inline
   href: Route
   groups: readonly {
     id: Slug

@@ -8,6 +8,7 @@ export default defineResourceList({
   kind: 'resource-list',
   slug: 'textbooks',
   title: 'Textbooks',
+  summary: 'Study texts on psychology, Indian philosophy and positive psychology.',
   groups: [
     {
       id: 'indian-and-western-textbooks',
@@ -59,6 +60,7 @@ export default defineResourceList({
     },
   ],
   provenance: {
+    drafted: ['summary'],
     sources: [
       { url: 'https://care4mind.org/text-books/', retrieved: '2026-10-27' },
       { url: 'https://care4mind.org/text-books-2-2/', retrieved: '2026-10-27' },
