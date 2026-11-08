@@ -293,11 +293,6 @@ export default defineConfig([
       },
     },
   },
-  {
-    // The workflow runtime supplies agent(), log() and the other script globals.
-    files: ['.claude/workflows/**/*.js'],
-    rules: { 'no-undef': 'off' },
-  },
   ...nextVitals,
   ...nextTypescript,
   // The jsx-a11y plugin is already registered by eslint-config-next; add its full recommended rule set.
