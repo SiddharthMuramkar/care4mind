@@ -15,10 +15,7 @@ const scripts = Object.keys(
 const PNPM_COMMANDS = new Set(['add', 'dlx', 'exec', 'install', 'remove', 'run', 'update', 'why'])
 
 /** Pointers that name, on purpose, something this repo doesn't hold, and why. */
-const ELSEWHERE = new Map([
-  ['MISSION.md', 'the /teach workspace, outside the repo'],
-  ['docs/agents/', 'removed; ADR 0005 says why'],
-])
+const ELSEWHERE = new Map([['MISSION.md', 'the /teach workspace, outside the repo']])
 
 /** A backticked token that reads as a path in this repo, as the path to look for. */
 function repoPath(token: string): string | undefined {
@@ -84,10 +81,8 @@ const sources = tracked.filter(
 
 describe('pointers in docs and comments', () => {
   it('reads the docs, the agent files and the source comments', () => {
-    for (const file of ['CLAUDE.md', 'SPEC.md', 'README.md', 'GLOSSARY.md'])
-      expect(sources).toContain(file)
-    expect(sources).toContain('docs/adr/0005-rules-live-in-checks.md')
-    expect(sources).toContain('.claude/workflows/ship.js')
+    for (const file of ['CLAUDE.md', 'README.md']) expect(sources).toContain(file)
+    expect(sources).toContain('docs/adr/0001-rebuild-instead-of-enhancing.md')
     expect(sources.some((file) => file.startsWith('tests/e2e/'))).toBe(true)
   })
 
@@ -114,7 +109,7 @@ describe('pointers in docs and comments', () => {
   it('passes the pointers that resolve, and leaves what is not a repo path alone', () => {
     expect(
       brokenPointers(
-        'See `scripts/lane/heavy.sh`, `@/content`, `SPEC.md:12`, `src/app/concepts/[slug]/`, ' +
+        'See `scripts/icons.mjs`, `@/content`, `README.md:12`, `src/app/concepts/[slug]/`, ' +
           '`archive/press-original`, `ticket-<n>-x`, `~/Desktop/x/`, `pnpm check:e2e`, ' +
           '`pnpm exec eslint`, pnpm and yarn. Read README.md, "Checks".',
       ),

@@ -1,6 +1,6 @@
 # Care4Mind.org rebuild: working brief
 
-> This brief is the source of truth for planning and building the project. Where it differs from the client's original ([the client's brief](https://github.com/SiddharthMuramkar/care4mind/blob/505105015beb09f12a7532c9ed33377e131061cf/docs/client-brief.md)), this one wins. The biggest difference is the decision to rebuild ([ADR-0001](adr/0001-rebuild-instead-of-enhancing.md)). Facts about the current site, with sources, are in [the current site](https://github.com/SiddharthMuramkar/care4mind/blob/505105015beb09f12a7532c9ed33377e131061cf/docs/current-site.md). Concept, Reference, Questionnaire, Content editor, Research editor and Psychology expert are defined in [GLOSSARY.md](../GLOSSARY.md).
+> This brief is the source of truth for planning and building the project. Where it differs from the client's original ([the client's brief](https://github.com/SiddharthMuramkar/care4mind/blob/505105015beb09f12a7532c9ed33377e131061cf/docs/client-brief.md)), this one wins. The biggest difference is the decision to rebuild ([ADR-0001](adr/0001-rebuild-instead-of-enhancing.md)). Facts about the current site, with sources, are in [the current site](https://github.com/SiddharthMuramkar/care4mind/blob/505105015beb09f12a7532c9ed33377e131061cf/docs/current-site.md).
 
 ## Goal
 
