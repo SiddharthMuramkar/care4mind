@@ -22,6 +22,9 @@ jobs:
     name: pnpm check
     runs-on: ubuntu-24.04
     timeout-minutes: 15
+    outputs:
+      # container.image can't read steps, so the browser jobs get the version from here.
+      playwright: ${{ steps.playwright.outputs.version }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
@@ -30,6 +33,8 @@ jobs:
           node-version-file: .nvmrc
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      - id: playwright
+        run: echo "version=$(node -p "require('@playwright/test/package.json').version")" >> "$GITHUB_OUTPUT"
       - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: .next/cache
@@ -53,6 +58,9 @@ jobs:
     name: Browser tests ${{ matrix.shard }}/${{ strategy.job-total }}
     needs: check
     runs-on: ubuntu-24.04
+    container:
+      image: mcr.microsoft.com/playwright:v${{ needs.check.outputs.playwright }}-noble
+      options: --user 1001 --init --ipc=host
     timeout-minutes: 20
     strategy:
       fail-fast: false
@@ -71,13 +79,6 @@ jobs:
         with:
           name: build
           path: .
-      - id: playwright
-        run: echo "version=$(node -p "require('@playwright/test/package.json').version")" >> "$GITHUB_OUTPUT"
-      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        with:
-          path: ~/.cache/ms-playwright
-          key: playwright-${{ runner.os }}-${{ steps.playwright.outputs.version }}
-      - run: pnpm exec playwright install --with-deps chromium
       # Every Chromium project; Firefox and WebKit run in the engines job.
       - run: >-
           pnpm check:e2e --shard=${{ matrix.shard }}/${{ strategy.job-total }}
@@ -99,6 +100,9 @@ jobs:
     name: Latency
     needs: check
     runs-on: ubuntu-24.04
+    container:
+      image: mcr.microsoft.com/playwright:v${{ needs.check.outputs.playwright }}-noble
+      options: --user 1001 --init --ipc=host
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -112,13 +116,6 @@ jobs:
         with:
           name: build
           path: .
-      - id: playwright
-        run: echo "version=$(node -p "require('@playwright/test/package.json').version")" >> "$GITHUB_OUTPUT"
-      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        with:
-          path: ~/.cache/ms-playwright
-          key: playwright-${{ runner.os }}-${{ steps.playwright.outputs.version }}
-      - run: pnpm exec playwright install --with-deps chromium
       # The specs throttle the CPU 4x, so nothing else may run beside them.
       - run: pnpm check:e2e --project=latency
         env:
@@ -136,7 +133,9 @@ jobs:
     name: Firefox and WebKit
     needs: check
     runs-on: ubuntu-24.04
-    # Two minutes normally, but a slow Ubuntu mirror has held apt alone past fourteen.
+    container:
+      image: mcr.microsoft.com/playwright:v${{ needs.check.outputs.playwright }}-noble
+      options: --user 1001 --init --ipc=host
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -150,13 +149,6 @@ jobs:
         with:
           name: build
           path: .
-      - id: playwright
-        run: echo "version=$(node -p "require('@playwright/test/package.json').version")" >> "$GITHUB_OUTPUT"
-      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        with:
-          path: ~/.cache/ms-playwright
-          key: playwright-engines-${{ runner.os }}-${{ steps.playwright.outputs.version }}
-      - run: pnpm exec playwright install --with-deps firefox webkit
       - run: pnpm check:e2e --project=firefox-360 --project=webkit-360
         env:
           E2E_SCOPE: full
@@ -172,8 +164,11 @@ jobs:
   flags-off:
     # Production's flag set: a link to a switched-off page would otherwise first fail live.
     name: Browser tests with every feature off
+    needs: check
     runs-on: ubuntu-24.04
-    # Under ten minutes normally, but a slow Ubuntu mirror has held apt alone past fourteen.
+    container:
+      image: mcr.microsoft.com/playwright:v${{ needs.check.outputs.playwright }}-noble
+      options: --user 1001 --init --ipc=host
     timeout-minutes: 30
     # Flags are read at build, so this job builds its own site rather than reuse check's.
     env:
@@ -190,13 +185,6 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm build
-      - id: playwright
-        run: echo "version=$(node -p "require('@playwright/test/package.json').version")" >> "$GITHUB_OUTPUT"
-      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        with:
-          path: ~/.cache/ms-playwright
-          key: playwright-${{ runner.os }}-${{ steps.playwright.outputs.version }}
-      - run: pnpm exec playwright install --with-deps chromium
       - run: pnpm check:e2e
         env:
           E2E_ONLY: crawler,pages
