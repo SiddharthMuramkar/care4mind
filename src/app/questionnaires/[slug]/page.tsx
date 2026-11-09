@@ -57,7 +57,7 @@ export default async function QuestionnairePage({ params }: PageProps<'/question
           })}
           size={120}
           phoneSize={88}
-          className={styles.picture}
+          className={reading.headPicture}
         />
       }
       kicker="Questionnaire"

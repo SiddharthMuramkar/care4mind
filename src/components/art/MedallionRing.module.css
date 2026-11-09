@@ -17,10 +17,12 @@
 }
 
 /*
- * Inks in with the scroll, and scrubs back if the visitor scrolls back. Every line follows the one
- * timeline named on the ring, so the flower and the laurels stay in step. The dash is there only
- * while it draws: `backwards` drops it once drawn, because a dash can leave a gap at a closed
- * ring's join. Firefox (no support yet) shows the finished ring, as does reduced motion.
+ * Inks in with the scroll, and scrubs back if the visitor scrolls back. It is done once the ring
+ * is wholly in view, so a ring at rest on the first screen is never left half-drawn. Every line
+ * follows the one timeline named on the ring, so the flower and the laurels stay in step. The
+ * dash is there only while it draws: `backwards` drops it once drawn, because a dash can leave a
+ * gap at a closed ring's join. Firefox (no support yet) shows the finished ring, as does reduced
+ * motion.
  */
 @media (prefers-reduced-motion: no-preference) {
   @supports (animation-timeline: view()) {
@@ -49,13 +51,13 @@
     .inks .stroke {
       animation: ink linear backwards;
       animation-timeline: --ring;
-      animation-range: entry 0% cover 40%;
+      animation-range: entry 0% entry 100%;
     }
 
     .inks .dots {
       animation: appear linear backwards;
       animation-timeline: --ring;
-      animation-range: entry 0% cover 40%;
+      animation-range: entry 0% entry 100%;
     }
   }
 }

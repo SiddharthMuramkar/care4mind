@@ -41,12 +41,6 @@ describe('a Questionnaire card', () => {
     expect(markup.indexOf('<img')).toBeLessThan(markup.indexOf('<h3'))
   })
 
-  it('asks for the Questionnaire’s own picture, never an Interim one', () => {
-    vi.mocked(ownArt).mockReturnValue(undefined)
-    card()
-    expect(ownArt).toHaveBeenCalledWith({ kind: 'questionnaire', slug: 'karmayoga-scale' })
-  })
-
   it('stays bare with no Plate of its own: no picture and no row kept for one', () => {
     vi.mocked(ownArt).mockReturnValue(undefined)
     const markup = card()

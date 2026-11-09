@@ -98,7 +98,7 @@ export default async function ConceptPage({ params }: PageProps<'/concepts/[slug
           art={artFor({ kind: 'concept', slug: concept.slug, topic: concept.topic.slug })}
           size={120}
           phoneSize={88}
-          className={styles.picture}
+          className={reading.headPicture}
         />
       }
       longTitle={!concept.term}

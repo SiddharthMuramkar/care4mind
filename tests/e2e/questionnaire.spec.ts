@@ -229,6 +229,15 @@ test.describe('The Karma Yoga cycle', () => {
     await expect.poll(() => unfinishedArrows(page)).toEqual({ lines: 0, heads: 0 })
   })
 
+  test('prints without its picture', async ({ page }) => {
+    await gotoReady(page, PATH)
+    const picture = page.getByRole('main').locator('header img')
+    await expect(picture).toBeVisible()
+    await page.emulateMedia({ media: 'print' })
+    await expect(picture).toBeHidden()
+    await expect(page.getByRole('heading', { level: 1 })).toBeVisible()
+  })
+
   test(
     'strikes each struck word from end to end, through its middle',
     { tag: '@self-width' },

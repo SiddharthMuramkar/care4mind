@@ -223,19 +223,8 @@ test('the KarmaYoga Scale page keeps its Medallion and its cycle in the theme’
   const picture = page.getByRole('main').locator('header img')
   await expect(picture).toBeVisible()
   await expect(picture).toHaveAttribute('alt', '')
-  await expect
-    .poll(() => picture.evaluate((image: HTMLImageElement) => image.naturalWidth))
-    .toBeGreaterThan(0)
-  const ring = page.getByRole('main').locator('header span:has(> img) > svg path')
-  expect(await ring.count(), 'the ring has paths').toBeGreaterThan(0)
-  for (const path of await ring.all()) {
-    const { stroke, color } = await path.evaluate((element) => ({
-      stroke: getComputedStyle(element).stroke,
-      color: getComputedStyle(element.parentElement as Element).color,
-    }))
-    expect(stroke).toBe(color)
-    expect(stroke).not.toMatch(/^transparent$|^rgba\(.*,\s*0\)$/)
-  }
+  await expectLoaded(picture)
+  await expectRingInTextColour(page.getByRole('main').locator('header span:has(> img) > svg path'))
   const seenIn = (selector: string, property: 'fill' | 'stroke') =>
     page
       .locator(`#karma-cycle svg ${selector}`)

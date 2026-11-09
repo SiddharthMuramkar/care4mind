@@ -177,7 +177,7 @@ const SECTION_STICKERS = [
 const NOTHING_FOUND = '/search/?q=zzqxqzzqx'
 
 /** The picture at the head of the page: the only one a section page's header holds. */
-const headSticker = (page: Page) => page.getByRole('main').locator('header img')
+const headImage = (page: Page) => page.getByRole('main').locator('header img')
 
 test.describe('section pages', () => {
   for (const { path, file } of SECTION_STICKERS) {
@@ -186,7 +186,7 @@ test.describe('section pages', () => {
       { tag: '@one-width' },
       async ({ page }) => {
         await gotoReady(page, path)
-        const sticker = headSticker(page)
+        const sticker = headImage(page)
         await expect(sticker).toHaveCount(1)
         await expect(sticker).toHaveAttribute('alt', '')
         expect(decodeURIComponent((await sticker.getAttribute('src')) ?? '')).toContain(
@@ -205,7 +205,7 @@ test.describe('section pages', () => {
 
   test('a Sticker keeps its size, lists two files and never takes a click', async ({ page }) => {
     await gotoReady(page, '/concepts/')
-    const sticker = headSticker(page)
+    const sticker = headImage(page)
     await expect(sticker).toHaveAttribute('width', '112')
     await expect(sticker).toHaveAttribute('height', '112')
     await expect(sticker).not.toHaveAttribute('sizes')
@@ -225,25 +225,25 @@ test.describe('section pages', () => {
 
   test('Search shows its Sticker only when nothing is listed', async ({ page }) => {
     await gotoReady(page, '/search/')
-    await expect(headSticker(page)).toHaveCount(1)
+    await expect(headImage(page)).toHaveCount(1)
     await gotoReady(page, NOTHING_FOUND)
     await expect(page.getByRole('heading', { name: /^No results for/ })).toBeVisible()
-    await expect(headSticker(page)).toHaveCount(1)
+    await expect(headImage(page)).toHaveCount(1)
     await gotoReady(page, '/search/?q=karma')
     await expect(page.getByRole('heading', { name: /results? for/ })).toBeVisible()
-    await expect(headSticker(page)).toHaveCount(0)
+    await expect(headImage(page)).toHaveCount(0)
   })
 
   test('Search with nothing found passes axe, its Sticker in place', async ({ page }) => {
     await gotoReady(page, NOTHING_FOUND)
-    await expect(headSticker(page)).toHaveCount(1)
+    await expect(headImage(page)).toHaveCount(1)
     await expectNoAxeViolations(page)
   })
 
   test('the proposals page has no Sticker', { tag: '@one-width' }, async ({ page }) => {
     const response = await gotoReady(page, '/proposals/')
     expect(response?.status(), 'the page exists').toBe(200)
-    await expect(headSticker(page)).toHaveCount(0)
+    await expect(headImage(page)).toHaveCount(0)
   })
 
   const stickerFiles = [...new Set(SECTION_STICKERS.map(({ file }) => file))]
@@ -393,7 +393,7 @@ test.describe('topic cards', () => {
       await cardLink(page, 'self').hover()
       await expect(cardSticker(page, 'self')).not.toHaveCSS('transform', 'none')
       await expect(cardSticker(page, 'mind')).toHaveCSS('transform', 'none')
-      await expect(headSticker(page)).toHaveCSS('transform', 'none')
+      await expect(headImage(page)).toHaveCSS('transform', 'none')
     },
   )
 
@@ -405,7 +405,7 @@ test.describe('topic cards', () => {
       await cardLink(page, 'mind').focus()
       await expect(cardSticker(page, 'mind')).not.toHaveCSS('transform', 'none')
       await expect(cardSticker(page, 'self')).toHaveCSS('transform', 'none')
-      await expect(headSticker(page)).toHaveCSS('transform', 'none')
+      await expect(headImage(page)).toHaveCSS('transform', 'none')
     },
   )
 
@@ -514,7 +514,7 @@ test.describe('Concept pages', () => {
       page,
     }) => {
       await gotoReady(page, path)
-      const picture = headSticker(page)
+      const picture = headImage(page)
       await expect(picture).toHaveCount(1)
       await expect(picture).toHaveAttribute('alt', '')
       expect(decodeURIComponent((await picture.getAttribute('src')) ?? '')).toContain(
@@ -532,7 +532,7 @@ test.describe('Concept pages', () => {
 
   test('the picture is 120 px, 88 on a phone, and lists two files', async ({ page }) => {
     await gotoReady(page, '/concepts/vikshepa/')
-    const picture = headSticker(page)
+    const picture = headImage(page)
     await expect(picture).toHaveAttribute('width', '120')
     await expect(picture).not.toHaveAttribute('sizes')
     const files = ((await picture.getAttribute('srcset')) ?? '').split(', ')
@@ -551,13 +551,16 @@ test.describe('Concept pages', () => {
 
 const KARMAYOGA_SCALE = '/questionnaires/karmayoga-scale/'
 
+/** The cards on a page. Only a card or a Folio is paper; the Folio is the one with the heading. */
+const cardsOn = (page: Page) => page.getByRole('main').locator('article[data-paper]:not(:has(h1))')
+
 test.describe('Questionnaire pages and cards', () => {
   test(
     'the KarmaYoga Scale page shows its own Plate, in its ring, centred above its title',
     { tag: '@one-width' },
     async ({ page }) => {
       await gotoReady(page, KARMAYOGA_SCALE)
-      const picture = headSticker(page)
+      const picture = headImage(page)
       await expect(picture).toHaveCount(1)
       await expect(picture).toHaveAttribute('alt', '')
       expect(decodeURIComponent((await picture.getAttribute('src')) ?? '')).toContain(
@@ -579,7 +582,7 @@ test.describe('Questionnaire pages and cards', () => {
 
   test('the picture is 120 px, 88 on a phone, and lists two files', async ({ page }) => {
     await gotoReady(page, KARMAYOGA_SCALE)
-    const picture = headSticker(page)
+    const picture = headImage(page)
     await expect(picture).toHaveAttribute('width', '120')
     await expect(picture).not.toHaveAttribute('sizes')
     const files = ((await picture.getAttribute('srcset')) ?? '').split(', ')
@@ -610,10 +613,6 @@ test.describe('Questionnaire pages and cards', () => {
       },
     )
   }
-
-  // Only a Questionnaire card or a Folio is paper; the Folio is the one with the page's heading.
-  const cardsOn = (page: Page) =>
-    page.getByRole('main').locator('article[data-paper]:not(:has(h1))')
 
   test('the KarmaYoga Scale card shows its Medallion in a row above the title, the status to its right', async ({
     page,
@@ -659,6 +658,23 @@ test.describe('Questionnaire pages and cards', () => {
     expect(await cards.count(), 'Questionnaire cards on the page').toBeGreaterThan(0)
     await expect(cards.locator('img[src*="stickers"]')).toHaveCount(0)
   })
+
+  test(
+    'the card’s ring is finished on a first screen that shows it whole, with no scrolling',
+    { tag: '@self-width' },
+    async ({ page }) => {
+      await page.setViewportSize({ width: 1366, height: 768 })
+      await gotoReady(page, '/questionnaires/')
+      const ring = cardsOn(page).filter({ hasText: 'KarmaYoga Scale' }).locator('svg')
+      await expect(ring).toBeInViewport({ ratio: 1 })
+      const paths = ring.locator('path')
+      expect(await paths.count(), 'the ring has paths').toBeGreaterThan(0)
+      for (const path of await paths.all()) {
+        await expect(path).toHaveCSS('stroke-dashoffset', '0px')
+        await expect(path).toHaveCSS('opacity', '1')
+      }
+    },
+  )
 })
 
 /** The pages that list Concept cards. */
@@ -670,8 +686,7 @@ test.describe('Concept cards', () => {
       page,
     }) => {
       await gotoReady(page, path)
-      // Only a Concept card or a Folio is paper; the Folio is the one with the page's heading.
-      const cards = page.getByRole('main').locator('article[data-paper]:not(:has(h1))')
+      const cards = cardsOn(page)
       expect(await cards.count(), 'Concept cards on the page').toBeGreaterThan(0)
       await expect(cards.locator('img[src*="stickers"]')).toHaveCount(0)
       for (const card of await cards.all()) {
@@ -760,7 +775,7 @@ test.describe('Traditional text pages', () => {
       async ({ page }) => {
         await gotoReady(page, href)
         const expected = artFor({ kind: 'work', slug })
-        const picture = headSticker(page)
+        const picture = headImage(page)
         await expect(picture).toHaveCount(1)
         await expect(picture).toHaveAttribute('alt', '')
         await expect(picture).toHaveAttribute('width', '120')
@@ -781,7 +796,7 @@ test.describe('Traditional text pages', () => {
   }) => {
     await gotoReady(page, '/texts/yoga-sutra/')
     const [picture, heading] = await Promise.all([
-      headSticker(page).boundingBox(),
+      headImage(page).boundingBox(),
       page.getByRole('heading', { level: 1 }).boundingBox(),
     ])
     if (!picture || !heading) throw new Error('The page head is laid out.')
@@ -799,7 +814,7 @@ test.describe('Traditional text pages', () => {
     async ({ page }) => {
       await gotoReady(page, '/texts/yoga-sutra/')
       await page.getByRole('heading', { level: 1 }).hover()
-      await expect(headSticker(page)).toHaveCSS('transform', 'none')
+      await expect(headImage(page)).toHaveCSS('transform', 'none')
     },
   )
 })
@@ -863,7 +878,7 @@ test.describe('every page, whatever has been made so far', () => {
       async ({ page }) => {
         await gotoReady(page, route.path)
         const expected = await headPicture(route)
-        const picture = headSticker(page)
+        const picture = headImage(page)
         if (!expected) {
           await expect(picture).toHaveCount(0)
           return
@@ -1767,7 +1782,7 @@ test.describe('the homepage, section and topic pages as a set', () => {
     {
       name: 'topic Frontispiece',
       path: '/topics/mind/',
-      box: (page) => ringOf(headSticker(page)),
+      box: (page) => ringOf(headImage(page)),
       wide: 240,
       narrow: 200,
       narrowBelow: 640,
@@ -1775,7 +1790,7 @@ test.describe('the homepage, section and topic pages as a set', () => {
     {
       name: 'section Sticker',
       path: '/concepts/',
-      box: headSticker,
+      box: headImage,
       wide: 112,
       narrow: 88,
       narrowBelow: 640,
@@ -1836,7 +1851,7 @@ test.describe('the homepage, section and topic pages as a set', () => {
       page,
     }) => {
       await gotoReady(page, path)
-      const picture = ringed ? ringOf(headSticker(page)) : headSticker(page)
+      const picture = ringed ? ringOf(headImage(page)) : headImage(page)
       const gap = await picture.evaluate((element) => {
         const next = element.nextElementSibling
         if (!next) throw new Error('The words follow the picture.')
@@ -1954,7 +1969,7 @@ test.describe('the Concept, Questionnaire, text and error pages as a set', () =>
       page,
     }) => {
       await gotoReady(page, path)
-      const picture = ringed ? ringOf(headSticker(page)) : headSticker(page)
+      const picture = ringed ? ringOf(headImage(page)) : headImage(page)
       const gap = await picture.evaluate((element) => {
         const next = element.nextElementSibling
         if (!next) throw new Error('The words follow the picture.')
