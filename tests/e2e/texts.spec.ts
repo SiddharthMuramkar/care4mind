@@ -80,9 +80,9 @@ test.describe('the shelf', () => {
       // A direct child of the card's article, which is what lets it lift with the card.
       await expect(leaf.locator(':scope > img')).toHaveCount(pothi ? 1 : 0)
       await expect(leaf.locator('img')).toHaveCount(pothi ? 1 : 0)
-      await expect(leaf.locator('img[src*="book-ornate"]')).toHaveCount(0)
       await expect(leaf).not.toHaveAttribute('data-paper')
-      // No work has its Pothi yet: this waits for the first one, or a local draft record.
+      const item = expect(leaf.locator('..'))
+      await (pothi ? item.not : item).toHaveAttribute('data-bare')
       if (pothi) {
         const picture = leaf.locator('img')
         await expect(picture).toHaveAttribute('alt', '')
@@ -96,15 +96,28 @@ test.describe('the shelf', () => {
     }
   })
 
+  test('the cards with a Pothi lead the shelf, so a full row leaves no hole', async ({ page }) => {
+    await gotoReady(page, TEXTS)
+    const bare = await main(page)
+      .getByRole('article')
+      .locator('..')
+      .evaluateAll((items) => items.map((item) => item.hasAttribute('data-bare')))
+    expect(bare).toEqual([...bare.filter((isBare) => !isBare), ...bare.filter(Boolean)])
+  })
+
   test(
     'beside bare cards a card with a Pothi takes a row of its own, and none does once all have one',
     { tag: '@from-768' },
     async ({ page }) => {
       await gotoReady(page, TEXTS)
-      // No work has its Pothi yet, so this marks the cards by hand to reach the shelf's own rule.
+      // Marks the cards by hand, so the shelf's rule is reached whichever works have a Pothi.
       const items = main(page).getByRole('article').locator('..')
       const [first, second] = [items.nth(0), items.nth(1)]
-      const widthOf = async (box: Locator) => (await box.boundingBox())?.width ?? 0
+      const widthOf = async (box: Locator) => {
+        const laidOut = await box.boundingBox()
+        if (!laidOut) throw new Error('The shelf and its cards are laid out.')
+        return laidOut.width
+      }
       const shelfWidth = await widthOf(first.locator('..'))
 
       await items.evaluateAll((all) =>

@@ -121,9 +121,7 @@ test('a Traditional text page keeps its head picture, decorative', async ({ page
   const picture = page.getByRole('main').locator('header img')
   await expect(picture).toBeVisible()
   await expect(picture).toHaveAttribute('alt', '')
-  await expect
-    .poll(() => picture.evaluate((image: HTMLImageElement) => image.naturalWidth))
-    .toBeGreaterThan(0)
+  await expectLoaded(picture)
 })
 
 test('a Traditional text card keeps its edge', async ({ page }) => {
