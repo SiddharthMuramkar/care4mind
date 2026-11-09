@@ -4,8 +4,7 @@ import { extname, join } from 'node:path'
 import { notFound } from 'next/navigation'
 import { ImageResponse } from 'next/og'
 
-import { art, artFor, type ArtRecord } from '@/art'
-import type { SectionKey } from '@/art/assign'
+import { art, artFor, type ArtRecord, type SectionKey } from '@/art'
 import { siteConfig as config } from '@/config/site'
 import { concepts, questionnaires } from '@/content'
 import { cardFaces } from '@/fonts/card-faces'
@@ -29,6 +28,8 @@ const RULE = CARD_COLOURS['--color-surface-rule']
 /** The text keeps to the left two thirds, so it can never reach the picture at x 800. */
 const TEXT_WIDTH = 656
 const PICTURE_SIZE = 320
+/** Puts the picture's top edge level with the top of the title, below the name and its rule. */
+const PICTURE_TOP = 187
 
 /** The picture on the share card of the public page whose route pattern is `pattern`. */
 export async function cardPicture(pattern: string, slug: string): Promise<ArtRecord> {
@@ -70,8 +71,7 @@ export async function cardPicture(pattern: string, slug: string): Promise<ArtRec
     case '/questionnaires/[slug]/take/': {
       const questionnaire = await questionnaires.get(slug)
       if (!questionnaire) notFound()
-      const firstConcept = questionnaire.concepts[0]?.slug
-      return artFor({ kind: 'questionnaire', slug, ...(firstConcept ? { firstConcept } : {}) })
+      return artFor({ kind: 'questionnaire', slug, firstConcept: questionnaire.concepts[0]?.slug })
     }
     default:
       throw new Error(`No share card picture for “${pattern}” (“${slug}”).`)
@@ -114,7 +114,7 @@ export async function shareCard(pattern: string, slug = ''): Promise<ImageRespon
         style={{
           fontFamily: 'Playfair Display, Tiro Devanagari Sanskrit',
           fontWeight: 500,
-          fontSize: title.length > 24 ? 56 : 72,
+          fontSize: 56,
           lineHeight: 1.1,
           width: TEXT_WIDTH,
           display: 'block',
@@ -131,7 +131,7 @@ export async function shareCard(pattern: string, slug = ''): Promise<ImageRespon
           lineHeight: 1.4,
           color: MUTED,
           display: 'block',
-          lineClamp: 3,
+          lineClamp: 4,
         }}
       >
         {description}
@@ -146,7 +146,7 @@ export async function shareCard(pattern: string, slug = ''): Promise<ImageRespon
         style={{
           position: 'absolute',
           left: 800,
-          top: 187,
+          top: PICTURE_TOP,
           borderRadius: picture.family === 'plate' ? PICTURE_SIZE / 2 : 0,
         }}
       />

@@ -13,6 +13,7 @@ import { createArt } from './resolve'
 export type * from './types'
 export type { ArtId }
 export type { ArtTarget, OwnArtTarget } from './resolve'
+export type { SectionKey } from './assign'
 export { originLine } from './origin'
 
 const pictures = createArt(ART, features)

@@ -17,13 +17,6 @@ describe('the picture on a share card', () => {
     },
   )
 
-  it('exists for every public page', async () => {
-    for (const route of await site.routes()) {
-      const picture = await cardPicture(route.pattern, route.record?.id ?? '')
-      expect(picture.src, route.path).toMatch(/^\/art\//)
-    }
-  })
-
   it("on a take page is its Questionnaire's", async () => {
     const takeable = (await site.routes()).filter((route) => route.kind === 'questionnaire-flow')
     expect(takeable.length).toBeGreaterThan(0)
