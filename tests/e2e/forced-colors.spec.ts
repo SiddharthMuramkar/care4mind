@@ -134,8 +134,26 @@ test('a Frontispiece ring draws in the text colour of the theme', async ({ page 
   }
 })
 
-test('the KarmaYoga Scale page keeps its cycle in the theme’s text colour', async ({ page }) => {
+test('the KarmaYoga Scale page keeps its Medallion and its cycle in the theme’s text colour', async ({
+  page,
+}) => {
   await gotoReady(page, '/questionnaires/karmayoga-scale/')
+  const picture = page.getByRole('main').locator('header img')
+  await expect(picture).toBeVisible()
+  await expect(picture).toHaveAttribute('alt', '')
+  await expect
+    .poll(() => picture.evaluate((image: HTMLImageElement) => image.naturalWidth))
+    .toBeGreaterThan(0)
+  const ring = page.getByRole('main').locator('header span:has(> img) > svg path')
+  expect(await ring.count(), 'the ring has paths').toBeGreaterThan(0)
+  for (const path of await ring.all()) {
+    const { stroke, color } = await path.evaluate((element) => ({
+      stroke: getComputedStyle(element).stroke,
+      color: getComputedStyle(element.parentElement as Element).color,
+    }))
+    expect(stroke).toBe(color)
+    expect(stroke).not.toMatch(/^transparent$|^rgba\(.*,\s*0\)$/)
+  }
   const seenIn = (selector: string, property: 'fill' | 'stroke') =>
     page
       .locator(`#karma-cycle svg ${selector}`)

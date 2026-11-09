@@ -13,6 +13,7 @@ const PICTURES = 'main img, footer img'
 const PAGES: { path: string; name: string }[] = [
   // Add a page in path order, not at the end.
   { path: '/concepts/vikshepa/', name: 'Vikṣepa Concept page' },
+  { path: '/questionnaires/karmayoga-scale/', name: 'KarmaYoga Scale page' },
   { path: '/topics/mind/', name: 'mind topic page' },
 ]
 
@@ -298,6 +299,117 @@ test.describe('Concept pages', () => {
     const expected = (page.viewportSize()?.width ?? 0) < 640 ? 88 : 120
     expect(box?.width).toBe(expected)
     expect(box?.height).toBe(expected)
+  })
+})
+
+const KARMAYOGA_SCALE = '/questionnaires/karmayoga-scale/'
+
+test.describe('Questionnaire pages and cards', () => {
+  test(
+    'the KarmaYoga Scale page shows its own Plate, in its ring, centred above its title',
+    { tag: '@one-width' },
+    async ({ page }) => {
+      await gotoReady(page, KARMAYOGA_SCALE)
+      const picture = headSticker(page)
+      await expect(picture).toHaveCount(1)
+      await expect(picture).toHaveAttribute('alt', '')
+      expect(decodeURIComponent((await picture.getAttribute('src')) ?? '')).toContain(
+        '/art/plates/karma-yoga.jpg',
+      )
+      await expect(
+        page.getByRole('main').locator('header span:has(> img) > svg').first(),
+      ).toBeVisible()
+      const [box, heading] = await Promise.all([
+        picture.boundingBox(),
+        page.getByRole('heading', { level: 1 }).boundingBox(),
+      ])
+      if (!box || !heading) throw new Error('The title page has its parts.')
+      expect(box.y + box.height).toBeLessThanOrEqual(heading.y)
+      expect(Math.abs(box.x + box.width / 2 - (heading.x + heading.width / 2))).toBeLessThan(1.5)
+    },
+  )
+
+  test('the picture is 120 px, 88 on a phone, and lists two files', async ({ page }) => {
+    await gotoReady(page, KARMAYOGA_SCALE)
+    const picture = headSticker(page)
+    await expect(picture).toHaveAttribute('width', '120')
+    await expect(picture).not.toHaveAttribute('sizes')
+    const files = ((await picture.getAttribute('srcset')) ?? '').split(', ')
+    expect(files).toHaveLength(2)
+    expect(files[0]).toMatch(/&w=120&.* 1x$/)
+    expect(files[1]).toMatch(/&w=240&.* 2x$/)
+    await expect
+      .poll(() => picture.evaluate((image: HTMLImageElement) => image.naturalWidth))
+      .toBeGreaterThan(0)
+    // The ring's band is 5% each side of the Medallion: the picture fills the 90% inside it.
+    const wide = (page.viewportSize()?.width ?? 0) >= 640
+    const box = await picture.locator('xpath=..').boundingBox()
+    expect(box?.width).toBe(wide ? 120 : 88)
+  })
+
+  for (const format of ['avif', 'webp']) {
+    test(
+      `the KarmaYoga Scale Medallion weighs at most 25 KB at 2x as ${format}`,
+      { tag: '@one-width' },
+      async ({ request }) => {
+        const response = await request.get(
+          '/_next/image/?url=%2Fart%2Fplates%2Fkarma-yoga.jpg&w=240&q=75',
+          { headers: { Accept: `image/${format}` } },
+        )
+        expect(response.status()).toBe(200)
+        expect(response.headers()['content-type']).toBe(`image/${format}`)
+        expect((await response.body()).byteLength).toBeLessThanOrEqual(25_000)
+      },
+    )
+  }
+
+  // Only a Questionnaire card or a Folio is paper; the Folio is the one with the page's heading.
+  const cardsOn = (page: Page) =>
+    page.getByRole('main').locator('article[data-paper]:not(:has(h1))')
+
+  test('the KarmaYoga Scale card shows its Medallion in a row above the title, the status to its right', async ({
+    page,
+  }) => {
+    await gotoReady(page, '/questionnaires/')
+    const card = cardsOn(page).filter({ hasText: 'KarmaYoga Scale' })
+    const picture = card.locator('img')
+    await expect(picture).toHaveCount(1)
+    await expect(picture).toHaveAttribute('alt', '')
+    await expect(picture).toHaveAttribute('width', '64')
+    expect(decodeURIComponent((await picture.getAttribute('src')) ?? '')).toContain(
+      'karma-yoga.jpg',
+    )
+    const medallion = picture.locator('xpath=..')
+    const [box, title, badge] = await Promise.all([
+      medallion.boundingBox(),
+      card.getByRole('heading', { level: 3 }).boundingBox(),
+      card.getByText('Preview', { exact: true }).boundingBox(),
+    ])
+    if (!box || !title || !badge) throw new Error('The card has its parts.')
+    expect(box.width).toBe(64)
+    expect(box.y + box.height, 'the picture stands above the title').toBeLessThanOrEqual(title.y)
+    expect(badge.x, 'the status stands to the picture’s right').toBeGreaterThanOrEqual(
+      box.x + box.width,
+    )
+    expect(
+      Math.abs(badge.y + badge.height / 2 - (box.y + box.height / 2)),
+      'the status is centred on the picture',
+    ).toBeLessThan(2)
+  })
+
+  test('the card’s picture takes no click and no focus', async ({ page }) => {
+    await gotoReady(page, '/questionnaires/')
+    const picture = cardsOn(page).filter({ hasText: 'KarmaYoga Scale' }).locator('img')
+    await expect(picture).toHaveCSS('pointer-events', 'none')
+    await expect(picture.locator('xpath=ancestor::a')).toHaveCount(0)
+    await expect(picture).not.toHaveAttribute('tabindex')
+  })
+
+  test('no Questionnaire card shows an Interim picture', async ({ page }) => {
+    await gotoReady(page, '/questionnaires/')
+    const cards = cardsOn(page)
+    expect(await cards.count(), 'Questionnaire cards on the page').toBeGreaterThan(0)
+    await expect(cards.locator('img[src*="stickers"]')).toHaveCount(0)
   })
 })
 
