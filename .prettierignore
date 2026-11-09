@@ -5,6 +5,7 @@ pnpm-workspace.yaml
 src/fonts/
 src/content/generated/
 scripts/art/originals.json
+/art/
 .next/
 playwright-report/
 test-results/
