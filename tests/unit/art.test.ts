@@ -3,11 +3,26 @@ import { join } from 'node:path'
 
 import { ESLint } from 'eslint'
 import sharp from 'sharp'
-import { describe, expect, it } from 'vitest'
+import { beforeAll, describe, expect, it } from 'vitest'
 
-import { art, type ArtOrigin } from '@/art'
+import { art, artFor, ownArt, type ArtOrigin, type ArtRecord } from '@/art'
+import {
+  conceptArt,
+  heroPlates,
+  questionnaireArt,
+  sectionArt,
+  topicArt,
+  workArt,
+  type PictureId,
+  type SectionKey,
+} from '@/art/assign'
 import { EMBLEM_MARK, EMBLEM_RING } from '@/art/emblem'
 import { ART } from '@/art/registry'
+import { createArt } from '@/art/resolve'
+import { SLOTS, type SlotId } from '@/art/slots'
+import { concepts, questionnaires, topics, works } from '@/content'
+
+import { flagsOff, flagsOn } from '../flags'
 
 const PUBLIC = join(process.cwd(), 'public')
 const LICENCE = "The client's own picture; reuse confirmation pending"
@@ -138,5 +153,393 @@ describe('the art registry', () => {
       expect(isComplete(record.origin)).toBe(true)
       expect(record.licence).not.toBe('')
     })
+  })
+})
+
+describe('the slots', () => {
+  it('name the 32 new pictures, 12 of them Stickers and 20 Plates', () => {
+    expect(SLOTS).toHaveLength(32)
+    expect(SLOTS.filter((slot) => slot.family === 'sticker')).toHaveLength(12)
+    expect(SLOTS.filter((slot) => slot.family === 'plate')).toHaveLength(20)
+  })
+
+  it('give every picture a unique kebab-case id', () => {
+    const ids = SLOTS.map((slot) => slot.id)
+    expect(new Set(ids).size).toBe(ids.length)
+    for (const id of ids) expect(id).toMatch(/^[a-z0-9]+(?:-[a-z0-9]+)*$/)
+  })
+
+  it('say where the assignment tables put them', () => {
+    const placed = new Map<string, string>([
+      ...Object.entries(sectionArt).map(
+        ([key, { art }]) => [art, key === 'notFound' ? 'page: 404' : `section: ${key}`] as const,
+      ),
+      ...Object.entries(topicArt).map(
+        ([slug, { sticker }]) => [sticker, `topic: ${slug}`] as const,
+      ),
+      ...Object.entries(conceptArt).map(([slug, id]) => [id, `concept: ${slug}`] as const),
+      ...Object.entries(workArt).map(([slug, id]) => [id, `text: ${slug}`] as const),
+    ])
+    for (const { id, placement } of SLOTS) expect(placement, id).toBe(placed.get(id))
+  })
+
+  it('use the words Plate and Pothi, never Medallion or cover', () => {
+    for (const { id, family } of SLOTS) {
+      expect(id).toMatch(/^(?:sticker|pothi|plate)-/)
+      expect(family, id).toBe(id.startsWith('plate-') ? 'plate' : 'sticker')
+    }
+  })
+
+  it('leave out the Dosha Survey’s Plate, which waits until the Survey has a page', () => {
+    expect(SLOTS.map((slot) => slot.id)).not.toContain('plate-dosha-survey')
+  })
+
+  it('give a record under a slot’s id the slot’s family', () => {
+    expect(wrongFamily(ART)).toEqual([])
+    expect(wrongFamily([draft('plate-ahimsa')])).toEqual([])
+    expect(wrongFamily([draft('sticker-self')])).toEqual(['sticker-self'])
+  })
+
+  it('make a mistyped slot id fail the typecheck', () => {
+    // @ts-expect-error a slot id that does not exist
+    const typo: SlotId = 'plate-ahimsaa'
+    expect(SLOTS.map((slot) => slot.id)).not.toContain(typo)
+  })
+})
+
+describe('the placements', () => {
+  let conceptSlugs: string[] = []
+  let workSlugs: string[] = []
+  let topicSlugs: string[] = []
+  let questionnaireSlugs: string[] = []
+
+  // Read once, with room for a busy machine: the content is built from all of its files.
+  beforeAll(async () => {
+    const [conceptList, workList, topicList, questionnaireList] = await Promise.all([
+      concepts.list(),
+      works.list(),
+      topics.list(),
+      questionnaires.list(),
+    ])
+    conceptSlugs = conceptList.map((card) => card.slug).sort()
+    workSlugs = workList.map((card) => card.slug).sort()
+    topicSlugs = topicList.map((card) => card.slug).sort()
+    questionnaireSlugs = questionnaireList.map((card) => card.slug).sort()
+  }, 60_000)
+
+  /** Every id the assignment tables name, Interim pictures included. */
+  function named(): string[] {
+    return [
+      ...Object.values(sectionArt).flatMap(({ art, interim }) => [art, interim]),
+      ...Object.values(topicArt).flatMap(({ sticker, interim, frontispiece }) => [
+        sticker,
+        interim,
+        frontispiece,
+      ]),
+      ...Object.values(conceptArt),
+      ...Object.values(workArt),
+      ...Object.values(questionnaireArt),
+      ...heroPlates,
+    ].filter((id) => id !== undefined)
+  }
+
+  it('name only pictures that are in the registry or the slots', () => {
+    const known = new Set<string>([...ART.map(({ id }) => id), ...SLOTS.map(({ id }) => id)])
+    expect(named().filter((id) => !known.has(id))).toEqual([])
+  })
+
+  it('name every slot, so no new picture is made for nowhere', () => {
+    const used = new Set(named())
+    expect(SLOTS.map(({ id }) => id).filter((id) => !used.has(id))).toEqual([])
+  })
+
+  it('cover exactly the site’s Concepts, Traditional texts and topics', () => {
+    expect(Object.keys(conceptArt).sort()).toEqual(conceptSlugs)
+    expect(Object.keys(workArt).sort()).toEqual(workSlugs)
+    expect(Object.keys(topicArt).sort()).toEqual(topicSlugs)
+  })
+
+  it('give a Questionnaire a picture of its own only where one was made for it', () => {
+    expect(questionnaireArt).toEqual({ 'karmayoga-scale': 'plate-karma-yoga' })
+    expect(questionnaireSlugs).toContain('karmayoga-scale')
+  })
+
+  it('leave the proposals page without a picture and give the others one', () => {
+    expect(Object.keys(sectionArt).sort()).toEqual([
+      'concepts',
+      'courses',
+      'inspirational-books',
+      'library',
+      'map',
+      'methods',
+      'notFound',
+      'questionnaires',
+      'references',
+      'search',
+      'start',
+      'textbooks',
+      'texts',
+    ])
+  })
+
+  it('show seven different hero Plates', () => {
+    expect(new Set(heroPlates).size).toBe(7)
+  })
+
+  it('never repeat a Sticker or Interim picture in the topic row', () => {
+    const today = Object.values(topicArt).map(({ sticker, interim }) => interim ?? sticker)
+    const finished = Object.values(topicArt).map(({ sticker }) => sticker)
+    expect(new Set(today).size).toBe(today.length)
+    expect(new Set(finished).size).toBe(finished.length)
+  })
+
+  it('make a mistyped picture id fail the typecheck', () => {
+    // @ts-expect-error a picture that is neither in the registry nor a slot
+    const typo: PictureId = 'plate-ahimsaa'
+    expect(named()).not.toContain(typo)
+  })
+})
+
+// What each page head shows while no new picture has a record, from the pictures spec.
+const SECTION_HEADS: Record<SectionKey, string> = {
+  concepts: 'sticker-cosmos',
+  map: 'sticker-cosmos',
+  texts: 'sticker-book-ornate',
+  questionnaires: 'sticker-clipboard',
+  library: 'sticker-book-clasp',
+  textbooks: 'sticker-book-clasp',
+  'inspirational-books': 'sticker-book-clasp',
+  courses: 'sticker-gear',
+  methods: 'sticker-mind-tools',
+  references: 'sticker-book-clasp',
+  start: 'sticker-cosmos',
+  search: 'sticker-mind-dome',
+  notFound: 'emblem-mark',
+}
+
+const TOPIC_CARDS: Record<string, string> = {
+  self: 'sticker-cosmos',
+  mind: 'sticker-mind-swirl',
+  practice: 'sticker-meditation',
+  values: 'sticker-book-ornate',
+  temperament: 'sticker-gear',
+}
+
+const FRONTISPIECES: Record<string, string> = {
+  self: 'plate-sage-lights-mind',
+  mind: 'plate-sage-paints-mind',
+  practice: 'plate-painter-bowl',
+  values: 'plate-tree-of-mind',
+  temperament: 'plate-farmers',
+}
+
+/** A picture made for a slot, unapproved unless the overrides say otherwise. */
+function draft(id: string, overrides: Partial<ArtRecord> = {}): ArtRecord {
+  return {
+    id,
+    family: 'plate',
+    src: '/art/plates/draft.jpg',
+    width: 1024,
+    height: 1024,
+    alt: 'A draft picture',
+    origin: { kind: 'generated', tool: 'A tool', model: 'A model', prompt: 'A brief', made: 'now' },
+    licence: 'A licence',
+    approved: false,
+    ...overrides,
+  }
+}
+
+const SLOT_IDS = new Set<string>(SLOTS.map(({ id }) => id))
+
+/** The registry with every slot empty, so these tests still hold once real pictures are added. */
+const NO_SLOTS = ART.filter(({ id }) => !SLOT_IDS.has(id))
+
+/** The ids of the records filed under a family other than their slot's. */
+function wrongFamily(records: readonly ArtRecord[]): string[] {
+  return records
+    .filter(({ id, family }) => SLOTS.some((slot) => slot.id === id && slot.family !== family))
+    .map(({ id }) => id)
+}
+
+describe.each([
+  ['drafts on', flagsOn()],
+  ['drafts off', flagsOff()],
+])('artFor, while no slot has a record, with %s', (_name, flags) => {
+  const { artFor: head } = createArt(NO_SLOTS, flags)
+  let conceptCards: Awaited<ReturnType<typeof concepts.list>> = []
+  let questionnaireCards: Awaited<ReturnType<typeof questionnaires.list>> = []
+  let workSlugs: string[] = []
+
+  beforeAll(async () => {
+    conceptCards = await concepts.list()
+    questionnaireCards = await questionnaires.list()
+    workSlugs = (await works.list()).map((card) => card.slug)
+  }, 60_000)
+
+  it.each(Object.entries(SECTION_HEADS))('shows the section %s its picture', (key, id) => {
+    expect(head({ kind: 'section', key: key as SectionKey }).id).toBe(id)
+  })
+
+  it.each(Object.entries(FRONTISPIECES))('heads the topic %s with its Frontispiece', (slug, id) => {
+    expect(head({ kind: 'topic', slug }).id).toBe(id)
+  })
+
+  it.each(Object.entries(TOPIC_CARDS))('gives the topic card %s its picture', (slug, id) => {
+    expect(head({ kind: 'topic-card', slug }).id).toBe(id)
+  })
+
+  it('heads every Concept with its primary topic’s picture', () => {
+    expect(conceptCards).not.toEqual([])
+    for (const card of conceptCards) {
+      const picture = head({ kind: 'concept', slug: card.slug, topic: card.topic.slug })
+      expect(picture.id, card.slug).toBe(TOPIC_CARDS[card.topic.slug])
+    }
+  })
+
+  it('heads Karta with the temperament picture, its primary topic', () => {
+    const karta = conceptCards.find((card) => card.slug === 'karta')
+    expect(karta?.topic.slug).toBe('temperament')
+    expect(head({ kind: 'concept', slug: 'karta', topic: 'temperament' }).id).toBe('sticker-gear')
+  })
+
+  it('heads every Questionnaire with the clipboard but the KarmaYoga Scale', () => {
+    expect(questionnaireCards).not.toEqual([])
+    for (const card of questionnaireCards) {
+      const picture = head({
+        kind: 'questionnaire',
+        slug: card.slug,
+        firstConcept: card.concepts[0]?.slug,
+      })
+      expect(picture.id, card.slug).toBe(
+        card.slug === 'karmayoga-scale' ? 'plate-karma-yoga' : 'sticker-clipboard',
+      )
+    }
+  })
+
+  it('heads every Traditional text with the ornate book', () => {
+    expect(workSlugs).not.toEqual([])
+    for (const slug of workSlugs) {
+      expect(head({ kind: 'work', slug }).id, slug).toBe('sticker-book-ornate')
+    }
+  })
+})
+
+describe('ownArt, while no slot has a record', () => {
+  it.each([
+    ['drafts on', flagsOn()],
+    ['drafts off', flagsOff()],
+  ])('gives every card nothing but the KarmaYoga Scale’s, with %s', async (_name, flags) => {
+    const { ownArt: own } = createArt(NO_SLOTS, flags)
+    const [conceptCards, workCards, questionnaireCards] = await Promise.all([
+      concepts.list(),
+      works.list(),
+      questionnaires.list(),
+    ])
+    expect(conceptCards).not.toEqual([])
+    for (const { slug } of conceptCards) {
+      expect(own({ kind: 'concept', slug }), slug).toBeUndefined()
+    }
+    for (const { slug } of workCards) expect(own({ kind: 'work', slug }), slug).toBeUndefined()
+    for (const { slug } of questionnaireCards) {
+      const picture = own({ kind: 'questionnaire', slug })
+      if (slug === 'karmayoga-scale') expect(picture?.id).toBe('plate-karma-yoga')
+      else expect(picture, slug).toBeUndefined()
+    }
+  })
+})
+
+describe('a slot’s record', () => {
+  const concept = { kind: 'concept', slug: 'ahimsa', topic: 'values' } as const
+
+  it('counts as absent while there is none, whichever the flag', () => {
+    for (const flags of [flagsOn(), flagsOff()]) {
+      const { artFor: head, ownArt: own } = createArt(NO_SLOTS, flags)
+      expect(head(concept).id).toBe('sticker-book-ornate')
+      expect(own(concept)).toBeUndefined()
+    }
+  })
+
+  it('shows unapproved only while the draftArt flag is on', () => {
+    const records = [...NO_SLOTS, draft('plate-ahimsa')]
+    const on = createArt(records, flagsOn())
+    expect(on.artFor(concept).id).toBe('plate-ahimsa')
+    expect(on.ownArt(concept)?.id).toBe('plate-ahimsa')
+
+    const off = createArt(records, flagsOff())
+    expect(off.artFor(concept).id).toBe('sticker-book-ornate')
+    expect(off.ownArt(concept)).toBeUndefined()
+  })
+
+  it('shows once approved, whichever the flag', () => {
+    const records = [...ART, draft('plate-ahimsa', { approved: true })]
+    for (const flags of [flagsOn(), flagsOff()]) {
+      const { artFor: head, ownArt: own } = createArt(records, flags)
+      expect(head(concept).id).toBe('plate-ahimsa')
+      expect(own(concept)?.id).toBe('plate-ahimsa')
+    }
+  })
+
+  it('takes over a section head, a topic card and the 404 page', () => {
+    const { artFor: head } = createArt(
+      [
+        ...ART,
+        draft('sticker-library', { family: 'sticker', approved: true }),
+        draft('sticker-self', { family: 'sticker', approved: true }),
+        draft('plate-404', { approved: true }),
+      ],
+      flagsOff(),
+    )
+    expect(head({ kind: 'section', key: 'library' }).id).toBe('sticker-library')
+    expect(head({ kind: 'topic-card', slug: 'self' }).id).toBe('sticker-self')
+    expect(head({ kind: 'section', key: 'notFound' }).id).toBe('plate-404')
+  })
+
+  it('makes a topic’s Sticker the Interim picture of its Concepts', () => {
+    const sticker = draft('sticker-self', { family: 'sticker', approved: true })
+    const { artFor: head } = createArt([...NO_SLOTS, sticker], flagsOff())
+    expect(head({ kind: 'concept', slug: 'atman', topic: 'self' }).id).toBe('sticker-self')
+  })
+
+  it('gives a Traditional text its Pothi at the head and on its card', () => {
+    const pothi = draft('pothi-dhammapada', { family: 'sticker', approved: true })
+    const { artFor: head, ownArt: own } = createArt([...ART, pothi], flagsOff())
+    expect(head({ kind: 'work', slug: 'dhammapada' }).id).toBe('pothi-dhammapada')
+    expect(own({ kind: 'work', slug: 'dhammapada' })?.id).toBe('pothi-dhammapada')
+  })
+})
+
+describe('a Questionnaire with no picture of its own', () => {
+  const target = { kind: 'questionnaire', slug: 'triguna', firstConcept: 'triguna' } as const
+
+  it('takes its first Concept’s Plate at its head once that Plate can show', () => {
+    const { artFor: head } = createArt([...ART, draft('plate-triguna')], flagsOn())
+    expect(head(target).id).toBe('plate-triguna')
+  })
+
+  it('takes the clipboard while that Plate cannot show, never the Concept’s Interim picture', () => {
+    const { artFor: head } = createArt([...ART, draft('plate-triguna')], flagsOff())
+    expect(head(target).id).toBe('sticker-clipboard')
+  })
+
+  it('takes the clipboard when it names no Concept', () => {
+    const { artFor: head } = createArt(ART, flagsOn())
+    expect(head({ kind: 'questionnaire', slug: 'dosha-survey' }).id).toBe('sticker-clipboard')
+  })
+
+  it('stays bare on its card, even when its first Concept has a Plate', () => {
+    const { ownArt: own } = createArt([...ART, draft('plate-triguna')], flagsOn())
+    expect(own({ kind: 'questionnaire', slug: 'triguna' })).toBeUndefined()
+  })
+})
+
+describe('artFor and ownArt from @/art', () => {
+  it('read this build’s registry', () => {
+    expect(artFor({ kind: 'topic', slug: 'mind' }).id).toBe('plate-sage-paints-mind')
+    expect(ownArt({ kind: 'questionnaire', slug: 'karmayoga-scale' })?.id).toBe('plate-karma-yoga')
+  })
+
+  it('refuse a topic that does not exist, naming it', () => {
+    expect(() => artFor({ kind: 'topic', slug: 'nonesuch' })).toThrow('nonesuch')
+    expect(() => artFor({ kind: 'concept', slug: 'x', topic: 'nonesuch' })).toThrow('nonesuch')
   })
 })
