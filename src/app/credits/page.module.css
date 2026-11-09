@@ -1,8 +1,3 @@
-.family {
-  display: grid;
-  gap: 1.25rem;
-}
-
 /* Fixed columns, so a picture stands at the same place in every family's row. */
 .gallery {
   display: grid;
@@ -11,10 +6,18 @@
   gap: 2rem;
 }
 
-/* At 360px the text is 328px wide: two 160px columns fit only with this narrow a gap. */
+/* At 360px the text is 328px wide: ArtFigure draws at 150px here, so two columns keep their room. */
 @media (width < 40rem) {
   .gallery {
-    column-gap: 0.5rem;
+    grid-template-columns: repeat(auto-fill, 150px);
+    column-gap: 1.75rem;
+  }
+}
+
+/* Too narrow for two columns: the one column stands in the middle. */
+@media (width < 22.5rem) {
+  .gallery {
+    justify-content: center;
   }
 }
 

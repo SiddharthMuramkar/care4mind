@@ -36,8 +36,10 @@ export default function CreditsPage() {
         const members = pictures.filter((picture) => picture.family === family)
         if (members.length === 0) return null
         return (
-          <section key={family} className={styles.family}>
-            <h2 className={reading.sectionTitle}>{title}</h2>
+          <section key={family} className={reading.section} aria-labelledby={`${family}-title`}>
+            <h2 id={`${family}-title`} className={reading.sectionTitle}>
+              {title}
+            </h2>
             <div className={styles.gallery}>
               {members.map((picture) => (
                 <ArtFigure key={picture.id} art={picture} shape={shape} />

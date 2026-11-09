@@ -18,6 +18,17 @@
   object-fit: cover;
 }
 
+/* Drawn a little smaller on a phone. The width attribute stays 160, so the same two files serve. */
+@media (width < 40rem) {
+  .picture {
+    width: 150px;
+  }
+
+  .circle {
+    height: 150px;
+  }
+}
+
 .caption {
   font-size: var(--text-small);
   color: var(--color-surface-muted);

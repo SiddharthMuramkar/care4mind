@@ -5,7 +5,7 @@ import { ESLint } from 'eslint'
 import { createElement } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
 import sharp from 'sharp'
-import { beforeAll, describe, expect, it } from 'vitest'
+import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest'
 
 import { art, artFor, originLine, ownArt, type ArtOrigin, type ArtRecord } from '@/art'
 import {
@@ -22,6 +22,7 @@ import { EMBLEM_MARK, EMBLEM_RING } from '@/art/emblem'
 import { ART } from '@/art/registry'
 import { createArt } from '@/art/resolve'
 import { SLOTS, type SlotId } from '@/art/slots'
+import { ArtFigure } from '@/components/art'
 import { Emblem } from '@/components/Emblem'
 import { concepts, questionnaires, topics, works } from '@/content'
 
@@ -49,7 +50,11 @@ function isComplete(origin: ArtOrigin): boolean {
     case 'care4mind':
       return origin.wpId > 0 && origin.oldPath.startsWith('/wp-content/uploads/')
     case 'generated':
-      return [origin.tool, origin.model, origin.prompt, origin.made].every(Boolean)
+      return (
+        [origin.tool, origin.model, origin.prompt].every(Boolean) &&
+        /^\d{4}-\d{2}-\d{2}/.test(origin.made) &&
+        !Number.isNaN(Date.parse(origin.made))
+      )
     case 'licensed':
       return [origin.credit, origin.source].every(Boolean)
   }
@@ -369,7 +374,13 @@ function draft(id: string, overrides: Partial<ArtRecord> = {}): ArtRecord {
     width: 1024,
     height: 1024,
     alt: 'A draft picture',
-    origin: { kind: 'generated', tool: 'A tool', model: 'A model', prompt: 'A brief', made: 'now' },
+    origin: {
+      kind: 'generated',
+      tool: 'A tool',
+      model: 'A model',
+      prompt: 'A brief',
+      made: '2026-11-03',
+    },
     licence: 'A licence',
     approved: false,
     ...overrides,
@@ -547,6 +558,21 @@ describe('a Questionnaire with no picture of its own', () => {
   })
 })
 
+describe('ArtFigure', () => {
+  const render = (record: ArtRecord) =>
+    renderToStaticMarkup(createElement(ArtFigure, { art: record, shape: 'circle' }))
+
+  it('shows the record’s alt and its caption', () => {
+    const html = render(draft('plate-ahimsa', { caption: 'The farmers', alt: 'Two farmers' }))
+    expect(html).toContain('alt="Two farmers"')
+    expect(html).toMatch(/<figcaption[^>]*>The farmers<\/figcaption>/)
+  })
+
+  it('has no caption when the record has none', () => {
+    expect(render(draft('plate-ahimsa'))).not.toContain('<figcaption')
+  })
+})
+
 describe('shipped', () => {
   const unapproved = draft('plate-ahimsa')
 
@@ -578,6 +604,10 @@ describe('shipped', () => {
 })
 
 describe('originLine', () => {
+  afterEach(() => {
+    vi.unstubAllEnvs()
+  })
+
   it('says the client’s own pictures came from the Care4Mind website', () => {
     const origin: ArtOrigin = { kind: 'care4mind', wpId: 511, oldPath: '/wp-content/uploads/x.png' }
     expect(originLine(origin)).toBe('From the Care4Mind website')
@@ -594,15 +624,16 @@ describe('originLine', () => {
     expect(originLine(origin)).toBe('Made with Recraft from the Care4Mind style, November 2026')
   })
 
-  it('reads the month in UTC, so the build’s timezone cannot move it', () => {
-    const origin: ArtOrigin = {
-      kind: 'generated',
-      tool: 'Recraft',
-      model: 'V4.1',
-      prompt: 'A brief',
-      made: '2026-11-01T00:00:00Z',
-    }
-    expect(originLine(origin)).toBe('Made with Recraft from the Care4Mind style, November 2026')
+  it('reads the month in UTC, so the build’s timezone cannot move it', async () => {
+    const made = '2026-11-01T00:00:00Z'
+    // Before the module loads, because its formatter takes the timezone when it is made.
+    vi.stubEnv('TZ', 'America/Los_Angeles')
+    vi.resetModules()
+    const { originLine: inLosAngeles } = await import('@/art/origin')
+    expect(new Date(made).getMonth(), 'the local month is October').toBe(9)
+    expect(
+      inLosAngeles({ kind: 'generated', tool: 'Recraft', model: 'V4.1', prompt: 'A brief', made }),
+    ).toBe('Made with Recraft from the Care4Mind style, November 2026')
   })
 
   it('gives a licensed picture its credit line', () => {

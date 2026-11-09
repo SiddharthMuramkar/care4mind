@@ -2,12 +2,18 @@ import type { Page } from '@playwright/test'
 
 import { expectNoAxeViolations } from './axe'
 import { expect, gotoReady, test } from './fixtures'
+import { originLine } from '@/art/origin'
+import { ART } from '@/art/registry'
+import type { ArtRecord } from '@/art/types'
 
 /** The homepage's hero Plate: the one picture allowed a `sizes` attribute. */
 const HERO = '[data-hero-plate]'
 
 /** The pictures the shared check looks at. */
 const PICTURES = 'main img, footer img'
+
+/** Every picture these tests' build shows: its draftArt flag is on, so drafts count too. */
+const RECORDS: readonly ArtRecord[] = ART
 
 /** The pages the shared check visits. A page joins the list when it gets its first picture. */
 const PAGES: { path: string; name: string }[] = [
@@ -124,30 +130,35 @@ test.describe('the credits gallery', () => {
   /** Words that say where a picture came from, which belong only on the plain list of sources. */
   const WHERE_FROM = /licen[cs]e|origin|source|credit|care4mind website|recraft/i
 
-  test('shows all 22 pictures, each with the record’s alt', async ({ page }) => {
+  test('shows every picture, each with the record’s alt', async ({ page }) => {
     await gotoReady(page, '/credits/')
     const main = page.locator('main')
-    await expect(main.locator('figure')).toHaveCount(22)
-    await expect(main.locator('figure img')).toHaveCount(22)
-    for (const alt of await main
+    await expect(main.locator('figure')).toHaveCount(RECORDS.length)
+    const alts = await main
       .locator('figure img')
-      .evaluateAll((images) => images.map((image) => image.getAttribute('alt')))) {
-      expect(alt?.trim(), 'the picture’s alt').toBeTruthy()
-    }
+      .evaluateAll((images) => images.map((image) => image.getAttribute('alt')))
+    expect(alts.sort()).toEqual(RECORDS.map(({ alt }) => alt).sort())
   })
 
-  test('captions only the pictures that have a caption', async ({ page }) => {
+  test('captions only the pictures that have a caption, in the record’s words', async ({
+    page,
+  }) => {
     await gotoReady(page, '/credits/')
-    await expect(page.locator('main figcaption')).toHaveCount(11)
+    const captions = await page.locator('main figcaption').allInnerTexts()
+    expect(captions.sort()).toEqual(RECORDS.flatMap(({ caption }) => caption ?? []).sort())
   })
 
   test('says nothing about where a picture came from beside it', async ({ page }) => {
     await gotoReady(page, '/credits/')
     const main = page.locator('main')
-    for (const text of await main.locator('figure').allInnerTexts()) {
+    // The title says "credits" and the last link says where the pictures come from, so the
+    // sections and figures take the full list, and the whole of main the words those two lack.
+    for (const text of await main.locator('section, figure').allInnerTexts()) {
       expect(text).not.toMatch(WHERE_FROM)
     }
-    await expect(main).not.toContainText('From the Care4Mind website')
+    await expect(main).not.toContainText(
+      /licen[cs]e|origin|care4mind website|recraft|reuse confirmation/i,
+    )
   })
 
   test('ends with its one link, to the plain list of sources', async ({ page }) => {
@@ -176,9 +187,12 @@ test.describe('the plain list of sources', () => {
     await expect(main.getByRole('heading', { level: 1 })).toHaveText(
       'Where these pictures come from',
     )
-    await expect(main.locator('ul > li')).toHaveCount(22)
-    await expect(main.getByText('From the Care4Mind website')).toHaveCount(22)
-    await expect(main.getByText('reuse confirmation pending')).toHaveCount(22)
+    const entries = await main.locator('ul > li').allInnerTexts()
+    expect(entries).toHaveLength(RECORDS.length)
+    RECORDS.forEach((record, index) => {
+      expect(entries[index], record.id).toContain(originLine(record.origin))
+      expect(entries[index], record.id).toContain(record.licence)
+    })
     await expect(main.locator('img')).toHaveCount(0)
     // A Plate goes by its caption and a Sticker, which has none, by its alt text.
     await expect(main).toContainText('The jeweller')

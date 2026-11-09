@@ -112,6 +112,19 @@
   line-height: 1.6;
 }
 
+/* On a phone each page is a full target, and the targets themselves space the rows. */
+@media (width < 48rem) {
+  .pages {
+    gap: 0;
+  }
+
+  .pages > li > a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+  }
+}
+
 /* Each topic carries its hue, as a small lozenge before its name: the folio's corner diamond. */
 .topic {
   display: flex;

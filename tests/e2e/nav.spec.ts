@@ -217,6 +217,21 @@ test.describe('without JavaScript', () => {
     await expect(footer).toContainText('A preview of the new site, not yet public.')
   })
 
+  test(
+    'every page listed in the footer is a full target on a phone',
+    { tag: '@self-width' },
+    async ({ page }) => {
+      await page.setViewportSize({ width: 360, height: 800 })
+      await page.goto('/concepts/vikshepa/')
+      const links = await footerNav(page).locator('ul ul > li > a').all()
+      expect(links.length).toBeGreaterThan(0)
+      for (const link of links) {
+        const box = await link.boundingBox()
+        expect(box?.height ?? 0, await link.innerText()).toBeGreaterThanOrEqual(44)
+      }
+    },
+  )
+
   test('the footer is signed with the Emblem beside the wordmark and the motto under it', async ({
     page,
   }) => {
