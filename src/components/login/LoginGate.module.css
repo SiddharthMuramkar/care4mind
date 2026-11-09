@@ -1,0 +1,5 @@
+/* What a logged-in user sees for a moment while the server confirms it. */
+.checking {
+  margin: 0;
+  color: var(--color-surface-muted);
+}

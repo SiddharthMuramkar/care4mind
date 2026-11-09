@@ -35,6 +35,8 @@ export type FixedPage =
   | 'search'
   | 'proposals'
   | 'start'
+  | 'log-in'
+  | 'sign-up'
 
 /**
  * What `hrefFor` turns into a path: a record (by its kind and id, with an anchor inside it where
@@ -554,6 +556,8 @@ export type RouteKind =
   | 'search'
   | 'proposals'
   | 'start'
+  | 'log-in'
+  | 'sign-up'
 
 /** One public page in the route registry. */
 export interface RouteEntry {

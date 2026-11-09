@@ -29,6 +29,8 @@ const FLAGGED_PAGES = [
   '/concepts/map/',
   '/proposals/',
   '/start/',
+  '/log-in/',
+  '/sign-up/',
 ]
 
 let records: ContentRecord[] = []
@@ -103,6 +105,7 @@ describe('the route registry, on the real content', () => {
       'concepts',
       'home',
       'library',
+      'log-in',
       'page',
       'proposals',
       'questionnaire',
@@ -111,6 +114,7 @@ describe('the route registry, on the real content', () => {
       'references',
       'resource-list',
       'search',
+      'sign-up',
       'start',
       'texts',
       'topic',
