@@ -19,6 +19,11 @@
   text-align: center;
 }
 
+/* The first Plate above the motto, with a clear gap before the words start. */
+.heroPlate {
+  margin-bottom: 1rem;
+}
+
 /* The motto: a small label above the promise, its words carried over unchanged. */
 .motto {
   margin: 0 0 1.25rem;
@@ -88,6 +93,51 @@
   align-items: center;
   gap: 0.75rem 1.25rem;
   margin: 1.5rem 0 0;
+}
+
+/*
+ * From 64rem the Folio splits in two: the Plate in its own column on the left, the words on the
+ * right. Every child is placed by hand, because the heading must stay a direct child of the Folio.
+ */
+@media (width >= 64rem) {
+  .heroFolio {
+    display: grid;
+    grid-template-columns: 360px minmax(0, 1fr);
+    column-gap: clamp(2rem, 4vw, 4rem);
+    max-width: 72rem;
+  }
+
+  .heroPlate {
+    grid-column: 1;
+    grid-row: 1 / span 4;
+    align-self: center;
+    margin-bottom: 0;
+  }
+
+  .motto,
+  .heroTitle,
+  .subhead,
+  .ctas,
+  .intro {
+    grid-column: 2;
+  }
+
+  /* Narrower here, so that the two-line heading fits its column and the button stays on screen. */
+  .heroTitle {
+    font-size: clamp(2.5rem, 4.6vw, 4rem);
+  }
+
+  .heroFleuron {
+    grid-column: 1;
+    grid-row: 5;
+    align-self: center;
+    margin-block: 1.5rem 0;
+  }
+
+  /* The Fleuron no longer stands between the buttons and the introduction, so this keeps them apart. */
+  .intro {
+    margin-top: 1.5rem;
+  }
 }
 
 /* An empty slot takes no room until its own work fills it. */
