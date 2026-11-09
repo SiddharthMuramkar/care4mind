@@ -90,6 +90,7 @@ function TextPage({ page }: { page: PageView }) {
       }
     >
       <Contents
+        tallLines
         entries={page.toc.map(({ id, heading, terms }) => ({
           id,
           heading,

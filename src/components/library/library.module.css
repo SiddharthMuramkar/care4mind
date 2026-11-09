@@ -38,6 +38,14 @@
   text-decoration: none;
 }
 
+/* A finger needs more than a pointer does. */
+@media (width < 40rem) {
+  .kind,
+  .kindCurrent {
+    min-height: 2.75rem;
+  }
+}
+
 .kind:hover {
   border-color: var(--color-surface-ink);
 }

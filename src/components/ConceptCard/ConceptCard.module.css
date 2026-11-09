@@ -80,16 +80,19 @@
   }
 }
 
-/* The card lifts under the pointer, as a topic card does. Before the press, which must win. */
+/* The card lifts under the pointer, as a topic card does, and the press, which comes last, wins. */
 @media (prefers-reduced-motion: no-preference) {
   .card:has(.action :is(a, button):hover) {
     transform: translateY(-3px);
   }
+
+  .card:has(.action :is(a, button):active) {
+    transform: translateY(2px);
+  }
 }
 
-/* Pressing the card presses it into the page, like type into paper. */
+/* Pressing the card presses it into the page, like type into paper, and this part never moves. */
 .card:has(.action :is(a, button):active) {
-  transform: translateY(2px);
   box-shadow:
     0 0 0 1px color-mix(in srgb, var(--color-surface-ink) 35%, transparent),
     inset 0 3px 8px rgb(0 0 0 / 0.18);

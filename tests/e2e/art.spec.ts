@@ -1707,3 +1707,206 @@ test.describe('the image optimiser', { tag: '@one-width' }, () => {
     expect(response.status()).toBe(400)
   })
 })
+
+/** The box a picture is drawn in. A Medallion's is its ring's, and the picture is inset from it. */
+const ringOf = (picture: Locator) => picture.locator('xpath=..')
+
+test.describe('the homepage, section and topic pages as a set', () => {
+  const main = (page: Page) => page.getByRole('main')
+  const emblem = 'img[src*="emblem-ring"]'
+
+  const SIZES: {
+    name: string
+    path: string
+    box: (page: Page) => Locator
+    wide: number
+    narrow: number
+    narrowBelow: number
+  }[] = [
+    {
+      name: 'hero Plate',
+      path: '/',
+      box: (page) => ringOf(page.locator(HERO)),
+      wide: 360,
+      narrow: 168,
+      narrowBelow: 1024,
+    },
+    {
+      name: 'topic Frontispiece',
+      path: '/topics/mind/',
+      box: (page) => ringOf(headSticker(page)),
+      wide: 240,
+      narrow: 200,
+      narrowBelow: 640,
+    },
+    {
+      name: 'section Sticker',
+      path: '/concepts/',
+      box: headSticker,
+      wide: 112,
+      narrow: 88,
+      narrowBelow: 640,
+    },
+    {
+      name: 'Sticker on a topic card',
+      path: '/',
+      box: (page) => cardSticker(page, 'self'),
+      wide: 64,
+      narrow: 64,
+      narrowBelow: 640,
+    },
+    {
+      name: 'Sticker beside What’s on your mind?',
+      path: '/',
+      box: (page) => homeSection(page, MIND).locator('img'),
+      wide: 56,
+      narrow: 56,
+      narrowBelow: 640,
+    },
+    {
+      name: 'Emblem in Who’s behind this',
+      path: '/',
+      box: (page) => main(page).locator(emblem),
+      wide: 120,
+      narrow: 120,
+      narrowBelow: 640,
+    },
+    {
+      name: 'footer Emblem',
+      path: '/',
+      box: (page) => page.getByRole('contentinfo').locator(emblem),
+      wide: 72,
+      narrow: 72,
+      narrowBelow: 640,
+    },
+  ]
+
+  for (const { name, path, box, wide, narrow, narrowBelow } of SIZES) {
+    test(`the ${name} on ${path} is ${wide} px wide, ${narrow} on a narrow screen`, async ({
+      page,
+    }) => {
+      await gotoReady(page, path)
+      const expected = (page.viewportSize()?.width ?? 0) < narrowBelow ? narrow : wide
+      expect((await box(page).boundingBox())?.width).toBeCloseTo(expected, 0)
+    })
+  }
+
+  for (const { path, ringed } of [
+    { path: '/concepts/', ringed: false },
+    { path: '/library/', ringed: false },
+    { path: '/texts/', ringed: false },
+    { path: '/questionnaires/', ringed: false },
+    { path: '/topics/mind/', ringed: true },
+    { path: '/topics/self/', ringed: true },
+  ]) {
+    test(`${path}: the head picture stands as far above the words as on every other head`, async ({
+      page,
+    }) => {
+      await gotoReady(page, path)
+      const picture = ringed ? ringOf(headSticker(page)) : headSticker(page)
+      const gap = await picture.evaluate((element) => {
+        const next = element.nextElementSibling
+        if (!next) throw new Error('The words follow the picture.')
+        return next.getBoundingClientRect().top - element.getBoundingClientRect().bottom
+      })
+      expect(gap).toBeCloseTo(28, 0)
+    })
+  }
+
+  for (const { name, path, controls } of [
+    {
+      name: 'the viewer’s buttons',
+      path: '/',
+      controls: (page: Page) => page.locator('[role="group"] button'),
+    },
+    {
+      name: 'the chips under What’s on your mind?',
+      path: '/',
+      controls: (page: Page) => homeSection(page, MIND).getByRole('link'),
+    },
+    {
+      name: 'the topic cards',
+      path: '/',
+      controls: (page: Page) => page.locator('article[data-topic]'),
+    },
+    {
+      name: 'the filter chips under the Sticker',
+      path: '/concepts/',
+      controls: (page: Page) => main(page).locator('button[aria-pressed]'),
+    },
+    {
+      name: 'the switch between book lists',
+      path: '/library/textbooks/',
+      controls: (page: Page) =>
+        page.getByRole('navigation', { name: 'Book lists' }).getByRole('link'),
+    },
+    {
+      name: 'the lines of a page’s contents',
+      path: '/library/methods/',
+      controls: (page: Page) => main(page).locator('[data-contents] a').filter({ visible: true }),
+    },
+  ]) {
+    test(
+      `${path}: ${name} are at least 44 px at 360 px`,
+      { tag: '@self-width' },
+      async ({ page }) => {
+        await page.setViewportSize({ width: 360, height: 800 })
+        await gotoReady(page, path)
+        const found = await controls(page).all()
+        expect(found.length).toBeGreaterThan(0)
+        for (const control of found) {
+          const box = await control.boundingBox()
+          expect(box?.height).toBeGreaterThanOrEqual(44)
+          expect(box?.width).toBeGreaterThanOrEqual(44)
+        }
+      },
+    )
+  }
+
+  test(
+    'Clear filters is at least 44 px tall at 360 px',
+    { tag: '@self-width' },
+    async ({ page }) => {
+      await page.setViewportSize({ width: 360, height: 800 })
+      await gotoReady(page, '/concepts/')
+      await main(page).locator('button[aria-pressed]').first().click()
+      const box = await main(page).getByRole('button', { name: 'Clear filters' }).boundingBox()
+      expect(box?.height).toBeGreaterThanOrEqual(44)
+    },
+  )
+
+  test(
+    'under reduced motion a hovered topic card still answers, without moving',
+    { tag: '@one-width' },
+    async ({ page }) => {
+      await page.emulateMedia({ reducedMotion: 'reduce' })
+      await gotoReady(page, '/concepts/')
+      await expect(cardLink(page, 'self')).toHaveCSS('text-decoration-line', 'none')
+      await cardLink(page, 'self').hover()
+      await expect(cardLink(page, 'self')).toHaveCSS('text-decoration-line', 'underline')
+      await expect(topicCard(page, 'self')).toHaveCSS('transform', 'none')
+    },
+  )
+
+  test(
+    'under reduced motion a pressed Concept card marks the press, without moving',
+    { tag: '@one-width' },
+    async ({ page }) => {
+      await page.emulateMedia({ reducedMotion: 'reduce' })
+      await gotoReady(page, '/')
+      const action = page.getByRole('link', { name: 'Read about Vikṣepa' })
+      const card = page.getByRole('article').filter({ has: action })
+      await action.scrollIntoViewIfNeeded()
+      const atRest = await card.evaluate((element) => getComputedStyle(element).boxShadow)
+      await action.hover()
+      await page.mouse.down()
+      await expect
+        .poll(() => card.evaluate((element) => getComputedStyle(element).boxShadow))
+        .not.toBe(atRest)
+      await expect(card).toHaveCSS('transform', 'none')
+      // Let go away from the card, so it doesn't navigate.
+      await page.mouse.move(1, 1)
+      await page.mouse.up()
+    },
+  )
+})

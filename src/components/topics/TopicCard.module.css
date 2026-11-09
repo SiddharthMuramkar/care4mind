@@ -114,6 +114,12 @@
   }
 }
 
+/* Outside the guard below, so a card still answers the pointer where nothing may move. */
+.card:has(.link:is(:hover, :focus-visible)) .link {
+  text-decoration-line: underline;
+  text-underline-offset: 0.18em;
+}
+
 @media (prefers-reduced-motion: no-preference) {
   .card {
     transition: transform var(--duration-quick) var(--ease-out);

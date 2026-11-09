@@ -4,10 +4,14 @@
   filter: drop-shadow(0 1px 2px var(--color-sticker-shadow));
 }
 
-/* At a page's head, above its title. `height: auto` keeps the shape when the width narrows. */
+/*
+ * At a page's head, above its title. `height: auto` keeps the shape when the width narrows. The
+ * margin is the one a topic's Frontispiece has, so every head keeps the same room under its picture.
+ */
 .head {
   width: 7rem;
   height: auto;
+  margin-block-end: 1rem;
 }
 
 @media (width < 40rem) {
