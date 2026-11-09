@@ -1,7 +1,7 @@
 import type { ArtFamily } from './types'
 
 /** A new picture named before it exists: placements can name it, and until it has a record it counts as absent. */
-export interface ArtSlot {
+interface ArtSlot {
   /** The id its record will take. */
   id: string
   /** A Pothi is a Sticker, so it files under that family. */

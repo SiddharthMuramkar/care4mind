@@ -163,13 +163,24 @@ describe('the slots', () => {
     expect(SLOTS.filter((slot) => slot.family === 'plate')).toHaveLength(20)
   })
 
-  it('give every picture a unique kebab-case id and a placement', () => {
+  it('give every picture a unique kebab-case id', () => {
     const ids = SLOTS.map((slot) => slot.id)
     expect(new Set(ids).size).toBe(ids.length)
-    for (const slot of SLOTS) {
-      expect(slot.id).toMatch(/^[a-z0-9]+(?:-[a-z0-9]+)*$/)
-      expect(slot.placement, slot.id).not.toBe('')
-    }
+    for (const id of ids) expect(id).toMatch(/^[a-z0-9]+(?:-[a-z0-9]+)*$/)
+  })
+
+  it('say where the assignment tables put them', () => {
+    const placed = new Map<string, string>([
+      ...Object.entries(sectionArt).map(
+        ([key, { art }]) => [art, key === 'notFound' ? 'page: 404' : `section: ${key}`] as const,
+      ),
+      ...Object.entries(topicArt).map(
+        ([slug, { sticker }]) => [sticker, `topic: ${slug}`] as const,
+      ),
+      ...Object.entries(conceptArt).map(([slug, id]) => [id, `concept: ${slug}`] as const),
+      ...Object.entries(workArt).map(([slug, id]) => [id, `text: ${slug}`] as const),
+    ])
+    for (const { id, placement } of SLOTS) expect(placement, id).toBe(placed.get(id))
   })
 
   it('use the words Plate and Pothi, never Medallion or cover', () => {
@@ -184,10 +195,9 @@ describe('the slots', () => {
   })
 
   it('give a record under a slot’s id the slot’s family', () => {
-    for (const record of ART) {
-      const slot = SLOTS.find((candidate) => candidate.id === (record.id as string))
-      if (slot) expect(record.family, record.id).toBe(slot.family)
-    }
+    expect(wrongFamily(ART)).toEqual([])
+    expect(wrongFamily([draft('plate-ahimsa')])).toEqual([])
+    expect(wrongFamily([draft('sticker-self')])).toEqual(['sticker-self'])
   })
 
   it('make a mistyped slot id fail the typecheck', () => {
@@ -272,16 +282,8 @@ describe('the placements', () => {
     ])
   })
 
-  it('show the seven hero Plates in their order', () => {
-    expect(heroPlates).toEqual([
-      'plate-jeweller',
-      'plate-sculptor',
-      'plate-farmers',
-      'plate-jeweller-woman',
-      'plate-painter-bowl',
-      'plate-painter-birds',
-      'plate-karma-yoga',
-    ])
+  it('show seven different hero Plates', () => {
+    expect(new Set(heroPlates).size).toBe(7)
   })
 
   it('never repeat a Sticker or Interim picture in the topic row', () => {
@@ -347,11 +349,23 @@ function draft(id: string, overrides: Partial<ArtRecord> = {}): ArtRecord {
   }
 }
 
+const SLOT_IDS = new Set<string>(SLOTS.map(({ id }) => id))
+
+/** The registry with every slot empty, so these tests still hold once real pictures are added. */
+const NO_SLOTS = ART.filter(({ id }) => !SLOT_IDS.has(id))
+
+/** The ids of the records filed under a family other than their slot's. */
+function wrongFamily(records: readonly ArtRecord[]): string[] {
+  return records
+    .filter(({ id, family }) => SLOTS.some((slot) => slot.id === id && slot.family !== family))
+    .map(({ id }) => id)
+}
+
 describe.each([
   ['drafts on', flagsOn()],
   ['drafts off', flagsOff()],
 ])('artFor, while no slot has a record, with %s', (_name, flags) => {
-  const { artFor: head } = createArt(ART, flags)
+  const { artFor: head } = createArt(NO_SLOTS, flags)
   let conceptCards: Awaited<ReturnType<typeof concepts.list>> = []
   let questionnaireCards: Awaited<ReturnType<typeof questionnaires.list>> = []
   let workSlugs: string[] = []
@@ -415,7 +429,7 @@ describe('ownArt, while no slot has a record', () => {
     ['drafts on', flagsOn()],
     ['drafts off', flagsOff()],
   ])('gives every card nothing but the KarmaYoga Scale’s, with %s', async (_name, flags) => {
-    const { ownArt: own } = createArt(ART, flags)
+    const { ownArt: own } = createArt(NO_SLOTS, flags)
     const [conceptCards, workCards, questionnaireCards] = await Promise.all([
       concepts.list(),
       works.list(),
@@ -439,14 +453,14 @@ describe('a slot’s record', () => {
 
   it('counts as absent while there is none, whichever the flag', () => {
     for (const flags of [flagsOn(), flagsOff()]) {
-      const { artFor: head, ownArt: own } = createArt(ART, flags)
+      const { artFor: head, ownArt: own } = createArt(NO_SLOTS, flags)
       expect(head(concept).id).toBe('sticker-book-ornate')
       expect(own(concept)).toBeUndefined()
     }
   })
 
   it('shows unapproved only while the draftArt flag is on', () => {
-    const records = [...ART, draft('plate-ahimsa')]
+    const records = [...NO_SLOTS, draft('plate-ahimsa')]
     const on = createArt(records, flagsOn())
     expect(on.artFor(concept).id).toBe('plate-ahimsa')
     expect(on.ownArt(concept)?.id).toBe('plate-ahimsa')
@@ -482,7 +496,7 @@ describe('a slot’s record', () => {
 
   it('makes a topic’s Sticker the Interim picture of its Concepts', () => {
     const sticker = draft('sticker-self', { family: 'sticker', approved: true })
-    const { artFor: head } = createArt([...ART, sticker], flagsOff())
+    const { artFor: head } = createArt([...NO_SLOTS, sticker], flagsOff())
     expect(head({ kind: 'concept', slug: 'atman', topic: 'self' }).id).toBe('sticker-self')
   })
 

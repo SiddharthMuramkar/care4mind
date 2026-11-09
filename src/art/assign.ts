@@ -23,7 +23,7 @@ export type SectionKey =
   | 'notFound'
 
 /** A picture for a page head. A slot must say what stands in for it until it has a record. */
-export type SectionPicture = { art: ArtId; interim?: never } | { art: SlotId; interim: ArtId }
+type SectionPicture = { art: ArtId; interim?: never } | { art: SlotId; interim: ArtId }
 
 /** A topic's Sticker, for its card, and the Plate shown as its Frontispiece. */
 export type TopicPicture = { frontispiece: ArtId } & (
