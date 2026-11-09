@@ -196,8 +196,8 @@ test.describe('the hero Plate', () => {
     await expect(withSizes).toHaveAttribute('data-hero-plate')
   })
 
-  /** The empty row under the caption that the viewer's buttons will stand in. */
-  const controlsRow = (page: Page) => figure(page).locator('> :last-child')
+  /** The row the viewer's buttons stand in. */
+  const controlsRow = (page: Page) => figure(page).locator('[role="group"]')
 
   test('keeps its button row at full height, with or without the script', async ({
     page,
@@ -218,6 +218,220 @@ test.describe('the hero Plate', () => {
 
   test('passes axe', async ({ page }) => {
     await gotoReady(page, '/')
+    await expectNoAxeViolations(page)
+  })
+
+  const paintings = (page: Page) => page.getByRole('group', { name: 'Paintings' })
+  const previous = (page: Page) =>
+    paintings(page).getByRole('button', { name: 'Previous painting', exact: true })
+  const next = (page: Page) =>
+    paintings(page).getByRole('button', { name: 'Next painting', exact: true })
+  const caption = (page: Page) => figure(page).locator('figcaption')
+
+  /** The file of the Plate on top, the one that keeps its alt text. */
+  const shownFile = (page: Page) =>
+    page.locator(`${HERO}:not([alt=""])`).evaluate((image: HTMLImageElement) => image.currentSrc)
+
+  test('moves through the seven Plates by keyboard alone, and wraps both ways', async ({
+    page,
+  }) => {
+    await gotoReady(page, '/')
+    await previous(page).focus()
+    await page.keyboard.press('Tab')
+    await expect(next(page)).toBeFocused()
+
+    const order = [
+      'The sculptor · 2 of 7',
+      'The farmers · 3 of 7',
+      'The necklace maker · 4 of 7',
+      'The bowl painter · 5 of 7',
+      'The bird painter · 6 of 7',
+      'The planter · 7 of 7',
+      'The jeweller · 1 of 7',
+    ]
+    for (const [step, text] of order.entries()) {
+      await page.keyboard.press(step % 2 ? 'Space' : 'Enter')
+      await expect(caption(page)).toHaveText(text)
+      await expect(next(page), 'focus stays on the button').toBeFocused()
+    }
+
+    await page.keyboard.press('Shift+Tab')
+    await expect(previous(page)).toBeFocused()
+    await page.keyboard.press('Enter')
+    await expect(caption(page)).toHaveText('The planter · 7 of 7')
+    await expect.poll(() => shownFile(page)).toContain('karma-yoga')
+  })
+
+  test('moves by mouse, and every Plate it has shown has loaded', async ({ page }) => {
+    await gotoReady(page, '/')
+    await next(page).click()
+    await expect(caption(page)).toHaveText('The sculptor · 2 of 7')
+    await expect.poll(() => shownFile(page)).toContain('sculptor')
+    await previous(page).click()
+    await previous(page).click()
+    await expect(caption(page)).toHaveText('The planter · 7 of 7')
+    await expect.poll(() => shownFile(page)).toContain('karma-yoga')
+    const widths = await page
+      .locator(HERO)
+      .evaluateAll((images: HTMLImageElement[]) => images.map((image) => image.naturalWidth))
+    expect(widths.every((width) => width > 0)).toBe(true)
+  })
+
+  test('moves by touch', { tag: '@one-width' }, async ({ browser, viewport }) => {
+    const context = await browser.newContext({ hasTouch: true, viewport })
+    const touch = await context.newPage()
+    await gotoReady(touch, '/')
+    await next(touch).tap()
+    await expect(caption(touch)).toHaveText('The sculptor · 2 of 7')
+    await context.close()
+  })
+
+  test('offers two buttons of at least 44 px in a labelled group, and a live caption', async ({
+    page,
+  }) => {
+    await gotoReady(page, '/')
+    for (const button of [previous(page), next(page)]) {
+      const box = await button.boundingBox()
+      expect(box?.width).toBeGreaterThanOrEqual(44)
+      expect(box?.height).toBeGreaterThanOrEqual(44)
+    }
+    await expect(caption(page)).toHaveAttribute('aria-live', 'polite')
+  })
+
+  test('stays on its Plate when left alone for 10 s', { tag: '@one-width' }, async ({ page }) => {
+    await page.clock.install()
+    await gotoReady(page, '/')
+    const before = await shownFile(page)
+    await page.clock.runFor(10_000)
+    await expect(caption(page)).toHaveText('The jeweller · 1 of 7')
+    expect(await shownFile(page)).toBe(before)
+  })
+
+  /** Start noting which of Plates 2 to 7 the page asks for. Call it before opening the page. */
+  function otherPlatesRequested(page: Page) {
+    const seen = new Set<string>()
+    page.on('request', (request) => {
+      const match =
+        /url=%2Fart%2Fplates%2F(sculptor|farmers|jeweller-woman|painter-bowl|painter-birds|karma-yoga)\.jpg/.exec(
+          request.url(),
+        )
+      if (match?.[1]) seen.add(match[1])
+    })
+    return seen
+  }
+
+  const NEIGHBOURS = ['karma-yoga', 'sculptor']
+
+  /** Open the homepage, and check it has asked for no Plate but the first and preloaded only that. */
+  async function openUntouched(page: Page, requested: Set<string>) {
+    await gotoReady(page, '/')
+    await page.waitForLoadState('load')
+    expect([...requested], 'Plates asked for before any button was touched').toEqual([])
+    await expect(page.locator('head link[rel="preload"][as="image"]')).toHaveCount(1)
+  }
+
+  test(
+    'asks for the neighbouring Plates when a button is hovered, not before',
+    { tag: '@one-width' },
+    async ({ page }) => {
+      const requested = otherPlatesRequested(page)
+      await openUntouched(page, requested)
+      await next(page).hover()
+      await expect.poll(() => [...requested].sort()).toEqual(NEIGHBOURS)
+      await expect(page.locator('head link[rel="preload"][as="image"]')).toHaveCount(1)
+    },
+  )
+
+  test(
+    'asks for the neighbouring Plates when a button takes focus, not before',
+    { tag: '@one-width' },
+    async ({ page }) => {
+      const requested = otherPlatesRequested(page)
+      await openUntouched(page, requested)
+      await next(page).focus()
+      await expect.poll(() => [...requested].sort()).toEqual(NEIGHBOURS)
+    },
+  )
+
+  test('without JavaScript shows the first Plate and its caption, and no buttons', async ({
+    browser,
+    viewport,
+  }) => {
+    const context = await browser.newContext({ javaScriptEnabled: false, viewport })
+    const bare = await context.newPage()
+    await bare.goto('/')
+    await expect(bare.locator(HERO)).toBeVisible()
+    await expect(caption(bare)).toHaveText('The jeweller · 1 of 7')
+    const buttons = controlsRow(bare).locator('button')
+    await expect(buttons).toHaveCount(2)
+    await expect(buttons.first()).toBeHidden()
+    await expect(buttons.last()).toBeHidden()
+    await context.close()
+  })
+
+  test('moves nothing around it across all seven Plates', async ({ page }) => {
+    await gotoReady(page, '/')
+    const where = async () => {
+      const [title, words] = await Promise.all([
+        page.getByRole('heading', { level: 1 }).boundingBox(),
+        caption(page).boundingBox(),
+      ])
+      return { titleY: title?.y, captionHeight: words?.height }
+    }
+    const before = await where()
+    for (let step = 0; step < 7; step++) {
+      await next(page).click()
+      expect(await where()).toEqual(before)
+    }
+  })
+
+  /** The Plates with a transition or animation still running for longer than the rule allows. */
+  const movingPlates = (page: Page) =>
+    page.locator(HERO).evaluateAll((images: HTMLImageElement[]) =>
+      images.flatMap((image) =>
+        image
+          .getAnimations()
+          .filter((animation) => {
+            const { duration, delay } = animation.effect?.getComputedTiming() ?? {}
+            return Number(duration) + Number(delay) > 1
+          })
+          .map((animation) => (animation as CSSTransition).transitionProperty),
+      ),
+    )
+
+  test('fades the new Plate in over the old one', async ({ page }) => {
+    await gotoReady(page, '/')
+    const current = page.locator(`${HERO}:not([alt=""])`)
+    await expect(current).toHaveCSS('transition-duration', '0.32s')
+    await expect(current).toHaveCSS('transition-property', 'opacity')
+  })
+
+  test(
+    'swaps at once under reduced motion, with nothing moving',
+    { tag: '@one-width' },
+    async ({ page }) => {
+      await page.emulateMedia({ reducedMotion: 'reduce' })
+      await gotoReady(page, '/')
+      await next(page).click()
+      await expect(caption(page)).toHaveText('The sculptor · 2 of 7')
+      await expect.poll(() => shownFile(page)).toContain('sculptor')
+      expect(await movingPlates(page)).toEqual([])
+    },
+  )
+
+  test('passes axe after a press', async ({ page }) => {
+    await gotoReady(page, '/')
+    await next(page).click()
+    await expect(caption(page)).toHaveText('The sculptor · 2 of 7')
+    await expect
+      .poll(() =>
+        figure(page).evaluate((element) =>
+          element
+            .getAnimations({ subtree: true })
+            .every((animation) => animation.playState !== 'running'),
+        ),
+      )
+      .toBe(true)
     await expectNoAxeViolations(page)
   })
 
