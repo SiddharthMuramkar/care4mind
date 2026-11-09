@@ -154,11 +154,8 @@ test('the References plus becomes a minus at once, with nothing moving, with red
   // At once: read two frames on, not polled.
   await nextFrames(page)
   expect(await turns(rules), 'a minus once open').toEqual([0, 0])
-  // The reduce rule cuts every transition to 1 ms, so nothing may run longer than that.
   for (const rule of await rules.all()) {
-    for (const { duration } of await animationsStartedOn(rule)) {
-      expect(duration, 'it folds flat at once').toBeLessThanOrEqual(1)
-    }
+    expect(await animationsStartedOn(rule), 'nothing starts on it').toEqual([])
   }
   expect(await movingAnimations(page)).toEqual([])
 
