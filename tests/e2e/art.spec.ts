@@ -1,15 +1,15 @@
 import type { Locator, Page } from '@playwright/test'
 
-import { artFor } from '@/art'
+import { artFor, ownArt, type SectionKey } from '@/art'
 import { heroPlates } from '@/art/assign'
 import { originLine } from '@/art/origin'
 import { ART } from '@/art/registry'
 import type { ArtRecord } from '@/art/types'
-import { works } from '@/content'
+import { concepts, questionnaires, works, type RouteEntry } from '@/content'
 
 import { expectNoAxeViolations } from './axe'
 import { expect, gotoReady, scrollsSideways, test } from './fixtures'
-import { MISSING } from './routes'
+import { MISSING, ROUTES_IN_SCOPE } from './routes'
 
 /** The homepage's hero Plate: the one picture allowed a `sizes` attribute. */
 const HERO = '[data-hero-plate]'
@@ -769,6 +769,126 @@ test.describe('Traditional text pages', () => {
       await expect(headSticker(page)).toHaveCSS('transform', 'none')
     },
   )
+})
+
+/** The picture a route's head should show, from the registry; nothing where the page has none. */
+async function headPicture({ kind, path }: RouteEntry): Promise<ArtRecord | undefined> {
+  const slug = path.split('/').at(-2) ?? ''
+  const section = (key: SectionKey) => artFor({ kind: 'section', key })
+  switch (kind) {
+    case 'concepts':
+      return section('concepts')
+    case 'concept-map':
+      return section('map')
+    case 'texts':
+      return section('texts')
+    case 'questionnaires':
+      return section('questionnaires')
+    case 'library':
+      return section('library')
+    case 'references':
+      return section('references')
+    case 'start':
+      return section('start')
+    case 'search':
+      return section('search')
+    case 'resource-list':
+    case 'page':
+      return section(slug as SectionKey)
+    case 'topic':
+      return artFor({ kind: 'topic', slug })
+    case 'work':
+      return artFor({ kind: 'work', slug })
+    case 'concept': {
+      const concept = await concepts.get(slug)
+      if (!concept) throw new Error(`No Concept has the slug “${slug}”.`)
+      return artFor({ kind: 'concept', slug, topic: concept.topic.slug })
+    }
+    case 'questionnaire': {
+      const questionnaire = await questionnaires.get(slug)
+      if (!questionnaire) throw new Error(`No Questionnaire has the slug “${slug}”.`)
+      return artFor({ kind: 'questionnaire', slug, firstConcept: questionnaire.concepts[0]?.slug })
+    }
+    // The homepage's picture stands beside its motto, not in a page head.
+    case 'home':
+    case 'questionnaire-flow':
+    case 'proposals':
+    case 'log-in':
+    case 'sign-up':
+    case 'privacy':
+    case 'credits':
+    case 'credits-sources':
+      return undefined
+  }
+}
+
+test.describe('every page, whatever has been made so far', () => {
+  for (const route of ROUTES_IN_SCOPE) {
+    test(
+      `${route.path} shows what the registry gives its head`,
+      { tag: '@one-width' },
+      async ({ page }) => {
+        await gotoReady(page, route.path)
+        const expected = await headPicture(route)
+        const picture = headSticker(page)
+        if (!expected) {
+          await expect(picture).toHaveCount(0)
+          return
+        }
+        await expect(picture).toHaveCount(1)
+        await expect(picture).toHaveAttribute('alt', '')
+        expect(decodeURIComponent((await picture.getAttribute('src')) ?? '')).toContain(
+          expected.src,
+        )
+        await expect
+          .poll(() => picture.evaluate((image: HTMLImageElement) => image.naturalWidth))
+          .toBeGreaterThan(0)
+      },
+    )
+  }
+
+  /** A card's own picture, read from its address: a Concept's, Traditional text's or Questionnaire's. */
+  function cardPicture(href: string): ArtRecord | undefined {
+    const [, section, slug = ''] = href.split('/')
+    switch (section) {
+      case 'concepts':
+        return ownArt({ kind: 'concept', slug })
+      case 'texts':
+        return ownArt({ kind: 'work', slug })
+      case 'questionnaires':
+        return ownArt({ kind: 'questionnaire', slug })
+      default:
+        throw new Error(`No card is known for the address “${href}”.`)
+    }
+  }
+
+  const CARD_LINK = 'a[href^="/concepts/"], a[href^="/texts/"], a[href^="/questionnaires/"]'
+
+  for (const path of ['/', '/start/', '/topics/mind/', '/texts/', '/questionnaires/']) {
+    test(
+      `on ${path} a card shows its own picture or stays bare`,
+      { tag: '@one-width' },
+      async ({ page }) => {
+        await gotoReady(page, path)
+        const titled = page
+          .getByRole('main')
+          .locator('article:not(:has(h1)):not([data-topic])')
+          .filter({ has: page.locator(CARD_LINK) })
+        expect(await titled.count(), 'cards on the page').toBeGreaterThan(0)
+        for (const card of await titled.all()) {
+          const href = await card.locator(CARD_LINK).first().getAttribute('href')
+          const expected = cardPicture(href ?? '')
+          const picture = card.locator('img')
+          await expect(picture, href ?? 'a card').toHaveCount(expected ? 1 : 0)
+          if (expected) {
+            expect(decodeURIComponent((await picture.getAttribute('src')) ?? '')).toContain(
+              expected.src,
+            )
+          }
+        }
+      },
+    )
+  }
 })
 
 test.describe('the hero Plate', () => {

@@ -25,6 +25,7 @@ import { SLOTS, type SlotId } from '@/art/slots'
 import { ArtFigure } from '@/components/art'
 import { Emblem } from '@/components/Emblem'
 import { concepts, questionnaires, topics, works } from '@/content'
+import { createContent, localSource } from '@/content/testing'
 import { stripDiacritics } from '@/lib/sanskrit'
 
 import { flagsOff, flagsOn } from '../flags'
@@ -244,6 +245,59 @@ describe('the slots', () => {
     // @ts-expect-error a slot id that does not exist
     const typo: SlotId = 'plate-ahimsaa'
     expect(SLOTS.map((slot) => slot.id)).not.toContain(typo)
+  })
+})
+
+/** The pages of the sections a slot can head, from the site map. */
+const SECTION_PAGES: Readonly<Record<string, string>> = {
+  library: '/library/',
+  'inspirational-books': '/library/inspirational-books/',
+  references: '/library/references/',
+}
+
+/** The pages a slot's placement puts its picture on. */
+function pagesOf(placement: string): string[] {
+  const [where, name = ''] = placement.split(': ')
+  switch (where) {
+    // A topic's Sticker stands on its card; its own page shows the Frontispiece, but must exist.
+    case 'topic':
+      return ['/', '/concepts/', `/topics/${name}/`]
+    case 'section':
+      return [SECTION_PAGES[name] ?? `no section page for ${name}`]
+    case 'concept':
+      return [`/concepts/${name}/`]
+    case 'text':
+      return [`/texts/${name}/`]
+    default:
+      throw new Error(`No page is known for the placement “${placement}”.`)
+  }
+}
+
+describe('every slot', () => {
+  const onPages = SLOTS.filter(({ placement }) => placement !== 'page: 404')
+
+  // Production's flags, so a slot has to reach a page that goes live, not one behind a flag.
+  let live: string[] = []
+
+  // Read once, with room for a busy machine: the registry is built from all of the content.
+  beforeAll(async () => {
+    live = (await createContent(localSource, flagsOff()).site.routes()).map(({ path }) => path)
+  }, 60_000)
+
+  it('is one of 31 on a page of the site map, or the one on the 404', () => {
+    expect(onPages).toHaveLength(31)
+    expect(SLOTS.filter(({ placement }) => placement === 'page: 404').map(({ id }) => id)).toEqual([
+      'plate-404',
+    ])
+  })
+
+  it.each(onPages)('$id reaches a real page through “$placement”', ({ placement }) => {
+    expect(pagesOf(placement).filter((path) => !live.includes(path))).toEqual([])
+  })
+
+  it('reaches the 404 page, which is no route of its own', () => {
+    expect(existsSync(join(process.cwd(), 'src/app/not-found.tsx'))).toBe(true)
+    expect(sectionArt.notFound.art).toBe('plate-404')
   })
 })
 
