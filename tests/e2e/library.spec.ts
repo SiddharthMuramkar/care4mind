@@ -557,6 +557,124 @@ for (const list of bookLists)
     )
   })
 
+test.describe('The hover label', { tag: '@from-768' }, () => {
+  const INSPIRATIONAL = hrefFor({ kind: 'resource-list', id: 'inspirational-books' })
+  const label = (page: Page) => page.locator('[data-hover-label]')
+  const book = (page: Page, title: string) =>
+    page
+      .getByRole('navigation', { name: 'Shelf: Inspirational Books' })
+      .getByRole('link', { name: new RegExp(`^${title}`) })
+
+  test('names a book across the page, above its spine, under the pointer', async ({ page }) => {
+    await gotoReady(page, INSPIRATIONAL)
+    const spine = book(page, 'My experiments with truth')
+    await spine.scrollIntoViewIfNeeded()
+    await spine.hover()
+    await expect(label(page)).toContainText('My experiments with truth')
+    await expect(label(page)).toContainText('Gandhi, M. K. · 1993')
+    const [plate, below] = await Promise.all([label(page).boundingBox(), spine.boundingBox()])
+    expect((plate?.y ?? Infinity) + (plate?.height ?? 0)).toBeLessThanOrEqual(below?.y ?? 0)
+  })
+
+  test('comes with keyboard focus, adds nothing to the link’s name, and Escape closes it', async ({
+    page,
+  }) => {
+    await gotoReady(page, INSPIRATIONAL)
+    const spine = book(page, 'My experiments with truth')
+    await spine.focus()
+    await expect(label(page)).toContainText('My experiments with truth')
+    await expect(spine).toBeFocused()
+    await expect(spine).toHaveAccessibleName('My experiments with truth Gandhi')
+    await page.keyboard.press('Escape')
+    await expect(label(page)).toBeHidden()
+    await expect(spine).toBeFocused()
+  })
+
+  test('follows the pointer along the shelf, and the pointer can move onto it', async ({
+    page,
+  }) => {
+    await gotoReady(page, INSPIRATIONAL)
+    await book(page, 'My experiments with truth').hover()
+    await expect(label(page)).toContainText('My experiments with truth')
+    await book(page, 'A search into secret India').hover()
+    await expect(label(page)).toContainText('A search into secret India')
+
+    const plate = await label(page).boundingBox()
+    if (!plate) throw new Error('The hover label is open.')
+    await page.mouse.move(plate.x + plate.width / 2, plate.y + plate.height / 2, { steps: 12 })
+    await page.waitForTimeout(500)
+    await expect(label(page)).toContainText('A search into secret India')
+  })
+
+  test('says what a volume on the Library home holds', async ({ page }) => {
+    await gotoReady(page, LIBRARY)
+    const volume = VOLUMES[1]
+    if (!volume) throw new Error('The Library has a reading list.')
+    await page
+      .getByRole('navigation', { name: 'The Library’s sections' })
+      .getByRole('link', { name: `${volume.title} ${volume.holds}` })
+      .hover()
+    await expect(label(page)).toContainText(volume.title)
+    await expect(label(page)).toContainText(volume.holds)
+  })
+
+  test('stays on screen at the shelf’s edge and clear of the site header', async ({ page }) => {
+    await gotoReady(page, INSPIRATIONAL)
+    const spine = page
+      .getByRole('navigation', { name: 'Shelf: Inspirational Books' })
+      .getByRole('link')
+      .first()
+    await spine.hover()
+    await expect(label(page)).toBeVisible()
+    const beside = await label(page).boundingBox()
+    expect(beside?.x ?? -1).toBeGreaterThanOrEqual(0)
+    expect((beside?.x ?? 0) + (beside?.width ?? Infinity)).toBeLessThanOrEqual(
+      page.viewportSize()?.width ?? 0,
+    )
+
+    await page.mouse.move(1, 1)
+    await expect(label(page)).toBeHidden()
+    // The book's head under the header (64 px): the label slides down rather than under it.
+    await spine.evaluate((element) =>
+      window.scrollBy({ top: element.getBoundingClientRect().top - 20, behavior: 'instant' }),
+    )
+    await spine.hover()
+    await expect(label(page)).toBeVisible()
+    const [slid, under] = await Promise.all([label(page).boundingBox(), spine.boundingBox()])
+    expect(slid?.y ?? 0).toBeGreaterThanOrEqual(64)
+    // Not flipped to the far end of the book.
+    expect((slid?.y ?? Infinity) + (slid?.height ?? 0)).toBeLessThan(
+      (under?.y ?? 0) + (under?.height ?? 0),
+    )
+  })
+
+  test('has no accessibility violations while open', async ({ page }) => {
+    // Tall enough not to scroll: axe can't settle the header's colours over a scrolled page.
+    await page.setViewportSize({ width: page.viewportSize()?.width ?? 1440, height: 1600 })
+    await gotoReady(page, INSPIRATIONAL)
+    await book(page, 'My experiments with truth').hover()
+    await expect(label(page)).toBeVisible()
+    await expectNoAxeViolations(page, 'a shelf with its hover label open')
+  })
+})
+
+test(
+  'at 390 px, the Library home’s lines show no hover label: they read across already',
+  { tag: '@self-width' },
+  async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 })
+    await gotoReady(page, LIBRARY)
+    await page
+      .getByRole('navigation', { name: 'The Library’s sections' })
+      .getByRole('link')
+      .nth(1)
+      .hover()
+    const label = page.locator('[data-hover-label]')
+    await expect(label, 'it opens, but out of sight').toHaveCount(1)
+    await expect(label).toBeHidden()
+  },
+)
+
 for (const list of courseLists)
   test(`${list.title}: each course is a card with its name, institution, city, description and link`, async ({
     page,

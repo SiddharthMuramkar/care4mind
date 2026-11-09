@@ -1,13 +1,17 @@
 import type { PreviewCard } from '@base-ui/react/preview-card'
+import type { Tooltip } from '@base-ui/react/tooltip'
 import type { ComponentType } from 'react'
 
+import type { HoverLabelPayload } from './HoverLabel'
 import type { PreviewPayload } from './LinkPreview'
 
 /** What the preview card's code brings once it loads: the card, and the triggers that open it. */
 export interface PreviewParts {
+  /** The preview card and the hover label, both mounted once. */
   Card: ComponentType
   Trigger: typeof PreviewCard.Trigger
   handle: PreviewCard.Handle<PreviewPayload>
+  label: { Trigger: typeof Tooltip.Trigger; handle: Tooltip.Handle<HoverLabelPayload> }
 }
 
 // Shared by LinkPreview and LinkPreviewRoot without Base UI itself, which loads only on intent.

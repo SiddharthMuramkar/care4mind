@@ -75,6 +75,7 @@ export function BookGroup({ group, headed }: { group: Group; headed: boolean }) 
             name={reference.id}
             index={index}
             title={reference.title}
+            byline={[reference.authors, reference.year].filter(Boolean).join(' · ')}
             {...(reference.authors ? { foot: spineAuthors(reference) } : {})}
           />
         ))}

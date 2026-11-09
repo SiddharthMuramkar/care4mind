@@ -3,6 +3,7 @@ import Link from 'next/link'
 import type { CSSProperties, ReactNode } from 'react'
 
 import { turnForward } from '@/components/PageTurn'
+import { HoverLabel } from '@/components/preview'
 import { cx } from '@/lib/cx'
 
 import styles from './shelf.module.css'
@@ -29,8 +30,10 @@ export interface SpineProps {
   index: number
   /** Set at the head, read across: a Devanagari numeral. Decoration. */
   head?: ReactNode
-  /** The title, set up the spine. */
-  title: ReactNode
+  /** The title, set up the spine and across the page on its hover label. */
+  title: string
+  /** The hover label's second line: a book's authors and year, or what a volume holds. */
+  byline: string
   /** Set at the foot: the author, or what a volume holds. */
   foot?: ReactNode
   /** How thick it is, 0 to 1, where that says something (a volume's size); else from its name. */
@@ -39,10 +42,10 @@ export interface SpineProps {
 
 /**
  * A book on a shelf, set in type: its title up the spine, with gilt rules at head and foot. The
- * whole spine is one link. It stands with its neighbours on a wide screen; a shelf may set it as
- * a line of a list on a narrow one.
+ * whole spine is one link, and its hover label says what it is across the page. It stands with
+ * its neighbours on a wide screen; a shelf may set it as a line of a list on a narrow one.
  */
-export function Spine({ href, name, index, head, title, foot, thickness }: SpineProps) {
+export function Spine({ href, name, index, head, title, byline, foot, thickness }: SpineProps) {
   const style = {
     '--height': measure(name),
     '--thickness': thickness ?? measure(`${name}/thickness`),
@@ -64,7 +67,20 @@ export function Spine({ href, name, index, head, title, foot, thickness }: Spine
     </>
   )
   return (
-    <li className={styles.slot} style={style}>
+    <HoverLabel
+      className={styles.slot}
+      style={style}
+      label={{
+        className: styles.hoverLabel,
+        tone: toneAt(index),
+        content: (
+          <>
+            <span className={styles.hoverTitle}>{title}</span>
+            {byline ? <span className={styles.hoverByline}>{byline}</span> : null}
+          </>
+        ),
+      }}
+    >
       {href.startsWith('#') ? (
         <a href={href} className={styles.spine} data-tone={toneAt(index)} data-ink>
           {inner}
@@ -80,7 +96,7 @@ export function Spine({ href, name, index, head, title, foot, thickness }: Spine
           {inner}
         </Link>
       )}
-    </li>
+    </HoverLabel>
   )
 }
 
