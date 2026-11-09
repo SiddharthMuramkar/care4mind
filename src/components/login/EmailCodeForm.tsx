@@ -31,6 +31,8 @@ const TICK_BOX = 'I am 18 or over and agree that Care4Mind can see my results'
 const NEW_ACCOUNTS_CAPPED =
   'We’re taking a lot of new accounts just now. Please try again in an hour.'
 const THROWAWAY = 'That looks like a throwaway email address. Please use one you keep.'
+/** Sign up answers this whether or not the address has an account, so it covers both. */
+const THROWAWAY_CODE_REFUSED = `${THROWAWAY} Already have an account with it? Log in instead.`
 
 /** What each error Google sign-in comes back with means for the user; anything else is generic. */
 const GOOGLE_ERRORS: Readonly<Record<string, string>> = {
@@ -92,7 +94,7 @@ async function post(path: string, body: unknown, headers: Record<string, string>
 /** What to say when asking for a code fails, and whether the bot check is what failed. */
 async function sendError(response: Response): Promise<{ message: string; botCheck: boolean }> {
   const { code } = ((await response.json().catch(() => ({}))) ?? {}) as { code?: string }
-  if (code === 'THROWAWAY_EMAIL') return { message: THROWAWAY, botCheck: false }
+  if (code === 'THROWAWAY_EMAIL') return { message: THROWAWAY_CODE_REFUSED, botCheck: false }
   if (code === 'EMAIL_LIMIT') {
     return {
       message: 'This email has had several codes already. Please wait an hour and try again.',

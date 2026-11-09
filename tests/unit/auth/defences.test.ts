@@ -139,13 +139,28 @@ describe('a throwaway email', () => {
     expect(isThrowawayEmail('someone@mailinator.com', list)).toBe(true)
   })
 
-  it('logs in an account already there, its name unchanged, when the list adds its domain', async () => {
+  it('answers Sign up the same with or without an account, so nothing is revealed', async () => {
+    const without = await login.sendCode('someone@mailinator.com', 'sign-up')
+    const answerWithout = await without.json()
+
     await login.addUser('someone@mailinator.com', 'Asha')
-    expect((await login.sendCode('someone@mailinator.com', 'sign-up')).status).toBe(200)
+    const withAccount = await login.sendCode('someone@mailinator.com', 'sign-up')
+
+    expect(withAccount.status).toBe(without.status)
+    expect(await withAccount.json()).toEqual(answerWithout)
+    expect(login.outbox).toEqual([])
+  })
+
+  it('leaves an account already there to Log in, its name unchanged, when the list adds its domain', async () => {
+    await login.addUser('someone@mailinator.com', 'Asha')
+    const refused = await login.sendCode('someone@mailinator.com', 'sign-up')
+    expect(refused.status).toBe(400)
+    expect(await refused.json()).toMatchObject({ code: 'THROWAWAY_EMAIL' })
+
+    expect((await login.sendCode('someone@mailinator.com', 'log-in')).status).toBe(200)
     const redeemed = await login.redeemCode(
       'someone@mailinator.com',
       login.codeFor('someone@mailinator.com'),
-      'Someone Else',
     )
     expect(redeemed.status).toBe(200)
     expect((await login.users())[0]).toMatchObject({ name: 'Asha' })

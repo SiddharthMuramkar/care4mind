@@ -218,13 +218,9 @@ export function defences({ limits, record }: DefenceDeps): BetterAuthPlugin {
           handler: createAuthMiddleware(async (ctx) => {
             const email: unknown = ctx.body?.email
             if (typeof email !== 'string') return
-            // Only a new account: anyone with one already must be able to get in, however they
-            // pressed, or a domain the list later adds would lock them out.
-            if (
-              ctx.headers?.get(LOGIN_INTENT_HEADER) === 'sign-up' &&
-              isThrowawayEmail(email) &&
-              !(await ctx.context.internalAdapter.findUserByEmail(email))
-            ) {
+            // Whether or not the address has an account, so the answer can't reveal which. Someone
+            // with an account at a domain the list later adds still gets in through Log in.
+            if (ctx.headers?.get(LOGIN_INTENT_HEADER) === 'sign-up' && isThrowawayEmail(email)) {
               throw new APIError('BAD_REQUEST', THROWAWAY_EMAIL)
             }
             const count = await countUp(ctx.context.adapter, emailKey(email))
