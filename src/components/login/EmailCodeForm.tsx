@@ -25,6 +25,37 @@ const CODE_LENGTH = 6
 
 const HEADING = 'email-code-heading'
 
+const TICK_BOX = 'I am 18 or over and agree that Care4Mind can see my results'
+
+/** What each error Google sign-in comes back with means for the user; anything else is generic. */
+const GOOGLE_ERRORS: Readonly<Record<string, string>> = {
+  signup_disabled:
+    'There’s no account for that Google address yet. Tick the box below, then continue with Google to sign up.',
+  access_denied: 'Google sign-in didn’t finish. Please try again, or use an emailed code instead.',
+  EMAIL_NOT_CONFIRMED:
+    'Google hasn’t confirmed that email address, so we can’t use it. Please use an emailed code instead.',
+  TICK_BOX_NEEDED: 'Please tick the box below, then continue with Google.',
+  account_not_linked:
+    'We couldn’t connect that Google account. Please use an emailed code instead.',
+}
+
+const GOOGLE_ERROR = 'Google sign-in didn’t work. Please try again, or use an emailed code instead.'
+
+/** The message for the error Google sign-in left in the address, if it left one. */
+function googleErrorFrom(query: string): string {
+  const code = new URLSearchParams(query).get('error')
+  return code ? (GOOGLE_ERRORS[code] ?? GOOGLE_ERROR) : ''
+}
+
+/** The address's query with Google's error gone, so it isn't carried on to the other screen. */
+function withoutGoogleError(query: string): string {
+  const params = new URLSearchParams(query)
+  params.delete('error')
+  params.delete('error_description')
+  const rest = params.toString()
+  return rest ? `?${rest}` : ''
+}
+
 const COPY = {
   'sign-up': {
     submit: 'Email me a code',
@@ -70,6 +101,7 @@ async function codeError(response: Response): Promise<string> {
   if (code === 'INVALID_OTP') return 'That code isn’t right. Please check it and try again.'
   if (code === 'NAME_NEEDED')
     return 'Please give your name (up to 100 characters) and ask for a new code.'
+  if (code === 'TICK_BOX_NEEDED') return 'Please tick the box first, and ask for a new code.'
   return 'Something went wrong on our side. Please try again in a minute.'
 }
 
@@ -89,6 +121,7 @@ export function EmailCodeForm({ mode, siteKey, otherScreen }: Props) {
   const [step, setStep] = useState<'details' | 'code'>('details')
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
+  const [agreed, setAgreed] = useState(false)
   const [code, setCode] = useState('')
   const [token, setToken] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
@@ -158,7 +191,7 @@ export function EmailCodeForm({ mode, siteKey, otherScreen }: Props) {
       const response = await post('/sign-in/email-otp', {
         email,
         otp: code,
-        ...(mode === 'sign-up' ? { name } : {}),
+        ...(mode === 'sign-up' ? { name, agreed } : {}),
       })
       if (!response.ok) {
         setError(await codeError(response))
@@ -173,12 +206,62 @@ export function EmailCodeForm({ mode, siteKey, otherScreen }: Props) {
     }
   }
 
+  /** Off to Google: the same token rule as a code, and Sign up asks for the tick box first. */
+  async function continueWithGoogle() {
+    if (mode === 'sign-up' && !agreed) {
+      setError('Please tick the box first, then continue with Google.')
+      return
+    }
+    if (!token) {
+      setError('The bot check hasn’t finished yet. Please wait a moment.')
+      return
+    }
+    setBusy(true)
+    setError('')
+    try {
+      const params = new URLSearchParams(window.location.search)
+      const response = await post(
+        '/sign-in/social',
+        {
+          provider: 'google',
+          callbackURL: safeReturnAddress(params.get('next')),
+          errorCallbackURL: `${window.location.pathname}${withoutGoogleError(window.location.search)}`,
+          disableRedirect: true,
+          ...(mode === 'sign-up' ? { requestSignUp: true, additionalData: { agreed: true } } : {}),
+        },
+        { 'x-captcha-response': token },
+      )
+      if (!response.ok) {
+        setError(await sendError(response))
+        return
+      }
+      const { url } = (await response.json()) as { url: string }
+      window.location.assign(url)
+    } catch {
+      setError('We couldn’t reach the site. Please check your connection and try again.')
+    } finally {
+      setBusy(false)
+      widget.current?.reset()
+    }
+  }
+
   // The next page, passed on when the user moves between Sign up and Log in.
   const query = useSyncExternalStore(
     never,
     () => window.location.search,
     () => '',
   )
+
+  // A new Google user who pressed Log in has no account: send them to Sign up for the tick box,
+  // with the page to come back to and the reason to show there.
+  useEffect(() => {
+    const search = window.location.search
+    if (mode === 'log-in' && new URLSearchParams(search).get('error') === 'signup_disabled') {
+      window.location.replace(`${otherScreen}${search}`)
+    }
+  }, [mode, otherScreen])
+
+  const otherQuery = withoutGoogleError(query)
 
   return (
     <div className={styles.form}>
@@ -217,18 +300,42 @@ export function EmailCodeForm({ mode, siteKey, otherScreen }: Props) {
               className={styles.input}
             />
           </div>
+          {mode === 'sign-up' ? (
+            <label className={styles.tick}>
+              <input
+                type="checkbox"
+                name="agreed"
+                required
+                checked={agreed}
+                onChange={(event) => setAgreed(event.target.checked)}
+                className={styles.tickBox}
+              />
+              <span>{TICK_BOX}</span>
+            </label>
+          ) : null}
           <TurnstileWidget ref={widget} siteKey={siteKey} onToken={onToken} />
           <div>
             <p className={styles.error} role="alert">
-              {error}
+              {error || googleErrorFrom(query)}
             </p>
             <button type="submit" className={cta.primary} disabled={busy}>
               {copy.submit}
             </button>
           </div>
+          <div className={styles.google}>
+            <p className={styles.other}>Or, without an emailed code:</p>
+            <button
+              type="button"
+              className={cta.secondary}
+              onClick={() => void continueWithGoogle()}
+              disabled={busy}
+            >
+              Continue with Google
+            </button>
+          </div>
           <p className={styles.other}>
             {copy.other.lead}{' '}
-            <Link href={`${otherScreen}${query}` as Route}>{copy.other.action}</Link>
+            <Link href={`${otherScreen}${otherQuery}` as Route}>{copy.other.action}</Link>
           </p>
         </form>
       ) : (
@@ -240,7 +347,7 @@ export function EmailCodeForm({ mode, siteKey, otherScreen }: Props) {
           {mode === 'log-in' ? (
             <p className={styles.other}>
               {copy.other.lead}{' '}
-              <Link href={`${otherScreen}${query}` as Route}>{copy.other.action}</Link>
+              <Link href={`${otherScreen}${otherQuery}` as Route}>{copy.other.action}</Link>
             </p>
           ) : null}
           <div className={styles.field}>

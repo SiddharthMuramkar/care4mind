@@ -32,6 +32,28 @@ export async function emailedCode(email: string): Promise<string> {
   return code
 }
 
+/**
+ * Google's sign-in page, answered as this person agreeing: straight back to the site's callback
+ * with a code that says who they are, for the server's own fake token endpoint (google-stand-in.mjs).
+ */
+export async function fakeGoogle(
+  page: Page,
+  profile: { email: string; name: string; email_verified?: boolean },
+) {
+  await page.route('https://accounts.google.com/**', async (route) => {
+    const google = new URL(route.request().url())
+    const code = Buffer.from(
+      JSON.stringify({ sub: `google-${profile.email}`, email_verified: true, ...profile }),
+    ).toString('base64url')
+    const back = new URL(google.searchParams.get('redirect_uri') ?? '')
+    back.search = new URLSearchParams({
+      code,
+      state: google.searchParams.get('state') ?? '',
+    }).toString()
+    await route.fulfill({ status: 302, headers: { location: back.toString() } })
+  })
+}
+
 /** Wait until the bot check widget has its token, so the next press can send it. */
 export async function waitForBotCheck(page: Page) {
   const response = page.locator('input[name="cf-turnstile-response"]')

@@ -22,7 +22,10 @@ async function detailsAndCode(
   page: import('@playwright/test').Page,
   { name, email }: { name?: string; email: string },
 ) {
-  if (name !== undefined) await page.getByLabel('Your name').fill(name)
+  if (name !== undefined) {
+    await page.getByLabel('Your name').fill(name)
+    await page.getByRole('checkbox', { name: /18 or over/ }).check()
+  }
   await page.getByLabel('Your email').fill(email)
   await waitForBotCheck(page)
   await page.getByRole('button', { name: 'Email me a code' }).click()

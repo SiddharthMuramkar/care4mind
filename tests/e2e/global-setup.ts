@@ -30,7 +30,7 @@ export default async function globalSetup() {
   if (!sent.ok()) throw new Error(`Sending the emailed code answered ${sent.status()}.`)
   const code = await emailedCode(EMAIL)
   const redeemed = await api.post('/api/auth/sign-in/email-otp/', {
-    data: { email: EMAIL, otp: code, name: 'Logged-in User' },
+    data: { email: EMAIL, otp: code, name: 'Logged-in User', agreed: true },
   })
   if (!redeemed.ok()) throw new Error(`Redeeming the code answered ${redeemed.status()}.`)
   await api.storageState({ path: LOGGED_IN })

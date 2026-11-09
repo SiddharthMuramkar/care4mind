@@ -36,11 +36,32 @@ export const TEST_SETTINGS: LoginSettings = {
     testKeys: false,
     verifyUrl: 'https://bot-check.test/siteverify',
   },
+  google: { clientId: 'google-client-id.test', clientSecret: 'google-client-secret-test' },
   email: { apiKey: 'unused', from: 'login@care4mind.test' },
   limits: { routePerMinute: 600, globalPerTenSeconds: 1000 },
 }
 
 const VERIFY_URL = TEST_SETTINGS.botCheck.verifyUrl
+const GOOGLE_TOKEN_URL = 'https://oauth2.googleapis.com/token'
+
+/** What Google says about the person who signed in. */
+export interface GoogleProfile {
+  sub: string
+  email: string
+  name: string
+  email_verified: boolean
+}
+
+/** Google's code for this person: the fake token endpoint reads who signed in straight from it. */
+const googleCode = (profile: GoogleProfile) =>
+  Buffer.from(JSON.stringify(profile)).toString('base64url')
+
+/** An id token as Google hands one back: Better Auth only decodes it, so it needs no signature. */
+function googleIdToken(code: string): string {
+  const part = (value: unknown) => Buffer.from(JSON.stringify(value)).toString('base64url')
+  const profile = JSON.parse(Buffer.from(code, 'base64url').toString('utf8')) as GoogleProfile
+  return `${part({ alg: 'none' })}.${part({ iss: 'https://accounts.google.com', ...profile })}.x`
+}
 
 interface HarnessOptions {
   settings?: Partial<LoginSettings>
@@ -55,9 +76,21 @@ export async function loginHarness({ settings, deps }: HarnessOptions = {}) {
 
   let verdict: BotCheckVerdict | 'unreachable' = PASSING
   const verified: string[] = []
+  const googleTokenRequests: URLSearchParams[] = []
   const realFetch = globalThis.fetch
   vi.stubGlobal('fetch', async (input: RequestInfo | URL, init?: RequestInit) => {
     const url = input instanceof Request ? input.url : String(input)
+    if (url === GOOGLE_TOKEN_URL) {
+      const form = new URLSearchParams(String(init?.body))
+      googleTokenRequests.push(form)
+      return Response.json({
+        access_token: 'google-access-token',
+        expires_in: 3600,
+        token_type: 'Bearer',
+        scope: 'openid email profile',
+        id_token: googleIdToken(form.get('code') ?? ''),
+      })
+    }
     if (url !== VERIFY_URL) throw new Error(`A unit test tried to reach ${url}.`)
     if (verdict === 'unreachable') throw new Error('connection refused')
     verified.push(String(init?.body))
@@ -117,10 +150,51 @@ export async function loginHarness({ settings, deps }: HarnessOptions = {}) {
       headers: { 'x-captcha-response': 'a-token', 'x-login-intent': intent, ...headers },
     })
 
-  const redeemCode = (email: string, otp: string, name?: string) =>
+  /** Redeem a code as a screen does: Sign up sends a name and the tick, Log in neither. */
+  const redeemCode = (email: string, otp: string, name?: string, { agreed = true } = {}) =>
     request('POST', '/sign-in/email-otp', {
-      body: { email, otp, ...(name === undefined ? {} : { name }) },
+      body: { email, otp, ...(name === undefined ? {} : { name, ...(agreed ? { agreed } : {}) }) },
     })
+
+  /** Press the Google button: `/sign-in/social` as a screen sends it. */
+  const startGoogle = (
+    screen: 'sign-up' | 'log-in',
+    { agreed = screen === 'sign-up', token = 'a-token' as string | null } = {},
+  ) =>
+    request('POST', '/sign-in/social', {
+      body: {
+        provider: 'google',
+        callbackURL: '/concepts/vikshepa/',
+        errorCallbackURL: '/sign-up/',
+        disableRedirect: true,
+        ...(screen === 'sign-up' ? { requestSignUp: true } : {}),
+        ...(agreed ? { additionalData: { agreed: true } } : {}),
+      },
+      headers: token ? { 'x-captcha-response': token } : {},
+    })
+
+  /** Come back from Google as this person, carrying the cookies the start of the flow set. */
+  async function finishGoogle(started: Response, profile: GoogleProfile) {
+    const { url } = (await started.json()) as { url: string }
+    const query = new URLSearchParams({
+      code: googleCode(profile),
+      state: new URL(url).searchParams.get('state') ?? '',
+    })
+    const cookie = started.headers
+      .getSetCookie()
+      .map((value) => value.split(';')[0])
+      .join('; ')
+    return request('GET', `/callback/google/?${query.toString()}`, { headers: { cookie } })
+  }
+
+  /** The whole Google journey: press the button on this screen, and come back as this person. */
+  async function googleSignIn(
+    screen: 'sign-up' | 'log-in',
+    profile: GoogleProfile,
+    options?: { agreed?: boolean },
+  ) {
+    return finishGoogle(await startGoogle(screen, options), profile)
+  }
 
   /** Run a whole sign-up: a code to the address, then its redemption with a name. */
   async function signUp(email: string, name = 'A User') {
@@ -137,6 +211,10 @@ export async function loginHarness({ settings, deps }: HarnessOptions = {}) {
     codeFor,
     outbox,
     verified,
+    startGoogle,
+    finishGoogle,
+    googleSignIn,
+    googleTokenRequests,
     setVerdict: (next: BotCheckVerdict | 'unreachable') => {
       verdict = next
     },
@@ -157,6 +235,7 @@ export async function loginHarness({ settings, deps }: HarnessOptions = {}) {
       )
       outbox.length = 0
       verified.length = 0
+      googleTokenRequests.length = 0
       verdict = PASSING
     },
     close: async () => {
