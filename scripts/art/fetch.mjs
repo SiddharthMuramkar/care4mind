@@ -24,7 +24,7 @@ const USER_AGENT = 'care4mind-site-rebuild/1.0'
 const PAUSE_MS = 200
 
 /** The whole media list, across as many pages as WordPress says it has. */
-export async function listLibrary(origin) {
+async function listLibrary(origin) {
   const rows = []
   let pages = 1
   for (let page = 1; page <= pages; page += 1) {
@@ -42,7 +42,7 @@ export async function listLibrary(origin) {
  * the server gzips fonts, and then Content-Length is the size of the compressed form, not of the
  * body fetch hands back.
  */
-export async function download(url) {
+async function download(url) {
   const response = await fetch(url, {
     headers: { 'user-agent': USER_AGENT, 'accept-encoding': 'identity' },
   })
@@ -58,7 +58,7 @@ export async function download(url) {
 }
 
 /** Stops on a picture whose pixels aren't what the list says. A font has no pixels to compare. */
-export async function checkPixels(bytes, row) {
+async function checkPixels(bytes, row) {
   const { width, height } = row.media_details
   if (width === undefined) return
   const actual = await sharp(bytes).metadata()
@@ -69,7 +69,7 @@ export async function checkPixels(bytes, row) {
 }
 
 /** Every old address of the library (each file and its resized copies), as a path, in order. */
-export function addressesOf(apiRows) {
+function addressesOf(apiRows) {
   const addresses = new Map()
   for (const row of apiRows) {
     const copies = Object.values(row.media_details.sizes ?? {}).map((copy) => copy.source_url)
@@ -84,14 +84,14 @@ export function addressesOf(apiRows) {
 }
 
 /** Where a file of the old library is saved. The month stays, because names repeat across them. */
-export function exportPath(root, oldPath) {
+function exportPath(root, oldPath) {
   const match = /^\/wp-content\/uploads\/(\d{4})\/(\d{2})\/((?!\.)[^/]+)$/.exec(oldPath)
   if (!match) throw new ToolError(`Not a file in the old media library: ${oldPath}`)
   return join(root, 'art/wp-export', match[1] ?? '', match[2] ?? '', match[3] ?? '')
 }
 
 /** Where a kept file goes: the address the site will serve it at, under the masters folder. */
-export function masterPath(root, newSrc) {
+function masterPath(root, newSrc) {
   const match = /^\/art\/(emblem|stickers|plates)\/([\w-]+\.\w+)$/.exec(newSrc)
   if (!match) throw new ToolError(`Not a place for a master: ${newSrc}`)
   return join(root, 'art/masters', match[1] ?? '', match[2] ?? '')
@@ -101,7 +101,7 @@ export function masterPath(root, newSrc) {
  * What differs between the live media list and the saved one, one line each. WordPress's reported
  * size is compared here, against the saved `kb`: the check on a download is its Content-Length.
  */
-export function compareLibrary(apiRows, files) {
+function compareLibrary(apiRows, files) {
   const differences = []
   const saved = new Map(files.map((file) => [file.wpId, file]))
   const live = new Set(apiRows.map((row) => row.id))
