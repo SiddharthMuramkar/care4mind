@@ -78,12 +78,20 @@ function Side({ ribWidth }: { ribWidth: number }) {
  * bottom. Below 96 px only the two rings. Decorative, in the current colour, with no ids. Fully
  * drawn by default; it inks in with the scroll unless `still`.
  */
-export function MedallionRing({ size, still = false }: { size: number; still?: boolean }) {
+export function MedallionRing({
+  size,
+  still = false,
+  className,
+}: {
+  size: number
+  still?: boolean
+  className?: string
+}) {
   const full = size >= FULL_FRAME_FROM
   const ribWidth = 0.66 * weight(size)
   return (
     <svg
-      className={cx(styles.ring, !still && styles.inks)}
+      className={cx(styles.ring, !still && styles.inks, className)}
       viewBox={`0 0 ${VIEW} ${VIEW}`}
       width={size}
       height={size}

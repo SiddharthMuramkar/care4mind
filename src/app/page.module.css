@@ -341,7 +341,7 @@
 }
 
 /* Five to a row before the sections reach full width, the longest title needs a phone's size to stay whole. */
-@media (64rem <= width < 72rem) {
+@media (width >= 64rem) and (width < 72rem) {
   .topics h3 {
     font-size: 1.3125rem;
   }

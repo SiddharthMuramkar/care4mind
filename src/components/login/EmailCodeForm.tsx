@@ -361,14 +361,17 @@ export function EmailCodeForm({ mode, siteKey, otherScreen }: Props) {
     () => '',
   )
 
+  // A plain string: the old-address redirects make Route too long a union for a dependency array.
+  const otherPath: string = otherScreen
+
   // A new Google user who pressed Log in has no account: send them to Sign up for the tick box,
   // with the page to come back to and the reason to show there.
   useEffect(() => {
     const search = window.location.search
     if (mode === 'log-in' && new URLSearchParams(search).get('error') === 'signup_disabled') {
-      window.location.replace(`${otherScreen}${search}`)
+      window.location.replace(`${otherPath}${search}`)
     }
-  }, [mode, otherScreen])
+  }, [mode, otherPath])
 
   const otherQuery = withoutGoogleError(query)
 

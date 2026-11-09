@@ -38,6 +38,9 @@ export async function cardPicture(pattern: string, slug: string): Promise<ArtRec
     case '/proposals/':
     case '/credits/':
     case '/credits/sources/':
+    case '/log-in/':
+    case '/sign-up/':
+    case '/privacy/':
       return art('emblem-ring')
     case '/concepts/':
       return artFor({ kind: 'section', key: 'concepts' })

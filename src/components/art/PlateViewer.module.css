@@ -135,7 +135,7 @@
 }
 
 @media (width >= 64rem) {
-  .medallion {
+  .circle {
     width: 360px;
   }
 }
