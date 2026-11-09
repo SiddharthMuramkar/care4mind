@@ -74,7 +74,7 @@ function Arrow({ arrow: { curve, tone } }: { arrow: CycleArrow }) {
 function ArrowLabel({ arrow: { label, labelAt } }: { arrow: CycleArrow }) {
   return (
     <text className={styles.label} x={labelAt[0]} y={labelAt[1]}>
-      <Runs runs={[label]} Tag="tspan" />
+      <RunText run={label} Tag="tspan" />
     </text>
   )
 }
@@ -108,7 +108,6 @@ function NodeName({ node: { lines, joined } }: { node: CycleNode }) {
 export function KarmaCycle() {
   const titleId = useId()
   const descriptionId = useId()
-  const { lines: centre, at: centreAt } = CYCLE_CENTRE
 
   return (
     <div className={styles.root}>
@@ -139,7 +138,7 @@ export function KarmaCycle() {
           {CYCLE_NODES.map((node) => (
             <Lines key={node.id} lines={node.lines} at={node.at} className={styles.node} />
           ))}
-          <Lines lines={centre} at={centreAt} className={styles.centre} />
+          <Lines lines={CYCLE_CENTRE.lines} at={CYCLE_CENTRE.at} className={styles.centre} />
         </svg>
         <figcaption className={styles.caption}>
           Read it clockwise, from <span lang="sa-Latn">Karmabija</span>.
@@ -157,23 +156,16 @@ export function KarmaCycle() {
         <ol className={styles.list}>
           {CYCLE_STEPS.map((step) => (
             <li key={step.id}>
-              <NodeName node={step.from} /> leads, through{' '}
-              <span lang="sa-Latn">{step.label.text}</span>, to <NodeName node={step.to} />.
+              <NodeName node={step.from} /> leads, through <RunText run={step.label} Tag="span" />,
+              to <NodeName node={step.to} />.
             </li>
           ))}
           <li>
-            <span lang="sa-Latn">{CYCLE_LOKASAMGRAHA.label.text}</span> also leads into{' '}
+            <RunText run={CYCLE_LOKASAMGRAHA.label} Tag="span" /> also leads into{' '}
             <NodeName node={CYCLE_LOKASAMGRAHA.to} />.
           </li>
           <li>
-            At the centre:{' '}
-            {centre.map(({ runs }, index) => (
-              <Fragment key={index}>
-                {index > 0 ? ' ' : null}
-                <Runs runs={runs} Tag="span" />
-              </Fragment>
-            ))}
-            .
+            At the centre: <NodeName node={CYCLE_CENTRE} />.
           </li>
         </ol>
       </details>

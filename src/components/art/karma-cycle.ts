@@ -70,9 +70,11 @@ const karmaphala: CycleNode = {
 export const CYCLE_NODES = [karmabija, dharmabaddha, nischayam, karma, karmaphala] as const
 
 /** The words at the centre of the circle. */
-export const CYCLE_CENTRE: { lines: readonly Line[]; at: Point } = {
+export const CYCLE_CENTRE: CycleNode = {
+  id: 'karmabandha-mochana',
   lines: [{ runs: [sa('Karmabandha')] }, { runs: [sa('Mochana')] }],
   at: [540, 340],
+  joined: 'name',
 }
 
 export interface CycleArrow {
@@ -109,7 +111,7 @@ export const CYCLE_STEPS: readonly CycleStep[] = [
   {
     id: 'buddhi',
     label: sa('Buddhi'),
-    labelAt: [918, 622],
+    labelAt: [940, 660],
     curve: [
       [900, 490],
       [895, 590],
@@ -123,7 +125,7 @@ export const CYCLE_STEPS: readonly CycleStep[] = [
   {
     id: 'svadharma',
     label: sa('Svadharma'),
-    labelAt: [135, 626],
+    labelAt: [125, 660],
     curve: [
       [412, 670],
       [290, 652],

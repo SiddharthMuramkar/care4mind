@@ -14,7 +14,7 @@
 
 .figure {
   margin: 0;
-  max-width: 720px;
+  max-width: 45rem;
   /* The old picture's address lands here. */
   scroll-margin-top: 1.5rem;
 }
@@ -30,7 +30,7 @@
   font-size: 47px;
 }
 
-@media (width >= 40rem) {
+@media (width >= 34rem) {
   .drawing {
     font-size: 32px;
   }
@@ -66,7 +66,7 @@
   stroke-linejoin: round;
 }
 
-@media (width >= 40rem) {
+@media (width >= 34rem) {
   .arrow {
     stroke-width: 3.5;
   }
@@ -100,7 +100,7 @@
 }
 
 .disclosure {
-  max-width: 720px;
+  max-width: 45rem;
 }
 
 .summary {
@@ -214,13 +214,13 @@
     .line {
       animation: cycle-draw linear both;
       animation-timeline: --karma-cycle;
-      animation-range: cover calc(10% + var(--step) * 6%) cover calc(16% + var(--step) * 6%);
+      animation-range: cover calc(6% + var(--step) * 4.5%) cover calc(10.5% + var(--step) * 4.5%);
     }
 
     .head {
       animation: cycle-head linear both;
       animation-timeline: --karma-cycle;
-      animation-range: cover calc(14% + var(--step) * 6%) cover calc(16% + var(--step) * 6%);
+      animation-range: cover calc(8.5% + var(--step) * 4.5%) cover calc(10.5% + var(--step) * 4.5%);
     }
 
     @keyframes cycle-draw {

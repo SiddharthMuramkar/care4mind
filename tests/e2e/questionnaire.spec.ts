@@ -83,24 +83,26 @@ test.describe('The Karma Yoga cycle', () => {
   })
 
   test(
-    'sets every label at 14 px or more on a 360 px phone',
+    'sets every label at 14 px or more on a 360 px phone and where the type steps down',
     { tag: '@self-width' },
     async ({ page }) => {
-      await page.setViewportSize({ width: 360, height: 800 })
-      await gotoReady(page, PATH)
-      const sizes = await drawing(page).evaluate((svg) => {
-        const scale = (svg as SVGSVGElement).getScreenCTM()?.a ?? 0
-        return [...svg.querySelectorAll('text')].map(
-          (text) => parseFloat(getComputedStyle(text).fontSize) * scale,
-        )
-      })
-      expect(sizes).toHaveLength(17)
-      for (const size of sizes) expect(size).toBeGreaterThanOrEqual(14)
+      for (const width of [360, 544]) {
+        await page.setViewportSize({ width, height: 800 })
+        await gotoReady(page, PATH)
+        const sizes = await drawing(page).evaluate((svg) => {
+          const scale = (svg as SVGSVGElement).getScreenCTM()?.a ?? 0
+          return [...svg.querySelectorAll('text')].map(
+            (text) => parseFloat(getComputedStyle(text).fontSize) * scale,
+          )
+        })
+        expect(sizes).toHaveLength(17)
+        for (const size of sizes) expect(size, `at ${width} px`).toBeGreaterThanOrEqual(14)
+      }
     },
   )
 
   test(
-    'leaves no two labels on top of each other, from a phone up',
+    'leaves no two labels on top of each other and no arrow across a label, from a phone up',
     { tag: '@self-width' },
     async ({ page }) => {
       for (const width of [360, 640, 1024]) {
@@ -119,7 +121,7 @@ test.describe('The Karma Yoga cycle', () => {
               bottom: top + height * 0.85,
             }
           })
-          return boxes.flatMap((a, index) =>
+          const labels = boxes.flatMap((a, index) =>
             boxes
               .slice(index + 1)
               .filter(
@@ -127,6 +129,29 @@ test.describe('The Karma Yoga cycle', () => {
               )
               .map((b) => `${a.word} / ${b.word}`),
           )
+          const arrows = [...svg.querySelectorAll<SVGPathElement>('[data-tone] path')].flatMap(
+            (path, index) => {
+              const toScreen = path.getScreenCTM()
+              if (!toScreen) return [`path ${index} has no place on screen`]
+              const halfStroke = (parseFloat(getComputedStyle(path).strokeWidth) * toScreen.a) / 2
+              const length = path.getTotalLength()
+              const points = Array.from({ length: 501 }, (_, step) =>
+                path.getPointAtLength((length * step) / 500).matrixTransform(toScreen),
+              )
+              return boxes
+                .filter((box) =>
+                  points.some(
+                    ({ x, y }) =>
+                      x > box.left - halfStroke &&
+                      x < box.right + halfStroke &&
+                      y > box.top - halfStroke &&
+                      y < box.bottom + halfStroke,
+                  ),
+                )
+                .map((box) => `path ${index} / ${box.word}`)
+            },
+          )
+          return [...labels, ...arrows]
         })
         expect(clashes, `at ${width} px`).toEqual([])
       }
@@ -134,17 +159,26 @@ test.describe('The Karma Yoga cycle', () => {
   )
 
   test(
-    'draws its arrows as it scrolls through view, and back',
+    'draws its arrows one after another as it scrolls through view, and back',
     { tag: '@self-width' },
     async ({ page }) => {
       await page.setViewportSize({ width: 768, height: 500 })
       await gotoReady(page, PATH)
-      const first = drawing(page).locator('path').first()
+      const lines = drawing(page).locator('[data-tone] path:first-child')
+      const first = lines.first()
+      const fifth = lines.nth(4)
       await expect.poll(() => undrawn(first)).toBeGreaterThan(0)
+      // A sixth of the way through the figure's crossing of the window.
+      await page.locator('#karma-cycle').evaluate((figure) => {
+        const { top, height } = figure.getBoundingClientRect()
+        window.scrollBy(0, top - window.innerHeight + (window.innerHeight + height) / 6)
+      })
+      await expect.poll(() => undrawn(first)).toBe(0)
+      expect(await undrawn(fifth)).toBeGreaterThan(0)
       await page
         .locator('#karma-cycle')
         .evaluate((figure) => figure.scrollIntoView({ block: 'center' }))
-      await expect.poll(() => undrawn(first)).toBe(0)
+      await expect.poll(() => undrawn(fifth)).toBe(0)
       await page.evaluate(() => window.scrollTo(0, 0))
       await expect.poll(() => undrawn(first)).toBeGreaterThan(0)
     },

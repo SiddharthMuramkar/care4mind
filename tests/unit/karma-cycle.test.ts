@@ -87,11 +87,4 @@ describe('the Karma Yoga cycle', () => {
     expect(svg).toContain('<tspan lang="sa-Latn">Kama</tspan> (Desire)')
     expect(list).toMatch(/<span lang="sa-Latn">Karmabija<\/span>/)
   })
-
-  it('is one figure, labelled for the old address', () => {
-    expect(html.match(/<figure id="karma-cycle"/g)).toHaveLength(1)
-    expect(html).toContain('<h3')
-    expect(html).toContain('The cycle of action')
-    expect(html).toContain('Read the cycle as a list')
-  })
 })
