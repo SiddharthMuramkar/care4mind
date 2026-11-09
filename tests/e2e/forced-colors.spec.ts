@@ -173,6 +173,27 @@ test('the error pages keep their Emblem and the edge of their button', async ({ 
   await expectVisibleEdge(page.getByRole('button', { name: 'Reload the page' }), 'Reload the page')
 })
 
+test('the KarmaYoga Scale page keeps its cycle in the theme’s text colour', async ({ page }) => {
+  await gotoReady(page, '/questionnaires/karmayoga-scale/')
+  const seenIn = (selector: string, property: 'fill' | 'stroke') =>
+    page
+      .locator(`#karma-cycle svg ${selector}`)
+      .evaluateAll(
+        (parts, property) => parts.map((part) => getComputedStyle(part)[property]),
+        property,
+      )
+  const text = await page
+    .locator('#karma-cycle')
+    .evaluate((figure) => getComputedStyle(figure).color)
+  const arrows = await seenIn('path', 'stroke')
+  const strikes = await seenIn('line', 'stroke')
+  const words = await seenIn('text', 'fill')
+  expect(arrows.length).toBeGreaterThan(0)
+  expect(strikes).toHaveLength(3)
+  expect(words.length).toBeGreaterThan(0)
+  for (const colour of [...arrows, ...strikes, ...words]) expect(colour).toBe(text)
+})
+
 const PARTS = [
   'Everyday Experience - 1',
   'Everyday Experience - 2',

@@ -4,12 +4,13 @@ import type { Locator, Page } from '@playwright/test'
 export const openingFolio = (page: Page) => page.getByRole('heading', { level: 1 }).locator('..')
 
 /**
- * Lines in decorative drawings that are not fully drawn. Lines a scroll
+ * Lines in drawings that are not fully drawn: decorative ones, and the
+ * Karma Yoga cycle, the one drawing that carries meaning. Lines a scroll
  * timeline is drawing are left out: they finish as the visitor scrolls.
  */
 export function unfinishedDrawings(page: Page) {
   return page.evaluate(() =>
-    [...document.querySelectorAll('svg[aria-hidden="true"] path')]
+    [...document.querySelectorAll('svg:is([aria-hidden="true"], [role="img"]) path')]
       .filter((line) =>
         line.getAnimations().every((animation) => animation.timeline instanceof DocumentTimeline),
       )

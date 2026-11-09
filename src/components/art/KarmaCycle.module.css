@@ -1,0 +1,258 @@
+.root {
+  display: grid;
+  gap: 1.25rem;
+  margin-block-start: 0.75rem;
+}
+
+.heading {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: var(--text-heading);
+  line-height: 1.2;
+}
+
+.figure {
+  margin: 0;
+  max-width: 45rem;
+  /* The old picture's address lands here, with the heading above it clear of the header. */
+  scroll-margin-top: 3rem;
+}
+
+/*
+ * Sized in the drawing's own units, so the type scales with the column: 47 units is 14 px at the
+ * 328 px column of a 360 px phone, and a wider column can afford 32, 15 px at a 512 px column.
+ */
+.drawing {
+  display: block;
+  width: 100%;
+  height: auto;
+  font-size: 47px;
+}
+
+@media (width >= 34rem) {
+  .drawing {
+    font-size: 32px;
+  }
+}
+
+.node {
+  fill: var(--color-surface-ink);
+  text-anchor: middle;
+}
+
+.label {
+  fill: var(--color-surface-link);
+  text-anchor: middle;
+}
+
+.centre {
+  fill: var(--color-surface-muted);
+  font-family: var(--font-display);
+  font-size: 1.15em;
+  text-anchor: middle;
+}
+
+/* Drawn in the labels' colour, over the word. */
+.strike {
+  stroke: var(--color-surface-link);
+  stroke-width: 4;
+}
+
+.arrow {
+  fill: none;
+  stroke-width: 5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+@media (width >= 34rem) {
+  .arrow {
+    stroke-width: 3.5;
+  }
+}
+
+.arrow[data-tone='1'] {
+  stroke: var(--color-cycle-arrow-1);
+}
+
+.arrow[data-tone='2'] {
+  stroke: var(--color-cycle-arrow-2);
+}
+
+.arrow[data-tone='3'] {
+  stroke: var(--color-cycle-arrow-3);
+}
+
+.arrow[data-tone='4'] {
+  stroke: var(--color-cycle-arrow-4);
+}
+
+.arrow[data-tone='5'] {
+  stroke: var(--color-cycle-arrow-5);
+}
+
+.caption {
+  margin-block-start: 0.75rem;
+  font-size: var(--text-base);
+  color: var(--color-surface-muted);
+  text-align: center;
+}
+
+.disclosure {
+  max-width: 45rem;
+}
+
+.summary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 44px;
+  list-style: none;
+  color: var(--color-surface-link);
+  cursor: pointer;
+}
+
+.summary::-webkit-details-marker {
+  display: none;
+}
+
+.summary:is(:hover, :focus-visible) {
+  text-decoration: underline;
+  text-decoration-thickness: 0.06em;
+  text-underline-offset: 0.18em;
+}
+
+.summary:active {
+  transform: translateY(1px);
+}
+
+/* A plus that folds into a minus, as the References' does. */
+.icon {
+  position: relative;
+  flex: none;
+  width: 14px;
+  height: 14px;
+}
+
+.icon > * {
+  position: absolute;
+  inset: 6px 0 auto;
+  height: 2px;
+  background: currentColor;
+}
+
+.icon > :last-child {
+  transform: rotate(90deg);
+}
+
+.disclosure[open] .icon > :last-child {
+  transform: rotate(0deg);
+}
+
+.list {
+  display: grid;
+  gap: 0.5rem;
+  margin: 0.25rem 0 0;
+  padding-inline-start: 1.5rem;
+  list-style: decimal;
+  line-height: 1.5;
+}
+
+@media (forced-colors: active) {
+  .node,
+  .label,
+  .centre {
+    fill: CanvasText;
+  }
+
+  .strike,
+  .arrow[data-tone] {
+    stroke: CanvasText;
+  }
+
+  .icon > * {
+    background: CanvasText;
+  }
+}
+
+/*
+ * As the figure comes into view each arrow draws after the one before it, and scrubs back as it
+ * leaves. One view timeline for the figure, which every arrow follows. Not in print, where the
+ * finished drawing is the one to set down.
+ */
+@media screen and (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    .figure {
+      view-timeline-name: --karma-cycle;
+    }
+
+    .arrow:nth-child(1) {
+      --step: 0;
+    }
+
+    .arrow:nth-child(2) {
+      --step: 1;
+    }
+
+    .arrow:nth-child(3) {
+      --step: 2;
+    }
+
+    .arrow:nth-child(4) {
+      --step: 3;
+    }
+
+    .arrow:nth-child(5) {
+      --step: 4;
+    }
+
+    .arrow:nth-child(6) {
+      --step: 5;
+    }
+
+    .line {
+      animation: cycle-draw linear both;
+      animation-timeline: --karma-cycle;
+      animation-range: cover calc(6% + var(--step) * 4.5%) cover calc(10.5% + var(--step) * 4.5%);
+    }
+
+    .head {
+      animation: cycle-head linear both;
+      animation-timeline: --karma-cycle;
+      animation-range: cover calc(8.5% + var(--step) * 4.5%) cover calc(10.5% + var(--step) * 4.5%);
+    }
+
+    @keyframes cycle-draw {
+      from {
+        stroke-dasharray: 1 1.1;
+        stroke-dashoffset: 1.05;
+      }
+
+      to {
+        stroke-dasharray: 1 1.1;
+        stroke-dashoffset: 0;
+      }
+    }
+
+    @keyframes cycle-head {
+      from {
+        opacity: 0;
+      }
+
+      to {
+        opacity: 1;
+      }
+    }
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .summary {
+    transition: transform var(--duration-instant) var(--ease-press);
+  }
+
+  .icon > :last-child {
+    transition: transform var(--duration-move) var(--ease-out);
+  }
+}
