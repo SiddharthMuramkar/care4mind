@@ -789,7 +789,7 @@ test.describe('the hero Plate', () => {
 
   test('keeps its ring still as the page scrolls', { tag: '@one-width' }, async ({ page }) => {
     await gotoReady(page, '/')
-    const ring = figure(page).locator('svg')
+    const ring = figure(page).locator(`${HERO} ~ svg`)
     expect(await ring.evaluate((svg) => svg.getAnimations({ subtree: true }).length)).toBe(0)
   })
 

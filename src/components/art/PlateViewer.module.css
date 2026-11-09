@@ -107,6 +107,16 @@
     transition: opacity var(--duration-move) var(--ease-out);
   }
 
+  /*
+   * A file the browser already holds loads before its Plate is first painted, and a transition then
+   * has nothing to start from. Never the first Plate, which is on the page from the start.
+   */
+  @starting-style {
+    .current:not(:first-child) {
+      opacity: 0;
+    }
+  }
+
   .arrow {
     transition: transform var(--duration-quick) var(--ease-out);
   }
