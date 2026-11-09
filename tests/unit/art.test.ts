@@ -21,6 +21,7 @@ import { ART } from '@/art/registry'
 import { createArt } from '@/art/resolve'
 import { SLOTS, type SlotId } from '@/art/slots'
 import { concepts, questionnaires, topics, works } from '@/content'
+import { stripDiacritics } from '@/lib/sanskrit'
 
 import { flagsOff, flagsOn } from '../flags'
 
@@ -541,32 +542,46 @@ describe('the prompts file', () => {
     readFileSync(join(process.cwd(), 'art/prompts.json'), 'utf8'),
   ) as Prompts
 
-  /** What a brief never asks for: the Traditional texts' titles, deities, and the spec's asides. */
+  /**
+   * What a brief never asks for: the Traditional texts' titles, deities, and the spec's asides.
+   * Tested against text with its diacritics stripped, so every spelling here is plain ASCII.
+   */
   const UNASKED =
-    /(?<!\p{L})(?:bhagavad|gita|gītā|dhammapada|sadhana|sādhana|panchakam|pañcakam|sushruta|suśruta|samhita|saṃhitā|vedanta|vedānta|yoga[ -]s[uū]tra|deity|deities|gods?|goddess(?:es)?|shiva|vishnu|krishna|rama|ganesha|hanuman|lakshmi|saraswati|durga|kali|buddha|brahma|client|flickr|atman|brahman|guna|guṇa)(?!\p{L})/iu
+    /(?<!\p{L})(?:bhagavad|gita|dhammapada|sadhana|panchakam|pancakam|sushruta|susruta|samhita|vedanta|yoga[ -]sutra|deity|deities|gods?|goddess(?:es)?|shiva|siva|vishnu|visnu|krishna|krsna|rama|ganesha?|ganesa|hanuman|lakshmi|laksmi|saraswati|sarasvati|parvati|durga|kali|buddha|brahma|client|flickr|atman|brahman|guna)(?!\p{L})/iu
 
-  /** How each template in the spec begins. */
-  const OPENINGS: Record<string, string> = {
-    sticker: 'Die-cut sticker illustration of ',
-    pothi: 'Die-cut sticker of a palm-leaf manuscript bundle (pothi), ',
-    plate: 'Square Indian folk painting of ',
+  /** The style sentences the Sticker and Pothi templates share. */
+  const STICKER_STYLE =
+    'Bold, even, near-black outlines; flat colour, no gradients; palette of coral pink, dusty rose, teal, deep teal, marigold and cream with small touches of orange and periwinkle. Front-on, centred, nearly symmetrical, filling about 85% of the frame. A thick, even, cream die-cut border follows the outer silhouette, with a faint soft shadow beneath. Plain transparent background. No text, letters, numbers, logos or watermark.'
+
+  const plate = (fills: string, mood: string) => (brief: string) =>
+    `Square Indian folk painting of ${brief}. Style blending Madhubani, Pattachitra and Kerala mural traditions: bold black contour lines, flat saturated colours (vermilion, marigold, peacock blue, leaf green, maroon, turmeric) on a cream ground, patterned fills in ${fills}, decorative birds, flowers and mandala rosettes. ${mood} Keep the whole subject inside the central circle of the square, which will be cropped to a circle; fill the corners with simple background pattern only. No text, letters, numbers, signature or watermark. ${avoid}`
+
+  /** Each template in the spec, filled in and closed on Avoid. */
+  const TEMPLATES: Record<string, (brief: string) => string> = {
+    sticker: (brief) =>
+      `Die-cut sticker illustration of ${brief}. Indian folk-art ornament style, Madhubani and Gond influence: every shape filled with fine pattern (dots, paisleys, lotus petals, scallops, leaf sprigs). ${STICKER_STYLE} ${avoid}`,
+    pothi: (brief) =>
+      `Die-cut sticker of a palm-leaf manuscript bundle (pothi), seen from the front at a slight angle: stacked palm leaves between two painted wooden boards, tied with a red cord. On the top board, painted in Indian folk style: ${brief}. ${STICKER_STYLE} ${avoid}`,
+    plate: plate(
+      'clothing, trees and sky',
+      'Calm, absorbed mood; a dignified, respectful depiction of Indian people in everyday dress.',
+    ),
+  }
+
+  /** The one Plate with nobody in it: no sentence about people, and no clothing to pattern. */
+  const NOBODY_IN_IT: Record<string, (brief: string) => string> = {
+    'plate-chittabhumi': plate('petals, water and sky', 'Calm, absorbed mood.'),
   }
 
   it('has a prompt for every slot and a slot for every prompt', () => {
     expect(Object.keys(pictures).sort()).toEqual(SLOTS.map((slot) => slot.id).sort())
   })
 
-  it.each(Object.entries(pictures))(
-    'fills in the brief of %s and closes on Avoid',
-    (_id, picture) => {
-      expect(picture.prompt).not.toMatch(/[{}]|\[Then/)
-      expect(picture.prompt).toContain(picture.brief)
-      expect(picture.prompt.endsWith(` ${avoid}`)).toBe(true)
-    },
-  )
-
-  it.each(Object.entries(pictures))('opens %s with the words of its template', (_id, picture) => {
-    expect(picture.prompt.startsWith(OPENINGS[picture.template] ?? 'no such template')).toBe(true)
+  it.each(Object.entries(pictures))('fills in the whole template for %s', (id, picture) => {
+    expect(picture.brief.trim()).not.toBe('')
+    expect(picture.prompt).not.toMatch(/[{}]|\[Then/)
+    const fill = NOBODY_IN_IT[id] ?? TEMPLATES[picture.template]
+    expect(picture.prompt).toBe(fill?.(picture.brief))
   })
 
   it.each(SLOTS.map((slot) => [slot.id, slot.family] as const))(
@@ -588,23 +603,22 @@ describe('the prompts file', () => {
     )
   })
 
-  it.each(Object.entries(pictures).filter(([, picture]) => picture.template === 'pothi'))(
-    'writes out the Sticker style in %s',
-    (_id, picture) => {
-      expect(picture.prompt).toContain('Bold, even, near-black outlines')
-      expect(picture.prompt).toContain('No text, letters, numbers, logos or watermark.')
-    },
-  )
-
   it.each(Object.entries(pictures))('names no title, deity or note in %s', (_id, picture) => {
-    expect(picture.prompt).not.toMatch(UNASKED)
+    expect(stripDiacritics(picture.prompt)).not.toMatch(UNASKED)
   })
 
   it.each(Object.keys(pictures).filter((id) => id.startsWith('plate-')))(
     'does not name the Concept in %s',
-    (id) => {
-      const name = id.replace('plate-', '').replaceAll('-', '[ -]')
-      expect(pictures[id]?.prompt).not.toMatch(new RegExp(`(?<!\\p{L})${name}(?!\\p{L})`, 'iu'))
+    async (id) => {
+      const slug = id.replace('plate-', '')
+      const cards = await concepts.list()
+      const name = cards.find((concept) => concept.slug === slug)?.name ?? slug
+      const names = [slug, stripDiacritics(name)]
+        .map((spelling) => spelling.replaceAll(/[ -]/g, '[ -]'))
+        .join('|')
+      expect(stripDiacritics(pictures[id]?.prompt ?? '')).not.toMatch(
+        new RegExp(`(?<!\\p{L})(?:${names})(?!\\p{L})`, 'iu'),
+      )
     },
   )
 
