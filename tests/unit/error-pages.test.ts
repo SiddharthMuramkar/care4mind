@@ -23,6 +23,13 @@ function buttonIn(node: ReactNode): ReactElement<{ onClick: () => void }> | unde
   return buttonIn(node.props.children)
 }
 
+/** The one picture in rendered markup. */
+function emblemIn(html: string) {
+  const pictures = html.match(/<img[^>]*>/g) ?? []
+  expect(pictures).toHaveLength(1)
+  return pictures[0]
+}
+
 describe('the error page', () => {
   const html = renderToStaticMarkup(createElement(ErrorPage, props))
 
@@ -33,6 +40,14 @@ describe('the error page', () => {
 
   it('offers a button to try again', () => {
     expect(html).toMatch(/<button type="button"[^>]*>Try again<\/button>/)
+  })
+
+  it('shows the decorative Emblem at its fixed size, with no list of widths', () => {
+    expect(emblemIn(html)).toMatch(/alt=""/)
+    expect(emblemIn(html)).toMatch(/width="96"/)
+    expect(emblemIn(html)).toMatch(/height="96"/)
+    expect(emblemIn(html)).toContain('emblem-mark')
+    expect(emblemIn(html)).not.toMatch(/\ssizes=/)
   })
 
   it('asks Next to render the page again when the button is pressed', () => {
@@ -65,6 +80,14 @@ describe('the global error page', () => {
 
   it('lets a keyboard skip to the main text', () => {
     expect(html).toContain('<a href="#main" class="skip-link">')
+  })
+
+  it('shows the decorative Emblem at its fixed size, with no list of widths', () => {
+    expect(emblemIn(html)).toMatch(/alt=""/)
+    expect(emblemIn(html)).toMatch(/width="96"/)
+    expect(emblemIn(html)).toMatch(/height="96"/)
+    expect(emblemIn(html)).toContain('emblem-mark')
+    expect(emblemIn(html)).not.toMatch(/\ssizes=/)
   })
 
   it('asks Next to render the site again when the button is pressed', () => {
