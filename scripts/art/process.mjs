@@ -100,7 +100,7 @@ async function hasCreamEdge(trimmed) {
       if (data.readUInt8(at) > 225 && data.readUInt8(at + 1) > 215 && data.readUInt8(at + 2) > 190)
         cream += 1
     }
-  return rim > 0 && cream / rim >= 0.4
+  return cream / rim >= 0.4
 }
 
 /**
@@ -280,9 +280,11 @@ function generatedJobs(root) {
   const folder = join(root, 'art/generated')
   if (!existsSync(folder)) return []
   return readdirSync(folder)
-    .filter((name) => name.endsWith('.png'))
+    .filter((name) => !name.startsWith('.') && !name.endsWith('.json'))
     .sort()
     .map((name) => {
+      if (!name.endsWith('.png'))
+        throw new ToolError(`${name} in the generated folder is not a .png.`)
       const id = name.slice(0, -'.png'.length)
       const master = join(folder, name)
       if (id.startsWith('plate-'))

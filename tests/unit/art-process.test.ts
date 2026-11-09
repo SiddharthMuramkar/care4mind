@@ -23,6 +23,11 @@ const CLEAR = { r: 0, g: 0, b: 0, alpha: 0 }
 const INK = { r: 120, g: 30, b: 40, alpha: 1 }
 const CREAM = { r: 255, g: 248, b: 236, alpha: 1 }
 const RING_GROUND = [249, 243, 231]
+const INK_PIXEL = [INK.r, INK.g, INK.b, 255]
+const CREAM_PIXEL = [CREAM.r, CREAM.g, CREAM.b, 255]
+
+/** The ring's ground colour, moved this far from itself in red alone. */
+const offGround = (distance: number) => [249 - distance, 243, 231]
 
 const run = (root: string) =>
   spawnSync(process.execPath, [TOOL, '--root', root], { encoding: 'utf8' })
@@ -69,7 +74,8 @@ async function rimmedSticker(side: number, canvas: number) {
 
 /**
  * An Emblem master, 1024 px wide on the ring's cream ground: an oval ring 401 x 321 px holding
- * more of that cream, with a bar of ink for the motto below it.
+ * more of that cream, with a bar of ink for the motto below it. Two pixels outside the oval sit
+ * either side of the ground's tolerance, within the ring's box so neither moves the trim.
  */
 function emblemMaster() {
   const [width, height] = [1024, 1000]
@@ -80,6 +86,8 @@ function emblemMaster() {
       const ink = (reach <= 1 && reach >= 0.6) || (y >= 880 && y <= 940 && x >= 212 && x <= 812)
       data.set(ink ? [INK.r, INK.g, INK.b] : RING_GROUND, (y * width + x) * 3)
     }
+  data.set(offGround(59), (340 * width + 332) * 3)
+  data.set(offGround(60), (340 * width + 330) * 3)
   return sharp(data, { raw: { width, height, channels: 3 } })
     .png()
     .toBuffer()
@@ -100,7 +108,10 @@ let made = 0
 
 type KeptRow = { family: string; newId: string; newSrc: string }
 
-/** A made-up repo holding one kept Plate, any other kept pictures, and the generated ones. */
+/**
+ * A made-up repo holding one kept Plate, one row that is not kept, any other kept pictures, and the
+ * generated ones. A generated name with no extension of its own is a .png.
+ */
 function repo(
   generated: Record<string, Buffer>,
   keptPlate: Buffer,
@@ -112,6 +123,7 @@ function repo(
     'scripts/art/originals.json': JSON.stringify({
       files: [
         { verdict: 'KEEP', family: 'plate', newId: 'plate-kept', newSrc: '/art/plates/kept.jpg' },
+        { verdict: 'ARCHIVE', family: 'emblem', newId: null, newSrc: null },
         ...others.map(({ row }) => ({ verdict: 'KEEP', ...row })),
       ],
     }),
@@ -120,7 +132,10 @@ function repo(
       others.map(({ row, master }) => [`art/masters/${row.newSrc.slice('/art/'.length)}`, master]),
     ),
     ...Object.fromEntries(
-      Object.entries(generated).map(([name, bytes]) => [`art/generated/${name}.png`, bytes]),
+      Object.entries(generated).map(([name, bytes]) => [
+        `art/generated/${name.includes('.') ? name : `${name}.png`}`,
+        bytes,
+      ]),
     ),
   }
   for (const [path, contents] of Object.entries(files)) {
@@ -157,8 +172,20 @@ describe('a run that finishes', () => {
         'sticker-margin': await sticker([480, 480], [900, 900]),
         'sticker-narrow': await sticker([479, 600], [481, 602]),
         'sticker-rimmed': await rimmedSticker(600, 640),
+        'sticker-rimmed.json': Buffer.from('{}'),
+        '.DS_Store': Buffer.from(''),
       },
       kept,
+      [
+        {
+          row: { family: 'sticker', newId: 'sticker-kept', newSrc: '/art/stickers/kept.png' },
+          master: await sticker([600, 600], [640, 640]),
+        },
+        {
+          row: { family: 'emblem', newId: 'emblem-mark', newSrc: '/art/emblem/mark.png' },
+          master: await sticker([300, 200], [500, 400]),
+        },
+      ],
     )
     first = run(root)
   }, 120_000)
@@ -182,12 +209,20 @@ describe('a run that finishes', () => {
   })
 
   it.each([
-    ['plate-big', 'plates/plate-big.jpg'],
-    ['pothi-palm', 'stickers/pothi-palm.png'],
-    ['sticker-exact', 'stickers/sticker-exact.png'],
-  ])('sends %s to %s, with a 320 px card', async (_id, path) => {
+    ['plate-big', 'plates/plate-big.jpg', 'jpeg'],
+    ['pothi-palm', 'stickers/pothi-palm.png', 'png'],
+    ['sticker-exact', 'stickers/sticker-exact.png', 'png'],
+  ])('sends %s to %s, with a 320 px %s card', async (_id, path, format) => {
     expect(existsSync(join(root, 'public/art', path))).toBe(true)
-    expect(await size(`art/cards/${path}`)).toMatchObject({ width: 320, height: 320 })
+    expect(await size(`art/cards/${path}`)).toMatchObject({ width: 320, height: 320, format })
+  })
+
+  it('lists each file with its pixel size, byte size and family', () => {
+    const path = 'public/art/plates/plate-small.jpg'
+    const line = row(path)
+    expect(line).toContain("'400x400'")
+    expect(line).toContain(` ${readFileSync(join(root, path)).length} `)
+    expect(line).toContain("'plate'")
   })
 
   it.each(['plates/plate-big.jpg', 'stickers/sticker-big.png'])(
@@ -236,16 +271,49 @@ describe('a run that finishes', () => {
     expect(width).toBe(height)
   })
 
-  it('lays art with no edge of its own on a cream die-cut edge', async () => {
+  it('lays art with no edge of its own on a cream edge 3% of its longer side wide', async () => {
     const { at, width, height } = await pixelsOf(
       join(root, 'public/art/stickers/sticker-exact.png'),
     )
     const y = Math.floor(height / 2)
-    const art = Array.from({ length: width }, (_, x) => x).find((x) => at(x, y)[0] === INK.r)
+    const art = Array.from({ length: width }, (_, x) => x).find((x) => at(x, y)[0] === INK.r) ?? 0
     expect(art).toBeGreaterThan(1)
-    expect(at((art ?? 0) - 1, y)).toEqual([CREAM.r, CREAM.g, CREAM.b, 255])
+    const outwards = Array.from({ length: art }, (_, step) => at(art - 1 - step, y))
+    const edge = outwards.findIndex((pixel) => pixel.join() !== CREAM_PIXEL.join())
+    expect(edge).toBe(Math.round(512 * 0.03))
     expect(at(0, 0)[3]).toBe(0)
     expect(row('public/art/stickers/sticker-exact.png')).toContain('edge added')
+  })
+
+  it('casts a soft dark shadow just below the die-cut edge', async () => {
+    const { at, width, height } = await pixelsOf(
+      join(root, 'public/art/stickers/sticker-exact.png'),
+    )
+    const x = Math.floor(width / 2)
+    const rows = Array.from({ length: height }, (_, y) => y)
+    const pixel = at(x, (rows.findLast((y) => at(x, y)[3] === 255) ?? 0) + 1)
+    expect(pixel[3]).toBeGreaterThan(0)
+    expect(pixel[3]).toBeLessThan(255)
+    expect(pixel.slice(0, 3).every((channel) => channel < 60)).toBe(true)
+  })
+
+  it('puts a kept Sticker through the Sticker recipe', async () => {
+    const path = 'public/art/stickers/kept.png'
+    expect(row(path)).toContain('edge added')
+    const { at, width, height } = await pixelsOf(join(root, path))
+    expect(width).toBe(height)
+    const y = Math.floor(height / 2)
+    const art = Array.from({ length: width }, (_, x) => x).find((x) => at(x, y)[0] === INK.r) ?? 0
+    expect(at(art - 1, y)).toEqual(CREAM_PIXEL)
+  })
+
+  it('trims a kept Emblem mark and squares it, with no margin', async () => {
+    const { at, width, height } = await pixelsOf(join(root, 'public/art/emblem/mark.png'))
+    expect([width, height]).toEqual([300, 300])
+    expect(at(0, 50)).toEqual(INK_PIXEL)
+    expect(at(299, 50)).toEqual(INK_PIXEL)
+    expect(at(150, 49)[3]).toBe(0)
+    expect(at(150, 50)).toEqual(INK_PIXEL)
   })
 
   it('leaves art with its own cream edge alone, inside a 4% clear margin', async () => {
@@ -298,6 +366,11 @@ describe('the Emblem ring', () => {
     expect(picture.at(0, 40)[3]).toBe(0)
   })
 
+  it('clears a pixel just within the tolerance of the ground and keeps one just beyond', () => {
+    expect(picture.at(20, 60)[3]).toBe(0)
+    expect(picture.at(18, 60)).toEqual([...offGround(60), 255])
+  })
+
   it('keeps the cream the ring encloses', () => {
     expect(picture.at(200, 200)).toEqual([...RING_GROUND, 255])
   })
@@ -337,6 +410,12 @@ describe('a run that stops', () => {
       'ornament-vine',
       () => solid(300, 300),
       'ornament-vine.png in the generated folder needs a plate-, sticker- or pothi- id.',
+    ],
+    [
+      'a generated picture that is not a .png',
+      'sticker-upper.PNG',
+      () => solid(300, 300),
+      'sticker-upper.PNG in the generated folder is not a .png.',
     ],
   ]
 
