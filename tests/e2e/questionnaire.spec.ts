@@ -1,3 +1,6 @@
+import type { Page } from '@playwright/test'
+
+import { undrawn } from './drawings'
 import { expect, gotoReady, test } from './fixtures'
 import { pageTurns, prefetched, recordPageTurns } from './page-turns'
 
@@ -44,6 +47,152 @@ test.describe('Questionnaire page (FR-05)', () => {
     )
     await expect(page.locator('main').locator('input, select, textarea, form')).toHaveCount(0)
   })
+})
+
+test.describe('The Karma Yoga cycle', () => {
+  const PATH = '/questionnaires/karmayoga-scale/'
+  const drawing = (page: Page) => page.locator('#karma-cycle svg')
+
+  test('stands under its heading in the purpose section, named by its title and description', async ({
+    page,
+  }) => {
+    await gotoReady(page, PATH)
+    const section = page.getByRole('region', { name: 'What it is for' })
+    await expect(
+      section.getByRole('heading', { level: 3, name: 'The cycle of action' }),
+    ).toBeVisible()
+    const picture = section.getByRole('img', { name: /^The Karma Yoga cycle A cycle of action/ })
+    await expect(picture).toBeVisible()
+    await expect(picture).toHaveAccessibleName(/At the centre: Karmabandha Mochana\.$/)
+    await expect(page.locator('#karma-cycle figcaption')).toHaveText(
+      'Read it clockwise, from Karmabija.',
+    )
+  })
+
+  test('opens as a list, with the same steps', async ({ page }) => {
+    await gotoReady(page, PATH)
+    const list = page.locator('details ol', { hasText: 'Manonigraha' })
+    await expect(list).toBeHidden()
+    await page.getByText('Read the cycle as a list').click()
+    await expect(list).toBeVisible()
+    await expect(list.getByRole('listitem')).toHaveCount(7)
+    await expect(list.getByRole('listitem').first()).toHaveText(
+      'Karmabija (struck through) leads, through Manonigraha, to Dharmabaddha Kama (Desire).',
+    )
+    await expect(list.locator('s').first()).toBeVisible()
+  })
+
+  test(
+    'sets every label at 14 px or more on a 360 px phone and where the type steps down',
+    { tag: '@self-width' },
+    async ({ page }) => {
+      for (const width of [360, 544]) {
+        await page.setViewportSize({ width, height: 800 })
+        await gotoReady(page, PATH)
+        const sizes = await drawing(page).evaluate((svg) => {
+          const scale = (svg as SVGSVGElement).getScreenCTM()?.a ?? 0
+          return [...svg.querySelectorAll('text')].map(
+            (text) => parseFloat(getComputedStyle(text).fontSize) * scale,
+          )
+        })
+        expect(sizes).toHaveLength(17)
+        for (const size of sizes) expect(size, `at ${width} px`).toBeGreaterThanOrEqual(14)
+      }
+    },
+  )
+
+  test(
+    'keeps labels apart and any arrow off them, from a phone up',
+    { tag: '@self-width' },
+    async ({ page }) => {
+      for (const width of [360, 640, 1024]) {
+        await page.setViewportSize({ width, height: 800 })
+        await gotoReady(page, PATH)
+        await page.evaluate(() => document.fonts.ready)
+        const clashes = await drawing(page).evaluate((svg) => {
+          // A text's box allows for ascenders and descenders no letter here reaches.
+          const boxes = [...svg.querySelectorAll('text')].map((text) => {
+            const { left, right, top, height } = text.getBoundingClientRect()
+            return {
+              word: text.textContent,
+              left,
+              right,
+              top: top + height * 0.2,
+              bottom: top + height * 0.85,
+            }
+          })
+          // Closer than this, labels on one row read as a single line of words.
+          const gap = 8
+          const labels = boxes.flatMap((a, index) =>
+            boxes
+              .slice(index + 1)
+              .filter(
+                (b) =>
+                  a.left < b.right + gap &&
+                  b.left < a.right + gap &&
+                  a.top < b.bottom &&
+                  b.top < a.bottom,
+              )
+              .map((b) => `${a.word} / ${b.word}`),
+          )
+          const arrows = [...svg.querySelectorAll<SVGPathElement>('[data-tone] path')].flatMap(
+            (path, index) => {
+              const toScreen = path.getScreenCTM()
+              if (!toScreen) return [`path ${index} has no place on screen`]
+              // The heads are rotated, so the scale is the matrix's length, not its a.
+              const halfStroke =
+                (parseFloat(getComputedStyle(path).strokeWidth) *
+                  Math.hypot(toScreen.a, toScreen.b)) /
+                2
+              const length = path.getTotalLength()
+              const points = Array.from({ length: 501 }, (_, step) =>
+                path.getPointAtLength((length * step) / 500).matrixTransform(toScreen),
+              )
+              return boxes
+                .filter((box) =>
+                  points.some(
+                    ({ x, y }) =>
+                      x > box.left - halfStroke &&
+                      x < box.right + halfStroke &&
+                      y > box.top - halfStroke &&
+                      y < box.bottom + halfStroke,
+                  ),
+                )
+                .map((box) => `path ${index} / ${box.word}`)
+            },
+          )
+          return [...labels, ...arrows]
+        })
+        expect(clashes, `at ${width} px`).toEqual([])
+      }
+    },
+  )
+
+  test(
+    'draws its arrows one after another as it scrolls through view, and back',
+    { tag: '@self-width' },
+    async ({ page }) => {
+      await page.setViewportSize({ width: 768, height: 500 })
+      await gotoReady(page, PATH)
+      const lines = drawing(page).locator('[data-tone] path:first-child')
+      const first = lines.first()
+      const fifth = lines.nth(4)
+      await expect.poll(() => undrawn(first)).toBeGreaterThan(0)
+      // A sixth of the way through the figure's crossing of the window.
+      await page.locator('#karma-cycle').evaluate((figure) => {
+        const { top, height } = figure.getBoundingClientRect()
+        window.scrollBy(0, top - window.innerHeight + (window.innerHeight + height) / 6)
+      })
+      await expect.poll(() => undrawn(first)).toBe(0)
+      expect(await undrawn(fifth)).toBeGreaterThan(0)
+      await page
+        .locator('#karma-cycle')
+        .evaluate((figure) => figure.scrollIntoView({ block: 'center' }))
+      await expect.poll(() => undrawn(fifth)).toBe(0)
+      await page.evaluate(() => window.scrollTo(0, 0))
+      await expect.poll(() => undrawn(first)).toBeGreaterThan(0)
+    },
+  )
 })
 
 // The flow itself is checked in questionnaire-flow.spec.ts; these cover the index.

@@ -1,4 +1,5 @@
 export { HeadPicture } from './HeadPicture'
+export { KarmaCycle } from './KarmaCycle'
 export { Medallion } from './Medallion'
 export { MedallionRing } from './MedallionRing'
 export { SectionSticker } from './SectionSticker'

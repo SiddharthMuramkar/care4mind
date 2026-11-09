@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 
+import { KarmaCycle } from '@/components/art'
 import { Citation } from '@/components/Citation'
 import { HelpLine } from '@/components/HelpLine'
 import { TitleMorph, turnForward } from '@/components/PageTurn'
@@ -76,6 +77,7 @@ export default async function QuestionnairePage({ params }: PageProps<'/question
               <Text text={paragraph} />
             </p>
           ))}
+          {slug === 'karmayoga-scale' ? <KarmaCycle /> : null}
         </section>
       ) : null}
 
