@@ -49,6 +49,7 @@ export const TEST_SETTINGS: LoginSettings = {
     blocking: false,
     codesPerEmailPerHour: 3,
     newAccountsPerHour: 5,
+    deleteLinksPerAccountPerHour: 3,
   },
   spikeAlert: { newAccountsPerHour: 4, to: 'developer@care4mind.test' },
 }

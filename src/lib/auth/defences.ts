@@ -8,7 +8,7 @@ import 'server-only'
 import { createHash } from 'node:crypto'
 
 import type { BetterAuthPlugin } from 'better-auth'
-import { APIError, createAuthMiddleware } from 'better-auth/api'
+import { APIError, createAuthMiddleware, getSessionFromCtx } from 'better-auth/api'
 import { disposableEmailBlocklistSet } from 'disposable-email-domains-js'
 
 import type { SendEmail } from './email'
@@ -19,7 +19,7 @@ import { LOGIN_INTENT_HEADER } from './shared'
 export type DefenceRecord =
   | { defence: 'botid'; action: 'recorded' | 'blocked' | 'check-failed' }
   | {
-      defence: 'email-limit' | 'new-account-cap'
+      defence: 'email-limit' | 'delete-link-limit' | 'new-account-cap'
       action: 'recorded' | 'blocked'
       count: number
       limit: number
@@ -187,6 +187,10 @@ async function countUp(adapter: Adapter, key: string): Promise<number> {
 const emailKey = (email: string) =>
   `codes:${createHash('sha256').update(email.toLowerCase()).digest('hex')}`
 
+/** The same for the links an account has asked for, keyed by account so it can't be read back. */
+const deleteLinkKey = (userId: string) =>
+  `delete-links:${createHash('sha256').update(userId).digest('hex')}`
+
 type LimitSettings = LoginSettings['limits']
 
 interface DefenceDeps {
@@ -194,7 +198,7 @@ interface DefenceDeps {
   record: RecordDefence
 }
 
-/** Refuse throwaway sign-ups, and count every code an address asks for. */
+/** Refuse throwaway sign-ups, and count every code an address and every link an account asks for. */
 export function defences({ limits, record }: DefenceDeps): BetterAuthPlugin {
   return {
     id: 'defences',
@@ -235,6 +239,30 @@ export function defences({ limits, record }: DefenceDeps): BetterAuthPlugin {
               throw new APIError('TOO_MANY_REQUESTS', {
                 code: 'EMAIL_LIMIT',
                 message: 'Too many codes for this email just now.',
+              })
+            }
+          }),
+        },
+        {
+          // Every ask emails the account's owner, on the same daily allowance as the emailed codes.
+          // A token means a link is being used, which sends nothing.
+          matcher: (ctx) => ctx.path === '/delete-user' && !ctx.body?.token,
+          handler: createAuthMiddleware(async (ctx) => {
+            // Here, not in the sender: a sender that throws has already been answered for.
+            const session = await getSessionFromCtx(ctx)
+            if (!session) return
+            const count = await countUp(ctx.context.adapter, deleteLinkKey(session.user.id))
+            if (count <= limits.deleteLinksPerAccountPerHour) return
+            record({
+              defence: 'delete-link-limit',
+              action: limits.blocking ? 'blocked' : 'recorded',
+              count,
+              limit: limits.deleteLinksPerAccountPerHour,
+            })
+            if (limits.blocking) {
+              throw new APIError('TOO_MANY_REQUESTS', {
+                code: 'DELETE_LINK_LIMIT',
+                message: 'Too many links for this account just now.',
               })
             }
           }),

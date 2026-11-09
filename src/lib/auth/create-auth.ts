@@ -5,7 +5,7 @@
 import 'server-only'
 
 import { betterAuth, getCurrentAdapter, type BetterAuthOptions } from 'better-auth'
-import { APIError, getOAuthState } from 'better-auth/api'
+import { APIError, createAuthMiddleware, getOAuthState } from 'better-auth/api'
 import { captcha } from 'better-auth/plugins/captcha'
 import { emailOTP } from 'better-auth/plugins/email-otp'
 
@@ -83,6 +83,12 @@ const TICK_BOX_NEEDED = {
   message: 'The tick box must be ticked before an account can be made.',
 }
 
+/** What a request for a Delete my account link is told when the email couldn't be sent. */
+const DELETE_EMAIL_FAILED = {
+  code: 'DELETE_EMAIL_FAILED',
+  message: 'The email couldn’t be sent.',
+}
+
 /** What a Google sign-up is told while Google hasn't confirmed the address belongs to its owner. */
 const EMAIL_NOT_CONFIRMED = {
   code: 'EMAIL_NOT_CONFIRMED',
@@ -100,6 +106,9 @@ export function createAuth({
 }: AuthDeps) {
   const { routeBurst, globalBurst } = settings.limits
   const perRoute = { window: 60, max: routeBurst }
+  // Better Auth hands the send to the background and answers 200 whatever becomes of it. The
+  // caller is logged in, so nothing leaks by waiting: the after hook below waits for it.
+  const deleteLinkSends = new WeakMap<Request, Promise<unknown>>()
   return betterAuth({
     appName: 'Care4Mind',
     baseURL: settings.baseURL,
@@ -146,11 +155,21 @@ export function createAuth({
         deleteTokenExpiresIn: DELETE_LINK_HOURS * 60 * 60,
         // The link opens our own page, which asks for one more press: the library's own link
         // deletes on opening, and answers 404 in a mail app's browser that isn't logged in.
-        sendDeleteAccountVerification: async ({ user, token }) => {
+        sendDeleteAccountVerification: async ({ user, token }, request) => {
           const link = `${settings.baseURL}${PRIVACY_PATH}?${DELETE_ACCOUNT_PARAM}=${token}`
-          await sendEmail(deleteAccountMessage(user.email, link))
+          const sending = sendEmail(deleteAccountMessage(user.email, link))
+          if (request) deleteLinkSends.set(request, sending)
+          await sending
         },
       },
+    },
+    hooks: {
+      after: createAuthMiddleware(async (ctx) => {
+        if (ctx.path !== '/delete-user' || !ctx.request) return
+        await deleteLinkSends.get(ctx.request)?.catch(() => {
+          throw new APIError('BAD_GATEWAY', DELETE_EMAIL_FAILED)
+        })
+      }),
     },
     databaseHooks: {
       user: {

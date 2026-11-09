@@ -57,10 +57,12 @@ export interface LoginSettings {
     routeBurst: number
     /** The same for any other auth route, with a quiet gap of 10 seconds. */
     globalBurst: number
-    /** Whether the limits per email and the new-account cap refuse, or only record. */
+    /** Whether the limits per email and per account and the new-account cap refuse, or only record. */
     blocking: boolean
     /** Emailed codes one address may be sent, per hour. */
     codesPerEmailPerHour: number
+    /** Delete my account links one account may be sent, per hour. */
+    deleteLinksPerAccountPerHour: number
     /** New accounts the whole site may take, per hour. */
     newAccountsPerHour: number
   }
@@ -146,6 +148,7 @@ export function readLoginSettings(env: Environment): LoginSettings {
       // Provisional: the trial sets the real numbers.
       blocking: onOff(env, 'LOGIN_LIMITS_BLOCKING'),
       codesPerEmailPerHour: wholeNumber(env, 'LOGIN_CODES_PER_EMAIL_PER_HOUR', 10),
+      deleteLinksPerAccountPerHour: wholeNumber(env, 'LOGIN_DELETE_LINKS_PER_ACCOUNT_PER_HOUR', 3),
       newAccountsPerHour: wholeNumber(env, 'LOGIN_NEW_ACCOUNTS_PER_HOUR', 500),
     },
     botId: { blocking: onOff(env, 'LOGIN_BOTID_BLOCKING') },

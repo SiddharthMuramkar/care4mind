@@ -1,6 +1,6 @@
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { loginHarness } from './harness'
+import { loginHarness, TEST_SETTINGS } from './harness'
 
 let login: Awaited<ReturnType<typeof loginHarness>>
 
@@ -128,5 +128,131 @@ describe('Delete my account', () => {
     expect(text).toMatch(/24 hours/)
     expect(text).toMatch(/ignore this email/)
     expect(html).toContain(`href="${linkIn().href}"`)
+  })
+})
+
+describe('when the email can’t be sent', () => {
+  it('says so instead of promising a link, and tells the user to ask again', async () => {
+    const cookie = await signedUp()
+    login.failEmailTo(EMAIL)
+
+    const response = await askToDelete(cookie)
+
+    expect(response.ok).toBe(false)
+    expect(await response.json()).toMatchObject({ code: 'DELETE_EMAIL_FAILED' })
+    expect(login.outbox.filter(({ subject }) => /delete/i.test(subject))).toEqual([])
+  })
+
+  it('says so on the live site too, where the send runs in the background', async () => {
+    const waiting: Promise<unknown>[] = []
+    const live = await loginHarness({
+      deps: { backgroundTask: (work) => void waiting.push(work) },
+    })
+    try {
+      await live.sendCode(EMAIL, 'sign-up')
+      await Promise.all(waiting)
+      const cookie = live.cookieHeader(
+        await live.redeemCode(EMAIL, live.codeFor(EMAIL), 'A User'),
+      )
+      live.failEmailTo(EMAIL)
+
+      const response = await live.request('POST', '/delete-user', { headers: { cookie } })
+
+      expect(response.status).toBe(502)
+    } finally {
+      await Promise.all(waiting)
+      await live.close()
+    }
+  })
+
+  it('still promises a link when one was sent', async () => {
+    const cookie = await signedUp()
+    expect((await askToDelete(cookie)).status).toBe(200)
+  })
+})
+
+describe('how many links one account can ask for', () => {
+  describe('with the limits blocking', () => {
+    let blocking: Awaited<ReturnType<typeof loginHarness>>
+
+    beforeAll(async () => {
+      blocking = await loginHarness({
+        settings: { limits: { ...TEST_SETTINGS.limits, blocking: true } },
+      })
+    })
+    beforeEach(() => blocking.reset())
+    afterAll(() => blocking.close())
+
+    const signUpAndAsk = async () => {
+      const cookie = blocking.cookieHeader(await blocking.signUp(EMAIL))
+      blocking.outbox.length = 0
+      for (let ask = 0; ask < 3; ask++) {
+        const response = await blocking.request('POST', '/delete-user', { headers: { cookie } })
+        expect(response.status, `ask ${ask}`).toBe(200)
+      }
+      return cookie
+    }
+
+    it('refuses the fourth in an hour, sends nothing and says so', async () => {
+      const cookie = await signUpAndAsk()
+
+      const response = await blocking.request('POST', '/delete-user', { headers: { cookie } })
+
+      expect(response.status).toBe(429)
+      expect(await response.json()).toMatchObject({ code: 'DELETE_LINK_LIMIT' })
+      expect(blocking.outbox).toHaveLength(3)
+      expect(blocking.records).toContainEqual({
+        defence: 'delete-link-limit',
+        action: 'blocked',
+        count: 4,
+        limit: 3,
+      })
+    })
+
+    it('counts per account, so one account’s asks can’t refuse another’s', async () => {
+      await signUpAndAsk()
+      const ravi = blocking.cookieHeader(await blocking.signUp('ravi@example.test'))
+
+      const response = await blocking.request('POST', '/delete-user', { headers: { cookie: ravi } })
+
+      expect(response.status).toBe(200)
+    })
+
+    it('never counts a deletion, only an ask that sends an email', async () => {
+      const cookie = await signUpAndAsk()
+
+      const response = await blocking.request('POST', '/delete-user', {
+        headers: { cookie },
+        body: { token: 'not-a-real-token' },
+      })
+
+      expect(response.status).not.toBe(429)
+    })
+
+    it('answers 401, and counts nothing, for a request with no user-session', async () => {
+      await signUpAndAsk()
+      const before = await blocking.count('defenceCount')
+
+      expect((await blocking.request('POST', '/delete-user')).status).toBe(401)
+
+      expect(await blocking.count('defenceCount')).toBe(before)
+    })
+  })
+
+  it('only records while the limits aren’t blocking, and still sends', async () => {
+    const cookie = await signedUp()
+    login.outbox.length = 0
+    for (let ask = 0; ask < 3; ask++) await askToDelete(cookie)
+
+    const response = await askToDelete(cookie)
+
+    expect(response.status).toBe(200)
+    expect(login.outbox).toHaveLength(4)
+    expect(login.records).toContainEqual({
+      defence: 'delete-link-limit',
+      action: 'recorded',
+      count: 4,
+      limit: 3,
+    })
   })
 })

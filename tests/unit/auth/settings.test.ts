@@ -84,18 +84,19 @@ describe('the login settings', () => {
 
   it('reads the provisional numbers for the trial to change', () => {
     expect(readLoginSettings(REQUIRED)).toMatchObject({
-      limits: { codesPerEmailPerHour: 10, newAccountsPerHour: 500 },
+      limits: { codesPerEmailPerHour: 10, newAccountsPerHour: 500, deleteLinksPerAccountPerHour: 3 },
       spikeAlert: { newAccountsPerHour: 100, to: 'developer@care4mind.org' },
     })
     expect(
       readLoginSettings({
         ...REQUIRED,
         LOGIN_CODES_PER_EMAIL_PER_HOUR: '4',
+        LOGIN_DELETE_LINKS_PER_ACCOUNT_PER_HOUR: '2',
         LOGIN_NEW_ACCOUNTS_PER_HOUR: '20',
         LOGIN_SPIKE_NEW_ACCOUNTS_PER_HOUR: '15',
       }),
     ).toMatchObject({
-      limits: { codesPerEmailPerHour: 4, newAccountsPerHour: 20 },
+      limits: { codesPerEmailPerHour: 4, newAccountsPerHour: 20, deleteLinksPerAccountPerHour: 2 },
       spikeAlert: { newAccountsPerHour: 15 },
     })
   })
