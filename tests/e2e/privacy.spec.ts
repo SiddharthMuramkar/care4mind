@@ -4,6 +4,7 @@ import { hrefFor } from '@/content'
 
 import { expectNoAxeViolations } from './axe'
 import { expect, gotoReady, test } from './fixtures'
+import { tabTo } from './focus-ring'
 import { freshEmail, inbox, signUpInBrowser } from './login'
 import { ROUTES } from './routes'
 
@@ -84,12 +85,12 @@ test.describe('Delete my account', { tag: '@one-width' }, () => {
     await signUpInBrowser(page, email)
     await gotoReady(page, PRIVACY)
 
-    await askButton(page).focus()
+    await tabTo(page, askButton(page))
     await page.keyboard.press('Enter')
     await expect(linkSent(page), 'focus follows the press').toBeFocused()
 
     await gotoReady(page, await deleteLink(email))
-    await confirmButton(page).focus()
+    await tabTo(page, confirmButton(page))
     await page.keyboard.press('Enter')
     await expect(page.getByText('Your account has been deleted.')).toBeVisible()
   })

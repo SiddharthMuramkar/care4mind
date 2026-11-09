@@ -15,6 +15,7 @@ import cta from '@/components/Cta'
 import { safeReturnAddress } from '@/lib/auth/return-address'
 import { authAddress, LOGIN_INTENT_HEADER } from '@/lib/auth/shared'
 
+import { useHydrated } from '../browser'
 import styles from './EmailCodeForm.module.css'
 import { type TurnstileHandle, TurnstileWidget } from './TurnstileWidget'
 
@@ -27,6 +28,10 @@ const HEADING = 'email-code-heading'
 
 const TICK_BOX = 'I am 18 or over and agree that Care4Mind can see my results'
 
+const NEW_ACCOUNTS_CAPPED =
+  'We’re taking a lot of new accounts just now. Please try again in an hour.'
+const THROWAWAY = 'That looks like a throwaway email address. Please use one you keep.'
+
 /** What each error Google sign-in comes back with means for the user; anything else is generic. */
 const GOOGLE_ERRORS: Readonly<Record<string, string>> = {
   signup_disabled:
@@ -37,6 +42,8 @@ const GOOGLE_ERRORS: Readonly<Record<string, string>> = {
   TICK_BOX_NEEDED: 'Please tick the box below, then continue with Google.',
   account_not_linked:
     'We couldn’t connect that Google account. Please use an emailed code instead.',
+  NEW_ACCOUNT_CAP: NEW_ACCOUNTS_CAPPED,
+  THROWAWAY_EMAIL: THROWAWAY,
 }
 
 const GOOGLE_ERROR = 'Google sign-in didn’t work. Please try again, or use an emailed code instead.'
@@ -85,12 +92,7 @@ async function post(path: string, body: unknown, headers: Record<string, string>
 /** What to say when asking for a code fails, and whether the bot check is what failed. */
 async function sendError(response: Response): Promise<{ message: string; botCheck: boolean }> {
   const { code } = ((await response.json().catch(() => ({}))) ?? {}) as { code?: string }
-  if (code === 'THROWAWAY_EMAIL') {
-    return {
-      message: 'That looks like a throwaway email address. Please use one you keep.',
-      botCheck: false,
-    }
-  }
+  if (code === 'THROWAWAY_EMAIL') return { message: THROWAWAY, botCheck: false }
   if (code === 'EMAIL_LIMIT') {
     return {
       message: 'This email has had several codes already. Please wait an hour and try again.',
@@ -115,20 +117,26 @@ async function sendError(response: Response): Promise<{ message: string; botChec
   }
 }
 
-async function codeError(response: Response): Promise<string> {
+/** What a refused code means, and whether the user has to go back to the details to fix it. */
+async function codeError(response: Response): Promise<{ message: string; toDetails: boolean }> {
   const { code } = ((await response.json().catch(() => ({}))) ?? {}) as { code?: string }
-  if (code === 'NEW_ACCOUNT_CAP') {
-    return 'We’re taking a lot of new accounts just now. Please try again in an hour.'
-  }
-  if (response.status === 429) return 'Too many tries just now. Please wait a minute and try again.'
-  if (code === 'OTP_EXPIRED') return 'That code has run out. Ask for a new one below.'
+  const stay = (message: string) => ({ message, toDetails: false })
+  if (code === 'NEW_ACCOUNT_CAP') return stay(NEW_ACCOUNTS_CAPPED)
+  if (response.status === 429)
+    return stay('Too many tries just now. Please wait a minute and try again.')
+  if (code === 'OTP_EXPIRED') return stay('That code has run out. Ask for a new one below.')
   if (code === 'TOO_MANY_ATTEMPTS')
-    return 'That code has had too many wrong tries. Ask for a new one below.'
-  if (code === 'INVALID_OTP') return 'That code isn’t right. Please check it and try again.'
+    return stay('That code has had too many wrong tries. Ask for a new one below.')
+  if (code === 'INVALID_OTP') return stay('That code isn’t right. Please check it and try again.')
+  // The name and the tick box are on the details step: the code step can't fix either.
   if (code === 'NAME_NEEDED')
-    return 'Please give your name (up to 100 characters) and ask for a new code.'
-  if (code === 'TICK_BOX_NEEDED') return 'Please tick the box first, and ask for a new code.'
-  return 'Something went wrong on our side. Please try again in a minute.'
+    return {
+      message: 'Please give your name (up to 100 characters) and ask for a new code.',
+      toDetails: true,
+    }
+  if (code === 'TICK_BOX_NEEDED')
+    return { message: 'Please tick the box first, and ask for a new code.', toDetails: true }
+  return stay('Something went wrong on our side. Please try again in a minute.')
 }
 
 interface Props {
@@ -154,6 +162,8 @@ export function EmailCodeForm({ mode, siteKey, otherScreen }: Props) {
   const [error, setError] = useState('')
   const [sentAgain, setSentAgain] = useState(false)
   const [botCheckFailures, setBotCheckFailures] = useState(0)
+  // Before this, the browser would submit the form itself: the details would go in the address.
+  const hydrated = useHydrated()
 
   const widget = useRef<TurnstileHandle>(null)
   const heading = useRef<HTMLHeadingElement>(null)
@@ -208,6 +218,10 @@ export function EmailCodeForm({ mode, siteKey, otherScreen }: Props) {
 
   async function submitDetails(event: FormEvent) {
     event.preventDefault()
+    if (mode === 'sign-up' && !name.trim()) {
+      setError('Please give your name.')
+      return
+    }
     if (await requestCode()) {
       setSentAgain(false)
       setStep('code')
@@ -216,6 +230,8 @@ export function EmailCodeForm({ mode, siteKey, otherScreen }: Props) {
 
   async function resend() {
     setCode('')
+    // Cleared first, so each new code is a change a screen reader announces.
+    setSentAgain(false)
     if (await requestCode()) setSentAgain(true)
   }
 
@@ -234,7 +250,13 @@ export function EmailCodeForm({ mode, siteKey, otherScreen }: Props) {
         ...(mode === 'sign-up' ? { name, agreed } : {}),
       })
       if (!response.ok) {
-        setError(await codeError(response))
+        const { message, toDetails } = await codeError(response)
+        setError(message)
+        if (toDetails) {
+          setCode('')
+          setToken(null)
+          setStep('details')
+        }
         return
       }
       const next = new URLSearchParams(window.location.search).get('next')
@@ -384,7 +406,7 @@ export function EmailCodeForm({ mode, siteKey, otherScreen }: Props) {
             <p className={styles.error} role="alert">
               {error || googleErrorFrom(query)}
             </p>
-            <button type="submit" className={cta.primary} disabled={busy}>
+            <button type="submit" className={cta.primary} disabled={busy || !hydrated}>
               {copy.submit}
             </button>
           </div>
@@ -394,7 +416,7 @@ export function EmailCodeForm({ mode, siteKey, otherScreen }: Props) {
               type="button"
               className={cta.secondary}
               onClick={() => void continueWithGoogle()}
-              disabled={busy}
+              disabled={busy || !hydrated}
             >
               Continue with Google
             </button>
@@ -458,11 +480,10 @@ export function EmailCodeForm({ mode, siteKey, otherScreen }: Props) {
             >
               Send a new code
             </button>
-            {sentAgain ? (
-              <p className={styles.sent} role="status">
-                A new code is on its way.
-              </p>
-            ) : null}
+            {/* Always in the page, empty until needed, so a screen reader announces each new code. */}
+            <p className={styles.sent} role="status">
+              {sentAgain ? 'A new code is on its way.' : ''}
+            </p>
           </div>
         </form>
       )}

@@ -3,6 +3,13 @@
   width: min(28rem, 100%);
 }
 
+/* Without JavaScript only the page's note shows: the bot check and the form can't run. */
+@media (scripting: none) {
+  .form {
+    display: none;
+  }
+}
+
 .form :where(form) {
   display: grid;
   gap: 1.25rem;

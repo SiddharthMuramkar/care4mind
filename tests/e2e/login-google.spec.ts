@@ -143,3 +143,15 @@ test.describe('Google', { tag: '@one-width' }, () => {
     await expect(logOut(page)).toHaveCount(0)
   })
 })
+
+test.describe('what Google’s return says', { tag: '@one-width' }, () => {
+  test('names a throwaway address, instead of suggesting an emailed code', async ({ page }) => {
+    await gotoReady(page, '/sign-up/?error=THROWAWAY_EMAIL')
+    await expect(page.getByRole('main').getByRole('alert')).toHaveText(/throwaway/)
+  })
+
+  test('says new accounts are capped, not that an emailed code would work', async ({ page }) => {
+    await gotoReady(page, '/sign-up/?error=NEW_ACCOUNT_CAP')
+    await expect(page.getByRole('main').getByRole('alert')).toHaveText(/in an hour/)
+  })
+})

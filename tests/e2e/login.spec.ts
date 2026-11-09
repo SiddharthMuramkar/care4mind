@@ -2,7 +2,8 @@ import { hrefFor } from '@/content'
 
 import { expectNoAxeViolations } from './axe'
 import { expect, gotoReady, scrollsSideways, test } from './fixtures'
-import { emailedCode, freshEmail, inbox, LOGGED_IN, waitForBotCheck } from './login'
+import { tabTo } from './focus-ring'
+import { emailedCode, fakeGoogle, freshEmail, inbox, LOGGED_IN, waitForBotCheck } from './login'
 import { ROUTES } from './routes'
 
 // Sign up and Log in with an emailed code, as a user does them in a browser: the header, both
@@ -99,13 +100,18 @@ test.describe('Sign up and Log in', { tag: '@one-width' }, () => {
     await expect(header(page).getByRole('link', { name: 'Log in' })).toHaveCount(0)
   })
 
-  test('takes a whole code pasted at once, spaces and all', async ({ page }, info) => {
+  test('takes a whole code pasted at once, spaces and all', async ({ page, context }, info) => {
+    await context.grantPermissions(['clipboard-read', 'clipboard-write'])
     const email = freshEmail(info)
     await gotoReady(page, '/sign-up/')
     await detailsAndCode(page, { name: 'Asha Rao', email })
     const code = await emailedCode(email)
     await page.getByLabel('Your six-digit code').focus()
-    await page.keyboard.insertText(`${code.slice(0, 3)} ${code.slice(3)}`)
+    await page.evaluate(
+      (text) => navigator.clipboard.writeText(text),
+      `${code.slice(0, 3)} ${code.slice(3)}`,
+    )
+    await page.keyboard.press('ControlOrMeta+V')
     await expect(page.getByLabel('Your six-digit code')).toHaveValue(code)
     await page.keyboard.press('Enter')
     await expect(header(page).getByRole('button', { name: 'Log out' })).toBeVisible()
@@ -122,6 +128,36 @@ test.describe('Sign up and Log in', { tag: '@one-width' }, () => {
     await page.getByLabel('Your six-digit code').fill(code)
     await page.getByRole('button', { name: 'Confirm' }).click()
     await expect(header(page).getByRole('button', { name: 'Log out' })).toBeVisible()
+  })
+
+  test('stops a name of only spaces at the details, before a code is sent', async ({
+    page,
+  }, info) => {
+    const email = freshEmail(info)
+    await gotoReady(page, '/sign-up/')
+    await page.getByLabel('Your name').fill('   ')
+    await page.getByRole('checkbox', { name: /18 or over/ }).check()
+    await page.getByLabel('Your email').fill(email)
+    await waitForBotCheck(page)
+    await page.getByRole('button', { name: 'Email me a code' }).click()
+    await expect(page.getByRole('main').getByRole('alert')).toHaveText(/give your name/)
+    await expect(page.getByRole('heading', { name: 'Enter your emailed code' })).toHaveCount(0)
+    expect(await inbox(email)).toEqual([])
+  })
+
+  test('goes back to the details when the server still needs the name or the tick', async ({
+    page,
+  }, info) => {
+    const email = freshEmail(info)
+    await gotoReady(page, '/sign-up/')
+    await detailsAndCode(page, { name: 'Asha Rao', email })
+    await page.route('**/api/auth/sign-in/email-otp/', (route) =>
+      route.fulfill({ status: 400, json: { code: 'NAME_NEEDED' } }),
+    )
+    await page.getByLabel('Your six-digit code').fill(await emailedCode(email))
+    await page.getByRole('button', { name: 'Confirm' }).click()
+    await expect(page.getByLabel('Your name')).toBeVisible()
+    await expect(page.getByRole('main').getByRole('alert')).toHaveText(/give your name/)
   })
 
   test('at Log in, an email with no account hears the same as one with, gets no code, and is pointed to Sign up', async ({
@@ -187,6 +223,134 @@ test.describe('Sign up and Log in', { tag: '@one-width' }, () => {
     await expect.poll(resets).toBe(before + 1)
     await expect.poll(async () => (await inbox(email)).length).toBeGreaterThan(1)
     await waitForBotCheck(page)
+  })
+})
+
+test.describe('a new code, asked for again', { tag: '@one-width' }, () => {
+  const SEND = '**/api/auth/email-otp/send-verification-otp/'
+
+  test('is said each time, cleared while it is on its way, and not said after a failure', async ({
+    page,
+  }, info) => {
+    const email = freshEmail(info)
+    await gotoReady(page, '/sign-up/')
+    await detailsAndCode(page, { name: 'Asha Rao', email })
+    const said = page.locator('[role="status"]').filter({ hasText: 'A new code is on its way.' })
+    const resend = page.getByRole('button', { name: 'Send a new code' })
+
+    await waitForBotCheck(page)
+    await resend.click()
+    await expect(said).toBeVisible()
+
+    await waitForBotCheck(page)
+    let release = () => {}
+    const held = new Promise<void>((resolve) => (release = resolve))
+    await page.route(SEND, async (route) => {
+      await held
+      await route.continue()
+    })
+    await resend.click()
+    await expect(said).toHaveCount(0)
+    release()
+    await expect(said).toBeVisible()
+    await page.unroute(SEND)
+
+    await waitForBotCheck(page)
+    await page.route(SEND, (route) => route.fulfill({ status: 500, json: {} }))
+    await resend.click()
+    await expect(page.getByRole('main').getByRole('alert')).toHaveText(/went wrong/)
+    await expect(said).toHaveCount(0)
+  })
+})
+
+test.describe('with only a keyboard', { tag: '@one-width' }, () => {
+  const button = (page: import('@playwright/test').Page, name: string) =>
+    page.getByRole('button', { name })
+
+  test('signs up, asks for a new code and confirms the code', async ({ page }, info) => {
+    const email = freshEmail(info)
+    await gotoReady(page, '/sign-up/')
+    await tabTo(page, page.getByLabel('Your name'))
+    await page.keyboard.type('Asha Rao')
+    const tick = page.getByRole('checkbox', { name: /18 or over/ })
+    await tabTo(page, tick)
+    await page.keyboard.press('Space')
+    await expect(tick).toBeChecked()
+    await tabTo(page, page.getByLabel('Your email'))
+    await page.keyboard.type(email)
+    await waitForBotCheck(page)
+    await tabTo(page, button(page, 'Email me a code'))
+    await page.keyboard.press('Enter')
+    await expect(page.getByRole('heading', { name: 'Enter your emailed code' })).toBeFocused()
+
+    await waitForBotCheck(page)
+    await tabTo(page, button(page, 'Send a new code'))
+    await page.keyboard.press('Enter')
+    await expect(page.getByText('A new code is on its way.')).toBeVisible()
+
+    await expect.poll(async () => (await inbox(email)).length).toBeGreaterThan(1)
+    const code = await emailedCode(email)
+    await tabTo(page, page.getByLabel('Your six-digit code'))
+    await page.keyboard.type(code)
+    await tabTo(page, button(page, 'Confirm'))
+    await page.keyboard.press('Enter')
+    await expect(header(page).getByRole('button', { name: 'Log out' })).toBeVisible()
+  })
+
+  test('asks for a code at Log in', async ({ page }, info) => {
+    await gotoReady(page, '/log-in/')
+    await tabTo(page, page.getByLabel('Your email'))
+    await page.keyboard.type(freshEmail(info))
+    await waitForBotCheck(page)
+    await tabTo(page, button(page, 'Email me a code'))
+    await page.keyboard.press('Enter')
+    await expect(page.getByRole('heading', { name: 'Enter your emailed code' })).toBeVisible()
+  })
+
+  test('continues with Google on Sign up', async ({ page }, info) => {
+    await fakeGoogle(page, { email: freshEmail(info), name: 'Asha From Google' })
+    await gotoReady(page, '/sign-up/')
+    const tick = page.getByRole('checkbox', { name: /18 or over/ })
+    await tabTo(page, tick)
+    await page.keyboard.press('Space')
+    await waitForBotCheck(page)
+    await tabTo(page, button(page, 'Continue with Google'))
+    await page.keyboard.press('Enter')
+    await expect(header(page).getByRole('button', { name: 'Log out' })).toBeVisible()
+  })
+})
+
+test.describe('without JavaScript', { tag: '@one-width' }, () => {
+  test.use({ javaScriptEnabled: false })
+
+  for (const path of ['/sign-up/', '/log-in/']) {
+    test(`${path} shows the note in place of a form that couldn’t work`, async ({ page }) => {
+      await page.goto(path)
+      await expect(page.getByRole('main').getByText('needs JavaScript')).toBeVisible()
+      await expect(page.getByLabel('Your email')).toBeHidden()
+      await expect(page.locator('button[type="submit"]')).toBeDisabled()
+    })
+  }
+})
+
+test.describe('the sign-up form’s code', { tag: '@one-width' }, () => {
+  test('stays off a page with no form on it', async ({ page, request }) => {
+    await gotoReady(page, '/concepts/vikshepa/')
+    const sources = await page
+      .locator('script[src]')
+      .evaluateAll((scripts) => scripts.map((script) => (script as HTMLScriptElement).src))
+    for (const source of sources) {
+      const text = await (await request.get(source)).text()
+      expect(text, source).not.toContain('challenges.cloudflare.com')
+    }
+  })
+})
+
+test.describe('the header at 320 px', { tag: '@self-width' }, () => {
+  test('gives up the Menu drawing, so Log in fits beside it', async ({ page }) => {
+    await page.setViewportSize({ width: 320, height: 640 })
+    await gotoReady(page, '/concepts/vikshepa/')
+    await expect(header(page).locator('a', { hasText: 'Menu' }).locator('svg')).toBeHidden()
   })
 })
 
@@ -263,6 +427,22 @@ test.describe('a logged-in user', { tag: '@one-width' }, () => {
       await page.getByRole('link', { name: 'Start the Questionnaire' }).click()
       await expect(page).toHaveURL(FLOW)
       await expect(page.getByRole('progressbar', { name: 'Your progress' })).toBeVisible()
+    })
+
+    test('keeps its login through a failed check, and is seen as logged in once it works', async ({
+      page,
+      context,
+    }) => {
+      const CHECK = '**/api/auth/get-session/'
+      await page.route(CHECK, (route) => route.fulfill({ status: 500, body: 'oops' }))
+      const answered = page.waitForResponse(CHECK)
+      await page.goto('/concepts/vikshepa/')
+      await answered
+      await page.unroute(CHECK)
+
+      await gotoReady(page, '/concepts/vikshepa/')
+      await expect(header(page).getByRole('button', { name: 'Log out' })).toBeVisible()
+      expect((await context.cookies()).map(({ name }) => name)).toContain('c4m-logged-in')
     })
 
     test('has a header that still fits 320 px with the longer Log out', async ({ page }) => {
