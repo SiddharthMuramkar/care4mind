@@ -206,7 +206,6 @@ export function EmailCodeForm({ mode, siteKey, otherScreen }: Props) {
   /** Ask for a code: the token it uses works once, so the widget is reset afterwards. */
   async function requestCode(): Promise<boolean> {
     if (!token) {
-      setBotCheckFailures((count) => count + 1)
       setError('The bot check hasn’t finished yet. Please wait a moment.')
       return false
     }
@@ -304,7 +303,6 @@ export function EmailCodeForm({ mode, siteKey, otherScreen }: Props) {
       return
     }
     if (!token) {
-      setBotCheckFailures((count) => count + 1)
       setError('The bot check hasn’t finished yet. Please wait a moment.')
       return
     }
@@ -489,6 +487,14 @@ export function EmailCodeForm({ mode, siteKey, otherScreen }: Props) {
               value={code}
               // No maxLength: it would cut a paste that holds spaces before they are removed.
               onChange={(event) => setCode(codeFrom(event.target.value))}
+              // A whole code pasted replaces the field, whatever digits or caret it finds there.
+              onPaste={(event) => {
+                const pasted = codeFrom(event.clipboardData.getData('text'))
+                if (pasted.length === CODE_LENGTH) {
+                  event.preventDefault()
+                  setCode(pasted)
+                }
+              }}
               className={styles.input}
             />
           </div>

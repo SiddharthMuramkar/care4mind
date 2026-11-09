@@ -69,6 +69,21 @@ test.describe('a person who keeps failing the bot check', { tag: '@one-width' },
     await expectNoAxeViolations(page)
   })
 
+  for (const name of ['Email me a code', 'Continue with Google']) {
+    test(`sees nothing extra for pressing ${name} before the bot check has finished`, async ({
+      page,
+    }) => {
+      await openWithFakeBotCheck(page, '/log-in/')
+      await page.getByLabel('Your email').fill('asha@example.test')
+      const press = page.getByRole('button', { name })
+      await press.click()
+      await press.click()
+      await expect(page.getByRole('main').getByRole('alert')).toHaveText(/hasn.t finished yet/)
+      await settled(page)
+      await expect(help(page)).toHaveCount(0)
+    })
+  }
+
   test('sees them when the server keeps refusing the token', async ({ page }) => {
     await page.route('**/api/auth/email-otp/send-verification-otp/', (route) =>
       route.fulfill({ status: 403, json: { code: 'VERIFICATION_FAILED' } }),

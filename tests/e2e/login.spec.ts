@@ -159,6 +159,43 @@ test.describe('Sign up and Log in', { tag: '@one-width' }, () => {
     await expect(page.getByLabel('Your six-digit code')).toHaveValue(code)
   })
 
+  test('takes a pasted code over a refused one still in the field', async ({
+    page,
+    context,
+  }, info) => {
+    await context.grantPermissions(['clipboard-read', 'clipboard-write'])
+    const email = freshEmail(info)
+    await gotoReady(page, '/sign-up/')
+    await detailsAndCode(page, { name: 'Asha Rao', email })
+    const code = await emailedCode(email)
+    const field = page.getByLabel('Your six-digit code')
+    await field.fill(code === '000000' ? '111111' : '000000')
+    await page.getByRole('button', { name: 'Confirm' }).click()
+    await expect(page.getByRole('main').getByRole('alert')).toHaveText(/isn.t right/)
+
+    await field.press('End')
+    await page.evaluate((text) => navigator.clipboard.writeText(text), code)
+    await page.keyboard.press('ControlOrMeta+V')
+
+    await expect(field).toHaveValue(code)
+    await page.getByRole('button', { name: 'Confirm' }).click()
+    await expect(header(page).getByRole('button', { name: 'Log out' })).toBeVisible()
+  })
+
+  test('takes a pasted code over digits already typed', async ({ page, context }, info) => {
+    await context.grantPermissions(['clipboard-read', 'clipboard-write'])
+    await gotoReady(page, '/sign-up/')
+    await detailsAndCode(page, { name: 'Asha Rao', email: freshEmail(info) })
+    const field = page.getByLabel('Your six-digit code')
+    await field.fill('12')
+
+    await field.press('End')
+    await page.evaluate((text) => navigator.clipboard.writeText(text), '654321')
+    await page.keyboard.press('ControlOrMeta+V')
+
+    await expect(field).toHaveValue('654321')
+  })
+
   test('says a wrong code is wrong, and leaves the field to try again', async ({ page }, info) => {
     const email = freshEmail(info)
     await gotoReady(page, '/sign-up/')
