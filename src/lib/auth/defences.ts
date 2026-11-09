@@ -36,20 +36,40 @@ export const logDefence: RecordDefence = (record) => {
 /** BotID's verdict on the current request, as `botid/server` gives it. */
 export type CheckBotId = () => Promise<{ isBot: boolean }>
 
+/**
+ * How long BotID gets before its check counts as failed. Under the 10 seconds Better Auth allows
+ * it, because when that runs out the request is refused with a 500 and nothing here finds out.
+ */
+export const BOT_ID_TIMEOUT_MS = 5_000
+
+/** Reject once the time is up: BotID's call takes no abort signal, so racing it is all there is. */
+function withinTime<T>(work: Promise<T>, timeoutMs: number): Promise<T> {
+  let timer: ReturnType<typeof setTimeout> | undefined
+  const late = new Promise<never>((_, reject) => {
+    timer = setTimeout(() => reject(new Error('BotID took too long to answer')), timeoutMs)
+  })
+  return Promise.race([work, late]).finally(() => clearTimeout(timer))
+}
+
 /** The BotID half of a `captcha()` plugin: only record, until the setting turns it to blocking. */
 export function botIdCheck({
   blocking,
   checkBotId,
   record,
+  timeoutMs,
 }: {
   blocking: boolean
   checkBotId: CheckBotId
   record: RecordDefence
+  timeoutMs: number
 }) {
   return {
     checkBotId: async () => {
       try {
-        return await checkBotId()
+        const verdict = await withinTime(checkBotId(), timeoutMs)
+        // BotID hands back whatever JSON its service sent, so an error body arrives with no verdict.
+        if (typeof verdict.isBot !== 'boolean') throw new Error('BotID gave no verdict')
+        return verdict
       } catch (error) {
         record({ defence: 'botid', action: 'check-failed' })
         // Record-only must never lock anyone out, so a failed check counts as a pass here.

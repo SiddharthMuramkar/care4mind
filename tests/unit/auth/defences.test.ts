@@ -34,6 +34,19 @@ describe('BotID, the second check', () => {
       expect((await login.sendCode('asha@example.test', 'sign-up')).status).toBe(200)
       expect(login.records).toContainEqual({ defence: 'botid', action: 'check-failed' })
     })
+
+    it('lets people in when BotID never answers, and says so', async () => {
+      login.setBotId('hangs')
+      expect((await login.sendCode('asha@example.test', 'sign-up')).status).toBe(200)
+      expect(login.records).toContainEqual({ defence: 'botid', action: 'check-failed' })
+      expect(login.outbox).toHaveLength(1)
+    })
+
+    it('counts an answer with no verdict as a failed check, and says so', async () => {
+      login.setBotId({})
+      expect((await login.sendCode('asha@example.test', 'sign-up')).status).toBe(200)
+      expect(login.records).toEqual([{ defence: 'botid', action: 'check-failed' }])
+    })
   })
 
   it('runs after the bot check has passed, and never for a request it refused', async () => {
@@ -79,6 +92,16 @@ describe('BotID, the second check', () => {
     it('stops everyone when BotID itself fails, as the bot check does', async () => {
       blocking.setBotId('unreachable')
       expect((await blocking.sendCode('asha@example.test', 'sign-up')).status).toBe(500)
+    })
+
+    it.each([
+      ['never answers', 'hangs'],
+      ['answers with no verdict', {}],
+    ] as const)('stops everyone when BotID %s, and says so', async (_, answer) => {
+      blocking.setBotId(answer)
+      expect((await blocking.sendCode('asha@example.test', 'sign-up')).status).toBe(500)
+      expect(blocking.records).toEqual([{ defence: 'botid', action: 'check-failed' }])
+      expect(blocking.outbox).toEqual([])
     })
   })
 })

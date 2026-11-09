@@ -75,6 +75,9 @@ function googleIdToken(code: string): string {
   return `${part({ alg: 'none' })}.${part({ iss: 'https://accounts.google.com', ...profile })}.x`
 }
 
+/** BotID's answer: a verdict, an error body with none, a failure, or no answer at all. */
+type BotIdAnswer = { isBot: boolean } | Record<string, never> | 'unreachable' | 'hangs'
+
 interface HarnessOptions {
   settings?: Partial<LoginSettings>
   deps?: Partial<AuthDeps>
@@ -120,7 +123,7 @@ export async function loginHarness({ settings, deps, poolSize }: HarnessOptions 
   })
 
   // What BotID answers: a human, until a test says otherwise.
-  let botId: { isBot: boolean } | 'unreachable' = { isBot: false }
+  let botId: BotIdAnswer = { isBot: false }
   const botIdChecks: { atVerifiedCount: number }[] = []
   const records: DefenceRecord[] = []
 
@@ -136,11 +139,14 @@ export async function loginHarness({ settings, deps, poolSize }: HarnessOptions 
     checkBotId: async () => {
       botIdChecks.push({ atVerifiedCount: verified.length })
       if (botId === 'unreachable') throw new Error('BotID is unreachable')
-      return botId
+      if (botId === 'hangs') return new Promise(() => undefined)
+      return botId as { isBot: boolean }
     },
     recordDefence: (record) => {
       records.push(record)
     },
+    // Short, so a test of a check that never answers doesn't wait out the real limit.
+    botIdTimeoutMs: 20,
     ...deps,
   })
   const route = authRoute({ features: flagsOn(), getAuth: () => auth })
@@ -272,7 +278,7 @@ export async function loginHarness({ settings, deps, poolSize }: HarnessOptions 
     setVerdict: (next: BotCheckVerdict | 'unreachable') => {
       verdict = next
     },
-    setBotId: (next: { isBot: boolean } | 'unreachable') => {
+    setBotId: (next: BotIdAnswer) => {
       botId = next
     },
     /** Make the email sender refuse this address until called with undefined. */

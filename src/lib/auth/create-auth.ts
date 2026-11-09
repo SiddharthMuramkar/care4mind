@@ -11,6 +11,7 @@ import { emailOTP } from 'better-auth/plugins/email-otp'
 
 import {
   alertOnSpike,
+  BOT_ID_TIMEOUT_MS,
   botIdCheck,
   capNewAccounts,
   type CheckBotId,
@@ -43,6 +44,8 @@ export interface AuthDeps {
   sendEmail: SendEmail
   /** BotID's verdict on the current request. */
   checkBotId: CheckBotId
+  /** How long that verdict may take before the check counts as failed. */
+  botIdTimeoutMs?: number
   /** Where the defences note what they saw, for the trial to read. */
   recordDefence: RecordDefence
   /** Keep work going after the response; without it, background work is awaited. */
@@ -91,6 +94,7 @@ export function createAuth({
   database,
   sendEmail,
   checkBotId,
+  botIdTimeoutMs = BOT_ID_TIMEOUT_MS,
   recordDefence,
   backgroundTask,
 }: AuthDeps) {
@@ -206,6 +210,7 @@ export function createAuth({
           blocking: settings.botId.blocking,
           checkBotId,
           record: recordDefence,
+          timeoutMs: botIdTimeoutMs,
         }),
       }),
       defences({ limits: settings.limits, record: recordDefence }),
