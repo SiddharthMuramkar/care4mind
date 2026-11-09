@@ -83,15 +83,15 @@ test.describe('the shelf', () => {
     expect(turn?.flights.map(({ name }) => name)).toContain('work-title-yoga-sutra')
   })
 
-  test('its breadcrumbs read Home › Traditional texts, and a work’s Home › Traditional texts › the work', async ({
+  test('its breadcrumbs read Go to home › Traditional texts, and a work’s Go to home › Traditional texts › the work', async ({
     page,
   }) => {
     const crumbs = page.getByRole('navigation', { name: 'Breadcrumb' }).getByRole('listitem')
     await gotoReady(page, TEXTS)
-    await expect(crumbs).toHaveText(['Home', 'Traditional texts'])
+    await expect(crumbs).toHaveText(['Go to home', 'Traditional texts'])
     await expect(crumbs.last().locator('[aria-current="page"]')).toHaveText('Traditional texts')
     await gotoReady(page, gita.href)
-    await expect(crumbs).toHaveText(['Home', 'Traditional texts', 'Bhagavad Gītā'])
+    await expect(crumbs).toHaveText(['Go to home', 'Traditional texts', 'Bhagavad Gītā'])
     await expect(crumbs.nth(1).getByRole('link')).toHaveAttribute('href', TEXTS)
     await expect(crumbs.last().locator('[aria-current="page"]')).toHaveText('Bhagavad Gītā')
   })

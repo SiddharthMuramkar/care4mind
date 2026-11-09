@@ -459,7 +459,7 @@ describe('site.routes', () => {
 describe('site.trail', () => {
   const trail = (path: string, flags: Features = ON) =>
     createContent(memorySource(...world), flags).site.trail(path)
-  const homeCrumb = { label: 'Home', href: '/' }
+  const homeCrumb = { label: 'Go to home', href: '/' }
   const concepts = { label: 'Concepts', href: '/concepts/' }
   const questionnaires = { label: 'Questionnaires', href: '/questionnaires/' }
   const library = { label: 'Library', href: '/library/' }
@@ -480,7 +480,7 @@ describe('site.trail', () => {
   })
 
   it('gives every other kind of page a trail from Home through its section', async () => {
-    expect(await trail('/')).toEqual([homeCrumb])
+    expect(await trail('/')).toEqual([{ label: 'Home', href: '/' }])
     expect(await trail('/concepts/')).toEqual([homeCrumb, concepts])
     expect(await trail('/concepts/map/')).toEqual([
       homeCrumb,

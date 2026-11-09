@@ -282,7 +282,7 @@ test.describe('Concept page lead', () => {
       await page.setViewportSize({ width: 1280, height: 900 })
       await gotoReady(page, '/concepts/vikshepa/')
       const trail = page.getByRole('navigation', { name: 'Breadcrumb', exact: true })
-      await expect(trail.getByRole('link', { name: 'Home', exact: true })).toBeVisible()
+      await expect(trail.getByRole('link', { name: 'Go to home', exact: true })).toBeVisible()
       await expect(trail.locator('[aria-current="page"]')).toHaveText(/Vikṣepa/)
     },
   )

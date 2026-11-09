@@ -114,11 +114,11 @@ test.describe('Questionnaires page', () => {
 
 test('names each Questionnaire page’s place in its breadcrumbs', async ({ page }) => {
   for (const [path, trail] of [
-    ['/questionnaires/', ['Home', 'Questionnaires']],
-    ['/questionnaires/karmayoga-scale/', ['Home', 'Questionnaires', 'KarmaYoga Scale']],
+    ['/questionnaires/', ['Go to home', 'Questionnaires']],
+    ['/questionnaires/karmayoga-scale/', ['Go to home', 'Questionnaires', 'KarmaYoga Scale']],
     [
       '/questionnaires/karmayoga-scale/take/',
-      ['Home', 'Questionnaires', 'KarmaYoga Scale', 'Take it'],
+      ['Go to home', 'Questionnaires', 'KarmaYoga Scale', 'Take it'],
     ],
   ] as const) {
     await page.goto(path)

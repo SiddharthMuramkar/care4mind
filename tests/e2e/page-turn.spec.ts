@@ -134,16 +134,16 @@ test(
 )
 
 test(
-  'the "Home" breadcrumb turns the page back to the homepage',
+  'the "Go to home" breadcrumb turns the page back to the homepage',
   { tag: '@one-width' },
   async ({ page }) => {
-    // A Concept's phone breadcrumb is one line back to its topic, with no "Home":
-    // this leg needs "Home", so it runs where the whole trail shows.
+    // A Concept's phone breadcrumb is one line back to its topic, with no "Go to home":
+    // this leg needs "Go to home", so it runs where the whole trail shows.
     await page.setViewportSize({ width: 1280, height: 900 })
     await recordPageTurns(page)
     await gotoReady(page, '/concepts/vikshepa/')
     const home = page.getByRole('navigation', { name: 'Breadcrumb' }).getByRole('link', {
-      name: 'Home',
+      name: 'Go to home',
     })
     await prefetched(home)
     await home.click()

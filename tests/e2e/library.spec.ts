@@ -478,12 +478,16 @@ test.describe('The Library home', () => {
   })
 })
 
-test('every Library page has its breadcrumbs: Home › Library › the page', async ({ page }) => {
+test('every Library page has its breadcrumbs: Go to home › Library › the page', async ({
+  page,
+}) => {
   for (const path of LIBRARY_PAGES) {
     await gotoReady(page, path)
     const crumbs = page.getByRole('navigation', { name: 'Breadcrumb' }).getByRole('listitem')
     const title = VOLUMES.find(({ href }) => href === path)?.title
-    await expect(crumbs, path).toHaveText(title ? ['Home', 'Library', title] : ['Home', 'Library'])
+    await expect(crumbs, path).toHaveText(
+      title ? ['Go to home', 'Library', title] : ['Go to home', 'Library'],
+    )
     await expect(crumbs.last().locator('[aria-current="page"]')).toHaveCount(1)
   }
 })
