@@ -107,6 +107,13 @@
     inset 0 3px 8px rgb(0 0 0 / 0.18);
 }
 
+/* The edge and the double frame are drawn in shadows, which forced colours drop. */
+@media (forced-colors: active) {
+  .card {
+    border: 1px solid CanvasText;
+  }
+}
+
 .title {
   grid-area: title;
   margin: 0;

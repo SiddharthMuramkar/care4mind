@@ -136,6 +136,12 @@ test('a topic card keeps its edge', async ({ page }) => {
   await expectVisibleEdge(page.locator('article[data-topic]').first(), 'topic card')
 })
 
+test('a Concept card keeps its edge', async ({ page }) => {
+  await gotoReady(page, hrefFor({ page: 'start' }))
+  // Inside a list item, because the page's Folio is an article too.
+  await expectVisibleEdge(page.getByRole('main').locator('li article').first(), 'Concept card')
+})
+
 test('a secondary call to action keeps its edge', async ({ page }) => {
   await gotoReady(page, FLOW)
   await expectVisibleEdge(

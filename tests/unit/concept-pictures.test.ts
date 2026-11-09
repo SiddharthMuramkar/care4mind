@@ -78,6 +78,9 @@ describe('a Concept card', () => {
     expect(widthOf(markup)).toBe('64')
     expect(markup).toMatch(/withArt/)
     expect(markup).toContain('data-plate')
+    expect(markup.indexOf('<img'), 'the picture comes before the title').toBeLessThan(
+      markup.indexOf('<h3'),
+    )
   })
 
   it('takes the homepage’s larger size when asked', () => {

@@ -922,7 +922,9 @@ test.describe('Concept page v2: print', () => {
     page,
   }) => {
     await gotoReady(page, '/concepts/vikshepa/')
+    await expect(titleBlock(page).locator('img')).toBeVisible()
     await page.emulateMedia({ media: 'print' })
+    await expect(titleBlock(page).locator('img')).toBeHidden()
     await expect(page.locator('header').first()).toBeHidden()
     await expect(page.locator('footer').last()).toBeHidden()
     await expect(contents(page)).toBeHidden()

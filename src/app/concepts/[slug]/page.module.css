@@ -186,7 +186,8 @@
   }
 
   .article > span[aria-hidden],
-  .article button {
+  .article button,
+  .article .picture {
     display: none;
   }
 

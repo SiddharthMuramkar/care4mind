@@ -498,56 +498,19 @@ test.describe('topic cards', () => {
  * Sticker, or the Interim picture of a topic whose Sticker is not made yet.
  */
 const CONCEPT_HEADS = [
-  { path: '/concepts/vikshepa/', file: 'mind-swirl' },
-  { path: '/concepts/atman/', file: 'cosmos' },
-  { path: '/concepts/ahimsa/', file: 'book-ornate' },
-  { path: '/concepts/triguna/', file: 'gear' },
+  { slug: 'vikshepa', file: 'mind-swirl' },
+  { slug: 'atman', file: 'cosmos' },
+  { slug: 'ahimsa', file: 'book-ornate' },
+  { slug: 'triguna', file: 'gear' },
 ] as const
 
-test.describe('Concept cards side by side', () => {
-  const LIST = '#featured ul'
-
-  /** Marks the first `count` cards as having a Plate, which no Concept has yet. */
-  const markPlates = (page: Page, count: number) =>
-    page.locator(`${LIST} > li > article`).evaluateAll((all, count) => {
-      all.slice(0, count).forEach((card) => card.setAttribute('data-plate', ''))
-    }, count)
-
-  test(
-    'a card with a Plate takes its own row while a neighbour is bare',
-    { tag: '@from-1440' },
-    async ({ page }) => {
-      await gotoReady(page, '/')
-      const items = page.locator(`${LIST} > li`)
-      await markPlates(page, 1)
-      const [first, second, whole] = await Promise.all([
-        items.nth(0).boundingBox(),
-        items.nth(1).boundingBox(),
-        page.locator(LIST).boundingBox(),
-      ])
-      if (!first || !second || !whole) throw new Error('The list has its cards.')
-      expect(Math.abs(first.width - whole.width)).toBeLessThan(1)
-      expect(second.y).toBeGreaterThanOrEqual(first.y + first.height)
-    },
-  )
-
-  test('cards stay side by side once all have a Plate', { tag: '@from-1440' }, async ({ page }) => {
-    await gotoReady(page, '/')
-    const items = page.locator(`${LIST} > li`)
-    await markPlates(page, await items.count())
-    const [first, second] = await Promise.all([
-      items.nth(0).boundingBox(),
-      items.nth(1).boundingBox(),
-    ])
-    if (!first || !second) throw new Error('The list has its cards.')
-    expect(second.x).toBeGreaterThan(first.x)
-    expect(second.y).toBe(first.y)
-  })
-})
+/** Vikṣepa's head is a Medallion once its Plate can show, and a bare Sticker until then. */
+const VIKSHEPA_RINGED = ownArt({ kind: 'concept', slug: 'vikshepa' })?.family === 'plate'
 
 test.describe('Concept pages', () => {
-  for (const { path, file } of CONCEPT_HEADS) {
-    test(`${path} shows the ${file} picture, decorative, centred above its title`, async ({
+  for (const { slug, file } of CONCEPT_HEADS) {
+    const path = `/concepts/${slug}/`
+    test(`${path} shows its Plate or the ${file} picture, decorative, centred above its title`, async ({
       page,
     }) => {
       await gotoReady(page, path)
@@ -555,7 +518,7 @@ test.describe('Concept pages', () => {
       await expect(picture).toHaveCount(1)
       await expect(picture).toHaveAttribute('alt', '')
       expect(decodeURIComponent((await picture.getAttribute('src')) ?? '')).toContain(
-        `/art/stickers/${file}.png`,
+        ownArt({ kind: 'concept', slug })?.src ?? `/art/stickers/${file}.png`,
       )
       const [box, heading] = await Promise.all([
         picture.boundingBox(),
@@ -579,7 +542,7 @@ test.describe('Concept pages', () => {
     await expect
       .poll(() => picture.evaluate((image: HTMLImageElement) => image.naturalWidth))
       .toBeGreaterThan(0)
-    const box = await picture.boundingBox()
+    const box = await (VIKSHEPA_RINGED ? ringOf(picture) : picture).boundingBox()
     const expected = (page.viewportSize()?.width ?? 0) < 640 ? 88 : 120
     expect(box?.width).toBe(expected)
     expect(box?.height).toBe(expected)
@@ -712,17 +675,79 @@ test.describe('Concept cards', () => {
       expect(await cards.count(), 'Concept cards on the page').toBeGreaterThan(0)
       await expect(cards.locator('img[src*="stickers"]')).toHaveCount(0)
       for (const card of await cards.all()) {
-        if ((await card.locator('img').count()) > 0) continue
         const [box, title] = await Promise.all([
           card.boundingBox(),
           card.getByRole('heading', { level: 3 }).boundingBox(),
         ])
         if (!box || !title) throw new Error('A card has its title.')
-        // The smallest picture and its gap would push the title down by at least 72 px.
-        expect(title.y - box.y, 'a bare card opens on its title').toBeLessThan(64)
+        const picture = card.locator('img')
+        if ((await picture.count()) === 0) {
+          // The smallest picture and its gap would push the title down by at least 72 px.
+          expect(title.y - box.y, 'a bare card opens on its title').toBeLessThan(64)
+          continue
+        }
+        await expect(picture).toHaveAttribute('width', path === '/' ? '72' : '64')
+        const medallion = await ringOf(picture).boundingBox()
+        if (!medallion) throw new Error('The picture is laid out.')
+        expect(
+          medallion.y + medallion.height,
+          'the picture stands above the title',
+        ).toBeLessThanOrEqual(title.y)
+        const devanagari = card.locator('p[lang="sa-Deva"]')
+        if ((await devanagari.count()) === 0) continue
+        const written = await devanagari.boundingBox()
+        if (!written) throw new Error('The Devanagari is laid out.')
+        expect(written.x, 'the Devanagari stands to the picture’s right').toBeGreaterThanOrEqual(
+          medallion.x + medallion.width,
+        )
       }
     })
   }
+
+  test.describe('side by side', () => {
+    const LIST = '#featured ul'
+
+    /** Marks the first `count` cards as having a Plate and the rest as bare. */
+    const markPlates = (page: Page, count: number) =>
+      page.locator(`${LIST} > li > article`).evaluateAll((all, count) => {
+        all.forEach((card, index) => card.toggleAttribute('data-plate', index < count))
+      }, count)
+
+    test(
+      'a card with a Plate takes its own row while a neighbour is bare',
+      { tag: '@from-1440' },
+      async ({ page }) => {
+        await gotoReady(page, '/')
+        const items = page.locator(`${LIST} > li`)
+        await markPlates(page, 1)
+        const [first, second, whole] = await Promise.all([
+          items.nth(0).boundingBox(),
+          items.nth(1).boundingBox(),
+          page.locator(LIST).boundingBox(),
+        ])
+        if (!first || !second || !whole) throw new Error('The list has its cards.')
+        expect(Math.abs(first.width - whole.width)).toBeLessThan(1)
+        expect(second.y).toBeGreaterThanOrEqual(first.y + first.height)
+      },
+    )
+
+    test(
+      'cards stay side by side once all have a Plate',
+      { tag: '@from-1440' },
+      async ({ page }) => {
+        await gotoReady(page, '/')
+        const items = page.locator(`${LIST} > li`)
+        await markPlates(page, await items.count())
+        const [first, second] = await Promise.all([
+          items.nth(0).boundingBox(),
+          items.nth(1).boundingBox(),
+        ])
+        if (!first || !second) throw new Error('The list has its cards.')
+        expect(second.x).toBeGreaterThan(first.x)
+        expect(second.y).toBe(first.y)
+      },
+    )
+  })
 })
 
 const WORKS = await works.list()
@@ -1921,7 +1946,7 @@ test.describe('the homepage, section and topic pages as a set', () => {
 
 test.describe('the Concept, Questionnaire, text and error pages as a set', () => {
   for (const { path, ringed } of [
-    { path: '/concepts/vikshepa/', ringed: false },
+    { path: '/concepts/vikshepa/', ringed: VIKSHEPA_RINGED },
     { path: KARMAYOGA_SCALE, ringed: true },
     { path: '/texts/yoga-sutra/', ringed: false },
   ]) {
