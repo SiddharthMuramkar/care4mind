@@ -1,0 +1,40 @@
+.viewer {
+  display: grid;
+  justify-items: center;
+  gap: 0.5rem;
+  margin: 0;
+}
+
+.circle {
+  position: relative;
+  width: 168px;
+  aspect-ratio: 1;
+}
+
+/* Inset so the ring has its own band, as on every Medallion. The pale paper shows until it loads. */
+.picture {
+  position: absolute;
+  inset: 5%;
+  width: 90%;
+  height: 90%;
+  border-radius: 50%;
+  object-fit: cover;
+  background: var(--color-surface-pale-18);
+}
+
+.caption {
+  color: var(--color-surface-muted);
+  font-size: var(--text-small);
+  font-style: italic;
+}
+
+/* Held at the buttons' full height from first paint, so that nothing below it moves. */
+.controls {
+  height: 3rem;
+}
+
+@media (width >= 64rem) {
+  .circle {
+    width: 360px;
+  }
+}

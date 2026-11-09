@@ -1,6 +1,8 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 
+import { art, heroPlates } from '@/art'
+import { PlateViewer } from '@/components/art'
 import { ConceptCard } from '@/components/ConceptCard'
 import { Fleuron } from '@/components/Fleuron'
 import { Folio } from '@/components/Folio'
@@ -24,12 +26,17 @@ export default async function HomePage() {
   const [page, topicCards, routes] = await Promise.all([home.get(), topics.list(), site.routes()])
   const startHereListed = routes.some((route) => route.kind === 'start')
   const closingLink = heroLinks(page.hero, startHereListed)[0]
+  const plates = heroPlates.map((id) => {
+    const { src, width, height, alt, caption } = art(id)
+    return { id, src, width, height, alt, caption }
+  })
 
   return (
     <PageTurn>
       <main id="main" className={styles.main}>
         <section className={styles.hero} aria-labelledby="home-title">
           <Folio className={styles.heroFolio}>
+            <PlateViewer plates={plates} className={styles.heroPlate} />
             <p className={styles.motto}>
               <span lang="sa-Deva" className={styles.heroDeva}>
                 {page.shloka.devanagari}

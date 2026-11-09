@@ -1,2 +1,3 @@
 export { Medallion } from './Medallion'
 export { MedallionRing } from './MedallionRing'
+export { PlateViewer } from './PlateViewer'

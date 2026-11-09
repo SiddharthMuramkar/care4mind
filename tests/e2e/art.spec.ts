@@ -1,5 +1,9 @@
 import type { Page } from '@playwright/test'
 
+import { heroPlates } from '@/art/assign'
+import { ART } from '@/art/registry'
+
+import { expectNoAxeViolations } from './axe'
 import { expect, gotoReady, test } from './fixtures'
 
 /** The homepage's hero Plate: the one picture allowed a `sizes` attribute. */
@@ -11,6 +15,7 @@ const PICTURES = 'main img, footer img'
 /** The pages the shared check visits. A page joins the list when it gets its first picture. */
 const PAGES: { path: string; name: string }[] = [
   // Add a page in path order, not at the end.
+  { path: '/', name: 'homepage' },
   { path: '/topics/mind/', name: 'mind topic page' },
 ]
 
@@ -117,6 +122,123 @@ for (const { path, name } of PAGES) {
     await expectPicturesBehave(page)
   })
 }
+
+test.describe('the hero Plate', () => {
+  const figure = (page: Page) => page.locator(`figure:has(${HERO})`)
+
+  test('opens the homepage with the first Plate and says which of the seven it is', async ({
+    page,
+  }) => {
+    await gotoReady(page, '/')
+    await expect(page.locator(HERO)).toHaveCount(1)
+    await expect(page.locator(HERO)).toHaveAttribute('alt', /^A jeweller in a maroon turban/)
+    await expect(figure(page).locator('figcaption')).toHaveText('The jeweller · 1 of 7')
+  })
+
+  /** The Medallion the hero Plate sits in, the Folio it stands on, and the heading beside it. */
+  async function heroBoxes(page: Page) {
+    const heading = page.getByRole('heading', { level: 1 })
+    const [circle, folio, title, motto] = await Promise.all([
+      page.locator(HERO).locator('xpath=..').boundingBox(),
+      heading.locator('xpath=..').boundingBox(),
+      heading.boundingBox(),
+      heading.locator('xpath=preceding-sibling::p[1]').boundingBox(),
+    ])
+    if (!circle || !folio || !title || !motto) throw new Error('the hero has all four parts')
+    return { circle, folio, title, motto }
+  }
+
+  test(
+    'from 64rem stands at 360 px in its own column, left of the heading, on a 72rem Folio',
+    { tag: '@self-width' },
+    async ({ page }) => {
+      await page.setViewportSize({ width: 1440, height: 900 })
+      await gotoReady(page, '/')
+      const { circle, folio, title } = await heroBoxes(page)
+      expect(circle.width).toBe(360)
+      expect(circle.height).toBe(360)
+      expect(circle.x + circle.width).toBeLessThan(title.x)
+      expect(folio.width).toBe(72 * 16)
+    },
+  )
+
+  for (const width of [360, 768]) {
+    test(
+      `at ${width} px stands at 168 px above the motto`,
+      { tag: '@self-width' },
+      async ({ page }) => {
+        await page.setViewportSize({ width, height: 900 })
+        await gotoReady(page, '/')
+        const { circle, motto } = await heroBoxes(page)
+        expect(circle.width).toBe(168)
+        expect(circle.y + circle.height).toBeLessThanOrEqual(motto.y)
+        expect(Math.abs(circle.x + circle.width / 2 - width / 2)).toBeLessThan(1)
+      },
+    )
+  }
+
+  test('keeps the heading a direct child of the Folio', async ({ page }) => {
+    await gotoReady(page, '/')
+    await expect(page.locator('[data-paper] > h1')).toHaveCount(1)
+  })
+
+  const SIZES = '(min-width: 64rem) 360px, 168px'
+
+  test('is the only picture preloaded, and the only one that sets sizes', async ({ page }) => {
+    await gotoReady(page, '/')
+    const preloads = page.locator('head link[rel="preload"][as="image"]')
+    await expect(preloads).toHaveCount(1)
+    await expect(preloads).toHaveAttribute('imagesizes', SIZES)
+    await expect(preloads).toHaveAttribute('imagesrcset', /%2Fart%2Fplates%2Fjeweller\.jpg/)
+    const withSizes = page.locator('img[sizes]')
+    await expect(withSizes).toHaveCount(1)
+    await expect(withSizes).toHaveAttribute('sizes', SIZES)
+    await expect(withSizes).toHaveAttribute('data-hero-plate')
+  })
+
+  /** The empty row under the caption that the viewer's buttons will stand in. */
+  const controlsRow = (page: Page) => figure(page).locator('> :last-child')
+
+  test('keeps its button row at full height, with or without the script', async ({
+    page,
+    browser,
+    viewport,
+  }) => {
+    await gotoReady(page, '/')
+    const hydrated = await controlsRow(page).boundingBox()
+    expect(hydrated?.height, 'tall enough for a 44 px button').toBeGreaterThanOrEqual(44)
+
+    const context = await browser.newContext({ javaScriptEnabled: false, viewport })
+    const bare = await context.newPage()
+    await bare.goto('/')
+    const firstPaint = await controlsRow(bare).boundingBox()
+    await context.close()
+    expect(firstPaint?.height).toBe(hydrated?.height)
+  })
+
+  test('passes axe', async ({ page }) => {
+    await gotoReady(page, '/')
+    await expectNoAxeViolations(page)
+  })
+
+  test(
+    'keeps each of its seven Plates within 120 KB at 750 px',
+    { tag: '@one-width' },
+    async ({ request }) => {
+      test.slow()
+      for (const id of heroPlates) {
+        const record = ART.find((picture) => picture.id === id)
+        if (!record) throw new Error(`no record for ${id}`)
+        const response = await request.get(
+          `/_next/image/?url=${encodeURIComponent(record.src)}&w=750&q=75`,
+          { headers: { Accept: 'image/avif' } },
+        )
+        expect(response.headers()['content-type'], id).toBe('image/avif')
+        expect((await response.body()).length, id).toBeLessThanOrEqual(120 * 1024)
+      }
+    },
+  )
+})
 
 // The check itself, on pages made here, so that a broken check cannot pass unnoticed.
 test.describe('the shared check', { tag: '@one-width' }, () => {

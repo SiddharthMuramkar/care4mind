@@ -13,6 +13,7 @@ import { createArt } from './resolve'
 export type * from './types'
 export type { ArtId }
 export type { ArtTarget, OwnArtTarget } from './resolve'
+export { heroPlates } from './assign'
 
 const pictures = createArt(ART, features)
 

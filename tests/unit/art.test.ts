@@ -284,6 +284,10 @@ describe('the placements', () => {
     ])
   })
 
+  it('give every hero Plate a caption for the viewer to show', () => {
+    for (const id of heroPlates) expect(art(id).caption, id).toBeTruthy()
+  })
+
   it('never repeat a Sticker or Interim picture in the topic row', () => {
     const today = Object.values(topicArt).map(({ sticker, interim }) => interim ?? sticker)
     const finished = Object.values(topicArt).map(({ sticker }) => sticker)
