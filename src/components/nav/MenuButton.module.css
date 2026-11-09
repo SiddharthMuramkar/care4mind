@@ -33,6 +33,13 @@
   }
 }
 
+/* The narrowest screens keep the word and lose the drawing, so Log in fits the strip beside it. */
+@media (width < 22.5rem) {
+  .glyphBesideLogIn {
+    display: none;
+  }
+}
+
 @media (width >= 72rem) {
   .menu {
     display: none;

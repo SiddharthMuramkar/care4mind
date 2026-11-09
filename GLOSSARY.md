@@ -24,6 +24,14 @@ _Avoid_: participant, respondent
 The period a user is logged in to the site.
 _Avoid_: session (on its own)
 
+**emailed code**:
+The six-digit code a user types to confirm their email when they sign up or log in.
+_Avoid_: OTP, magic code, password
+
+**bot check**:
+The test every sign-up and log-in must pass to show a real person is behind it.
+_Avoid_: captcha, verification
+
 **user-report**:
 The PDF a user gets after finishing a Questionnaire, which analyses each of their answers.
 _Avoid_: report (on its own), result PDF

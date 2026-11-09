@@ -20,6 +20,7 @@ export interface MenuDrawerProps {
   /** The Menu control, where focus goes back to as the Drawer closes. */
   returnFocus: RefObject<HTMLElement | null>
   search?: ReactNode
+  login?: ReactNode
   mapNote?: ReactNode
 }
 
@@ -34,6 +35,7 @@ export function MenuDrawer({
   onOpenChange,
   returnFocus,
   search,
+  login,
   mapNote,
 }: MenuDrawerProps) {
   const pathname = usePathname()
@@ -64,7 +66,12 @@ export function MenuDrawer({
                 </Drawer.Close>
               </div>
 
-              {search ? <div className={styles.tools}>{search}</div> : null}
+              {search || login ? (
+                <div className={styles.tools}>
+                  {search}
+                  {login}
+                </div>
+              ) : null}
 
               <nav aria-label="Main">
                 {nav.start ? (

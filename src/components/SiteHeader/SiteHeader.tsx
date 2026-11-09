@@ -2,6 +2,7 @@ import Link from 'next/link'
 
 import { SearchGlyph } from '@/components/glyphs'
 import { CurrentLink } from '@/components/nav'
+import { LoginSlot } from '@/components/login-slot'
 import { MenuButton } from '@/components/nav'
 import { SectionNav } from '@/components/nav'
 import { siteNav } from '@/components/nav'
@@ -18,7 +19,8 @@ import styles from './SiteHeader.module.css'
  * leading home, then the section links and Search, each a server-rendered link that works
  * without JavaScript. On a computer Concepts and Library open panels; on a narrow screen the
  * sections move into the Menu's Drawer, and Search stays. While its proposal is on, Start here
- * follows the wordmark from 30rem up, and below that it heads the Drawer's list.
+ * follows the wordmark from 30rem up, and below that it heads the Drawer's list. While the
+ * login switch is on, Log in sits beside Search, and Log out in its place for a user who is in.
  */
 export async function SiteHeader() {
   const nav = await siteNav()
@@ -42,6 +44,7 @@ export async function SiteHeader() {
             <SearchGlyph className={styles.searchGlyph} />
             <span className={cx('sr-only', styles.searchLabel)}>Search</span>
           </SearchTrigger>
+          {nav.login ? <LoginSlot href={nav.login.href} className={styles.login} /> : null}
         </nav>
         <MenuButton
           nav={nav}
@@ -50,6 +53,9 @@ export async function SiteHeader() {
               <SearchGlyph className={styles.searchGlyph} />
               Search
             </SearchTrigger>
+          }
+          login={
+            nav.login ? <LoginSlot href={nav.login.href} className={styles.drawerLogin} /> : null
           }
           mapNote={mapNote}
         />

@@ -165,6 +165,13 @@ export function recordRoutes(graph: ContentGraph, flags: Features): RecordRoute[
     fixed('references', 'references', 'References'),
     ...library.sort(byPath),
     fixed('search', 'search', 'Search'),
+    ...(flags.login
+      ? [
+          fixed('log-in', 'log-in', 'Log in'),
+          fixed('sign-up', 'sign-up', 'Sign up'),
+          fixed('privacy', 'privacy', 'Privacy'),
+        ]
+      : []),
     ...(proposalsPageOn(flags) ? [fixed('proposals', 'proposals', 'Proposals', true)] : []),
   ]
 

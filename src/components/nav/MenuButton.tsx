@@ -11,6 +11,8 @@ import {
   useState,
 } from 'react'
 
+import { cx } from '@/lib/cx'
+
 import { MenuGlyph } from '../glyphs'
 import { useHydrated, whenIdle } from '../browser'
 import { WIDE } from './current'
@@ -25,6 +27,8 @@ interface Props {
   nav: SiteNav
   /** The Search slot the Drawer holds, rendered on the server. */
   search?: ReactNode
+  /** The Log in slot the Drawer holds, rendered on the server. */
+  login?: ReactNode
   /** The Proposal label beside the Concept map. */
   mapNote?: ReactNode
 }
@@ -34,7 +38,7 @@ interface Props {
  * footer; with it, a button that opens the Drawer. The Drawer's code loads when the browser is
  * idle or on the first press, never with the page.
  */
-export function MenuButton({ nav, search, mapNote }: Props) {
+export function MenuButton({ nav, search, login, mapNote }: Props) {
   const hydrated = useHydrated()
   const button = useRef<HTMLAnchorElement>(null)
   const [open, setOpen] = useState(false)
@@ -86,7 +90,7 @@ export function MenuButton({ nav, search, mapNote }: Props) {
           if (event.key === ' ') press(event)
         }}
       >
-        <MenuGlyph className={styles.glyph} />
+        <MenuGlyph className={cx(styles.glyph, nav.login && styles.glyphBesideLogIn)} />
         Menu
       </a>
       {Drawer ? (
@@ -96,6 +100,7 @@ export function MenuButton({ nav, search, mapNote }: Props) {
           onOpenChange={setOpen}
           returnFocus={button}
           search={search}
+          login={login}
           mapNote={mapNote}
         />
       ) : null}

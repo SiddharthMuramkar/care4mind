@@ -380,6 +380,9 @@ describe('site.routes', () => {
         sample: true,
       },
       { path: '/search/', kind: 'search', pattern: '/search/', title: 'Search', sample: true },
+      { path: '/log-in/', kind: 'log-in', pattern: '/log-in/', title: 'Log in', sample: true },
+      { path: '/sign-up/', kind: 'sign-up', pattern: '/sign-up/', title: 'Sign up', sample: true },
+      { path: '/privacy/', kind: 'privacy', pattern: '/privacy/', title: 'Privacy', sample: true },
       {
         path: '/proposals/',
         kind: 'proposals',
@@ -398,12 +401,23 @@ describe('site.routes', () => {
     const without = (...gone: string[]) => all.filter((path) => !gone.includes(path))
 
     expect(await paths(OFF)).toEqual(
-      without('/start/', '/concepts/map/', '/proposals/', '/questionnaires/work-scale/take/'),
+      without(
+        '/start/',
+        '/concepts/map/',
+        '/proposals/',
+        '/questionnaires/work-scale/take/',
+        '/log-in/',
+        '/sign-up/',
+        '/privacy/',
+      ),
     )
     expect(await paths({ ...ON, questionnairePreview: false })).toEqual(
       without('/questionnaires/work-scale/take/'),
     )
     expect(await paths({ ...ON, conceptMap: false })).toEqual(without('/concepts/map/'))
+    expect(await paths({ ...ON, login: false })).toEqual(
+      without('/log-in/', '/sign-up/', '/privacy/'),
+    )
     expect(await paths({ ...ON, startHere: false })).toEqual(without('/start/'))
   })
 

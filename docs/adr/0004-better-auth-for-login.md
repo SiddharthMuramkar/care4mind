@@ -4,7 +4,7 @@ status: accepted
 
 # Run login inside the site with Better Auth
 
-Users sign up or log in before taking a Questionnaire, and every sign-up and log-in must pass a server-verified bot check, because the old site has 2,945 subscriber accounts of unexplained origin (#333), which the developer attributes to bots. A one-time invite from the Client is the only exception. So login runs inside the Next.js app on Better Auth, with its data in Neon (ADR-0002). The developer chose this on 2026-11-09. It was the only option looked at that could force the check on both ways in, Google and the emailed code, and it joined Vercel in July 2026.
+Users sign up or log in before taking a Questionnaire, and every sign-up and log-in must pass a server-verified bot check, because the old site has 2,945 subscriber accounts of unexplained origin (#333), which the developer attributes to bots. There is no way around the check. So login runs inside the Next.js app on Better Auth, with its data in Neon (ADR-0002). The developer chose this on 2026-11-09. It was the only option looked at that could force the check on both ways in, Google and the emailed code, and it joined Vercel in July 2026.
 
 ## Considered options
 

@@ -5,7 +5,7 @@ import { contrastRatio } from '@/styles/contrast'
 import { expect } from './fixtures'
 
 /** Press Tab until `target` has focus, as a keyboard user would. */
-async function tabTo(page: Page, target: Locator) {
+export async function tabTo(page: Page, target: Locator) {
   for (let presses = 0; presses < 120; presses += 1) {
     if (await target.evaluate((element) => element === document.activeElement)) return
     await page.keyboard.press('Tab')

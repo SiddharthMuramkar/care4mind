@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 
 import { Citation } from '@/components/Citation'
+import { LoginRequired } from '@/components/login-gate'
 import { ReadingPage } from '@/components/ReadingPage'
 import { Text } from '@/components/prose'
 import { StatusBadge } from '@/components/StatusBadge'
@@ -28,6 +29,7 @@ export async function generateMetadata({
  * Taking a Questionnaire: the flow is a client island, server-rendered at part 1. Its end
  * screen's limitations, source and related Concepts are set here and handed to it. Without
  * JavaScript the page says why it can't work and leads back to the purpose and limitations.
+ * Behind the login switch, only a user who is logged in sees the flow; the page stays static.
  */
 export default async function TakeQuestionnairePage({
   params,
@@ -93,15 +95,17 @@ export default async function TakeQuestionnairePage({
         </section>
       </noscript>
 
-      <Flow
-        form={form}
-        instructions={form.parts.map((part) => (
-          <Text key={part.id} text={part.instructions} />
-        ))}
-        intro={intro}
-        limits={limits}
-        sources={sources}
-      />
+      <LoginRequired>
+        <Flow
+          form={form}
+          instructions={form.parts.map((part) => (
+            <Text key={part.id} text={part.instructions} />
+          ))}
+          intro={intro}
+          limits={limits}
+          sources={sources}
+        />
+      </LoginRequired>
     </ReadingPage>
   )
 }

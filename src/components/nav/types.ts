@@ -61,4 +61,8 @@ export interface SiteNav {
   proposals?: NavLink
   /** Start here, while its proposal is on: the header shows it after the wordmark. */
   start?: NavLink
+  /** Log in, while the login switch is on: the header shows it beside Search. */
+  login?: NavLink
+  /** The Privacy page, which exists only while the login switch is on: the footer lists it. */
+  privacy?: NavLink
 }
