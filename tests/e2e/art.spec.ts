@@ -258,28 +258,67 @@ const CONCEPT_HEADS = [
   { path: '/concepts/triguna/', file: 'gear' },
 ] as const
 
+test.describe('Concept cards side by side', () => {
+  const LIST = '#featured ul'
+
+  /** Marks the first `count` cards as having a Plate, which no Concept has yet. */
+  const markPlates = (page: Page, count: number) =>
+    page.locator(`${LIST} > li > article`).evaluateAll((all, count) => {
+      all.slice(0, count).forEach((card) => card.setAttribute('data-plate', ''))
+    }, count)
+
+  test(
+    'a card with a Plate takes its own row while a neighbour is bare',
+    { tag: '@from-1440' },
+    async ({ page }) => {
+      await gotoReady(page, '/')
+      const items = page.locator(`${LIST} > li`)
+      await markPlates(page, 1)
+      const [first, second, whole] = await Promise.all([
+        items.nth(0).boundingBox(),
+        items.nth(1).boundingBox(),
+        page.locator(LIST).boundingBox(),
+      ])
+      if (!first || !second || !whole) throw new Error('The list has its cards.')
+      expect(Math.abs(first.width - whole.width)).toBeLessThan(1)
+      expect(second.y).toBeGreaterThanOrEqual(first.y + first.height)
+    },
+  )
+
+  test('cards stay side by side once all have a Plate', { tag: '@from-1440' }, async ({ page }) => {
+    await gotoReady(page, '/')
+    const items = page.locator(`${LIST} > li`)
+    await markPlates(page, await items.count())
+    const [first, second] = await Promise.all([
+      items.nth(0).boundingBox(),
+      items.nth(1).boundingBox(),
+    ])
+    if (!first || !second) throw new Error('The list has its cards.')
+    expect(second.x).toBeGreaterThan(first.x)
+    expect(second.y).toBe(first.y)
+  })
+})
+
 test.describe('Concept pages', () => {
   for (const { path, file } of CONCEPT_HEADS) {
-    test(
-      `${path} shows the ${file} picture, decorative, centred above its title`,
-      { tag: '@one-width' },
-      async ({ page }) => {
-        await gotoReady(page, path)
-        const picture = headSticker(page)
-        await expect(picture).toHaveCount(1)
-        await expect(picture).toHaveAttribute('alt', '')
-        expect(decodeURIComponent((await picture.getAttribute('src')) ?? '')).toContain(
-          `/art/stickers/${file}.png`,
-        )
-        const [box, heading] = await Promise.all([
-          picture.boundingBox(),
-          page.getByRole('heading', { level: 1 }).boundingBox(),
-        ])
-        if (!box || !heading) throw new Error('The title page has its parts.')
-        expect(box.y + box.height).toBeLessThanOrEqual(heading.y)
-        expect(Math.abs(box.x + box.width / 2 - (heading.x + heading.width / 2))).toBeLessThan(1.5)
-      },
-    )
+    test(`${path} shows the ${file} picture, decorative, centred above its title`, async ({
+      page,
+    }) => {
+      await gotoReady(page, path)
+      const picture = headSticker(page)
+      await expect(picture).toHaveCount(1)
+      await expect(picture).toHaveAttribute('alt', '')
+      expect(decodeURIComponent((await picture.getAttribute('src')) ?? '')).toContain(
+        `/art/stickers/${file}.png`,
+      )
+      const [box, heading] = await Promise.all([
+        picture.boundingBox(),
+        page.getByRole('heading', { level: 1 }).boundingBox(),
+      ])
+      if (!box || !heading) throw new Error('The title page has its parts.')
+      expect(box.y + box.height).toBeLessThanOrEqual(heading.y)
+      expect(Math.abs(box.x + box.width / 2 - (heading.x + heading.width / 2))).toBeLessThan(1.5)
+    })
   }
 
   test('the picture is 120 px, 88 on a phone, and lists two files', async ({ page }) => {

@@ -69,22 +69,20 @@ describe('the picture at a page head', () => {
 
 describe('a Concept card', () => {
   it('shows a Concept’s own Plate as a Medallion at 64 px, decorative', () => {
-    vi.mocked(ownArt).mockReturnValue(art('plate-jeweller'))
+    vi.mocked(ownArt).mockImplementation((target) =>
+      'slug' in target && target.slug === 'vikshepa' ? art('plate-jeweller') : undefined,
+    )
     const markup = card()
     expect(markup).toContain('<svg')
     expect(markup).toContain('alt=""')
     expect(widthOf(markup)).toBe('64')
+    expect(markup).toMatch(/withArt/)
+    expect(markup).toContain('data-plate')
   })
 
   it('takes the homepage’s larger size when asked', () => {
     vi.mocked(ownArt).mockReturnValue(art('plate-jeweller'))
     expect(widthOf(card({ pictureSize: 72 }))).toBe('72')
-  })
-
-  it('asks for the Concept’s own picture, never an Interim one', () => {
-    vi.mocked(ownArt).mockReturnValue(undefined)
-    card()
-    expect(ownArt).toHaveBeenCalledWith({ kind: 'concept', slug: 'vikshepa' })
   })
 
   it('stays bare with no Plate of its own: no picture and no row kept for one', () => {
@@ -93,5 +91,6 @@ describe('a Concept card', () => {
     expect(markup).not.toContain('<img')
     expect(markup).not.toContain('<svg')
     expect(markup).not.toMatch(/withArt/)
+    expect(markup).not.toContain('data-plate')
   })
 })

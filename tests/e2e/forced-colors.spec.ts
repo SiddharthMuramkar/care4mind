@@ -125,11 +125,19 @@ test('a Frontispiece ring draws in the text colour of the theme', async ({ page 
   const paths = page.getByRole('main').locator('header span:has(> img) > svg path')
   expect(await paths.count()).toBeGreaterThan(0)
   for (const path of await paths.all()) {
-    const { stroke, color } = await path.evaluate((element) => ({
-      stroke: getComputedStyle(element).stroke,
-      color: getComputedStyle(element.parentElement as Element).color,
-    }))
+    const { stroke, color, canvasText } = await path.evaluate((element) => {
+      const probe = document.body.appendChild(document.createElement('span'))
+      probe.style.color = 'CanvasText'
+      const canvasText = getComputedStyle(probe).color
+      probe.remove()
+      return {
+        stroke: getComputedStyle(element).stroke,
+        color: getComputedStyle(element.parentElement as Element).color,
+        canvasText,
+      }
+    })
     expect(stroke).toBe(color)
+    expect(color).toBe(canvasText)
     expect(stroke).not.toMatch(/^transparent$|^rgba\(.*,\s*0\)$/)
   }
 })

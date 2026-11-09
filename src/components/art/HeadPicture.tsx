@@ -20,7 +20,7 @@ export function HeadPicture({
   phoneSize: number
   className?: string
 }) {
-  const shown = { art, size, ...(className ? { className } : {}) }
+  const shown = { art, size, className }
   return art.family === 'plate' ? (
     <Medallion {...shown} phoneSize={phoneSize} />
   ) : (

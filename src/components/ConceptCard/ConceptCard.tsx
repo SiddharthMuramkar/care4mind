@@ -43,6 +43,7 @@ export function ConceptCard({
     <article
       className={cx(styles.card, picture && styles.withArt, featured && styles.featured, className)}
       data-paper
+      data-plate={picture ? '' : undefined}
     >
       {featured ? <FrameCorners /> : null}
       {picture ? <Medallion art={picture} size={pictureSize} className={styles.art} /> : null}

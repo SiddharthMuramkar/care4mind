@@ -20,8 +20,12 @@
     box-shadow var(--duration-instant) var(--ease-press);
 }
 
-/* A card with its own Plate gives it a row above the title; a bare card keeps no such row. */
-.withArt {
+/*
+ * A card with its own Plate gives it a row above the title; a bare card keeps no such row. Two
+ * classes, so it also outranks the phone's one-column `.card` below.
+ */
+.card.withArt {
+  grid-template-columns: 1fr auto;
   grid-template-areas:
     'art deva'
     'title title'
@@ -152,17 +156,6 @@
       'summary'
       'action';
     padding: 1.5rem;
-  }
-
-  .withArt {
-    grid-template-columns: 1fr auto;
-    grid-template-areas:
-      'art deva'
-      'title title'
-      'gloss gloss'
-      'meta meta'
-      'summary summary'
-      'action action';
   }
 
   .title {
