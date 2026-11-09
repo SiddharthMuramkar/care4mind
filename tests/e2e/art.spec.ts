@@ -12,6 +12,18 @@ const PICTURES = 'main img, footer img'
 /** The pages the shared check visits. A page joins the list when `main` gets its first picture. */
 const PAGES: { path: string; name: string }[] = [
   // Add a page in path order, not at the end.
+  { path: '/concepts/', name: 'Concepts page' },
+  { path: '/concepts/map/', name: 'Concept map' },
+  { path: '/library/', name: 'Library' },
+  { path: '/library/courses/', name: 'Courses page' },
+  { path: '/library/inspirational-books/', name: 'Inspirational Books page' },
+  { path: '/library/methods/', name: 'Methods page' },
+  { path: '/library/references/', name: 'References page' },
+  { path: '/library/textbooks/', name: 'Textbooks page' },
+  { path: '/questionnaires/', name: 'Questionnaires page' },
+  { path: '/search/', name: 'Search page' },
+  { path: '/start/', name: 'Start page' },
+  { path: '/texts/', name: 'Texts page' },
 ]
 
 /** Start adding up the page's layout shifts. Call it before opening the page. */
@@ -149,22 +161,6 @@ const NOTHING_FOUND = '/search/?q=zzqxqzzqx'
 const headSticker = (page: Page) => page.getByRole('main').locator('header img')
 
 test.describe('section pages', () => {
-  // The shared check at each section page, with the web fonts held back. Their late swap rewraps
-  // some headings by itself, a shift the Sticker has no part in, so without them only a picture
-  // that holds no space can move the page.
-  for (const { path } of SECTION_STICKERS) {
-    test(`${path}: the Sticker loads, keeps its width list short and shifts nothing`, async ({
-      page,
-    }) => {
-      await page.route('**/*.woff2', (route) => route.abort())
-      await watchLayoutShifts(page)
-      const response = await gotoReady(page, path)
-      expect(response?.status(), 'the page exists').toBe(200)
-      await expectSomePicture(page)
-      await expectPicturesBehave(page)
-    })
-  }
-
   for (const { path, file } of SECTION_STICKERS) {
     test(
       `${path} shows the ${file} Sticker, decorative, above its heading`,
@@ -226,7 +222,8 @@ test.describe('section pages', () => {
   })
 
   test('the proposals page has no Sticker', { tag: '@one-width' }, async ({ page }) => {
-    await gotoReady(page, '/proposals/')
+    const response = await gotoReady(page, '/proposals/')
+    expect(response?.status(), 'the page exists').toBe(200)
     await expect(headSticker(page)).toHaveCount(0)
   })
 

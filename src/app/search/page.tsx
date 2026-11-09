@@ -47,7 +47,7 @@ export default async function SearchPage({ searchParams }: PageProps<'/search'>)
     <ReadingPage
       path={PATH}
       titleId="search-title"
-      beforeTitle={query === '' || found.length === 0 ? <SectionSticker section="search" /> : null}
+      beforeTitle={found.length === 0 ? <SectionSticker section="search" /> : null}
       title="Search"
       afterTitle={<SearchForm query={query} />}
     >
