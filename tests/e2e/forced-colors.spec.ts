@@ -2,6 +2,7 @@ import type { Locator, Page } from '@playwright/test'
 
 import { hrefFor } from '@/content'
 
+import { gotoErrorPage } from './error-page'
 import { expect, gotoReady, test } from './fixtures'
 
 // Windows' contrast themes repaint backgrounds and borders in system colours and drop every
@@ -111,6 +112,23 @@ test('a Frontispiece ring draws in the text colour of the theme', async ({ page 
     expect(stroke).toBe(color)
     expect(stroke).not.toMatch(/^transparent$|^rgba\(.*,\s*0\)$/)
   }
+})
+
+test('the footer keeps its Emblem and motto', async ({ page }) => {
+  await gotoReady(page, '/concepts/vikshepa/')
+  const footer = page.getByRole('contentinfo')
+  const emblem = footer.locator('img')
+  await emblem.scrollIntoViewIfNeeded()
+  await expect(emblem).toBeVisible()
+  await expect(footer.locator('[lang="sa-Deva"]')).toBeVisible()
+})
+
+test('the error pages keep their Emblem', async ({ page }) => {
+  await gotoErrorPage(page, 'segment')
+  await expect(page.getByRole('main').locator('img')).toBeVisible()
+  await page.unrouteAll()
+  await gotoErrorPage(page, 'global')
+  await expect(page.getByRole('main').locator('img')).toBeVisible()
 })
 
 const PARTS = [
