@@ -57,6 +57,19 @@ describe('search engines stay out until launch', () => {
   })
 })
 
+describe('the security headers', () => {
+  it('go out on every path', async () => {
+    expect((await nextConfig.headers?.()) ?? []).toContainEqual({
+      source: '/:path*',
+      headers: [
+        { key: 'X-Content-Type-Options', value: 'nosniff' },
+        { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
+        { key: 'X-Frame-Options', value: 'DENY' },
+      ],
+    })
+  })
+})
+
 describe('the skip link', () => {
   it('is the first thing in the body, leading to the main landmark', () => {
     const body = elementChildren(layoutTree()).find((child) => child.type === 'body')

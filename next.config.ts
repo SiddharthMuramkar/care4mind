@@ -3,6 +3,15 @@ import type { NextConfig } from 'next'
 import { redirects } from './src/config/redirects'
 import { siteConfig } from './src/config/site'
 
+const securityHeaders = [
+  // A browser treats a file only as the type it was served with.
+  { key: 'X-Content-Type-Options', value: 'nosniff' },
+  // Another site learns which site a reader came from, never which page.
+  { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
+  // No site can frame these pages to trick a reader into clicking something.
+  { key: 'X-Frame-Options', value: 'DENY' },
+]
+
 const nextConfig: NextConfig = {
   poweredByHeader: false,
   // Next generates typedRoutes without trailing slashes despite trailingSlash, so it cannot check slashed paths.
@@ -12,8 +21,10 @@ const nextConfig: NextConfig = {
   // Share cards read their fonts from disk at render time, which the file tracer cannot see.
   outputFileTracingIncludes: { '/**/opengraph-image*': ['./src/fonts/**/*.woff'] },
   async headers() {
-    if (siteConfig.indexable) return []
+    const secure = { source: '/:path*', headers: securityHeaders }
+    if (siteConfig.indexable) return [secure]
     return [
+      secure,
       {
         source: '/:path*',
         headers: [{ key: 'X-Robots-Tag', value: 'noindex, nofollow' }],
