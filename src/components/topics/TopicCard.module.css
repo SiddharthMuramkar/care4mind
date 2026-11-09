@@ -6,12 +6,10 @@
   position: relative;
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);
-  grid-template-rows: auto 1fr auto auto;
+  grid-template-rows: auto 1fr;
   grid-template-areas:
     'art numeral'
-    'title title'
-    'term term'
-    'count count';
+    'title title';
   align-content: start;
   gap: 0.5rem;
   padding: 1.25rem 1.25rem 1rem;
@@ -23,6 +21,13 @@
     inset 0 3px 0 var(--topic, var(--color-highlight));
   overflow-wrap: anywhere;
   overflow: clip;
+}
+
+/* Not a second `overflow` line above: the build drops that as dead for the browsers it targets. */
+@supports not (overflow: clip) {
+  .card {
+    overflow: hidden;
+  }
 }
 
 .art {
@@ -78,7 +83,7 @@
 }
 
 .term {
-  grid-area: term;
+  grid-column: 1 / -1;
   margin: 0;
   font-style: italic;
   color: var(--color-surface-muted);
@@ -90,7 +95,7 @@
 }
 
 .count {
-  grid-area: count;
+  grid-column: 1 / -1;
   margin: 0;
   padding-top: 0.5rem;
   border-top: 1px solid color-mix(in srgb, var(--color-surface-rule) 60%, transparent);
@@ -106,6 +111,7 @@
   }
 
   .title {
+    margin-block-start: 0.25rem;
     font-size: 1.3125rem;
   }
 
@@ -120,7 +126,13 @@
     transition: transform var(--duration-quick) var(--ease-out);
   }
 
+  /*
+   * Lifted, the card would rise off a pointer at its bottom edge and drop back under it. So while
+   * it is up the link reaches past that edge, as far as the focus ring reaches.
+   */
   .card:has(.link:hover) {
+    overflow: visible;
+    clip-path: inset(-6px);
     transform: translateY(-3px);
   }
 

@@ -311,7 +311,59 @@ test.describe('topic cards', () => {
         ).toBeLessThanOrEqual(title.y)
       }
     })
+
+    test(`${path}: the picture and the lines keep an even rhythm, with or without a term`, async ({
+      page,
+    }) => {
+      await gotoReady(page, path)
+      const textGap = (page.viewportSize()?.width ?? 0) < 640 ? 4 : 8
+      for (const { slug } of TOPIC_STICKERS) {
+        const card = topicCard(page, slug)
+        // The count is the last line, and a term, on the cards that have one, the line above it.
+        const lines = card.locator(':scope > p')
+        const above = (await lines.count()) > 1 ? lines.first() : card.getByRole('heading')
+        const [picture, title, line, count] = await Promise.all([
+          cardSticker(page, slug).boundingBox(),
+          card.getByRole('heading').boundingBox(),
+          above.boundingBox(),
+          lines.last().boundingBox(),
+        ])
+        if (!picture || !title || !line || !count) throw new Error(`The ${slug} card is laid out.`)
+        expect(title.y - (picture.y + picture.height), `${slug}: picture to title`).toBeCloseTo(
+          8,
+          0,
+        )
+        expect(count.y - (line.y + line.height), `${slug}: above the count`).toBeCloseTo(textGap, 0)
+      }
+    })
   }
+
+  test('a pointer at a card’s bottom edge keeps it lifted, and past the edge it finds no link', async ({
+    page,
+  }) => {
+    await gotoReady(page, '/concepts/')
+    const card = topicCard(page, 'self')
+    await card.evaluate((el) => el.scrollIntoView({ block: 'center', behavior: 'instant' }))
+    const box = await card.boundingBox()
+    if (!box) throw new Error('The self card is laid out.')
+    const x = box.x + box.width / 2
+    const bottom = box.y + box.height
+
+    const hitBelow = await page.evaluate(
+      (point) => !!document.elementFromPoint(point.x, point.y)?.closest('article[data-topic]'),
+      { x, y: bottom + 2 },
+    )
+    expect(hitBelow, 'the link stops at the card').toBe(false)
+
+    await page.mouse.move(x, bottom - 1.5)
+    await expect(card).toHaveCSS('transform', 'matrix(1, 0, 0, 1, 0, -3)')
+    // The same point again, now that the card is up: the browser tests what is under the pointer.
+    await page.mouse.move(x, bottom - 1.5)
+    expect(await card.evaluate((el) => el.matches(':hover')), 'the card keeps the pointer').toBe(
+      true,
+    )
+    await expect(card).toHaveCSS('transform', 'matrix(1, 0, 0, 1, 0, -3)')
+  })
 
   test(
     'hovering a card lifts its Sticker alone, and the page-head Sticker stays still',
