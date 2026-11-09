@@ -1,6 +1,6 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 
-import { loginHarness } from './harness'
+import { loginHarness, TEST_SETTINGS } from './harness'
 
 let login: Awaited<ReturnType<typeof loginHarness>>
 
@@ -113,6 +113,51 @@ describe('a Google sign-up on one database connection', () => {
       await small.close()
     }
   }, 20_000)
+})
+
+describe('the new-account cap on a Google sign-up', () => {
+  it('refuses a sign-up past the cap while the limits block, with no account or user-session', async () => {
+    const capped = await loginHarness({
+      settings: { limits: { ...TEST_SETTINGS.limits, blocking: true } },
+    })
+    try {
+      for (let made = 0; made < 5; made++) await capped.signUp(`user${made}@example.test`)
+      const accountsBefore = await capped.count('account')
+
+      const response = await capped.googleSignIn('sign-up', ASHA)
+
+      expect(response.status).toBe(302)
+      const sentTo = redirectOf(response)
+      expect(sentTo.pathname).toBe('/sign-up/')
+      expect(sentTo.searchParams.get('error')).toBe('NEW_ACCOUNT_CAP')
+      expect(response.headers.getSetCookie().join('\n')).not.toMatch(/session_token=/)
+      expect(await capped.count('user')).toBe(5)
+      expect(await capped.count('account')).toBe(accountsBefore)
+      expect(capped.records).toContainEqual({
+        defence: 'new-account-cap',
+        action: 'blocked',
+        count: 6,
+        limit: 5,
+      })
+    } finally {
+      await capped.close()
+    }
+  })
+
+  it('records and still makes the account while the limits only record', async () => {
+    for (let made = 0; made < 5; made++) await login.signUp(`user${made}@example.test`)
+
+    const response = await login.googleSignIn('sign-up', ASHA)
+
+    expect(response.headers.get('set-cookie')).toMatch(/session_token=/)
+    expect(await login.count('user')).toBe(6)
+    expect(login.records).toContainEqual({
+      defence: 'new-account-cap',
+      action: 'recorded',
+      count: 6,
+      limit: 5,
+    })
+  })
 })
 
 describe('coming back from Google on Log in', () => {

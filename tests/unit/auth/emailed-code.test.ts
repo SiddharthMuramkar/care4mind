@@ -284,6 +284,28 @@ describe('the logged-in hint a static page reads', () => {
     ).toMatch(/^c4m-logged-in=;.*Max-Age=0/)
   })
 
+  it('follows the user-session’s own cookie name and Secure on the real site, over https', async () => {
+    const live = await loginHarness({ settings: { baseURL: 'https://www.care4mind.xyz' } })
+    try {
+      const started = await live.signUp(EMAIL, 'Asha')
+      const set = started.headers.getSetCookie()
+      expect(set.some((cookie) => cookie.startsWith('__Secure-better-auth.session_token='))).toBe(
+        true,
+      )
+      const hint = set.find((cookie) => cookie.startsWith('c4m-logged-in=1'))
+      expect(hint).toMatch(/Max-Age=604800/)
+      expect(hint).toMatch(/; Secure/)
+
+      const cookie = live.cookieHeader(started)
+      const ended = await live.request('POST', '/sign-out', { headers: { cookie } })
+      expect(
+        ended.headers.getSetCookie().find((value) => value.startsWith('c4m-logged-in=')),
+      ).toMatch(/^c4m-logged-in=;.*Max-Age=0.*; Secure/)
+    } finally {
+      await live.close()
+    }
+  })
+
   it('is absent from answers that touch no user-session', async () => {
     const response = await login.request('GET', '/get-session')
     expect(response.headers.getSetCookie().filter((cookie) => cookie.startsWith('c4m'))).toEqual([])

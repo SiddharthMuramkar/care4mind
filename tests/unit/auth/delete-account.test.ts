@@ -105,7 +105,7 @@ describe('Delete my account', () => {
     expect(await login.count('user')).toBe(1)
   })
 
-  it('refuses a link after 24 hours, and says the link is what ran out', async () => {
+  it('refuses a link after 24 hours', async () => {
     const cookie = await signedUp()
     await askToDelete(cookie)
     vi.useFakeTimers({ toFake: ['Date'] })
@@ -113,7 +113,8 @@ describe('Delete my account', () => {
 
     const response = await confirmDelete(cookie, tokenIn())
 
-    expect(response.ok).toBe(false)
+    expect(response.status).toBe(404)
+    expect(await response.json()).toMatchObject({ code: 'INVALID_TOKEN' })
     expect(await login.count('user')).toBe(1)
   })
 

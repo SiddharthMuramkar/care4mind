@@ -90,6 +90,8 @@ interface HarnessOptions {
 export async function loginHarness({ settings, deps, poolSize }: HarnessOptions = {}) {
   const pglite = new PGlite()
   await pglite.exec(readFileSync('migrations/0001_auth.sql', 'utf8'))
+  // Every request says the origin of the site under test, so a test can be an https one.
+  const origin = settings?.baseURL ?? ORIGIN
   const socket = poolSize ? new PGLiteSocketServer({ db: pglite, port: 0 }) : undefined
   await socket?.start()
   const pool = socket
@@ -162,8 +164,8 @@ export async function loginHarness({ settings, deps, poolSize }: HarnessOptions 
     options: { body?: unknown; headers?: Record<string, string>; exactPath?: boolean } = {},
   ) {
     const slashed = /[/?]/.test(path.slice(-1)) || path.includes('?') || options.exactPath
-    const url = `${ORIGIN}/api/auth${slashed ? path : `${path}/`}`
-    const headers = { origin: ORIGIN, 'x-forwarded-for': '203.0.113.7', ...options.headers }
+    const url = `${origin}/api/auth${slashed ? path : `${path}/`}`
+    const headers = { origin, 'x-forwarded-for': '203.0.113.7', ...options.headers }
     const init: RequestInit =
       method === 'POST'
         ? {
