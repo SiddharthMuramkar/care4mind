@@ -241,6 +241,20 @@ test('the KarmaYoga Scale page keeps its Medallion and its cycle in the theme’
   for (const colour of [...arrows, ...strikes, ...words]) expect(colour).toBe(text)
 })
 
+test('the hero Medallion ring draws in the text colour of the theme', async ({ page }) => {
+  await gotoReady(page, '/')
+  const paths = page.locator('figure:has([data-hero-plate]) svg path')
+  expect(await paths.count()).toBeGreaterThan(0)
+  for (const path of await paths.all()) {
+    const { stroke, color } = await path.evaluate((element) => ({
+      stroke: getComputedStyle(element).stroke,
+      color: getComputedStyle(element.parentElement as Element).color,
+    }))
+    expect(stroke).toBe(color)
+    expect(stroke).not.toMatch(/^transparent$|^rgba\(.*,\s*0\)$/)
+  }
+})
+
 const PARTS = [
   'Everyday Experience - 1',
   'Everyday Experience - 2',
