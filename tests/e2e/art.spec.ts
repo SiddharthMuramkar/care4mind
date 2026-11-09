@@ -1,13 +1,13 @@
 import type { Locator, Page } from '@playwright/test'
 
-import { artFor, ownArt, type SectionKey } from '@/art'
-import { heroPlates } from '@/art/assign'
+import { art, artFor, heroPlates, ownArt, type SectionKey } from '@/art'
 import { originLine } from '@/art/origin'
 import { ART } from '@/art/registry'
 import type { ArtRecord } from '@/art/types'
 import { concepts, questionnaires, works, type RouteEntry } from '@/content'
 
 import { expectNoAxeViolations } from './axe'
+import { openingFolio } from './drawings'
 import { gotoErrorPage } from './error-page'
 import { expect, gotoReady, scrollsSideways, test } from './fixtures'
 import { MISSING, ROUTES_IN_SCOPE } from './routes'
@@ -955,18 +955,18 @@ test.describe('the hero Plate', () => {
     },
   )
 
-  test('keeps its ring still as the page scrolls', { tag: '@one-width' }, async ({ page }) => {
+  test('gives its ring nothing that would ink it in', { tag: '@one-width' }, async ({ page }) => {
     await gotoReady(page, '/')
     const ring = figure(page).locator(`${HERO} ~ svg`)
     expect(await ring.evaluate((svg) => svg.getAnimations({ subtree: true }).length)).toBe(0)
   })
 
-  /** The Medallion the hero Plate sits in, the Folio it stands on, and the heading beside it. */
+  /** The Medallion, the Folio it stands on, the heading and the motto. */
   async function heroBoxes(page: Page) {
     const heading = page.getByRole('heading', { level: 1 })
     const [medallion, folio, title, motto] = await Promise.all([
       page.locator(HERO).locator('xpath=..').boundingBox(),
-      heading.locator('xpath=..').boundingBox(),
+      openingFolio(page).boundingBox(),
       heading.boundingBox(),
       heading.locator('xpath=preceding-sibling::p[1]').boundingBox(),
     ])
@@ -1341,10 +1341,8 @@ test.describe('the hero Plate', () => {
     async ({ request }) => {
       test.slow()
       for (const id of heroPlates) {
-        const record = ART.find((picture) => picture.id === id)
-        if (!record) throw new Error(`no record for ${id}`)
         const response = await request.get(
-          `/_next/image/?url=${encodeURIComponent(record.src)}&w=750&q=75`,
+          `/_next/image/?url=${encodeURIComponent(art(id).src)}&w=750&q=75`,
           { headers: { Accept: 'image/avif' } },
         )
         expect(response.headers()['content-type'], id).toBe('image/avif')

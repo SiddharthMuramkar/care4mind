@@ -42,8 +42,8 @@
 }
 
 /*
- * Held at the buttons' full height from first paint, so that nothing below it moves. A figcaption
- * has to come last in its figure, so `order` is what stands this row under the caption.
+ * Held at a fixed height the buttons fit in, from first paint, so that nothing below it moves. A
+ * figcaption has to come last in its figure, so `order` is what stands this row under the caption.
  */
 .controls {
   order: 2;
