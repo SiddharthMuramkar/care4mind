@@ -24,6 +24,7 @@ const PAGES: { path: string; name: string }[] = [
   { path: '/search/', name: 'Search page' },
   { path: '/start/', name: 'Start page' },
   { path: '/texts/', name: 'Texts page' },
+  { path: '/topics/mind/', name: 'mind topic page' },
 ]
 
 /** Start adding up the page's layout shifts. Call it before opening the page. */
