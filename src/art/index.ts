@@ -5,17 +5,20 @@
  */
 import 'server-only'
 
+import { features } from '@/config/features'
+
 import { ART, type ArtId } from './registry'
-import type { ArtRecord } from './types'
+import { createArt } from './resolve'
 
 export type * from './types'
 export type { ArtId }
+export type { ArtTarget, OwnArtTarget } from './resolve'
 
-const BY_ID: ReadonlyMap<string, ArtRecord> = new Map(ART.map((record) => [record.id, record]))
+const pictures = createArt(ART, features)
 
 /** The record of the picture with this id. */
-export function art(id: ArtId): ArtRecord {
-  const record = BY_ID.get(id)
-  if (!record) throw new Error(`No picture has the id “${id}”.`)
-  return record
-}
+export const art = pictures.art
+/** The picture for a page head or a topic's card, following the Interim pictures. */
+export const artFor = pictures.artFor
+/** A Concept's, Questionnaire's or Traditional text's own picture for its card, or nothing. */
+export const ownArt = pictures.ownArt

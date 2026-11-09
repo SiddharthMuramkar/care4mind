@@ -18,6 +18,8 @@ export interface Features {
   startHere: boolean
   /** Proposal: the "What's on your mind?" chips under the homepage hero. */
   whatsOnYourMind: boolean
+  /** A picture not yet approved by the client can show. Seen in local runs and the contact sheet: branch previews are off and production stays off. */
+  draftArt: boolean
 }
 
 const VARIABLES = {
@@ -25,6 +27,7 @@ const VARIABLES = {
   conceptMap: 'FEATURE_CONCEPT_MAP',
   startHere: 'FEATURE_START_HERE',
   whatsOnYourMind: 'FEATURE_WHATS_ON_YOUR_MIND',
+  draftArt: 'FEATURE_DRAFT_ART',
 } as const satisfies Record<keyof Features, string>
 
 type Environment = Readonly<Record<string, string | undefined>>
@@ -44,6 +47,7 @@ export function readFeatures(env: Environment): Features {
     conceptMap: flag(VARIABLES.conceptMap),
     startHere: flag(VARIABLES.startHere),
     whatsOnYourMind: flag(VARIABLES.whatsOnYourMind),
+    draftArt: flag(VARIABLES.draftArt),
   }
 }
 
