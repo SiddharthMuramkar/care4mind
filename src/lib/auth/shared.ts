@@ -1,5 +1,14 @@
 /** What the login screens and the auth route both need to agree on: no secrets, safe in a browser bundle. */
 
+/** The hostnames a bot check token may have been issued for, as Cloudflare's widget lists them. */
+export const BOT_CHECK_HOSTNAMES = ['www.care4mind.xyz', 'care4mind.org', 'www.care4mind.org']
+
+/** The routes every request to must carry a bot check token the server has verified. */
+export const BOT_CHECKED_PATHS: readonly string[] = [
+  '/email-otp/send-verification-otp',
+  '/sign-in/social',
+]
+
 /** The action the Turnstile widget stamps on a token and the server insists on. */
 export const BOT_CHECK_ACTION = 'login'
 

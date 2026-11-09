@@ -5,6 +5,7 @@ import { Kysely, PGliteDialect } from 'kysely'
 import { vi } from 'vitest'
 
 import { createAuth, type AuthDeps } from '@/lib/auth/create-auth'
+import type { DefenceRecord } from '@/lib/auth/defences'
 import type { OutgoingEmail } from '@/lib/auth/email'
 import { authRoute } from '@/lib/auth/route-handler'
 import type { LoginSettings } from '@/lib/auth/settings'
@@ -38,7 +39,15 @@ export const TEST_SETTINGS: LoginSettings = {
   },
   google: { clientId: 'google-client-id.test', clientSecret: 'google-client-secret-test' },
   email: { apiKey: 'unused', from: 'login@care4mind.test' },
-  limits: { routePerMinute: 600, globalPerTenSeconds: 1000 },
+  botId: { blocking: false },
+  limits: {
+    routePerMinute: 600,
+    globalPerTenSeconds: 1000,
+    blocking: false,
+    codesPerEmailPerHour: 3,
+    newAccountsPerHour: 5,
+  },
+  spikeAlert: { newAccountsPerHour: 4, to: 'developer@care4mind.test' },
 }
 
 const VERIFY_URL = TEST_SETTINGS.botCheck.verifyUrl
@@ -97,12 +106,27 @@ export async function loginHarness({ settings, deps }: HarnessOptions = {}) {
     return Response.json(verdict)
   })
 
+  // What BotID answers: a human, until a test says otherwise.
+  let botId: { isBot: boolean } | 'unreachable' = { isBot: false }
+  const botIdChecks: { atVerifiedCount: number }[] = []
+  const records: DefenceRecord[] = []
+
   const outbox: OutgoingEmail[] = []
+  let failFor: string | undefined
   const auth = createAuth({
     settings: { ...TEST_SETTINGS, ...settings },
     database,
     sendEmail: async (email) => {
+      if (email.to === failFor) throw new Error('the sender refused this email')
       outbox.push(email)
+    },
+    checkBotId: async () => {
+      botIdChecks.push({ atVerifiedCount: verified.length })
+      if (botId === 'unreachable') throw new Error('BotID is unreachable')
+      return botId
+    },
+    recordDefence: (record) => {
+      records.push(record)
     },
     ...deps,
   })
@@ -234,6 +258,17 @@ export async function loginHarness({ settings, deps }: HarnessOptions = {}) {
     setVerdict: (next: BotCheckVerdict | 'unreachable') => {
       verdict = next
     },
+    setBotId: (next: { isBot: boolean } | 'unreachable') => {
+      botId = next
+    },
+    /** Make the email sender refuse this address until called with undefined. */
+    failEmailTo: (address: string | undefined) => {
+      failFor = address
+    },
+    /** Each BotID check, and how many Cloudflare token checks had already happened. */
+    botIdChecks,
+    /** What the defences noted, as they would to the logs. */
+    records,
     /** The users in the database, however they got there. */
     users: async () => {
       const rows = await kysely
@@ -247,12 +282,16 @@ export async function loginHarness({ settings, deps }: HarnessOptions = {}) {
     /** Between tests: every table empty, the outbox empty, the verdict passing. */
     reset: async () => {
       await pglite.exec(
-        'truncate "user", "session", "account", "verification", "rateLimit" cascade;',
+        'truncate "user", "session", "account", "verification", "rateLimit", "defenceCount" cascade;',
       )
       outbox.length = 0
       verified.length = 0
       googleTokenRequests.length = 0
       verdict = PASSING
+      botId = { isBot: false }
+      failFor = undefined
+      botIdChecks.length = 0
+      records.length = 0
     },
     close: async () => {
       vi.stubGlobal('fetch', realFetch)

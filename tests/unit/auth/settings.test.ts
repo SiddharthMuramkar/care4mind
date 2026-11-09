@@ -13,6 +13,7 @@ const REQUIRED = {
   GOOGLE_CLIENT_SECRET: 'a-real-client-secret',
   BREVO_API_KEY: 'a-real-key',
   LOGIN_EMAIL_FROM: 'login@care4mind.org',
+  LOGIN_ALERT_EMAIL: 'developer@care4mind.org',
 }
 
 const PRODUCTION = { VERCEL: '1', VERCEL_ENV: 'production' }
@@ -46,12 +47,12 @@ describe('.env.example', () => {
 describe('the login settings', () => {
   it('names every missing setting', () => {
     expect(() => readLoginSettings({})).toThrow(
-      /BETTER_AUTH_URL.*BETTER_AUTH_SECRET.*DATABASE_URL.*TURNSTILE_SECRET_KEY.*GOOGLE_CLIENT_ID.*GOOGLE_CLIENT_SECRET.*BREVO_API_KEY.*LOGIN_EMAIL_FROM/,
+      /BETTER_AUTH_URL.*BETTER_AUTH_SECRET.*DATABASE_URL.*TURNSTILE_SECRET_KEY.*GOOGLE_CLIENT_ID.*GOOGLE_CLIENT_SECRET.*BREVO_API_KEY.*LOGIN_EMAIL_FROM.*LOGIN_ALERT_EMAIL/,
     )
   })
 
   it('reads the limits, with raised defaults that leave one Wi-Fi unblocked', () => {
-    expect(readLoginSettings(REQUIRED).limits).toEqual({
+    expect(readLoginSettings(REQUIRED).limits).toMatchObject({
       routePerMinute: 600,
       globalPerTenSeconds: 1000,
     })
@@ -61,7 +62,41 @@ describe('the login settings', () => {
         LOGIN_ROUTE_LIMIT_PER_MINUTE: '40',
         LOGIN_GLOBAL_LIMIT_PER_10_SECONDS: '50',
       }).limits,
-    ).toEqual({ routePerMinute: 40, globalPerTenSeconds: 50 })
+    ).toMatchObject({ routePerMinute: 40, globalPerTenSeconds: 50 })
+  })
+
+  it('leaves the limits and BotID recording only, until a setting turns each to blocking', () => {
+    const quiet = readLoginSettings(REQUIRED)
+    expect(quiet.limits.blocking).toBe(false)
+    expect(quiet.botId.blocking).toBe(false)
+    expect(readLoginSettings({ ...REQUIRED, LOGIN_LIMITS_BLOCKING: '1' }).limits.blocking).toBe(
+      true,
+    )
+    expect(readLoginSettings({ ...REQUIRED, LOGIN_BOTID_BLOCKING: '1' }).botId.blocking).toBe(true)
+  })
+
+  it('refuses a blocking setting that is neither 1 nor 0', () => {
+    expect(() => readLoginSettings({ ...REQUIRED, LOGIN_BOTID_BLOCKING: 'yes' })).toThrow(
+      'LOGIN_BOTID_BLOCKING',
+    )
+  })
+
+  it('reads the provisional numbers for the trial to change', () => {
+    expect(readLoginSettings(REQUIRED)).toMatchObject({
+      limits: { codesPerEmailPerHour: 10, newAccountsPerHour: 500 },
+      spikeAlert: { newAccountsPerHour: 100, to: 'developer@care4mind.org' },
+    })
+    expect(
+      readLoginSettings({
+        ...REQUIRED,
+        LOGIN_CODES_PER_EMAIL_PER_HOUR: '4',
+        LOGIN_NEW_ACCOUNTS_PER_HOUR: '20',
+        LOGIN_SPIKE_NEW_ACCOUNTS_PER_HOUR: '15',
+      }),
+    ).toMatchObject({
+      limits: { codesPerEmailPerHour: 4, newAccountsPerHour: 20 },
+      spikeAlert: { newAccountsPerHour: 15 },
+    })
   })
 
   it('refuses a limit that isn’t a whole number', () => {

@@ -2,9 +2,11 @@
 import 'server-only'
 
 import { attachDatabasePool, waitUntil } from '@vercel/functions'
+import { checkBotId } from 'botid/server'
 import { Pool } from 'pg'
 
 import { createAuth, type Auth } from './create-auth'
+import { logDefence } from './defences'
 import { brevoSender } from './email'
 import { readLoginSettings } from './settings'
 
@@ -19,6 +21,9 @@ export function getAuth(): Auth {
     settings,
     database: pool,
     sendEmail: brevoSender(settings.email),
+    // Off Vercel there is no BotID to ask, so a local production build answers as a human.
+    checkBotId: () => checkBotId({ developmentOptions: { isDevelopment: !process.env.VERCEL } }),
+    recordDefence: logDefence,
     backgroundTask: waitUntil,
   })
   return auth

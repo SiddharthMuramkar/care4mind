@@ -220,6 +220,20 @@ test.describe('Start, while login is on', { tag: '@one-width' }, () => {
   })
 })
 
+test.describe('a throwaway email', { tag: '@one-width' }, () => {
+  test('is refused on Sign up, with a reason, and no code is sent', async ({ page }) => {
+    await gotoReady(page, '/sign-up/')
+    await page.getByLabel('Your name').fill('Asha Rao')
+    await page.getByLabel('Your email').fill('someone@mailinator.com')
+    await page.getByRole('checkbox', { name: /18 or over/ }).check()
+    await waitForBotCheck(page)
+    await page.getByRole('button', { name: 'Email me a code' }).click()
+    await expect(page.getByText('throwaway email address')).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Enter your emailed code' })).toHaveCount(0)
+    expect(await inbox('someone@mailinator.com')).toEqual([])
+  })
+})
+
 test.describe('a logged-in user', { tag: '@one-width' }, () => {
   test('sees Log out, which ends the user-session and brings back Log in', async ({
     page,
