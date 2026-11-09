@@ -5,6 +5,11 @@
   text-align: center;
 }
 
+/* The Emblem, with the room the 404's picture has before the words begin. */
+.emblem {
+  margin-block-end: 1rem;
+}
+
 .title {
   margin: 0;
   font-family: var(--font-display);

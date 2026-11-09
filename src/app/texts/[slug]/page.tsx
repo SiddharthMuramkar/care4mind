@@ -45,7 +45,13 @@ export default async function WorkPage({ params }: PageProps<'/texts/[slug]'>) {
       pageClassName={styles.page}
       articleClassName={styles.article}
       beforeTrail={<ReadingThread />}
-      beforeTitle={<Sticker art={artFor({ kind: 'work', slug: work.slug })} size={120} />}
+      beforeTitle={
+        <Sticker
+          art={artFor({ kind: 'work', slug: work.slug })}
+          size={120}
+          className={styles.picture}
+        />
+      }
       kicker="Traditional text"
       titleClassName={styles.title}
       title={

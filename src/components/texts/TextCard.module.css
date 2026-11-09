@@ -13,6 +13,7 @@
   background: var(--leaf);
   color: var(--color-surface-ink);
   border-radius: 2px;
+  overflow: clip;
   box-shadow:
     0 0 0 1px color-mix(in srgb, var(--color-surface-ink) 28%, transparent),
     inset 0 0 0 5px var(--leaf),
@@ -31,11 +32,14 @@
   text-decoration: none;
 }
 
-/* The whole card answers the pointer: the link reaches over it (WCAG 2.5.8). */
+/*
+ * The whole card answers the pointer: the link reaches over it (WCAG 2.5.8). `data-ink` positions
+ * the link itself, so the reach is drawn large from there and the card clips it to its own edge.
+ */
 .link::after {
   content: '';
   position: absolute;
-  inset: 0;
+  inset: -100vmax;
   border-radius: inherit;
 }
 

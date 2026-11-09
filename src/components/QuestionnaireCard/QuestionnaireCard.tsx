@@ -53,7 +53,6 @@ export function QuestionnaireCard({
         <Link
           href={hrefFor({ kind: 'questionnaire', id: slug, status })}
           transitionTypes={turnForward}
-          data-ink
         >
           About the {title}
         </Link>

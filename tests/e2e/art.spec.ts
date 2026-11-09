@@ -8,6 +8,7 @@ import type { ArtRecord } from '@/art/types'
 import { concepts, questionnaires, works, type RouteEntry } from '@/content'
 
 import { expectNoAxeViolations } from './axe'
+import { gotoErrorPage } from './error-page'
 import { expect, gotoReady, scrollsSideways, test } from './fixtures'
 import { MISSING, ROUTES_IN_SCOPE } from './routes'
 
@@ -1905,6 +1906,109 @@ test.describe('the homepage, section and topic pages as a set', () => {
         .not.toBe(atRest)
       await expect(card).toHaveCSS('transform', 'none')
       // Let go away from the card, so it doesn't navigate.
+      await page.mouse.move(1, 1)
+      await page.mouse.up()
+    },
+  )
+})
+
+test.describe('the Concept, Questionnaire, text and error pages as a set', () => {
+  for (const { path, ringed } of [
+    { path: '/concepts/vikshepa/', ringed: false },
+    { path: KARMAYOGA_SCALE, ringed: true },
+    { path: '/texts/yoga-sutra/', ringed: false },
+  ]) {
+    test(`${path}: the room under the head picture matches the other reading pages`, async ({
+      page,
+    }) => {
+      await gotoReady(page, path)
+      const picture = ringed ? ringOf(headSticker(page)) : headSticker(page)
+      const gap = await picture.evaluate((element) => {
+        const next = element.nextElementSibling
+        if (!next) throw new Error('The words follow the picture.')
+        return next.getBoundingClientRect().top - element.getBoundingClientRect().bottom
+      })
+      const wide = (page.viewportSize()?.width ?? 0) >= 640
+      expect(gap).toBeCloseTo(wide ? 28 : 12, 0)
+    })
+  }
+
+  for (const { path, link } of [
+    { path: '/questionnaires/', link: /^About the/ },
+    { path: '/texts/', link: /Yoga Sūtra/ },
+  ]) {
+    test(`${path}: the whole card is the card's link`, async ({ page }) => {
+      await gotoReady(page, path)
+      const card = page
+        .locator('main article:not(:has(article))')
+        .filter({ has: page.getByRole('link', { name: link }) })
+        .first()
+      await card.scrollIntoViewIfNeeded()
+      const answers = await card.evaluate((element) => {
+        const box = element.getBoundingClientRect()
+        const own = element.querySelector('a')
+        return [
+          [box.left + box.width / 2, box.top + box.height / 2],
+          [box.left + 16, box.bottom - 16],
+          [box.right - 16, box.top + 16],
+        ].map(([x, y]) => document.elementFromPoint(x ?? 0, y ?? 0)?.closest('a') === own)
+      })
+      expect(answers).toEqual([true, true, true])
+    })
+  }
+
+  test('a focused Questionnaire card rings the whole card', async ({ page }) => {
+    await gotoReady(page, '/questionnaires/')
+    const card = page.locator('main article article').first()
+    const box = await card.boundingBox()
+    const ringWidth = await card
+      .getByRole('link', { name: /^About the/ })
+      .evaluate((element) => Number.parseFloat(getComputedStyle(element, '::after').width))
+    expect(ringWidth).toBeCloseTo(box?.width ?? 0, 0)
+  })
+
+  for (const kind of ['segment', 'global'] as const) {
+    test(`the ${kind} error page gives its Emblem the 404's room`, async ({ page }) => {
+      await gotoErrorPage(page, kind)
+      const gap = await page
+        .locator('main img')
+        .first()
+        .evaluate((element) => {
+          const next = element.nextElementSibling
+          if (!next) throw new Error('The words follow the Emblem.')
+          return next.getBoundingClientRect().top - element.getBoundingClientRect().bottom
+        })
+      expect(gap).toBeCloseTo(32, 0)
+    })
+  }
+
+  const CHIP = /^I can.t focus$/
+
+  test(
+    'a pressed starting point on the 404 presses in',
+    { tag: '@one-width' },
+    async ({ page }) => {
+      await gotoReady(page, MISSING)
+      await page.getByRole('link', { name: CHIP }).hover()
+      await page.mouse.down()
+      await expect(page.getByRole('link', { name: CHIP })).toHaveCSS(
+        'transform',
+        'matrix(1, 0, 0, 1, 0, 1)',
+      )
+      await page.mouse.move(1, 1)
+      await page.mouse.up()
+    },
+  )
+
+  test(
+    'under reduced motion a pressed starting point stays put',
+    { tag: '@one-width' },
+    async ({ page }) => {
+      await page.emulateMedia({ reducedMotion: 'reduce' })
+      await gotoReady(page, MISSING)
+      await page.getByRole('link', { name: CHIP }).hover()
+      await page.mouse.down()
+      await expect(page.getByRole('link', { name: CHIP })).toHaveCSS('transform', 'none')
       await page.mouse.move(1, 1)
       await page.mouse.up()
     },
