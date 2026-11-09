@@ -31,6 +31,28 @@ function withSessionHint(response: Response, request: Request): Response {
   })
 }
 
+/**
+ * The only addresses passed on to Better Auth. Its limiter runs before it looks for a route and
+ * counts each path separately, so anything else would be an unlimited stream of database writes.
+ */
+const SERVED_PATHS: ReadonlySet<string> = new Set([
+  '/get-session',
+  '/sign-in/social',
+  '/callback/google',
+  '/email-otp/send-verification-otp',
+  '/sign-in/email-otp',
+  '/sign-out',
+  '/delete-user',
+  '/delete-user/callback',
+  // Better Auth sends a failed Google return here when it can't tell which screen it came from.
+  '/error',
+  // Asks only whether the route is up.
+  '/ok',
+])
+
+const isServed = (request: Request) =>
+  SERVED_PATHS.has(new URL(request.url).pathname.replace(/^\/api\/auth/, '').replace(/\/+$/, ''))
+
 interface AuthRouteDeps {
   features: Pick<Features, 'login'>
   getAuth: () => Pick<Auth, 'handler'>
@@ -38,7 +60,7 @@ interface AuthRouteDeps {
 
 export function authRoute({ features, getAuth }: AuthRouteDeps) {
   const handle = async (request: Request): Promise<Response> => {
-    if (!features.login) return new Response(null, { status: 404 })
+    if (!features.login || !isServed(request)) return new Response(null, { status: 404 })
     return withSessionHint(await getAuth().handler(request), request)
   }
   return { GET: handle, POST: handle }

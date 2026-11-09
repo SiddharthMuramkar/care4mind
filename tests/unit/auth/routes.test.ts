@@ -83,7 +83,7 @@ describe('every auth route', () => {
     )
   })
 
-  it('is bot-checked, switched off, needs a user-session, or is reviewed', async () => {
+  it('is bot-checked, switched off, needs a user-session, is reviewed, or isn’t served', async () => {
     const ungated: string[] = []
     for (const { path, method } of listedRoutes()) {
       if (DISABLED_PATHS.includes(path)) continue
@@ -92,7 +92,10 @@ describe('every auth route', () => {
       const response = await login.request(method as 'GET' | 'POST', address(path), {
         body: VALID_BODIES[path] ?? {},
       })
-      if (response.status !== 401) ungated.push(`${method} ${path} answered ${response.status}`)
+      // 404: the auth route doesn't pass it on, so nothing behind it can run.
+      if (response.status !== 401 && response.status !== 404) {
+        ungated.push(`${method} ${path} answered ${response.status}`)
+      }
     }
     expect(ungated, 'routes with no gate: bot-check, switch off, or review them').toEqual([])
   })
@@ -130,6 +133,25 @@ describe('every auth route', () => {
   it('keeps the reviewed list real: nothing on it has gone away', () => {
     const paths = listedRoutes().map(({ path }) => path)
     for (const path of REVIEWED_PATHS) expect(paths, path).toContain(path)
+  })
+})
+
+describe('an address no route of ours is at', () => {
+  it.each([
+    ['GET', '/a1'],
+    ['POST', '/a2'],
+    ['GET', '/callback/not-a-provider'],
+    ['GET', '/reset-password/not-a-token'],
+  ] as const)('answers %s %s with a 404, and writes nothing', async (method, path) => {
+    expect((await login.request(method, path)).status).toBe(404)
+    expect(await login.count('rateLimit')).toBe(0)
+  })
+
+  it('never reaches a limit, however many such addresses are asked for', async () => {
+    for (let attempt = 0; attempt < 10; attempt++) {
+      expect((await login.request('GET', `/made-up-${attempt}`)).status).toBe(404)
+    }
+    expect(await login.count('rateLimit')).toBe(0)
   })
 })
 
