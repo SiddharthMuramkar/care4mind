@@ -33,9 +33,7 @@
     "content:new": "node scripts/content/new.mjs",
     "content:verify": "node scripts/content/registry.mjs && node scripts/content/verify.mjs",
     "content:report": "node scripts/content/registry.mjs && node scripts/content/report.mjs",
-    "content:fidelity": "vitest run --config vitest.fidelity.config.ts",
-    "ruleset:check": "node scripts/github/ruleset.mjs",
-    "ruleset:apply": "node scripts/github/apply-ruleset.mjs"
+    "content:fidelity": "vitest run --config vitest.fidelity.config.ts"
   },
   "dependencies": {
     "@base-ui/react": "1.9.0",
@@ -64,7 +62,6 @@
     "typescript": "6.0.3",
     "typescript-eslint": "8.72.1",
     "vite": "8.3.5",
-    "vitest": "5.0.5",
-    "yaml": "2.9.1"
+    "vitest": "5.0.5"
   }
 }

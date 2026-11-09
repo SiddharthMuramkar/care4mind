@@ -12,7 +12,17 @@ const scripts = Object.keys(
 )
 
 // pnpm's own commands, which no package.json script needs to define.
-const PNPM_COMMANDS = new Set(['add', 'dlx', 'exec', 'install', 'remove', 'run', 'update', 'why'])
+const PNPM_COMMANDS = new Set([
+  'add',
+  'audit',
+  'dlx',
+  'exec',
+  'install',
+  'remove',
+  'run',
+  'update',
+  'why',
+])
 
 /** Pointers that name, on purpose, something this repo doesn't hold, and why. */
 const ELSEWHERE = new Map([['MISSION.md', 'the /teach workspace, outside the repo']])
