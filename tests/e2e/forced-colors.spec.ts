@@ -255,6 +255,17 @@ test('the hero Medallion ring draws in the text colour of the theme', async ({ p
   }
 })
 
+test("the Plate viewer's buttons keep their edges and their arrows", async ({ page }) => {
+  await gotoReady(page, '/')
+  const group = page.getByRole('group', { name: 'Paintings' })
+  for (const name of ['Previous painting', 'Next painting']) {
+    const button = group.getByRole('button', { name, exact: true })
+    await expectVisibleEdge(button, name)
+    const stroke = await button.locator('svg').evaluate((glyph) => getComputedStyle(glyph).stroke)
+    expect(stroke, `${name}: arrow`).not.toMatch(/^none$|^transparent$|^rgba\(.*,\s*0\)$/)
+  }
+})
+
 const PARTS = [
   'Everyday Experience - 1',
   'Everyday Experience - 2',

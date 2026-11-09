@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 
 import { art, heroPlates } from '@/art'
-import { PlateViewer } from '@/components/art'
+import { MedallionRing, PlateViewer } from '@/components/art'
 import { ConceptCard } from '@/components/ConceptCard'
 import { Fleuron } from '@/components/Fleuron'
 import { Folio } from '@/components/Folio'
@@ -36,7 +36,11 @@ export default async function HomePage() {
       <main id="main" className={styles.main}>
         <section className={styles.hero} aria-labelledby="home-title">
           <Folio className={styles.heroFolio}>
-            <PlateViewer plates={plates} className={styles.heroPlate} />
+            <PlateViewer
+              plates={plates}
+              ring={<MedallionRing size={360} still />}
+              className={styles.heroPlate}
+            />
             <p className={styles.motto}>
               <span lang="sa-Deva" className={styles.heroDeva}>
                 {page.shloka.devanagari}
