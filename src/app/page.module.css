@@ -71,6 +71,16 @@
   min-height: 48px;
   color: var(--color-link);
   text-decoration-line: underline;
+  text-underline-offset: 0.18em;
+}
+
+/* The line thickens under the pointer and thickens again when pressed, moving nothing. */
+.textLink:hover {
+  text-decoration-thickness: 2px;
+}
+
+.textLink:active {
+  text-decoration-thickness: 3px;
 }
 
 .heroFleuron {
@@ -168,9 +178,20 @@
   text-decoration: none;
 }
 
-.mindChip:hover {
+.mindChip:is(:hover, :active) {
   border-color: var(--color-ink);
   color: var(--color-link);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .mindChip {
+    transition: transform var(--duration-quick) var(--ease-out);
+  }
+
+  .mindChip:active {
+    transform: translateY(1px);
+    transition-duration: var(--duration-instant);
+  }
 }
 
 /* Sections on the indigo ground */
@@ -190,6 +211,17 @@
   font-weight: 500;
   font-size: clamp(2.25rem, 6vw, 3.25rem);
   line-height: 1.1;
+}
+
+/* A heading with its Sticker after it, so every heading keeps the same left edge. */
+.sectionHead {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.sectionSticker {
+  flex: none;
 }
 
 .sectionIntro {
@@ -240,6 +272,25 @@
   grid-column: 1 / -1;
 }
 
+/* Each card fills its row's height, so a row's cards end level. */
+.cards > li {
+  display: grid;
+  min-width: 0;
+}
+
+/* The Emblem above the words on a phone, and beside them from 48rem. */
+@media (width >= 48rem) {
+  .whoBehind {
+    grid-template-columns: auto minmax(0, 1fr);
+    column-gap: 2rem;
+    align-items: center;
+  }
+
+  .emblem {
+    grid-row: 1 / span 2;
+  }
+}
+
 .closingSection {
   display: grid;
   gap: 1.5rem;
@@ -267,4 +318,31 @@
 
 .closingCta {
   margin: 0;
+}
+
+/*
+ * From 64rem the sections widen with the hero's Folio, and the cards take explicit columns: at
+ * these widths `auto-fill` leaves the five topics at four and one, and the three featured at two.
+ * Last, so it overrides the rules above at equal specificity.
+ */
+@media (width >= 64rem) {
+  .section,
+  .closingSection {
+    max-width: 72rem;
+  }
+
+  .topics {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+
+  .cards {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+/* Five to a row before the sections reach full width, the longest title needs a phone's size to stay whole. */
+@media (64rem <= width < 72rem) {
+  .topics h3 {
+    font-size: 1.3125rem;
+  }
 }

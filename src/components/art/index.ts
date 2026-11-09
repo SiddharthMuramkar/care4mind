@@ -1,4 +1,5 @@
 export { ArtFigure } from './ArtFigure'
+export { FolkBorder } from './FolkBorder'
 export { HeadPicture } from './HeadPicture'
 export { KarmaCycle } from './KarmaCycle'
 export { Medallion } from './Medallion'

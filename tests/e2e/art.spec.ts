@@ -1,4 +1,4 @@
-import type { Page } from '@playwright/test'
+import type { Locator, Page } from '@playwright/test'
 
 import { artFor } from '@/art'
 import { heroPlates } from '@/art/assign'
@@ -1262,6 +1262,209 @@ test.describe('the plain list of sources', () => {
   test('passes axe', async ({ page }) => {
     await gotoReady(page, '/credits/sources/')
     await expectNoAxeViolations(page)
+  })
+})
+
+/** A homepage section, found by its heading or label. */
+const homeSection = (page: Page, name: string) => page.getByRole('region', { name, exact: true })
+
+const MIND = 'What’s on your mind?'
+const TOPICS = 'Explore by topic'
+const FEATURED = 'Start with these'
+const WHO = 'Who’s behind this'
+const CLOSING = 'Closing'
+
+test.describe('the homepage around its pictures', () => {
+  test('a decorative 56 px Sticker stands beside What’s on your mind?', async ({ page }) => {
+    await gotoReady(page, '/')
+    const section = homeSection(page, MIND)
+    const sticker = section.locator('img')
+    await expect(sticker).toHaveCount(1)
+    await expect(sticker).toHaveAttribute('alt', '')
+    expect(decodeURIComponent((await sticker.getAttribute('src')) ?? '')).toContain(
+      '/art/stickers/mind-dome.png',
+    )
+    const [box, heading] = await Promise.all([
+      sticker.boundingBox(),
+      section.getByRole('heading', { level: 2 }).boundingBox(),
+    ])
+    if (!box || !heading) throw new Error('The heading and its Sticker are laid out.')
+    expect(box.width).toBe(56)
+    expect(box.height).toBe(56)
+    expect(box.x, 'after the heading').toBeGreaterThanOrEqual(heading.x + heading.width)
+    expect(box.y + box.height / 2, 'level with the heading').toBeGreaterThan(heading.y)
+    expect(box.y + box.height / 2).toBeLessThan(heading.y + heading.height)
+  })
+
+  for (const { width, beside } of [
+    { width: 360, beside: false },
+    { width: 768, beside: true },
+    { width: 1440, beside: true },
+  ]) {
+    test(
+      `at ${width} px the 120 px Emblem stands ${beside ? 'beside' : 'above'} Who’s behind this`,
+      { tag: '@self-width' },
+      async ({ page }) => {
+        await page.setViewportSize({ width, height: 900 })
+        await gotoReady(page, '/')
+        const section = homeSection(page, WHO)
+        const emblem = section.getByRole('img', { name: /^Care4Mind's emblem/ })
+        await expect(emblem).toHaveCount(1)
+        await emblem.scrollIntoViewIfNeeded()
+        const [box, heading] = await Promise.all([
+          emblem.boundingBox(),
+          section.getByRole('heading', { level: 2 }).boundingBox(),
+        ])
+        if (!box || !heading) throw new Error('The heading and the Emblem are laid out.')
+        expect(box.width).toBe(120)
+        expect(box.height).toBe(120)
+        if (beside) expect(box.x + box.width).toBeLessThan(heading.x)
+        else expect(box.y + box.height).toBeLessThanOrEqual(heading.y)
+      },
+    )
+  }
+
+  test('the folk border runs the width of the closing section, above its line', async ({
+    page,
+  }) => {
+    await gotoReady(page, '/')
+    const section = homeSection(page, CLOSING)
+    const border = section.locator('svg')
+    await expect(border).toHaveCount(1)
+    await expect(border).toHaveAttribute('aria-hidden', 'true')
+    const [box, line, inner] = await Promise.all([
+      border.boundingBox(),
+      section.locator('p').first().boundingBox(),
+      section.evaluate((element) => {
+        const { paddingLeft, paddingRight } = getComputedStyle(element)
+        return element.clientWidth - parseFloat(paddingLeft) - parseFloat(paddingRight)
+      }),
+    ])
+    if (!box || !line) throw new Error('The border and the closing line are laid out.')
+    expect(box.height).toBe(12)
+    expect(Math.abs(box.width - inner)).toBeLessThan(1)
+    expect(box.y + box.height).toBeLessThanOrEqual(line.y)
+  })
+
+  test('the sections widen to 72rem from 64rem', { tag: '@self-width' }, async ({ page }) => {
+    await page.setViewportSize({ width: 1440, height: 900 })
+    await gotoReady(page, '/')
+    for (const name of [MIND, TOPICS, FEATURED, WHO, CLOSING]) {
+      const box = await homeSection(page, name).boundingBox()
+      expect(box?.width, name).toBe(72 * 16)
+    }
+  })
+
+  for (const width of [1024, 1440]) {
+    test(
+      `at ${width} px the five topic cards and three featured cards each fill one row`,
+      { tag: '@self-width' },
+      async ({ page }) => {
+        await page.setViewportSize({ width, height: 900 })
+        await gotoReady(page, '/')
+        const tops = async (list: Locator) =>
+          Promise.all((await list.all()).map(async (item) => (await item.boundingBox())?.y))
+
+        const topicCards = homeSection(page, TOPICS).locator('article')
+        await expect(topicCards).toHaveCount(5)
+        expect(new Set(await tops(topicCards)).size, 'five topics, one row').toBe(1)
+
+        const featured = homeSection(page, FEATURED).locator('article')
+        await expect(featured).toHaveCount(3)
+        expect(new Set(await tops(featured)).size, 'three cards, one row').toBe(1)
+        const heights = await Promise.all(
+          (await featured.all()).map(async (card) => (await card.boundingBox())?.height),
+        )
+        expect(new Set(heights).size, 'all one height').toBe(1)
+        const links = homeSection(page, FEATURED).getByRole('link', { name: /^Read about/ })
+        expect(new Set(await tops(links)).size, 'their links level').toBe(1)
+
+        for (const cards of [topicCards, featured]) {
+          const items = cards.locator('xpath=parent::li')
+          for (const [i, card] of (await cards.all()).entries()) {
+            const [box, column] = await Promise.all([
+              card.boundingBox(),
+              items.nth(i).boundingBox(),
+            ])
+            if (!box || !column) throw new Error('A card and its column are laid out.')
+            expect(Math.abs(box.width - column.width), 'a card fills its column').toBeLessThan(1)
+          }
+          const titles = cards.getByRole('heading', { level: 3 })
+          for (const title of await titles.all()) {
+            expect(await brokenWords(title), 'no word in a title splits').toEqual([])
+          }
+        }
+      },
+    )
+  }
+})
+
+/** The words of an element's text that run onto a second line. */
+const brokenWords = (element: Locator) =>
+  element.evaluate((node) => {
+    const walker = document.createTreeWalker(node, NodeFilter.SHOW_TEXT)
+    const broken: string[] = []
+    while (walker.nextNode()) {
+      const text = walker.currentNode as Text
+      for (const { 0: word, index } of text.data.matchAll(/\S+/g)) {
+        const range = document.createRange()
+        range.setStart(text, index)
+        range.setEnd(text, index + word.length)
+        const lines = new Set([...range.getClientRects()].map(({ top }) => Math.round(top)))
+        if (lines.size > 1) broken.push(word)
+      }
+    }
+    return broken
+  })
+
+test.describe('the homepage’s picture weight', { tag: '@self-width' }, () => {
+  // The chromium projects run at 1x, which would fetch the smaller file of each pair.
+  test.use({ deviceScaleFactor: 2 })
+
+  const KB = 1024
+
+  test('the phone’s first screen stays within 120 KB of pictures', async ({ page }) => {
+    await page.setViewportSize({ width: 360, height: 740 })
+    await gotoReady(page, '/')
+    const hero = page.locator(HERO)
+    await expect
+      .poll(() => hero.evaluate((image: HTMLImageElement) => image.naturalWidth))
+      .toBeGreaterThan(0)
+    const bytes = await page.evaluate(() => {
+      const onScreen = [...document.querySelectorAll<HTMLImageElement>('main img')].filter(
+        (image) => {
+          const { top, bottom } = image.getBoundingClientRect()
+          return top < window.innerHeight && bottom > 0
+        },
+      )
+      const entries = performance.getEntriesByType('resource') as PerformanceResourceTiming[]
+      return onScreen.reduce(
+        (sum, image) =>
+          sum + (entries.find(({ name }) => name === image.currentSrc)?.encodedBodySize ?? 0),
+        0,
+      )
+    })
+    expect(bytes, 'the hero Plate was measured').toBeGreaterThan(0)
+    expect(bytes).toBeLessThanOrEqual(120 * KB)
+  })
+
+  test('the whole page stays within 350 KB of pictures', async ({ page }) => {
+    test.slow()
+    await page.setViewportSize({ width: 1440, height: 900 })
+    await gotoReady(page, '/')
+    for (const picture of await page.locator('main img').all()) {
+      await picture.scrollIntoViewIfNeeded()
+      await expect
+        .poll(() => picture.evaluate((image: HTMLImageElement) => image.naturalWidth))
+        .toBeGreaterThan(0)
+    }
+    const bytes = await page.evaluate(() =>
+      (performance.getEntriesByType('resource') as PerformanceResourceTiming[])
+        .filter(({ name }) => name.includes('/_next/image'))
+        .reduce((sum, { encodedBodySize }) => sum + encodedBodySize, 0),
+    )
+    expect(bytes, 'pictures were measured').toBeGreaterThan(0)
+    expect(bytes).toBeLessThanOrEqual(350 * KB)
   })
 })
 
