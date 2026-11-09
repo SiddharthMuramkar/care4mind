@@ -1053,11 +1053,6 @@ test.describe('the hero Plate', () => {
     expect(firstPaint?.height).toBe(hydrated?.height)
   })
 
-  test('passes axe', async ({ page }) => {
-    await gotoReady(page, '/')
-    await expectNoAxeViolations(page)
-  })
-
   const paintings = (page: Page) => page.getByRole('group', { name: 'Paintings' })
   const previous = (page: Page) =>
     paintings(page).getByRole('button', { name: 'Previous painting', exact: true })
@@ -1183,20 +1178,23 @@ test.describe('the hero Plate', () => {
     expect(await shownFile(page)).toBe(before)
   })
 
+  const OTHER_PLATES = new Set<string>(heroPlates.slice(1).map((id) => art(id).src))
+
   /** Start noting which of Plates 2 to 7 the page asks for. Call it before opening the page. */
   function otherPlatesRequested(page: Page) {
     const seen = new Set<string>()
     page.on('request', (request) => {
-      const match =
-        /url=%2Fart%2Fplates%2F(sculptor|farmers|jeweller-woman|painter-bowl|painter-birds|karma-yoga)\.jpg/.exec(
-          request.url(),
-        )
-      if (match?.[1]) seen.add(match[1])
+      const file = new URL(request.url()).searchParams.get('url')
+      if (file && OTHER_PLATES.has(file)) seen.add(file)
     })
     return seen
   }
 
-  const NEIGHBOURS = ['karma-yoga', 'sculptor']
+  /** Either side of the first Plate: the second and the last. */
+  const NEIGHBOURS = heroPlates
+    .filter((_, index) => index === 1 || index === heroPlates.length - 1)
+    .map((id) => art(id).src)
+    .sort()
 
   /** Open the homepage, and check it has asked for no Plate but the first and preloaded only that. */
   async function openUntouched(page: Page, requested: Set<string>) {

@@ -72,7 +72,6 @@ export function PlateViewer({
 
   const warmOnApproach = {
     onPointerEnter: () => warm(asked),
-    onPointerDown: () => warm(asked),
     onFocus: () => warm(asked),
   }
 
