@@ -8,7 +8,7 @@ import cta from '@/components/Cta'
 import { authAddress, DELETE_ACCOUNT_PARAM, PRIVACY_PATH } from '@/lib/auth/shared'
 
 import styles from './DeleteAccount.module.css'
-import { isLoggedIn } from './user-session'
+import { isLoggedIn } from '../login-slot'
 
 const never = () => () => {}
 

@@ -2,7 +2,7 @@ import Link from 'next/link'
 
 import { SearchGlyph } from '@/components/glyphs'
 import { CurrentLink } from '@/components/nav'
-import { LoginSlot } from '@/components/login'
+import { LoginSlot } from '@/components/login-slot'
 import { MenuButton } from '@/components/nav'
 import { SectionNav } from '@/components/nav'
 import { siteNav } from '@/components/nav'

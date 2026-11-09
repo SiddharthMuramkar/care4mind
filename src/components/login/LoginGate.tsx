@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useEffect, useState, type ReactNode } from 'react'
 
 import { useHydrated } from '../browser'
-import { isLoggedIn } from './user-session'
+import { isLoggedIn } from '../login-slot'
 import styles from './LoginGate.module.css'
 
 /**

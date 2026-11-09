@@ -24,7 +24,9 @@ export function isLoggedIn(): Promise<boolean> {
 async function askServer(): Promise<boolean> {
   try {
     const response = await fetch(authAddress('/get-session'))
-    const session: unknown = response.ok ? await response.json() : null
+    // Only a real answer of no user-session clears the hint: the check failing says nothing.
+    if (!response.ok) return false
+    const session: unknown = await response.json()
     const loggedIn = typeof session === 'object' && session !== null && 'user' in session
     if (!loggedIn) clearSessionHint()
     return loggedIn
