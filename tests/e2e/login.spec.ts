@@ -326,7 +326,9 @@ test.describe('without JavaScript', { tag: '@one-width' }, () => {
   for (const path of ['/sign-up/', '/log-in/']) {
     test(`${path} shows the note in place of a form that couldn’t work`, async ({ page }) => {
       await page.goto(path)
-      await expect(page.getByRole('main').getByText('needs JavaScript')).toBeVisible()
+      // By element: Playwright's text matching doesn't look inside noscript.
+      await expect(page.locator('main noscript p')).toContainText('needs JavaScript')
+      await expect(page.locator('main noscript p')).toBeVisible()
       await expect(page.getByLabel('Your email')).toBeHidden()
       await expect(page.locator('button[type="submit"]')).toBeDisabled()
     })
@@ -334,11 +336,13 @@ test.describe('without JavaScript', { tag: '@one-width' }, () => {
 })
 
 test.describe('the sign-up form’s code', { tag: '@one-width' }, () => {
-  test('stays off a page with no form on it', async ({ page, request }) => {
-    await gotoReady(page, '/concepts/vikshepa/')
-    const sources = await page
-      .locator('script[src]')
-      .evaluateAll((scripts) => scripts.map((script) => (script as HTMLScriptElement).src))
+  test('stays off a page with no form on it', async ({ request }) => {
+    // The page's own scripts, from its HTML: the browser also prefetches the next page's chunks.
+    const html = await (await request.get('/concepts/vikshepa/')).text()
+    const sources = [...html.matchAll(/<script[^>]*\ssrc="([^"]+)"/g)].map(
+      (match) => match[1] ?? '',
+    )
+    expect(sources.length).toBeGreaterThan(0)
     for (const source of sources) {
       const text = await (await request.get(source)).text()
       expect(text, source).not.toContain('challenges.cloudflare.com')
