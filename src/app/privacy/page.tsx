@@ -1,9 +1,7 @@
 import type { Metadata } from 'next'
-import { notFound } from 'next/navigation'
 
 import { DeleteAccount } from '@/components/login'
 import { ReadingPage } from '@/components/ReadingPage'
-import { features } from '@/config/features'
 import { hrefFor } from '@/content'
 import { metadataFor } from '@/lib/metadata'
 
@@ -22,9 +20,6 @@ export function generateMetadata(): Promise<Metadata> {
  * an address.
  */
 export default function PrivacyPage() {
-  // Not only the metadata: generateMetadata answering 404 doesn't stop this body rendering.
-  if (!features.login) notFound()
-
   return (
     <ReadingPage path={PATH} titleId="privacy-title" title="Privacy">
       <p>

@@ -61,6 +61,8 @@ test(
     expect(await page.text()).not.toContain('What we keep')
     const payload = await request.get('/privacy/', { headers: { RSC: '1' } })
     expect(await payload.text()).not.toContain('What we keep')
+    const file = await request.get('/privacy.rsc')
+    expect(await file.text()).not.toContain('What we keep')
   },
 )
 

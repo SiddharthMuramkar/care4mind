@@ -1,9 +1,7 @@
 import type { Metadata } from 'next'
-import { notFound } from 'next/navigation'
 
 import { EmailCodeForm, InAppBrowserPrompt } from '@/components/login'
 import { ReadingPage } from '@/components/ReadingPage'
-import { features } from '@/config/features'
 import { hrefFor } from '@/content'
 import { turnstileSiteKey } from '@/lib/auth/settings'
 import { metadataFor } from '@/lib/metadata'
@@ -16,9 +14,6 @@ export function generateMetadata(): Promise<Metadata> {
 
 /** Log in: only an email, then the code sent to it. */
 export default function LogInPage() {
-  // Not only the metadata: generateMetadata answering 404 doesn't stop this body rendering.
-  if (!features.login) notFound()
-
   return (
     <ReadingPage path={PATH} titleId="log-in-title" title="Log in">
       <noscript>Log in needs JavaScript, so that the bot check can run.</noscript>
