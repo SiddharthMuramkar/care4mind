@@ -47,5 +47,10 @@ export function trail(graph: ContentGraph, flags: Features, path: string): Crumb
     const topic = graph.record('concept', id)?.topics.primary
     if (topic !== undefined) add(hrefFor({ kind: 'topic', id: topic }))
   }
-  return [...above, page].map((route) => crumb(route, graph))
+  // Above a page, the homepage's crumb is a way back, so it says so.
+  const link = (route: RecordRoute): Crumb =>
+    route.entry.kind === 'home'
+      ? { ...crumb(route, graph), label: 'Go to home' }
+      : crumb(route, graph)
+  return [...above.map(link), crumb(page, graph)]
 }

@@ -63,7 +63,7 @@ test.describe('the proposals page', () => {
   })
 
   test(
-    'is labelled a proposal by its heading, under Home › Proposals',
+    'is labelled a proposal by its heading, under Go to home › Proposals',
     { tag: '@one-width' },
     async ({ page }) => {
       await gotoReady(page, PATH)
@@ -71,7 +71,7 @@ test.describe('the proposals page', () => {
       await expect(header).toContainText('Proposal')
       await expect(header).toContainText('Each awaits the Project owner’s decision')
       const crumbs = page.getByRole('navigation', { name: 'Breadcrumb' }).getByRole('listitem')
-      await expect(crumbs).toHaveText(['Home', 'Proposals'])
+      await expect(crumbs).toHaveText(['Go to home', 'Proposals'])
     },
   )
 

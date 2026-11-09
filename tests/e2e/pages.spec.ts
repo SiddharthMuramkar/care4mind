@@ -63,7 +63,7 @@ for (const route of ROUTES_IN_SCOPE) {
           .soft(topic, `${where}: Breadcrumb’s topic link`)
           .toHaveAttribute('href', /^\/topics\/[^/]+\/$/)
       } else {
-        const home = trail.getByRole('link', { name: 'Home', exact: true })
+        const home = trail.getByRole('link', { name: 'Go to home', exact: true })
         await expect.soft(home, `${where}: Breadcrumb links to Home`).toBeVisible()
         await expect.soft(home, `${where}: Breadcrumb’s Home link`).toHaveAttribute('href', '/')
       }

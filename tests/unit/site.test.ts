@@ -227,7 +227,7 @@ describe('breadcrumbs', () => {
 
   it('leads a Concept through its primary topic, each crumb a link, the Concept last', async () => {
     expect(await site.trail('/concepts/vikshepa/')).toEqual([
-      { label: 'Home', href: '/' },
+      { label: 'Go to home', href: '/' },
       { label: 'Concepts', href: '/concepts/' },
       { label: 'Mind: states and obstacles', href: '/topics/mind/' },
       { label: 'Vikṣepa', href: '/concepts/vikshepa/', lang: 'sa-Latn', gloss: 'Distraction' },
@@ -235,29 +235,41 @@ describe('breadcrumbs', () => {
   })
 
   it('gives one page of every other kind a trail from Home through its section', async () => {
-    expect(await labels('/concepts/')).toEqual(['Home', 'Concepts'])
-    expect(await labels('/concepts/map/')).toEqual(['Home', 'Concepts', 'Concept map'])
-    expect(await labels('/topics/values/')).toEqual(['Home', 'Concepts', 'Values: yama and niyama'])
-    expect(await labels('/texts/')).toEqual(['Home', 'Traditional texts'])
-    expect(await labels('/texts/yoga-sutra/')).toEqual(['Home', 'Traditional texts', 'Yoga Sūtra'])
-    expect(await labels('/questionnaires/')).toEqual(['Home', 'Questionnaires'])
+    expect(await labels('/concepts/')).toEqual(['Go to home', 'Concepts'])
+    expect(await labels('/concepts/map/')).toEqual(['Go to home', 'Concepts', 'Concept map'])
+    expect(await labels('/topics/values/')).toEqual([
+      'Go to home',
+      'Concepts',
+      'Values: yama and niyama',
+    ])
+    expect(await labels('/texts/')).toEqual(['Go to home', 'Traditional texts'])
+    expect(await labels('/texts/yoga-sutra/')).toEqual([
+      'Go to home',
+      'Traditional texts',
+      'Yoga Sūtra',
+    ])
+    expect(await labels('/questionnaires/')).toEqual(['Go to home', 'Questionnaires'])
     expect(await labels('/questionnaires/karmayoga-scale/')).toEqual([
-      'Home',
+      'Go to home',
       'Questionnaires',
       'KarmaYoga Scale',
     ])
     expect(await labels('/questionnaires/karmayoga-scale/take/')).toEqual([
-      'Home',
+      'Go to home',
       'Questionnaires',
       'KarmaYoga Scale',
       'Take it',
     ])
-    expect(await labels('/library/')).toEqual(['Home', 'Library'])
-    expect(await labels('/library/references/')).toEqual(['Home', 'Library', 'References'])
-    expect(await labels('/library/textbooks/')).toEqual(['Home', 'Library', 'Textbooks'])
-    expect(await labels('/library/methods/')).toEqual(['Home', 'Library', 'Therapy approaches'])
-    expect(await labels('/search/')).toEqual(['Home', 'Search'])
-    expect(await labels('/proposals/')).toEqual(['Home', 'Proposals'])
+    expect(await labels('/library/')).toEqual(['Go to home', 'Library'])
+    expect(await labels('/library/references/')).toEqual(['Go to home', 'Library', 'References'])
+    expect(await labels('/library/textbooks/')).toEqual(['Go to home', 'Library', 'Textbooks'])
+    expect(await labels('/library/methods/')).toEqual([
+      'Go to home',
+      'Library',
+      'Therapy approaches',
+    ])
+    expect(await labels('/search/')).toEqual(['Go to home', 'Search'])
+    expect(await labels('/proposals/')).toEqual(['Go to home', 'Proposals'])
   })
 })
 

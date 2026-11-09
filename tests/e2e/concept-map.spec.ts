@@ -69,7 +69,7 @@ const colourOf = async (locator: Locator, property = 'color') =>
   )
 
 test.describe('the Concept map', () => {
-  test('is labelled a proposal by its heading, under Home › Concepts › Concept map', async ({
+  test('is labelled a proposal by its heading, under Go to home › Concepts › Concept map', async ({
     page,
   }) => {
     await gotoReady(page, PATH)
@@ -80,7 +80,7 @@ test.describe('the Concept map', () => {
     )
     await expect(header).toContainText('Awaiting the Project owner’s decision')
     const crumbs = page.getByRole('navigation', { name: 'Breadcrumb' }).getByRole('listitem')
-    await expect(crumbs).toHaveText(['Home', 'Concepts', 'Concept map'])
+    await expect(crumbs).toHaveText(['Go to home', 'Concepts', 'Concept map'])
   })
 
   test('lists every connection with its reasons, both Concepts as links', async ({ page }) => {
