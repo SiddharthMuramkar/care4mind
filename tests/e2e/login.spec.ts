@@ -33,6 +33,22 @@ async function detailsAndCode(
   await expect(page.getByRole('heading', { name: 'Enter your emailed code' })).toBeVisible()
 }
 
+test(
+  'a take page carries none of the sign-up form’s script',
+  { tag: '@one-width' },
+  async ({ request }) => {
+    const html = await (await request.get(FLOW)).text()
+    const sources = [...html.matchAll(/<script[^>]+src="(\/_next\/[^"]+)"/g)].map(
+      ([, source]) => source as string,
+    )
+    expect(sources.length, 'the page has scripts to read').toBeGreaterThan(0)
+    for (const source of sources) {
+      const script = await (await request.get(source)).text()
+      expect(script, source).not.toContain('I am 18 or over')
+    }
+  },
+)
+
 test.describe('the header', () => {
   test('shows Log in beside Search and carries the page to come back to', async ({ page }) => {
     await gotoReady(page, '/concepts/vikshepa/')
@@ -117,6 +133,24 @@ test.describe('Sign up and Log in', { tag: '@one-width' }, () => {
     await expect(header(page).getByRole('button', { name: 'Log out' })).toBeVisible()
   })
 
+  test('takes the emailed line pasted whole, and ignores the digit in Care4Mind', async ({
+    page,
+    context,
+  }, info) => {
+    await context.grantPermissions(['clipboard-read', 'clipboard-write'])
+    const email = freshEmail(info)
+    await gotoReady(page, '/sign-up/')
+    await detailsAndCode(page, { name: 'Asha Rao', email })
+    const code = await emailedCode(email)
+    await page.getByLabel('Your six-digit code').focus()
+    await page.evaluate(
+      (text) => navigator.clipboard.writeText(text),
+      `Your Care4Mind code is ${code}.`,
+    )
+    await page.keyboard.press('ControlOrMeta+V')
+    await expect(page.getByLabel('Your six-digit code')).toHaveValue(code)
+  })
+
   test('says a wrong code is wrong, and leaves the field to try again', async ({ page }, info) => {
     const email = freshEmail(info)
     await gotoReady(page, '/sign-up/')
@@ -124,10 +158,56 @@ test.describe('Sign up and Log in', { tag: '@one-width' }, () => {
     const code = await emailedCode(email)
     await page.getByLabel('Your six-digit code').fill(code === '000000' ? '111111' : '000000')
     await page.getByRole('button', { name: 'Confirm' }).click()
-    await expect(page.getByRole('main').getByRole('alert')).toHaveText(/isn.t right/)
+    await expect(page.getByRole('main').getByRole('alert')).toHaveText(
+      /isn.t right.*ask for a new one/,
+    )
     await page.getByLabel('Your six-digit code').fill(code)
     await page.getByRole('button', { name: 'Confirm' }).click()
     await expect(header(page).getByRole('button', { name: 'Log out' })).toBeVisible()
+  })
+
+  test('lets a mistyped email be changed, keeping the name and the tick', async ({
+    page,
+  }, info) => {
+    const email = freshEmail(info)
+    await gotoReady(page, '/sign-up/')
+    await detailsAndCode(page, { name: 'Asha Rao', email: `typo-${email}` })
+
+    await page.getByRole('button', { name: 'Use a different email' }).click()
+
+    await expect(page.getByLabel('Your email')).toBeFocused()
+    await expect(page.getByLabel('Your name')).toHaveValue('Asha Rao')
+    await expect(page.getByRole('checkbox', { name: /18 or over/ })).toBeChecked()
+    await page.getByLabel('Your email').fill(email)
+    await waitForBotCheck(page)
+    await page.getByRole('button', { name: 'Email me a code' }).click()
+    await expect(page.getByText(email, { exact: false })).toBeVisible()
+    await page.getByLabel('Your six-digit code').fill(await emailedCode(email))
+    await page.getByRole('button', { name: 'Confirm' }).click()
+    await expect(header(page).getByRole('button', { name: 'Log out' })).toBeVisible()
+  })
+
+  test('passes axe on the code step, with its status and alert filled', async ({ page }, info) => {
+    for (const [path, name] of [
+      ['/sign-up/', 'Asha Rao'],
+      ['/log-in/', undefined],
+    ] as const) {
+      const email = freshEmail(info)
+      await gotoReady(page, path)
+      await detailsAndCode(page, { ...(name ? { name } : {}), email })
+      await waitForBotCheck(page)
+      await expectNoAxeViolations(page, `the code step on ${path}`)
+
+      await page.getByRole('button', { name: 'Send a new code' }).click()
+      await expect(page.getByText('A new code is on its way.')).toBeVisible()
+      await waitForBotCheck(page)
+      await expectNoAxeViolations(page, `a new code sent on ${path}`)
+
+      await page.getByLabel('Your six-digit code').fill('000000')
+      await page.getByRole('button', { name: 'Confirm' }).click()
+      await expect(page.getByRole('main').getByRole('alert')).toHaveText(/isn.t right/)
+      await expectNoAxeViolations(page, `a wrong code on ${path}`)
+    }
   })
 
   test('stops a name of only spaces at the details, before a code is sent', async ({

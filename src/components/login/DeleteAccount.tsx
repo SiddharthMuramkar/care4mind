@@ -27,6 +27,7 @@ export function DeleteAccount({ logIn }: { logIn: Route }) {
   )
   const params = new URLSearchParams(search)
   const token = params.get(DELETE_ACCOUNT_PARAM)
+  const deleted = params.has(DELETED_PARAM)
 
   const [loggedIn, setLoggedIn] = useState<boolean | null>(null)
   const [sent, setSent] = useState(false)
@@ -40,9 +41,11 @@ export function DeleteAccount({ logIn }: { logIn: Route }) {
   }, [])
 
   // The button that was pressed is gone, so keyboard users are moved to what happened instead.
+  // A confirmation after a reload is put in the page already holding its words, where a screen
+  // reader might miss it, far down the page: focus takes it there and reads it out.
   useEffect(() => {
-    if (sent) said.current?.focus()
-  }, [sent])
+    if (sent || deleted) said.current?.focus()
+  }, [sent, deleted])
 
   async function askForLink() {
     setBusy(true)
@@ -53,8 +56,16 @@ export function DeleteAccount({ logIn }: { logIn: Route }) {
         headers: { 'content-type': 'application/json' },
         body: '{}',
       })
-      if (response.ok) setSent(true)
-      else setError('We couldn’t send the email. Please try again in a minute.')
+      if (response.ok) {
+        setSent(true)
+        return
+      }
+      const { code } = ((await response.json().catch(() => ({}))) ?? {}) as { code?: string }
+      setError(
+        code === 'DELETE_LINK_LIMIT'
+          ? 'You’ve asked for several links already. Please wait an hour and try again.'
+          : 'We couldn’t send the email. Please try again in a minute.',
+      )
     } catch {
       setError('We couldn’t reach the site. Please check your connection and try again.')
     } finally {
@@ -88,9 +99,9 @@ export function DeleteAccount({ logIn }: { logIn: Route }) {
     }
   }
 
-  if (params.has(DELETED_PARAM)) {
+  if (deleted) {
     return (
-      <p className={styles.message} role="status">
+      <p ref={said} className={styles.message} role="status" tabIndex={-1}>
         Your account has been deleted.
       </p>
     )

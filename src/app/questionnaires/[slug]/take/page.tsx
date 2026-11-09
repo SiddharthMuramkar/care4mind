@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 
 import { Citation } from '@/components/Citation'
-import { LoginRequired } from '@/components/login'
+import { LoginRequired } from '@/components/login-gate'
 import { ReadingPage } from '@/components/ReadingPage'
 import { Text } from '@/components/prose'
 import { StatusBadge } from '@/components/StatusBadge'

@@ -87,6 +87,10 @@
   margin: 0;
 }
 
+.changeEmail {
+  justify-self: start;
+}
+
 .other {
   margin: 0;
   font-size: var(--text-body);

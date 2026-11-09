@@ -117,6 +117,13 @@ async function sendError(response: Response): Promise<{ message: string; botChec
   }
 }
 
+/** A whole code in what was typed or pasted, ahead of any stray digit, such as Care4Mind's. */
+const WHOLE_CODE = new RegExp(`\\d{${CODE_LENGTH}}`)
+
+/** The digits of a code from a paste, which may hold spaces or the whole line of the email. */
+const codeFrom = (typed: string) =>
+  WHOLE_CODE.exec(typed)?.[0] ?? typed.replace(/\D/g, '').slice(0, CODE_LENGTH)
+
 /** What a refused code means, and whether the user has to go back to the details to fix it. */
 async function codeError(response: Response): Promise<{ message: string; toDetails: boolean }> {
   const { code } = ((await response.json().catch(() => ({}))) ?? {}) as { code?: string }
@@ -127,7 +134,10 @@ async function codeError(response: Response): Promise<{ message: string; toDetai
   if (code === 'OTP_EXPIRED') return stay('That code has run out. Ask for a new one below.')
   if (code === 'TOO_MANY_ATTEMPTS')
     return stay('That code has had too many wrong tries. Ask for a new one below.')
-  if (code === 'INVALID_OTP') return stay('That code isn’t right. Please check it and try again.')
+  // A spent or run-out code also lands here once its first refusal has passed: Better Auth has
+  // deleted it by then, so the words have to fit a code that can never work as well.
+  if (code === 'INVALID_OTP')
+    return stay('That code isn’t right. Please check it and try again, or ask for a new one below.')
   // The name and the tick box are on the details step: the code step can't fix either.
   if (code === 'NAME_NEEDED')
     return {
@@ -167,6 +177,8 @@ export function EmailCodeForm({ mode, siteKey, otherScreen }: Props) {
 
   const widget = useRef<TurnstileHandle>(null)
   const heading = useRef<HTMLHeadingElement>(null)
+  const emailField = useRef<HTMLInputElement>(null)
+  const changingEmail = useRef(false)
   const copy = COPY[mode]
 
   // A chunk of its own, loaded by the form: only the login pages carry BotID's script.
@@ -175,7 +187,12 @@ export function EmailCodeForm({ mode, siteKey, otherScreen }: Props) {
   }, [])
 
   useEffect(() => {
-    if (step === 'code') heading.current?.focus()
+    if (step === 'code') {
+      heading.current?.focus()
+    } else if (changingEmail.current) {
+      changingEmail.current = false
+      emailField.current?.focus()
+    }
   }, [step])
 
   const onToken = useCallback((value: string | null) => setToken(value), [])
@@ -226,6 +243,16 @@ export function EmailCodeForm({ mode, siteKey, otherScreen }: Props) {
       setSentAgain(false)
       setStep('code')
     }
+  }
+
+  /** Back to the details to fix a mistyped address; what the user already typed there stays. */
+  function changeEmail() {
+    changingEmail.current = true
+    setCode('')
+    setError('')
+    setSentAgain(false)
+    setToken(null)
+    setStep('details')
   }
 
   async function resend() {
@@ -377,6 +404,7 @@ export function EmailCodeForm({ mode, siteKey, otherScreen }: Props) {
               type="email"
               autoComplete="email"
               required
+              ref={emailField}
               value={email}
               onChange={(event) => setEmail(event.target.value)}
               className={styles.input}
@@ -432,6 +460,14 @@ export function EmailCodeForm({ mode, siteKey, otherScreen }: Props) {
             Enter your emailed code
           </h2>
           <p className={styles.sent}>{copy.sent(email)}</p>
+          <button
+            type="button"
+            className={`${cta.secondary} ${styles.changeEmail}`}
+            onClick={changeEmail}
+            disabled={busy}
+          >
+            Use a different email
+          </button>
           {mode === 'log-in' ? (
             <p className={styles.other}>
               {copy.other.lead}{' '}
@@ -450,9 +486,7 @@ export function EmailCodeForm({ mode, siteKey, otherScreen }: Props) {
               autoComplete="one-time-code"
               value={code}
               // No maxLength: it would cut a paste that holds spaces before they are removed.
-              onChange={(event) =>
-                setCode(event.target.value.replace(/\D/g, '').slice(0, CODE_LENGTH))
-              }
+              onChange={(event) => setCode(codeFrom(event.target.value))}
               className={styles.input}
             />
           </div>

@@ -23,13 +23,13 @@ afterEach(() => vi.doUnmock('@/config/features'))
 describe('login before Start', () => {
   it('leaves the page exactly as it was while the switch is off', async () => {
     buildWithLogin(false)
-    const { LoginRequired } = await import('@/components/login')
+    const { LoginRequired } = await import('@/components/login-gate')
     expect(LoginRequired({ children: 'the Questionnaire' })).toBe('the Questionnaire')
   })
 
   it('sets the page behind the login gate while the switch is on', async () => {
     buildWithLogin(true)
-    const { LoginRequired } = await import('@/components/login')
+    const { LoginRequired } = await import('@/components/login-gate')
     const gate = LoginRequired({ children: 'the Questionnaire' }) as ReactElement<{
       children: string
       logIn: string

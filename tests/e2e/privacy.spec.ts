@@ -92,7 +92,9 @@ test.describe('Delete my account', { tag: '@one-width' }, () => {
     await gotoReady(page, await deleteLink(email))
     await tabTo(page, confirmButton(page))
     await page.keyboard.press('Enter')
-    await expect(page.getByText('Your account has been deleted.')).toBeVisible()
+    const deleted = page.getByText('Your account has been deleted.')
+    await expect(deleted, 'focus lands on the confirmation').toBeFocused()
+    await expect(deleted, 'and it is on screen').toBeInViewport()
   })
 
   test('passes axe at every step', async ({ page }, info) => {
@@ -129,6 +131,20 @@ test.describe('Delete my account', { tag: '@one-width' }, () => {
 
     await page.getByRole('main').getByRole('link', { name: 'Log in' }).click()
     await expect(page).toHaveURL(`/log-in/?next=${encodeURIComponent(link)}`)
+  })
+
+  test('says why when an account has asked for too many links', async ({ page }, info) => {
+    const email = freshEmail(info)
+    await signUpInBrowser(page, email)
+    await gotoReady(page, PRIVACY)
+    await page.route('**/api/auth/delete-user/', (route) =>
+      route.fulfill({ status: 429, json: { code: 'DELETE_LINK_LIMIT' } }),
+    )
+
+    await askButton(page).click()
+
+    await expect(page.getByRole('main').getByRole('alert')).toHaveText(/wait an hour/)
+    await expect(askButton(page), 'the button stays').toBeVisible()
   })
 
   test('says so when the link is no good, and offers a new one', async ({ page }, info) => {

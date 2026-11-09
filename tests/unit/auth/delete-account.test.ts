@@ -152,9 +152,7 @@ describe('when the email can’t be sent', () => {
     try {
       await live.sendCode(EMAIL, 'sign-up')
       await Promise.all(waiting)
-      const cookie = live.cookieHeader(
-        await live.redeemCode(EMAIL, live.codeFor(EMAIL), 'A User'),
-      )
+      const cookie = live.cookieHeader(await live.redeemCode(EMAIL, live.codeFor(EMAIL), 'A User'))
       live.failEmailTo(EMAIL)
 
       const response = await live.request('POST', '/delete-user', { headers: { cookie } })

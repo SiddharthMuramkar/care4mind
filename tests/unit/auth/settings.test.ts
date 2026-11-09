@@ -84,7 +84,11 @@ describe('the login settings', () => {
 
   it('reads the provisional numbers for the trial to change', () => {
     expect(readLoginSettings(REQUIRED)).toMatchObject({
-      limits: { codesPerEmailPerHour: 10, newAccountsPerHour: 500, deleteLinksPerAccountPerHour: 3 },
+      limits: {
+        codesPerEmailPerHour: 10,
+        newAccountsPerHour: 500,
+        deleteLinksPerAccountPerHour: 3,
+      },
       spikeAlert: { newAccountsPerHour: 100, to: 'developer@care4mind.org' },
     })
     expect(
