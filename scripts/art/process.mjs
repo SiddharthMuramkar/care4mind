@@ -13,7 +13,7 @@ import { rootFrom, runTool, ToolError } from '../content/cli.mjs'
 
 const CARD_PX = 320
 const MAX_PX = 1024
-/** Below this a picture may look soft at its largest uses, so the table says so. */
+/** Art with a shorter side below this may look soft at its largest uses, so the table says so. */
 const SMALL_PX = 512
 const CLEAR = { r: 0, g: 0, b: 0, alpha: 0 }
 /** The first row of the Emblem ring's master that holds the motto, not the ring. */
@@ -32,8 +32,14 @@ async function pixels(input) {
   return { data, width: info.width, height: info.height }
 }
 
+/** The shorter side of a picture, in pixels. */
+async function shortSide(input) {
+  const { width, height } = await sharp(input).metadata()
+  return Math.min(width, height)
+}
+
 /** Cuts a picture down to the box around every pixel that shows at all. */
-async function trim(input) {
+async function trim(input, label) {
   const { data, width, height } = await pixels(input)
   let [left, top, right, bottom] = [width, height, -1, -1]
   for (let y = 0; y < height; y += 1)
@@ -44,6 +50,7 @@ async function trim(input) {
       right = Math.max(right, x)
       bottom = Math.max(bottom, y)
     }
+  if (right < 0) throw new ToolError(`${label} is fully transparent.`)
   return sharp(input)
     .extract({ left, top, width: right - left + 1, height: bottom - top + 1 })
     .png()
@@ -118,7 +125,7 @@ function grownMask({ data, width, height }, radius) {
   return mask
 }
 
-/** A flat colour showing through a mask, as an encoded image. */
+/** A flat colour showing through a mask, as a sharp pipeline. */
 function maskLayer(mask, size, [r, g, b], opacity) {
   const data = Buffer.alloc(mask.length * 4)
   mask.forEach((value, p) => {
@@ -160,22 +167,22 @@ async function addDieCut(trimmed) {
 
 /** A kept Plate is served exactly as the client's file is. */
 async function keptPlate(input) {
-  return { bytes: input }
+  return { bytes: input, short: await shortSide(input) }
 }
 
 async function sticker(input, label) {
   if ((await sharp(input).stats()).isOpaque)
     throw new ToolError(`${label} has no transparency. Remove its background first.`)
-  const trimmed = await trim(input)
+  const trimmed = await trim(input, label)
   const edge = !(await hasCreamEdge(trimmed))
-  const body = edge ? await trim(await addDieCut(trimmed)) : trimmed
+  const body = edge ? await trim(await addDieCut(trimmed), label) : trimmed
   const padded = await padSquare(body, 0.04)
   // Its own pipeline, because sharp always runs extend after resize within one.
   const bytes = await sharp(padded)
     .resize(MAX_PX, MAX_PX, { fit: 'inside', withoutEnlargement: true })
     .png(PNG)
     .toBuffer()
-  return { bytes, edge }
+  return { bytes, edge, short: await shortSide(trimmed) }
 }
 
 /**
@@ -215,29 +222,35 @@ function clearGround({ data, width, height }) {
 }
 
 /** The ring without its motto, and with its ground cleared. No margin: that is a Sticker's rule. */
-async function emblemRing(input) {
+async function emblemRing(input, label) {
   const { width } = await sharp(input).metadata()
   const above = await sharp(input).extract({ left: 0, top: 0, width, height: MOTTO_TOP }).toBuffer()
   const image = await pixels(above)
   clearGround(image)
   const raw = { width: image.width, height: image.height, channels: /** @type {4} */ (4) }
   const cleared = await sharp(image.data, { raw }).png().toBuffer()
-  const padded = await padSquare(await trim(cleared), 0)
-  return { bytes: await sharp(padded).png(PNG).toBuffer() }
+  return emblem(await trim(cleared, label))
 }
 
-async function emblemMark(input) {
-  const padded = await padSquare(await trim(input), 0)
-  return { bytes: await sharp(padded).png(PNG).toBuffer() }
+async function emblemMark(input, label) {
+  return emblem(await trim(input, label))
+}
+
+/** A trimmed Emblem, squared up with no margin. */
+async function emblem(art) {
+  const padded = await padSquare(art, 0)
+  return { bytes: await sharp(padded).png(PNG).toBuffer(), short: await shortSide(art) }
 }
 
 /** Unlike the client's Plates, a generated one arrives as a large PNG and is re-encoded. */
-async function generatedPlate(input) {
+async function generatedPlate(input, label) {
+  const { width, height } = await sharp(input).metadata()
+  if (width !== height) throw new ToolError(`${label} is ${width} x ${height}. A Plate is square.`)
   const bytes = await sharp(input)
     .resize(MAX_PX, MAX_PX, { fit: 'inside', withoutEnlargement: true })
     .jpeg({ quality: 85 })
     .toBuffer()
-  return { bytes }
+  return { bytes, short: width }
 }
 
 /** The recipe for a kept picture. Throws on an Emblem it has no recipe for. */
@@ -296,19 +309,17 @@ async function main(args) {
   const made = []
   for (const job of [...keptJobs(root), ...generatedJobs(root)]) {
     const input = readFileSync(job.master)
-    const { width, height } = await sharp(input).metadata()
-    const { bytes, edge } = await job.make(input, job.path)
-    const flags = [
-      edge ? 'edge added' : '',
-      Math.min(width, height) < SMALL_PX ? 'under 512 px' : '',
-    ]
+    const { bytes, edge, short } = await job.make(input, job.path)
+    const flags = [edge && 'edge added', short < SMALL_PX && `under ${SMALL_PX} px`]
+      .filter(Boolean)
+      .join(', ')
     made.push({ job, bytes, copy: await card(bytes, job.family), flags })
   }
 
   const table = []
   for (const { job, bytes, copy, flags } of made)
     for (const [folder, file, note] of [
-      ['public/art', bytes, flags.filter(Boolean).join(', ')],
+      ['public/art', bytes, flags],
       ['art/cards', copy, ''],
     ]) {
       write(join(root, folder, job.path), file)
