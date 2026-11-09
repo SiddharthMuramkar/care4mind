@@ -31,6 +31,8 @@ const seen = (control: Locator) =>
     }
   })
 
+const TRANSPARENT = /^transparent$|^rgba\(.*,\s*0\)$|\/\s*0\)$/
+
 /** An edge the theme can see: a border wider than 0 in a colour that isn't transparent. */
 async function expectVisibleEdge(locator: Locator, what: string) {
   const edge = await locator.evaluate((element) => {
@@ -38,9 +40,7 @@ async function expectVisibleEdge(locator: Locator, what: string) {
     return { width: parseFloat(style.borderTopWidth), color: style.borderTopColor }
   })
   expect(edge.width, `${what}: border width`).toBeGreaterThan(0)
-  expect(edge.color, `${what}: border colour`).not.toMatch(
-    /^transparent$|^rgba\(.*,\s*0\)$|\/\s*0\)$/,
-  )
+  expect(edge.color, `${what}: border colour`).not.toMatch(TRANSPARENT)
 }
 
 const optionOf = (radio: Locator) => radio.locator('xpath=ancestor::label[1]')
@@ -101,15 +101,21 @@ test('the Menu Drawer keeps its edge', { tag: '@self-width' }, async ({ page }) 
 
 test('a Frontispiece ring draws in the text colour of the theme', async ({ page }) => {
   await gotoReady(page, hrefFor({ kind: 'topic', id: 'mind' }))
-  const paths = page.getByRole('main').locator('header span:has(> img) > svg path')
+  const header = page.getByRole('main').locator('header')
+  const paths = header.locator('span:has(> img) > svg path')
   expect(await paths.count()).toBeGreaterThan(0)
+  // What CanvasText resolves to in this theme, read through a probe set inside the header.
+  const text = await header.evaluate((element) => {
+    const probe = document.createElement('i')
+    probe.style.color = 'CanvasText'
+    element.append(probe)
+    const colour = getComputedStyle(probe).color
+    probe.remove()
+    return colour
+  })
+  expect(text).not.toMatch(TRANSPARENT)
   for (const path of await paths.all()) {
-    const { stroke, color } = await path.evaluate((element) => ({
-      stroke: getComputedStyle(element).stroke,
-      color: getComputedStyle(element.parentElement as Element).color,
-    }))
-    expect(stroke).toBe(color)
-    expect(stroke).not.toMatch(/^transparent$|^rgba\(.*,\s*0\)$/)
+    expect(await path.evaluate((element) => getComputedStyle(element).stroke)).toBe(text)
   }
 })
 

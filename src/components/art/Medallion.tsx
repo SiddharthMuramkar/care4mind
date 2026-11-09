@@ -12,7 +12,7 @@ import { MedallionRing } from './MedallionRing'
  * when the record's alt speaks for it. With `topic` the ring takes that topic's colour, set as an
  * inline `--topic`, never a second `data-topic` (a Concept card's chip must stay the only one).
  * Its width is inline, so a page sets a narrower one with `max-width` in `className`; the ring and
- * the picture fill the box, and the picture's own width and height hold it steady as it loads.
+ * the picture fill the box, whose width and aspect-ratio hold it steady as the picture loads.
  */
 export function Medallion({
   art,
