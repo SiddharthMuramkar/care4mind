@@ -63,6 +63,12 @@
   /* Decorative only, never behind or as text: */
   --color-ink-wash: var(--press-indigo-wash);
   --color-surface-rule: var(--press-rule);
+  /* The Karma Yoga cycle's arrows, in the old picture's order and hues. Plain turmeric is too faint on the paper. */
+  --color-cycle-arrow-1: var(--press-turmeric-deep);
+  --color-cycle-arrow-2: var(--press-vermilion);
+  --color-cycle-arrow-3: var(--press-rose);
+  --color-cycle-arrow-4: var(--press-indigo-rule);
+  --color-cycle-arrow-5: var(--press-umber);
   /* The hard shadow a raised button stands on: the accent's, and the ground-coloured button's. */
   --color-accent-shadow: var(--press-turmeric-deep);
   --color-ground-shadow: var(--press-night-deep);

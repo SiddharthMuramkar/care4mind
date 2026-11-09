@@ -15,6 +15,7 @@ interface Options {
   reduced: 'off' | 'on' | 'both'
   only: string[] | null
   widths: number[]
+  states: string | null
 }
 
 interface Shot {
@@ -22,13 +23,17 @@ interface Shot {
   width: number
   height: number
   reducedMotion: boolean
+  full: boolean
   file: string
+  state?: 'hover' | 'focus-visible' | 'active'
+  selector?: string
 }
 
 const shots = (await import(pathToFileURL(resolve('scripts/shots.mjs')).href)) as {
   parseArgs(argv: readonly string[]): Options
   planShots(options: Options, routes: readonly RouteEntry[]): Shot[]
   describeServer(port: number, buildId: string | null): Promise<string>
+  loadRoutes(): Promise<readonly RouteEntry[]>
 }
 
 const route = (path: RouteEntry['path'], kind: RouteEntry['kind'], sample?: true): RouteEntry => ({
@@ -54,17 +59,35 @@ const REGISTRY: readonly RouteEntry[] = [
 
 const plan = (...argv: string[]) => shots.planShots(shots.parseArgs(argv), REGISTRY)
 const files = (...argv: string[]) => plan(...argv).map((shot) => shot.file)
+/** A state shot's file, whatever the hash: one test below pins how it is made. */
+const hashed = (name: string): unknown =>
+  expect.stringMatching(new RegExp(`^${name}-[0-9a-f]{6}\\.jpg$`))
 
 describe('pnpm shots', () => {
   it('shoots each sample route at phone and desktop width, with motion, by default', () => {
     expect(plan()).toEqual([
-      { path: '/', width: 360, height: 800, reducedMotion: false, file: 'home-360.jpg' },
-      { path: '/', width: 1440, height: 900, reducedMotion: false, file: 'home-1440.jpg' },
+      {
+        path: '/',
+        width: 360,
+        height: 800,
+        reducedMotion: false,
+        full: false,
+        file: 'home-360.jpg',
+      },
+      {
+        path: '/',
+        width: 1440,
+        height: 900,
+        reducedMotion: false,
+        full: false,
+        file: 'home-1440.jpg',
+      },
       {
         path: '/concepts/',
         width: 360,
         height: 800,
         reducedMotion: false,
+        full: false,
         file: 'concepts-360.jpg',
       },
       {
@@ -72,6 +95,7 @@ describe('pnpm shots', () => {
         width: 1440,
         height: 900,
         reducedMotion: false,
+        full: false,
         file: 'concepts-1440.jpg',
       },
       {
@@ -79,6 +103,7 @@ describe('pnpm shots', () => {
         width: 360,
         height: 800,
         reducedMotion: false,
+        full: false,
         file: 'concepts-ahimsa-360.jpg',
       },
       {
@@ -86,6 +111,7 @@ describe('pnpm shots', () => {
         width: 1440,
         height: 900,
         reducedMotion: false,
+        full: false,
         file: 'concepts-ahimsa-1440.jpg',
       },
       {
@@ -93,6 +119,7 @@ describe('pnpm shots', () => {
         width: 360,
         height: 800,
         reducedMotion: false,
+        full: false,
         file: 'questionnaires-karmayoga-scale-take-360.jpg',
       },
       {
@@ -100,6 +127,7 @@ describe('pnpm shots', () => {
         width: 1440,
         height: 900,
         reducedMotion: false,
+        full: false,
         file: 'questionnaires-karmayoga-scale-take-1440.jpg',
       },
     ])
@@ -163,6 +191,118 @@ describe('pnpm shots', () => {
   it('shoots the viewport, and whole pages under --full', () => {
     expect(shots.parseArgs([]).full).toBe(false)
     expect(shots.parseArgs(['--full']).full).toBe(true)
+    expect(plan('--only', '/').every((shot) => !shot.full)).toBe(true)
+    expect(plan('--only', '/', '--full').every((shot) => shot.full)).toBe(true)
+  })
+
+  it('shoots a state the screen’s worth, even under --full', () => {
+    expect(plan('--only', '/', '--full', '--states', 'main a').some((shot) => shot.full)).toBe(
+      false,
+    )
+  })
+
+  it('shoots a selector in its hover, focus-visible and active states', () => {
+    expect(plan('--only', '/', '--widths', '360', '--states', 'main article a')).toEqual([
+      {
+        path: '/',
+        width: 360,
+        height: 800,
+        reducedMotion: false,
+        full: false,
+        file: 'home-360-hover-main-article-a-572cdb.jpg',
+        state: 'hover',
+        selector: 'main article a',
+      },
+      {
+        path: '/',
+        width: 360,
+        height: 800,
+        reducedMotion: false,
+        full: false,
+        file: 'home-360-focus-visible-main-article-a-572cdb.jpg',
+        state: 'focus-visible',
+        selector: 'main article a',
+      },
+      {
+        path: '/',
+        width: 360,
+        height: 800,
+        reducedMotion: false,
+        full: false,
+        file: 'home-360-active-main-article-a-572cdb.jpg',
+        state: 'active',
+        selector: 'main article a',
+      },
+    ])
+  })
+
+  it('shoots the states at each width', () => {
+    expect(files('--only', '/', '--widths', '360,1440', '--states', 'main article a')).toEqual([
+      hashed('home-360-hover-main-article-a'),
+      hashed('home-360-focus-visible-main-article-a'),
+      hashed('home-360-active-main-article-a'),
+      hashed('home-1440-hover-main-article-a'),
+      hashed('home-1440-focus-visible-main-article-a'),
+      hashed('home-1440-active-main-article-a'),
+    ])
+  })
+
+  it('gives different selectors different files, even when their letters match', () => {
+    const fileOf = (selector: string) =>
+      plan('--only', '/', '--widths', '360', '--states', selector)[0]?.file
+    expect(fileOf('.card a')).toEqual(hashed('home-360-hover-card-a'))
+    expect(fileOf('.card-a')).toEqual(hashed('home-360-hover-card-a'))
+    expect(fileOf('.card a')).not.toBe(fileOf('.card-a'))
+    const start = 'main section:nth-of-type(2) article:nth-of-type'
+    expect(fileOf(`${start}(1) a`)).not.toBe(fileOf(`${start}(2) a`))
+  })
+
+  it('leaves no hyphen dangling where it cuts a long selector', () => {
+    expect(
+      files(
+        '--only',
+        '/',
+        '--widths',
+        '360',
+        '--states',
+        'main article a[href="/concepts/karma-yoga/xyz"]',
+      )[0],
+    ).toEqual(hashed('home-360-hover-main-article-a-href-concepts-karma-yoga'))
+  })
+
+  it('keeps a selector whole, commas and quotes included, and stops at an empty one', () => {
+    const selector = 'nav a, main a[href="/concepts/"]'
+    expect(plan('--only', '/', '--widths', '360', `--states=${selector}`)[0]).toMatchObject({
+      selector,
+      file: hashed('home-360-hover-nav-a-main-a-href-concepts'),
+    })
+    expect(() => plan('--states', '')).toThrow(/--states takes/)
+    expect(() => plan('--states')).toThrow(/--states takes/)
+    expect(() => plan('--states=  ')).toThrow(/--states takes/)
+  })
+
+  it('shoots the states with and without motion under --both', () => {
+    expect(
+      files('--only', '/concepts/vikshepa/', '--widths', '1440', '--both', '--states', 'main a'),
+    ).toEqual([
+      hashed('concepts-vikshepa-1440-hover-main-a'),
+      hashed('concepts-vikshepa-1440-focus-visible-main-a'),
+      hashed('concepts-vikshepa-1440-active-main-a'),
+      hashed('concepts-vikshepa-1440-reduced-hover-main-a'),
+      hashed('concepts-vikshepa-1440-reduced-focus-visible-main-a'),
+      hashed('concepts-vikshepa-1440-reduced-active-main-a'),
+    ])
+  })
+
+  it('names a selector with no letters or digits by its hash alone', () => {
+    expect(files('--only', '/', '--widths', '360', '--states', '*')).toEqual([
+      hashed('home-360-hover'),
+      hashed('home-360-focus-visible'),
+      hashed('home-360-active'),
+    ])
+    expect(files('--only', '/', '--widths', '360', '--states', '#')[0]).toEqual(
+      hashed('home-360-hover'),
+    )
   })
 
   it('stops at an option it doesn’t know', () => {
@@ -190,6 +330,16 @@ describe('pnpm shots over the route registry', () => {
     const names = shots.planShots(shots.parseArgs(['--only', everyPath, '--widths', '360']), routes)
     expect(names).toHaveLength(routes.length)
     expect(new Set(names.map((shot) => shot.file)).size).toBe(routes.length)
+  })
+})
+
+describe('pnpm shots loading the route registry itself', () => {
+  // The command has its own loader, outside Vitest's aliases, so it needs a test of its own.
+  it('reads the same routes the site has', async () => {
+    const loaded = await shots.loadRoutes()
+    expect(loaded.map((entry) => entry.path)).toEqual(
+      (await site.routes()).map((entry) => entry.path),
+    )
   })
 })
 
