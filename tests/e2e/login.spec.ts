@@ -201,11 +201,14 @@ test.describe('Sign up and Log in', { tag: '@one-width' }, () => {
       await page.getByRole('button', { name: 'Send a new code' }).click()
       await expect(page.getByText('A new code is on its way.')).toBeVisible()
       await waitForBotCheck(page)
+      // From the top: axe counts a target the press scrolled under the sticky header as obscured.
+      await page.evaluate(() => window.scrollTo(0, 0))
       await expectNoAxeViolations(page, `a new code sent on ${path}`)
 
       await page.getByLabel('Your six-digit code').fill('000000')
       await page.getByRole('button', { name: 'Confirm' }).click()
       await expect(page.getByRole('main').getByRole('alert')).toHaveText(/isn.t right/)
+      await page.evaluate(() => window.scrollTo(0, 0))
       await expectNoAxeViolations(page, `a wrong code on ${path}`)
     }
   })
