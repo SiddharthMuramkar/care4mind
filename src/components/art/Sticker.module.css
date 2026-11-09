@@ -22,14 +22,15 @@
 
 /*
  * On a card, the Sticker lifts at a corner with its card and presses with it. Only a direct child
- * of an `article` moves: a page's Folio is an `article` too, and its Stickers stay still.
+ * of an `article` moves: a page's Folio is an `article` too, and its Stickers stay still. A mouse
+ * press focuses the card's link as well, so only focus that shows its ring lifts the Sticker.
  */
 @media (prefers-reduced-motion: no-preference) {
   .sticker {
     transition: transform var(--duration-quick) var(--ease-out);
   }
 
-  article:is(:hover, :focus-within) > .sticker {
+  article:is(:hover, :has(:focus-visible)) > .sticker {
     transform: translateY(-3px) rotate(-3deg);
   }
 

@@ -266,17 +266,8 @@ test.describe('section pages', () => {
   }
 })
 
-/**
- * Each topic's card and its picture, as the pictures spec's table names it. Three stand as their
- * Interim picture until their own Sticker is made.
- */
-const TOPIC_STICKERS = [
-  { slug: 'self', file: 'cosmos' },
-  { slug: 'mind', file: 'mind-swirl' },
-  { slug: 'practice', file: 'meditation' },
-  { slug: 'values', file: 'book-ornate' },
-  { slug: 'temperament', file: 'gear' },
-] as const
+/** The topics with a card. Which picture each shows is the registry's to say. */
+const TOPIC_SLUGS = ['self', 'mind', 'practice', 'values', 'temperament'] as const
 
 /** The pages that show the topic cards. */
 const TOPIC_CARD_PAGES = ['/', '/concepts/'] as const
@@ -293,19 +284,19 @@ test.describe('topic cards', () => {
       { tag: '@one-width' },
       async ({ page }) => {
         await gotoReady(page, path)
-        await expect(page.locator('article[data-topic]')).toHaveCount(TOPIC_STICKERS.length)
+        await expect(page.locator('article[data-topic]')).toHaveCount(TOPIC_SLUGS.length)
         const shown: string[] = []
-        for (const { slug, file } of TOPIC_STICKERS) {
+        for (const slug of TOPIC_SLUGS) {
           const sticker = cardSticker(page, slug)
           await expect(sticker).toHaveCount(1)
           await expect(sticker).toHaveAttribute('alt', '')
           await expect(sticker).toHaveAttribute('width', '64')
           await expect(sticker).toHaveAttribute('height', '64')
           const src = decodeURIComponent((await sticker.getAttribute('src')) ?? '')
-          expect(src).toContain(`/art/stickers/${file}.png`)
+          expect(src).toContain(artFor({ kind: 'topic-card', slug }).src)
           shown.push(src)
         }
-        expect(new Set(shown).size, 'no Sticker repeats in the row').toBe(TOPIC_STICKERS.length)
+        expect(new Set(shown).size, 'no Sticker repeats in the row').toBe(TOPIC_SLUGS.length)
       },
     )
 
@@ -313,7 +304,7 @@ test.describe('topic cards', () => {
       page,
     }) => {
       await gotoReady(page, path)
-      for (const { slug } of TOPIC_STICKERS) {
+      for (const slug of TOPIC_SLUGS) {
         const card = topicCard(page, slug)
         const [picture, numeral, title] = await Promise.all([
           cardSticker(page, slug).boundingBox(),
@@ -321,6 +312,8 @@ test.describe('topic cards', () => {
           card.getByRole('heading').boundingBox(),
         ])
         if (!picture || !numeral || !title) throw new Error(`The ${slug} card is laid out.`)
+        expect(picture.width, `${slug}: drawn at 64 px wide`).toBe(64)
+        expect(picture.height, `${slug}: drawn at 64 px high`).toBe(64)
         expect(picture.y + picture.height, `${slug}: above the title`).toBeLessThanOrEqual(title.y)
         expect(numeral.x, `${slug}: the numeral beside it`).toBeGreaterThanOrEqual(
           picture.x + picture.width,
@@ -337,7 +330,7 @@ test.describe('topic cards', () => {
     }) => {
       await gotoReady(page, path)
       const textGap = (page.viewportSize()?.width ?? 0) < 640 ? 4 : 8
-      for (const { slug } of TOPIC_STICKERS) {
+      for (const slug of TOPIC_SLUGS) {
         const card = topicCard(page, slug)
         // The count is the last line, and a term, on the cards that have one, the line above it.
         const lines = card.locator(':scope > p')
@@ -416,6 +409,20 @@ test.describe('topic cards', () => {
     },
   )
 
+  test(
+    'a mouse press leaves no Sticker tilted once the pointer has gone',
+    { tag: '@one-width' },
+    async ({ page }) => {
+      await gotoReady(page, '/concepts/')
+      await cardLink(page, 'self').hover()
+      await page.mouse.down()
+      await page.mouse.move(5, 5, { steps: 5 })
+      await page.mouse.up()
+      await expect(cardLink(page, 'self')).toBeFocused()
+      await expect(cardSticker(page, 'self')).toHaveCSS('transform', 'none')
+    },
+  )
+
   test('pressing a card presses its Sticker', { tag: '@one-width' }, async ({ page }) => {
     await gotoReady(page, '/concepts/')
     await cardLink(page, 'self').hover()
@@ -459,7 +466,7 @@ test.describe('topic cards', () => {
     async ({ page }) => {
       await gotoReady(page, '/concepts/')
       await cardLink(page, 'self').focus()
-      for (const { slug } of TOPIC_STICKERS.slice(1)) {
+      for (const slug of TOPIC_SLUGS.slice(1)) {
         await page.keyboard.press('Tab')
         await expect(cardLink(page, slug)).toBeFocused()
       }
@@ -471,7 +478,7 @@ test.describe('topic cards', () => {
     { tag: '@one-width' },
     async ({ page }) => {
       await gotoReady(page, '/concepts/')
-      for (const { slug } of TOPIC_STICKERS) {
+      for (const slug of TOPIC_SLUGS) {
         await expect(topicCard(page, slug)).not.toHaveAttribute('data-paper')
         await expect(topicCard(page, slug).locator('[data-topic]')).toHaveCount(0)
       }

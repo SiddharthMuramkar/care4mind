@@ -114,6 +114,13 @@
   }
 }
 
+/* The edge and the hue along its top are drawn in shadows, which forced colours drop. */
+@media (forced-colors: active) {
+  .card {
+    border: 1px solid CanvasText;
+  }
+}
+
 /* Outside the guard below, so a card still answers the pointer where nothing may move. */
 .card:has(.link:is(:hover, :focus-visible)) .link {
   text-decoration-line: underline;

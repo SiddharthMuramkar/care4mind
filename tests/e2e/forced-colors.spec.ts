@@ -131,6 +131,11 @@ test('a Traditional text card keeps its edge', async ({ page }) => {
   await expectVisibleEdge(page.getByRole('main').getByRole('article').first(), 'text card')
 })
 
+test('a topic card keeps its edge', async ({ page }) => {
+  await gotoReady(page, hrefFor({ page: 'concepts' }))
+  await expectVisibleEdge(page.locator('article[data-topic]').first(), 'topic card')
+})
+
 test('a secondary call to action keeps its edge', async ({ page }) => {
   await gotoReady(page, FLOW)
   await expectVisibleEdge(
