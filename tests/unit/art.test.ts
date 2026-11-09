@@ -2,12 +2,15 @@ import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs'
 import { join } from 'node:path'
 
 import { ESLint } from 'eslint'
+import { createElement } from 'react'
+import { renderToStaticMarkup } from 'react-dom/server'
 import sharp from 'sharp'
 import { describe, expect, it } from 'vitest'
 
 import { art, type ArtOrigin } from '@/art'
 import { EMBLEM_MARK, EMBLEM_RING } from '@/art/emblem'
 import { ART } from '@/art/registry'
+import { Emblem } from '@/components/Emblem'
 
 const PUBLIC = join(process.cwd(), 'public')
 const LICENCE = "The client's own picture; reuse confirmation pending"
@@ -83,6 +86,32 @@ describe('the Emblem records', { timeout: 30_000 }, () => {
     const code =
       "import type { ArtRecord } from './types'\nexport type { ArtFamily } from './types'\nexport type R = ArtRecord\n"
     expect(await problems(code)).toEqual([])
+  })
+})
+
+describe('the Emblem', () => {
+  const render = (props: Parameters<typeof Emblem>[0]) =>
+    renderToStaticMarkup(createElement(Emblem, props))
+
+  it('is decorative unless told otherwise', () => {
+    expect(render({ variant: 'ring', size: 72 })).toContain('alt=""')
+  })
+
+  it('says what it shows when it stands alone', () => {
+    expect(render({ variant: 'ring', size: 120, decorative: false })).toContain(
+      `alt="${EMBLEM_RING.alt.replace("'", '&#x27;')}"`,
+    )
+  })
+
+  it('shows the picture its variant names, at the size asked for', () => {
+    const html = render({ variant: 'mark', size: 96 })
+    expect(html).toContain('emblem-mark')
+    expect(html).toContain('width="96"')
+    expect(html).toContain('height="96"')
+  })
+
+  it('leaves its width list to the size, so the page lists two files', () => {
+    expect(render({ variant: 'ring', size: 72 })).not.toMatch(/\ssizes=/)
   })
 })
 

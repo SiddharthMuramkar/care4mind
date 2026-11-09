@@ -216,6 +216,38 @@ test.describe('without JavaScript', () => {
     await expect(footer).toContainText('Powered by IIT Bombay-SJMSOM & HUA')
     await expect(footer).toContainText('A preview of the new site, not yet public.')
   })
+
+  test('the footer is signed with the Emblem beside the wordmark and the motto under it', async ({
+    page,
+  }) => {
+    await page.goto('/concepts/vikshepa/')
+    const footer = page.getByRole('contentinfo')
+    const emblem = footer.locator('img')
+    await expect(emblem).toHaveCount(1)
+    await emblem.scrollIntoViewIfNeeded()
+    await expect(emblem).toHaveAttribute('alt', '')
+    await expect(emblem).toHaveAttribute('width', '72')
+    await expect(emblem).toHaveAttribute('src', /emblem-ring/)
+    expect(await emblem.getAttribute('sizes')).toBeNull()
+    await expect
+      .poll(() => emblem.evaluate((image: HTMLImageElement) => image.naturalWidth))
+      .toBeGreaterThan(0)
+
+    const motto = footer.locator('[lang="sa-Deva"]')
+    await expect(motto).toHaveText('यद् भावं तद् भवति')
+    const [ring, wordmark, line] = await Promise.all([
+      emblem.boundingBox(),
+      footer.getByText('Care4Mind', { exact: true }).boundingBox(),
+      motto.boundingBox(),
+    ])
+    expect(ring).toMatchObject({ width: 72, height: 72 })
+    expect((ring?.x ?? 0) + 72, 'the wordmark stands beside the Emblem').toBeLessThanOrEqual(
+      wordmark?.x ?? 0,
+    )
+    expect((ring?.y ?? 0) + 72, 'the motto stands under the Emblem').toBeLessThanOrEqual(
+      line?.y ?? 0,
+    )
+  })
 })
 
 test.describe('the section you are in', () => {
