@@ -479,7 +479,9 @@ test.describe('a throwaway email', { tag: '@one-width' }, () => {
     await page.getByRole('checkbox', { name: /18 or over/ }).check()
     await waitForBotCheck(page)
     await page.getByRole('button', { name: 'Email me a code' }).click()
-    await expect(page.getByText('throwaway email address')).toBeVisible()
+    await expect(page.getByRole('main').getByRole('alert')).toHaveText(
+      /throwaway email address.*Log in instead/,
+    )
     await expect(page.getByRole('heading', { name: 'Enter your emailed code' })).toHaveCount(0)
     expect(await inbox('someone@mailinator.com')).toEqual([])
   })

@@ -122,7 +122,7 @@ describe('the emailed code', () => {
     expect((await login.redeemCode(EMAIL, fresh, 'Asha')).status).toBe(200)
   })
 
-  it('takes five wrong tries and still works', async () => {
+  it('still works after four wrong tries', async () => {
     await login.sendCode(EMAIL, 'sign-up')
     const code = login.codeFor(EMAIL)
     const wrong = code === '000000' ? '000001' : '000000'

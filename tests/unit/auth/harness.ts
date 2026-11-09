@@ -220,7 +220,7 @@ export async function loginHarness({ settings, deps, poolSize }: HarnessOptions 
       body: {
         provider: 'google',
         callbackURL: '/concepts/vikshepa/',
-        errorCallbackURL: '/sign-up/',
+        errorCallbackURL: `/${screen}/`,
         disableRedirect: true,
         ...(screen === 'sign-up' ? { requestSignUp: true } : {}),
         ...(agreed ? { additionalData: { agreed: true } } : {}),

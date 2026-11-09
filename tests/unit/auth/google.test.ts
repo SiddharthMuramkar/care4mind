@@ -161,11 +161,11 @@ describe('the new-account cap on a Google sign-up', () => {
 })
 
 describe('coming back from Google on Log in', () => {
-  it('sends a new Google user to Sign up, with no account made', async () => {
+  it('returns a new Google user to Log in with signup_disabled, with no account made', async () => {
     const response = await login.googleSignIn('log-in', ASHA)
     expect(response.status).toBe(302)
     const sentTo = redirectOf(response)
-    expect(sentTo.pathname).toBe('/sign-up/')
+    expect(sentTo.pathname).toBe('/log-in/')
     expect(sentTo.searchParams.get('error')).toBe('signup_disabled')
     expect(await login.count('user')).toBe(0)
   })

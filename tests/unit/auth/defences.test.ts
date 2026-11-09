@@ -232,9 +232,18 @@ describe('the limit per email', () => {
       })
     })
 
-    it('answers the same for an address with no account, so nothing is revealed', async () => {
-      for (let send = 0; send < 3; send++) await blocking.sendCode('nobody@example.test', 'log-in')
-      expect((await blocking.sendCode('nobody@example.test', 'log-in')).status).toBe(429)
+    it('answers the same past its number with or without an account, so nothing is revealed', async () => {
+      await blocking.addUser('asha@example.test', 'Asha')
+      for (const email of ['asha@example.test', 'nobody@example.test']) {
+        for (let send = 0; send < 3; send++) await blocking.sendCode(email, 'log-in')
+      }
+
+      const known = await blocking.sendCode('asha@example.test', 'log-in')
+      const unknown = await blocking.sendCode('nobody@example.test', 'log-in')
+
+      expect(known.status).toBe(429)
+      expect(unknown.status).toBe(429)
+      expect(await known.json()).toEqual(await unknown.json())
     })
   })
 })
