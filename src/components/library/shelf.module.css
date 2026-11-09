@@ -51,14 +51,16 @@
   --color-focus: var(--color-surface-focus);
 }
 
-.spine[data-tone='ground'] {
+.spine[data-tone='ground'],
+.hoverLabel[data-tone='ground'] {
   --tone: var(--color-ground);
   --tone-ink: var(--color-ink);
   --gilt: var(--color-accent);
 }
 
 /* Pale paper, lighter than the page, so it stands out from it. */
-.spine[data-tone='paper'] {
+.spine[data-tone='paper'],
+.hoverLabel[data-tone='paper'] {
   --tone: color-mix(in srgb, var(--color-surface) 45%, var(--color-ink));
   --tone-ink: var(--color-surface-ink);
   --gilt: var(--color-surface-rule);
@@ -66,16 +68,88 @@
   outline-offset: -1px;
 }
 
-.spine[data-tone='accent'] {
+.spine[data-tone='accent'],
+.hoverLabel[data-tone='accent'] {
   --tone: var(--color-accent);
   --tone-ink: var(--color-accent-ink);
   --gilt: var(--color-accent-ink);
 }
 
-.spine[data-tone='highlight'] {
+.spine[data-tone='highlight'],
+.hoverLabel[data-tone='highlight'] {
   --tone: var(--color-highlight);
   --tone-ink: var(--color-highlight-ink);
   --gilt: var(--color-highlight-ink);
+}
+
+/*
+ * A spine's hover label: its title set across the page, on a plate of the book's own binding
+ * between gilt rules, with a small tab pointing down at the book.
+ */
+.hoverLabel {
+  box-sizing: border-box;
+  display: grid;
+  gap: 0.2rem;
+  width: max-content;
+  max-width: min(22rem, calc(100vw - 2rem));
+  padding: 0.7rem 1.1rem 0.8rem;
+  border-block: 3px double var(--gilt);
+  border-radius: 3px;
+  background: var(--tone);
+  color: var(--tone-ink);
+  box-shadow: 0 0.75rem 2rem -0.75rem var(--color-scroll-shadow);
+  text-align: center;
+  transform-origin: var(--transform-origin);
+}
+
+.hoverTitle {
+  font-family: var(--font-display);
+  font-size: var(--text-title);
+  font-weight: 500;
+  line-height: 1.2;
+  text-wrap: balance;
+}
+
+.hoverByline {
+  font-family: var(--font-text);
+  font-size: var(--text-base);
+  line-height: 1.3;
+}
+
+.hoverLabel [data-stem] {
+  bottom: -0.45rem;
+  width: 0.6rem;
+  height: 0.6rem;
+  background: var(--tone);
+  border-right: 1px solid var(--gilt);
+  border-bottom: 1px solid var(--gilt);
+  rotate: 45deg;
+}
+
+/* Slid along to stay on screen, it no longer stands over the book: its tab would point elsewhere. */
+.hoverLabel [data-stem][data-uncentered] {
+  display: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .hoverLabel {
+    transition:
+      opacity var(--duration-quick) var(--ease-out),
+      transform var(--duration-quick) var(--ease-out);
+  }
+
+  .hoverLabel[data-starting-style],
+  .hoverLabel[data-ending-style] {
+    opacity: 0;
+    transform: translateY(0.25rem);
+  }
+}
+
+/* Where the spines become lines of a list, their titles already read across. */
+@media (width < 40rem) {
+  .hoverLabel {
+    display: none;
+  }
 }
 
 /* Gilt rules across the head and the foot: two hairlines each, as a cloth binding is tooled. */

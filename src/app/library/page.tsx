@@ -77,6 +77,7 @@ export default async function LibraryPage() {
             index={index}
             head={<Numeral value={index + 1} />}
             title={title}
+            byline={`${holds.count} ${holds.unit}`}
             foot={<Holds {...holds} />}
             thickness={thickness(holds.count)}
           />

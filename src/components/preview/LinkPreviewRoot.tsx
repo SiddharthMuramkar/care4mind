@@ -3,6 +3,7 @@
 import { useEffect, useSyncExternalStore } from 'react'
 import { flushSync } from 'react-dom'
 
+import { LABEL_OPEN_DELAY } from './delays'
 import { getNoParts, getParts, provide, subscribe, whenWanted } from './store'
 
 type Card = typeof import('./PreviewCard')
@@ -52,9 +53,12 @@ function listen(): () => void {
     if (focused) {
       span(key)?.querySelector('a')?.focus()
     } else {
+      const { handle, delay } = span(key)?.hasAttribute('data-hover-label-trigger')
+        ? { handle: parts.label.handle, delay: LABEL_OPEN_DELAY }
+        : { handle: parts.handle, delay: OPEN_DELAY }
       setTimeout(() => {
-        if (span(key)?.matches(':hover')) parts.handle.open(key)
-      }, OPEN_DELAY)
+        if (span(key)?.matches(':hover')) handle.open(key)
+      }, delay)
     }
   }
   function on(event: Event) {
@@ -76,9 +80,9 @@ function listen(): () => void {
 }
 
 /**
- * The one preview card every LinkPreview on a page opens, mounted
- * once in the root layout. A page with no LinkPreview never loads it; one with them fetches it
- * when a mouse moves or a key is pressed, so touch screens never do.
+ * The one preview card every LinkPreview on a page opens, and the one label every HoverLabel
+ * does, mounted once in the root layout. A page with neither never loads them; one with either
+ * fetches them when a mouse moves or a key is pressed, so touch screens never do.
  */
 export function LinkPreviewRoot() {
   const parts = useSyncExternalStore(subscribe, getParts, getNoParts)
