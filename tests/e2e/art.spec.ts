@@ -1378,6 +1378,9 @@ test.describe('the homepage around its pictures', () => {
         expect(new Set(heights).size, 'all one height').toBe(1)
         const links = homeSection(page, FEATURED).getByRole('link', { name: /^Read about/ })
         expect(new Set(await tops(links)).size, 'their links level').toBe(1)
+        // One of the three has no Devanagari, and its rows must not ride up beside the others.
+        const chips = featured.locator('[data-topic]')
+        expect(new Set(await tops(chips)).size, 'their topic chips level').toBe(1)
 
         for (const cards of [topicCards, featured]) {
           const items = cards.locator('xpath=parent::li')
@@ -1397,6 +1400,25 @@ test.describe('the homepage around its pictures', () => {
       },
     )
   }
+
+  test(
+    'at 768 px the topic cards stand three and two, each row level and of one height',
+    { tag: '@self-width' },
+    async ({ page }) => {
+      await page.setViewportSize({ width: 768, height: 900 })
+      await gotoReady(page, '/')
+      const cards = homeSection(page, TOPICS).locator('article')
+      await expect(cards).toHaveCount(5)
+      const boxes = await Promise.all((await cards.all()).map((card) => card.boundingBox()))
+      const [a, b, c, d, e] = boxes
+      if (!a || !b || !c || !d || !e) throw new Error('The five cards are laid out.')
+      expect(new Set([a.y, b.y, c.y]).size, 'three in the first row').toBe(1)
+      expect(new Set([a.height, b.height, c.height]).size, 'of one height').toBe(1)
+      expect(new Set([d.y, e.y]).size, 'two in the second row').toBe(1)
+      expect(d.height).toBe(e.height)
+      expect(d.y).toBeGreaterThanOrEqual(a.y + a.height)
+    },
+  )
 })
 
 /** The words of an element's text that run onto a second line. */
