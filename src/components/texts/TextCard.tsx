@@ -1,5 +1,7 @@
 import Link from 'next/link'
 
+import { ownArt } from '@/art'
+import { Sticker } from '@/components/art'
 import { turnForward } from '@/components/PageTurn'
 import { Text } from '@/components/prose'
 import { hrefFor, type WorkView } from '@/content'
@@ -26,15 +28,18 @@ function incipitOf(work: WorkView) {
 }
 
 /**
- * A work on the shelf, set like a catalogue card: its title in both scripts, who composed it, its
- * blurb where one is supplied, the first line it is quoted from, and a tally of the verses quoted.
+ * A work on the shelf, set like a catalogue card: its Pothi once it has one, its title in both
+ * scripts, who composed it, its blurb where one is supplied, the first line it is quoted from, and
+ * a tally of the verses quoted.
  * The whole card leads to the work's page, and its title flies into that page's heading as the
  * page turns forward.
  */
 export function TextCard({ work, className }: { work: WorkView; className?: string }) {
   const incipit = incipitOf(work)
+  const pothi = ownArt({ kind: 'work', slug: work.slug })
   return (
     <article className={cx(styles.card, className)}>
+      {pothi ? <Sticker art={pothi} size={72} className={styles.pothi} /> : null}
       <h2 className={styles.title}>
         <Link
           href={hrefFor({ kind: 'work', id: work.slug })}

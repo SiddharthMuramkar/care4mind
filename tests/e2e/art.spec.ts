@@ -1,5 +1,8 @@
 import type { Page } from '@playwright/test'
 
+import { artFor } from '@/art'
+import { works } from '@/content'
+
 import { expectNoAxeViolations } from './axe'
 import { expect, gotoReady, test } from './fixtures'
 
@@ -13,6 +16,7 @@ const PICTURES = 'main img, footer img'
 const PAGES: { path: string; name: string }[] = [
   // Add a page in path order, not at the end.
   { path: '/', name: 'homepage' },
+  { path: '/texts/yoga-sutra/', name: 'Traditional text page' },
 ]
 
 /** Start adding up the page's layout shifts. Call it before opening the page. */
@@ -405,6 +409,60 @@ test.describe('topic cards', () => {
     await expect(index.getByRole('listitem').first()).toBeVisible()
     await expect(index.locator('img')).toHaveCount(0)
   })
+})
+
+const WORKS = await works.list()
+
+test.describe('Traditional text pages', () => {
+  for (const { slug, href } of WORKS) {
+    test(
+      `${href} shows its Pothi or Interim picture, decorative, at 120 px, above its title`,
+      { tag: '@one-width' },
+      async ({ page }) => {
+        await gotoReady(page, href)
+        const expected = artFor({ kind: 'work', slug })
+        const picture = headSticker(page)
+        await expect(picture).toHaveCount(1)
+        await expect(picture).toHaveAttribute('alt', '')
+        await expect(picture).toHaveAttribute('width', '120')
+        await expect(picture).toHaveAttribute(
+          'height',
+          String(Math.round((120 * expected.height) / expected.width)),
+        )
+        await expect(picture).not.toHaveAttribute('sizes')
+        expect(decodeURIComponent((await picture.getAttribute('src')) ?? '')).toContain(
+          expected.src,
+        )
+      },
+    )
+  }
+
+  test('the picture stands centred above the title, 120 px wide on every screen', async ({
+    page,
+  }) => {
+    await gotoReady(page, '/texts/yoga-sutra/')
+    const [picture, heading] = await Promise.all([
+      headSticker(page).boundingBox(),
+      page.getByRole('heading', { level: 1 }).boundingBox(),
+    ])
+    if (!picture || !heading) throw new Error('The page head is laid out.')
+    expect(picture.width).toBe(120)
+    expect(picture.y + picture.height, 'above the title').toBeLessThanOrEqual(heading.y)
+    expect(
+      Math.abs(picture.x + picture.width / 2 - (heading.x + heading.width / 2)),
+      'centred on the title',
+    ).toBeLessThanOrEqual(1)
+  })
+
+  test(
+    'the picture stays still while the pointer is on the page',
+    { tag: '@one-width' },
+    async ({ page }) => {
+      await gotoReady(page, '/texts/yoga-sutra/')
+      await page.getByRole('heading', { level: 1 }).hover()
+      await expect(headSticker(page)).toHaveCSS('transform', 'none')
+    },
+  )
 })
 
 // The check itself, on pages made here, so that a broken check cannot pass unnoticed.
