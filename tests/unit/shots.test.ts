@@ -23,6 +23,7 @@ interface Shot {
   width: number
   height: number
   reducedMotion: boolean
+  full: boolean
   file: string
   state?: 'hover' | 'focus-visible' | 'active'
   selector?: string
@@ -58,17 +59,35 @@ const REGISTRY: readonly RouteEntry[] = [
 
 const plan = (...argv: string[]) => shots.planShots(shots.parseArgs(argv), REGISTRY)
 const files = (...argv: string[]) => plan(...argv).map((shot) => shot.file)
+/** A state shot's file, whatever the hash: one test below pins how it is made. */
+const hashed = (name: string): unknown =>
+  expect.stringMatching(new RegExp(`^${name}-[0-9a-f]{6}\\.jpg$`))
 
 describe('pnpm shots', () => {
   it('shoots each sample route at phone and desktop width, with motion, by default', () => {
     expect(plan()).toEqual([
-      { path: '/', width: 360, height: 800, reducedMotion: false, file: 'home-360.jpg' },
-      { path: '/', width: 1440, height: 900, reducedMotion: false, file: 'home-1440.jpg' },
+      {
+        path: '/',
+        width: 360,
+        height: 800,
+        reducedMotion: false,
+        full: false,
+        file: 'home-360.jpg',
+      },
+      {
+        path: '/',
+        width: 1440,
+        height: 900,
+        reducedMotion: false,
+        full: false,
+        file: 'home-1440.jpg',
+      },
       {
         path: '/concepts/',
         width: 360,
         height: 800,
         reducedMotion: false,
+        full: false,
         file: 'concepts-360.jpg',
       },
       {
@@ -76,6 +95,7 @@ describe('pnpm shots', () => {
         width: 1440,
         height: 900,
         reducedMotion: false,
+        full: false,
         file: 'concepts-1440.jpg',
       },
       {
@@ -83,6 +103,7 @@ describe('pnpm shots', () => {
         width: 360,
         height: 800,
         reducedMotion: false,
+        full: false,
         file: 'concepts-ahimsa-360.jpg',
       },
       {
@@ -90,6 +111,7 @@ describe('pnpm shots', () => {
         width: 1440,
         height: 900,
         reducedMotion: false,
+        full: false,
         file: 'concepts-ahimsa-1440.jpg',
       },
       {
@@ -97,6 +119,7 @@ describe('pnpm shots', () => {
         width: 360,
         height: 800,
         reducedMotion: false,
+        full: false,
         file: 'questionnaires-karmayoga-scale-take-360.jpg',
       },
       {
@@ -104,6 +127,7 @@ describe('pnpm shots', () => {
         width: 1440,
         height: 900,
         reducedMotion: false,
+        full: false,
         file: 'questionnaires-karmayoga-scale-take-1440.jpg',
       },
     ])
@@ -167,6 +191,14 @@ describe('pnpm shots', () => {
   it('shoots the viewport, and whole pages under --full', () => {
     expect(shots.parseArgs([]).full).toBe(false)
     expect(shots.parseArgs(['--full']).full).toBe(true)
+    expect(plan('--only', '/').every((shot) => !shot.full)).toBe(true)
+    expect(plan('--only', '/', '--full').every((shot) => shot.full)).toBe(true)
+  })
+
+  it('shoots a state the screen’s worth, even under --full', () => {
+    expect(plan('--only', '/', '--full', '--states', 'main a').some((shot) => shot.full)).toBe(
+      false,
+    )
   })
 
   it('shoots a selector in its hover, focus-visible and active states', () => {
@@ -176,6 +208,7 @@ describe('pnpm shots', () => {
         width: 360,
         height: 800,
         reducedMotion: false,
+        full: false,
         file: 'home-360-hover-main-article-a-572cdb.jpg',
         state: 'hover',
         selector: 'main article a',
@@ -185,6 +218,7 @@ describe('pnpm shots', () => {
         width: 360,
         height: 800,
         reducedMotion: false,
+        full: false,
         file: 'home-360-focus-visible-main-article-a-572cdb.jpg',
         state: 'focus-visible',
         selector: 'main article a',
@@ -194,6 +228,7 @@ describe('pnpm shots', () => {
         width: 360,
         height: 800,
         reducedMotion: false,
+        full: false,
         file: 'home-360-active-main-article-a-572cdb.jpg',
         state: 'active',
         selector: 'main article a',
@@ -203,20 +238,21 @@ describe('pnpm shots', () => {
 
   it('shoots the states at each width', () => {
     expect(files('--only', '/', '--widths', '360,1440', '--states', 'main article a')).toEqual([
-      'home-360-hover-main-article-a-572cdb.jpg',
-      'home-360-focus-visible-main-article-a-572cdb.jpg',
-      'home-360-active-main-article-a-572cdb.jpg',
-      'home-1440-hover-main-article-a-572cdb.jpg',
-      'home-1440-focus-visible-main-article-a-572cdb.jpg',
-      'home-1440-active-main-article-a-572cdb.jpg',
+      hashed('home-360-hover-main-article-a'),
+      hashed('home-360-focus-visible-main-article-a'),
+      hashed('home-360-active-main-article-a'),
+      hashed('home-1440-hover-main-article-a'),
+      hashed('home-1440-focus-visible-main-article-a'),
+      hashed('home-1440-active-main-article-a'),
     ])
   })
 
   it('gives different selectors different files, even when their letters match', () => {
     const fileOf = (selector: string) =>
       plan('--only', '/', '--widths', '360', '--states', selector)[0]?.file
-    expect(fileOf('.card a')).toBe('home-360-hover-card-a-3cfe3a.jpg')
-    expect(fileOf('.card-a')).toBe('home-360-hover-card-a-573f94.jpg')
+    expect(fileOf('.card a')).toEqual(hashed('home-360-hover-card-a'))
+    expect(fileOf('.card-a')).toEqual(hashed('home-360-hover-card-a'))
+    expect(fileOf('.card a')).not.toBe(fileOf('.card-a'))
     const start = 'main section:nth-of-type(2) article:nth-of-type'
     expect(fileOf(`${start}(1) a`)).not.toBe(fileOf(`${start}(2) a`))
   })
@@ -231,14 +267,14 @@ describe('pnpm shots', () => {
         '--states',
         'main article a[href="/concepts/karma-yoga/xyz"]',
       )[0],
-    ).toBe('home-360-hover-main-article-a-href-concepts-karma-yoga-af9247.jpg')
+    ).toEqual(hashed('home-360-hover-main-article-a-href-concepts-karma-yoga'))
   })
 
   it('keeps a selector whole, commas and quotes included, and stops at an empty one', () => {
     const selector = 'nav a, main a[href="/concepts/"]'
     expect(plan('--only', '/', '--widths', '360', `--states=${selector}`)[0]).toMatchObject({
       selector,
-      file: 'home-360-hover-nav-a-main-a-href-concepts-67494b.jpg',
+      file: hashed('home-360-hover-nav-a-main-a-href-concepts'),
     })
     expect(() => plan('--states', '')).toThrow(/--states takes/)
     expect(() => plan('--states')).toThrow(/--states takes/)
@@ -249,23 +285,23 @@ describe('pnpm shots', () => {
     expect(
       files('--only', '/concepts/vikshepa/', '--widths', '1440', '--both', '--states', 'main a'),
     ).toEqual([
-      'concepts-vikshepa-1440-hover-main-a-4f5cba.jpg',
-      'concepts-vikshepa-1440-focus-visible-main-a-4f5cba.jpg',
-      'concepts-vikshepa-1440-active-main-a-4f5cba.jpg',
-      'concepts-vikshepa-1440-reduced-hover-main-a-4f5cba.jpg',
-      'concepts-vikshepa-1440-reduced-focus-visible-main-a-4f5cba.jpg',
-      'concepts-vikshepa-1440-reduced-active-main-a-4f5cba.jpg',
+      hashed('concepts-vikshepa-1440-hover-main-a'),
+      hashed('concepts-vikshepa-1440-focus-visible-main-a'),
+      hashed('concepts-vikshepa-1440-active-main-a'),
+      hashed('concepts-vikshepa-1440-reduced-hover-main-a'),
+      hashed('concepts-vikshepa-1440-reduced-focus-visible-main-a'),
+      hashed('concepts-vikshepa-1440-reduced-active-main-a'),
     ])
   })
 
   it('names a selector with no letters or digits by its hash alone', () => {
     expect(files('--only', '/', '--widths', '360', '--states', '*')).toEqual([
-      'home-360-hover-684888.jpg',
-      'home-360-focus-visible-684888.jpg',
-      'home-360-active-684888.jpg',
+      hashed('home-360-hover'),
+      hashed('home-360-focus-visible'),
+      hashed('home-360-active'),
     ])
-    expect(files('--only', '/', '--widths', '360', '--states', '#')[0]).toBe(
-      'home-360-hover-334359.jpg',
+    expect(files('--only', '/', '--widths', '360', '--states', '#')[0]).toEqual(
+      hashed('home-360-hover'),
     )
   })
 

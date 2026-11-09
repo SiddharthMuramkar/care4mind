@@ -169,6 +169,7 @@ export function planShots(options, routes) {
           width,
           height: heightFor(width),
           reducedMotion,
+          full: options.full && state === undefined,
           file: fileFor(route.path, width, reducedMotion, state, selector ?? ''),
           ...(state === undefined ? {} : { state, selector }),
         })),
@@ -394,7 +395,7 @@ export async function enterState(page, { path, selector, state }) {
 }
 
 /** Take one shot in a fresh browser context; the file it wrote. */
-async function take(browser, baseURL, full, shot) {
+async function take(browser, baseURL, shot) {
   const context = await browser.newContext({
     baseURL,
     viewport: { width: shot.width, height: shot.height },
@@ -414,12 +415,7 @@ async function take(browser, baseURL, full, shot) {
     await picturesDone(page, shot.path)
     await animationsDone(page)
     const file = join(OUT, shot.file)
-    await page.screenshot({
-      path: file,
-      type: 'jpeg',
-      quality: 70,
-      fullPage: full && shot.state === undefined,
-    })
+    await page.screenshot({ path: file, type: 'jpeg', quality: 70, fullPage: shot.full })
     return file
   } finally {
     await context.close()
@@ -430,7 +426,7 @@ async function take(browser, baseURL, full, shot) {
  * Take every shot, a few at once, printing each file in the plan's order as it lands. At the
  * first failure it starts no more, prints what it wrote and throws.
  */
-async function shootAll(shots, baseURL, full) {
+async function shootAll(shots, baseURL) {
   const { chromium } = await import('@playwright/test')
   mkdirSync(OUT, { recursive: true })
   const browser = await chromium.launch()
@@ -446,7 +442,7 @@ async function shootAll(shots, baseURL, full) {
       const index = next
       next += 1
       try {
-        written[index] = await take(browser, baseURL, full, shots[index])
+        written[index] = await take(browser, baseURL, shots[index])
         print()
       } catch (error) {
         failure ??= error
@@ -492,7 +488,7 @@ async function main(argv) {
   process.once('exit', () => server?.kill())
   try {
     await server?.ready()
-    await shootAll(shots, `http://localhost:${port}`, options.full)
+    await shootAll(shots, `http://localhost:${port}`)
   } finally {
     await server?.stop()
   }

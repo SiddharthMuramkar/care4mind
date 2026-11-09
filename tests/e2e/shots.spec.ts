@@ -38,18 +38,39 @@ const STATES: readonly State[] = ['hover', 'focus-visible', 'active']
 
 test.describe('pnpm shots', { tag: '@one-width' }, () => {
   for (const state of STATES) {
-    // At this width the first link in a nav is hidden, so this reaches a later, visible one.
     test(`puts the first visible match in its ${state} state`, async ({ page }) => {
-      await gotoReady(page, '/')
-      await shots.enterState(page, { path: '/', selector: 'nav a', state })
+      await openStandIn(
+        page,
+        `<a href="#a" hidden>Hidden</a><a href="#b" id="first">First</a> <a href="#c">Later</a>`,
+      )
+      await shots.enterState(page, { path: STAND_IN, selector: 'a', state })
       const entered = await page
-        .locator('nav a')
-        .visible()
-        .first()
+        .locator('#first')
         .evaluate((link, pseudo) => link.matches(pseudo), `:${state}`)
       expect(entered).toBe(true)
     })
   }
+
+  test('centres the element on the screen, clear of a sticky header', async ({ page }) => {
+    await openStandIn(
+      page,
+      `<header style="position:fixed;inset:0 0 auto;height:80px;background:#fff">Header</header>
+       <div style="height:5000px"></div>
+       <a id="far" href="#far" style="display:block;height:20px">Far down</a>
+       <div style="height:5000px"></div>`,
+    )
+    // On the screen but under the header, where nothing but the centring moves it clear.
+    await page.evaluate(() => window.scrollTo(0, 4980))
+
+    await shots.enterState(page, { path: STAND_IN, selector: '#far', state: 'hover' })
+
+    const { top, middle, screen } = await page.locator('#far').evaluate((link) => {
+      const box = link.getBoundingClientRect()
+      return { top: box.top, middle: box.top + box.height / 2, screen: window.innerHeight }
+    })
+    expect(top).toBeGreaterThan(80)
+    expect(Math.abs(middle - screen / 2)).toBeLessThan(2)
+  })
 
   test('stops at a selector nothing visible matches', async ({ page }) => {
     await gotoReady(page, '/')
@@ -70,9 +91,11 @@ test.describe('pnpm shots', { tag: '@one-width' }, () => {
       page,
       '<a href="#x" style="position:absolute;left:-9999px">Off the screen</a>',
     )
+    const started = Date.now()
     await expect(
       shots.enterState(page, { path: STAND_IN, selector: 'a', state: 'hover' }),
     ).rejects.toThrow(`“a” on ${STAND_IN} couldn’t be hovered`)
+    expect(Date.now() - started).toBeLessThan(10_000)
   })
 
   test('waits for a slow lazy picture far below the screen', async ({ page }) => {
