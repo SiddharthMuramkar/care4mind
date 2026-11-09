@@ -54,8 +54,11 @@ export default async function NotFound() {
                   href={hrefFor({ kind: 'concept', id: start.slug })}
                   transitionTypes={turnForward}
                 >
-                  Read about&nbsp;<span lang={start.lang}>{start.name}</span>
-                  {start.gloss ? <> · {start.gloss}</> : null}
+                  {/* One box inside the flex link, so the spaces around the dot aren't trimmed. */}
+                  <span>
+                    Read about&nbsp;<span lang={start.lang}>{start.name}</span>
+                    {start.gloss ? <> · {start.gloss}</> : null}
+                  </span>
                 </Link>
               </li>
             ) : null}

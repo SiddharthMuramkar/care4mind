@@ -103,14 +103,15 @@ test('the Menu Drawer keeps its edge', { tag: '@self-width' }, async ({ page }) 
 
 test('a Frontispiece ring draws in the text colour of the theme', async ({ page }) => {
   await gotoReady(page, hrefFor({ kind: 'topic', id: 'mind' }))
-  const paths = page.getByRole('main').locator('header span:has(> img) > svg path')
+  const main = page.getByRole('main')
+  const text = await main
+    .locator('header p', { hasText: /^Topic/ })
+    .evaluate((kicker) => getComputedStyle(kicker).color)
+  const paths = main.locator('header span:has(> img) > svg path')
   expect(await paths.count()).toBeGreaterThan(0)
   for (const path of await paths.all()) {
-    const { stroke, color } = await path.evaluate((element) => ({
-      stroke: getComputedStyle(element).stroke,
-      color: getComputedStyle(element.parentElement as Element).color,
-    }))
-    expect(stroke).toBe(color)
+    const stroke = await path.evaluate((element) => getComputedStyle(element).stroke)
+    expect(stroke).toBe(text)
     expect(stroke).not.toMatch(/^transparent$|^rgba\(.*,\s*0\)$/)
   }
 })
