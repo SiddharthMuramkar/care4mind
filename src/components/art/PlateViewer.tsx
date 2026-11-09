@@ -3,7 +3,7 @@
 import Image, { getImageProps } from 'next/image'
 import { type ReactNode, useRef, useState } from 'react'
 
-import type { ArtRecord } from '@/art/types'
+import type { ArtRecord } from '@/art'
 import { cx } from '@/lib/cx'
 
 import { useHydrated } from '../browser'

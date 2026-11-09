@@ -112,6 +112,7 @@ const pose = (lotus: Locator) =>
   )
 
 async function pointAt(page: Page, lotus: Locator) {
+  await lotus.scrollIntoViewIfNeeded()
   const box = await lotus.boundingBox()
   if (!box) throw new Error('the lotus has no box')
   await page.mouse.move(box.x + box.width * 0.9, box.y + box.height / 2, { steps: 4 })

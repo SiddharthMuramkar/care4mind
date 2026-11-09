@@ -41,7 +41,10 @@
   font-style: italic;
 }
 
-/* Held at the buttons' full height from first paint, so that nothing below it moves. */
+/*
+ * Held at the buttons' full height from first paint, so that nothing below it moves. A figcaption
+ * has to come last in its figure, so `order` is what stands this row under the caption.
+ */
 .controls {
   order: 2;
   display: flex;
@@ -132,7 +135,7 @@
 }
 
 @media (width >= 64rem) {
-  .circle {
+  .medallion {
     width: 360px;
   }
 }

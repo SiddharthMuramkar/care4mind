@@ -222,6 +222,7 @@ test("pointing at and pressing a lotus moves nothing, with reduced motion, and t
     .getByRole('link', { name: 'Care4Mind home', exact: true })
     .locator('svg[data-lotus]')
   for (const lotus of [main.first(), main.last(), logo]) {
+    await lotus.scrollIntoViewIfNeeded()
     const box = await lotus.boundingBox()
     if (!box) continue
     await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2)

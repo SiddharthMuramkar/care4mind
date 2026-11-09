@@ -79,7 +79,7 @@ test.describe('the opening folio', () => {
     await expect(
       page.getByRole('main').getByRole('img', { name: /^A jeweller in a maroon turban/ }),
     ).toBeVisible()
-    await expect(page.locator('main img:not([data-hero-plate])[alt]:not([alt=""])')).toHaveCount(0)
+    await expect(page.locator('main img:not([data-hero-plate]):not([alt=""])')).toHaveCount(0)
     await expect(page.locator('main img:not([width]), main img:not([height])')).toHaveCount(0)
     const strokes = await fleuron.locator('path').all()
     expect(strokes.length, 'drawn in more than one stroke').toBeGreaterThan(1)
