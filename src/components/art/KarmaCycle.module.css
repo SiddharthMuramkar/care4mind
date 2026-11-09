@@ -15,8 +15,8 @@
 .figure {
   margin: 0;
   max-width: 720px;
-  /* The old picture's address lands here. */
-  scroll-margin-top: 1.5rem;
+  /* The old picture's address lands here, with the heading above clear of the sticky header. */
+  scroll-margin-top: 3.25rem;
 }
 
 /*

@@ -4,6 +4,8 @@ import { join } from 'node:path'
 import { getPathMatch } from 'next/dist/shared/lib/router/utils/path-match'
 import { beforeAll, describe, expect, it } from 'vitest'
 
+import { ART } from '@/art/registry'
+import { artFileOf } from '@/config/old-media-art'
 import {
   feedOf,
   oldArchives,
@@ -12,8 +14,6 @@ import {
   oldPagesAndPosts,
   oldShortlinks,
 } from '@/config/old-site-urls'
-import { ART } from '@/art/registry'
-import { artFileOf } from '@/config/old-media-art'
 import { redirects, type Redirect } from '@/config/redirects'
 import { hrefFor, site } from '@/content'
 import { CONTENT_KINDS, type ContentRecord, type RecordOf, localSource } from '@/content/testing'

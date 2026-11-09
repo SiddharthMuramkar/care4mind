@@ -1008,7 +1008,7 @@ export const oldMedia: readonly OldMedia[] = [
     address:
       '/wp-content/uploads/2025/03/brahma-madurai-meenakshi-amman-temple-1576032-1024x821-1-150x150.jpg',
     wpId: 734,
-    shownOn: [],
+    shownOn: ['/concepts/'],
   },
   {
     address:

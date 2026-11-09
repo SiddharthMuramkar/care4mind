@@ -1,6 +1,6 @@
 /**
  * The redirect table: every address the site moves elsewhere, in one place. Each leads to
- * its page in one hop, and next.config.ts answers each with a 301 (moved permanently), which
+ * its page or file in one hop, and next.config.ts answers each with a 301 (moved permanently), which
  * browsers follow and search engines remember.
  *
  * Next matches a source ignoring case, so `/VIKSHEPA/` takes one hop too. It adds a missing
@@ -9,7 +9,8 @@
  *
  * Destinations are written out rather than made by hrefFor(): next.config.ts loads this file
  * through a loader that can't follow the `@/` imports the content module uses. The unit test
- * (tests/unit/redirects.test.ts) holds each one to hrefFor() and to the content's provenance.
+ * (tests/unit/redirects.test.ts) holds each page to hrefFor() and to the content's provenance,
+ * and each file to `public/`.
  *
  * Each old page is declared once below. The feed the old site served under every page and
  * archive is derived from that declaration, and leads where its page leads, so it stays one
