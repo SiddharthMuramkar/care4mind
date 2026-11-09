@@ -316,9 +316,10 @@ test.describe('Questionnaire pages and cards', () => {
       expect(decodeURIComponent((await picture.getAttribute('src')) ?? '')).toContain(
         '/art/plates/karma-yoga.jpg',
       )
+      // Two rings are drawn, one for each width: only the one this width shows is visible.
       await expect(
-        page.getByRole('main').locator('header span:has(> img) > svg').first(),
-      ).toBeVisible()
+        page.getByRole('main').locator('header span:has(> img) > svg:visible'),
+      ).toHaveCount(1)
       const [box, heading] = await Promise.all([
         picture.boundingBox(),
         page.getByRole('heading', { level: 1 }).boundingBox(),
