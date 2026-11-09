@@ -1,6 +1,6 @@
 import Image from 'next/image'
 
-import type { ArtRecord } from '@/art/types'
+import type { ArtRecord } from '@/art'
 import { cx } from '@/lib/cx'
 
 import { MedallionRing } from './MedallionRing'

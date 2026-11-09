@@ -74,12 +74,15 @@ test.describe('the opening folio', () => {
     const fleuron = heroFleuron(page)
     await expect(fleuron).toBeVisible()
     await expect(fleuron).toHaveAttribute('aria-hidden', 'true')
-    // The hero Plate is the one picture that speaks; the rest stay out of the way.
-    await expect(page.getByRole('main').getByRole('img')).toHaveCount(1)
+    // The hero Plate and the Emblem are the two pictures that speak; the rest stay out of the way.
+    const main = page.getByRole('main')
+    await expect(main.getByRole('img')).toHaveCount(2)
+    await expect(main.getByRole('img', { name: /^A jeweller in a maroon turban/ })).toBeVisible()
+    await expect(page.locator('figure:has([data-hero-plate]) figcaption')).toBeVisible()
+    await expect(main.getByRole('img', { name: /^Care4Mind's emblem/ })).toHaveCount(1)
     await expect(
-      page.getByRole('main').getByRole('img', { name: /^A jeweller in a maroon turban/ }),
-    ).toBeVisible()
-    await expect(page.locator('main img:not([data-hero-plate])[alt]:not([alt=""])')).toHaveCount(0)
+      page.locator('main img:not([data-hero-plate]):not(#who-behind img)[alt]:not([alt=""])'),
+    ).toHaveCount(0)
     await expect(page.locator('main img:not([width]), main img:not([height])')).toHaveCount(0)
     const strokes = await fleuron.locator('path').all()
     expect(strokes.length, 'drawn in more than one stroke').toBeGreaterThan(1)

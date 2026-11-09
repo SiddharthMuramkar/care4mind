@@ -1,0 +1,17 @@
+.border {
+  display: block;
+  width: 100%;
+  height: 12px;
+  color: var(--color-highlight);
+}
+
+.accent {
+  fill: var(--color-accent);
+}
+
+/* A contrast theme may paint the page in any colour, so both dots take its text colour. */
+@media (forced-colors: active) {
+  .accent {
+    fill: currentColor;
+  }
+}

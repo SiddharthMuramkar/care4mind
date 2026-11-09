@@ -1,3 +1,4 @@
+export { FolkBorder } from './FolkBorder'
 export { HeadPicture } from './HeadPicture'
 export { Medallion } from './Medallion'
 export { MedallionRing } from './MedallionRing'

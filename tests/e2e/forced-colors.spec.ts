@@ -179,6 +179,29 @@ test('the hero Medallion ring draws in the text colour of the theme', async ({ p
   }
 })
 
+test('the homepage keeps its folk border and its Emblem', async ({ page }) => {
+  await gotoReady(page, '/')
+  const main = page.getByRole('main')
+  const emblem = main.getByRole('region', { name: 'Who’s behind this', exact: true }).locator('img')
+  await emblem.scrollIntoViewIfNeeded()
+  await expect(emblem).toBeVisible()
+  await expectLoaded(emblem)
+
+  const border = main.getByRole('region', { name: 'Closing', exact: true }).locator('svg')
+  await border.scrollIntoViewIfNeeded()
+  await expect(border).toBeVisible()
+  const shapes = border.locator('pattern circle, pattern rect')
+  expect(await shapes.count()).toBeGreaterThan(0)
+  for (const shape of await shapes.all()) {
+    const { fill, color } = await shape.evaluate((element) => ({
+      fill: getComputedStyle(element).fill,
+      color: getComputedStyle(element).color,
+    }))
+    expect(fill).toBe(color)
+    expect(fill).not.toMatch(/^transparent$|^rgba\(.*,\s*0\)$/)
+  }
+})
+
 const PARTS = [
   'Everyday Experience - 1',
   'Everyday Experience - 2',
