@@ -116,6 +116,18 @@ describe('a throwaway email', () => {
     expect(isThrowawayEmail('someone@mailinator.com', list)).toBe(true)
   })
 
+  it('logs in an account already there, its name unchanged, when the list adds its domain', async () => {
+    await login.addUser('someone@mailinator.com', 'Asha')
+    expect((await login.sendCode('someone@mailinator.com', 'sign-up')).status).toBe(200)
+    const redeemed = await login.redeemCode(
+      'someone@mailinator.com',
+      login.codeFor('someone@mailinator.com'),
+      'Someone Else',
+    )
+    expect(redeemed.status).toBe(200)
+    expect((await login.users())[0]).toMatchObject({ name: 'Asha' })
+  })
+
   it('leaves Log in alone: an account whose domain the list later adds can still get in', async () => {
     const response = await login.sendCode('someone@mailinator.com', 'log-in')
     expect(response.status).toBe(200)
@@ -306,6 +318,7 @@ describe('one connection, as a lecture hall on one Wi-Fi is', () => {
       BETTER_AUTH_URL: 'https://www.care4mind.xyz',
       BETTER_AUTH_SECRET: 'x'.repeat(32),
       DATABASE_URL: 'postgres://user:pass@db.example.test/care4mind',
+      TURNSTILE_SITE_KEY: 'a-real-site-key',
       TURNSTILE_SECRET_KEY: 'a-real-secret',
       GOOGLE_CLIENT_ID: 'a-real-client-id',
       GOOGLE_CLIENT_SECRET: 'a-real-client-secret',

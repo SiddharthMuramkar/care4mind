@@ -4,7 +4,7 @@
  */
 import 'server-only'
 
-import { betterAuth, type BetterAuthOptions } from 'better-auth'
+import { betterAuth, getCurrentAdapter, type BetterAuthOptions } from 'better-auth'
 import { APIError, getOAuthState } from 'better-auth/api'
 import { captcha } from 'better-auth/plugins/captcha'
 import { emailOTP } from 'better-auth/plugins/email-otp'
@@ -15,7 +15,9 @@ import {
   capNewAccounts,
   type CheckBotId,
   defences,
+  isThrowawayEmail,
   type RecordDefence,
+  THROWAWAY_EMAIL,
 } from './defences'
 import {
   DELETE_LINK_HOURS,
@@ -62,6 +64,8 @@ export const DISABLED_PATHS: readonly string[] = [
   '/email-otp/change-email',
   '/email-otp/verify-email',
   '/verify-email',
+  // Nothing on the site edits a name, and this route would skip every rule Sign up sets on one.
+  '/update-user',
 ]
 
 /** What a sign-up that sent no name, or one too long, is told. */
@@ -90,8 +94,8 @@ export function createAuth({
   recordDefence,
   backgroundTask,
 }: AuthDeps) {
-  const { routePerMinute, globalPerTenSeconds } = settings.limits
-  const perRoute = { window: 60, max: routePerMinute }
+  const { routeBurst, globalBurst } = settings.limits
+  const perRoute = { window: 60, max: routeBurst }
   return betterAuth({
     appName: 'Care4Mind',
     baseURL: settings.baseURL,
@@ -116,13 +120,16 @@ export function createAuth({
       enabled: true,
       storage: 'database',
       window: 10,
-      max: globalPerTenSeconds,
+      max: globalBurst,
       customRules: {
         '/email-otp/send-verification-otp': perRoute,
         '/sign-in/email-otp': perRoute,
         '/sign-in/social': perRoute,
         // Each ask emails the user, so it counts as a route that sends.
         '/delete-user': perRoute,
+        // Every page load of a logged-in user asks this and it sends nothing, so one Wi-Fi's
+        // phones never run out of it; Vercel's firewall guards it against a flood.
+        '/get-session': false,
       },
     },
     advanced: {
@@ -149,13 +156,16 @@ export function createAuth({
           // Google, and in the body with the code; only a real `true` counts, whichever it is.
           before: async (user, ctx) => {
             if (!user.emailVerified) throw new APIError('BAD_REQUEST', EMAIL_NOT_CONFIRMED)
+            // Here as well as before a code is sent, because Google sign-ups reach only this.
+            if (isThrowawayEmail(user.email)) throw new APIError('BAD_REQUEST', THROWAWAY_EMAIL)
             const state = (await getOAuthState()) as { agreed?: unknown } | null
             const agreed = (state ?? (ctx?.body as { agreed?: unknown } | undefined))?.agreed
             if (agreed !== true) throw new APIError('BAD_REQUEST', TICK_BOX_NEEDED)
             const name = user.name.trim()
             if (!name || name.length > NAME_MAX) throw new APIError('BAD_REQUEST', NAME_NEEDED)
             if (ctx) {
-              await capNewAccounts(ctx.context.adapter, {
+              // A Google sign-up holds a connection for its transaction: count on that one.
+              await capNewAccounts(await getCurrentAdapter(ctx.context.adapter), {
                 limits: settings.limits,
                 record: recordDefence,
               })

@@ -69,6 +69,52 @@ describe('coming back from Google on Sign up', () => {
   })
 })
 
+describe('a throwaway address on Google', () => {
+  it('is refused at Sign up, as an emailed code to it would be', async () => {
+    const response = await login.googleSignIn('sign-up', {
+      ...ASHA,
+      email: 'someone@mailinator.com',
+    })
+    expect(response.status).toBe(302)
+    expect(redirectOf(response).searchParams.get('error')).toBe('THROWAWAY_EMAIL')
+    expect(response.headers.getSetCookie().join()).not.toMatch(/session_token=/)
+    expect(await login.count('user')).toBe(0)
+    expect(await login.count('account')).toBe(0)
+  })
+
+  it('lets a privacy relay sign up', async () => {
+    const response = await login.googleSignIn('sign-up', {
+      ...ASHA,
+      email: 'someone@mozmail.com',
+    })
+    expect(response.headers.get('set-cookie')).toMatch(/session_token=/)
+    expect(await login.count('user')).toBe(1)
+  })
+
+  it('leaves an account already at that address able to log in', async () => {
+    await login.addUser('someone@mailinator.com', 'Asha')
+    const response = await login.googleSignIn('log-in', {
+      ...ASHA,
+      email: 'someone@mailinator.com',
+    })
+    expect(response.headers.get('set-cookie')).toMatch(/session_token=/)
+    expect(await login.count('user')).toBe(1)
+  })
+})
+
+describe('a Google sign-up on one database connection', () => {
+  it('finishes, because the new-account cap counts on the connection the sign-up holds', async () => {
+    const small = await loginHarness({ poolSize: 1 })
+    try {
+      const response = await small.googleSignIn('sign-up', ASHA)
+      expect(response.status).toBe(302)
+      expect(await small.count('user')).toBe(1)
+    } finally {
+      await small.close()
+    }
+  }, 20_000)
+})
+
 describe('coming back from Google on Log in', () => {
   it('sends a new Google user to Sign up, with no account made', async () => {
     const response = await login.googleSignIn('log-in', ASHA)

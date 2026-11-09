@@ -1,7 +1,10 @@
+import { randomUUID } from 'node:crypto'
 import { readFileSync } from 'node:fs'
 
 import { PGlite } from '@electric-sql/pglite'
+import { PGLiteSocketServer } from '@electric-sql/pglite-socket'
 import { Kysely, PGliteDialect } from 'kysely'
+import { Pool } from 'pg'
 import { vi } from 'vitest'
 
 import { createAuth, type AuthDeps } from '@/lib/auth/create-auth'
@@ -41,8 +44,8 @@ export const TEST_SETTINGS: LoginSettings = {
   email: { apiKey: 'unused', from: 'login@care4mind.test' },
   botId: { blocking: false },
   limits: {
-    routePerMinute: 600,
-    globalPerTenSeconds: 1000,
+    routeBurst: 600,
+    globalBurst: 1000,
     blocking: false,
     codesPerEmailPerHour: 3,
     newAccountsPerHour: 5,
@@ -75,13 +78,23 @@ function googleIdToken(code: string): string {
 interface HarnessOptions {
   settings?: Partial<LoginSettings>
   deps?: Partial<AuthDeps>
+  /** Connect through a real pool of this size, as the site does, instead of PGlite directly. */
+  poolSize?: number
 }
 
 /** A fresh database and a fresh auth route for one test file. */
-export async function loginHarness({ settings, deps }: HarnessOptions = {}) {
+export async function loginHarness({ settings, deps, poolSize }: HarnessOptions = {}) {
   const pglite = new PGlite()
   await pglite.exec(readFileSync('migrations/0001_auth.sql', 'utf8'))
-  const database = { dialect: new PGliteDialect({ pglite }), type: 'postgres' } as const
+  const socket = poolSize ? new PGLiteSocketServer({ db: pglite, port: 0 }) : undefined
+  await socket?.start()
+  const pool = socket
+    ? new Pool({
+        connectionString: `postgres://postgres@${socket.getServerConn()}/postgres`,
+        max: poolSize,
+      })
+    : undefined
+  const database = pool ?? ({ dialect: new PGliteDialect({ pglite }), type: 'postgres' } as const)
 
   let verdict: BotCheckVerdict | 'unreachable' = PASSING
   const verified: string[] = []
@@ -139,9 +152,10 @@ export async function loginHarness({ settings, deps }: HarnessOptions = {}) {
   function request(
     method: 'GET' | 'POST',
     path: string,
-    options: { body?: unknown; headers?: Record<string, string> } = {},
+    options: { body?: unknown; headers?: Record<string, string>; exactPath?: boolean } = {},
   ) {
-    const url = `${ORIGIN}/api/auth${/[/?]/.test(path.slice(-1)) || path.includes('?') ? path : `${path}/`}`
+    const slashed = /[/?]/.test(path.slice(-1)) || path.includes('?') || options.exactPath
+    const url = `${ORIGIN}/api/auth${slashed ? path : `${path}/`}`
     const headers = { origin: ORIGIN, 'x-forwarded-for': '203.0.113.7', ...options.headers }
     const init: RequestInit =
       method === 'POST'
@@ -277,6 +291,19 @@ export async function loginHarness({ settings, deps }: HarnessOptions = {}) {
         .execute()
       return rows as { email: string; name: string; emailVerified: boolean }[]
     },
+    /** An account already in the database, however it got there: a list update, say. */
+    addUser: (email: string, name: string) =>
+      kysely
+        .insertInto('user')
+        .values({
+          id: randomUUID(),
+          email,
+          name,
+          emailVerified: true,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        })
+        .execute(),
     /** How many rows a table holds. */
     count: async (table: string) => (await kysely.selectFrom(table).selectAll().execute()).length,
     /** Between tests: every table empty, the outbox empty, the verdict passing. */
@@ -295,6 +322,8 @@ export async function loginHarness({ settings, deps }: HarnessOptions = {}) {
     },
     close: async () => {
       vi.stubGlobal('fetch', realFetch)
+      await pool?.end()
+      await socket?.stop()
       // Destroying the Kysely instance also closes the database it was handed.
       await kysely.destroy()
     },

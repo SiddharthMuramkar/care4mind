@@ -11,7 +11,7 @@ const WEEK = 60 * 60 * 24 * 7
 
 /**
  * A second, readable cookie beside the user-session's own, which pages can't read: it lets a
- * page that is static and has no session of its own skip asking the server anything for the
+ * page that is static and has no user-session of its own skip asking the server anything for the
  * many visitors who aren't logged in.
  */
 function withSessionHint(response: Response, request: Request): Response {

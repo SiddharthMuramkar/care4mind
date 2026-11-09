@@ -8,6 +8,7 @@ const REQUIRED = {
   BETTER_AUTH_URL: 'https://www.care4mind.xyz',
   BETTER_AUTH_SECRET: 'x'.repeat(32),
   DATABASE_URL: 'postgres://user:pass@db.example.test/care4mind',
+  TURNSTILE_SITE_KEY: 'a-real-site-key',
   TURNSTILE_SECRET_KEY: 'a-real-secret',
   GOOGLE_CLIENT_ID: 'a-real-client-id',
   GOOGLE_CLIENT_SECRET: 'a-real-client-secret',
@@ -53,16 +54,16 @@ describe('the login settings', () => {
 
   it('reads the limits, with raised defaults that leave one Wi-Fi unblocked', () => {
     expect(readLoginSettings(REQUIRED).limits).toMatchObject({
-      routePerMinute: 600,
-      globalPerTenSeconds: 1000,
+      routeBurst: 600,
+      globalBurst: 1000,
     })
     expect(
       readLoginSettings({
         ...REQUIRED,
-        LOGIN_ROUTE_LIMIT_PER_MINUTE: '40',
-        LOGIN_GLOBAL_LIMIT_PER_10_SECONDS: '50',
+        LOGIN_ROUTE_LIMIT_BURST: '40',
+        LOGIN_GLOBAL_LIMIT_BURST: '50',
       }).limits,
-    ).toMatchObject({ routePerMinute: 40, globalPerTenSeconds: 50 })
+    ).toMatchObject({ routeBurst: 40, globalBurst: 50 })
   })
 
   it('leaves the limits and BotID recording only, until a setting turns each to blocking', () => {
@@ -100,8 +101,8 @@ describe('the login settings', () => {
   })
 
   it('refuses a limit that isn’t a whole number', () => {
-    expect(() => readLoginSettings({ ...REQUIRED, LOGIN_ROUTE_LIMIT_PER_MINUTE: 'lots' })).toThrow(
-      'LOGIN_ROUTE_LIMIT_PER_MINUTE',
+    expect(() => readLoginSettings({ ...REQUIRED, LOGIN_ROUTE_LIMIT_BURST: 'lots' })).toThrow(
+      'LOGIN_ROUTE_LIMIT_BURST',
     )
   })
 
@@ -109,10 +110,31 @@ describe('the login settings', () => {
     const test = '1x0000000000000000000000000000000AA'
 
     it('are noticed, so the hostname and action checks can be set aside', () => {
-      expect(readLoginSettings({ ...REQUIRED, TURNSTILE_SECRET_KEY: test }).botCheck.testKeys).toBe(
-        true,
-      )
+      expect(
+        readLoginSettings({ ...REQUIRED, TURNSTILE_SITE_KEY: '', TURNSTILE_SECRET_KEY: test })
+          .botCheck.testKeys,
+      ).toBe(true)
       expect(readLoginSettings(REQUIRED).botCheck.testKeys).toBe(false)
+    })
+
+    it('are refused beside a real site key, whose real tokens they can’t accept', () => {
+      expect(() =>
+        readLoginSettings({
+          ...REQUIRED,
+          TURNSTILE_SITE_KEY: 'a-real-site-key',
+          TURNSTILE_SECRET_KEY: test,
+        }),
+      ).toThrow(/TURNSTILE_SITE_KEY.*TURNSTILE_SECRET_KEY/)
+    })
+
+    it('are the only secrets a test site key can pass, so a real one beside it is refused', () => {
+      const realSecret = { ...REQUIRED, TURNSTILE_SECRET_KEY: 'a-real-secret' }
+      expect(() => readLoginSettings({ ...realSecret, TURNSTILE_SITE_KEY: '' })).toThrow(
+        /TURNSTILE_SITE_KEY.*TURNSTILE_SECRET_KEY/,
+      )
+      expect(() =>
+        readLoginSettings({ ...realSecret, TURNSTILE_SITE_KEY: '1x00000000000000000000BB' }),
+      ).toThrow(/TURNSTILE_SITE_KEY.*TURNSTILE_SECRET_KEY/)
     })
 
     it('are refused in production', () => {
@@ -160,14 +182,20 @@ describe('the site key built into the forms', () => {
     expect(turnstileSiteKey({ TURNSTILE_SITE_KEY: 'real' }, true)).toBe('real')
   })
 
-  it('is required in production with login on, and a test key is refused', () => {
-    expect(() => turnstileSiteKey({ VERCEL_ENV: 'production' }, true)).toThrow(/TURNSTILE_SITE_KEY/)
+  it.each([
+    '1x00000000000000000000AA',
+    '2x00000000000000000000AB',
+    '1x00000000000000000000BB',
+    '2x00000000000000000000BB',
+    '3x00000000000000000000FF',
+  ])('refuses Cloudflare’s test key %s in production with login on', (key) => {
     expect(() =>
-      turnstileSiteKey(
-        { VERCEL_ENV: 'production', TURNSTILE_SITE_KEY: '1x00000000000000000000AA' },
-        true,
-      ),
+      turnstileSiteKey({ VERCEL_ENV: 'production', TURNSTILE_SITE_KEY: key }, true),
     ).toThrow(/TURNSTILE_SITE_KEY/)
+  })
+
+  it('is required in production with login on', () => {
+    expect(() => turnstileSiteKey({ VERCEL_ENV: 'production' }, true)).toThrow(/TURNSTILE_SITE_KEY/)
     expect(turnstileSiteKey({ VERCEL_ENV: 'production', TURNSTILE_SITE_KEY: 'real' }, true)).toBe(
       'real',
     )

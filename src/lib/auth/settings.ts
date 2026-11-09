@@ -21,6 +21,8 @@ const TEST_SITE_KEY = '1x00000000000000000000AA'
 const TEST_SITE_KEYS: readonly string[] = [
   TEST_SITE_KEY,
   '2x00000000000000000000AB',
+  '1x00000000000000000000BB',
+  '2x00000000000000000000BB',
   '3x00000000000000000000FF',
 ]
 
@@ -48,10 +50,13 @@ export interface LoginSettings {
     apiUrl?: string
   }
   limits: {
-    /** Requests one address may make to a route that sends or redeems an emailed code, per minute. */
-    routePerMinute: number
-    /** Requests one address may make to any other auth route, per 10 seconds. */
-    globalPerTenSeconds: number
+    /**
+     * Requests one address may make to a route that sends or redeems an emailed code before it
+     * has to stop for 60 seconds. Not a rate: the count only restarts after a quiet 60 seconds.
+     */
+    routeBurst: number
+    /** The same for any other auth route, with a quiet gap of 10 seconds. */
+    globalBurst: number
     /** Whether the limits per email and the new-account cap refuse, or only record. */
     blocking: boolean
     /** Emailed codes one address may be sent, per hour. */
@@ -117,6 +122,14 @@ export function readLoginSettings(env: Environment): LoginSettings {
       'TURNSTILE_SECRET_KEY is one of Cloudflare’s test secrets, refused in production.',
     )
   }
+  // A test site key's tokens pass only a test secret and a real key's only a real one, so a
+  // mismatched pair fails every bot check; production has refused each half already.
+  const siteKeyIsTest = TEST_SITE_KEYS.includes(env.TURNSTILE_SITE_KEY || TEST_SITE_KEY)
+  if (env.VERCEL_ENV !== 'production' && siteKeyIsTest !== testKeys) {
+    throw new Error(
+      'TURNSTILE_SITE_KEY and TURNSTILE_SECRET_KEY must both be Cloudflare test keys or both real; a blank site key means the test key.',
+    )
+  }
   const apiUrl = standIn(env, 'BREVO_API_URL')
   const verifyUrl = standIn(env, 'TURNSTILE_VERIFY_URL')
 
@@ -128,8 +141,8 @@ export function readLoginSettings(env: Environment): LoginSettings {
     google: { clientId, clientSecret },
     email: { apiKey, from, ...(apiUrl ? { apiUrl } : {}) },
     limits: {
-      routePerMinute: wholeNumber(env, 'LOGIN_ROUTE_LIMIT_PER_MINUTE', 600),
-      globalPerTenSeconds: wholeNumber(env, 'LOGIN_GLOBAL_LIMIT_PER_10_SECONDS', 1000),
+      routeBurst: wholeNumber(env, 'LOGIN_ROUTE_LIMIT_BURST', 600),
+      globalBurst: wholeNumber(env, 'LOGIN_GLOBAL_LIMIT_BURST', 1000),
       // Provisional: the trial sets the real numbers.
       blocking: onOff(env, 'LOGIN_LIMITS_BLOCKING'),
       codesPerEmailPerHour: wholeNumber(env, 'LOGIN_CODES_PER_EMAIL_PER_HOUR', 10),

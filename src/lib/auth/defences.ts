@@ -99,6 +99,12 @@ function domainAndParents(domain: string): string[] {
   return labels.slice(0, -1).map((_, start) => labels.slice(start).join('.'))
 }
 
+/** What a sign-up at a throwaway domain is told, by whichever way it came in. */
+export const THROWAWAY_EMAIL = {
+  code: 'THROWAWAY_EMAIL',
+  message: 'Throwaway email addresses can’t be used.',
+}
+
 /** Whether an address is at a throwaway domain, unless it is a privacy relay. */
 export function isThrowawayEmail(email: string, list: ReadonlySet<string> = THROWAWAY_DOMAINS) {
   const domains = domainAndParents(email.toLowerCase().split('@').pop() ?? '')
@@ -188,12 +194,14 @@ export function defences({ limits, record }: DefenceDeps): BetterAuthPlugin {
           handler: createAuthMiddleware(async (ctx) => {
             const email: unknown = ctx.body?.email
             if (typeof email !== 'string') return
-            // Only for Sign up: refusing Log in would lock out an account the list later catches.
-            if (ctx.headers?.get(LOGIN_INTENT_HEADER) === 'sign-up' && isThrowawayEmail(email)) {
-              throw new APIError('BAD_REQUEST', {
-                code: 'THROWAWAY_EMAIL',
-                message: 'Throwaway email addresses can’t be used.',
-              })
+            // Only a new account: anyone with one already must be able to get in, however they
+            // pressed, or a domain the list later adds would lock them out.
+            if (
+              ctx.headers?.get(LOGIN_INTENT_HEADER) === 'sign-up' &&
+              isThrowawayEmail(email) &&
+              !(await ctx.context.internalAdapter.findUserByEmail(email))
+            ) {
+              throw new APIError('BAD_REQUEST', THROWAWAY_EMAIL)
             }
             const count = await countUp(ctx.context.adapter, emailKey(email))
             if (count <= limits.codesPerEmailPerHour) return
@@ -217,14 +225,17 @@ export function defences({ limits, record }: DefenceDeps): BetterAuthPlugin {
 }
 
 /** Where the new-account check and the spike alert count: this hour's new accounts. */
-const newAccountsLastHour = (adapter: Adapter) =>
+const newAccountsLastHour = (adapter: Pick<Adapter, 'count'>) =>
   adapter.count({
     model: 'user',
     where: [{ field: 'createdAt', operator: 'gte', value: new Date(Date.now() - HOUR) }],
   })
 
 /** Record, and when blocking refuse, an account past the hourly cap. Soft by a request or two at most. */
-export async function capNewAccounts(adapter: Adapter, { limits, record }: DefenceDeps) {
+export async function capNewAccounts(
+  adapter: Pick<Adapter, 'count'>,
+  { limits, record }: DefenceDeps,
+) {
   const count = (await newAccountsLastHour(adapter)) + 1
   if (count <= limits.newAccountsPerHour) return
   record({

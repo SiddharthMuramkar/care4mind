@@ -1,4 +1,4 @@
-import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { BOT_CHECKED_PATHS, DISABLED_PATHS } from '@/lib/auth/create-auth'
 
@@ -10,6 +10,7 @@ beforeAll(async () => {
   login = await loginHarness()
 })
 beforeEach(() => login.reset())
+afterEach(() => vi.useRealTimers())
 afterAll(() => login.close())
 
 /** Routes that can't start a sign-in on their own, each read and reviewed by hand. */
@@ -55,7 +56,7 @@ const fill = (path: string) => path.replace(/:\w+/g, 'x')
 
 /**
  * The fields some routes check before they look for a user-session: a body that passes those
- * checks, so the answer is about the session and not about a missing field.
+ * checks, so the answer is about the user-session and not about a missing field.
  */
 const VALID_BODIES: Readonly<Record<string, Record<string, unknown>>> = {
   '/verify-password': { password: 'a-long-enough-password' },
@@ -110,6 +111,7 @@ describe('every auth route', () => {
     ['POST', '/email-otp/change-email'],
     ['POST', '/email-otp/verify-email'],
     ['GET', '/verify-email'],
+    ['POST', '/update-user'],
   ] as const)('is switched off: %s %s', async (method, path) => {
     expect((await login.request(method, path)).status).toBe(404)
   })
@@ -158,21 +160,58 @@ describe('the limits', () => {
 
   it('raises the global limit past Better Auth’s 100 per 10 seconds', async () => {
     for (let attempt = 0; attempt < 120; attempt++) {
-      const response = await login.request('GET', '/get-session', { headers: IP })
+      const response = await login.request('GET', '/ok', { headers: IP })
       expect(response.status, `attempt ${attempt}`).toBe(200)
     }
   })
 
   it('keeps counts in the database', async () => {
-    await login.request('GET', '/get-session', { headers: IP })
+    await login.request('GET', '/ok', { headers: IP })
     expect(await login.count('rateLimit')).toBeGreaterThan(0)
   })
 })
 
 describe('the settings the limits read', () => {
+  it('never limits the user-session check, which every logged-in page load makes', async () => {
+    const strict = await loginHarness({
+      settings: { limits: { ...TEST_SETTINGS.limits, globalBurst: 2 } },
+    })
+    try {
+      for (let attempt = 0; attempt < 5; attempt++) {
+        const response = await strict.request('GET', '/get-session')
+        expect(response.status, `attempt ${attempt}`).toBe(200)
+      }
+      expect(await strict.count('rateLimit')).toBe(0)
+    } finally {
+      await strict.close()
+    }
+  })
+
+  it('counts a burst, not a rate: only a full quiet window restarts the count', async () => {
+    const strict = await loginHarness({
+      settings: { limits: { ...TEST_SETTINGS.limits, globalBurst: 2 } },
+    })
+    const at = (seconds: number) => new Date(Date.UTC(2026, 0, 1, 0, 0, seconds))
+    const ok = () => strict.request('GET', '/ok').then((response) => response.status)
+    try {
+      vi.useFakeTimers({ toFake: ['Date'] })
+      vi.setSystemTime(at(0))
+      expect(await ok()).toBe(200)
+      vi.setSystemTime(at(5))
+      expect(await ok()).toBe(200)
+      // Two in the last 10 seconds, the most the setting says: but no quiet window has passed.
+      vi.setSystemTime(at(14))
+      expect(await ok()).toBe(429)
+      vi.setSystemTime(at(16))
+      expect(await ok()).toBe(200)
+    } finally {
+      await strict.close()
+    }
+  })
+
   it('blocks past the set number', async () => {
     const strict = await loginHarness({
-      settings: { limits: { ...TEST_SETTINGS.limits, routePerMinute: 3 } },
+      settings: { limits: { ...TEST_SETTINGS.limits, routeBurst: 3 } },
     })
     try {
       for (let attempt = 0; attempt < 3; attempt++) {
