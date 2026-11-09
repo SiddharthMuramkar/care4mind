@@ -23,6 +23,20 @@ function buttonIn(node: ReactNode): ReactElement<{ onClick: () => void }> | unde
   return buttonIn(node.props.children)
 }
 
+/** The test both error pages share: their markup holds one picture, the Emblem. */
+function itShowsTheEmblem(html: string) {
+  it('shows the decorative Emblem at its fixed size, with no list of widths', () => {
+    const pictures = html.match(/<img[^>]*>/g) ?? []
+    expect(pictures).toHaveLength(1)
+    const [emblem] = pictures
+    expect(emblem).toMatch(/alt=""/)
+    expect(emblem).toMatch(/width="96"/)
+    expect(emblem).toMatch(/height="96"/)
+    expect(emblem).toContain('emblem-mark')
+    expect(emblem).not.toMatch(/\ssizes=/)
+  })
+}
+
 describe('the error page', () => {
   const html = renderToStaticMarkup(createElement(ErrorPage, props))
 
@@ -34,6 +48,8 @@ describe('the error page', () => {
   it('offers a button to try again', () => {
     expect(html).toMatch(/<button type="button"[^>]*>Try again<\/button>/)
   })
+
+  itShowsTheEmblem(html)
 
   it('asks Next to render the page again when the button is pressed', () => {
     const retry = vi.fn()
@@ -66,6 +82,8 @@ describe('the global error page', () => {
   it('lets a keyboard skip to the main text', () => {
     expect(html).toContain('<a href="#main" class="skip-link">')
   })
+
+  itShowsTheEmblem(html)
 
   it('asks Next to render the site again when the button is pressed', () => {
     const retry = vi.fn()

@@ -222,6 +222,63 @@ test.describe('without JavaScript', () => {
     await expect(footer).toContainText('Powered by IIT Bombay-SJMSOM & HUA')
     await expect(footer).toContainText('A preview of the new site, not yet public.')
   })
+
+  test('the footer is signed with the Emblem beside the wordmark and the motto under it', async ({
+    page,
+  }) => {
+    await page.goto('/concepts/vikshepa/')
+    const footer = page.getByRole('contentinfo')
+    const emblem = footer.locator('img')
+    await expect(emblem).toHaveCount(1)
+    await emblem.scrollIntoViewIfNeeded()
+    await expect(emblem).toHaveAttribute('alt', '')
+    await expect(emblem).toHaveAttribute('width', '72')
+    await expect(emblem).toHaveAttribute('src', /emblem-ring/)
+    await expect(emblem).not.toHaveAttribute('sizes')
+    const candidates = (await emblem.getAttribute('srcset'))?.split(', ') ?? []
+    expect(candidates).toHaveLength(2)
+    expect(candidates[0]).toMatch(/[?&]w=72&.* 1x$/)
+    expect(candidates[1]).toMatch(/[?&]w=144&.* 2x$/)
+    await expect
+      .poll(() => emblem.evaluate((image: HTMLImageElement) => image.naturalWidth))
+      .toBeGreaterThan(0)
+
+    const motto = footer.locator('[lang="sa-Deva"]')
+    await expect(motto).toHaveText('यद् भावं तद् भवति')
+    const [ring, wordmark, line] = await Promise.all([
+      emblem.boundingBox(),
+      footer.getByText('Care4Mind', { exact: true }).boundingBox(),
+      motto.boundingBox(),
+    ])
+    expect(ring).toMatchObject({ width: 72, height: 72 })
+    expect((ring?.x ?? 0) + 72, 'the wordmark stands beside the Emblem').toBeLessThanOrEqual(
+      wordmark?.x ?? 0,
+    )
+    expect((ring?.y ?? 0) + 72, 'the motto stands under the Emblem').toBeLessThanOrEqual(
+      line?.y ?? 0,
+    )
+  })
+
+  test(
+    'the footer Emblem keeps its box when the browser text size is raised on a phone',
+    { tag: '@self-width' },
+    async ({ browser, baseURL }) => {
+      // Only a launch flag sets the browser's own default text size.
+      const raised = await browser
+        .browserType()
+        .launch({ args: ['--blink-settings=defaultFontSize=32'] })
+      try {
+        const page = await raised.newPage({ baseURL, viewport: { width: 360, height: 800 } })
+        await page.goto('/search/')
+        expect(await page.getByRole('contentinfo').locator('img').boundingBox()).toMatchObject({
+          width: 72,
+          height: 72,
+        })
+      } finally {
+        await raised.close()
+      }
+    },
+  )
 })
 
 test.describe('the section you are in', () => {

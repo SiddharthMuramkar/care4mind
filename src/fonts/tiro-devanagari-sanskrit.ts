@@ -2,8 +2,8 @@ import type { LateFace } from './late-faces'
 import tiro from './tiro-devanagari-sanskrit/TiroDevanagariSanskrit-Regular.woff2' with { turbopackModuleType: 'asset' }
 
 // Built by scripts/fonts/subset.py: Devanagari only, about 110 kB. It is added once the page's
-// text is painted, and only pages with Devanagari fetch it. Until then that text is
-// set in a system font, with the same line height (globals.css), so the swap moves nothing.
+// text is painted, and every page with the footer fetches it, for the motto. Until then that text
+// is set in a system font, with the same line height (globals.css), so the swap moves nothing.
 
 export const tiroDevanagariSanskrit: LateFace = {
   // The name globals.css gives --font-tiro.
