@@ -17,6 +17,8 @@ pnpm check                          # lint, types, unit tests and the production
 
 `main` deploys production on Vercel; branch previews are off (`vercel.json`). Every page tells search engines not to index it until launch.
 
+Login's real accounts and settings are set up once, by a person, with [scripts/setup-login.sh](scripts/setup-login.sh).
+
 ## Checks
 
 `pnpm check` is the one signal that a change is done: it writes the content registry, then runs lint, format, types, the unit tests and the production build. CI runs `pnpm audit` and `pnpm check` as one check named `ci`, on pull requests and pushes to `main`. Browser tests and Lighthouse run locally only. Vercel holds production until `ci` passes on `main`. Run locally, `pnpm lint` and `pnpm format:check` cache their results in `node_modules/.cache/`, so a repeat run skips unchanged files.
