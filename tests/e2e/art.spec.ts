@@ -12,6 +12,7 @@ const PICTURES = 'main img, footer img'
 /** The pages the shared check visits. A page joins the list when it gets its first picture. */
 const PAGES: { path: string; name: string }[] = [
   // Add a page in path order, not at the end.
+  { path: '/', name: 'homepage' },
 ]
 
 /** Start adding up the page's layout shifts. Call it before opening the page. */
@@ -243,6 +244,167 @@ test.describe('section pages', () => {
       )
     }
   }
+})
+
+/**
+ * Each topic's card and its picture, as the pictures spec's table names it. Three stand as their
+ * Interim picture until their own Sticker is made.
+ */
+const TOPIC_STICKERS = [
+  { slug: 'self', file: 'cosmos' },
+  { slug: 'mind', file: 'mind-swirl' },
+  { slug: 'practice', file: 'meditation' },
+  { slug: 'values', file: 'book-ornate' },
+  { slug: 'temperament', file: 'gear' },
+] as const
+
+/** The pages that show the topic cards. */
+const TOPIC_CARD_PAGES = ['/', '/concepts/'] as const
+
+const topicCard = (page: Page, slug: string) => page.locator(`article[data-topic="${slug}"]`)
+/** A direct child of the card's `article`: the only place the lift reaches. */
+const cardSticker = (page: Page, slug: string) => topicCard(page, slug).locator(':scope > img')
+const cardLink = (page: Page, slug: string) => topicCard(page, slug).getByRole('link')
+
+test.describe('topic cards', () => {
+  for (const path of TOPIC_CARD_PAGES) {
+    test(
+      `${path}: each card shows its own Sticker, decorative, at 64 px, none repeated`,
+      { tag: '@one-width' },
+      async ({ page }) => {
+        await gotoReady(page, path)
+        await expect(page.locator('article[data-topic]')).toHaveCount(TOPIC_STICKERS.length)
+        const shown: string[] = []
+        for (const { slug, file } of TOPIC_STICKERS) {
+          const sticker = cardSticker(page, slug)
+          await expect(sticker).toHaveCount(1)
+          await expect(sticker).toHaveAttribute('alt', '')
+          await expect(sticker).toHaveAttribute('width', '64')
+          await expect(sticker).toHaveAttribute('height', '64')
+          const src = decodeURIComponent((await sticker.getAttribute('src')) ?? '')
+          expect(src).toContain(`/art/stickers/${file}.png`)
+          shown.push(src)
+        }
+        expect(new Set(shown).size, 'no Sticker repeats in the row').toBe(TOPIC_STICKERS.length)
+      },
+    )
+
+    test(`${path}: the picture has its own row above the title, the numeral to its right`, async ({
+      page,
+    }) => {
+      await gotoReady(page, path)
+      for (const { slug } of TOPIC_STICKERS) {
+        const card = topicCard(page, slug)
+        const [picture, numeral, title] = await Promise.all([
+          cardSticker(page, slug).boundingBox(),
+          card.locator(':scope > span[aria-hidden]').boundingBox(),
+          card.getByRole('heading').boundingBox(),
+        ])
+        if (!picture || !numeral || !title) throw new Error(`The ${slug} card is laid out.`)
+        expect(picture.y + picture.height, `${slug}: above the title`).toBeLessThanOrEqual(title.y)
+        expect(numeral.x, `${slug}: the numeral beside it`).toBeGreaterThanOrEqual(
+          picture.x + picture.width,
+        )
+        expect(
+          numeral.y + numeral.height,
+          `${slug}: the numeral above the title`,
+        ).toBeLessThanOrEqual(title.y)
+      }
+    })
+  }
+
+  test(
+    'hovering a card lifts its Sticker alone, and the page-head Sticker stays still',
+    { tag: '@one-width' },
+    async ({ page }) => {
+      await gotoReady(page, '/concepts/')
+      await cardLink(page, 'self').hover()
+      await expect(cardSticker(page, 'self')).not.toHaveCSS('transform', 'none')
+      await expect(cardSticker(page, 'mind')).toHaveCSS('transform', 'none')
+      await expect(headSticker(page)).toHaveCSS('transform', 'none')
+    },
+  )
+
+  test(
+    'focusing a card lifts its Sticker alone, and the page-head Sticker stays still',
+    { tag: '@one-width' },
+    async ({ page }) => {
+      await gotoReady(page, '/concepts/')
+      await cardLink(page, 'mind').focus()
+      await expect(cardSticker(page, 'mind')).not.toHaveCSS('transform', 'none')
+      await expect(cardSticker(page, 'self')).toHaveCSS('transform', 'none')
+      await expect(headSticker(page)).toHaveCSS('transform', 'none')
+    },
+  )
+
+  test('pressing a card presses its Sticker', { tag: '@one-width' }, async ({ page }) => {
+    await gotoReady(page, '/concepts/')
+    await cardLink(page, 'self').hover()
+    await page.mouse.down()
+    await expect(cardSticker(page, 'self')).toHaveCSS('transform', 'matrix(0.97, 0, 0, 0.97, 0, 0)')
+    await page.mouse.up()
+  })
+
+  test(
+    'under reduced motion a hovered card’s Sticker has no transform',
+    { tag: '@one-width' },
+    async ({ page }) => {
+      await page.emulateMedia({ reducedMotion: 'reduce' })
+      await gotoReady(page, '/concepts/')
+      await cardLink(page, 'self').hover()
+      expect(
+        await topicCard(page, 'self').evaluate((card) => card.matches(':hover')),
+        'the card is hovered',
+      ).toBe(true)
+      await expect(cardSticker(page, 'self')).toHaveCSS('transform', 'none')
+    },
+  )
+
+  test(
+    'a click on the picture follows the card’s link',
+    { tag: '@one-width' },
+    async ({ page }) => {
+      await gotoReady(page, '/concepts/')
+      await expect(cardSticker(page, 'self')).toHaveCSS('pointer-events', 'none')
+      const href = await cardLink(page, 'self').getAttribute('href')
+      if (!href) throw new Error('The self card has a link.')
+      // Forced, because the picture itself refuses the pointer: the click lands on whatever is under it.
+      await cardSticker(page, 'self').click({ force: true })
+      await expect(page).toHaveURL(new RegExp(`${href}$`))
+    },
+  )
+
+  test(
+    'tabbing goes from link to link, never to a picture',
+    { tag: '@one-width' },
+    async ({ page }) => {
+      await gotoReady(page, '/concepts/')
+      await cardLink(page, 'self').focus()
+      for (const { slug } of TOPIC_STICKERS.slice(1)) {
+        await page.keyboard.press('Tab')
+        await expect(cardLink(page, slug)).toBeFocused()
+      }
+    },
+  )
+
+  test(
+    'a card has no paper edging and names its topic once',
+    { tag: '@one-width' },
+    async ({ page }) => {
+      await gotoReady(page, '/concepts/')
+      for (const { slug } of TOPIC_STICKERS) {
+        await expect(topicCard(page, slug)).not.toHaveAttribute('data-paper')
+        await expect(topicCard(page, slug).locator('[data-topic]')).toHaveCount(0)
+      }
+    },
+  )
+
+  test('no A to Z entry has a picture', { tag: '@one-width' }, async ({ page }) => {
+    await gotoReady(page, '/concepts/')
+    const index = page.getByRole('region', { name: 'From A to Z' })
+    await expect(index.getByRole('listitem').first()).toBeVisible()
+    await expect(index.locator('img')).toHaveCount(0)
+  })
 })
 
 // The check itself, on pages made here, so that a broken check cannot pass unnoticed.
