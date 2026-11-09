@@ -20,4 +20,4 @@ The pictures are stable files under `public/art/`, served through `next/image`. 
 - The 22 kept pictures go in before the client confirms the right to reuse them. That answer blocks launch, and is tracked in [#25](https://github.com/SiddharthMuramkar/care4mind/issues/25).
 - Pictures vary in palette next to Press's indigo and paper. They sit on the paper as tipped-in Plates and Stickers, and Press itself does not change.
 - No origin, licence or credit text sits beside a picture. `/credits/` shows captions only, and `/credits/sources/` is the plain list built from the registry.
-- The originals are 1024 x 1024, which caps how large they can show sharply. [#25](https://github.com/SiddharthMuramkar/care4mind/issues/25) asks the client for larger ones.
+- The Plates are 1024 x 1024 and most Stickers are smaller, which caps how large they can show sharply. [#25](https://github.com/SiddharthMuramkar/care4mind/issues/25) asks the client for larger ones.
