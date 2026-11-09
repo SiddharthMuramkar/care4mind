@@ -16,7 +16,9 @@ export function generateMetadata(): Promise<Metadata> {
 export default function SignUpPage() {
   return (
     <ReadingPage path={PATH} titleId="sign-up-title" title="Sign up">
-      <noscript>Sign up needs JavaScript, so that the bot check can run.</noscript>
+      <noscript>
+        <p>Sign up needs JavaScript, so that the bot check can run.</p>
+      </noscript>
       <InAppBrowserPrompt />
       <EmailCodeForm
         mode="sign-up"

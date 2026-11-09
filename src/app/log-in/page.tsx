@@ -16,7 +16,9 @@ export function generateMetadata(): Promise<Metadata> {
 export default function LogInPage() {
   return (
     <ReadingPage path={PATH} titleId="log-in-title" title="Log in">
-      <noscript>Log in needs JavaScript, so that the bot check can run.</noscript>
+      <noscript>
+        <p>Log in needs JavaScript, so that the bot check can run.</p>
+      </noscript>
       <InAppBrowserPrompt />
       <EmailCodeForm
         mode="log-in"
