@@ -78,6 +78,11 @@ export async function SiteFooter() {
                 <li>
                   <Link href={nav.search.href}>{nav.search.label}</Link>
                 </li>
+                {nav.privacy ? (
+                  <li>
+                    <Link href={nav.privacy.href}>{nav.privacy.label}</Link>
+                  </li>
+                ) : null}
               </ul>
             </li>
             {nav.proposals ? (

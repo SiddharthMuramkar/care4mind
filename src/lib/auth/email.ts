@@ -29,6 +29,23 @@ export function emailedCodeMessage(to: string, code: string): OutgoingEmail {
   }
 }
 
+/** How long a Delete my account link works, in hours: Better Auth is told the same. */
+export const DELETE_LINK_HOURS = 24
+
+/** The Delete my account email: a link to a page that asks for one more press, not a deletion. */
+export function deleteAccountMessage(to: string, link: string): OutgoingEmail {
+  const lines = [
+    'To delete your Care4Mind account, open this link in the browser where you’re logged in, then press the button on that page.',
+    `It works for ${DELETE_LINK_HOURS} hours. If you didn’t ask for it, you can ignore this email and your account stays as it is.`,
+  ]
+  return {
+    to,
+    subject: 'Delete your Care4Mind account',
+    text: `${lines[0]}\n\n${link}\n\n${lines[1]}`,
+    html: `<p>${lines[0]}</p><p><a href="${link}">Delete my account</a></p><p>${lines[1]}</p>`,
+  }
+}
+
 /** A sender that posts each email to Brevo, or to the local stand-in a browser test run gives it. */
 export function brevoSender(email: LoginSettings['email']): SendEmail {
   return async ({ to, subject, text, html }) => {

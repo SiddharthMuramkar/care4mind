@@ -25,6 +25,9 @@ const CODE_LENGTH = 6
 
 const HEADING = 'email-code-heading'
 
+/** How many failed bot checks count as a person who keeps failing it. */
+const KEEPS_FAILING = 2
+
 const COPY = {
   'sign-up': {
     submit: 'Email me a code',
@@ -48,17 +51,25 @@ async function post(path: string, body: unknown, headers: Record<string, string>
   })
 }
 
-/** What to say when asking for a code fails. */
-async function sendError(response: Response): Promise<string> {
+/** What to say when asking for a code fails, and whether the bot check is what failed. */
+async function sendError(response: Response): Promise<{ message: string; botCheck: boolean }> {
   if (response.status === 429) {
-    return 'Too many tries from here just now. Please wait a minute and try again.'
+    return {
+      message: 'Too many tries from here just now. Please wait a minute and try again.',
+      botCheck: false,
+    }
   }
   const { code } = ((await response.json().catch(() => ({}))) ?? {}) as { code?: string }
-  if (code === 'INVALID_EMAIL') return 'Please check your email address and try again.'
-  if (code === 'MISSING_RESPONSE' || code === 'VERIFICATION_FAILED') {
-    return 'The bot check didn’t work. Please try it once more.'
+  if (code === 'INVALID_EMAIL') {
+    return { message: 'Please check your email address and try again.', botCheck: false }
   }
-  return 'Something went wrong on our side. Please try again in a minute.'
+  if (code === 'MISSING_RESPONSE' || code === 'VERIFICATION_FAILED') {
+    return { message: 'The bot check didn’t work. Please try it once more.', botCheck: true }
+  }
+  return {
+    message: 'Something went wrong on our side. Please try again in a minute.',
+    botCheck: false,
+  }
 }
 
 async function codeError(response: Response): Promise<string> {
@@ -94,6 +105,7 @@ export function EmailCodeForm({ mode, siteKey, otherScreen }: Props) {
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
   const [sentAgain, setSentAgain] = useState(false)
+  const [botCheckFailures, setBotCheckFailures] = useState(0)
 
   const widget = useRef<TurnstileHandle>(null)
   const heading = useRef<HTMLHeadingElement>(null)
@@ -104,10 +116,15 @@ export function EmailCodeForm({ mode, siteKey, otherScreen }: Props) {
   }, [step])
 
   const onToken = useCallback((value: string | null) => setToken(value), [])
+  const onBotCheckFailure = useCallback(
+    (final: boolean) => setBotCheckFailures((count) => (final ? KEEPS_FAILING : count + 1)),
+    [],
+  )
 
   /** Ask for a code: the token it uses works once, so the widget is reset afterwards. */
   async function requestCode(): Promise<boolean> {
     if (!token) {
+      setBotCheckFailures((count) => count + 1)
       setError('The bot check hasn’t finished yet. Please wait a moment.')
       return false
     }
@@ -120,9 +137,12 @@ export function EmailCodeForm({ mode, siteKey, otherScreen }: Props) {
         { 'x-captcha-response': token, [LOGIN_INTENT_HEADER]: mode },
       )
       if (!response.ok) {
-        setError(await sendError(response))
+        const { message, botCheck } = await sendError(response)
+        if (botCheck) setBotCheckFailures((count) => count + 1)
+        setError(message)
         return false
       }
+      setBotCheckFailures(0)
       return true
     } catch {
       setError('We couldn’t reach the site. Please check your connection and try again.')
@@ -173,6 +193,22 @@ export function EmailCodeForm({ mode, siteKey, otherScreen }: Props) {
     }
   }
 
+  // Always in the page, empty until needed, so a screen reader announces the things to try.
+  const botCheckHelp = (
+    <div className={styles.help} role="status">
+      {botCheckFailures >= KEEPS_FAILING ? (
+        <>
+          <p>The bot check keeps failing. Things to try:</p>
+          <ul>
+            <li>Open this page in another browser.</li>
+            <li>Use mobile data instead of Wi-Fi.</li>
+            <li>Turn off your VPN, if you use one.</li>
+          </ul>
+        </>
+      ) : null}
+    </div>
+  )
+
   // The next page, passed on when the user moves between Sign up and Log in.
   const query = useSyncExternalStore(
     never,
@@ -217,7 +253,13 @@ export function EmailCodeForm({ mode, siteKey, otherScreen }: Props) {
               className={styles.input}
             />
           </div>
-          <TurnstileWidget ref={widget} siteKey={siteKey} onToken={onToken} />
+          <TurnstileWidget
+            ref={widget}
+            siteKey={siteKey}
+            onToken={onToken}
+            onFailure={onBotCheckFailure}
+          />
+          {botCheckHelp}
           <div>
             <p className={styles.error} role="alert">
               {error}
@@ -270,7 +312,13 @@ export function EmailCodeForm({ mode, siteKey, otherScreen }: Props) {
             </button>
           </div>
           <div className={styles.resend}>
-            <TurnstileWidget ref={widget} siteKey={siteKey} onToken={onToken} />
+            <TurnstileWidget
+              ref={widget}
+              siteKey={siteKey}
+              onToken={onToken}
+              onFailure={onBotCheckFailure}
+            />
+            {botCheckHelp}
             <button
               type="button"
               className={cta.secondary}

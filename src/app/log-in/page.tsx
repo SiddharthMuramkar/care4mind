@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 
-import { EmailCodeForm } from '@/components/login'
+import { EmailCodeForm, InAppBrowserPrompt } from '@/components/login'
 import { ReadingPage } from '@/components/ReadingPage'
 import { hrefFor } from '@/content'
 import { turnstileSiteKey } from '@/lib/auth/settings'
@@ -17,6 +17,7 @@ export default function LogInPage() {
   return (
     <ReadingPage path={PATH} titleId="log-in-title" title="Log in">
       <noscript>Log in needs JavaScript, so that the bot check can run.</noscript>
+      <InAppBrowserPrompt />
       <EmailCodeForm
         mode="log-in"
         siteKey={turnstileSiteKey()}

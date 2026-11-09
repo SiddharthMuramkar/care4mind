@@ -37,3 +37,15 @@ export async function waitForBotCheck(page: Page) {
   const response = page.locator('input[name="cf-turnstile-response"]')
   await expect(response, 'the bot check has passed').toHaveValue(/./, { timeout: 20_000 })
 }
+
+/** Sign a new user up through the Sign up screen, ending logged in. */
+export async function signUpInBrowser(page: Page, email: string) {
+  await page.goto('/sign-up/')
+  await page.getByLabel('Your name').fill('Asha Rao')
+  await page.getByLabel('Your email').fill(email)
+  await waitForBotCheck(page)
+  await page.getByRole('button', { name: 'Email me a code' }).click()
+  await page.getByLabel('Your six-digit code').fill(await emailedCode(email))
+  await page.getByRole('button', { name: 'Confirm' }).click()
+  await expect(page.getByRole('banner').getByRole('button', { name: 'Log out' })).toBeVisible()
+}

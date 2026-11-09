@@ -31,6 +31,7 @@ const FLAGGED_PAGES = [
   '/start/',
   '/log-in/',
   '/sign-up/',
+  '/privacy/',
 ]
 
 let records: ContentRecord[] = []
@@ -107,6 +108,7 @@ describe('the route registry, on the real content', () => {
       'library',
       'log-in',
       'page',
+      'privacy',
       'proposals',
       'questionnaire',
       'questionnaire-flow',

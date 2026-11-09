@@ -25,6 +25,8 @@ interface Props {
   siteKey: string
   /** Called with each new token, and with null when the token is gone. */
   onToken: (token: string | null) => void
+  /** Called when the check fails: `final` when retrying can't help, such as a blocked script. */
+  onFailure: (final: boolean) => void
   ref?: Ref<TurnstileHandle>
 }
 
@@ -57,7 +59,7 @@ function loadTurnstile(): Promise<TurnstileApi> {
  * click only when it sees risk. Rendered explicitly, so a reset can ask for a new token on every
  * send of an emailed code; the token it hands back is what the server verifies.
  */
-export function TurnstileWidget({ siteKey, onToken, ref }: Props) {
+export function TurnstileWidget({ siteKey, onToken, onFailure, ref }: Props) {
   const box = useRef<HTMLDivElement>(null)
   const widget = useRef<string | undefined>(undefined)
 
@@ -73,22 +75,31 @@ export function TurnstileWidget({ siteKey, onToken, ref }: Props) {
           size: element.clientWidth < FLEXIBLE_MIN_WIDTH ? 'compact' : 'flexible',
           callback: (token: string) => onToken(token),
           'expired-callback': () => onToken(null),
-          'timeout-callback': () => onToken(null),
+          'timeout-callback': () => {
+            onToken(null)
+            onFailure(false)
+          },
+          'unsupported-callback': () => onFailure(true),
           'error-callback': () => {
             onToken(null)
+            // Cloudflare retries by itself and calls this again each time, which is the count.
+            onFailure(false)
             // Returning true tells Cloudflare the page has handled the error.
             return true
           },
         })
       })
       // A blocked script leaves the form's press saying the bot check hasn't finished.
-      .catch(() => onToken(null))
+      .catch(() => {
+        onToken(null)
+        onFailure(true)
+      })
     return () => {
       unmounted = true
       if (widget.current !== undefined) window.turnstile?.remove(widget.current)
       widget.current = undefined
     }
-  }, [siteKey, onToken])
+  }, [siteKey, onToken, onFailure])
 
   useImperativeHandle(
     ref,

@@ -16,8 +16,13 @@ test('shows no Log in', async ({ page }) => {
   await expect(page.getByRole('banner').getByRole('link', { name: 'Log in' })).toHaveCount(0)
 })
 
-test('has no Sign up or Log in screen', { tag: '@one-width' }, async ({ request }) => {
-  for (const path of ['/log-in/', '/sign-up/']) {
+test('shows no link to the Privacy page', async ({ page }) => {
+  await gotoReady(page, '/')
+  await expect(page.getByRole('link', { name: 'Privacy' })).toHaveCount(0)
+})
+
+test('has no Sign up, Log in or Privacy page', { tag: '@one-width' }, async ({ request }) => {
+  for (const path of ['/log-in/', '/sign-up/', '/privacy/']) {
     expect((await request.get(path)).status(), path).toBe(404)
   }
 })
