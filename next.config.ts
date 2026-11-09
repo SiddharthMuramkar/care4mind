@@ -1,5 +1,6 @@
 import type { NextConfig } from 'next'
 
+import { readFeatures } from './src/config/read-features'
 import { redirects } from './src/config/redirects'
 import { siteConfig } from './src/config/site'
 
@@ -30,6 +31,16 @@ const nextConfig: NextConfig = {
         headers: [{ key: 'X-Robots-Tag', value: 'noindex, nofollow' }],
       },
     ]
+  },
+  // Login off: every method on the auth route reaches an address that doesn't exist, as if the
+  // route didn't. The route's own 404 can't cover OPTIONS or PUT, which Next.js answers itself.
+  async rewrites() {
+    if (readFeatures(process.env).login) return []
+    return {
+      beforeFiles: [{ source: '/api/auth/:path*', destination: '/api/login-is-off/' }],
+      afterFiles: [],
+      fallback: [],
+    }
   },
   // The one redirect table, each a 301 rather than Next.js's default 308.
   async redirects() {

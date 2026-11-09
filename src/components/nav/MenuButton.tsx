@@ -11,6 +11,8 @@ import {
   useState,
 } from 'react'
 
+import { cx } from '@/lib/cx'
+
 import { MenuGlyph } from '../glyphs'
 import { useHydrated, whenIdle } from '../browser'
 import { WIDE } from './current'
@@ -88,7 +90,7 @@ export function MenuButton({ nav, search, login, mapNote }: Props) {
           if (event.key === ' ') press(event)
         }}
       >
-        <MenuGlyph className={styles.glyph} />
+        <MenuGlyph className={cx(styles.glyph, nav.login && styles.glyphBesideLogIn)} />
         Menu
       </a>
       {Drawer ? (

@@ -40,6 +40,52 @@ test(
 )
 
 test(
+  'answers every method on an auth route the way an address that doesn’t exist answers',
+  { tag: '@one-width' },
+  async ({ request }) => {
+    const missing = await request.get('/api/nothing/')
+    expect(missing.status()).toBe(404)
+    for (const method of ['GET', 'OPTIONS', 'PUT', 'DELETE']) {
+      const route = await request.fetch('/api/auth/get-session/', { method })
+      expect(route.status(), method).toBe(404)
+      expect(route.headers()['content-type'], method).toBe(missing.headers()['content-type'])
+    }
+  },
+)
+
+test(
+  'keeps the Privacy page’s text out of the 404 and its React payload',
+  { tag: '@one-width' },
+  async ({ request }) => {
+    const page = await request.get('/privacy/')
+    expect(await page.text()).not.toContain('What we keep')
+    const payload = await request.get('/privacy/', { headers: { RSC: '1' } })
+    expect(await payload.text()).not.toContain('What we keep')
+  },
+)
+
+test.describe('without JavaScript', { tag: '@one-width' }, () => {
+  test.use({ javaScriptEnabled: false })
+
+  test('shows the real 404 page for an address that would be a login page', async ({ page }) => {
+    await page.goto('/privacy/')
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText('This page isn’t in the book')
+  })
+})
+
+test(
+  'keeps the Menu drawing at 320 px, as there is no Log in to fit',
+  { tag: '@self-width' },
+  async ({ page }) => {
+    await page.setViewportSize({ width: 320, height: 640 })
+    await gotoReady(page, '/concepts/vikshepa/')
+    await expect(
+      page.getByRole('banner').locator('a', { hasText: 'Menu' }).locator('svg'),
+    ).toBeVisible()
+  },
+)
+
+test(
   'lets Start open the Questionnaire as it always has',
   { tag: '@one-width' },
   async ({ page }) => {

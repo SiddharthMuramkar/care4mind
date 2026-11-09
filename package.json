@@ -27,6 +27,7 @@
     "test:e2e": "node scripts/content/registry.mjs && playwright test",
     "check": "node scripts/content/registry.mjs && pnpm lint && pnpm format:check && pnpm typecheck && pnpm test && pnpm build",
     "check:e2e": "playwright test",
+    "check:e2e:off": "FEATURE_LOGIN=0 pnpm build && FEATURE_LOGIN=0 E2E_ONLY=login-off playwright test",
     "lhci": "lhci autorun",
     "shots": "node scripts/shots.mjs",
     "icons": "node scripts/icons.mjs",

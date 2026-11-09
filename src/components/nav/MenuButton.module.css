@@ -35,7 +35,7 @@
 
 /* The narrowest screens keep the word and lose the drawing, so Log in fits the strip beside it. */
 @media (width < 22.5rem) {
-  .glyph {
+  .glyphBesideLogIn {
     display: none;
   }
 }
