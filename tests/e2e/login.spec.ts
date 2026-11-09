@@ -57,6 +57,14 @@ test.describe('the header', () => {
     await expect(logIn).toHaveAttribute('href', '/log-in/?next=%2Fconcepts%2Fvikshepa%2F')
   })
 
+  test('carries the query of the page to come back to', async ({ page }) => {
+    await gotoReady(page, '/search/?q=shame')
+    await expect(header(page).getByRole('link', { name: 'Log in' })).toHaveAttribute(
+      'href',
+      '/log-in/?next=%2Fsearch%2F%3Fq%3Dshame',
+    )
+  })
+
   test('adds nothing to a page view for a visitor who isn’t logged in', async ({ page }) => {
     const authRequests: string[] = []
     page.on('request', (request) => {
