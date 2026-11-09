@@ -20,6 +20,28 @@
     box-shadow var(--duration-instant) var(--ease-press);
 }
 
+/* A card with its own Plate gives it a row above the title; a bare card keeps no such row. */
+.withArt {
+  grid-template-areas:
+    'art deva'
+    'title title'
+    'gloss gloss'
+    'meta meta'
+    'summary summary'
+    'action action';
+}
+
+/* The whole card is the card's one link, so the picture never takes the click. */
+.art {
+  grid-area: art;
+  align-self: center;
+  pointer-events: none;
+}
+
+.withArt .deva {
+  align-self: center;
+}
+
 /* A featured card takes the Folio's double frame, diamond corners included. */
 .featured {
   box-shadow:
@@ -130,6 +152,17 @@
       'summary'
       'action';
     padding: 1.5rem;
+  }
+
+  .withArt {
+    grid-template-columns: 1fr auto;
+    grid-template-areas:
+      'art deva'
+      'title title'
+      'gloss gloss'
+      'meta meta'
+      'summary summary'
+      'action action';
   }
 
   .title {

@@ -1,5 +1,7 @@
 import type { ReactNode } from 'react'
 
+import { ownArt } from '@/art'
+import { Medallion } from '@/components/art'
 import { FrameCorners } from '@/components/Folio'
 import { TitleMorph } from '@/components/PageTurn'
 import { TopicChip } from '@/components/TopicChip'
@@ -20,16 +22,30 @@ interface Props {
   className?: string
   /** A featured card takes the printer's double frame; the rest keep a single thin rule. */
   featured?: boolean
+  /** The width of the Concept's Medallion, where it has its own Plate. */
+  pictureSize?: 64 | 72
 }
 
 /**
  * A Concept in brief. Its title shares a view-transition name with the Concept
- * page's heading, so following the card morphs one into the other.
+ * page's heading, so following the card morphs one into the other. A Concept with its own Plate
+ * shows it in a row above the title, with the Devanagari to its right; the rest stay bare.
  */
-export function ConceptCard({ concept, action, className, featured = false }: Props) {
+export function ConceptCard({
+  concept,
+  action,
+  className,
+  featured = false,
+  pictureSize = 64,
+}: Props) {
+  const picture = ownArt({ kind: 'concept', slug: concept.slug })
   return (
-    <article className={cx(styles.card, featured && styles.featured, className)} data-paper>
+    <article
+      className={cx(styles.card, picture && styles.withArt, featured && styles.featured, className)}
+      data-paper
+    >
       {featured ? <FrameCorners /> : null}
+      {picture ? <Medallion art={picture} size={pictureSize} className={styles.art} /> : null}
       <TitleMorph kind="concept" slug={concept.slug}>
         <h3 className={styles.title}>
           <span lang={concept.lang}>{concept.name}</span>

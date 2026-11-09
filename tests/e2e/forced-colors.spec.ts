@@ -84,6 +84,17 @@ test('a section page keeps its Sticker', async ({ page }) => {
   await expect(page.getByRole('heading', { level: 1 })).toBeVisible()
 })
 
+test('a Concept page keeps its picture', async ({ page }) => {
+  await gotoReady(page, hrefFor({ kind: 'concept', id: 'vikshepa' }))
+  const picture = page.getByRole('main').locator('header img')
+  await expect(picture).toBeVisible()
+  await expect(picture).toHaveAttribute('alt', '')
+  await expect
+    .poll(() => picture.evaluate((image: HTMLImageElement) => image.naturalWidth))
+    .toBeGreaterThan(0)
+  await expect(page.getByRole('heading', { level: 1 })).toBeVisible()
+})
+
 test('a secondary call to action keeps its edge', async ({ page }) => {
   await gotoReady(page, FLOW)
   await expectVisibleEdge(
@@ -138,6 +149,20 @@ test('the error pages keep their Emblem and the edge of their button', async ({ 
   await expect(emblem).toBeVisible()
   await expectLoaded(emblem)
   await expectVisibleEdge(page.getByRole('button', { name: 'Reload the page' }), 'Reload the page')
+})
+
+test('a Frontispiece ring draws in the text colour of the theme', async ({ page }) => {
+  await gotoReady(page, hrefFor({ kind: 'topic', id: 'mind' }))
+  const paths = page.getByRole('main').locator('header span:has(> img) > svg path')
+  expect(await paths.count()).toBeGreaterThan(0)
+  for (const path of await paths.all()) {
+    const { stroke, color } = await path.evaluate((element) => ({
+      stroke: getComputedStyle(element).stroke,
+      color: getComputedStyle(element.parentElement as Element).color,
+    }))
+    expect(stroke).toBe(color)
+    expect(stroke).not.toMatch(/^transparent$|^rgba\(.*,\s*0\)$/)
+  }
 })
 
 const PARTS = [
