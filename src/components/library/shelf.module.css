@@ -143,6 +143,11 @@
     opacity: 0;
     transform: translateY(0.25rem);
   }
+
+  /* Pressed, it goes at once: still fading, it would cut short the page turn the press starts. */
+  .hoverLabel[data-instant='dismiss'] {
+    transition: none;
+  }
 }
 
 /* Where the spines become lines of a list, their titles already read across. */
