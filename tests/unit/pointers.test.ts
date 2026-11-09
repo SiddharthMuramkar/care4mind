@@ -86,6 +86,8 @@ function prose(file: string): string {
 const sources = tracked.filter(
   (file) =>
     !file.startsWith('src/content/data/') &&
+    // A spec: most of the paths it names are files its tickets have yet to create.
+    file !== 'docs/images-and-icons.md' &&
     (file.endsWith('.md') || HASH_COMMENTS.test(file) || SLASH_COMMENTS.test(file)),
 )
 
