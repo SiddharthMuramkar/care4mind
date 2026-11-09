@@ -9,9 +9,14 @@ import { APIError, getOAuthState } from 'better-auth/api'
 import { captcha } from 'better-auth/plugins/captcha'
 import { emailOTP } from 'better-auth/plugins/email-otp'
 
-import { emailedCodeMessage, type SendEmail } from './email'
+import {
+  DELETE_LINK_HOURS,
+  deleteAccountMessage,
+  emailedCodeMessage,
+  type SendEmail,
+} from './email'
 import { BOT_CHECK_HOSTNAMES, type LoginSettings } from './settings'
-import { BOT_CHECK_ACTION, LOGIN_INTENT_HEADER } from './shared'
+import { BOT_CHECK_ACTION, DELETE_ACCOUNT_PARAM, LOGIN_INTENT_HEADER, PRIVACY_PATH } from './shared'
 
 export interface AuthDeps {
   settings: LoginSettings
@@ -94,11 +99,25 @@ export function createAuth({ settings, database, sendEmail, backgroundTask }: Au
         '/email-otp/send-verification-otp': perRoute,
         '/sign-in/email-otp': perRoute,
         '/sign-in/social': perRoute,
+        // Each ask emails the user, so it counts as a route that sends.
+        '/delete-user': perRoute,
       },
     },
     advanced: {
       skipTrailingSlashes: true,
       ...(backgroundTask ? { backgroundTasks: { handler: backgroundTask } } : {}),
+    },
+    user: {
+      deleteUser: {
+        enabled: true,
+        deleteTokenExpiresIn: DELETE_LINK_HOURS * 60 * 60,
+        // The link opens our own page, which asks for one more press: the library's own link
+        // deletes on opening, and answers 404 in a mail app's browser that isn't logged in.
+        sendDeleteAccountVerification: async ({ user, token }) => {
+          const link = `${settings.baseURL}${PRIVACY_PATH}?${DELETE_ACCOUNT_PARAM}=${token}`
+          await sendEmail(deleteAccountMessage(user.email, link))
+        },
+      },
     },
     databaseHooks: {
       user: {

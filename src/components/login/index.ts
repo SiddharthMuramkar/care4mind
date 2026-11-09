@@ -1,3 +1,5 @@
+export { DeleteAccount } from './DeleteAccount'
 export { EmailCodeForm } from './EmailCodeForm'
+export { InAppBrowserPrompt } from './InAppBrowserPrompt'
 export { LoginRequired } from './LoginRequired'
 export { LoginSlot } from './LoginSlot'

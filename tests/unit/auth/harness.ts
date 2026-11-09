@@ -132,6 +132,14 @@ export async function loginHarness({ settings, deps }: HarnessOptions = {}) {
       : route.GET(new Request(url, init))
   }
 
+  /** The Cookie header a browser would send after this response set its cookies. */
+  function cookieHeader(response: Response): string {
+    return response.headers
+      .getSetCookie()
+      .map((cookie) => cookie.split(';')[0])
+      .join('; ')
+  }
+
   /** The emailed code in the newest email to this address. */
   function codeFor(email: string): string {
     const message = outbox.filter(({ to }) => to === email).at(-1)
@@ -202,12 +210,20 @@ export async function loginHarness({ settings, deps }: HarnessOptions = {}) {
     return redeemCode(email, codeFor(email), name)
   }
 
+  /** Log an account in from another browser: a code to the address, then its redemption. */
+  async function logIn(email: string) {
+    await sendCode(email, 'log-in')
+    return cookieHeader(await redeemCode(email, codeFor(email)))
+  }
+
   return {
     auth,
     request,
     sendCode,
     redeemCode,
     signUp,
+    logIn,
+    cookieHeader,
     codeFor,
     outbox,
     verified,

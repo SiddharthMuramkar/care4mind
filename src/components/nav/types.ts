@@ -63,4 +63,6 @@ export interface SiteNav {
   start?: NavLink
   /** Log in, while the login switch is on: the header shows it beside Search. */
   login?: NavLink
+  /** The Privacy page, which exists only while the login switch is on: the footer lists it. */
+  privacy?: NavLink
 }

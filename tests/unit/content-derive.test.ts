@@ -382,6 +382,7 @@ describe('site.routes', () => {
       { path: '/search/', kind: 'search', pattern: '/search/', title: 'Search', sample: true },
       { path: '/log-in/', kind: 'log-in', pattern: '/log-in/', title: 'Log in', sample: true },
       { path: '/sign-up/', kind: 'sign-up', pattern: '/sign-up/', title: 'Sign up', sample: true },
+      { path: '/privacy/', kind: 'privacy', pattern: '/privacy/', title: 'Privacy', sample: true },
       {
         path: '/proposals/',
         kind: 'proposals',
@@ -407,13 +408,16 @@ describe('site.routes', () => {
         '/questionnaires/work-scale/take/',
         '/log-in/',
         '/sign-up/',
+        '/privacy/',
       ),
     )
     expect(await paths({ ...ON, questionnairePreview: false })).toEqual(
       without('/questionnaires/work-scale/take/'),
     )
     expect(await paths({ ...ON, conceptMap: false })).toEqual(without('/concepts/map/'))
-    expect(await paths({ ...ON, login: false })).toEqual(without('/log-in/', '/sign-up/'))
+    expect(await paths({ ...ON, login: false })).toEqual(
+      without('/log-in/', '/sign-up/', '/privacy/'),
+    )
     expect(await paths({ ...ON, startHere: false })).toEqual(without('/start/'))
   })
 
