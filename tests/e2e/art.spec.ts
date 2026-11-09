@@ -416,7 +416,7 @@ const WORKS = await works.list()
 test.describe('Traditional text pages', () => {
   for (const { slug, href } of WORKS) {
     test(
-      `${href} shows its Pothi or Interim picture, decorative, at 120 px, above its title`,
+      `${href} shows its Pothi or Interim picture, decorative, at 120 px`,
       { tag: '@one-width' },
       async ({ page }) => {
         await gotoReady(page, href)

@@ -39,7 +39,7 @@ export function TextCard({ work, className }: { work: WorkView; className?: stri
   const pothi = ownArt({ kind: 'work', slug: work.slug })
   return (
     <article className={cx(styles.card, className)}>
-      {pothi ? <Sticker art={pothi} size={72} className={styles.pothi} /> : null}
+      {pothi ? <Sticker art={pothi} size={72} /> : null}
       <h2 className={styles.title}>
         <Link
           href={hrefFor({ kind: 'work', id: work.slug })}

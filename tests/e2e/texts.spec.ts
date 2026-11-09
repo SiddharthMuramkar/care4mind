@@ -70,36 +70,57 @@ test.describe('the shelf', () => {
     await expect(card(page, 'Dhammapada')).toContainText('1 verse quoted')
   })
 
+  test('a card stays bare until it has its own Pothi, and never shows an Interim picture', async ({
+    page,
+  }) => {
+    await gotoReady(page, TEXTS)
+    for (const view of views) {
+      const leaf = card(page, view.title)
+      const pothi = ownArt({ kind: 'work', slug: view.slug })
+      // A direct child of the card's article, which is what lets it lift with the card.
+      await expect(leaf.locator(':scope > img')).toHaveCount(pothi ? 1 : 0)
+      await expect(leaf.locator('img')).toHaveCount(pothi ? 1 : 0)
+      await expect(leaf.locator('img[src*="book-ornate"]')).toHaveCount(0)
+      await expect(leaf).not.toHaveAttribute('data-paper')
+      // No work has its Pothi yet: this waits for the first one, or a local draft record.
+      if (pothi) {
+        const picture = leaf.locator('img')
+        await expect(picture).toHaveAttribute('alt', '')
+        await expect(picture).toHaveAttribute('width', '72')
+        const [box, heading] = await Promise.all([
+          picture.boundingBox(),
+          leaf.getByRole('heading').boundingBox(),
+        ])
+        expect((box?.y ?? Infinity) + (box?.height ?? 0)).toBeLessThanOrEqual(heading?.y ?? 0)
+      }
+    }
+  })
+
   test(
-    'a card shows only its own Pothi, in a row of its own above the title, never an Interim picture',
-    { tag: '@one-width' },
+    'beside bare cards a card with a Pothi takes a row of its own, and none does once all have one',
+    { tag: '@from-768' },
     async ({ page }) => {
       await gotoReady(page, TEXTS)
-      for (const view of views) {
-        const leaf = card(page, view.title)
-        const pothi = ownArt({ kind: 'work', slug: view.slug })
-        // A direct child of the card's article, which is what lets it lift with the card.
-        await expect(leaf.locator(':scope > img')).toHaveCount(pothi ? 1 : 0)
-        await expect(leaf.locator('img')).toHaveCount(pothi ? 1 : 0)
-        await expect(leaf.locator('img[src*="book-ornate"]')).toHaveCount(0)
-        await expect(leaf).not.toHaveAttribute('data-paper')
-        if (pothi) {
-          const picture = leaf.locator('img')
-          await expect(picture).toHaveAttribute('alt', '')
-          await expect(picture).toHaveAttribute('width', '72')
-          const [box, heading] = await Promise.all([
-            picture.boundingBox(),
-            leaf.getByRole('heading').boundingBox(),
-          ])
-          expect((box?.y ?? Infinity) + (box?.height ?? 0)).toBeLessThanOrEqual(heading?.y ?? 0)
-        }
-      }
+      // No work has its Pothi yet, so this marks the cards by hand to reach the shelf's own rule.
+      const items = main(page).getByRole('article').locator('..')
+      const [first, second] = [items.nth(0), items.nth(1)]
+      const widthOf = async (box: Locator) => (await box.boundingBox())?.width ?? 0
+      const shelfWidth = await widthOf(first.locator('..'))
+
+      await items.evaluateAll((all) =>
+        all.forEach((item, index) => item.toggleAttribute('data-bare', index !== 0)),
+      )
+      expect(await widthOf(first)).toBeCloseTo(shelfWidth, 0)
+      expect(await widthOf(second)).toBeLessThan(shelfWidth)
+
+      await items.evaluateAll((all) => all.forEach((item) => item.removeAttribute('data-bare')))
+      expect(await widthOf(first)).toBeLessThan(shelfWidth)
     },
   )
 
   test(
     'a card’s verse tally stands at the foot of the card, level with the others in its row',
-    { tag: '@from-1440' },
+    { tag: '@from-768' },
     async ({ page }) => {
       await gotoReady(page, TEXTS)
       const feet = await Promise.all(
@@ -113,13 +134,10 @@ test.describe('the shelf', () => {
               .boundingBox(),
           ])
           if (!cardBox || !tallyBox) throw new Error(`The ${view.slug} card is laid out.`)
-          return { row: cardBox.y, tally: tallyBox.y, height: tallyBox.height }
+          return { row: cardBox.y, tally: tallyBox.y }
         }),
       )
-      const firstRow = feet.filter(({ row }) => row === feet[0]?.row)
-      // A long tally can wrap to a second line, and so stand a line taller.
-      const oneLine = Math.min(...firstRow.map(({ height }) => height))
-      const rules = firstRow.filter(({ height }) => height === oneLine).map(({ tally }) => tally)
+      const rules = feet.filter(({ row }) => row === feet[0]?.row).map(({ tally }) => tally)
       expect(rules.length, 'the row has tallies to compare').toBeGreaterThan(1)
       expect(new Set(rules).size, 'one line for the tally rules').toBe(1)
     },

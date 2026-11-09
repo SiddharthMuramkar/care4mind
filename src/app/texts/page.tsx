@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 
+import { ownArt } from '@/art'
 import { SectionSticker } from '@/components/art'
 import { Fleuron } from '@/components/Fleuron'
 import { ReadingPage } from '@/components/ReadingPage'
@@ -46,7 +47,11 @@ export default async function TextsPage() {
     >
       <ul className={styles.shelf}>
         {shelf.map((work) => (
-          <li key={work.slug} className={styles.item}>
+          <li
+            key={work.slug}
+            className={styles.item}
+            data-bare={ownArt({ kind: 'work', slug: work.slug }) ? undefined : ''}
+          >
             <TextCard work={work} />
           </li>
         ))}
