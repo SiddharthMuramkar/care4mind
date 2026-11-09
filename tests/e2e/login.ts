@@ -64,6 +64,7 @@ export async function waitForBotCheck(page: Page) {
 export async function signUpInBrowser(page: Page, email: string) {
   await page.goto('/sign-up/')
   await page.getByLabel('Your name').fill('Asha Rao')
+  await page.getByRole('checkbox', { name: /18 or over/ }).check()
   await page.getByLabel('Your email').fill(email)
   await waitForBotCheck(page)
   await page.getByRole('button', { name: 'Email me a code' }).click()
