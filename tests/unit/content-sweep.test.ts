@@ -101,6 +101,8 @@ describe('the route registry, on the real content', () => {
       'concept',
       'concept-map',
       'concepts',
+      'credits',
+      'credits-sources',
       'home',
       'library',
       'page',

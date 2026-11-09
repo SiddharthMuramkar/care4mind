@@ -117,6 +117,13 @@ test('the error pages keep their Emblem', async ({ page }) => {
   await expect(page.getByRole('main').locator('img')).toBeVisible()
 })
 
+test('the credits gallery keeps its pictures and its link', async ({ page }) => {
+  await gotoReady(page, hrefFor({ page: 'credits' }))
+  const main = page.getByRole('main')
+  await expect(main.locator('figure img').first()).toBeVisible()
+  await expect(main.getByRole('link').last()).toBeVisible()
+})
+
 const PARTS = [
   'Everyday Experience - 1',
   'Everyday Experience - 2',

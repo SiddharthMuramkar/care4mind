@@ -1,0 +1,37 @@
+.entries {
+  display: grid;
+  gap: 1.25rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.entry {
+  display: grid;
+  gap: 0.25rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--color-surface-rule);
+}
+
+.name {
+  margin: 0;
+  font-size: var(--text-large);
+}
+
+.facts {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.15rem 0.75rem;
+  margin: 0;
+  font-size: var(--text-small);
+  color: var(--color-surface-muted);
+}
+
+.term {
+  font-variant-caps: all-small-caps;
+  letter-spacing: 0.08em;
+}
+
+.fact {
+  margin: 0;
+}

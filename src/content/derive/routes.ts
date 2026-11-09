@@ -166,6 +166,8 @@ export function recordRoutes(graph: ContentGraph, flags: Features): RecordRoute[
     ...library.sort(byPath),
     fixed('search', 'search', 'Search'),
     ...(proposalsPageOn(flags) ? [fixed('proposals', 'proposals', 'Proposals', true)] : []),
+    fixed('credits', 'credits', 'Picture credits'),
+    fixed('credits-sources', 'credits-sources', 'Where these pictures come from'),
   ]
 
   const sampled = new Set<RouteKind>()

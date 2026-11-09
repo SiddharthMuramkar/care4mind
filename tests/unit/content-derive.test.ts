@@ -388,6 +388,20 @@ describe('site.routes', () => {
         sample: true,
         proposal: true,
       },
+      {
+        path: '/credits/',
+        kind: 'credits',
+        pattern: '/credits/',
+        title: 'Picture credits',
+        sample: true,
+      },
+      {
+        path: '/credits/sources/',
+        kind: 'credits-sources',
+        pattern: '/credits/sources/',
+        title: 'Where these pictures come from',
+        sample: true,
+      },
     ])
   })
 
@@ -533,6 +547,13 @@ describe('site.trail', () => {
     expect(await trail('/proposals/')).toEqual([
       homeCrumb,
       { label: 'Proposals', href: '/proposals/' },
+    ])
+    const credits = { label: 'Picture credits', href: '/credits/' }
+    expect(await trail('/credits/')).toEqual([homeCrumb, credits])
+    expect(await trail('/credits/sources/')).toEqual([
+      homeCrumb,
+      credits,
+      { label: 'Where these pictures come from', href: '/credits/sources/' },
     ])
   })
 

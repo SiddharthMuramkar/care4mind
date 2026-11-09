@@ -1,0 +1,25 @@
+.figure {
+  display: grid;
+  justify-items: center;
+  align-content: start;
+  gap: 0.5rem;
+  margin: 0;
+}
+
+.picture {
+  display: block;
+  width: 160px;
+  height: auto;
+}
+
+.circle {
+  height: 160px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.caption {
+  font-size: var(--text-small);
+  color: var(--color-surface-muted);
+  text-align: center;
+}

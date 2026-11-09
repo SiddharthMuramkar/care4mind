@@ -105,6 +105,7 @@ async function build(): Promise<SiteNav> {
       hrefFor({ page: 'questionnaires' }),
     ),
     search: link('Search', hrefFor({ page: 'search' })),
+    credits: link('Picture credits', hrefFor({ page: 'credits' })),
     ...(has('start') ? { start: link('Start here', hrefFor({ page: 'start' })) } : {}),
     ...(has('proposals') ? { proposals: link('Proposals', hrefFor({ page: 'proposals' })) } : {}),
   }

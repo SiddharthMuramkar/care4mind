@@ -14,6 +14,8 @@ const FIXED_PAGES = {
   search: '/search/',
   proposals: '/proposals/',
   start: '/start/',
+  credits: '/credits/',
+  'credits-sources': '/credits/sources/',
 } as const satisfies Record<FixedPage, string>
 
 const withAnchor = (path: string, anchor: string | undefined) =>

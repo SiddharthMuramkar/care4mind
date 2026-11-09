@@ -250,6 +250,8 @@ describe('the pure helpers', () => {
     expect(hrefFor({ page: 'references' })).toBe('/library/references/')
     expect(hrefFor({ page: 'search' })).toBe('/search/')
     expect(hrefFor({ page: 'proposals' })).toBe('/proposals/')
+    expect(hrefFor({ page: 'credits' })).toBe('/credits/')
+    expect(hrefFor({ page: 'credits-sources' })).toBe('/credits/sources/')
   })
 
   it('names a Concept by its capitalised IAST term, else its English title (displayName)', () => {

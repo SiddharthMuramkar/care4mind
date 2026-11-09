@@ -1,5 +1,6 @@
 import type { Page } from '@playwright/test'
 
+import { expectNoAxeViolations } from './axe'
 import { expect, gotoReady, test } from './fixtures'
 
 /** The homepage's hero Plate: the one picture allowed a `sizes` attribute. */
@@ -11,6 +12,7 @@ const PICTURES = 'main img, footer img'
 /** The pages the shared check visits. A page joins the list when it gets its first picture. */
 const PAGES: { path: string; name: string }[] = [
   // Add a page in path order, not at the end.
+  { path: '/credits/', name: 'credits gallery' },
   { path: '/search/', name: 'search page, whose one picture is the footer Emblem' },
 ]
 
@@ -117,6 +119,77 @@ for (const { path, name } of PAGES) {
     await expectPicturesBehave(page)
   })
 }
+
+test.describe('the credits gallery', () => {
+  /** Words that say where a picture came from, which belong only on the plain list of sources. */
+  const WHERE_FROM = /licen[cs]e|origin|source|credit|care4mind website|recraft/i
+
+  test('shows all 22 pictures, each with the record’s alt', async ({ page }) => {
+    await gotoReady(page, '/credits/')
+    const main = page.locator('main')
+    await expect(main.locator('figure')).toHaveCount(22)
+    await expect(main.locator('figure img')).toHaveCount(22)
+    for (const alt of await main
+      .locator('figure img')
+      .evaluateAll((images) => images.map((image) => image.getAttribute('alt')))) {
+      expect(alt?.trim(), 'the picture’s alt').toBeTruthy()
+    }
+  })
+
+  test('captions only the pictures that have a caption', async ({ page }) => {
+    await gotoReady(page, '/credits/')
+    await expect(page.locator('main figcaption')).toHaveCount(11)
+  })
+
+  test('says nothing about where a picture came from beside it', async ({ page }) => {
+    await gotoReady(page, '/credits/')
+    const main = page.locator('main')
+    for (const text of await main.locator('figure').allInnerTexts()) {
+      expect(text).not.toMatch(WHERE_FROM)
+    }
+    await expect(main).not.toContainText('From the Care4Mind website')
+  })
+
+  test('ends with its one link, to the plain list of sources', async ({ page }) => {
+    await gotoReady(page, '/credits/')
+    const last = page.locator('main').getByRole('link').last()
+    await expect(last).toHaveText('Where these pictures come from')
+    await expect(last).toHaveAttribute('href', '/credits/sources/')
+  })
+
+  test('its link is at least 44 px tall', async ({ page }) => {
+    await gotoReady(page, '/credits/')
+    const box = await page.locator('main').getByRole('link').last().boundingBox()
+    expect(box?.height ?? 0).toBeGreaterThanOrEqual(44)
+  })
+
+  test('passes axe', async ({ page }) => {
+    await gotoReady(page, '/credits/')
+    await expectNoAxeViolations(page)
+  })
+})
+
+test.describe('the plain list of sources', () => {
+  test('gives every picture’s origin and licence, and shows no picture', async ({ page }) => {
+    await gotoReady(page, '/credits/sources/')
+    const main = page.locator('main')
+    await expect(main.getByRole('heading', { level: 1 })).toHaveText(
+      'Where these pictures come from',
+    )
+    await expect(main.locator('ul > li')).toHaveCount(22)
+    await expect(main.getByText('From the Care4Mind website')).toHaveCount(22)
+    await expect(main.getByText('reuse confirmation pending')).toHaveCount(22)
+    await expect(main.locator('img')).toHaveCount(0)
+    // A Plate goes by its caption and a Sticker, which has none, by its alt text.
+    await expect(main).toContainText('The jeweller')
+    await expect(main).toContainText('Interlocking gears inside a patterned mandala')
+  })
+
+  test('passes axe', async ({ page }) => {
+    await gotoReady(page, '/credits/sources/')
+    await expectNoAxeViolations(page)
+  })
+})
 
 // The check itself, on pages made here, so that a broken check cannot pass unnoticed.
 test.describe('the shared check', { tag: '@one-width' }, () => {

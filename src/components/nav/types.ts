@@ -58,6 +58,8 @@ export interface SiteNav {
    */
   questionnaires: NavLink
   search: NavLink
+  /** The footer's link to the Picture credits, never beside a picture. */
+  credits: NavLink
   proposals?: NavLink
   /** Start here, while its proposal is on: the header shows it after the wordmark. */
   start?: NavLink

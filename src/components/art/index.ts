@@ -1,0 +1,1 @@
+export { ArtFigure } from './ArtFigure'

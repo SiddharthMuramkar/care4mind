@@ -12,9 +12,9 @@ import styles from './SiteFooter.module.css'
 
 /**
  * The colophon every page ends with: the Emblem beside the wordmark with the motto under them,
- * the tagline, the full navigation (every section, Questionnaires, the topics and every Library
- * page, and the proposals while one is on), the credit and the preview notice. Without
- * JavaScript, the header's Menu leads here.
+ * the tagline, the full navigation (every section, Questionnaires, the topics, every Library
+ * page, the Picture credits and the proposals while one is on), the credit and the preview
+ * notice. Without JavaScript, the header's Menu leads here.
  */
 export async function SiteFooter() {
   const [nav, { tagline, shloka }] = await Promise.all([siteNav(), home.get()])
@@ -85,6 +85,9 @@ export async function SiteFooter() {
                 </li>
                 <li>
                   <Link href={nav.search.href}>{nav.search.label}</Link>
+                </li>
+                <li>
+                  <Link href={nav.credits.href}>{nav.credits.label}</Link>
                 </li>
               </ul>
             </li>
