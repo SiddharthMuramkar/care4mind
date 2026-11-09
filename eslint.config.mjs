@@ -36,6 +36,19 @@ const dynamicImportOf = (source, message) => [
   { selector: `TSImportType[source.value=${source}]`, message },
 ]
 
+// The art module's boundary. Outside src/art, code reads pictures through `@/art`, which is
+// server-only, so no record reaches the browser bundle. The Emblem's plain data, `@/art/emblem`,
+// is the one exception, for the client error pages.
+const ART_MESSAGE =
+  'The picture registry is private: import @/art, or @/art/emblem for the Emblem records.'
+
+const artPatterns = [
+  { regex: '^@/art/(?!emblem$)', caseSensitive: true, message: ART_MESSAGE },
+  { regex: '^\\.{1,2}/(?:.+/)?art/(?!emblem$)', caseSensitive: true, message: ART_MESSAGE },
+]
+
+const ART_REACH_SOURCE = String.raw`/^(?:@\/art\/(?!emblem$)|\.{1,2}\/(?:.+\/)?art\/(?!emblem$))/`
+
 const contentBoundary = {
   files: ['src/**/*.{ts,tsx}'],
   ignores: ['src/content/**'],
@@ -54,11 +67,13 @@ const contentBoundary = {
             caseSensitive: true,
             message: 'Reach the content module through @/content, never by a relative path.',
           },
+          ...artPatterns,
         ],
       },
     ],
     'no-restricted-syntax': [
       'error',
+      ...dynamicImportOf(ART_REACH_SOURCE, ART_MESSAGE),
       ...clientTypesOnly(
         CONTENT_PUBLIC_SOURCE,
         "A 'use client' file may import @/content for types only: use `import type`.",
@@ -211,7 +226,10 @@ const componentStructure = [
   {
     files: ['src/app/**/*.{ts,tsx}', 'src/lib/**/*.{ts,tsx}'],
     rules: {
-      'no-restricted-imports': ['error', { patterns: [...contentPatterns, ...componentPatterns] }],
+      'no-restricted-imports': [
+        'error',
+        { patterns: [...contentPatterns, ...artPatterns, ...componentPatterns] },
+      ],
     },
   },
   {
@@ -222,6 +240,7 @@ const componentStructure = [
         {
           patterns: [
             ...contentPatterns,
+            ...artPatterns,
             ...componentPatterns,
             {
               regex: '^@/app/',
