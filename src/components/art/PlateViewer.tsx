@@ -49,7 +49,7 @@ export function PlateViewer({
       const { props } = getImageProps({ src, width, height, sizes: SIZES, alt: '' })
       const file = new window.Image()
       // Sizes first: setting the srcset is what starts the choice of file.
-      file.sizes = props.sizes ?? SIZES
+      file.sizes = SIZES
       file.srcset = props.srcSet ?? ''
     }
   }
@@ -61,6 +61,13 @@ export function PlateViewer({
     if (loaded.current.has(target)) setShown(target)
     // The button stays hovered or focused after a press, so its own events won't come again.
     warm(target)
+  }
+
+  /** Let go of a Plate whose file failed, so that the next visit fetches it again. */
+  const forget = (index: number) => {
+    warmed.current.delete(index)
+    setMounted((all) => all.filter((other) => other !== index))
+    if (index === asked) setAsked(shown)
   }
 
   const warmOnApproach = {
@@ -89,6 +96,8 @@ export function PlateViewer({
                   loaded.current.add(index)
                   if (index === asked) setShown(index)
                 }}
+                // Not on the first Plate: with `onError`, next/image requests a server-sent file again.
+                onError={index === 0 ? undefined : () => forget(index)}
                 data-hero-plate
               />
             ),

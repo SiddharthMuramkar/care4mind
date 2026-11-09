@@ -286,6 +286,46 @@ test.describe('the hero Plate', () => {
     await context.close()
   })
 
+  test('keeps no hover look after a tap', { tag: '@one-width' }, async ({ browser, viewport }) => {
+    const context = await browser.newContext({ hasTouch: true, isMobile: true, viewport })
+    const touch = await context.newPage()
+    await gotoReady(touch, '/')
+    const atRest = await next(touch).evaluate((button) => getComputedStyle(button).borderColor)
+    await next(touch).tap()
+    await expect(caption(touch)).toHaveText('The sculptor · 2 of 7')
+    await expect(next(touch)).toHaveCSS('border-color', atRest)
+    await expect(next(touch).locator('svg')).toHaveCSS('transform', 'none')
+    await context.close()
+  })
+
+  test(
+    'names the Plate still on screen when a file fails, and asks for it again next time',
+    { tag: '@one-width' },
+    async ({ page }) => {
+      const sculptor = /url=%2Fart%2Fplates%2Fsculptor\.jpg/
+      let fail: () => void = () => undefined
+      const failing = new Promise<void>((resolve) => {
+        fail = resolve
+      })
+      await page.route(sculptor, async (route) => {
+        await failing
+        await route.abort()
+      })
+      await gotoReady(page, '/')
+      const before = await shownFile(page)
+      await next(page).click()
+      await expect(caption(page)).toHaveText('The sculptor · 2 of 7')
+      fail()
+      await expect(caption(page)).toHaveText('The jeweller · 1 of 7')
+      expect(await shownFile(page)).toBe(before)
+
+      await page.unroute(sculptor)
+      await next(page).click()
+      await expect(caption(page)).toHaveText('The sculptor · 2 of 7')
+      await expect.poll(() => shownFile(page)).toContain('sculptor')
+    },
+  )
+
   test('offers two buttons of at least 44 px in a labelled group, and a live caption', async ({
     page,
   }) => {
@@ -401,9 +441,33 @@ test.describe('the hero Plate', () => {
 
   test('fades the new Plate in over the old one', async ({ page }) => {
     await gotoReady(page, '/')
-    const current = page.locator(`${HERO}:not([alt=""])`)
-    await expect(current).toHaveCSS('transition-duration', '0.32s')
-    await expect(current).toHaveCSS('transition-property', 'opacity')
+    await figure(page).scrollIntoViewIfNeeded()
+    // Pressed and read in the page, because the fade is over before a second call could look.
+    const fadeStart = await figure(page).evaluate(
+      (element: HTMLElement) =>
+        new Promise<{ leaving: number; arriving: number; topFirst: string[] }>((resolve) => {
+          element.addEventListener('transitionrun', (event) => {
+            const arriving = event.target
+            if (!(arriving instanceof HTMLImageElement) || !arriving.alt) return
+            if (event.propertyName !== 'opacity') return
+            const leaving = element.querySelector('img[alt=""]')
+            if (!leaving) return
+            const { left, top, width, height } = arriving.getBoundingClientRect()
+            resolve({
+              leaving: Number(getComputedStyle(leaving).opacity),
+              arriving: Number(getComputedStyle(arriving).opacity),
+              topFirst: document
+                .elementsFromPoint(left + width / 2, top + height / 2)
+                .filter((found) => found === arriving || found === leaving)
+                .map((found) => (found === arriving ? 'arriving' : 'leaving')),
+            })
+          })
+          element.querySelector<HTMLElement>('[aria-label="Next painting"]')?.click()
+        }),
+    )
+    expect(fadeStart.leaving, 'the old Plate stays whole').toBe(1)
+    expect(fadeStart.arriving, 'the new Plate is still fading in').toBeLessThan(1)
+    expect(fadeStart.topFirst).toEqual(['arriving', 'leaving'])
   })
 
   test(

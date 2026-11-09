@@ -70,7 +70,14 @@
   cursor: pointer;
 }
 
-.button:is(:hover, :focus-visible) {
+/* Only where a pointer can rest: a touch screen would hold the hover after a tap. */
+@media (hover: hover) {
+  .button:hover {
+    border-color: var(--color-surface-ink);
+  }
+}
+
+.button:focus-visible {
   border-color: var(--color-surface-ink);
 }
 
@@ -101,11 +108,21 @@
     transition: transform var(--duration-quick) var(--ease-out);
   }
 
-  .button:is(:hover, :focus-visible) .arrow {
+  @media (hover: hover) {
+    .button:hover .arrow {
+      transform: translateX(3px);
+    }
+
+    .previous:hover .arrow {
+      transform: translateX(-3px) scaleX(-1);
+    }
+  }
+
+  .button:focus-visible .arrow {
     transform: translateX(3px);
   }
 
-  .previous:is(:hover, :focus-visible) .arrow {
+  .previous:focus-visible .arrow {
     transform: translateX(-3px) scaleX(-1);
   }
 
