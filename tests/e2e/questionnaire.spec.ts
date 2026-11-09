@@ -57,6 +57,20 @@ test.describe('The Karma Yoga cycle', () => {
   const PATH = '/questionnaires/karmayoga-scale/'
   const drawing = (page: Page) => page.locator('#karma-cycle svg')
 
+  /** How many arrows' lines are still to draw, and how many of their heads are still to show. */
+  const unfinishedArrows = (page: Page) =>
+    drawing(page).evaluate((svg) => {
+      const reading = (selector: string, read: (style: CSSStyleDeclaration) => boolean) =>
+        [...svg.querySelectorAll(selector)].filter((path) => read(getComputedStyle(path))).length
+      return {
+        lines: reading(
+          '[data-tone] path:first-child',
+          ({ strokeDashoffset }) => parseFloat(strokeDashoffset) !== 0,
+        ),
+        heads: reading('[data-tone] path:last-child', ({ opacity }) => opacity !== '1'),
+      }
+    })
+
   test('stands under its heading in the purpose section, named by its title and description', async ({
     page,
   }) => {
@@ -197,6 +211,83 @@ test.describe('The Karma Yoga cycle', () => {
       await expect.poll(() => undrawn(first)).toBeGreaterThan(0)
     },
   )
+
+  test(
+    'has every arrow drawn when a tall screen shows the whole figure at load',
+    { tag: '@self-width' },
+    async ({ page }) => {
+      await page.setViewportSize({ width: 1080, height: 1920 })
+      await gotoReady(page, PATH)
+      await expect(page.locator('#karma-cycle')).toBeInViewport({ ratio: 1 })
+      await expect.poll(() => unfinishedArrows(page)).toEqual({ lines: 0, heads: 0 })
+    },
+  )
+
+  test('prints with every arrow drawn', async ({ page }) => {
+    await gotoReady(page, PATH)
+    await page.emulateMedia({ media: 'print' })
+    await expect.poll(() => unfinishedArrows(page)).toEqual({ lines: 0, heads: 0 })
+  })
+
+  test(
+    'strikes each struck word from end to end, through its middle',
+    { tag: '@self-width' },
+    async ({ page }) => {
+      for (const width of [360, 1024]) {
+        await page.setViewportSize({ width, height: 800 })
+        await gotoReady(page, PATH)
+        await page.evaluate(() => document.fonts.ready)
+        const strikes = await drawing(page).evaluate((svg) =>
+          [...svg.querySelectorAll('line')].map((line) => {
+            const text = line.previousElementSibling as SVGTextElement
+            const word = text.getBoundingClientRect()
+            const strike = line.getBoundingClientRect()
+            return {
+              word: text.textContent,
+              before: word.left - strike.left,
+              after: strike.right - word.right,
+              height: (strike.top - word.top) / word.height,
+            }
+          }),
+        )
+        expect(strikes).toHaveLength(3)
+        for (const { word, before, after, height } of strikes) {
+          const where = `${word} at ${width} px`
+          expect(before, `${where}: from its start`).toBeGreaterThan(-1)
+          expect(before, `${where}: not far past its start`).toBeLessThan(4)
+          expect(after, `${where}: to its end`).toBeGreaterThan(-1)
+          expect(after, `${where}: not far past its end`).toBeLessThan(4)
+          expect(height, `${where}: below its top`).toBeGreaterThan(0.3)
+          expect(height, `${where}: above its foot`).toBeLessThan(0.7)
+        }
+      }
+    },
+  )
+
+  test('gives assistive technology its words once, as the picture’s name', async ({ page }) => {
+    await gotoReady(page, PATH)
+    const session = await page.context().newCDPSession(page)
+    const { nodes } = await session.send('Accessibility.getFullAXTree')
+    const byId = new Map(nodes.map((node) => [node.nodeId, node]))
+    const picture = nodes.find(
+      ({ role, name }) =>
+        role?.value === 'image' && String(name?.value).startsWith('The Karma Yoga cycle'),
+    )
+    expect(picture, 'the picture is in the accessibility tree').toBeDefined()
+    expect(picture?.description?.value ?? '', 'no description repeating the name').toBe('')
+    const below = (ids: string[] = []): typeof nodes =>
+      ids.flatMap((id) => {
+        const node = byId.get(id)
+        return node ? [node, ...below(node.childIds)] : []
+      })
+    const spoken = below(picture?.childIds).filter(
+      ({ ignored, role }) => !ignored && role?.value === 'StaticText',
+    )
+    expect(
+      spoken.map(({ name }) => name?.value),
+      'no label repeated beneath it',
+    ).toEqual([])
+  })
 })
 
 // The flow itself is checked in questionnaire-flow.spec.ts; these cover the index.

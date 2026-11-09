@@ -171,15 +171,17 @@
     stroke: CanvasText;
   }
 
+  /* The summary's words are LinkText here, and the plus goes with them. */
   .icon > * {
-    background: CanvasText;
+    background: LinkText;
   }
 }
 
 /*
- * As the figure comes into view each arrow draws after the one before it, and scrubs back as it
- * leaves. One view timeline for the figure, which every arrow follows. Not in print, where the
- * finished drawing is the one to set down.
+ * As the figure comes into view each arrow draws after the one before it, and scrubs back if the
+ * visitor scrolls back. One view timeline for the figure, which every arrow follows, measured over
+ * its entry so a tall screen showing all of it shows it finished. Not in print, where the finished
+ * drawing is the one to set down.
  */
 @media screen and (prefers-reduced-motion: no-preference) {
   @supports (animation-timeline: view()) {
@@ -214,13 +216,13 @@
     .line {
       animation: cycle-draw linear both;
       animation-timeline: --karma-cycle;
-      animation-range: cover calc(6% + var(--step) * 4.5%) cover calc(10.5% + var(--step) * 4.5%);
+      animation-range: entry calc(10% + var(--step) * 14%) entry calc(24% + var(--step) * 14%);
     }
 
     .head {
       animation: cycle-head linear both;
       animation-timeline: --karma-cycle;
-      animation-range: cover calc(8.5% + var(--step) * 4.5%) cover calc(10.5% + var(--step) * 4.5%);
+      animation-range: entry calc(18% + var(--step) * 14%) entry calc(24% + var(--step) * 14%);
     }
 
     @keyframes cycle-draw {
@@ -254,5 +256,12 @@
 
   .icon > :last-child {
     transition: transform var(--duration-move) var(--ease-out);
+  }
+}
+
+/* The global 1 ms still makes this a transition, which waits frames on the compositor: not at once. */
+@media (prefers-reduced-motion: reduce) {
+  .icon > :last-child {
+    transition-property: none;
   }
 }

@@ -109,6 +109,7 @@ function NodeName({ node: { lines, joined } }: { node: CycleNode }) {
 export function KarmaCycle() {
   const titleId = useId()
   const descriptionId = useId()
+  const noDescriptionId = useId()
 
   return (
     <div className={styles.root}>
@@ -118,28 +119,34 @@ export function KarmaCycle() {
           className={styles.drawing}
           role="img"
           aria-labelledby={`${titleId} ${descriptionId}`}
+          // The name already holds these words: left alone, <desc> would be read out again as the
+          // description, and every label in the drawing after it. Pointing at nothing says none.
+          aria-describedby={noDescriptionId}
           viewBox="0 0 1080 740"
           focusable="false"
         >
           <title id={titleId}>{CYCLE_TITLE}</title>
           <desc id={descriptionId}>{CYCLE_DESCRIPTION}</desc>
+          <g id={noDescriptionId} />
 
-          <g>
+          <g aria-hidden="true">
+            <g>
+              {CYCLE_STEPS.map((step) => (
+                <Arrow key={step.id} arrow={step} />
+              ))}
+              <Arrow arrow={CYCLE_LOKASAMGRAHA} />
+            </g>
+
             {CYCLE_STEPS.map((step) => (
-              <Arrow key={step.id} arrow={step} />
+              <ArrowLabel key={step.id} arrow={step} />
             ))}
-            <Arrow arrow={CYCLE_LOKASAMGRAHA} />
+            <ArrowLabel arrow={CYCLE_LOKASAMGRAHA} />
+
+            {CYCLE_NODES.map((node) => (
+              <Lines key={node.id} lines={node.lines} at={node.at} className={styles.node} />
+            ))}
+            <Lines lines={CYCLE_CENTRE.lines} at={CYCLE_CENTRE.at} className={styles.centre} />
           </g>
-
-          {CYCLE_STEPS.map((step) => (
-            <ArrowLabel key={step.id} arrow={step} />
-          ))}
-          <ArrowLabel arrow={CYCLE_LOKASAMGRAHA} />
-
-          {CYCLE_NODES.map((node) => (
-            <Lines key={node.id} lines={node.lines} at={node.at} className={styles.node} />
-          ))}
-          <Lines lines={CYCLE_CENTRE.lines} at={CYCLE_CENTRE.at} className={styles.centre} />
         </svg>
         <figcaption className={styles.caption}>
           Read it clockwise, from <span lang="sa-Latn">Karmabija</span>.

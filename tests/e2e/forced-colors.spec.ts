@@ -253,6 +253,12 @@ test('the KarmaYoga Scale page keeps its Medallion and its cycle in the theme’
   expect(strikes).toHaveLength(3)
   expect(words.length).toBeGreaterThan(0)
   for (const colour of [...arrows, ...strikes, ...words]) expect(colour).toBe(text)
+  const summary = page.locator('summary', { hasText: 'Read the cycle as a list' })
+  const wording = await summary.evaluate((element) => getComputedStyle(element).color)
+  const bars = await summary
+    .locator('[aria-hidden="true"] > *')
+    .evaluateAll((parts) => parts.map((part) => getComputedStyle(part).backgroundColor))
+  expect(bars).toEqual([wording, wording])
 })
 
 test('the hero Medallion ring draws in the text colour of the theme', async ({ page }) => {
