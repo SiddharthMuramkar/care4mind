@@ -147,6 +147,17 @@ test.describe('Delete my account', { tag: '@one-width' }, () => {
     await expect(askButton(page), 'the button stays').toBeVisible()
   })
 
+  test('moves a keyboard user to the message when the link is no good', async ({ page }, info) => {
+    const email = freshEmail(info)
+    await signUpInBrowser(page, email)
+    await gotoReady(page, `${PRIVACY}?delete-account=not-a-real-token`)
+
+    await tabTo(page, confirmButton(page))
+    await page.keyboard.press('Enter')
+
+    await expect(page.getByRole('alert').filter({ hasText: /run out/ })).toBeFocused()
+  })
+
   test('says so when the link is no good, and offers a new one', async ({ page }, info) => {
     const email = freshEmail(info)
     await signUpInBrowser(page, email)

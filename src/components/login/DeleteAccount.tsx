@@ -35,6 +35,7 @@ export function DeleteAccount({ logIn }: { logIn: Route }) {
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
   const said = useRef<HTMLParagraphElement>(null)
+  const refused = useRef<HTMLParagraphElement>(null)
 
   useEffect(() => {
     void isLoggedIn().then(setLoggedIn)
@@ -46,6 +47,12 @@ export function DeleteAccount({ logIn }: { logIn: Route }) {
   useEffect(() => {
     if (sent || deleted) said.current?.focus()
   }, [sent, deleted])
+
+  // The same when the link is refused: the Yes button goes, and an alert put in the page already
+  // holding its words may not be read out, so focus takes the user there.
+  useEffect(() => {
+    if (linkRefused) refused.current?.focus()
+  }, [linkRefused])
 
   async function askForLink() {
     setBusy(true)
@@ -161,7 +168,12 @@ export function DeleteAccount({ logIn }: { logIn: Route }) {
           Delete my account
         </button>
       )}
-      <p className={styles.error} role="alert">
+      <p
+        ref={refused}
+        className={styles.error}
+        role="alert"
+        tabIndex={linkRefused ? -1 : undefined}
+      >
         {error}
       </p>
     </div>
