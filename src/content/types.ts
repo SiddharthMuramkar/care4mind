@@ -38,6 +38,8 @@ export type FixedPage =
   | 'log-in'
   | 'sign-up'
   | 'privacy'
+  | 'credits'
+  | 'credits-sources'
 
 /**
  * What `hrefFor` turns into a path: a record (by its kind and id, with an anchor inside it where
@@ -560,6 +562,8 @@ export type RouteKind =
   | 'log-in'
   | 'sign-up'
   | 'privacy'
+  | 'credits'
+  | 'credits-sources'
 
 /** One public page in the route registry. */
 export interface RouteEntry {

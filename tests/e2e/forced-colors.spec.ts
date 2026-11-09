@@ -266,6 +266,13 @@ test("the Plate viewer's buttons keep their edges and their arrows", async ({ pa
   }
 })
 
+test('the credits gallery keeps its pictures and its link', async ({ page }) => {
+  await gotoReady(page, hrefFor({ page: 'credits' }))
+  const main = page.getByRole('main')
+  await expect(main.locator('figure img').first()).toBeVisible()
+  await expect(main.getByRole('link').last()).toBeVisible()
+})
+
 const PARTS = [
   'Everyday Experience - 1',
   'Everyday Experience - 2',

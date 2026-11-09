@@ -36,10 +36,13 @@ export type OwnArtTarget =
 export function createArt(records: readonly ArtRecord[], flags: Pick<Features, 'draftArt'>) {
   const byId: ReadonlyMap<string, ArtRecord> = new Map(records.map((record) => [record.id, record]))
 
-  /** A slot with no record is absent, and an unapproved record counts only while drafts show. */
+  /** An unapproved record counts only while drafts show. */
+  const canShow = (record: ArtRecord) => record.approved || flags.draftArt
+
+  /** A slot with no record is absent. */
   function usable(id: PictureId | undefined): ArtRecord | undefined {
     const record = id === undefined ? undefined : byId.get(id)
-    return record && (record.approved || flags.draftArt) ? record : undefined
+    return record && canShow(record) ? record : undefined
   }
 
   /** The first of these that can show. Every list ends in a picture the registry holds. */
@@ -58,6 +61,11 @@ export function createArt(records: readonly ArtRecord[], flags: Pick<Features, '
   }
 
   return {
+    /** Every picture that can show on this build, in registry order: the credits gallery's list. */
+    shipped(): ArtRecord[] {
+      return records.filter(canShow)
+    },
+
     /** The record of the picture with this id. */
     art(id: ArtId): ArtRecord {
       const record = byId.get(id)

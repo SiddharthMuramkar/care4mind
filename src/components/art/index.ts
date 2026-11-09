@@ -1,3 +1,4 @@
+export { ArtFigure } from './ArtFigure'
 export { HeadPicture } from './HeadPicture'
 export { KarmaCycle } from './KarmaCycle'
 export { Medallion } from './Medallion'

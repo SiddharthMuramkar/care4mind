@@ -15,6 +15,7 @@ export type { ArtId }
 export type { SectionKey } from './assign'
 export type { ArtTarget, OwnArtTarget } from './resolve'
 export { heroPlates } from './assign'
+export { originLine } from './origin'
 
 const pictures = createArt(ART, features)
 
@@ -24,3 +25,5 @@ export const art = pictures.art
 export const artFor = pictures.artFor
 /** A Concept's, Questionnaire's or Traditional text's own picture for its card, or nothing. */
 export const ownArt = pictures.ownArt
+/** Every picture that can show on this build, in registry order. */
+export const shipped = pictures.shipped

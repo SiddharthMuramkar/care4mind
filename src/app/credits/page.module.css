@@ -1,0 +1,37 @@
+/* Fixed columns, so a picture stands at the same place in every family's row. */
+.gallery {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, 160px);
+  justify-content: space-between;
+  gap: 2rem;
+}
+
+/* At 360px the text is 328px wide: ArtFigure draws at 150px here, so two columns keep their room. */
+@media (width < 40rem) {
+  .gallery {
+    grid-template-columns: repeat(auto-fill, 150px);
+    column-gap: 1.75rem;
+  }
+}
+
+/* Too narrow for two columns: the one column stands in the middle. */
+@media (width < 22.5rem) {
+  .gallery {
+    justify-content: center;
+  }
+}
+
+.sources {
+  margin: 0;
+}
+
+/* A link at the foot of a page, with room to take a thumb. */
+.sources a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+}
+
+.sources a:active {
+  color: var(--color-surface-ink);
+}

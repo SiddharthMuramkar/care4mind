@@ -5,9 +5,9 @@ import { ESLint } from 'eslint'
 import { createElement } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
 import sharp from 'sharp'
-import { beforeAll, describe, expect, it } from 'vitest'
+import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest'
 
-import { art, artFor, ownArt, type ArtOrigin, type ArtRecord } from '@/art'
+import { art, artFor, originLine, ownArt, type ArtOrigin, type ArtRecord } from '@/art'
 import {
   conceptArt,
   heroPlates,
@@ -22,6 +22,7 @@ import { EMBLEM_MARK, EMBLEM_RING } from '@/art/emblem'
 import { ART } from '@/art/registry'
 import { createArt } from '@/art/resolve'
 import { SLOTS, type SlotId } from '@/art/slots'
+import { ArtFigure } from '@/components/art'
 import { Emblem } from '@/components/Emblem'
 import { concepts, questionnaires, topics, works } from '@/content'
 
@@ -49,7 +50,11 @@ function isComplete(origin: ArtOrigin): boolean {
     case 'care4mind':
       return origin.wpId > 0 && origin.oldPath.startsWith('/wp-content/uploads/')
     case 'generated':
-      return [origin.tool, origin.model, origin.prompt, origin.made].every(Boolean)
+      return (
+        [origin.tool, origin.model, origin.prompt].every(Boolean) &&
+        /^\d{4}-\d{2}-\d{2}/.test(origin.made) &&
+        !Number.isNaN(Date.parse(origin.made))
+      )
     case 'licensed':
       return [origin.credit, origin.source].every(Boolean)
   }
@@ -380,7 +385,13 @@ function draft(id: string, overrides: Partial<ArtRecord> = {}): ArtRecord {
     width: 1024,
     height: 1024,
     alt: 'A draft picture',
-    origin: { kind: 'generated', tool: 'A tool', model: 'A model', prompt: 'A brief', made: 'now' },
+    origin: {
+      kind: 'generated',
+      tool: 'A tool',
+      model: 'A model',
+      prompt: 'A brief',
+      made: '2026-11-03',
+    },
     licence: 'A licence',
     approved: false,
     ...overrides,
@@ -567,6 +578,94 @@ describe('a Questionnaire with no picture of its own', () => {
   it('stays bare on its card, even when its first Concept has a Plate', () => {
     const { ownArt: own } = createArt([...ART, draft('plate-triguna')], flagsOn())
     expect(own({ kind: 'questionnaire', slug: 'triguna' })).toBeUndefined()
+  })
+})
+
+describe('ArtFigure', () => {
+  const render = (record: ArtRecord) =>
+    renderToStaticMarkup(createElement(ArtFigure, { art: record, shape: 'circle' }))
+
+  it('shows the record’s alt and its caption', () => {
+    const html = render(draft('plate-ahimsa', { caption: 'The farmers', alt: 'Two farmers' }))
+    expect(html).toContain('alt="Two farmers"')
+    expect(html).toMatch(/<figcaption[^>]*>The farmers<\/figcaption>/)
+  })
+
+  it('has no caption when the record has none', () => {
+    expect(render(draft('plate-ahimsa'))).not.toContain('<figcaption')
+  })
+})
+
+describe('shipped', () => {
+  const unapproved = draft('plate-ahimsa')
+
+  it('leaves out an unapproved picture while the draftArt flag is off', () => {
+    const ids = createArt([...ART, unapproved], flagsOff())
+      .shipped()
+      .map(({ id }) => id)
+    expect(ids).not.toContain('plate-ahimsa')
+    expect(ids).toHaveLength(22)
+  })
+
+  it('includes an unapproved picture while the draftArt flag is on', () => {
+    const ids = createArt([...ART, unapproved], flagsOn())
+      .shipped()
+      .map(({ id }) => id)
+    expect(ids).toContain('plate-ahimsa')
+  })
+
+  it('includes an approved picture whichever the flag, in registry order', () => {
+    const records = [...ART, draft('plate-ahimsa', { approved: true })]
+    for (const flags of [flagsOn(), flagsOff()]) {
+      expect(
+        createArt(records, flags)
+          .shipped()
+          .map(({ id }) => id),
+      ).toEqual(records.map(({ id }) => id))
+    }
+  })
+})
+
+describe('originLine', () => {
+  afterEach(() => {
+    vi.unstubAllEnvs()
+  })
+
+  it('says the client’s own pictures came from the Care4Mind website', () => {
+    const origin: ArtOrigin = { kind: 'care4mind', wpId: 511, oldPath: '/wp-content/uploads/x.png' }
+    expect(originLine(origin)).toBe('From the Care4Mind website')
+  })
+
+  it('names the tool and the month of a generated picture', () => {
+    const origin: ArtOrigin = {
+      kind: 'generated',
+      tool: 'Recraft',
+      model: 'V4.1',
+      prompt: 'A brief',
+      made: '2026-11-03',
+    }
+    expect(originLine(origin)).toBe('Made with Recraft from the Care4Mind style, November 2026')
+  })
+
+  it('reads the month in UTC, so the build’s timezone cannot move it', async () => {
+    const made = '2026-11-01T00:00:00Z'
+    // Before the module loads, because its formatter takes the timezone when it is made.
+    vi.stubEnv('TZ', 'America/Los_Angeles')
+    vi.resetModules()
+    const { originLine: inLosAngeles } = await import('@/art/origin')
+    expect(new Date(made).getMonth(), 'the local month is October').toBe(9)
+    expect(
+      inLosAngeles({ kind: 'generated', tool: 'Recraft', model: 'V4.1', prompt: 'A brief', made }),
+    ).toBe('Made with Recraft from the Care4Mind style, November 2026')
+  })
+
+  it('gives a licensed picture its credit line', () => {
+    const origin: ArtOrigin = {
+      kind: 'licensed',
+      credit: 'Photograph by A. Person',
+      source: 'https://example.org/a',
+    }
+    expect(originLine(origin)).toBe('Photograph by A. Person')
   })
 })
 

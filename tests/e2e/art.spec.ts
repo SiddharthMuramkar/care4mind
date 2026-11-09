@@ -2,7 +2,9 @@ import type { Page } from '@playwright/test'
 
 import { artFor } from '@/art'
 import { heroPlates } from '@/art/assign'
+import { originLine } from '@/art/origin'
 import { ART } from '@/art/registry'
+import type { ArtRecord } from '@/art/types'
 import { works } from '@/content'
 
 import { expectNoAxeViolations } from './axe'
@@ -15,6 +17,9 @@ const HERO = '[data-hero-plate]'
 /** The pictures the shared check looks at. */
 const PICTURES = 'main img, footer img'
 
+/** Every picture these tests' build shows: its draftArt flag is on, so drafts count too. */
+const RECORDS: readonly ArtRecord[] = ART
+
 /** The pages the shared check visits. A page joins the list when `main` gets its first picture. */
 const PAGES: { path: string; name: string; status?: number }[] = [
   // Add a page in path order, not at the end.
@@ -22,6 +27,7 @@ const PAGES: { path: string; name: string; status?: number }[] = [
   { path: '/concepts/', name: 'Concepts page' },
   { path: '/concepts/map/', name: 'Concept map' },
   { path: '/concepts/vikshepa/', name: 'Vikṣepa Concept page' },
+  { path: '/credits/', name: 'credits gallery' },
   { path: '/library/', name: 'Library' },
   { path: '/library/courses/', name: 'Courses page' },
   { path: '/library/inspirational-books/', name: 'Inspirational Books page' },
@@ -1151,6 +1157,85 @@ test.describe('the hero Plate', () => {
       }
     },
   )
+})
+
+test.describe('the credits gallery', () => {
+  /** Words that say where a picture came from, which belong only on the plain list of sources. */
+  const WHERE_FROM = /licen[cs]e|origin|source|credit|care4mind website|recraft/i
+
+  test('shows every picture, each with the record’s alt', async ({ page }) => {
+    await gotoReady(page, '/credits/')
+    const main = page.locator('main')
+    await expect(main.locator('figure')).toHaveCount(RECORDS.length)
+    const alts = await main
+      .locator('figure img')
+      .evaluateAll((images) => images.map((image) => image.getAttribute('alt')))
+    expect(alts.sort()).toEqual(RECORDS.map(({ alt }) => alt).sort())
+  })
+
+  test('captions only the pictures that have a caption, in the record’s words', async ({
+    page,
+  }) => {
+    await gotoReady(page, '/credits/')
+    const captions = await page.locator('main figcaption').allInnerTexts()
+    expect(captions.sort()).toEqual(RECORDS.flatMap(({ caption }) => caption ?? []).sort())
+  })
+
+  test('says nothing about where a picture came from beside it', async ({ page }) => {
+    await gotoReady(page, '/credits/')
+    const main = page.locator('main')
+    // The title says "credits" and the last link says where the pictures come from, so the
+    // sections and figures take the full list, and the whole of main the words those two lack.
+    for (const text of await main.locator('section, figure').allInnerTexts()) {
+      expect(text).not.toMatch(WHERE_FROM)
+    }
+    await expect(main).not.toContainText(
+      /licen[cs]e|origin|care4mind website|recraft|reuse confirmation/i,
+    )
+  })
+
+  test('ends with its one link, to the plain list of sources', async ({ page }) => {
+    await gotoReady(page, '/credits/')
+    const last = page.locator('main').getByRole('link').last()
+    await expect(last).toHaveText('Where these pictures come from')
+    await expect(last).toHaveAttribute('href', '/credits/sources/')
+  })
+
+  test('its link is at least 44 px tall', async ({ page }) => {
+    await gotoReady(page, '/credits/')
+    const box = await page.locator('main').getByRole('link').last().boundingBox()
+    expect(box?.height ?? 0).toBeGreaterThanOrEqual(44)
+  })
+
+  test('passes axe', async ({ page }) => {
+    await gotoReady(page, '/credits/')
+    await expectNoAxeViolations(page)
+  })
+})
+
+test.describe('the plain list of sources', () => {
+  test('gives every picture’s origin and licence, and shows no picture', async ({ page }) => {
+    await gotoReady(page, '/credits/sources/')
+    const main = page.locator('main')
+    await expect(main.getByRole('heading', { level: 1 })).toHaveText(
+      'Where these pictures come from',
+    )
+    const entries = await main.locator('ul > li').allInnerTexts()
+    expect(entries).toHaveLength(RECORDS.length)
+    RECORDS.forEach((record, index) => {
+      expect(entries[index], record.id).toContain(originLine(record.origin))
+      expect(entries[index], record.id).toContain(record.licence)
+    })
+    await expect(main.locator('img')).toHaveCount(0)
+    // A Plate goes by its caption and a Sticker, which has none, by its alt text.
+    await expect(main).toContainText('The jeweller')
+    await expect(main).toContainText('Interlocking gears inside a patterned mandala')
+  })
+
+  test('passes axe', async ({ page }) => {
+    await gotoReady(page, '/credits/sources/')
+    await expectNoAxeViolations(page)
+  })
 })
 
 // The check itself, on pages made here, so that a broken check cannot pass unnoticed.
