@@ -86,6 +86,17 @@ test('a section page keeps its Sticker', async ({ page }) => {
   await expect(page.getByRole('heading', { level: 1 })).toBeVisible()
 })
 
+test('a Concept page keeps its picture', async ({ page }) => {
+  await gotoReady(page, hrefFor({ kind: 'concept', id: 'vikshepa' }))
+  const picture = page.getByRole('main').locator('header img')
+  await expect(picture).toBeVisible()
+  await expect(picture).toHaveAttribute('alt', '')
+  await expect
+    .poll(() => picture.evaluate((image: HTMLImageElement) => image.naturalWidth))
+    .toBeGreaterThan(0)
+  await expect(page.getByRole('heading', { level: 1 })).toBeVisible()
+})
+
 test('a secondary call to action keeps its edge', async ({ page }) => {
   await gotoReady(page, FLOW)
   await expectVisibleEdge(

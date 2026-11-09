@@ -13,16 +13,20 @@ import { MedallionRing } from './MedallionRing'
  * inline `--topic`, never a second `data-topic` (a Concept card's chip must stay the only one).
  * Its width is inline, so a page sets a narrower one with `max-width` in `className`; the ring and
  * the picture fill the box, whose width and aspect-ratio hold it steady as the picture loads.
+ * Where that narrowing crosses the ring's 96 px line, `phoneSize` names the phone width, and below
+ * 40rem the ring drawn for that size shows instead.
  */
 export function Medallion({
   art,
   size,
+  phoneSize,
   topic,
   decorative = true,
   className,
 }: {
   art: Pick<ArtRecord, 'src' | 'alt'>
   size: number
+  phoneSize?: number
   topic?: string
   decorative?: boolean
   className?: string
@@ -40,7 +44,14 @@ export function Medallion({
         height={size}
         alt={decorative ? '' : art.alt}
       />
-      <MedallionRing size={size} />
+      {phoneSize === undefined ? (
+        <MedallionRing size={size} />
+      ) : (
+        <>
+          <MedallionRing size={size} className={styles.wideRing} />
+          <MedallionRing size={phoneSize} className={styles.phoneRing} />
+        </>
+      )}
     </span>
   )
 }

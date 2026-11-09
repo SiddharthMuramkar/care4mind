@@ -1,3 +1,17 @@
+/* Its picture, above the name. A phone shows it smaller, and with no extra room below. */
+@media (width >= 40rem) {
+  .picture {
+    margin-block-end: 1rem;
+  }
+}
+
+@media (width < 40rem) {
+  .picture {
+    max-width: 5.5rem;
+    height: auto;
+  }
+}
+
 /* Its gloss, a subtitle at reading size under the name. */
 .gloss {
   margin: 0;

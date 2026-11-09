@@ -15,6 +15,7 @@ const PAGES: { path: string; name: string }[] = [
   { path: '/', name: 'homepage' },
   { path: '/concepts/', name: 'Concepts page' },
   { path: '/concepts/map/', name: 'Concept map' },
+  { path: '/concepts/vikshepa/', name: 'Vikṣepa Concept page' },
   { path: '/library/', name: 'Library' },
   { path: '/library/courses/', name: 'Courses page' },
   { path: '/library/inspirational-books/', name: 'Inspirational Books page' },
@@ -460,6 +461,126 @@ test.describe('topic cards', () => {
     await expect(index.getByRole('listitem').first()).toBeVisible()
     await expect(index.locator('img')).toHaveCount(0)
   })
+})
+
+/**
+ * The picture at the head of a Concept page until the Concept has its own Plate: its topic's
+ * Sticker, or the Interim picture of a topic whose Sticker is not made yet.
+ */
+const CONCEPT_HEADS = [
+  { path: '/concepts/vikshepa/', file: 'mind-swirl' },
+  { path: '/concepts/atman/', file: 'cosmos' },
+  { path: '/concepts/ahimsa/', file: 'book-ornate' },
+  { path: '/concepts/triguna/', file: 'gear' },
+] as const
+
+test.describe('Concept cards side by side', () => {
+  const LIST = '#featured ul'
+
+  /** Marks the first `count` cards as having a Plate, which no Concept has yet. */
+  const markPlates = (page: Page, count: number) =>
+    page.locator(`${LIST} > li > article`).evaluateAll((all, count) => {
+      all.slice(0, count).forEach((card) => card.setAttribute('data-plate', ''))
+    }, count)
+
+  test(
+    'a card with a Plate takes its own row while a neighbour is bare',
+    { tag: '@from-1440' },
+    async ({ page }) => {
+      await gotoReady(page, '/')
+      const items = page.locator(`${LIST} > li`)
+      await markPlates(page, 1)
+      const [first, second, whole] = await Promise.all([
+        items.nth(0).boundingBox(),
+        items.nth(1).boundingBox(),
+        page.locator(LIST).boundingBox(),
+      ])
+      if (!first || !second || !whole) throw new Error('The list has its cards.')
+      expect(Math.abs(first.width - whole.width)).toBeLessThan(1)
+      expect(second.y).toBeGreaterThanOrEqual(first.y + first.height)
+    },
+  )
+
+  test('cards stay side by side once all have a Plate', { tag: '@from-1440' }, async ({ page }) => {
+    await gotoReady(page, '/')
+    const items = page.locator(`${LIST} > li`)
+    await markPlates(page, await items.count())
+    const [first, second] = await Promise.all([
+      items.nth(0).boundingBox(),
+      items.nth(1).boundingBox(),
+    ])
+    if (!first || !second) throw new Error('The list has its cards.')
+    expect(second.x).toBeGreaterThan(first.x)
+    expect(second.y).toBe(first.y)
+  })
+})
+
+test.describe('Concept pages', () => {
+  for (const { path, file } of CONCEPT_HEADS) {
+    test(`${path} shows the ${file} picture, decorative, centred above its title`, async ({
+      page,
+    }) => {
+      await gotoReady(page, path)
+      const picture = headSticker(page)
+      await expect(picture).toHaveCount(1)
+      await expect(picture).toHaveAttribute('alt', '')
+      expect(decodeURIComponent((await picture.getAttribute('src')) ?? '')).toContain(
+        `/art/stickers/${file}.png`,
+      )
+      const [box, heading] = await Promise.all([
+        picture.boundingBox(),
+        page.getByRole('heading', { level: 1 }).boundingBox(),
+      ])
+      if (!box || !heading) throw new Error('The title page has its parts.')
+      expect(box.y + box.height).toBeLessThanOrEqual(heading.y)
+      expect(Math.abs(box.x + box.width / 2 - (heading.x + heading.width / 2))).toBeLessThan(1.5)
+    })
+  }
+
+  test('the picture is 120 px, 88 on a phone, and lists two files', async ({ page }) => {
+    await gotoReady(page, '/concepts/vikshepa/')
+    const picture = headSticker(page)
+    await expect(picture).toHaveAttribute('width', '120')
+    await expect(picture).not.toHaveAttribute('sizes')
+    const files = ((await picture.getAttribute('srcset')) ?? '').split(', ')
+    expect(files).toHaveLength(2)
+    expect(files[0]).toMatch(/&w=120&.* 1x$/)
+    expect(files[1]).toMatch(/&w=240&.* 2x$/)
+    await expect
+      .poll(() => picture.evaluate((image: HTMLImageElement) => image.naturalWidth))
+      .toBeGreaterThan(0)
+    const box = await picture.boundingBox()
+    const expected = (page.viewportSize()?.width ?? 0) < 640 ? 88 : 120
+    expect(box?.width).toBe(expected)
+    expect(box?.height).toBe(expected)
+  })
+})
+
+/** The pages that list Concept cards. */
+const CONCEPT_CARD_PAGES = ['/', '/start/', '/topics/mind/'] as const
+
+test.describe('Concept cards', () => {
+  for (const path of CONCEPT_CARD_PAGES) {
+    test(`on ${path} none shows an Interim picture, and a bare card keeps no empty row`, async ({
+      page,
+    }) => {
+      await gotoReady(page, path)
+      // Only a Concept card or a Folio is paper; the Folio is the one with the page's heading.
+      const cards = page.getByRole('main').locator('article[data-paper]:not(:has(h1))')
+      expect(await cards.count(), 'Concept cards on the page').toBeGreaterThan(0)
+      await expect(cards.locator('img[src*="stickers"]')).toHaveCount(0)
+      for (const card of await cards.all()) {
+        if ((await card.locator('img').count()) > 0) continue
+        const [box, title] = await Promise.all([
+          card.boundingBox(),
+          card.getByRole('heading', { level: 3 }).boundingBox(),
+        ])
+        if (!box || !title) throw new Error('A card has its title.')
+        // The smallest picture and its gap would push the title down by at least 72 px.
+        expect(title.y - box.y, 'a bare card opens on its title').toBeLessThan(64)
+      }
+    })
+  }
 })
 
 // The check itself, on pages made here, so that a broken check cannot pass unnoticed.

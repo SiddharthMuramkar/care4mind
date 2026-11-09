@@ -185,6 +185,11 @@
   grid-template-columns: repeat(auto-fill, minmax(min(100%, 26rem), 1fr));
 }
 
+/* A card with a Plate has an extra row, so beside a bare card it takes a row of its own. */
+.cards:has(article:not([data-plate])) > li:has(article[data-plate]) {
+  grid-column: 1 / -1;
+}
+
 .closingSection {
   display: grid;
   gap: 1.5rem;
