@@ -529,3 +529,87 @@ describe('artFor and ownArt from @/art', () => {
     expect(() => artFor({ kind: 'concept', slug: 'x', topic: 'nonesuch' })).toThrow('nonesuch')
   })
 })
+
+interface Prompts {
+  rule: string
+  avoid: string
+  pictures: Record<string, { template: string; brief: string; prompt: string }>
+}
+
+describe('the prompts file', () => {
+  const { avoid, pictures, rule } = JSON.parse(
+    readFileSync(join(process.cwd(), 'art/prompts.json'), 'utf8'),
+  ) as Prompts
+
+  /** What a brief never asks for: the Traditional texts' titles, deities, and the spec's asides. */
+  const UNASKED =
+    /(?<!\p{L})(?:bhagavad|gita|gītā|dhammapada|sadhana|sādhana|panchakam|pañcakam|sushruta|suśruta|samhita|saṃhitā|vedanta|vedānta|yoga[ -]s[uū]tra|deity|deities|gods?|goddess(?:es)?|shiva|vishnu|krishna|rama|ganesha|hanuman|lakshmi|saraswati|durga|kali|buddha|brahma|client|flickr|atman|brahman|guna|guṇa)(?!\p{L})/iu
+
+  /** How each template in the spec begins. */
+  const OPENINGS: Record<string, string> = {
+    sticker: 'Die-cut sticker illustration of ',
+    pothi: 'Die-cut sticker of a palm-leaf manuscript bundle (pothi), ',
+    plate: 'Square Indian folk painting of ',
+  }
+
+  it('has a prompt for every slot and a slot for every prompt', () => {
+    expect(Object.keys(pictures).sort()).toEqual(SLOTS.map((slot) => slot.id).sort())
+  })
+
+  it.each(Object.entries(pictures))(
+    'fills in the brief of %s and closes on Avoid',
+    (_id, picture) => {
+      expect(picture.prompt).not.toMatch(/[{}]|\[Then/)
+      expect(picture.prompt).toContain(picture.brief)
+      expect(picture.prompt.endsWith(` ${avoid}`)).toBe(true)
+    },
+  )
+
+  it.each(Object.entries(pictures))('opens %s with the words of its template', (_id, picture) => {
+    expect(picture.prompt.startsWith(OPENINGS[picture.template] ?? 'no such template')).toBe(true)
+  })
+
+  it.each(SLOTS.map((slot) => [slot.id, slot.family] as const))(
+    'files %s under the template its slot needs',
+    (id, family) => {
+      const expected = id.startsWith('pothi-') ? 'pothi' : family
+      expect(pictures[id]?.template).toBe(expected)
+    },
+  )
+
+  it('asks for people in every Plate but the one with nobody in it', () => {
+    const peopled = Object.entries(pictures).filter(
+      ([, picture]) => picture.template === 'plate' && picture.prompt.includes('Indian people'),
+    )
+    expect(peopled.map(([id]) => id).sort()).toEqual(
+      SLOTS.filter((slot) => slot.family === 'plate' && slot.id !== 'plate-chittabhumi')
+        .map((slot) => slot.id)
+        .sort(),
+    )
+  })
+
+  it.each(Object.entries(pictures).filter(([, picture]) => picture.template === 'pothi'))(
+    'writes out the Sticker style in %s',
+    (_id, picture) => {
+      expect(picture.prompt).toContain('Bold, even, near-black outlines')
+      expect(picture.prompt).toContain('No text, letters, numbers, logos or watermark.')
+    },
+  )
+
+  it.each(Object.entries(pictures))('names no title, deity or note in %s', (_id, picture) => {
+    expect(picture.prompt).not.toMatch(UNASKED)
+  })
+
+  it.each(Object.keys(pictures).filter((id) => id.startsWith('plate-')))(
+    'does not name the Concept in %s',
+    (id) => {
+      const name = id.replace('plate-', '').replaceAll('-', '[ -]')
+      expect(pictures[id]?.prompt).not.toMatch(new RegExp(`(?<!\\p{L})${name}(?!\\p{L})`, 'iu'))
+    },
+  )
+
+  it('keeps the rule that the rights question comes before any image tool', () => {
+    expect(rule).toMatch(/no client picture/i)
+    expect(rule).toMatch(/rights question/i)
+  })
+})
