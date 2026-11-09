@@ -5,8 +5,9 @@
  * Sources: the saved copies of the current site (its pages and posts as the WordPress REST
  * API listed them, kept apart from this repo) for the pages below, and the sitemap list
  * FR-07 cites for the archives. The sitemap's two author archives are named here only as
- * the pattern the redirect table matches, so no username is ever written down. Its media
- * addresses and the posts' `?p=` shortlinks are read from the same saved copies.
+ * the pattern the redirect table matches, so no username is ever written down. The posts'
+ * `?p=` shortlinks are read from the same saved copies. The media addresses are WordPress's
+ * media list (art/old-media-addresses.json) plus the Elementor thumbnails those copies show.
  *
  * This file is data, not a table of where anything goes: the redirect table declares each
  * moved page's new home, and the tests hold every address here to the route registry.
@@ -76,168 +77,1009 @@ export function feedOf(address: string): string {
 /** An uploaded file's address, with the pages that showed it, in this inventory's order. */
 export interface OldMedia {
   address: string
+  /** The WordPress id of the uploaded file this address is, or is a size of. */
+  wpId: number
   shownOn: readonly string[]
 }
 
 /**
- * The 52 addresses under /wp-content/uploads/ that the pages and posts showed, sizes and
- * thumbnails included. They are 12 of the 71 uploaded files FR-07 counts: the saved copies hold
- * no media library, so the rest are not known here.
+ * Every uploaded file, all 71, at each address the old site served it from, sizes included: the
+ * 273 addresses in WordPress's media list, and the 9 Elementor thumbnails its pages showed that
+ * the list leaves out, 282 in all. `shownOn` is empty for a file no page showed.
  */
 export const oldMedia: readonly OldMedia[] = [
   {
     address: '/wp-content/uploads/2023/09/Karma-Yoga-1024x705.png',
+    wpId: 38,
     shownOn: ['/', '/home/', '/home-2/'],
   },
+  { address: '/wp-content/uploads/2023/09/Karma-Yoga-150x150.png', wpId: 38, shownOn: [] },
   {
     address: '/wp-content/uploads/2023/09/Karma-Yoga-300x207.png',
+    wpId: 38,
     shownOn: ['/', '/home/', '/home-2/'],
   },
   {
     address: '/wp-content/uploads/2023/09/Karma-Yoga-768x529.png',
+    wpId: 38,
     shownOn: ['/', '/home/', '/home-2/'],
   },
-  { address: '/wp-content/uploads/2023/09/Karma-Yoga.png', shownOn: ['/', '/home/', '/home-2/'] },
-  { address: '/wp-content/uploads/2023/09/Triguna-Scale-150x150.png', shownOn: ['/home/'] },
-  { address: '/wp-content/uploads/2023/09/Triguna-Scale-300x300.png', shownOn: ['/home/'] },
-  { address: '/wp-content/uploads/2023/09/Triguna-Scale.png', shownOn: ['/home/'] },
   {
-    address: '/wp-content/uploads/2023/09/elementor/thumbs/Triguna-Scale-150x150.png',
+    address: '/wp-content/uploads/2023/09/Karma-Yoga.png',
+    wpId: 38,
+    shownOn: ['/', '/home/', '/home-2/'],
+  },
+  {
+    address: '/wp-content/uploads/2023/09/Logo-with-frame-4-and-text-removebg-preview-150x150.png',
+    wpId: 624,
+    shownOn: [],
+  },
+  {
+    address: '/wp-content/uploads/2023/09/Logo-with-frame-4-and-text-removebg-preview-300x300.png',
+    wpId: 624,
+    shownOn: [],
+  },
+  {
+    address: '/wp-content/uploads/2023/09/Logo-with-frame-4-and-text-removebg-preview.png',
+    wpId: 624,
+    shownOn: [],
+  },
+  {
+    address: '/wp-content/uploads/2023/09/Triguna-Scale-150x150.png',
+    wpId: 37,
     shownOn: ['/home/'],
   },
-  { address: '/wp-content/uploads/2023/11/atman-and-brahman-300x207.jpg', shownOn: ['/home-2/'] },
-  { address: '/wp-content/uploads/2023/11/atman-and-brahman.jpg', shownOn: ['/home-2/'] },
+  {
+    address: '/wp-content/uploads/2023/09/Triguna-Scale-300x300.png',
+    wpId: 37,
+    shownOn: ['/home/'],
+  },
+  { address: '/wp-content/uploads/2023/09/Triguna-Scale.png', wpId: 37, shownOn: ['/home/'] },
+  {
+    address: '/wp-content/uploads/2023/09/WhatsApp-Image-2023-08-03-at-3.13.15-PM-1024x1024.png',
+    wpId: 9,
+    shownOn: [],
+  },
+  {
+    address: '/wp-content/uploads/2023/09/WhatsApp-Image-2023-08-03-at-3.13.15-PM-150x150.png',
+    wpId: 9,
+    shownOn: [],
+  },
+  {
+    address: '/wp-content/uploads/2023/09/WhatsApp-Image-2023-08-03-at-3.13.15-PM-300x300.png',
+    wpId: 9,
+    shownOn: [],
+  },
+  {
+    address: '/wp-content/uploads/2023/09/WhatsApp-Image-2023-08-03-at-3.13.15-PM-768x768.png',
+    wpId: 9,
+    shownOn: [],
+  },
+  {
+    address: '/wp-content/uploads/2023/09/WhatsApp-Image-2023-08-03-at-3.13.15-PM.png',
+    wpId: 9,
+    shownOn: [],
+  },
+  {
+    address: '/wp-content/uploads/2023/09/WhatsApp-Image-2023-08-03-at-3.50.07-PM-2-1024x683.jpeg',
+    wpId: 35,
+    shownOn: [],
+  },
+  {
+    address: '/wp-content/uploads/2023/09/WhatsApp-Image-2023-08-03-at-3.50.07-PM-2-150x150.jpeg',
+    wpId: 35,
+    shownOn: [],
+  },
+  {
+    address: '/wp-content/uploads/2023/09/WhatsApp-Image-2023-08-03-at-3.50.07-PM-2-300x200.jpeg',
+    wpId: 35,
+    shownOn: [],
+  },
+  {
+    address: '/wp-content/uploads/2023/09/WhatsApp-Image-2023-08-03-at-3.50.07-PM-2-768x512.jpeg',
+    wpId: 35,
+    shownOn: [],
+  },
+  {
+    address: '/wp-content/uploads/2023/09/WhatsApp-Image-2023-08-03-at-3.50.07-PM-2.jpeg',
+    wpId: 35,
+    shownOn: [],
+  },
+  {
+    address:
+      '/wp-content/uploads/2023/09/cropped-Logo-with-frame-4-and-text-removebg-preview-e1742128192520-150x150.webp',
+    wpId: 643,
+    shownOn: [],
+  },
+  {
+    address:
+      '/wp-content/uploads/2023/09/cropped-Logo-with-frame-4-and-text-removebg-preview-e1742128192520-161x153.webp',
+    wpId: 643,
+    shownOn: [],
+  },
+  {
+    address:
+      '/wp-content/uploads/2023/09/cropped-Logo-with-frame-4-and-text-removebg-preview-e1742128192520-300x286.webp',
+    wpId: 643,
+    shownOn: [],
+  },
+  {
+    address:
+      '/wp-content/uploads/2023/09/cropped-Logo-with-frame-4-and-text-removebg-preview-e1742128192520.webp',
+    wpId: 643,
+    shownOn: [],
+  },
+  {
+    address: '/wp-content/uploads/2023/09/elementor/thumbs/Triguna-Scale-150x150.png',
+    wpId: 37,
+    shownOn: ['/home/'],
+  },
+  {
+    address:
+      '/wp-content/uploads/2023/09/elementor/thumbs/WhatsApp-Image-2023-08-03-at-3.13.15-PM-150x150.png',
+    wpId: 9,
+    shownOn: [],
+  },
+  { address: '/wp-content/uploads/2023/10/001-growth-150x150.png', wpId: 200, shownOn: [] },
+  { address: '/wp-content/uploads/2023/10/001-growth-300x300.png', wpId: 200, shownOn: [] },
+  { address: '/wp-content/uploads/2023/10/001-growth.png', wpId: 200, shownOn: [] },
+  { address: '/wp-content/uploads/2023/10/002-emotions-150x150.png', wpId: 201, shownOn: [] },
+  { address: '/wp-content/uploads/2023/10/002-emotions-300x300.png', wpId: 201, shownOn: [] },
+  { address: '/wp-content/uploads/2023/10/002-emotions.png', wpId: 201, shownOn: [] },
+  { address: '/wp-content/uploads/2023/10/003-sensory-150x150.png', wpId: 202, shownOn: [] },
+  { address: '/wp-content/uploads/2023/10/003-sensory-300x300.png', wpId: 202, shownOn: [] },
+  { address: '/wp-content/uploads/2023/10/003-sensory.png', wpId: 202, shownOn: [] },
+  { address: '/wp-content/uploads/2023/10/004-group-therapy-150x150.png', wpId: 203, shownOn: [] },
+  { address: '/wp-content/uploads/2023/10/004-group-therapy-300x300.png', wpId: 203, shownOn: [] },
+  { address: '/wp-content/uploads/2023/10/004-group-therapy.png', wpId: 203, shownOn: [] },
+  { address: '/wp-content/uploads/2023/10/005-mental-health-150x150.png', wpId: 204, shownOn: [] },
+  { address: '/wp-content/uploads/2023/10/005-mental-health-300x300.png', wpId: 204, shownOn: [] },
+  { address: '/wp-content/uploads/2023/10/005-mental-health.png', wpId: 204, shownOn: [] },
+  { address: '/wp-content/uploads/2023/10/006-unlock-150x150.png', wpId: 205, shownOn: [] },
+  { address: '/wp-content/uploads/2023/10/006-unlock-300x300.png', wpId: 205, shownOn: [] },
+  { address: '/wp-content/uploads/2023/10/006-unlock.png', wpId: 205, shownOn: [] },
+  { address: '/wp-content/uploads/2023/10/008-psychology-150x150.png', wpId: 207, shownOn: [] },
+  { address: '/wp-content/uploads/2023/10/008-psychology-300x300.png', wpId: 207, shownOn: [] },
+  { address: '/wp-content/uploads/2023/10/008-psychology.png', wpId: 207, shownOn: [] },
+  { address: '/wp-content/uploads/2023/10/009-psychology-1-150x150.png', wpId: 208, shownOn: [] },
+  { address: '/wp-content/uploads/2023/10/009-psychology-1-300x300.png', wpId: 208, shownOn: [] },
+  { address: '/wp-content/uploads/2023/10/009-psychology-1.png', wpId: 208, shownOn: [] },
+  { address: '/wp-content/uploads/2023/10/SamarkanNormal-Gg5D.ttf', wpId: 220, shownOn: [] },
+  { address: '/wp-content/uploads/2023/10/SamarkanOblique-BXew.ttf', wpId: 221, shownOn: [] },
+  { address: '/wp-content/uploads/2023/10/Shobhika-Regular.otf', wpId: 217, shownOn: [] },
+  { address: '/wp-content/uploads/2023/10/image-1-150x150.png', wpId: 245, shownOn: [] },
+  { address: '/wp-content/uploads/2023/10/image-1-300x300.png', wpId: 245, shownOn: [] },
+  { address: '/wp-content/uploads/2023/10/image-1.png', wpId: 245, shownOn: [] },
+  { address: '/wp-content/uploads/2023/10/logo-150x150.png', wpId: 241, shownOn: [] },
+  { address: '/wp-content/uploads/2023/10/logo.png', wpId: 241, shownOn: [] },
+  {
+    address: '/wp-content/uploads/2023/11/52688095545_b9fa332de6_c-150x150.jpg',
+    wpId: 276,
+    shownOn: [],
+  },
+  {
+    address: '/wp-content/uploads/2023/11/52688095545_b9fa332de6_c-280x300.jpg',
+    wpId: 276,
+    shownOn: [],
+  },
+  { address: '/wp-content/uploads/2023/11/52688095545_b9fa332de6_c.jpg', wpId: 276, shownOn: [] },
+  {
+    address: '/wp-content/uploads/2023/11/53233668647_b2f50e07b4_c-150x150.jpg',
+    wpId: 275,
+    shownOn: [],
+  },
+  {
+    address: '/wp-content/uploads/2023/11/53233668647_b2f50e07b4_c-300x292.jpg',
+    wpId: 275,
+    shownOn: [],
+  },
+  {
+    address: '/wp-content/uploads/2023/11/53233668647_b2f50e07b4_c-768x748.jpg',
+    wpId: 275,
+    shownOn: [],
+  },
+  { address: '/wp-content/uploads/2023/11/53233668647_b2f50e07b4_c.jpg', wpId: 275, shownOn: [] },
+  {
+    address: '/wp-content/uploads/2023/11/Spiritua_Seeking_7214-1024x439.jpg',
+    wpId: 271,
+    shownOn: [],
+  },
+  {
+    address: '/wp-content/uploads/2023/11/Spiritua_Seeking_7214-150x150.jpg',
+    wpId: 271,
+    shownOn: [],
+  },
+  {
+    address: '/wp-content/uploads/2023/11/Spiritua_Seeking_7214-300x129.jpg',
+    wpId: 271,
+    shownOn: [],
+  },
+  {
+    address: '/wp-content/uploads/2023/11/Spiritua_Seeking_7214-768x329.jpg',
+    wpId: 271,
+    shownOn: [],
+  },
+  { address: '/wp-content/uploads/2023/11/Spiritua_Seeking_7214.jpg', wpId: 271, shownOn: [] },
+  { address: '/wp-content/uploads/2023/11/atman-and-brahman-150x150.jpg', wpId: 324, shownOn: [] },
+  {
+    address: '/wp-content/uploads/2023/11/atman-and-brahman-300x207.jpg',
+    wpId: 324,
+    shownOn: ['/home-2/'],
+  },
+  {
+    address: '/wp-content/uploads/2023/11/atman-and-brahman.jpg',
+    wpId: 324,
+    shownOn: ['/home-2/'],
+  },
+  {
+    address:
+      '/wp-content/uploads/2023/11/brahma-madurai-meenakshi-amman-temple-1576032-1024x821.jpg',
+    wpId: 371,
+    shownOn: [],
+  },
+  {
+    address:
+      '/wp-content/uploads/2023/11/brahma-madurai-meenakshi-amman-temple-1576032-150x150.jpg',
+    wpId: 371,
+    shownOn: [],
+  },
+  {
+    address:
+      '/wp-content/uploads/2023/11/brahma-madurai-meenakshi-amman-temple-1576032-300x240.jpg',
+    wpId: 371,
+    shownOn: [],
+  },
+  {
+    address:
+      '/wp-content/uploads/2023/11/brahma-madurai-meenakshi-amman-temple-1576032-768x616.jpg',
+    wpId: 371,
+    shownOn: [],
+  },
+  {
+    address: '/wp-content/uploads/2023/11/brahma-madurai-meenakshi-amman-temple-1576032.jpg',
+    wpId: 371,
+    shownOn: [],
+  },
+  {
+    address: '/wp-content/uploads/2023/11/elementor/thumbs/52688095545_b9fa332de6_c-150x150.jpg',
+    wpId: 276,
+    shownOn: [],
+  },
+  {
+    address: '/wp-content/uploads/2023/11/elementor/thumbs/atman-and-brahman-150x150.jpg',
+    wpId: 324,
+    shownOn: [],
+  },
+  {
+    address:
+      '/wp-content/uploads/2023/11/indian-jeweler-hunched-over-intricate-workspace-crafting-exquisite-ornaments-emeralds-glinting-un-1-150x150.png',
+    wpId: 398,
+    shownOn: [],
+  },
+  {
+    address:
+      '/wp-content/uploads/2023/11/indian-jeweler-hunched-over-intricate-workspace-crafting-exquisite-ornaments-emeralds-glinting-un-1-300x300.png',
+    wpId: 398,
+    shownOn: [],
+  },
+  {
+    address:
+      '/wp-content/uploads/2023/11/indian-jeweler-hunched-over-intricate-workspace-crafting-exquisite-ornaments-emeralds-glinting-un-1-768x768.png',
+    wpId: 398,
+    shownOn: [],
+  },
+  {
+    address:
+      '/wp-content/uploads/2023/11/indian-jeweler-hunched-over-intricate-workspace-crafting-exquisite-ornaments-emeralds-glinting-un-1.png',
+    wpId: 398,
+    shownOn: [],
+  },
+  {
+    address: '/wp-content/uploads/2023/11/physical-symptoms-1024x1024.jpg',
+    wpId: 312,
+    shownOn: [],
+  },
+  { address: '/wp-content/uploads/2023/11/physical-symptoms-150x150.jpg', wpId: 312, shownOn: [] },
+  {
+    address: '/wp-content/uploads/2023/11/physical-symptoms-1536x1536.jpg',
+    wpId: 312,
+    shownOn: [],
+  },
+  { address: '/wp-content/uploads/2023/11/physical-symptoms-300x300.jpg', wpId: 312, shownOn: [] },
+  { address: '/wp-content/uploads/2023/11/physical-symptoms-768x768.jpg', wpId: 312, shownOn: [] },
+  { address: '/wp-content/uploads/2023/11/physical-symptoms.jpg', wpId: 312, shownOn: [] },
+  {
+    address: '/wp-content/uploads/2023/11/rustic-raw-gold-ore-649489767-150x150.png',
+    wpId: 385,
+    shownOn: [],
+  },
+  {
+    address: '/wp-content/uploads/2023/11/rustic-raw-gold-ore-649489767-300x300.png',
+    wpId: 385,
+    shownOn: [],
+  },
+  {
+    address: '/wp-content/uploads/2023/11/rustic-raw-gold-ore-649489767-768x768.png',
+    wpId: 385,
+    shownOn: [],
+  },
+  {
+    address: '/wp-content/uploads/2023/11/rustic-raw-gold-ore-649489767.png',
+    wpId: 385,
+    shownOn: [],
+  },
+  {
+    address: '/wp-content/uploads/2023/11/rustic-raw-impure-gold-ore-487328361-150x150.png',
+    wpId: 384,
+    shownOn: [],
+  },
+  {
+    address: '/wp-content/uploads/2023/11/rustic-raw-impure-gold-ore-487328361-300x300.png',
+    wpId: 384,
+    shownOn: [],
+  },
+  {
+    address: '/wp-content/uploads/2023/11/rustic-raw-impure-gold-ore-487328361-768x768.png',
+    wpId: 384,
+    shownOn: [],
+  },
+  {
+    address: '/wp-content/uploads/2023/11/rustic-raw-impure-gold-ore-487328361.png',
+    wpId: 384,
+    shownOn: [],
+  },
+  {
+    address: '/wp-content/uploads/2023/11/shutterstock_1561867960.jpg-150x150.webp',
+    wpId: 272,
+    shownOn: [],
+  },
+  {
+    address: '/wp-content/uploads/2023/11/shutterstock_1561867960.jpg-300x158.webp',
+    wpId: 272,
+    shownOn: [],
+  },
+  {
+    address: '/wp-content/uploads/2023/11/shutterstock_1561867960.jpg.webp',
+    wpId: 272,
+    shownOn: [],
+  },
+  {
+    address:
+      '/wp-content/uploads/2023/11/south-indian-sculptor-in-veshti-cross-legged-engaged-intensely-in-carving-a-rock-2-150x150.png',
+    wpId: 415,
+    shownOn: [],
+  },
+  {
+    address:
+      '/wp-content/uploads/2023/11/south-indian-sculptor-in-veshti-cross-legged-engaged-intensely-in-carving-a-rock-2-300x300.png',
+    wpId: 415,
+    shownOn: [],
+  },
+  {
+    address:
+      '/wp-content/uploads/2023/11/south-indian-sculptor-in-veshti-cross-legged-engaged-intensely-in-carving-a-rock-2-768x768.png',
+    wpId: 415,
+    shownOn: [],
+  },
+  {
+    address:
+      '/wp-content/uploads/2023/11/south-indian-sculptor-in-veshti-cross-legged-engaged-intensely-in-carving-a-rock-2.png',
+    wpId: 415,
+    shownOn: [],
+  },
+  {
+    address:
+      '/wp-content/uploads/2023/11/transformation-of-gold-ore-into-lustrous-ornaments-in-the-background-of-serene-meditative-whitish-382111856-150x150.png',
+    wpId: 383,
+    shownOn: [],
+  },
+  {
+    address:
+      '/wp-content/uploads/2023/11/transformation-of-gold-ore-into-lustrous-ornaments-in-the-background-of-serene-meditative-whitish-382111856-300x300.png',
+    wpId: 383,
+    shownOn: [],
+  },
+  {
+    address:
+      '/wp-content/uploads/2023/11/transformation-of-gold-ore-into-lustrous-ornaments-in-the-background-of-serene-meditative-whitish-382111856-768x768.png',
+    wpId: 383,
+    shownOn: [],
+  },
+  {
+    address:
+      '/wp-content/uploads/2023/11/transformation-of-gold-ore-into-lustrous-ornaments-in-the-background-of-serene-meditative-whitish-382111856.png',
+    wpId: 383,
+    shownOn: [],
+  },
+  {
+    address: '/wp-content/uploads/2023/11/wepik-20231128112742aCcw-1024x576.png',
+    wpId: 405,
+    shownOn: [],
+  },
+  {
+    address: '/wp-content/uploads/2023/11/wepik-20231128112742aCcw-150x150.png',
+    wpId: 405,
+    shownOn: [],
+  },
+  {
+    address: '/wp-content/uploads/2023/11/wepik-20231128112742aCcw-1536x864.png',
+    wpId: 405,
+    shownOn: [],
+  },
+  {
+    address: '/wp-content/uploads/2023/11/wepik-20231128112742aCcw-300x169.png',
+    wpId: 405,
+    shownOn: [],
+  },
+  {
+    address: '/wp-content/uploads/2023/11/wepik-20231128112742aCcw-768x432.png',
+    wpId: 405,
+    shownOn: [],
+  },
+  { address: '/wp-content/uploads/2023/11/wepik-20231128112742aCcw.png', wpId: 405, shownOn: [] },
+  {
+    address: '/wp-content/uploads/2023/11/wepik-20231128113137reiF-1024x576.png',
+    wpId: 406,
+    shownOn: [],
+  },
+  {
+    address: '/wp-content/uploads/2023/11/wepik-20231128113137reiF-150x150.png',
+    wpId: 406,
+    shownOn: [],
+  },
+  {
+    address: '/wp-content/uploads/2023/11/wepik-20231128113137reiF-1536x864.png',
+    wpId: 406,
+    shownOn: [],
+  },
+  {
+    address: '/wp-content/uploads/2023/11/wepik-20231128113137reiF-300x169.png',
+    wpId: 406,
+    shownOn: [],
+  },
+  {
+    address: '/wp-content/uploads/2023/11/wepik-20231128113137reiF-768x432.png',
+    wpId: 406,
+    shownOn: [],
+  },
+  { address: '/wp-content/uploads/2023/11/wepik-20231128113137reiF.png', wpId: 406, shownOn: [] },
+  { address: '/wp-content/uploads/2024/05/Book-icon-2-150x150.png', wpId: 513, shownOn: [] },
   {
     address: '/wp-content/uploads/2024/05/Book-icon-2-218x300.png',
+    wpId: 513,
     shownOn: ['/', '/home/', '/home-2/'],
   },
-  { address: '/wp-content/uploads/2024/05/Book-icon-2.png', shownOn: ['/', '/home/', '/home-2/'] },
+  {
+    address: '/wp-content/uploads/2024/05/Book-icon-2.png',
+    wpId: 513,
+    shownOn: ['/', '/home/', '/home-2/'],
+  },
   {
     address: '/wp-content/uploads/2024/05/Cosmos-icon-150x150.png',
+    wpId: 511,
     shownOn: ['/', '/home/', '/home-2/'],
   },
   {
     address: '/wp-content/uploads/2024/05/Cosmos-icon-300x300.png',
+    wpId: 511,
     shownOn: ['/', '/home/', '/home-2/'],
   },
   {
     address: '/wp-content/uploads/2024/05/Cosmos-icon-768x768.png',
+    wpId: 511,
     shownOn: ['/', '/home/', '/home-2/'],
   },
-  { address: '/wp-content/uploads/2024/05/Cosmos-icon.png', shownOn: ['/', '/home/', '/home-2/'] },
+  {
+    address: '/wp-content/uploads/2024/05/Cosmos-icon.png',
+    wpId: 511,
+    shownOn: ['/', '/home/', '/home-2/'],
+  },
   {
     address: '/wp-content/uploads/2024/05/Gear-Icon-150x150.png',
+    wpId: 508,
     shownOn: ['/', '/home/', '/home-2/'],
   },
   {
     address: '/wp-content/uploads/2024/05/Gear-Icon-300x297.png',
+    wpId: 508,
     shownOn: ['/', '/home/', '/home-2/'],
   },
   {
     address: '/wp-content/uploads/2024/05/Gear-Icon-768x761.png',
+    wpId: 508,
     shownOn: ['/', '/home/', '/home-2/'],
   },
-  { address: '/wp-content/uploads/2024/05/Gear-Icon.png', shownOn: ['/', '/home/', '/home-2/'] },
-  { address: '/wp-content/uploads/2024/05/Karmayoga-Main-image-150x150.jpeg', shownOn: ['/home/'] },
-  { address: '/wp-content/uploads/2024/05/Karmayoga-Main-image-300x300.jpeg', shownOn: ['/home/'] },
-  { address: '/wp-content/uploads/2024/05/Karmayoga-Main-image-768x768.jpeg', shownOn: ['/home/'] },
-  { address: '/wp-content/uploads/2024/05/Karmayoga-Main-image.jpeg', shownOn: ['/home/'] },
+  {
+    address: '/wp-content/uploads/2024/05/Gear-Icon.png',
+    wpId: 508,
+    shownOn: ['/', '/home/', '/home-2/'],
+  },
+  { address: '/wp-content/uploads/2024/05/Indian-Farmer-150x150.jpeg', wpId: 468, shownOn: [] },
+  { address: '/wp-content/uploads/2024/05/Indian-Farmer-300x300.jpeg', wpId: 468, shownOn: [] },
+  { address: '/wp-content/uploads/2024/05/Indian-Farmer-768x768.jpeg', wpId: 468, shownOn: [] },
+  { address: '/wp-content/uploads/2024/05/Indian-Farmer.jpeg', wpId: 468, shownOn: [] },
+  {
+    address: '/wp-content/uploads/2024/05/Intricate-painting-1-150x150.jpeg',
+    wpId: 461,
+    shownOn: [],
+  },
+  {
+    address: '/wp-content/uploads/2024/05/Intricate-painting-1-300x300.jpeg',
+    wpId: 461,
+    shownOn: [],
+  },
+  {
+    address: '/wp-content/uploads/2024/05/Intricate-painting-1-768x768.jpeg',
+    wpId: 461,
+    shownOn: [],
+  },
+  { address: '/wp-content/uploads/2024/05/Intricate-painting-1.jpeg', wpId: 461, shownOn: [] },
+  {
+    address: '/wp-content/uploads/2024/05/Intricate-painting-2-150x150.jpeg',
+    wpId: 462,
+    shownOn: [],
+  },
+  {
+    address: '/wp-content/uploads/2024/05/Intricate-painting-2-300x300.jpeg',
+    wpId: 462,
+    shownOn: [],
+  },
+  {
+    address: '/wp-content/uploads/2024/05/Intricate-painting-2-768x768.jpeg',
+    wpId: 462,
+    shownOn: [],
+  },
+  { address: '/wp-content/uploads/2024/05/Intricate-painting-2.jpeg', wpId: 462, shownOn: [] },
+  { address: '/wp-content/uploads/2024/05/Jewellry-making-1-150x150.jpeg', wpId: 463, shownOn: [] },
+  { address: '/wp-content/uploads/2024/05/Jewellry-making-1-300x300.jpeg', wpId: 463, shownOn: [] },
+  { address: '/wp-content/uploads/2024/05/Jewellry-making-1-768x768.jpeg', wpId: 463, shownOn: [] },
+  { address: '/wp-content/uploads/2024/05/Jewellry-making-1.jpeg', wpId: 463, shownOn: [] },
+  { address: '/wp-content/uploads/2024/05/Jewellry-making-2-150x150.jpeg', wpId: 464, shownOn: [] },
+  { address: '/wp-content/uploads/2024/05/Jewellry-making-2-300x300.jpeg', wpId: 464, shownOn: [] },
+  { address: '/wp-content/uploads/2024/05/Jewellry-making-2-768x768.jpeg', wpId: 464, shownOn: [] },
+  { address: '/wp-content/uploads/2024/05/Jewellry-making-2.jpeg', wpId: 464, shownOn: [] },
+  {
+    address: '/wp-content/uploads/2024/05/Karmayoga-Main-image-150x150.jpeg',
+    wpId: 497,
+    shownOn: ['/home/'],
+  },
+  {
+    address: '/wp-content/uploads/2024/05/Karmayoga-Main-image-300x300.jpeg',
+    wpId: 497,
+    shownOn: ['/home/'],
+  },
+  {
+    address: '/wp-content/uploads/2024/05/Karmayoga-Main-image-768x768.jpeg',
+    wpId: 497,
+    shownOn: ['/home/'],
+  },
+  {
+    address: '/wp-content/uploads/2024/05/Karmayoga-Main-image.jpeg',
+    wpId: 497,
+    shownOn: ['/home/'],
+  },
+  {
+    address: '/wp-content/uploads/2024/05/Logo-final-e1715691828178-150x150.png',
+    wpId: 498,
+    shownOn: [],
+  },
+  {
+    address: '/wp-content/uploads/2024/05/Logo-final-e1715691828178-300x274.png',
+    wpId: 498,
+    shownOn: [],
+  },
+  {
+    address: '/wp-content/uploads/2024/05/Logo-final-e1715691828178-768x701.png',
+    wpId: 498,
+    shownOn: [],
+  },
+  { address: '/wp-content/uploads/2024/05/Logo-final-e1715691828178.png', wpId: 498, shownOn: [] },
+  {
+    address: '/wp-content/uploads/2024/05/Logo-with-frame-2-final-150x150.png',
+    wpId: 589,
+    shownOn: [],
+  },
+  {
+    address: '/wp-content/uploads/2024/05/Logo-with-frame-2-final-300x300.png',
+    wpId: 589,
+    shownOn: [],
+  },
+  {
+    address: '/wp-content/uploads/2024/05/Logo-with-frame-2-final-768x768.png',
+    wpId: 589,
+    shownOn: [],
+  },
+  { address: '/wp-content/uploads/2024/05/Logo-with-frame-2-final.png', wpId: 589, shownOn: [] },
+  { address: '/wp-content/uploads/2024/05/Logo-with-frame-3-768x768.png', wpId: 595, shownOn: [] },
+  {
+    address: '/wp-content/uploads/2024/05/Logo-with-frame-3-e1715785860721-1-150x150.png',
+    wpId: 597,
+    shownOn: [],
+  },
+  {
+    address: '/wp-content/uploads/2024/05/Logo-with-frame-3-e1715785860721-1-300x292.png',
+    wpId: 597,
+    shownOn: [],
+  },
+  {
+    address: '/wp-content/uploads/2024/05/Logo-with-frame-3-e1715785860721-1.png',
+    wpId: 597,
+    shownOn: [],
+  },
+  {
+    address: '/wp-content/uploads/2024/05/Logo-with-frame-3-e1715785860721-150x150.png',
+    wpId: 595,
+    shownOn: [],
+  },
+  {
+    address: '/wp-content/uploads/2024/05/Logo-with-frame-3-e1715785860721-300x292.png',
+    wpId: 595,
+    shownOn: [],
+  },
+  {
+    address: '/wp-content/uploads/2024/05/Logo-with-frame-3-e1715785860721.png',
+    wpId: 595,
+    shownOn: [],
+  },
+  {
+    address: '/wp-content/uploads/2024/05/Logo-with-frame-4-and-text-150x150.png',
+    wpId: 604,
+    shownOn: [],
+  },
+  {
+    address: '/wp-content/uploads/2024/05/Logo-with-frame-4-and-text-300x300.png',
+    wpId: 604,
+    shownOn: [],
+  },
+  {
+    address: '/wp-content/uploads/2024/05/Logo-with-frame-4-and-text-768x768.png',
+    wpId: 604,
+    shownOn: [],
+  },
+  { address: '/wp-content/uploads/2024/05/Logo-with-frame-4-and-text.png', wpId: 604, shownOn: [] },
+  {
+    address: '/wp-content/uploads/2024/05/Madhubani-dot-line-border-e1715423049444-1-150x43.png',
+    wpId: 490,
+    shownOn: [],
+  },
+  {
+    address: '/wp-content/uploads/2024/05/Madhubani-dot-line-border-e1715423049444-1-300x16.png',
+    wpId: 490,
+    shownOn: [],
+  },
+  {
+    address: '/wp-content/uploads/2024/05/Madhubani-dot-line-border-e1715423049444-1-768x41.png',
+    wpId: 490,
+    shownOn: [],
+  },
+  {
+    address: '/wp-content/uploads/2024/05/Madhubani-dot-line-border-e1715423049444-1.png',
+    wpId: 490,
+    shownOn: [],
+  },
+  {
+    address: '/wp-content/uploads/2024/05/Madhubani-dot-line-border-e1715423049444-2-1024x19.png',
+    wpId: 495,
+    shownOn: [],
+  },
+  {
+    address: '/wp-content/uploads/2024/05/Madhubani-dot-line-border-e1715423049444-2-150x21.png',
+    wpId: 495,
+    shownOn: [],
+  },
+  {
+    address: '/wp-content/uploads/2024/05/Madhubani-dot-line-border-e1715423049444-2-300x6.png',
+    wpId: 495,
+    shownOn: [],
+  },
+  {
+    address: '/wp-content/uploads/2024/05/Madhubani-dot-line-border-e1715423049444-2-768x15.png',
+    wpId: 495,
+    shownOn: [],
+  },
+  {
+    address: '/wp-content/uploads/2024/05/Madhubani-dot-line-border-e1715423049444-2.png',
+    wpId: 495,
+    shownOn: [],
+  },
+  { address: '/wp-content/uploads/2024/05/Meditation-icon-150x150.png', wpId: 512, shownOn: [] },
+  { address: '/wp-content/uploads/2024/05/Meditation-icon-291x300.png', wpId: 512, shownOn: [] },
+  { address: '/wp-content/uploads/2024/05/Meditation-icon-768x791.png', wpId: 512, shownOn: [] },
+  { address: '/wp-content/uploads/2024/05/Meditation-icon.png', wpId: 512, shownOn: [] },
+  { address: '/wp-content/uploads/2024/05/Mind-2-150x150.jpeg', wpId: 457, shownOn: [] },
+  { address: '/wp-content/uploads/2024/05/Mind-2-300x300.jpeg', wpId: 457, shownOn: [] },
+  { address: '/wp-content/uploads/2024/05/Mind-2-768x768.jpeg', wpId: 457, shownOn: [] },
+  { address: '/wp-content/uploads/2024/05/Mind-2.jpeg', wpId: 457, shownOn: [] },
+  {
+    address: '/wp-content/uploads/2024/05/Psychology-Techniques-icon-150x150.png',
+    wpId: 509,
+    shownOn: [],
+  },
+  {
+    address: '/wp-content/uploads/2024/05/Psychology-Techniques-icon-2-150x150.png',
+    wpId: 510,
+    shownOn: [],
+  },
+  {
+    address: '/wp-content/uploads/2024/05/Psychology-Techniques-icon-2-296x300.png',
+    wpId: 510,
+    shownOn: [],
+  },
+  {
+    address: '/wp-content/uploads/2024/05/Psychology-Techniques-icon-2-768x778.png',
+    wpId: 510,
+    shownOn: [],
+  },
+  {
+    address: '/wp-content/uploads/2024/05/Psychology-Techniques-icon-2.png',
+    wpId: 510,
+    shownOn: [],
+  },
+  {
+    address: '/wp-content/uploads/2024/05/Psychology-Techniques-icon-300x259.png',
+    wpId: 509,
+    shownOn: [],
+  },
   {
     address: '/wp-content/uploads/2024/05/Psychology-Techniques-icon-4-150x150.png',
+    wpId: 514,
     shownOn: ['/', '/home-2/'],
   },
   {
     address: '/wp-content/uploads/2024/05/Psychology-Techniques-icon-4-300x278.png',
+    wpId: 514,
     shownOn: ['/home/'],
   },
   {
     address: '/wp-content/uploads/2024/05/Psychology-Techniques-icon-4-768x713.png',
+    wpId: 514,
     shownOn: ['/home/'],
   },
-  { address: '/wp-content/uploads/2024/05/Psychology-Techniques-icon-4.png', shownOn: ['/home/'] },
-  { address: '/wp-content/uploads/2024/05/Sculptor-3-150x150.jpeg', shownOn: ['/home/'] },
-  { address: '/wp-content/uploads/2024/05/Sculptor-3-300x300.jpeg', shownOn: ['/home/'] },
-  { address: '/wp-content/uploads/2024/05/Sculptor-3-768x768.jpeg', shownOn: ['/home/'] },
-  { address: '/wp-content/uploads/2024/05/Sculptor-3.jpeg', shownOn: ['/home/'] },
-  { address: '/wp-content/uploads/2024/05/Spiritual-Climate-150x150.jpeg', shownOn: ['/home/'] },
-  { address: '/wp-content/uploads/2024/05/Spiritual-Climate-300x300.jpeg', shownOn: ['/home/'] },
-  { address: '/wp-content/uploads/2024/05/Spiritual-Climate-768x768.jpeg', shownOn: ['/home/'] },
-  { address: '/wp-content/uploads/2024/05/Spiritual-Climate.jpeg', shownOn: ['/home/'] },
+  {
+    address: '/wp-content/uploads/2024/05/Psychology-Techniques-icon-4.png',
+    wpId: 514,
+    shownOn: ['/home/'],
+  },
+  {
+    address: '/wp-content/uploads/2024/05/Psychology-Techniques-icon-768x663.png',
+    wpId: 509,
+    shownOn: [],
+  },
+  { address: '/wp-content/uploads/2024/05/Psychology-Techniques-icon.png', wpId: 509, shownOn: [] },
+  {
+    address: '/wp-content/uploads/2024/05/Sculptor-3-150x150.jpeg',
+    wpId: 466,
+    shownOn: ['/home/'],
+  },
+  {
+    address: '/wp-content/uploads/2024/05/Sculptor-3-300x300.jpeg',
+    wpId: 466,
+    shownOn: ['/home/'],
+  },
+  {
+    address: '/wp-content/uploads/2024/05/Sculptor-3-768x768.jpeg',
+    wpId: 466,
+    shownOn: ['/home/'],
+  },
+  { address: '/wp-content/uploads/2024/05/Sculptor-3.jpeg', wpId: 466, shownOn: ['/home/'] },
+  {
+    address: '/wp-content/uploads/2024/05/Spiritual-Climate-150x150.jpeg',
+    wpId: 499,
+    shownOn: ['/home/'],
+  },
+  {
+    address: '/wp-content/uploads/2024/05/Spiritual-Climate-300x300.jpeg',
+    wpId: 499,
+    shownOn: ['/home/'],
+  },
+  {
+    address: '/wp-content/uploads/2024/05/Spiritual-Climate-768x768.jpeg',
+    wpId: 499,
+    shownOn: ['/home/'],
+  },
+  { address: '/wp-content/uploads/2024/05/Spiritual-Climate.jpeg', wpId: 499, shownOn: ['/home/'] },
+  { address: '/wp-content/uploads/2024/05/Survey-1-150x150.png', wpId: 515, shownOn: [] },
+  { address: '/wp-content/uploads/2024/05/Survey-1-240x300.png', wpId: 515, shownOn: [] },
   {
     address: '/wp-content/uploads/2024/05/Survey-1-e1715701729946.png',
+    wpId: 515,
     shownOn: ['/', '/home/', '/home-2/'],
   },
   {
+    address: '/wp-content/uploads/2024/05/Work-on-the-brain-1-150x150.jpeg',
+    wpId: 467,
+    shownOn: [],
+  },
+  {
+    address: '/wp-content/uploads/2024/05/Work-on-the-brain-1-300x300.jpeg',
+    wpId: 467,
+    shownOn: [],
+  },
+  {
+    address: '/wp-content/uploads/2024/05/Work-on-the-brain-1-768x768.jpeg',
+    wpId: 467,
+    shownOn: [],
+  },
+  { address: '/wp-content/uploads/2024/05/Work-on-the-brain-1.jpeg', wpId: 467, shownOn: [] },
+  { address: '/wp-content/uploads/2024/05/book-icon-1024x1024.png', wpId: 505, shownOn: [] },
+  { address: '/wp-content/uploads/2024/05/book-icon-150x150.png', wpId: 505, shownOn: [] },
+  { address: '/wp-content/uploads/2024/05/book-icon-300x300.png', wpId: 505, shownOn: [] },
+  { address: '/wp-content/uploads/2024/05/book-icon-768x768.png', wpId: 505, shownOn: [] },
+  { address: '/wp-content/uploads/2024/05/book-icon.png', wpId: 505, shownOn: [] },
+  { address: '/wp-content/uploads/2024/05/border-7a-150x150.png', wpId: 583, shownOn: [] },
+  { address: '/wp-content/uploads/2024/05/border-7a-2-1024x37.png', wpId: 585, shownOn: [] },
+  { address: '/wp-content/uploads/2024/05/border-7a-2-150x69.png', wpId: 585, shownOn: [] },
+  { address: '/wp-content/uploads/2024/05/border-7a-2-1536x56.png', wpId: 585, shownOn: [] },
+  { address: '/wp-content/uploads/2024/05/border-7a-2-300x11.png', wpId: 585, shownOn: [] },
+  { address: '/wp-content/uploads/2024/05/border-7a-2-768x28.png', wpId: 585, shownOn: [] },
+  { address: '/wp-content/uploads/2024/05/border-7a-2.png', wpId: 585, shownOn: [] },
+  { address: '/wp-content/uploads/2024/05/border-7a-300x300.png', wpId: 583, shownOn: [] },
+  { address: '/wp-content/uploads/2024/05/border-7a-768x768.png', wpId: 583, shownOn: [] },
+  { address: '/wp-content/uploads/2024/05/border-7a.png', wpId: 583, shownOn: [] },
+  {
+    address: '/wp-content/uploads/2024/05/elementor/thumbs/Intricate-painting-1-150x150.jpeg',
+    wpId: 461,
+    shownOn: [],
+  },
+  {
     address: '/wp-content/uploads/2024/05/elementor/thumbs/Karmayoga-Main-image-150x150.jpeg',
+    wpId: 497,
     shownOn: ['/home/'],
   },
   {
     address:
       '/wp-content/uploads/2024/05/elementor/thumbs/Karmayoga-Main-image-qo59eispz4twwxmn55tonqvlcp7uj1yr0lutq8vkaw.jpeg',
-    shownOn: ['/home/'],
-  },
-  {
-    address: '/wp-content/uploads/2024/05/elementor/thumbs/Spiritual-Climate-150x150.jpeg',
+    wpId: 497,
     shownOn: ['/home/'],
   },
   {
     address:
+      '/wp-content/uploads/2024/05/elementor/thumbs/Karmayoga-Main-image-qo59eisseudn7r9jau73towanoqpasftl81hz4s2a0.jpeg',
+    wpId: 497,
+    shownOn: [],
+  },
+  {
+    address: '/wp-content/uploads/2024/05/elementor/thumbs/Spiritual-Climate-150x150.jpeg',
+    wpId: 499,
+    shownOn: ['/home/'],
+  },
+  {
+    address: '/wp-content/uploads/2024/05/elementor/thumbs/Work-on-the-brain-1-150x150.jpeg',
+    wpId: 467,
+    shownOn: [],
+  },
+  {
+    address: '/wp-content/uploads/2024/05/elementor/thumbs/human-mind-and-sage-2-150x150.jpeg',
+    wpId: 460,
+    shownOn: [],
+  },
+  {
+    address: '/wp-content/uploads/2024/05/human-mind-and-sage-2-150x150.jpeg',
+    wpId: 460,
+    shownOn: [],
+  },
+  {
+    address: '/wp-content/uploads/2024/05/human-mind-and-sage-2-300x300.jpeg',
+    wpId: 460,
+    shownOn: [],
+  },
+  {
+    address: '/wp-content/uploads/2024/05/human-mind-and-sage-2-768x768.jpeg',
+    wpId: 460,
+    shownOn: [],
+  },
+  { address: '/wp-content/uploads/2024/05/human-mind-and-sage-2.jpeg', wpId: 460, shownOn: [] },
+  {
+    address: '/wp-content/uploads/2025/02/Logo-with-frame-4-and-text-removebg-preview-150x150.png',
+    wpId: 614,
+    shownOn: [],
+  },
+  {
+    address: '/wp-content/uploads/2025/02/Logo-with-frame-4-and-text-removebg-preview-300x300.png',
+    wpId: 614,
+    shownOn: [],
+  },
+  {
+    address: '/wp-content/uploads/2025/02/Logo-with-frame-4-and-text-removebg-preview.png',
+    wpId: 614,
+    shownOn: [],
+  },
+  { address: '/wp-content/uploads/2025/02/hiking-v1-150x150.jpg', wpId: 631, shownOn: [] },
+  { address: '/wp-content/uploads/2025/02/hiking-v1-300x187.jpg', wpId: 631, shownOn: [] },
+  { address: '/wp-content/uploads/2025/02/hiking-v1.jpg', wpId: 631, shownOn: [] },
+  { address: '/wp-content/uploads/2025/02/image-1-150x150.jpg', wpId: 634, shownOn: [] },
+  { address: '/wp-content/uploads/2025/02/image-1-295x300.jpg', wpId: 634, shownOn: [] },
+  { address: '/wp-content/uploads/2025/02/image-1.jpg', wpId: 634, shownOn: [] },
+  { address: '/wp-content/uploads/2025/02/outdoor-image-01-150x150.jpg', wpId: 633, shownOn: [] },
+  { address: '/wp-content/uploads/2025/02/outdoor-image-01-300x187.jpg', wpId: 633, shownOn: [] },
+  { address: '/wp-content/uploads/2025/02/outdoor-image-01.jpg', wpId: 633, shownOn: [] },
+  { address: '/wp-content/uploads/2025/02/outdoor-image-04-150x150.jpg', wpId: 636, shownOn: [] },
+  { address: '/wp-content/uploads/2025/02/outdoor-image-04-300x173.jpg', wpId: 636, shownOn: [] },
+  { address: '/wp-content/uploads/2025/02/outdoor-image-04.jpg', wpId: 636, shownOn: [] },
+  { address: '/wp-content/uploads/2025/02/quote-1-150x150.png', wpId: 630, shownOn: [] },
+  { address: '/wp-content/uploads/2025/02/quote-1.png', wpId: 630, shownOn: [] },
+  { address: '/wp-content/uploads/2025/02/snow-1-150x150.jpg', wpId: 635, shownOn: [] },
+  { address: '/wp-content/uploads/2025/02/snow-1-295x300.jpg', wpId: 635, shownOn: [] },
+  { address: '/wp-content/uploads/2025/02/snow-1.jpg', wpId: 635, shownOn: [] },
+  { address: '/wp-content/uploads/2025/02/walking-v1-150x150.jpg', wpId: 632, shownOn: [] },
+  { address: '/wp-content/uploads/2025/02/walking-v1-300x187.jpg', wpId: 632, shownOn: [] },
+  { address: '/wp-content/uploads/2025/02/walking-v1.jpg', wpId: 632, shownOn: [] },
+  {
+    address:
+      '/wp-content/uploads/2025/03/brahma-madurai-meenakshi-amman-temple-1576032-1024x821-1-150x150.jpg',
+    wpId: 734,
+    shownOn: [],
+  },
+  {
+    address:
       '/wp-content/uploads/2025/03/brahma-madurai-meenakshi-amman-temple-1576032-1024x821-1-300x241.jpg',
+    wpId: 734,
     shownOn: ['/concepts/'],
   },
   {
     address:
       '/wp-content/uploads/2025/03/brahma-madurai-meenakshi-amman-temple-1576032-1024x821-1-768x616.jpg',
+    wpId: 734,
     shownOn: ['/concepts/'],
   },
   {
     address:
       '/wp-content/uploads/2025/03/brahma-madurai-meenakshi-amman-temple-1576032-1024x821-1.jpg',
+    wpId: 734,
     shownOn: ['/concepts/'],
   },
   {
     address:
       '/wp-content/uploads/elementor/thumbs/52688095545_b9fa332de6_c-qepk82df3v1ko7kmqlxlp7eichst6sbb13p9q9eg0o.jpg',
+    wpId: 276,
     shownOn: ['/'],
   },
   {
     address:
       '/wp-content/uploads/elementor/thumbs/Indian-Farmer-qnpo5vd6t06qgw0f4390stijv9dc23wgsvbsngii6g.jpeg',
+    wpId: 468,
     shownOn: ['/', '/home-2/'],
   },
   {
     address:
       '/wp-content/uploads/elementor/thumbs/Jewellry-making-2-qnpn6ncwphyxex69sd5av7hqigz6mf2kaj9s96qlc8.jpeg',
+    wpId: 464,
     shownOn: ['/', '/home-2/'],
   },
   {
     address:
       '/wp-content/uploads/elementor/thumbs/Karmayoga-Main-image-qo59eit25oq90z7zaahdsjb7q3c54m3xujqj89nsm0.jpeg',
+    wpId: 497,
     shownOn: ['/', '/home-2/'],
   },
   {
     address:
       '/wp-content/uploads/elementor/thumbs/Sculptor-3-qnpnpjw25juiwlprejb70frglfsxfa4883lbpipk7c.jpeg',
+    wpId: 466,
     shownOn: ['/', '/home-2/'],
   },
   {
     address:
       '/wp-content/uploads/elementor/thumbs/WhatsApp-Image-2023-08-03-at-3.13.15-PM-qcoafukgqxnyv2l3pj6x632wqgmdxau37o1vcnv060.png',
+    wpId: 9,
     shownOn: ['/'],
   },
   {
     address:
       '/wp-content/uploads/elementor/thumbs/Work-on-the-brain-1-qnpo4hk2xc6vhlm4c4dhrgiqr8b6bpjvrymrptclnc.jpeg',
+    wpId: 467,
     shownOn: ['/', '/home-2/'],
   },
   {
     address:
       '/wp-content/uploads/elementor/thumbs/atman-and-brahman-qffrg0eg02682go1v94erjhb959nq529jfe1q2kza0.jpg',
+    wpId: 324,
     shownOn: ['/'],
   },
   {
     address:
       '/wp-content/uploads/elementor/thumbs/human-mind-and-sage-2-qnpn5u8906rdj1xxnn7kcpa2gx33ld02ogxfvmq108.jpeg',
+    wpId: 460,
     shownOn: ['/', '/home-2/'],
   },
 ]

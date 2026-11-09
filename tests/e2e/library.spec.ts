@@ -52,7 +52,7 @@ const VOLUMES = [
     holds: `${view.kind === 'page' ? view.sections.length : view.groups.flatMap((g) => g.items).length} ${UNITS[view.slug] ?? '?'}`,
   })),
 ]
-const LIBRARY_PAGES = [LIBRARY, ...VOLUMES.map(({ href }) => href)]
+const LIBRARY_PAGES = [LIBRARY].concat(VOLUMES.map(({ href }) => href))
 
 // A Reference's topics are those of the Concepts that cite it (and of a topic citing it itself).
 const conceptTopics = new Map(

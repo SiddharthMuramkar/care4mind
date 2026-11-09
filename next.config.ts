@@ -6,6 +6,8 @@ import { siteConfig } from './src/config/site'
 const nextConfig: NextConfig = {
   poweredByHeader: false,
   // Next generates typedRoutes without trailing slashes despite trailingSlash, so it cannot check slashed paths.
+  // Every redirect source joins the Route union, which tsc is unable to reduce any more: a Route in a
+  // ternary, or an array literal with a spread, fails with TS2590, so those are written another way.
   typedRoutes: true,
   // Every address ends with a slash, as the current site's do; the bare one redirects to it.
   trailingSlash: true,

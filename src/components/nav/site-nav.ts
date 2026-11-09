@@ -71,7 +71,7 @@ async function build(): Promise<SiteNav> {
         id: 'concepts',
         ...link('Concepts', hrefFor({ page: 'concepts' })),
         // A topic sits under Concepts, wherever its own address is.
-        within: [hrefFor({ page: 'concepts' }), ...topicLinks.map((topic) => topic.href)],
+        within: [hrefFor({ page: 'concepts' })].concat(topicLinks.map((topic) => topic.href)),
       },
       {
         id: 'texts',

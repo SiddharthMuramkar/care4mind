@@ -1,3 +1,6 @@
+import { readFileSync, statSync } from 'node:fs'
+import { join } from 'node:path'
+
 import { getPathMatch } from 'next/dist/shared/lib/router/utils/path-match'
 import { beforeAll, describe, expect, it } from 'vitest'
 
@@ -9,6 +12,8 @@ import {
   oldPagesAndPosts,
   oldShortlinks,
 } from '@/config/old-site-urls'
+import { ART } from '@/art/registry'
+import { artFileOf } from '@/config/old-media-art'
 import { redirects, type Redirect } from '@/config/redirects'
 import { hrefFor, site } from '@/content'
 import { CONTENT_KINDS, type ContentRecord, type RecordOf, localSource } from '@/content/testing'
@@ -69,6 +74,41 @@ const PAGES_AND_POSTS: Readonly<Record<string, string>> = {
 /** Where an old page now leads: its row's page, or itself when the new site keeps it. */
 const newPageOf = (old: string) => PAGES_AND_POSTS[old] ?? old
 
+/** The old Karma Yoga picture's home: an anchor hrefFor() never makes, so named exactly here. */
+const KARMA_CYCLE = '/questionnaires/karmayoga-scale/#karma-cycle'
+
+/** Whether an address is a real file under `public/`. `/` is that folder itself, so it isn't. */
+const isPublicFile = (address: string) =>
+  statSync(join(process.cwd(), 'public', address), { throwIfNoEntry: false })?.isFile() ?? false
+
+const readJson = (path: string) => JSON.parse(readFileSync(join(process.cwd(), path), 'utf8'))
+
+/** The WordPress media list saved beside the masters: every address, with its file's id. */
+const MEDIA_LIST = readJson('art/old-media-addresses.json') as {
+  address: string
+  wpId: number
+}[]
+
+/** All 71 uploaded files, with what the new site does with each. */
+const ORIGINALS = (
+  readJson('scripts/art/originals.json') as {
+    files: { wpId: number; verdict: string }[]
+  }
+).files
+
+/** The Elementor thumbnails the media list leaves out, by file name, with the file each was cut from. */
+const ELEMENTOR_THUMBNAILS: Readonly<Record<string, number>> = {
+  '52688095545_b9fa332de6_c': 276,
+  'Indian-Farmer': 468,
+  'Jewellry-making-2': 464,
+  'Karmayoga-Main-image': 497,
+  'Sculptor-3': 466,
+  'WhatsApp-Image-2023-08-03-at-3.13.15-PM': 9,
+  'Work-on-the-brain-1': 467,
+  'atman-and-brahman': 324,
+  'human-mind-and-sage-2': 460,
+}
+
 /** An old shortlink as a browser asks for it. */
 const shortlinkOf = (id: string) => `/?p=${id}`
 
@@ -97,12 +137,11 @@ function addressesOf(record: ContentRecord): string[] {
     case 'page':
       return [hrefFor({ kind: record.kind, id: record.slug })]
     case 'resource-list':
-      return [
-        hrefFor({ kind: 'resource-list', id: record.slug }),
-        ...record.groups.map(({ id }) =>
+      return [hrefFor({ kind: 'resource-list', id: record.slug })].concat(
+        record.groups.map(({ id }) =>
           hrefFor({ kind: 'resource-list', id: record.slug, anchor: id }),
         ),
-      ]
+      )
     case 'work':
       return [hrefFor({ kind: 'work', id: record.slug })]
     case 'passage':
@@ -239,22 +278,42 @@ describe('the checked-in inventory of the old site’s addresses (FR-07)', () =>
       const destination = sends(address)
       expect(typeof destination, `${address} is caught by exactly one row`).toBe('string')
       const [path = ''] = (destination as string).split('#')
-      expect(paths, `${address} → ${destination}`).toContain(path)
+      if (!isPublicFile(path)) expect(paths, `${address} → ${destination}`).toContain(path)
       expect(rowsCatching(path), `${address} → ${destination} is one hop`).toEqual([])
     }
   })
 })
 
+describe('the map of surviving pictures', () => {
+  const kept = ORIGINALS.filter(({ verdict }) => verdict === 'KEEP')
+
+  it('has an entry for every kept picture', () => {
+    expect(kept).toHaveLength(22)
+    for (const { wpId } of kept) expect(artFileOf[wpId], `wpId ${wpId}`).toBeDefined()
+  })
+
+  it('leads each entry, but the Karma Yoga picture, to a file in the art registry', () => {
+    const files = new Set<string>(ART.map(({ src }) => src))
+    for (const [wpId, file] of Object.entries(artFileOf)) {
+      if (Number(wpId) === 38) {
+        expect(file).toBe(KARMA_CYCLE)
+        continue
+      }
+      expect(files, `wpId ${wpId}`).toContain(file)
+      expect(isPublicFile(file), file).toBe(true)
+    }
+  })
+})
+
 describe('the old site’s media and shortlinks', () => {
-  it('names the 52 media addresses the saved copies show, each once, with the pages that showed it', () => {
-    expect(oldMedia).toHaveLength(52)
+  it('names all 282 media addresses, each once, with the pages that showed it', () => {
+    expect(oldMedia).toHaveLength(282)
     const addresses = oldMedia.map(({ address }) => address.toLowerCase())
     expect(new Set(addresses).size).toBe(addresses.length)
     for (const { address, shownOn } of oldMedia) {
       expect(address).toMatch(
-        /^\/wp-content\/uploads\/(?:[a-z0-9]+\/)+[A-Za-z0-9._-]+\.(?:png|jpe?g)$/,
+        /^\/wp-content\/uploads\/(?:[a-z0-9]+\/)+[A-Za-z0-9._-]+\.(?:png|jpe?g|webp|ttf|otf)$/,
       )
-      expect(shownOn.length, address).toBeGreaterThan(0)
       for (const page of shownOn) expect(oldPagesAndPosts, address).toContain(page)
       // Shown on several pages, it goes where the first of them in the inventory goes.
       const inInventoryOrder = [...shownOn].sort(
@@ -264,9 +323,70 @@ describe('the old site’s media and shortlinks', () => {
     }
   })
 
-  it('sends each media address where the first page that showed it now leads, by one row', () => {
-    for (const { address, shownOn } of oldMedia)
-      expect(sends(address), address).toBe(newPageOf(shownOn[0] ?? ''))
+  it('gives each address the WordPress id the media list names', () => {
+    const idOf = new Map(oldMedia.map(({ address, wpId }) => [address, wpId]))
+    for (const { address, wpId } of MEDIA_LIST) expect(idOf.get(address), address).toBe(wpId)
+    const known = new Set(ORIGINALS.map(({ wpId }) => wpId))
+    for (const { address, wpId } of oldMedia) expect(known, address).toContain(wpId)
+  })
+
+  it('keeps the 9 Elementor thumbnails beside the list, each matched by its file name', () => {
+    const listed = new Set(MEDIA_LIST.map(({ address }) => address))
+    const others = oldMedia.filter(({ address }) => !listed.has(address))
+    const idOf = Object.fromEntries(
+      others.map(({ address, wpId }) => [
+        address
+          .replace('/wp-content/uploads/elementor/thumbs/', '')
+          .replace(/-q[a-z0-9]+\.\w+$/, ''),
+        wpId,
+      ]),
+    )
+    expect(idOf).toEqual(ELEMENTOR_THUMBNAILS)
+  })
+
+  it('sends a picture that survives to its new file, whatever page showed it', () => {
+    const uploads = '/wp-content/uploads'
+    expect(sends(`${uploads}/2024/05/Jewellry-making-2.jpeg`)).toBe('/art/plates/jeweller.jpg')
+    expect(sends(`${uploads}/2024/05/Jewellry-making-2-300x300.jpeg`)).toBe(
+      '/art/plates/jeweller.jpg',
+    )
+    expect(
+      sends(
+        `${uploads}/elementor/thumbs/Jewellry-making-2-qnpn6ncwphyxex69sd5av7hqigz6mf2kaj9s96qlc8.jpeg`,
+      ),
+    ).toBe('/art/plates/jeweller.jpg')
+    expect(sends(`${uploads}/2024/05/Gear-Icon.png`)).toBe('/art/stickers/gear.png')
+  })
+
+  it('sends all three old copies of the Emblem, every size, to the Emblem', () => {
+    const copies = oldMedia.filter(({ wpId }) => [643, 624, 614].includes(wpId))
+    expect(copies).toHaveLength(10)
+    for (const { address } of copies)
+      expect(sends(address), address).toBe('/art/emblem/emblem-ring.png')
+  })
+
+  it('sends every size of the old Karma Yoga picture to the cycle on the KarmaYoga Scale page', () => {
+    const sizes = oldMedia.filter(({ address }) => address.includes('/Karma-Yoga'))
+    expect(sizes).toHaveLength(5)
+    for (const { address } of sizes) expect(sends(address), address).toBe(KARMA_CYCLE)
+  })
+
+  it('sends any other file to the page that showed it, or home when no page did', () => {
+    const uploads = '/wp-content/uploads'
+    expect(sends(`${uploads}/2023/11/atman-and-brahman.jpg`)).toBe(newPageOf('/home-2/'))
+    expect(
+      sends(`${uploads}/2025/03/brahma-madurai-meenakshi-amman-temple-1576032-1024x821-1.jpg`),
+    ).toBe('/concepts/')
+    const unshown = oldMedia.find(
+      ({ wpId, shownOn }) => artFileOf[wpId] === undefined && shownOn.length === 0,
+    )
+    expect(unshown).toBeDefined()
+    expect(sends(unshown?.address ?? '')).toBe('/')
+  })
+
+  it('sends each media address to its new file, else where the first page that showed it leads, by one row', () => {
+    for (const { address, wpId, shownOn } of oldMedia)
+      expect(sends(address), address).toBe(artFileOf[wpId] ?? newPageOf(shownOn[0] ?? '/'))
     // Capitals in a file name match as typed, and any other case too.
     const named = oldMedia.find(({ address }) => /[A-Z]/.test(address))?.address ?? ''
     expect(named).not.toBe('')
@@ -327,14 +447,22 @@ describe('the table (FR-07)', () => {
     expect(served).toEqual(redirects.map((row) => ({ ...row, statusCode: 301 })))
   })
 
-  it('sends every row to a route in the registry, or to an anchor hrefFor() makes on one', async () => {
+  it('sends every row to a route in the registry, an anchor hrefFor() makes on one, or a file in public', async () => {
     const paths = new Set<string>((await site.routes()).map(({ path }) => path))
     const anchors = new Set(records.flatMap(addressesOf).filter((address) => address.includes('#')))
     expect(anchors.size, 'anchors hrefFor() makes').toBeGreaterThan(100)
     for (const { destination } of redirects) {
+      if (isPublicFile(destination)) continue
       expect(paths, destination).toContain(destination.split('#')[0])
-      if (destination.includes('#')) expect(anchors, destination).toContain(destination)
+      if (destination.includes('#') && destination !== KARMA_CYCLE)
+        expect(anchors, destination).toContain(destination)
     }
+  })
+
+  it('holds 370 rows, 282 of them the old media addresses', () => {
+    expect(redirects).toHaveLength(370)
+    const sources = new Set(redirects.map(({ source }) => source))
+    for (const { address } of oldMedia) expect(sources, address).toContain(address)
   })
 
   it('never sends a row to an address the table moves, so each one is a single hop', () => {
