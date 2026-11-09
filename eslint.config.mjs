@@ -102,6 +102,26 @@ const graphBelowViews = {
   },
 }
 
+// The client error pages show the Emblem, so its records' file may bring in types and nothing
+// else: a value imported or re-exported from the art module would carry `server-only` with it.
+const emblemPlainData = {
+  files: ['src/art/emblem.ts'],
+  rules: {
+    'no-restricted-syntax': [
+      'error',
+      ...[
+        'ImportDeclaration[importKind!="type"]',
+        'ExportNamedDeclaration[source][exportKind!="type"]',
+        'ExportAllDeclaration[exportKind!="type"]',
+        'ImportExpression',
+      ].map((selector) => ({
+        selector,
+        message: 'The Emblem records are plain data for client pages: bring in types only.',
+      })),
+    ],
+  },
+}
+
 // Every internal link comes from hrefFor(), so an address changes in one place. A path typed
 // into an href fails, however it is written; a fragment
 // (#main), another site (https://, //) and a path a view or hrefFor() made pass.
@@ -307,6 +327,7 @@ export default defineConfig([
   ...tseslint.configs.strict.map((config) => ({ ...config, files: ['**/*.{ts,tsx}'] })),
   contentBoundary,
   graphBelowViews,
+  emblemPlainData,
   ...componentStructure,
   internalLinks,
   prettier,

@@ -11,6 +11,13 @@ const nextConfig: NextConfig = {
   trailingSlash: true,
   // Share cards read their fonts from disk at render time, which the file tracer cannot see.
   outputFileTracingIncludes: { '/**/opengraph-image*': ['./src/fonts/**/*.woff'] },
+  images: {
+    formats: ['image/avif', 'image/webp'],
+    // Files under /art/ never change in place, so a long cache is safe. Next.js 16's default is 4 hours.
+    minimumCacheTTL: 2_678_400, // 31 days
+    // The widths the pictures use, so each is transformed at only a few sizes. 720 is served by the 750 device size.
+    imageSizes: [64, 72, 112, 120, 128, 144, 160, 168, 200, 224, 240, 320, 336, 360, 400, 480],
+  },
   async headers() {
     if (siteConfig.indexable) return []
     return [

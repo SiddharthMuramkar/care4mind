@@ -63,6 +63,8 @@
   /* Decorative only, never behind or as text: */
   --color-ink-wash: var(--press-indigo-wash);
   --color-surface-rule: var(--press-rule);
+  --color-ring: var(--press-rule);
+  --color-sticker-shadow: color-mix(in srgb, var(--press-night) 18%, transparent);
   /* The hard shadow a raised button stands on: the accent's, and the ground-coloured button's. */
   --color-accent-shadow: var(--press-turmeric-deep);
   --color-ground-shadow: var(--press-night-deep);
