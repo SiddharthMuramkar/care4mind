@@ -8,7 +8,7 @@ const HERO = '[data-hero-plate]'
 /** The pictures the shared check looks at. */
 const PICTURES = 'main img, footer img'
 
-/** The pages the shared check visits. A page joins the list when it gets its first picture. */
+/** The pages the shared check visits. A page joins the list when `main` gets its first picture. */
 const PAGES: { path: string; name: string }[] = [
   // Add a page in path order, not at the end.
 ]
@@ -82,9 +82,12 @@ function picturesWithoutSpace(page: Page) {
   )
 }
 
-/** Fail a page with no picture, where the shared check would pass having looked at nothing. */
+/**
+ * Fail a page with no picture of its own, where the shared check would pass having looked at
+ * nothing. The footer does not count: its Emblem is on every page.
+ */
 async function expectSomePicture(page: Page) {
-  expect(await page.locator(PICTURES).count(), 'pictures on the page').toBeGreaterThan(0)
+  expect(await page.locator('main img').count(), 'pictures on the page').toBeGreaterThan(0)
 }
 
 /** The check every page with pictures passes. Call `watchLayoutShifts` before opening the page. */
@@ -109,6 +112,8 @@ for (const { path, name } of PAGES) {
   test(`on the ${name} at ${path}, every picture loads, keeps its width list short and shifts nothing`, async ({
     page,
   }) => {
+    // Late web fonts move the text as they arrive, so without them the sum measures only pictures.
+    await page.route(/\.woff2?($|\?)/, (route) => route.abort())
     await watchLayoutShifts(page)
     const response = await gotoReady(page, path)
     expect(response?.status(), 'the page exists').toBe(200)
@@ -145,6 +150,14 @@ test.describe('the shared check', { tag: '@one-width' }, () => {
 
   test('fails a page with no pictures', async ({ page }) => {
     await open(page, '<main><p>Only words here.</p></main>')
+    await expect(expectSomePicture(page)).rejects.toThrow(/pictures on the page/)
+  })
+
+  test('fails a page whose only picture is in the footer', async ({ page }) => {
+    await open(
+      page,
+      `<main><p>Only words here.</p></main><footer><img src="${PIXEL}" alt=""></footer>`,
+    )
     await expect(expectSomePicture(page)).rejects.toThrow(/pictures on the page/)
   })
 
