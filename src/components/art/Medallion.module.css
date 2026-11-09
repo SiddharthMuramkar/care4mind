@@ -1,0 +1,16 @@
+.medallion {
+  position: relative;
+  display: block;
+  aspect-ratio: 1;
+}
+
+/* Inset so the ring has its own band outside the picture. The pale paper shows until it loads. */
+.picture {
+  position: absolute;
+  inset: 5%;
+  width: 90%;
+  height: 90%;
+  border-radius: 50%;
+  object-fit: cover;
+  background: var(--color-surface-pale-18);
+}

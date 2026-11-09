@@ -12,6 +12,7 @@ const PICTURES = 'main img, footer img'
 /** The pages the shared check visits. A page joins the list when it gets its first picture. */
 const PAGES: { path: string; name: string }[] = [
   // Add a page in path order, not at the end.
+  { path: '/topics/mind/', name: 'mind topic page' },
 ]
 
 /** Start adding up the page's layout shifts. Call it before opening the page. */
