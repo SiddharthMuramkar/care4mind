@@ -1,3 +1,14 @@
+/* The topic's Plate, centred above the heading, with room before the words begin. */
+.frontispiece {
+  margin-block-end: 1rem;
+}
+
+@media (width < 40rem) {
+  .frontispiece {
+    max-width: 12.5rem;
+  }
+}
+
 .order {
   margin-inline-start: 0.35em;
   font-family: var(--font-deva);

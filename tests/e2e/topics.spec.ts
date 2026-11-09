@@ -3,6 +3,7 @@ import type { Locator, Page } from '@playwright/test'
 import { hrefFor, topics } from '@/content'
 
 import { expectNoAxeViolations } from './axe'
+import { undrawn } from './drawings'
 import { focusRingContrast } from './focus-ring'
 import { expect, gotoReady, scrollsSideways, test } from './fixtures'
 import { expectPageTurned, pageTurns, prefetched, recordPageTurns } from './page-turns'
@@ -160,6 +161,103 @@ test('under reduced motion a row lights at once, with nothing inking in', async 
   )
   expect(long, 'nothing runs longer than the reduced-motion 1 ms').toBe(0)
 })
+
+/** Each topic's Frontispiece, by its file: written out so a wrong assignment fails here. */
+const FRONTISPIECES = [
+  ['self', 'sage-lights-mind'],
+  ['mind', 'sage-paints-mind'],
+  ['practice', 'painter-bowl'],
+  ['values', 'tree-of-mind'],
+  ['temperament', 'farmers'],
+] as const
+
+const titlePage = (page: Page) => page.getByRole('main').locator('header')
+const frontispiece = (page: Page) => titlePage(page).locator('img')
+const medallion = (page: Page) => titlePage(page).locator('span:has(> img)')
+const ring = (page: Page) => titlePage(page).locator('span:has(> img) > svg')
+
+/** What a CSS colour resolves to, read through a probe set inside the title page. */
+const resolved = (page: Page, value: string, property: 'color' | 'backgroundColor') =>
+  titlePage(page).evaluate(
+    (header, [value, property]) => {
+      const probe = document.createElement('i')
+      probe.style[property as 'color'] = value as string
+      header.append(probe)
+      const colour = getComputedStyle(probe)[property as 'color']
+      probe.remove()
+      return colour
+    },
+    [value, property],
+  )
+
+for (const [slug, file] of FRONTISPIECES) {
+  test(`the ${slug} topic opens with its Frontispiece, decorative and in its colour`, async ({
+    page,
+  }) => {
+    await gotoReady(page, hrefFor({ kind: 'topic', id: slug }))
+    const picture = frontispiece(page)
+    await expect(picture).toHaveCount(1)
+    await expect(picture).toHaveAttribute('alt', '')
+    await expect(picture).toHaveAttribute('width', '240')
+    await expect(picture).toHaveAttribute('src', new RegExp(`${file}\\.jpg`))
+    expect((await picture.getAttribute('srcset'))?.split(', ')).toHaveLength(2)
+    await expect(ring(page)).toHaveCSS(
+      'color',
+      await resolved(page, `var(--color-topic-${slug})`, 'color'),
+    )
+    await expect(titlePage(page).locator('[data-topic]')).toHaveCount(0)
+  })
+}
+
+test('the Frontispiece stands centred above the heading, smaller on a phone', async ({ page }) => {
+  await gotoReady(page, hrefFor({ kind: 'topic', id: 'mind' }))
+  const box = await medallion(page).boundingBox()
+  const kicker = await titlePage(page).locator('p').first().boundingBox()
+  const heading = await page.getByRole('heading', { level: 1 }).boundingBox()
+  if (!box || !kicker || !heading) throw new Error('The title page has its parts.')
+  expect(box.y + box.height).toBeLessThanOrEqual(kicker.y)
+  expect(Math.abs(box.x + box.width / 2 - (heading.x + heading.width / 2))).toBeLessThanOrEqual(1)
+  const expected = (page.viewportSize()?.width ?? 1440) < 640 ? 200 : 240
+  expect(box.width).toBe(expected)
+  expect(box.height).toBe(expected)
+})
+
+test('while the Plate loads, its circle shows the pale paper colour', async ({ page }) => {
+  await page.route('**/_next/image**', (route) => route.abort())
+  await gotoReady(page, hrefFor({ kind: 'topic', id: 'mind' }))
+  await expect(frontispiece(page)).toHaveCSS(
+    'background-color',
+    await resolved(page, 'var(--color-surface-pale-18)', 'backgroundColor'),
+  )
+  await expect(frontispiece(page)).toHaveCSS('border-radius', '50%')
+})
+
+test('under reduced motion the ring is drawn, with nothing inking in', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  await gotoReady(page, hrefFor({ kind: 'topic', id: 'mind' }))
+  const paths = ring(page).locator('path')
+  expect(await paths.count()).toBeGreaterThan(0)
+  for (const path of await paths.all()) expect(await undrawn(path)).toBe(0)
+  expect(await ring(page).evaluate((svg) => svg.getAnimations({ subtree: true }).length)).toBe(0)
+})
+
+test(
+  'the ring inks in as it scrolls into view, and back as it scrolls out',
+  { tag: '@one-width' },
+  async ({ page }) => {
+    // On so short a screen the Frontispiece is still coming into view at the top of the page.
+    await page.setViewportSize({ width: 640, height: 360 })
+    await gotoReady(page, hrefFor({ kind: 'topic', id: 'mind' }))
+    const hairline = ring(page).locator('path[pathLength]').first()
+    const scrollTo = (top: number) =>
+      page.evaluate((top) => window.scrollTo({ top, behavior: 'instant' }), top)
+    await expect.poll(() => undrawn(hairline)).toBeGreaterThan(0)
+    await scrollTo(400)
+    await expect.poll(() => undrawn(hairline)).toBe(0)
+    await scrollTo(0)
+    await expect.poll(() => undrawn(hairline)).toBeGreaterThan(0)
+  },
+)
 
 test('the values topic shows its yama–niyama introduction; no other topic has one', async ({
   page,
