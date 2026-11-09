@@ -105,7 +105,7 @@ section { break-after: page; padding: 24px 32px }
 h2 { margin: 0; font-size: 22px }
 small { margin-left: 12px; font-size: 16px; font-weight: normal }
 p { margin: 4px 0 16px; max-width: 72ch }
-.ground { padding: 16px 28px; margin-bottom: 16px }
+.ground { padding: 16px 28px; margin-bottom: 16px; forced-color-adjust: none }
 .paper { background: ${colours.paper}; color: ${colours.ink} }
 .indigo { background: ${colours.indigo}; color: ${colours.paper} }
 .row { display: flex; gap: 16px }

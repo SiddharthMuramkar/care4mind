@@ -141,9 +141,15 @@ describe('the sheet page', () => {
     expect(count(sectionOf(html, 'sticker-self'), 'data-ground=')).toBe(2)
   })
 
+  it('keeps both grounds in forced colours, where the browser would paint them alike', () => {
+    expect(page()).toMatch(/\.ground \{[^}]*forced-color-adjust: none/)
+  })
+
   it('puts the circle on Plates only', () => {
     const html = page()
-    expect(sectionOf(html, 'plate-ahimsa')).toContain('mask')
+    const plate = sectionOf(html, 'plate-ahimsa')
+    expect(count(plate, 'class="picture mask"')).toBe(12)
+    expect(count(plate, 'class="empty mask"')).toBe(24)
     expect(sectionOf(html, 'sticker-self')).not.toContain('mask')
     expect(sectionOf(html, 'pothi-dhammapada')).not.toContain('mask')
   })
@@ -199,6 +205,29 @@ describe('the thumbnails', () => {
       rgb.forEach((level, channel) => {
         expect(Math.abs((data[channel] ?? 0) - level), ground).toBeLessThanOrEqual(2)
       })
+    }
+  })
+
+  it('shrink a large picture to the thumbnail size and never enlarge a small one', async () => {
+    const make = async (name: string, width: number, height: number) => {
+      const file = join(inbox, 'sticker-self', name)
+      mkdirSync(dirname(file), { recursive: true })
+      await sharp({ create: { width, height, channels: 3, background: '#808080' } })
+        .png()
+        .toFile(file)
+      return file
+    }
+    const planned = plan({
+      'sticker-self': { 2: await make('2.png', 960, 600), 3: await make('3.png', 300, 200) },
+    })
+
+    await sheet.writeThumbs(planned, COLOURS, inbox, resolve('.'))
+
+    const size = (number: number, ground: string) =>
+      sharp(join(inbox, `.thumbs/sticker-self/${String(number)}-${ground}.jpg`)).metadata()
+    for (const ground of ['paper', 'indigo']) {
+      expect(await size(2, ground), ground).toMatchObject({ width: 480, height: 300 })
+      expect(await size(3, ground), ground).toMatchObject({ width: 300, height: 200 })
     }
   })
 })
@@ -283,13 +312,25 @@ describe('the candidates in the inbox', () => {
 })
 
 describe('the Press colours', () => {
-  it('are read from the stylesheet', () => {
-    expect(sheet.readColours(readFileSync(resolve('src/styles/globals.css'), 'utf8'))).toEqual({
-      paper: '#eadbb6',
-      indigo: '#151a3d',
-      page: '#f6eedb',
-      ink: '#1d1a2e',
+  it('are read from the custom property behind each', () => {
+    const css = `:root {
+      --press-paper-fresh: #a1a1a1;
+      --press-paper-ink: #b2b2b2;
+      --press-indigo: #c3c3c3;
+      --press-paper: #d4d4d4;
+    }`
+    expect(sheet.readColours(css)).toEqual({
+      paper: '#d4d4d4',
+      indigo: '#c3c3c3',
+      page: '#a1a1a1',
+      ink: '#b2b2b2',
     })
+  })
+
+  it('are all in the site’s stylesheet', () => {
+    const colours = sheet.readColours(readFileSync(resolve('src/styles/globals.css'), 'utf8'))
+    expect(Object.keys(colours)).toHaveLength(4)
+    for (const value of Object.values(colours)) expect(value).toMatch(/^#[0-9a-f]{3,8}$/i)
   })
 
   it('stop the sheet when one is missing', () => {
