@@ -5,6 +5,7 @@ import { expect, gotoReady, test } from './fixtures'
 import { logoLotus } from './lotuses'
 import {
   expectPageTurned,
+  inPageTransitions,
   pageTurns,
   prefetched,
   recordPageTurns,
@@ -113,6 +114,20 @@ test('links in the header change page at once, without turning it', async ({ pag
     expect(change.arriving).toBeNull()
   }
 })
+
+test(
+  'a view transition that is skipped moves nothing, and is not waited for',
+  { tag: '@one-width' },
+  async ({ page }) => {
+    await recordPageTurns(page)
+    await gotoReady(page, '/')
+    await page.evaluate(() => document.startViewTransition(() => {}).skipTransition())
+    const skipped = (await inPageTransitions(page)).at(-1)
+    expect(skipped?.leaving).toBeNull()
+    expect(skipped?.arriving).toBeNull()
+    expect(skipped?.flights).toEqual([])
+  },
+)
 
 test(
   "the browser's back button changes page at once, without turning it",

@@ -24,6 +24,9 @@ const ABOUT: Partial<Record<RouteEntry['kind'], string>> = {
   start:
     'A proposal: what Indian psychology is, how Care4Mind is organised, how to read Sanskrit names and where to begin.',
   proposals: 'Features proposed beyond the brief, for the Project owner to accept or refuse.',
+  'log-in': 'Log in to Care4Mind with a code sent to your email.',
+  'sign-up': 'Sign up to Care4Mind with your name and a code sent to your email.',
+  privacy: 'What Care4Mind keeps about you, who helps run the site and how to delete your account.',
 }
 
 function described(graph: ContentGraph, route: RouteEntry): { name: string; description: string } {

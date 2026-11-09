@@ -55,6 +55,7 @@ Targets marked † are standard defaults, chosen where the client brief set no m
 | FR-07 | URLs | After launch, every URL the current site served returns 200, or a 301 to a URL that returns 200. None returns 404.† The URLs to test include at least the 43 in its sitemap (see [the current site](https://github.com/SiddharthMuramkar/care4mind/blob/505105015beb09f12a7532c9ed33377e131061cf/docs/current-site.md)), its 71 media files and its feed. |
 | FR-08 | Security and recovery | Editing requires a login. Backups run automatically, and a restore has been tested and written up. |
 | FR-09 | Handover | Code, configuration, content model and deployment steps are documented in the repo, plus a short guide for Content editors. The repo and every account the site runs on are handed over to the client. |
+| FR-10 | Accounts and saved results | A user signs up or logs in before taking a Questionnaire, and every sign-up and log-in passes a server-verified bot check. Each result is saved, and both the user and a client-reviewer can read it. The user also gets a PDF user-report built only from that Questionnaire's documented rules. |
 | NFR-01 | Accessibility | WCAG 2.2 AA.† |
 | NFR-02 | Speed | Core Web Vitals "good" on mobile: LCP ≤ 2.5 s, INP ≤ 200 ms, CLS ≤ 0.1.† |
 | NFR-03 | Sanskrit terms | Each Concept's Sanskrit term, where it has one, is stored in IAST (e.g. vikṣepa), in Devanagari where available (विक्षेप), and in every plain-ASCII spelling it goes by: at least IAST without diacritics (viksepa) and any spelling the current site uses (vikshepa). Search matches any stored form.† |
@@ -85,7 +86,6 @@ The client brief's exclusions, minus the rebuild:
 
 - clinical diagnosis or treatment services
 - new psychometric instruments or validation studies
-- user accounts, personalised dashboards or saved Questionnaire histories, beyond what the requirements above need (such as the editing login in FR-08)
 - journal publishing or peer review
 - AI-generated psychological advice, or automated interpretation of anyone's mental-health data beyond the result a Questionnaire's documented scoring rules give (FR-05)
 - rewriting, translating or scholarly checking of all existing content
@@ -103,16 +103,20 @@ This brief decides none of these. "(Client)" means the Project owner answers it.
    - Content back end and search: open, worked in the map's [Architecture review](https://github.com/SiddharthMuramkar/care4mind/issues/19), with what search finds in [What search finds](https://github.com/SiddharthMuramkar/care4mind/issues/14).
 2. **Who runs the site after launch? (Client)** Who edits content, who keeps the site patched, and who pays for the hosting. The answer shapes what Content editors need to meet FR-02.
 3. **Which Questionnaires are in scope?** Only two have questions on the site today: KarmaYoga Scale (45 questions) and Dosha Survey (12). Sixteen more pages describe a questionnaire and its High/Moderate/Low results but contain no questions: Triguna, the eight "Profiling" pages and seven others (listed in [the current site](https://github.com/SiddharthMuramkar/care4mind/blob/505105015beb09f12a7532c9ed33377e131061cf/docs/current-site.md)). The homepage also links to a separate questionnaire app, which refused connections on 2026-10-26; whether these questionnaires lived there is unknown.
+   - The Client is sending the Questionnaires as PDFs, one first: [First Questionnaire](https://github.com/SiddharthMuramkar/care4mind/issues/353).
 4. **Where do each Questionnaire's questions and scoring rules come from?** For now: scrape what's public, then revisit. The public pages show only part of the scoring: the KarmaYoga Scale page flags one answer per question as correct and shows a percentage result, the sixteen pages above give no cut-offs, and nothing public shows how the Dosha Survey scores. Other possible sources are the client, whoever built the questionnaire app, and web archives. Without an in-scope Questionnaire's questions and scoring rules, it can't be rebuilt faithfully.
+   - The Client's PDFs replace scraping for the questions. Scoring rules and user-report wording are still open, worked in [First Questionnaire](https://github.com/SiddharthMuramkar/care4mind/issues/353).
 5. **Which pages to keep, merge or drop, and which topics matter most?** This includes the duplicate and empty pages listed in [the current site](https://github.com/SiddharthMuramkar/care4mind/blob/505105015beb09f12a7532c9ed33377e131061cf/docs/current-site.md).
 6. **Does the Dosha Survey give a result?** Finding out from the public site means submitting the live form, which sends an entry to the current site. If it only collects answers, it isn't a Questionnaire as the glossary defines it, and what becomes of it is part of question 5.
 7. **Analytics:** which tool, and what it may record.
 8. **Privacy and consent for Questionnaires. (Client and advisers)** What is stored about the person answering, if anything, and for how long. Do past responses on the current site need keeping? Only the client can export them.
+   - Past responses aren't kept ([#334](https://github.com/SiddharthMuramkar/care4mind/issues/334)). What is stored and for how long is worked in [#352](https://github.com/SiddharthMuramkar/care4mind/issues/352) and [#353](https://github.com/SiddharthMuramkar/care4mind/issues/353).
 9. **Domain and DNS. (Client)** Who controls care4mind.org and questionnaire.care4mind.org, and how the switch to the new site happens at launch.
+   - The domain stays registered at Namecheap for launch. The switch is [#341](https://github.com/SiddharthMuramkar/care4mind/issues/341), and `questionnaire.care4mind.org` is retired ([#334](https://github.com/SiddharthMuramkar/care4mind/issues/334)).
 10. **Content model details:** what a topic is, traditional texts and their passages, models and techniques, how authors and journals are recorded, and how a Concept links to a modern construct.
 11. **Client sign-off on the defaults marked †.**
 12. **Who fills the roles marked TBD?** The client names the Project owner, Psychology expert and Research editor (see Roles). The questions marked (Client) go to the Project owner, so they wait on this one.
 
 ## Launch
 
-The site launches when every requirement above passes, the content kept under open question 5 is on the new site, and the Project owner signs off. FR-05 applies to the Questionnaires that are ready; one that isn't doesn't hold up launch (see Priorities) and follows after it.
+The site launches when every requirement above passes, the content kept under open question 5 is on the new site, and the Project owner signs off. FR-05 and FR-10 apply to the Questionnaires that are ready; one that isn't doesn't hold up launch (see Priorities) and follows after it.

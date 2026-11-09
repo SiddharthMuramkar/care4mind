@@ -3,10 +3,12 @@ import type { Locator, Page } from '@playwright/test'
 import { hrefFor } from '@/content'
 
 import { expect, gotoReady, test } from './fixtures'
+import { LOGGED_IN } from './login'
 
 // Windows' contrast themes repaint backgrounds and borders in system colours and drop every
 // box-shadow, so a state or an edge drawn only with those has to be drawn again.
 test.use({ forcedColors: 'active' })
+test.use({ storageState: LOGGED_IN })
 
 const FLOW = '/questionnaires/karmayoga-scale/take/'
 

@@ -3,6 +3,7 @@ import type { Locator, Page } from '@playwright/test'
 import { expectNoAxeViolations } from './axe'
 import { unfinishedRules } from './drawings'
 import { expect, gotoReady, test } from './fixtures'
+import { LOGGED_IN } from './login'
 import { expectPaperFocusRing } from './paper'
 
 // Taking the KarmaYoga Scale. Local runs and CI build with the
@@ -11,6 +12,8 @@ import { expectPaperFocusRing } from './paper'
 
 const INTRO = '/questionnaires/karmayoga-scale/'
 const FLOW = '/questionnaires/karmayoga-scale/take/'
+
+test.use({ storageState: LOGGED_IN })
 
 /** The four parts in the record's settings order, with how many statements each holds. */
 const PARTS = [

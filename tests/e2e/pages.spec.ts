@@ -32,6 +32,14 @@ for (const route of ROUTES_IN_SCOPE) {
       .soft(page.locator('meta[name="robots"]'), `${where}: noindex in the robots meta tag`)
       .toHaveAttribute('content', /noindex/)
 
+    const headers = response?.headers() ?? {}
+    expect
+      .soft(
+        [headers['x-content-type-options'], headers['referrer-policy'], headers['x-frame-options']],
+        `${where}: the security headers`,
+      )
+      .toEqual(['nosniff', 'strict-origin-when-cross-origin', 'DENY'])
+
     // "{name} · Care4Mind", a description and one canonical address, with its slash.
     await expect
       .soft(page, `${where}: title`)

@@ -1,0 +1,248 @@
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
+
+import { BOT_CHECKED_PATHS, DISABLED_PATHS } from '@/lib/auth/create-auth'
+
+import { loginHarness, TEST_SETTINGS } from './harness'
+
+let login: Awaited<ReturnType<typeof loginHarness>>
+
+beforeAll(async () => {
+  login = await loginHarness()
+})
+beforeEach(() => login.reset())
+afterEach(() => vi.useRealTimers())
+afterAll(() => login.close())
+
+/** Routes that can't start a sign-in on their own, each read and reviewed by hand. */
+const REVIEWED_PATHS: readonly string[] = [
+  // Redeems an emailed code, which only a bot-checked request can have asked for.
+  '/sign-in/email-otp',
+  // Finishes a sign-in the bot-checked route already began.
+  '/callback/:id',
+  // Reads a user-session; ends one.
+  '/get-session',
+  '/sign-out',
+  // Answer without touching an account.
+  '/ok',
+  '/error',
+  // Only redirects to the app; with the password routes off, it can't reset anything.
+  '/reset-password/:token',
+  // Answers 404 without a live user-session, so a link scanner can't delete an account.
+  '/delete-user/callback',
+]
+
+/** The routes Better Auth serves for this configuration, as their paths. */
+function listedRoutes() {
+  return Object.values(login.auth.api)
+    .map(
+      (endpoint) =>
+        endpoint as unknown as {
+          path?: string
+          options?: { method?: string | string[]; metadata?: { SERVER_ONLY?: boolean } }
+        },
+    )
+    .filter((endpoint) => endpoint.path && !endpoint.options?.metadata?.SERVER_ONLY)
+    .map((endpoint) => ({
+      path: endpoint.path as string,
+      method:
+        (Array.isArray(endpoint.options?.method)
+          ? endpoint.options.method[0]
+          : endpoint.options?.method) ?? 'POST',
+    }))
+}
+
+/** A concrete path for a route that has parameters. */
+const fill = (path: string) => path.replace(/:\w+/g, 'x')
+
+/**
+ * The fields some routes check before they look for a user-session: a body that passes those
+ * checks, so the answer is about the user-session and not about a missing field.
+ */
+const VALID_BODIES: Readonly<Record<string, Record<string, unknown>>> = {
+  '/verify-password': { password: 'a-long-enough-password' },
+  '/change-email': { newEmail: 'new@example.test' },
+  '/change-password': {
+    newPassword: 'a-long-enough-password',
+    currentPassword: 'a-long-enough-password',
+  },
+  '/revoke-session': { token: 'x' },
+  '/link-social': { provider: 'google' },
+  '/unlink-account': { accountId: 'x' },
+  '/refresh-token': { accountId: 'x' },
+  '/get-access-token': { accountId: 'x' },
+}
+
+/** A concrete address for a route, with any query string it needs. */
+const address = (path: string) => (path === '/account-info' ? `${path}/?accountId=x` : fill(path))
+
+describe('every auth route', () => {
+  it('finds the routes it says exist', () => {
+    const paths = listedRoutes().map(({ path }) => path)
+    expect(paths).toEqual(
+      expect.arrayContaining(['/sign-in/email-otp', '/get-session', '/sign-up/email']),
+    )
+  })
+
+  it('is bot-checked, switched off, needs a user-session, is reviewed, or isn’t served', async () => {
+    const ungated: string[] = []
+    for (const { path, method } of listedRoutes()) {
+      if (DISABLED_PATHS.includes(path)) continue
+      if (BOT_CHECKED_PATHS.includes(path)) continue
+      if (REVIEWED_PATHS.includes(path)) continue
+      const response = await login.request(method as 'GET' | 'POST', address(path), {
+        body: VALID_BODIES[path] ?? {},
+      })
+      // 404: the auth route doesn't pass it on, so nothing behind it can run.
+      if (response.status !== 401 && response.status !== 404) {
+        ungated.push(`${method} ${path} answered ${response.status}`)
+      }
+    }
+    expect(ungated, 'routes with no gate: bot-check, switch off, or review them').toEqual([])
+  })
+
+  it.each([
+    ['POST', '/sign-up/email'],
+    ['POST', '/sign-in/email'],
+    ['POST', '/request-password-reset'],
+    ['POST', '/reset-password'],
+    ['POST', '/send-verification-email'],
+    ['POST', '/email-otp/request-password-reset'],
+    ['POST', '/forget-password/email-otp'],
+    ['POST', '/email-otp/reset-password'],
+    ['POST', '/email-otp/check-verification-otp'],
+    ['POST', '/email-otp/request-email-change'],
+    ['POST', '/email-otp/change-email'],
+    ['POST', '/email-otp/verify-email'],
+    ['GET', '/verify-email'],
+    ['POST', '/update-user'],
+  ] as const)('is switched off: %s %s', async (method, path) => {
+    expect((await login.request(method, path)).status).toBe(404)
+  })
+
+  it.each(['/email-otp/send-verification-otp', '/sign-in/social'])(
+    'refuses %s with no bot check token',
+    async (path) => {
+      const response = await login.request('POST', path, {
+        body: { email: 'asha@example.test', type: 'sign-in', provider: 'google' },
+      })
+      expect(response.status).toBe(400)
+      expect(await response.json()).toMatchObject({ code: 'MISSING_RESPONSE' })
+    },
+  )
+
+  it('keeps the reviewed list real: nothing on it has gone away', () => {
+    const paths = listedRoutes().map(({ path }) => path)
+    for (const path of REVIEWED_PATHS) expect(paths, path).toContain(path)
+  })
+})
+
+describe('an address no route of ours is at', () => {
+  it.each([
+    ['GET', '/a1'],
+    ['POST', '/a2'],
+    ['GET', '/callback/not-a-provider'],
+    ['GET', '/reset-password/not-a-token'],
+  ] as const)('answers %s %s with a 404, and writes nothing', async (method, path) => {
+    expect((await login.request(method, path)).status).toBe(404)
+    expect(await login.count('rateLimit')).toBe(0)
+  })
+
+  it('never reaches a limit, however many such addresses are asked for', async () => {
+    for (let attempt = 0; attempt < 10; attempt++) {
+      expect((await login.request('GET', `/made-up-${attempt}`)).status).toBe(404)
+    }
+    expect(await login.count('rateLimit')).toBe(0)
+  })
+})
+
+describe('the limits', () => {
+  const IP = { 'x-forwarded-for': '203.0.113.50' }
+
+  it('lets the fourth request from one connection through, so one Wi-Fi isn’t blocked', async () => {
+    for (let attempt = 0; attempt < 8; attempt++) {
+      const response = await login.request('POST', '/email-otp/send-verification-otp', {
+        body: { email: `user${attempt}@example.test`, type: 'sign-in' },
+        headers: { 'x-captcha-response': 'a-token', 'x-login-intent': 'sign-up', ...IP },
+      })
+      expect(response.status, `attempt ${attempt}`).toBe(200)
+    }
+  })
+
+  it('raises the routes that redeem an emailed code and start Google the same way', async () => {
+    for (const path of ['/sign-in/email-otp', '/sign-in/social']) {
+      for (let attempt = 0; attempt < 8; attempt++) {
+        const response = await login.request('POST', path, {
+          body: { email: 'x@example.test', otp: '000000', provider: 'google' },
+          headers: { 'x-captcha-response': 'a-token', ...IP },
+        })
+        expect(response.status, `${path} attempt ${attempt}`).not.toBe(429)
+      }
+    }
+  })
+
+  it('raises the global limit past Better Auth’s 100 per 10 seconds', async () => {
+    for (let attempt = 0; attempt < 120; attempt++) {
+      const response = await login.request('GET', '/ok', { headers: IP })
+      expect(response.status, `attempt ${attempt}`).toBe(200)
+    }
+  })
+
+  it('keeps counts in the database', async () => {
+    await login.request('GET', '/ok', { headers: IP })
+    expect(await login.count('rateLimit')).toBeGreaterThan(0)
+  })
+})
+
+describe('the settings the limits read', () => {
+  it('never limits the user-session check, which every logged-in page load makes', async () => {
+    const strict = await loginHarness({
+      settings: { limits: { ...TEST_SETTINGS.limits, globalBurst: 2 } },
+    })
+    try {
+      for (let attempt = 0; attempt < 5; attempt++) {
+        const response = await strict.request('GET', '/get-session')
+        expect(response.status, `attempt ${attempt}`).toBe(200)
+      }
+      expect(await strict.count('rateLimit')).toBe(0)
+    } finally {
+      await strict.close()
+    }
+  })
+
+  it('counts a burst, not a rate: only a full quiet window restarts the count', async () => {
+    const strict = await loginHarness({
+      settings: { limits: { ...TEST_SETTINGS.limits, globalBurst: 2 } },
+    })
+    const at = (seconds: number) => new Date(Date.UTC(2026, 0, 1, 0, 0, seconds))
+    const ok = () => strict.request('GET', '/ok').then((response) => response.status)
+    try {
+      vi.useFakeTimers({ toFake: ['Date'] })
+      vi.setSystemTime(at(0))
+      expect(await ok()).toBe(200)
+      vi.setSystemTime(at(5))
+      expect(await ok()).toBe(200)
+      // Two in the last 10 seconds, the most the setting says: but no quiet window has passed.
+      vi.setSystemTime(at(14))
+      expect(await ok()).toBe(429)
+      vi.setSystemTime(at(16))
+      expect(await ok()).toBe(200)
+    } finally {
+      await strict.close()
+    }
+  })
+
+  it('blocks past the set number', async () => {
+    const strict = await loginHarness({
+      settings: { limits: { ...TEST_SETTINGS.limits, routeBurst: 3 } },
+    })
+    try {
+      for (let attempt = 0; attempt < 3; attempt++) {
+        const response = await strict.sendCode(`user${attempt}@example.test`, 'sign-up')
+        expect(response.status).toBe(200)
+      }
+      expect((await strict.sendCode('fourth@example.test', 'sign-up')).status).toBe(429)
+    } finally {
+      await strict.close()
+    }
+  })
+})

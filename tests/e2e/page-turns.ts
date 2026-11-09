@@ -193,6 +193,15 @@ export function recordPageTurns(page: Page, { hold = false } = {}) {
           }
         })
         .catch(() => {})
+      // A skipped transition never becomes ready and moves nothing, but its update still runs.
+      transition.ready.catch(() =>
+        transition.finished
+          .catch(() => {})
+          .then(() => {
+            turn.to = location.pathname
+            turn.sampled = true
+          }),
+      )
       return transition
     }
   }, hold)
