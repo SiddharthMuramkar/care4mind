@@ -310,6 +310,17 @@ test.describe('References: filters', () => {
     await expect(shown(page)).toHaveCount(all.length)
   })
 
+  test('sets the search box’s label directly above it, not at the top of the page', async ({
+    page,
+  }) => {
+    await gotoReady(page, REFERENCES)
+    const box = await page.getByRole('searchbox').boundingBox()
+    const label = await page.getByText('Search by author, title or year').boundingBox()
+    const gap = (box?.y ?? 0) - ((label?.y ?? 0) + (label?.height ?? 0))
+    expect(gap, 'pixels from the label down to its box').toBeGreaterThanOrEqual(0)
+    expect(gap, 'pixels from the label down to its box').toBeLessThanOrEqual(16)
+  })
+
   test('has no accessibility violations with a filter applied', async ({ page }) => {
     await gotoReady(page, `${REFERENCES}?kind=book`)
     await expect(count(page)).toHaveText(entries(books.length))
@@ -452,8 +463,10 @@ test.describe('The Library home', () => {
       await expect(links.nth(at)).toHaveAttribute('href', volume.href)
       await expect(links.nth(at)).toBeVisible()
     }
-    // No images: nothing from the current site but its words.
-    await expect(page.getByRole('main').locator('img, picture, video, svg image')).toHaveCount(0)
+    // Its only picture is its Sticker, which is decorative: the shelf is words.
+    const pictures = page.getByRole('main').locator('img, picture, video, svg image')
+    await expect(pictures).toHaveCount(1)
+    await expect(pictures).toHaveAttribute('alt', '')
   })
 
   test('a volume lifts from the shelf under the pointer and turns the page forward', async ({

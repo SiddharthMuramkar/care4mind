@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import type { CSSProperties } from 'react'
 
+import { SectionSticker } from '@/components/art'
 import { Contents } from '@/components/concept'
 import { BookGroup, CourseGroup, holdingsOf, libraryStyles as styles } from '@/components/library'
 import { OrnamentRule } from '@/components/OrnamentRule'
@@ -32,6 +33,15 @@ const BOOK_LISTS = [
   { slug: 'inspirational-books', label: 'Inspirational' },
   { slug: 'textbooks', label: 'Academic' },
 ] as const
+
+/** The Library's pages, each of which names its Sticker by its slug. */
+const LIBRARY_SECTIONS = ['textbooks', 'inspirational-books', 'courses', 'methods'] as const
+
+function sectionOf(slug: string) {
+  const section = LIBRARY_SECTIONS.find((key) => key === slug)
+  if (!section) throw new Error(`The Library's page ${slug} has no Sticker.`)
+  return section
+}
 
 /** A reading list: its books on their shelves, or its courses as cards, group by group. */
 function ReadingList({ list }: { list: ResourceListView }) {
@@ -107,6 +117,7 @@ export default async function LibraryItemPage({ params }: PageProps<'/library/[s
       path={page.href}
       titleId="page-title"
       width={page.kind === 'page' ? 'libraryContents' : 'library'}
+      beforeTitle={<SectionSticker section={sectionOf(page.slug)} />}
       kicker="Library"
       title={page.title}
       afterTitle={

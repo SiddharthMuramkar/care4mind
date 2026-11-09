@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 
+import { SectionSticker } from '@/components/art'
 import { Numeral } from '@/components/Numeral'
 import { ReadingPage } from '@/components/ReadingPage'
 import { Holds, holdingsOf, libraryStyles as styles, Shelf, Spine } from '@/components/library'
@@ -26,8 +27,8 @@ const thickness = (count: number) => Math.min(1, Math.log(count + 1) / Math.log(
 
 /**
  * The Library: its five sections standing as volumes on a shelf, each as thick as what it holds,
- * with its count on the spine. On a phone the shelf is a book's contents. It shows no images:
- * they wait for a later phase.
+ * with its count on the spine. On a phone the shelf is a book's contents. Its only picture is
+ * its Sticker.
  */
 export default async function LibraryPage() {
   const [pages, all] = await Promise.all([library.list(), references.list()])
@@ -56,6 +57,7 @@ export default async function LibraryPage() {
       path={PATH}
       titleId="library-title"
       width="library"
+      beforeTitle={<SectionSticker section="library" />}
       title="Library"
       afterTitle={
         <>
