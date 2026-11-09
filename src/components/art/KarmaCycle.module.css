@@ -15,8 +15,8 @@
 .figure {
   margin: 0;
   max-width: 45rem;
-  /* The old picture's address lands here. */
-  scroll-margin-top: 1.5rem;
+  /* The old picture's address lands here, with the heading above it clear of the header. */
+  scroll-margin-top: 3rem;
 }
 
 /*

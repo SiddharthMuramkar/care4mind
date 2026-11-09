@@ -21,11 +21,13 @@ import styles from './KarmaCycle.module.css'
 const LEADING = 1.2
 const STRIKE_LIFT = 0.3
 
-const RunText = ({ run, Tag }: { run: Run; Tag: 'span' | 'tspan' }) =>
-  run.sanskrit ? <Tag lang="sa-Latn">{run.text}</Tag> : run.text
+function RunText({ run, Tag }: { run: Run; Tag: 'span' | 'tspan' }) {
+  return run.sanskrit ? <Tag lang="sa-Latn">{run.text}</Tag> : run.text
+}
 
-const Runs = ({ runs, Tag }: { runs: readonly Run[]; Tag: 'span' | 'tspan' }) =>
-  runs.map((run) => <RunText key={run.text} run={run} Tag={Tag} />)
+function Runs({ runs, Tag }: { runs: readonly Run[]; Tag: 'span' | 'tspan' }) {
+  return runs.map((run) => <RunText key={run.text} run={run} Tag={Tag} />)
+}
 
 /** A label's lines stacked at a point, each drawn struck through where it is. */
 function Lines({
@@ -86,7 +88,6 @@ function NodeName({ node: { lines, joined } }: { node: CycleNode }) {
     return strike ? <s>{inner}</s> : inner
   }
   const [first, second] = lines
-  if (!first) return null
   const struck = lines.filter((line) => line.strike).length
   return (
     <>

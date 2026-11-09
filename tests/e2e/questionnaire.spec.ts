@@ -102,7 +102,7 @@ test.describe('The Karma Yoga cycle', () => {
   )
 
   test(
-    'leaves no two labels on top of each other and no arrow across a label, from a phone up',
+    'keeps labels apart and any arrow off them, from a phone up',
     { tag: '@self-width' },
     async ({ page }) => {
       for (const width of [360, 640, 1024]) {
@@ -121,11 +121,17 @@ test.describe('The Karma Yoga cycle', () => {
               bottom: top + height * 0.85,
             }
           })
+          // Closer than this, labels on one row read as a single line of words.
+          const gap = 8
           const labels = boxes.flatMap((a, index) =>
             boxes
               .slice(index + 1)
               .filter(
-                (b) => a.left < b.right && b.left < a.right && a.top < b.bottom && b.top < a.bottom,
+                (b) =>
+                  a.left < b.right + gap &&
+                  b.left < a.right + gap &&
+                  a.top < b.bottom &&
+                  b.top < a.bottom,
               )
               .map((b) => `${a.word} / ${b.word}`),
           )
@@ -133,7 +139,11 @@ test.describe('The Karma Yoga cycle', () => {
             (path, index) => {
               const toScreen = path.getScreenCTM()
               if (!toScreen) return [`path ${index} has no place on screen`]
-              const halfStroke = (parseFloat(getComputedStyle(path).strokeWidth) * toScreen.a) / 2
+              // The heads are rotated, so the scale is the matrix's length, not its a.
+              const halfStroke =
+                (parseFloat(getComputedStyle(path).strokeWidth) *
+                  Math.hypot(toScreen.a, toScreen.b)) /
+                2
               const length = path.getTotalLength()
               const points = Array.from({ length: 501 }, (_, step) =>
                 path.getPointAtLength((length * step) / 500).matrixTransform(toScreen),

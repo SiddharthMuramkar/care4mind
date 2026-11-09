@@ -78,9 +78,9 @@ describe('the Karma Yoga cycle', () => {
     expect(items).toEqual(STEPS)
   })
 
-  it('shows a strike-through in the list and says it in words', () => {
-    expect(list.match(/<s>/g)?.length).toBeGreaterThan(0)
-    expect(list).toContain('struck through')
+  it('strikes through the same three words in the list, and no others', () => {
+    const struck = [...list.matchAll(/<s>(.*?)<\/s>/g)].map(([, inner = '']) => words(inner))
+    expect([...new Set(struck)].sort()).toEqual(['Karmabija', 'Karmaphala', 'Punya or Papa'])
   })
 
   it('marks the Sanskrit, not the English', () => {

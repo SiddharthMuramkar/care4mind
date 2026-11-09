@@ -22,7 +22,7 @@ export type Point = readonly [x: number, y: number]
 
 export interface CycleNode {
   id: string
-  lines: readonly Line[]
+  lines: readonly [Line] | readonly [Line, Line]
   at: Point
   /** How the list runs its lines together: the words of one name, a gloss, or a pair. */
   joined: 'name' | 'gloss' | 'pair'
@@ -73,7 +73,7 @@ export const CYCLE_NODES = [karmabija, dharmabaddha, nischayam, karma, karmaphal
 export const CYCLE_CENTRE: CycleNode = {
   id: 'karmabandha-mochana',
   lines: [{ runs: [sa('Karmabandha')] }, { runs: [sa('Mochana')] }],
-  at: [540, 340],
+  at: [540, 400],
   joined: 'name',
 }
 
@@ -88,7 +88,7 @@ export interface CycleArrow {
   to: CycleNode
 }
 
-export interface CycleStep extends CycleArrow {
+interface CycleStep extends CycleArrow {
   from: CycleNode
 }
 
