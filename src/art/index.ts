@@ -12,7 +12,6 @@ import { createArt } from './resolve'
 
 export type * from './types'
 export type { ArtId }
-export type { ArtTarget, OwnArtTarget } from './resolve'
 
 const pictures = createArt(ART, features)
 
