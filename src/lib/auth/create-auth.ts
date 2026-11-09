@@ -10,18 +10,39 @@ import { captcha } from 'better-auth/plugins/captcha'
 import { emailOTP } from 'better-auth/plugins/email-otp'
 
 import {
+  alertOnSpike,
+  botIdCheck,
+  capNewAccounts,
+  type CheckBotId,
+  defences,
+  type RecordDefence,
+} from './defences'
+import {
   DELETE_LINK_HOURS,
   deleteAccountMessage,
   emailedCodeMessage,
   type SendEmail,
 } from './email'
-import { BOT_CHECK_HOSTNAMES, type LoginSettings } from './settings'
-import { BOT_CHECK_ACTION, DELETE_ACCOUNT_PARAM, LOGIN_INTENT_HEADER, PRIVACY_PATH } from './shared'
+import type { LoginSettings } from './settings'
+import {
+  BOT_CHECK_ACTION,
+  BOT_CHECK_HOSTNAMES,
+  BOT_CHECKED_PATHS,
+  DELETE_ACCOUNT_PARAM,
+  LOGIN_INTENT_HEADER,
+  PRIVACY_PATH,
+} from './shared'
+
+export { BOT_CHECKED_PATHS } from './shared'
 
 export interface AuthDeps {
   settings: LoginSettings
   database: BetterAuthOptions['database']
   sendEmail: SendEmail
+  /** BotID's verdict on the current request. */
+  checkBotId: CheckBotId
+  /** Where the defences note what they saw, for the trial to read. */
+  recordDefence: RecordDefence
   /** Keep work going after the response; without it, background work is awaited. */
   backgroundTask?: (work: Promise<unknown>) => void
 }
@@ -43,12 +64,6 @@ export const DISABLED_PATHS: readonly string[] = [
   '/verify-email',
 ]
 
-/** The routes every request to must carry a bot check token the server has verified. */
-export const BOT_CHECKED_PATHS: readonly string[] = [
-  '/email-otp/send-verification-otp',
-  '/sign-in/social',
-]
-
 /** What a sign-up that sent no name, or one too long, is told. */
 const NAME_NEEDED = { code: 'NAME_NEEDED', message: 'A name of up to 100 characters is needed.' }
 
@@ -67,7 +82,14 @@ const EMAIL_NOT_CONFIRMED = {
   message: 'Google hasn’t confirmed this email address.',
 }
 
-export function createAuth({ settings, database, sendEmail, backgroundTask }: AuthDeps) {
+export function createAuth({
+  settings,
+  database,
+  sendEmail,
+  checkBotId,
+  recordDefence,
+  backgroundTask,
+}: AuthDeps) {
   const { routePerMinute, globalPerTenSeconds } = settings.limits
   const perRoute = { window: 60, max: routePerMinute }
   return betterAuth({
@@ -132,7 +154,23 @@ export function createAuth({ settings, database, sendEmail, backgroundTask }: Au
             if (agreed !== true) throw new APIError('BAD_REQUEST', TICK_BOX_NEEDED)
             const name = user.name.trim()
             if (!name || name.length > NAME_MAX) throw new APIError('BAD_REQUEST', NAME_NEEDED)
+            if (ctx) {
+              await capNewAccounts(ctx.context.adapter, {
+                limits: settings.limits,
+                record: recordDefence,
+              })
+            }
             return { data: { ...user, name } }
+          },
+          after: async (_user, ctx) => {
+            // Never waits on the sender, so a slow or failing Brevo can't slow a sign-up.
+            await ctx?.context.runInBackgroundOrAwait(
+              alertOnSpike(ctx.context.adapter, {
+                spikeAlert: settings.spikeAlert,
+                sendEmail,
+                record: recordDefence,
+              }),
+            )
           },
         },
       },
@@ -150,6 +188,17 @@ export function createAuth({ settings, database, sendEmail, backgroundTask }: Au
           ? {}
           : { allowedHostnames: BOT_CHECK_HOSTNAMES, expectedAction: BOT_CHECK_ACTION }),
       }),
+      // After Turnstile, so a request it refuses never reaches BotID.
+      captcha({
+        provider: 'vercel-botid',
+        endpoints: [...BOT_CHECKED_PATHS],
+        ...botIdCheck({
+          blocking: settings.botId.blocking,
+          checkBotId,
+          record: recordDefence,
+        }),
+      }),
+      defences({ limits: settings.limits, record: recordDefence }),
       emailOTP({
         otpLength: 6,
         expiresIn: 600,

@@ -24,9 +24,6 @@ const TEST_SITE_KEYS: readonly string[] = [
   '3x00000000000000000000FF',
 ]
 
-/** The hostnames a bot check token may have been issued for, as Cloudflare's widget lists them. */
-export const BOT_CHECK_HOSTNAMES = ['www.care4mind.xyz', 'care4mind.org', 'www.care4mind.org']
-
 export interface LoginSettings {
   /** The site's own address, which cookies and the origin check are built from. */
   baseURL: string
@@ -55,7 +52,17 @@ export interface LoginSettings {
     routePerMinute: number
     /** Requests one address may make to any other auth route, per 10 seconds. */
     globalPerTenSeconds: number
+    /** Whether the limits per email and the new-account cap refuse, or only record. */
+    blocking: boolean
+    /** Emailed codes one address may be sent, per hour. */
+    codesPerEmailPerHour: number
+    /** New accounts the whole site may take, per hour. */
+    newAccountsPerHour: number
   }
+  /** BotID only records until `blocking` is on. */
+  botId: { blocking: boolean }
+  /** New accounts in one hour past `newAccountsPerHour` email the developer at `to`, once. */
+  spikeAlert: { newAccountsPerHour: number; to: string }
 }
 
 /** A whole number from the environment, or its default while it is unset. */
@@ -66,6 +73,14 @@ function wholeNumber(env: Environment, name: string, byDefault: number): number 
     throw new Error(`${name} must be a whole number above 0, not “${value}”.`)
   }
   return Number(value)
+}
+
+/** A switch from the environment: 1 on, 0 or unset off. */
+function onOff(env: Environment, name: string): boolean {
+  const value = env[name]
+  if (value === undefined || value === '' || value === '0') return false
+  if (value === '1') return true
+  throw new Error(`${name} must be 1 (on) or 0 (off), not “${value}”.`)
 }
 
 /** A browser test run's local stand-in for an outside service: refused on Vercel, production or not. */
@@ -91,6 +106,7 @@ export function readLoginSettings(env: Environment): LoginSettings {
   const clientSecret = required('GOOGLE_CLIENT_SECRET')
   const apiKey = required('BREVO_API_KEY')
   const from = required('LOGIN_EMAIL_FROM')
+  const alertTo = required('LOGIN_ALERT_EMAIL')
   if (missing.length > 0) {
     throw new Error(`Login needs ${missing.join(', ')}, which .env.example explains.`)
   }
@@ -114,6 +130,15 @@ export function readLoginSettings(env: Environment): LoginSettings {
     limits: {
       routePerMinute: wholeNumber(env, 'LOGIN_ROUTE_LIMIT_PER_MINUTE', 600),
       globalPerTenSeconds: wholeNumber(env, 'LOGIN_GLOBAL_LIMIT_PER_10_SECONDS', 1000),
+      // Provisional: the trial sets the real numbers.
+      blocking: onOff(env, 'LOGIN_LIMITS_BLOCKING'),
+      codesPerEmailPerHour: wholeNumber(env, 'LOGIN_CODES_PER_EMAIL_PER_HOUR', 10),
+      newAccountsPerHour: wholeNumber(env, 'LOGIN_NEW_ACCOUNTS_PER_HOUR', 500),
+    },
+    botId: { blocking: onOff(env, 'LOGIN_BOTID_BLOCKING') },
+    spikeAlert: {
+      newAccountsPerHour: wholeNumber(env, 'LOGIN_SPIKE_NEW_ACCOUNTS_PER_HOUR', 100),
+      to: alertTo,
     },
   }
 }

@@ -2,7 +2,7 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 
 import { BOT_CHECKED_PATHS, DISABLED_PATHS } from '@/lib/auth/create-auth'
 
-import { loginHarness } from './harness'
+import { loginHarness, TEST_SETTINGS } from './harness'
 
 let login: Awaited<ReturnType<typeof loginHarness>>
 
@@ -172,7 +172,7 @@ describe('the limits', () => {
 describe('the settings the limits read', () => {
   it('blocks past the set number', async () => {
     const strict = await loginHarness({
-      settings: { limits: { routePerMinute: 3, globalPerTenSeconds: 1000 } },
+      settings: { limits: { ...TEST_SETTINGS.limits, routePerMinute: 3 } },
     })
     try {
       for (let attempt = 0; attempt < 3; attempt++) {

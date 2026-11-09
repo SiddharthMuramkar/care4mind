@@ -13,6 +13,8 @@ const options = (pglite: PGlite) =>
     settings: TEST_SETTINGS,
     database: { dialect: new PGliteDialect({ pglite }), type: 'postgres' },
     sendEmail: async () => undefined,
+    checkBotId: async () => ({ isBot: false }),
+    recordDefence: () => undefined,
   }).options
 
 describe('the database migration', () => {

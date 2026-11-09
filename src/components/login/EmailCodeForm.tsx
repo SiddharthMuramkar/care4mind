@@ -84,13 +84,25 @@ async function post(path: string, body: unknown, headers: Record<string, string>
 
 /** What to say when asking for a code fails, and whether the bot check is what failed. */
 async function sendError(response: Response): Promise<{ message: string; botCheck: boolean }> {
+  const { code } = ((await response.json().catch(() => ({}))) ?? {}) as { code?: string }
+  if (code === 'THROWAWAY_EMAIL') {
+    return {
+      message: 'That looks like a throwaway email address. Please use one you keep.',
+      botCheck: false,
+    }
+  }
+  if (code === 'EMAIL_LIMIT') {
+    return {
+      message: 'This email has had several codes already. Please wait an hour and try again.',
+      botCheck: false,
+    }
+  }
   if (response.status === 429) {
     return {
       message: 'Too many tries from here just now. Please wait a minute and try again.',
       botCheck: false,
     }
   }
-  const { code } = ((await response.json().catch(() => ({}))) ?? {}) as { code?: string }
   if (code === 'INVALID_EMAIL') {
     return { message: 'Please check your email address and try again.', botCheck: false }
   }
@@ -104,8 +116,11 @@ async function sendError(response: Response): Promise<{ message: string; botChec
 }
 
 async function codeError(response: Response): Promise<string> {
-  if (response.status === 429) return 'Too many tries just now. Please wait a minute and try again.'
   const { code } = ((await response.json().catch(() => ({}))) ?? {}) as { code?: string }
+  if (code === 'NEW_ACCOUNT_CAP') {
+    return 'We’re taking a lot of new accounts just now. Please try again in an hour.'
+  }
+  if (response.status === 429) return 'Too many tries just now. Please wait a minute and try again.'
   if (code === 'OTP_EXPIRED') return 'That code has run out. Ask for a new one below.'
   if (code === 'TOO_MANY_ATTEMPTS')
     return 'That code has had too many wrong tries. Ask for a new one below.'
@@ -143,6 +158,11 @@ export function EmailCodeForm({ mode, siteKey, otherScreen }: Props) {
   const widget = useRef<TurnstileHandle>(null)
   const heading = useRef<HTMLHeadingElement>(null)
   const copy = COPY[mode]
+
+  // A chunk of its own, loaded by the form: only the login pages carry BotID's script.
+  useEffect(() => {
+    void import('./startBotId')
+  }, [])
 
   useEffect(() => {
     if (step === 'code') heading.current?.focus()

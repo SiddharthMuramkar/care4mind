@@ -8,6 +8,8 @@ create table "verification" ("id" text not null primary key, "identifier" text n
 
 create table "rateLimit" ("id" text not null primary key, "key" text not null unique, "count" integer not null, "lastRequest" bigint not null);
 
+create table "defenceCount" ("id" text not null primary key, "key" text not null unique, "count" integer not null, "windowStart" bigint not null);
+
 create index "session_userId_idx" on "session" ("userId");
 
 create index "account_userId_idx" on "account" ("userId");

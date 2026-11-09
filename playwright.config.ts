@@ -206,6 +206,7 @@ export default defineConfig({
           BREVO_API_KEY: 'browser-tests-only',
           BREVO_API_URL: `http://127.0.0.1:${STAND_IN_PORT}/v3/smtp/email`,
           LOGIN_EMAIL_FROM: 'login@care4mind.test',
+          LOGIN_ALERT_EMAIL: 'developer@care4mind.test',
         },
       },
     ],
