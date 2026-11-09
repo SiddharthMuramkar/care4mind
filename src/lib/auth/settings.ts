@@ -39,6 +39,10 @@ export interface LoginSettings {
     /** A stand-in for Cloudflare's token check, for a local run only; never set on Vercel. */
     verifyUrl?: string
   }
+  google: {
+    clientId: string
+    clientSecret: string
+  }
   email: {
     apiKey: string
     /** The address emails come from. */
@@ -83,6 +87,8 @@ export function readLoginSettings(env: Environment): LoginSettings {
   const secret = required('BETTER_AUTH_SECRET')
   const databaseUrl = required('DATABASE_URL')
   const secretKey = required('TURNSTILE_SECRET_KEY')
+  const clientId = required('GOOGLE_CLIENT_ID')
+  const clientSecret = required('GOOGLE_CLIENT_SECRET')
   const apiKey = required('BREVO_API_KEY')
   const from = required('LOGIN_EMAIL_FROM')
   if (missing.length > 0) {
@@ -103,6 +109,7 @@ export function readLoginSettings(env: Environment): LoginSettings {
     secret,
     databaseUrl,
     botCheck: { secretKey, testKeys, ...(verifyUrl ? { verifyUrl } : {}) },
+    google: { clientId, clientSecret },
     email: { apiKey, from, ...(apiUrl ? { apiUrl } : {}) },
     limits: {
       routePerMinute: wholeNumber(env, 'LOGIN_ROUTE_LIMIT_PER_MINUTE', 600),

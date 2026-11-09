@@ -199,6 +199,10 @@ export default defineConfig({
           // Cloudflare's published test secret: it can only pass tokens made with its test site key.
           TURNSTILE_SECRET_KEY: '1x0000000000000000000000000000000AA',
           TURNSTILE_VERIFY_URL: `http://127.0.0.1:${STAND_IN_PORT}/turnstile/v0/siteverify`,
+          // Google's token endpoint is faked in this server's own process (google-stand-in.mjs).
+          NODE_OPTIONS: `--import=${fileURLToPath(new URL('tests/e2e/google-stand-in.mjs', import.meta.url))}`,
+          GOOGLE_CLIENT_ID: 'browser-tests-only',
+          GOOGLE_CLIENT_SECRET: 'browser-tests-only',
           BREVO_API_KEY: 'browser-tests-only',
           BREVO_API_URL: `http://127.0.0.1:${STAND_IN_PORT}/v3/smtp/email`,
           LOGIN_EMAIL_FROM: 'login@care4mind.test',

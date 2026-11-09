@@ -9,6 +9,8 @@ const REQUIRED = {
   BETTER_AUTH_SECRET: 'x'.repeat(32),
   DATABASE_URL: 'postgres://user:pass@db.example.test/care4mind',
   TURNSTILE_SECRET_KEY: 'a-real-secret',
+  GOOGLE_CLIENT_ID: 'a-real-client-id',
+  GOOGLE_CLIENT_SECRET: 'a-real-client-secret',
   BREVO_API_KEY: 'a-real-key',
   LOGIN_EMAIL_FROM: 'login@care4mind.org',
 }
@@ -44,7 +46,7 @@ describe('.env.example', () => {
 describe('the login settings', () => {
   it('names every missing setting', () => {
     expect(() => readLoginSettings({})).toThrow(
-      /BETTER_AUTH_URL.*BETTER_AUTH_SECRET.*DATABASE_URL.*TURNSTILE_SECRET_KEY.*BREVO_API_KEY.*LOGIN_EMAIL_FROM/,
+      /BETTER_AUTH_URL.*BETTER_AUTH_SECRET.*DATABASE_URL.*TURNSTILE_SECRET_KEY.*GOOGLE_CLIENT_ID.*GOOGLE_CLIENT_SECRET.*BREVO_API_KEY.*LOGIN_EMAIL_FROM/,
     )
   })
 

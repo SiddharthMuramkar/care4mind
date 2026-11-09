@@ -5,7 +5,7 @@
 import 'server-only'
 
 import { betterAuth, type BetterAuthOptions } from 'better-auth'
-import { APIError } from 'better-auth/api'
+import { APIError, getOAuthState } from 'better-auth/api'
 import { captcha } from 'better-auth/plugins/captcha'
 import { emailOTP } from 'better-auth/plugins/email-otp'
 
@@ -50,6 +50,18 @@ const NAME_NEEDED = { code: 'NAME_NEEDED', message: 'A name of up to 100 charact
 /** The longest name a user may give. */
 const NAME_MAX = 100
 
+/** What a sign-up without the tick box ticked is told; only a tampered client gets this far. */
+const TICK_BOX_NEEDED = {
+  code: 'TICK_BOX_NEEDED',
+  message: 'The tick box must be ticked before an account can be made.',
+}
+
+/** What a Google sign-up is told while Google hasn't confirmed the address belongs to its owner. */
+const EMAIL_NOT_CONFIRMED = {
+  code: 'EMAIL_NOT_CONFIRMED',
+  message: 'Google hasn’t confirmed this email address.',
+}
+
 export function createAuth({ settings, database, sendEmail, backgroundTask }: AuthDeps) {
   const { routePerMinute, globalPerTenSeconds } = settings.limits
   const perRoute = { window: 60, max: routePerMinute }
@@ -60,6 +72,18 @@ export function createAuth({ settings, database, sendEmail, backgroundTask }: Au
     database,
     telemetry: { enabled: false },
     disabledPaths: [...DISABLED_PATHS],
+    socialProviders: {
+      google: {
+        clientId: settings.google.clientId,
+        clientSecret: settings.google.clientSecret,
+        // A new Google user needs the tick box, which only Sign up shows: Log in sends them there.
+        disableImplicitSignUp: true,
+        // Exactly the address registered with Google, which follows the site's trailing slash.
+        redirectURI: new URL('/api/auth/callback/google/', settings.baseURL).href,
+        // Nothing here sends an id token, and that route can't carry the tick box.
+        disableIdTokenSignIn: true,
+      },
+    },
     session: { expiresIn: 60 * 60 * 24 * 7, updateAge: 60 * 60 * 24 },
     rateLimit: {
       enabled: true,
@@ -79,8 +103,14 @@ export function createAuth({ settings, database, sendEmail, backgroundTask }: Au
     databaseHooks: {
       user: {
         create: {
-          // After the emailed code is confirmed, so the answer can't reveal who has an account.
-          before: async (user) => {
+          // After the emailed code or Google has confirmed the address, so the answer can't reveal
+          // who has an account. The tick box comes through the OAuth state on the way back from
+          // Google, and in the body with the code; only a real `true` counts, whichever it is.
+          before: async (user, ctx) => {
+            if (!user.emailVerified) throw new APIError('BAD_REQUEST', EMAIL_NOT_CONFIRMED)
+            const state = (await getOAuthState()) as { agreed?: unknown } | null
+            const agreed = (state ?? (ctx?.body as { agreed?: unknown } | undefined))?.agreed
+            if (agreed !== true) throw new APIError('BAD_REQUEST', TICK_BOX_NEEDED)
             const name = user.name.trim()
             if (!name || name.length > NAME_MAX) throw new APIError('BAD_REQUEST', NAME_NEEDED)
             return { data: { ...user, name } }
