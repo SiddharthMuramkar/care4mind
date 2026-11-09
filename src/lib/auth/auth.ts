@@ -3,9 +3,9 @@ import 'server-only'
 
 import { attachDatabasePool, waitUntil } from '@vercel/functions'
 import { checkBotId } from 'botid/server'
-import { Pool } from 'pg'
 
 import { createAuth, type Auth } from './create-auth'
+import { databasePool } from './database-pool'
 import { logDefence } from './defences'
 import { brevoSender } from './email'
 import { readLoginSettings } from './settings'
@@ -15,7 +15,7 @@ let auth: Auth | undefined
 export function getAuth(): Auth {
   if (auth) return auth
   const settings = readLoginSettings(process.env)
-  const pool = new Pool({ connectionString: settings.databaseUrl })
+  const pool = databasePool(settings.databaseUrl)
   attachDatabasePool(pool)
   auth = createAuth({
     settings,

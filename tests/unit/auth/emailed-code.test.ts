@@ -90,14 +90,20 @@ describe('the emailed code', () => {
     expect(response.headers.get('set-cookie')).toMatch(/session_token=/)
   })
 
-  it('is never sent for anything but signing in', async () => {
-    const response = await login.request('POST', '/email-otp/send-verification-otp', {
-      body: { email: EMAIL, type: 'email-verification' },
-      headers: { 'x-captcha-response': 'a-token' },
-    })
-    expect(response.status).toBe(200)
-    expect(login.outbox).toEqual([])
-  })
+  // An account is needed: for an address with none, Better Auth stops before calling the sender.
+  it.each(['email-verification', 'forget-password'])(
+    'is never sent for %s, even to a real account',
+    async (type) => {
+      await login.signUp(EMAIL, 'Asha')
+      login.outbox.length = 0
+      const response = await login.request('POST', '/email-otp/send-verification-otp', {
+        body: { email: EMAIL, type },
+        headers: { 'x-captcha-response': 'a-token' },
+      })
+      expect(response.status).toBe(200)
+      expect(login.outbox).toEqual([])
+    },
+  )
 
   it('works for 10 minutes and no longer', async () => {
     const start = new Date('2026-11-09T10:00:00Z')
@@ -238,6 +244,14 @@ describe('a user-session', () => {
     expect((await sessionFor(cookie))?.user?.email).toBe(EMAIL)
   })
 
+  it('does not renew within a day of its last renewal', async () => {
+    const cookie = await logIn()
+    vi.setSystemTime(days(0.9))
+    expect((await sessionFor(cookie))?.user?.email).toBe(EMAIL)
+    vi.setSystemTime(days(7.1))
+    expect(await sessionFor(cookie)).toBeNull()
+  })
+
   it('renews when used, at most once a day', async () => {
     const cookie = await logIn()
     vi.setSystemTime(days(3))
@@ -280,7 +294,7 @@ describe('the auth route’s addresses', () => {
   it('answers with the site’s trailing slash, and without one', async () => {
     const slashed = await login.request('GET', '/get-session/')
     expect(slashed.status).toBe(200)
-    const route = await login.request('GET', '/ok')
-    expect(route.status).toBe(200)
+    const slashless = await login.request('GET', '/ok', { exactPath: true })
+    expect(slashless.status).toBe(200)
   })
 })
