@@ -45,6 +45,11 @@ const START_LINK = ROUTES.some(({ path }) => path === hrefFor({ page: 'start' })
   ? ['Start here']
   : []
 
+/** Log in sits beside Search, at every width, while the login switch is on. */
+const LOG_IN_LINK = ROUTES.some(({ path }) => path === hrefFor({ page: 'log-in' }))
+  ? [/^\s*Log in\s*$/]
+  : []
+
 const isWide = (page: Page) => (page.viewportSize()?.width ?? 0) >= WIDE
 const banner = (page: Page) => page.getByRole('banner')
 const header = (page: Page) => banner(page).getByRole('navigation', { name: 'Main' })
@@ -104,6 +109,7 @@ test.describe('without JavaScript', () => {
         'Care4Mind',
         ...START_LINK,
         ...SECTIONS.map(({ name }) => new RegExp(`^\\s*${name}\\s*$`)),
+        ...LOG_IN_LINK,
       ])
       for (const { name, path } of SECTIONS) {
         expect(await pathOf(header(page).getByRole('link', { name, exact: true }))).toBe(path)
@@ -111,7 +117,7 @@ test.describe('without JavaScript', () => {
     } else {
       // On a phone the sections wait behind Menu, which is a link to the footer's navigation.
       const start = (page.viewportSize()?.width ?? 0) >= 480 ? START_LINK : []
-      await expect(links).toHaveText(['Care4Mind', ...start, /Search/, /Menu/])
+      await expect(links).toHaveText(['Care4Mind', ...start, /Search/, ...LOG_IN_LINK, /Menu/])
       const menu = banner(page).getByRole('link', { name: 'Menu' })
       await expect(menu).toHaveAttribute('href', '#site-nav')
       expect(await pathOf(banner(page).getByRole('link', { name: 'Search' }))).toBe('/search/')

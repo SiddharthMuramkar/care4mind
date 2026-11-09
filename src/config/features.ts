@@ -18,6 +18,8 @@ export interface Features {
   startHere: boolean
   /** Proposal: the "What's on your mind?" chips under the homepage hero. */
   whatsOnYourMind: boolean
+  /** Sign up and Log in: Log in beside Search, the auth routes, and login before Start. */
+  login: boolean
 }
 
 const VARIABLES = {
@@ -25,6 +27,7 @@ const VARIABLES = {
   conceptMap: 'FEATURE_CONCEPT_MAP',
   startHere: 'FEATURE_START_HERE',
   whatsOnYourMind: 'FEATURE_WHATS_ON_YOUR_MIND',
+  login: 'FEATURE_LOGIN',
 } as const satisfies Record<keyof Features, string>
 
 type Environment = Readonly<Record<string, string | undefined>>
@@ -44,6 +47,7 @@ export function readFeatures(env: Environment): Features {
     conceptMap: flag(VARIABLES.conceptMap),
     startHere: flag(VARIABLES.startHere),
     whatsOnYourMind: flag(VARIABLES.whatsOnYourMind),
+    login: flag(VARIABLES.login),
   }
 }
 

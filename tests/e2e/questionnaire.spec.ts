@@ -1,5 +1,9 @@
 import { expect, gotoReady, test } from './fixtures'
+import { LOGGED_IN } from './login'
 import { pageTurns, prefetched, recordPageTurns } from './page-turns'
+
+// The breadcrumbs test below opens a take page, which needs a user who is logged in.
+test.use({ storageState: LOGGED_IN })
 
 // Local runs and CI build with the preview flag on, so the KarmaYoga Scale's Start opens
 // its flow. Where the flag is off, Start stays disabled and says "In preparation"; the

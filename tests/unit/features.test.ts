@@ -10,6 +10,7 @@ const FLAGS = [
   { flag: 'conceptMap', variable: 'FEATURE_CONCEPT_MAP' },
   { flag: 'startHere', variable: 'FEATURE_START_HERE' },
   { flag: 'whatsOnYourMind', variable: 'FEATURE_WHATS_ON_YOUR_MIND' },
+  { flag: 'login', variable: 'FEATURE_LOGIN' },
 ] as const satisfies readonly { flag: keyof Features; variable: string }[]
 
 // The three environments a build runs in, as Vercel names them in VERCEL_ENV.
@@ -75,6 +76,7 @@ describe('feature flags', () => {
       conceptMap: true,
       startHere: true,
       whatsOnYourMind: true,
+      login: true,
     })
   })
 
@@ -84,6 +86,7 @@ describe('feature flags', () => {
       conceptMap: false,
       startHere: false,
       whatsOnYourMind: false,
+      login: false,
     })
   })
 

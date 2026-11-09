@@ -1,0 +1,292 @@
+'use client'
+
+import type { Route } from 'next'
+import Link from 'next/link'
+import {
+  type FormEvent,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from 'react'
+
+import cta from '@/components/Cta'
+import { safeReturnAddress } from '@/lib/auth/return-address'
+import { authAddress, LOGIN_INTENT_HEADER } from '@/lib/auth/shared'
+
+import styles from './EmailCodeForm.module.css'
+import { type TurnstileHandle, TurnstileWidget } from './TurnstileWidget'
+
+const never = () => () => {}
+
+/** How many digits an emailed code has: a paste with anything else is reduced to these. */
+const CODE_LENGTH = 6
+
+const HEADING = 'email-code-heading'
+
+const COPY = {
+  'sign-up': {
+    submit: 'Email me a code',
+    other: { lead: 'Already have an account?', action: 'Log in' },
+    sent: (email: string) => `We’ve sent a six-digit code to ${email}. It works for 10 minutes.`,
+  },
+  'log-in': {
+    submit: 'Email me a code',
+    other: { lead: 'No account yet?', action: 'Sign up' },
+    // The same words for an address with an account and one without, so nobody can learn which.
+    sent: (email: string) =>
+      `If ${email} has an account, a six-digit code is on its way. It works for 10 minutes.`,
+  },
+} as const
+
+async function post(path: string, body: unknown, headers: Record<string, string> = {}) {
+  return fetch(authAddress(path), {
+    method: 'POST',
+    headers: { 'content-type': 'application/json', ...headers },
+    body: JSON.stringify(body),
+  })
+}
+
+/** What to say when asking for a code fails. */
+async function sendError(response: Response): Promise<string> {
+  if (response.status === 429) {
+    return 'Too many tries from here just now. Please wait a minute and try again.'
+  }
+  const { code } = ((await response.json().catch(() => ({}))) ?? {}) as { code?: string }
+  if (code === 'INVALID_EMAIL') return 'Please check your email address and try again.'
+  if (code === 'MISSING_RESPONSE' || code === 'VERIFICATION_FAILED') {
+    return 'The bot check didn’t work. Please try it once more.'
+  }
+  return 'Something went wrong on our side. Please try again in a minute.'
+}
+
+async function codeError(response: Response): Promise<string> {
+  if (response.status === 429) return 'Too many tries just now. Please wait a minute and try again.'
+  const { code } = ((await response.json().catch(() => ({}))) ?? {}) as { code?: string }
+  if (code === 'OTP_EXPIRED') return 'That code has run out. Ask for a new one below.'
+  if (code === 'TOO_MANY_ATTEMPTS')
+    return 'That code has had too many wrong tries. Ask for a new one below.'
+  if (code === 'INVALID_OTP') return 'That code isn’t right. Please check it and try again.'
+  if (code === 'NAME_NEEDED')
+    return 'Please give your name (up to 100 characters) and ask for a new code.'
+  return 'Something went wrong on our side. Please try again in a minute.'
+}
+
+interface Props {
+  mode: 'sign-up' | 'log-in'
+  /** The bot check's site key, read on the server. */
+  siteKey: string
+  /** The other screen: Sign up links to Log in, and Log in to Sign up. */
+  otherScreen: Route
+}
+
+/**
+ * Sign up or Log in with an emailed code, in two steps: first the details and the bot check,
+ * then the code. Getting a code back returns the user to the page they came from.
+ */
+export function EmailCodeForm({ mode, siteKey, otherScreen }: Props) {
+  const [step, setStep] = useState<'details' | 'code'>('details')
+  const [name, setName] = useState('')
+  const [email, setEmail] = useState('')
+  const [code, setCode] = useState('')
+  const [token, setToken] = useState<string | null>(null)
+  const [busy, setBusy] = useState(false)
+  const [error, setError] = useState('')
+  const [sentAgain, setSentAgain] = useState(false)
+
+  const widget = useRef<TurnstileHandle>(null)
+  const heading = useRef<HTMLHeadingElement>(null)
+  const copy = COPY[mode]
+
+  useEffect(() => {
+    if (step === 'code') heading.current?.focus()
+  }, [step])
+
+  const onToken = useCallback((value: string | null) => setToken(value), [])
+
+  /** Ask for a code: the token it uses works once, so the widget is reset afterwards. */
+  async function requestCode(): Promise<boolean> {
+    if (!token) {
+      setError('The bot check hasn’t finished yet. Please wait a moment.')
+      return false
+    }
+    setBusy(true)
+    setError('')
+    try {
+      const response = await post(
+        '/email-otp/send-verification-otp',
+        { email, type: 'sign-in' },
+        { 'x-captcha-response': token, [LOGIN_INTENT_HEADER]: mode },
+      )
+      if (!response.ok) {
+        setError(await sendError(response))
+        return false
+      }
+      return true
+    } catch {
+      setError('We couldn’t reach the site. Please check your connection and try again.')
+      return false
+    } finally {
+      setBusy(false)
+      widget.current?.reset()
+    }
+  }
+
+  async function submitDetails(event: FormEvent) {
+    event.preventDefault()
+    if (await requestCode()) {
+      setSentAgain(false)
+      setStep('code')
+    }
+  }
+
+  async function resend() {
+    setCode('')
+    if (await requestCode()) setSentAgain(true)
+  }
+
+  async function submitCode(event: FormEvent) {
+    event.preventDefault()
+    if (code.length !== CODE_LENGTH) {
+      setError(`An emailed code has ${CODE_LENGTH} digits. Please check it and try again.`)
+      return
+    }
+    setBusy(true)
+    setError('')
+    try {
+      const response = await post('/sign-in/email-otp', {
+        email,
+        otp: code,
+        ...(mode === 'sign-up' ? { name } : {}),
+      })
+      if (!response.ok) {
+        setError(await codeError(response))
+        return
+      }
+      const next = new URLSearchParams(window.location.search).get('next')
+      window.location.replace(safeReturnAddress(next))
+    } catch {
+      setError('We couldn’t reach the site. Please check your connection and try again.')
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  // The next page, passed on when the user moves between Sign up and Log in.
+  const query = useSyncExternalStore(
+    never,
+    () => window.location.search,
+    () => '',
+  )
+
+  return (
+    <div className={styles.form}>
+      {step === 'details' ? (
+        <form onSubmit={(event) => void submitDetails(event)}>
+          {mode === 'sign-up' ? (
+            <div className={styles.field}>
+              <label htmlFor="login-name" className={styles.label}>
+                Your name
+              </label>
+              <input
+                id="login-name"
+                name="name"
+                type="text"
+                autoComplete="name"
+                required
+                maxLength={100}
+                value={name}
+                onChange={(event) => setName(event.target.value)}
+                className={styles.input}
+              />
+            </div>
+          ) : null}
+          <div className={styles.field}>
+            <label htmlFor="login-email" className={styles.label}>
+              Your email
+            </label>
+            <input
+              id="login-email"
+              name="email"
+              type="email"
+              autoComplete="email"
+              required
+              value={email}
+              onChange={(event) => setEmail(event.target.value)}
+              className={styles.input}
+            />
+          </div>
+          <TurnstileWidget ref={widget} siteKey={siteKey} onToken={onToken} />
+          <div>
+            <p className={styles.error} role="alert">
+              {error}
+            </p>
+            <button type="submit" className={cta.primary} disabled={busy}>
+              {copy.submit}
+            </button>
+          </div>
+          <p className={styles.other}>
+            {copy.other.lead}{' '}
+            <Link href={`${otherScreen}${query}` as Route}>{copy.other.action}</Link>
+          </p>
+        </form>
+      ) : (
+        <form onSubmit={(event) => void submitCode(event)}>
+          <h2 id={HEADING} ref={heading} tabIndex={-1} className={styles.heading}>
+            Enter your emailed code
+          </h2>
+          <p className={styles.sent}>{copy.sent(email)}</p>
+          {mode === 'log-in' ? (
+            <p className={styles.other}>
+              {copy.other.lead}{' '}
+              <Link href={`${otherScreen}${query}` as Route}>{copy.other.action}</Link>
+            </p>
+          ) : null}
+          <div className={styles.field}>
+            <label htmlFor="login-code" className={styles.label}>
+              Your six-digit code
+            </label>
+            <input
+              id="login-code"
+              name="code"
+              type="text"
+              inputMode="numeric"
+              autoComplete="one-time-code"
+              value={code}
+              // No maxLength: it would cut a paste that holds spaces before they are removed.
+              onChange={(event) =>
+                setCode(event.target.value.replace(/\D/g, '').slice(0, CODE_LENGTH))
+              }
+              className={styles.input}
+            />
+          </div>
+          <div>
+            <p className={styles.error} role="alert">
+              {error}
+            </p>
+            <button type="submit" className={cta.primary} disabled={busy}>
+              Confirm
+            </button>
+          </div>
+          <div className={styles.resend}>
+            <TurnstileWidget ref={widget} siteKey={siteKey} onToken={onToken} />
+            <button
+              type="button"
+              className={cta.secondary}
+              onClick={() => void resend()}
+              disabled={busy || !token}
+            >
+              Send a new code
+            </button>
+            {sentAgain ? (
+              <p className={styles.sent} role="status">
+                A new code is on its way.
+              </p>
+            ) : null}
+          </div>
+        </form>
+      )}
+    </div>
+  )
+}

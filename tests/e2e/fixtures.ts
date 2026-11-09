@@ -1,7 +1,20 @@
-import { expect, type Page, test } from '@playwright/test'
+import { expect, type Page, test as base } from '@playwright/test'
+
+import { LOGGED_IN } from './login'
 
 // Every spec takes test and expect from here, so a fixture added here reaches them all.
-export { expect, test }
+export { expect }
+
+/**
+ * A take page asks for login while the login switch is on, so a test whose title names one
+ * starts logged in (the specs that loop over routes name each path). A spec about the flow
+ * itself says so with `test.use({ storageState: LOGGED_IN })`.
+ */
+export const test = base.extend({
+  storageState: async ({ storageState }, provide, testInfo) => {
+    await provide(testInfo.title.includes('/take/') ? LOGGED_IN : storageState)
+  },
+})
 
 /**
  * How widely the specs that loop over routes test (E2E_SCOPE): every route,

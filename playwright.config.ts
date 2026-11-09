@@ -60,6 +60,9 @@ function onlyIgnore() {
 }
 
 const PORT = port()
+// The login stand-ins' ports, one and two above the site's, so builders' runs side by side don't meet.
+const STAND_IN_PORT = PORT + 1
+const DATABASE_PORT = PORT + 2
 const ONLY = onlyIgnore()
 e2eScope() // read by the specs that loop over routes; checked here so a typo stops the run at once
 
@@ -170,15 +173,37 @@ export default defineConfig({
         testIgnore: [project.testIgnore ?? [], ONLY].flat(),
       }))
     : projects,
+  globalSetup: './tests/e2e/global-setup.ts',
   ...(!process.env.PLAYWRIGHT_BASE_URL && {
-    webServer: {
-      command: `pnpm start -p ${PORT}`,
-      // By port, so anything already listening there counts, not only a server that answers.
-      port: PORT,
-      // Each run starts its own server. If the port is taken the run stops at once, naming it
-      // ("http://localhost:3110 is already used"), rather than test another builder's server.
-      reuseExistingServer: reuse(),
-      timeout: 120_000,
-    },
+    webServer: [
+      {
+        // Postgres, Brevo and Cloudflare's token check, on this machine only (login-stand-ins.mjs).
+        command: `pnpm exec node tests/e2e/login-stand-ins.mjs ${DATABASE_PORT} ${STAND_IN_PORT}`,
+        port: STAND_IN_PORT,
+        reuseExistingServer: reuse(),
+        timeout: 60_000,
+      },
+      {
+        command: `pnpm start -p ${PORT}`,
+        // By port, so anything already listening there counts, not only a server that answers.
+        port: PORT,
+        // Each run starts its own server. If the port is taken the run stops at once, naming it
+        // ("http://localhost:3110 is already used"), rather than test another builder's server.
+        reuseExistingServer: reuse(),
+        timeout: 120_000,
+        env: {
+          BETTER_AUTH_URL: baseURL,
+          // Signs user-sessions in this throwaway database only.
+          BETTER_AUTH_SECRET: 'browser-tests-only-this-signs-nothing-real',
+          DATABASE_URL: `postgres://postgres:postgres@127.0.0.1:${DATABASE_PORT}/postgres`,
+          // Cloudflare's published test secret: it can only pass tokens made with its test site key.
+          TURNSTILE_SECRET_KEY: '1x0000000000000000000000000000000AA',
+          TURNSTILE_VERIFY_URL: `http://127.0.0.1:${STAND_IN_PORT}/turnstile/v0/siteverify`,
+          BREVO_API_KEY: 'browser-tests-only',
+          BREVO_API_URL: `http://127.0.0.1:${STAND_IN_PORT}/v3/smtp/email`,
+          LOGIN_EMAIL_FROM: 'login@care4mind.test',
+        },
+      },
+    ],
   }),
 })
