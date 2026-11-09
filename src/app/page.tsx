@@ -28,7 +28,7 @@ export default async function HomePage() {
   const closingLink = heroLinks(page.hero, startHereListed)[0]
   const plates = heroPlates.map((id) => {
     const { src, width, height, alt, caption } = art(id)
-    return { id, src, width, height, alt, caption }
+    return { src, width, height, alt, caption }
   })
 
   return (

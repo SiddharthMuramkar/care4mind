@@ -1,6 +1,6 @@
 import Image from 'next/image'
 
-import type { ArtRecord } from '@/art/types'
+import type { ArtRecord } from '@/art'
 import { cx } from '@/lib/cx'
 
 import { MedallionRing } from './MedallionRing'
@@ -14,14 +14,14 @@ export function PlateViewer({
   plates,
   className,
 }: {
-  plates: readonly Pick<ArtRecord, 'id' | 'src' | 'width' | 'height' | 'alt' | 'caption'>[]
+  plates: readonly Pick<ArtRecord, 'src' | 'width' | 'height' | 'alt' | 'caption'>[]
   className?: string
 }) {
   const plate = plates[0]
   if (!plate) return null
   return (
     <figure className={cx(styles.viewer, className)}>
-      <div className={styles.circle}>
+      <div className={styles.medallion}>
         <Image
           className={styles.picture}
           src={plate.src}
@@ -34,10 +34,10 @@ export function PlateViewer({
         />
         <MedallionRing size={360} still />
       </div>
+      <div className={styles.controls} />
       <figcaption className={styles.caption}>
         {plate.caption} · 1 of {plates.length}
       </figcaption>
-      <div className={styles.controls} />
     </figure>
   )
 }

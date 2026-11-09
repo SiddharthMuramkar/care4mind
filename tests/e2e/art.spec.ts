@@ -126,38 +126,51 @@ for (const { path, name } of PAGES) {
 test.describe('the hero Plate', () => {
   const figure = (page: Page) => page.locator(`figure:has(${HERO})`)
 
-  test('opens the homepage with the first Plate and says which of the seven it is', async ({
-    page,
-  }) => {
+  test(
+    'opens the homepage with the first Plate and says which of the seven it is',
+    { tag: '@one-width' },
+    async ({ page }) => {
+      await gotoReady(page, '/')
+      await expect(page.locator(HERO)).toHaveCount(1)
+      await expect(page.locator(HERO)).toHaveAttribute('alt', /^A jeweller in a maroon turban/)
+      await expect(figure(page).locator('> figcaption:last-child')).toHaveText(
+        'The jeweller · 1 of 7',
+      )
+    },
+  )
+
+  test('keeps its ring still as the page scrolls', { tag: '@one-width' }, async ({ page }) => {
     await gotoReady(page, '/')
-    await expect(page.locator(HERO)).toHaveCount(1)
-    await expect(page.locator(HERO)).toHaveAttribute('alt', /^A jeweller in a maroon turban/)
-    await expect(figure(page).locator('figcaption')).toHaveText('The jeweller · 1 of 7')
+    const ring = figure(page).locator('svg')
+    expect(await ring.evaluate((svg) => svg.getAnimations({ subtree: true }).length)).toBe(0)
   })
 
   /** The Medallion the hero Plate sits in, the Folio it stands on, and the heading beside it. */
   async function heroBoxes(page: Page) {
     const heading = page.getByRole('heading', { level: 1 })
-    const [circle, folio, title, motto] = await Promise.all([
+    const [medallion, folio, title, motto] = await Promise.all([
       page.locator(HERO).locator('xpath=..').boundingBox(),
       heading.locator('xpath=..').boundingBox(),
       heading.boundingBox(),
       heading.locator('xpath=preceding-sibling::p[1]').boundingBox(),
     ])
-    if (!circle || !folio || !title || !motto) throw new Error('the hero has all four parts')
-    return { circle, folio, title, motto }
+    if (!medallion || !folio || !title || !motto) throw new Error('the hero has all four parts')
+    return { medallion, folio, title, motto }
   }
 
   test(
     'from 64rem stands at 360 px in its own column, left of the heading, on a 72rem Folio',
     { tag: '@self-width' },
     async ({ page }) => {
-      await page.setViewportSize({ width: 1440, height: 900 })
       await gotoReady(page, '/')
-      const { circle, folio, title } = await heroBoxes(page)
-      expect(circle.width).toBe(360)
-      expect(circle.height).toBe(360)
-      expect(circle.x + circle.width).toBeLessThan(title.x)
+      for (const width of [1024, 1440]) {
+        await page.setViewportSize({ width, height: 900 })
+        const { medallion, title } = await heroBoxes(page)
+        expect(medallion.width, `at ${width} px`).toBe(360)
+        expect(medallion.height, `at ${width} px`).toBe(360)
+        expect(medallion.x + medallion.width, `at ${width} px`).toBeLessThan(title.x)
+      }
+      const { folio } = await heroBoxes(page)
       expect(folio.width).toBe(72 * 16)
     },
   )
@@ -169,35 +182,41 @@ test.describe('the hero Plate', () => {
       async ({ page }) => {
         await page.setViewportSize({ width, height: 900 })
         await gotoReady(page, '/')
-        const { circle, motto } = await heroBoxes(page)
-        expect(circle.width).toBe(168)
-        expect(circle.y + circle.height).toBeLessThanOrEqual(motto.y)
-        expect(Math.abs(circle.x + circle.width / 2 - width / 2)).toBeLessThan(1)
+        const { medallion, motto } = await heroBoxes(page)
+        expect(medallion.width).toBe(168)
+        expect(medallion.y + medallion.height).toBeLessThanOrEqual(motto.y)
+        expect(Math.abs(medallion.x + medallion.width / 2 - width / 2)).toBeLessThan(1)
       },
     )
   }
 
-  test('keeps the heading a direct child of the Folio', async ({ page }) => {
+  test('keeps the heading a direct child of the Folio', { tag: '@one-width' }, async ({ page }) => {
     await gotoReady(page, '/')
     await expect(page.locator('[data-paper] > h1')).toHaveCount(1)
   })
 
   const SIZES = '(min-width: 64rem) 360px, 168px'
 
-  test('is the only picture preloaded, and the only one that sets sizes', async ({ page }) => {
-    await gotoReady(page, '/')
-    const preloads = page.locator('head link[rel="preload"][as="image"]')
-    await expect(preloads).toHaveCount(1)
-    await expect(preloads).toHaveAttribute('imagesizes', SIZES)
-    await expect(preloads).toHaveAttribute('imagesrcset', /%2Fart%2Fplates%2Fjeweller\.jpg/)
-    const withSizes = page.locator('img[sizes]')
-    await expect(withSizes).toHaveCount(1)
-    await expect(withSizes).toHaveAttribute('sizes', SIZES)
-    await expect(withSizes).toHaveAttribute('data-hero-plate')
-  })
+  test(
+    'is the only picture preloaded, and the only one that sets sizes',
+    { tag: '@one-width' },
+    async ({ page }) => {
+      await gotoReady(page, '/')
+      const preloads = page.locator('head link[rel="preload"][as="image"]')
+      await expect(preloads).toHaveCount(1)
+      await expect(preloads).toHaveAttribute('imagesizes', SIZES)
+      await expect(preloads).toHaveAttribute('imagesrcset', /%2Fart%2Fplates%2Fjeweller\.jpg/)
+      const withSizes = page.locator('img[sizes]')
+      await expect(withSizes).toHaveCount(1)
+      await expect(withSizes).toHaveAttribute('sizes', SIZES)
+      await expect(withSizes).toHaveAttribute('data-hero-plate')
+    },
+  )
+
+  const caption = (page: Page) => figure(page).locator('> figcaption')
 
   /** The empty row under the caption that the viewer's buttons will stand in. */
-  const controlsRow = (page: Page) => figure(page).locator('> :last-child')
+  const controlsRow = (page: Page) => caption(page).locator('xpath=preceding-sibling::*[1]')
 
   test('keeps its button row at full height, with or without the script', async ({
     page,
@@ -207,6 +226,8 @@ test.describe('the hero Plate', () => {
     await gotoReady(page, '/')
     const hydrated = await controlsRow(page).boundingBox()
     expect(hydrated?.height, 'tall enough for a 44 px button').toBeGreaterThanOrEqual(44)
+    const captionBox = await caption(page).boundingBox()
+    expect(captionBox?.y, 'the caption stands above the row').toBeLessThan(hydrated?.y ?? 0)
 
     const context = await browser.newContext({ javaScriptEnabled: false, viewport })
     const bare = await context.newPage()

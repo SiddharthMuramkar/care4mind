@@ -9,6 +9,13 @@
   pointer-events: none;
 }
 
+/* An svg keeps a colour set on it even when colours are forced, so the theme's has to be named. */
+@media (forced-colors: active) {
+  .ring {
+    color: CanvasText;
+  }
+}
+
 /*
  * Inks in with the scroll, and scrubs back if the visitor scrolls back. Every line follows the one
  * timeline named on the ring, so the flower and the laurels stay in step. The dash is there only

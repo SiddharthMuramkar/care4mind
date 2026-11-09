@@ -43,6 +43,24 @@ async function expectVisibleEdge(locator: Locator, what: string) {
   )
 }
 
+/**
+ * Every line of a ring in the theme's text colour. Read off a probe, because a line's inherited
+ * colour is the same value as its stroke whether or not the theme reached it.
+ */
+async function expectRingInTextColour(paths: Locator) {
+  expect(await paths.count()).toBeGreaterThan(0)
+  for (const path of await paths.all()) {
+    const { stroke, text } = await path.evaluate((element) => {
+      const probe = document.body.appendChild(document.createElement('i'))
+      probe.style.color = 'CanvasText'
+      const text = getComputedStyle(probe).color
+      probe.remove()
+      return { stroke: getComputedStyle(element).stroke, text }
+    })
+    expect(stroke).toBe(text)
+  }
+}
+
 const optionOf = (radio: Locator) => radio.locator('xpath=ancestor::label[1]')
 
 test('a chosen answer stands apart from the others', async ({ page }) => {
@@ -101,30 +119,12 @@ test('the Menu Drawer keeps its edge', { tag: '@self-width' }, async ({ page }) 
 
 test('a Frontispiece ring draws in the text colour of the theme', async ({ page }) => {
   await gotoReady(page, hrefFor({ kind: 'topic', id: 'mind' }))
-  const paths = page.getByRole('main').locator('header span:has(> img) > svg path')
-  expect(await paths.count()).toBeGreaterThan(0)
-  for (const path of await paths.all()) {
-    const { stroke, color } = await path.evaluate((element) => ({
-      stroke: getComputedStyle(element).stroke,
-      color: getComputedStyle(element.parentElement as Element).color,
-    }))
-    expect(stroke).toBe(color)
-    expect(stroke).not.toMatch(/^transparent$|^rgba\(.*,\s*0\)$/)
-  }
+  await expectRingInTextColour(page.getByRole('main').locator('header span:has(> img) > svg path'))
 })
 
 test('the hero Medallion ring draws in the text colour of the theme', async ({ page }) => {
   await gotoReady(page, '/')
-  const paths = page.locator('figure:has([data-hero-plate]) svg path')
-  expect(await paths.count()).toBeGreaterThan(0)
-  for (const path of await paths.all()) {
-    const { stroke, color } = await path.evaluate((element) => ({
-      stroke: getComputedStyle(element).stroke,
-      color: getComputedStyle(element.parentElement as Element).color,
-    }))
-    expect(stroke).toBe(color)
-    expect(stroke).not.toMatch(/^transparent$|^rgba\(.*,\s*0\)$/)
-  }
+  await expectRingInTextColour(page.locator('figure:has([data-hero-plate]) svg path'))
 })
 
 const PARTS = [
