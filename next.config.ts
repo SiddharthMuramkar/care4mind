@@ -35,15 +35,20 @@ const nextConfig: NextConfig = {
   // Login off: the auth route and the login pages all reach an address that doesn't exist. The
   // route's own 404 can't cover OPTIONS or PUT, which Next.js answers itself, and a page's
   // notFound() leaves a statically rendered 404 with an empty body for a reader without
-  // JavaScript. Only this gives the real 404 page, for every method.
+  // JavaScript. Only this gives the real 404 page, for every method. Each page's flight files
+  // go too: Vercel serves those from the build, and they hold the page's body.
   async rewrites() {
     if (readFeatures(process.env).login) return []
     const nowhere = '/api/login-is-off/'
     return {
-      beforeFiles: ['/api/auth/:path*', '/log-in', '/sign-up', '/privacy'].map((source) => ({
-        source,
-        destination: nowhere,
-      })),
+      beforeFiles: [
+        '/api/auth/:path*',
+        ...['/log-in', '/sign-up', '/privacy'].flatMap((page) => [
+          page,
+          `${page}.rsc`,
+          `${page}.segments/:path*`,
+        ]),
+      ].map((source) => ({ source, destination: nowhere })),
       afterFiles: [],
       fallback: [],
     }
