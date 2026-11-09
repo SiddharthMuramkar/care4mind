@@ -270,6 +270,11 @@
     background-size: 100% 0.12em;
   }
 
+  /* Pressed, the accent thickens. */
+  a:not([class]):active {
+    background-size: 100% 0.22em;
+  }
+
   :focus-visible {
     outline: 3px solid var(--color-focus);
     outline-offset: 3px;

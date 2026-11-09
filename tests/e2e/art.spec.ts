@@ -5,6 +5,7 @@ import { works } from '@/content'
 
 import { expectNoAxeViolations } from './axe'
 import { expect, gotoReady, test } from './fixtures'
+import { MISSING } from './routes'
 
 /** The homepage's hero Plate: the one picture allowed a `sizes` attribute. */
 const HERO = '[data-hero-plate]'
@@ -13,7 +14,7 @@ const HERO = '[data-hero-plate]'
 const PICTURES = 'main img, footer img'
 
 /** The pages the shared check visits. A page joins the list when `main` gets its first picture. */
-const PAGES: { path: string; name: string }[] = [
+const PAGES: { path: string; name: string; status?: number }[] = [
   // Add a page in path order, not at the end.
   { path: '/', name: 'homepage' },
   { path: '/concepts/', name: 'Concepts page' },
@@ -32,6 +33,7 @@ const PAGES: { path: string; name: string }[] = [
   { path: '/texts/', name: 'Texts page' },
   { path: '/texts/yoga-sutra/', name: 'Traditional text page' },
   { path: '/topics/mind/', name: 'mind topic page' },
+  { path: MISSING, name: '404 page', status: 404 },
 ]
 
 /** Start adding up the page's layout shifts. Call it before opening the page. */
@@ -129,7 +131,7 @@ async function expectPicturesBehave(page: Page) {
   expect(shift, 'layout shift').toBeLessThan(0.01)
 }
 
-for (const { path, name } of PAGES) {
+for (const { path, name, status = 200 } of PAGES) {
   test(`on the ${name} at ${path}, every picture loads, keeps its width list short and shifts nothing`, async ({
     page,
   }) => {
@@ -137,7 +139,7 @@ for (const { path, name } of PAGES) {
     await page.route(/\.woff2?($|\?)/, (route) => route.abort())
     await watchLayoutShifts(page)
     const response = await gotoReady(page, path)
-    expect(response?.status(), 'the page exists').toBe(200)
+    expect(response?.status(), 'the page answers as it should').toBe(status)
     await expectSomePicture(page)
     await expectPicturesBehave(page)
   })
