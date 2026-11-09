@@ -32,12 +32,18 @@ const nextConfig: NextConfig = {
       },
     ]
   },
-  // Login off: every method on the auth route reaches an address that doesn't exist, as if the
-  // route didn't. The route's own 404 can't cover OPTIONS or PUT, which Next.js answers itself.
+  // Login off: the auth route and the login pages all reach an address that doesn't exist. The
+  // route's own 404 can't cover OPTIONS or PUT, which Next.js answers itself, and a page's
+  // notFound() leaves a statically rendered 404 with an empty body for a reader without
+  // JavaScript. Only this gives the real 404 page, for every method.
   async rewrites() {
     if (readFeatures(process.env).login) return []
+    const nowhere = '/api/login-is-off/'
     return {
-      beforeFiles: [{ source: '/api/auth/:path*', destination: '/api/login-is-off/' }],
+      beforeFiles: ['/api/auth/:path*', '/log-in', '/sign-up', '/privacy'].map((source) => ({
+        source,
+        destination: nowhere,
+      })),
       afterFiles: [],
       fallback: [],
     }
