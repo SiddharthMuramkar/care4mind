@@ -246,6 +246,8 @@ async function emblem(art) {
 async function generatedPlate(input, label) {
   const { width, height } = await sharp(input).metadata()
   if (width !== height) throw new ToolError(`${label} is ${width} x ${height}. A Plate is square.`)
+  if (!(await sharp(input).stats()).isOpaque)
+    throw new ToolError(`${label} has transparency. A Plate is opaque.`)
   const bytes = await sharp(input)
     .resize(MAX_PX, MAX_PX, { fit: 'inside', withoutEnlargement: true })
     .jpeg({ quality: 85 })

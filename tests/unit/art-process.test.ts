@@ -21,6 +21,8 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 const TOOL = fileURLToPath(new URL('../../scripts/art/process.mjs', import.meta.url))
 const CLEAR = { r: 0, g: 0, b: 0, alpha: 0 }
 const INK = { r: 120, g: 30, b: 40, alpha: 1 }
+const CREAM = { r: 255, g: 248, b: 236, alpha: 1 }
+const RING_GROUND = [249, 243, 231]
 
 const run = (root: string) =>
   spawnSync(process.execPath, [TOOL, '--root', root], { encoding: 'utf8' })
@@ -47,20 +49,76 @@ function sticker([artWidth, artHeight]: [number, number], [width, height]: [numb
     .toBuffer()
 }
 
+/** Art that already has its own cream rim, 24 px wide, centred on a clear canvas. */
+async function rimmedSticker(side: number, canvas: number) {
+  const inner = await sharp({
+    create: { width: side - 48, height: side - 48, channels: 4, background: INK },
+  })
+    .png()
+    .toBuffer()
+  const art = await sharp({ create: { width: side, height: side, channels: 4, background: CREAM } })
+    .composite([{ input: inner, left: 24, top: 24 }])
+    .png()
+    .toBuffer()
+  const margin = (canvas - side) / 2
+  return sharp(art)
+    .extend({ left: margin, top: margin, right: margin, bottom: margin, background: CLEAR })
+    .png()
+    .toBuffer()
+}
+
+/**
+ * An Emblem master, 1024 px wide on the ring's cream ground: an oval ring 401 x 321 px holding
+ * more of that cream, with a bar of ink for the motto below it.
+ */
+function emblemMaster() {
+  const [width, height] = [1024, 1000]
+  const data = Buffer.alloc(width * height * 3)
+  for (let y = 0; y < height; y += 1)
+    for (let x = 0; x < width; x += 1) {
+      const reach = ((x - 512) / 200) ** 2 + ((y - 480) / 160) ** 2
+      const ink = (reach <= 1 && reach >= 0.6) || (y >= 880 && y <= 940 && x >= 212 && x <= 812)
+      data.set(ink ? [INK.r, INK.g, INK.b] : RING_GROUND, (y * width + x) * 3)
+    }
+  return sharp(data, { raw: { width, height, channels: 3 } })
+    .png()
+    .toBuffer()
+}
+
+/** A written picture's pixels, each read as [r, g, b, alpha]. */
+async function pixelsOf(file: string) {
+  const { data, info } = await sharp(file).ensureAlpha().raw().toBuffer({ resolveWithObject: true })
+  const at = (x: number, y: number) => {
+    const start = (y * info.width + x) * 4
+    return [...data.subarray(start, start + 4)]
+  }
+  return { at, width: info.width, height: info.height }
+}
+
 let scratch = ''
 let made = 0
 
-/** A made-up repo holding one kept Plate and the given generated pictures. */
-function repo(generated: Record<string, Buffer>, keptPlate: Buffer) {
+type KeptRow = { family: string; newId: string; newSrc: string }
+
+/** A made-up repo holding one kept Plate, any other kept pictures, and the generated ones. */
+function repo(
+  generated: Record<string, Buffer>,
+  keptPlate: Buffer,
+  others: { row: KeptRow; master: Buffer }[] = [],
+) {
   made += 1
   const root = join(scratch, `repo-${made}`)
   const files: Record<string, Buffer | string> = {
     'scripts/art/originals.json': JSON.stringify({
       files: [
         { verdict: 'KEEP', family: 'plate', newId: 'plate-kept', newSrc: '/art/plates/kept.jpg' },
+        ...others.map(({ row }) => ({ verdict: 'KEEP', ...row })),
       ],
     }),
     'art/masters/plates/kept.jpg': keptPlate,
+    ...Object.fromEntries(
+      others.map(({ row, master }) => [`art/masters/${row.newSrc.slice('/art/'.length)}`, master]),
+    ),
     ...Object.fromEntries(
       Object.entries(generated).map(([name, bytes]) => [`art/generated/${name}.png`, bytes]),
     ),
@@ -81,21 +139,24 @@ afterAll(() => rmSync(scratch, { recursive: true, force: true }))
 describe('a run that finishes', () => {
   let root = ''
   let kept: Buffer
+  let plateSmall: Buffer
   let first: ReturnType<typeof run>
 
   beforeAll(async () => {
     kept = await sharp(await solid(1024, 1024))
       .jpeg()
       .toBuffer()
+    plateSmall = await solid(400, 400)
     root = repo(
       {
         'plate-big': await solid(1500, 1500),
-        'plate-small': await solid(400, 400),
+        'plate-small': plateSmall,
         'pothi-palm': await sticker([600, 600], [640, 640]),
         'sticker-big': await sticker([1300, 1300], [1400, 1400]),
         'sticker-exact': await sticker([512, 512], [600, 600]),
         'sticker-margin': await sticker([480, 480], [900, 900]),
         'sticker-narrow': await sticker([479, 600], [481, 602]),
+        'sticker-rimmed': await rimmedSticker(600, 640),
       },
       kept,
     )
@@ -155,6 +216,50 @@ describe('a run that finishes', () => {
     expect(row('art/cards/plates/plate-small.jpg')).not.toContain('under 512 px')
   })
 
+  it('never enlarges a small Sticker or Plate', async () => {
+    expect((await size('public/art/stickers/sticker-margin.png')).width).toBeLessThan(1024)
+    expect(await size('public/art/plates/plate-small.jpg')).toMatchObject({
+      width: 400,
+      height: 400,
+    })
+  })
+
+  it('encodes a generated Plate as JPEG at quality 85', async () => {
+    const expected = await sharp(plateSmall).jpeg({ quality: 85 }).toBuffer()
+    expect(readFileSync(join(root, 'public/art/plates/plate-small.jpg')).equals(expected)).toBe(
+      true,
+    )
+  })
+
+  it('pads a Sticker that is not square to a square', async () => {
+    const { width, height } = await size('public/art/stickers/sticker-narrow.png')
+    expect(width).toBe(height)
+  })
+
+  it('lays art with no edge of its own on a cream die-cut edge', async () => {
+    const { at, width, height } = await pixelsOf(
+      join(root, 'public/art/stickers/sticker-exact.png'),
+    )
+    const y = Math.floor(height / 2)
+    const art = Array.from({ length: width }, (_, x) => x).find((x) => at(x, y)[0] === INK.r)
+    expect(art).toBeGreaterThan(1)
+    expect(at((art ?? 0) - 1, y)).toEqual([CREAM.r, CREAM.g, CREAM.b, 255])
+    expect(at(0, 0)[3]).toBe(0)
+    expect(row('public/art/stickers/sticker-exact.png')).toContain('edge added')
+  })
+
+  it('leaves art with its own cream edge alone, inside a 4% clear margin', async () => {
+    const path = 'public/art/stickers/sticker-rimmed.png'
+    expect(row(path)).not.toContain('edge added')
+    const { at, width, height } = await pixelsOf(join(root, path))
+    expect([width, height]).toEqual([648, 648])
+    const middle = 324
+    expect(at(23, middle)[3]).toBe(0)
+    expect(at(24, middle)).toEqual([CREAM.r, CREAM.g, CREAM.b, 255])
+    expect(at(623, middle)).toEqual([CREAM.r, CREAM.g, CREAM.b, 255])
+    expect(at(624, middle)[3]).toBe(0)
+  })
+
   it('writes the same bytes on a second run', () => {
     const snapshot = () =>
       ['public/art', 'art/cards'].flatMap((folder) =>
@@ -168,6 +273,33 @@ describe('a run that finishes', () => {
     expect(before.length).toBeGreaterThan(0)
     expect(run(root).status).toBe(0)
     expect(snapshot()).toEqual(before)
+  })
+})
+
+describe('the Emblem ring', () => {
+  let picture: Awaited<ReturnType<typeof pixelsOf>>
+
+  beforeAll(async () => {
+    const root = repo({}, await solid(300, 300), [
+      {
+        row: { family: 'emblem', newId: 'emblem-ring', newSrc: '/art/emblems/ring.png' },
+        master: await emblemMaster(),
+      },
+    ])
+    expect(run(root).status).toBe(0)
+    picture = await pixelsOf(join(root, 'public/art/emblems/ring.png'))
+  }, 120_000)
+
+  it('leaves the motto out and comes out square, with no margin', () => {
+    expect([picture.width, picture.height]).toEqual([401, 401])
+  })
+
+  it('clears the ground outside the ring, inside the box around it', () => {
+    expect(picture.at(0, 40)[3]).toBe(0)
+  })
+
+  it('keeps the cream the ring encloses', () => {
+    expect(picture.at(200, 200)).toEqual([...RING_GROUND, 255])
   })
 })
 
@@ -195,6 +327,12 @@ describe('a run that stops', () => {
       'plates/plate-wide.jpg is 600 x 400. A Plate is square.',
     ],
     [
+      'a Plate with transparency',
+      'plate-clear',
+      () => sticker([200, 200], [300, 300]),
+      'plates/plate-clear.jpg has transparency. A Plate is opaque.',
+    ],
+    [
       'an id with no known first word',
       'ornament-vine',
       () => solid(300, 300),
@@ -212,5 +350,18 @@ describe('a run that stops', () => {
     expect(result.stdout).toBe('')
     expect(existsSync(join(root, 'public'))).toBe(false)
     expect(existsSync(join(root, 'art/cards'))).toBe(false)
+  })
+
+  it('names an Emblem with no recipe, exits 2 and writes nothing', async () => {
+    const root = repo({}, await solid(300, 300), [
+      {
+        row: { family: 'emblem', newId: 'emblem-seal', newSrc: '/art/emblems/seal.png' },
+        master: await solid(300, 300),
+      },
+    ])
+    const result = run(root)
+    expect(result.status).toBe(2)
+    expect(result.stderr).toContain('No recipe for emblem-seal (family emblem).')
+    expect(existsSync(join(root, 'public'))).toBe(false)
   })
 })
