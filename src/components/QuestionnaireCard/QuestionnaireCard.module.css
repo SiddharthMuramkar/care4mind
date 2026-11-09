@@ -5,6 +5,15 @@
     'action action';
 }
 
+/* A card with its own Plate: the Concept card's row above the title, with no gloss or meta rows. */
+.card.withArt {
+  grid-template-areas:
+    'art deva'
+    'title title'
+    'summary summary'
+    'action action';
+}
+
 .badge {
   grid-area: deva;
   align-self: center;
