@@ -4,6 +4,7 @@ import { hrefFor } from '@/content'
 
 import { gotoErrorPage } from './error-page'
 import { expect, gotoReady, test } from './fixtures'
+import { MISSING } from './routes'
 
 // Windows' contrast themes repaint backgrounds and borders in system colours and drop every
 // box-shadow, so a state or an edge drawn only with those has to be drawn again.
@@ -112,6 +113,19 @@ test('a Frontispiece ring draws in the text colour of the theme', async ({ page 
     expect(stroke).toBe(color)
     expect(stroke).not.toMatch(/^transparent$|^rgba\(.*,\s*0\)$/)
   }
+})
+
+test('the 404 page keeps its picture and its Fleuron', async ({ page }) => {
+  await gotoReady(page, MISSING)
+  const main = page.getByRole('main')
+  await expect(main.locator('img')).toBeVisible()
+  const fleuron = main.locator('svg[data-lotus]')
+  await expect(fleuron).toBeVisible()
+  const stroke = await fleuron
+    .locator('path')
+    .first()
+    .evaluate((path) => getComputedStyle(path).stroke)
+  expect(stroke).not.toMatch(/^none$|^transparent$|^rgba\(.*,\s*0\)$/)
 })
 
 test('the footer keeps its Emblem and motto', async ({ page }) => {

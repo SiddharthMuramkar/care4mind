@@ -1,6 +1,7 @@
 import type { Page } from '@playwright/test'
 
 import { expect, gotoReady, test } from './fixtures'
+import { MISSING } from './routes'
 
 /** The homepage's hero Plate: the one picture allowed a `sizes` attribute. */
 const HERO = '[data-hero-plate]'
@@ -9,9 +10,10 @@ const HERO = '[data-hero-plate]'
 const PICTURES = 'main img, footer img'
 
 /** The pages the shared check visits. A page joins the list when it gets its first picture. */
-const PAGES: { path: string; name: string }[] = [
+const PAGES: { path: string; name: string; status?: number }[] = [
   // Add a page in path order, not at the end.
   { path: '/search/', name: 'search page, whose one picture is the footer Emblem' },
+  { path: MISSING, name: '404 page', status: 404 },
   { path: '/topics/mind/', name: 'mind topic page' },
 ]
 
@@ -107,13 +109,13 @@ async function expectPicturesBehave(page: Page) {
   expect(shift, 'layout shift').toBeLessThan(0.01)
 }
 
-for (const { path, name } of PAGES) {
+for (const { path, name, status = 200 } of PAGES) {
   test(`on the ${name} at ${path}, every picture loads, keeps its width list short and shifts nothing`, async ({
     page,
   }) => {
     await watchLayoutShifts(page)
     const response = await gotoReady(page, path)
-    expect(response?.status(), 'the page exists').toBe(200)
+    expect(response?.status(), 'the page answers as it should').toBe(status)
     await expectSomePicture(page)
     await expectPicturesBehave(page)
   })

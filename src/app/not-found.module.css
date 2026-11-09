@@ -1,3 +1,15 @@
+/* The page's picture, centred above the kicker, with room before the words begin. */
+.picture {
+  margin-block-end: 1rem;
+}
+
+@media (width < 40rem) {
+  .picture {
+    max-width: 10rem;
+    height: auto;
+  }
+}
+
 /* The lotus Fleuron at rest, as on every page but the home page: a wrong turn is still a page of the book. */
 .fleuron {
   width: min(10rem, 50%);

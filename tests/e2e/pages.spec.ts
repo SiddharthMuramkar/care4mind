@@ -144,7 +144,7 @@ test.describe('404 page', () => {
   }) => {
     await gotoReady(page, MISSING)
     const main = page.getByRole('main')
-    const fleuron = main.locator('svg')
+    const fleuron = main.locator('svg[data-lotus]')
     await expect(fleuron).toHaveCount(1)
     await expect(fleuron).toBeVisible()
     await expect(fleuron).toHaveAttribute('aria-hidden', 'true')
@@ -152,6 +152,33 @@ test.describe('404 page', () => {
     expect(await breathes(fleuron), 'it never breathes').toBe(false)
     expect(await unfinishedDrawings(page), 'every stroke whole').toEqual([])
   })
+})
+
+// Measured at the two sizes the page sets, on the Medallion's box when the picture has a ring.
+test.describe('the 404 page picture', { tag: '@self-width' }, () => {
+  for (const { width, size } of [
+    { width: 1440, size: 200 },
+    { width: 360, size: 160 },
+  ]) {
+    test(`is decorative, loaded and ${size} px across on a screen ${width} px wide`, async ({
+      page,
+    }) => {
+      await page.setViewportSize({ width, height: 900 })
+      await gotoReady(page, MISSING)
+      const main = page.getByRole('main')
+      const picture = main.locator('img')
+      await expect(picture).toHaveCount(1)
+      await expect(picture).toBeVisible()
+      await expect(picture).toHaveAttribute('alt', '')
+      await expect(picture).toHaveAttribute('width', '200')
+      await expect(picture).toHaveAttribute('height', '200')
+      await expect
+        .poll(() => picture.evaluate((image: HTMLImageElement) => image.naturalWidth))
+        .toBeGreaterThan(0)
+      const box = await main.locator('span:has(> img), img').first().boundingBox()
+      expect(box).toMatchObject({ width: size, height: size })
+    })
+  }
 })
 
 // The double frame marks only the hero, verse cards and featured cards; a reading page is a
