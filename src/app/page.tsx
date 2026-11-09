@@ -117,6 +117,7 @@ export default async function HomePage() {
               <li key={concept.slug}>
                 <ConceptCard
                   featured
+                  pictureSize={72}
                   concept={concept}
                   action={
                     <Link
