@@ -31,16 +31,19 @@
   gap: 0.75rem;
 }
 
-/* The Emblem and the wordmark side by side, with the motto under them as the old logo had it. */
+/*
+ * The Emblem and the wordmark side by side, with the motto under them as the old logo had it.
+ * Raised text on a phone sends the wordmark under the Emblem rather than squeezing the picture.
+ */
 .signature {
-  display: grid;
-  grid-template-columns: auto 1fr;
+  display: flex;
+  flex-wrap: wrap;
   align-items: center;
   column-gap: 0.75rem;
 }
 
 .motto {
-  grid-column: 1 / -1;
+  flex-basis: 100%;
   margin: 0.25rem 0 0;
   color: var(--color-ink-muted);
 }

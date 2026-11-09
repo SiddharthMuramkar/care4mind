@@ -17,7 +17,7 @@ for (const { kind, name, action } of [
       await expect(emblem).toBeVisible()
       await expect(emblem).toHaveAttribute('alt', '')
       await expect(emblem).toHaveAttribute('src', /emblem-mark/)
-      expect(await emblem.getAttribute('sizes')).toBeNull()
+      await expect(emblem).not.toHaveAttribute('sizes')
       expect(await emblem.boundingBox()).toMatchObject({ width: 96, height: 96 })
       await expect
         .poll(() => emblem.evaluate((image: HTMLImageElement) => image.naturalWidth))

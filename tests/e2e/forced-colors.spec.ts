@@ -100,22 +100,33 @@ test('the Menu Drawer keeps its edge', { tag: '@self-width' }, async ({ page }) 
   await expectVisibleEdge(drawer, 'Menu Drawer')
 })
 
+/** A picture's box stands even if its file failed, so what counts is that the file arrived. */
+const expectLoaded = (picture: Locator) =>
+  expect
+    .poll(() => picture.evaluate((image: HTMLImageElement) => image.naturalWidth))
+    .toBeGreaterThan(0)
+
 test('the footer keeps its Emblem and motto', async ({ page }) => {
   await gotoReady(page, '/concepts/vikshepa/')
   const footer = page.getByRole('contentinfo')
   const emblem = footer.locator('img')
+  // It loads lazily, so it has to come near the screen.
   await emblem.scrollIntoViewIfNeeded()
   await expect(emblem).toBeVisible()
+  await expectLoaded(emblem)
   await expect(footer.locator('[lang="sa-Deva"]')).toBeVisible()
 })
 
 test('the error pages keep their Emblem and the edge of their button', async ({ page }) => {
+  const emblem = page.getByRole('main').locator('img')
   await gotoErrorPage(page, 'segment')
-  await expect(page.getByRole('main').locator('img')).toBeVisible()
+  await expect(emblem).toBeVisible()
+  await expectLoaded(emblem)
   await expectVisibleEdge(page.getByRole('button', { name: 'Try again' }), 'Try again')
   await page.unrouteAll()
   await gotoErrorPage(page, 'global')
-  await expect(page.getByRole('main').locator('img')).toBeVisible()
+  await expect(emblem).toBeVisible()
+  await expectLoaded(emblem)
   await expectVisibleEdge(page.getByRole('button', { name: 'Reload the page' }), 'Reload the page')
 })
 

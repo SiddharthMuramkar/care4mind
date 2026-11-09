@@ -13,10 +13,12 @@ export function Emblem({
   variant,
   size,
   decorative = true,
+  className,
 }: {
   variant: keyof typeof RECORDS
   size: number
   decorative?: boolean
+  className?: string
 }) {
   const record = RECORDS[variant]
   return (
@@ -25,6 +27,7 @@ export function Emblem({
       width={size}
       height={Math.round((size * record.height) / record.width)}
       alt={decorative ? '' : record.alt}
+      className={className}
     />
   )
 }

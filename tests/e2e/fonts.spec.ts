@@ -113,7 +113,6 @@ for (const { path, name } of PAGES) {
     test('sets its Devanagari in its own face', async ({ page }) => {
       await page.goto(path)
       const devanagari = page.locator('[lang="sa-Deva"]')
-      test.skip((await devanagari.count()) === 0, 'no Devanagari on this page')
       const family = await devanagari
         .first()
         .evaluate((element) => getComputedStyle(element).fontFamily)

@@ -228,7 +228,7 @@ test.describe('without JavaScript', () => {
     await expect(emblem).toHaveAttribute('alt', '')
     await expect(emblem).toHaveAttribute('width', '72')
     await expect(emblem).toHaveAttribute('src', /emblem-ring/)
-    expect(await emblem.getAttribute('sizes')).toBeNull()
+    await expect(emblem).not.toHaveAttribute('sizes')
     const candidates = (await emblem.getAttribute('srcset'))?.split(', ') ?? []
     expect(candidates).toHaveLength(2)
     expect(candidates[0]).toMatch(/[?&]w=72&.* 1x$/)
@@ -252,6 +252,27 @@ test.describe('without JavaScript', () => {
       line?.y ?? 0,
     )
   })
+
+  test(
+    'the footer Emblem keeps its box when the browser text size is raised on a phone',
+    { tag: '@self-width' },
+    async ({ browser, baseURL }) => {
+      // Only a launch flag sets the browser's own default text size.
+      const raised = await browser
+        .browserType()
+        .launch({ args: ['--blink-settings=defaultFontSize=32'] })
+      try {
+        const page = await raised.newPage({ baseURL, viewport: { width: 360, height: 800 } })
+        await page.goto('/search/')
+        expect(await page.getByRole('contentinfo').locator('img').boundingBox()).toMatchObject({
+          width: 72,
+          height: 72,
+        })
+      } finally {
+        await raised.close()
+      }
+    },
+  )
 })
 
 test.describe('the section you are in', () => {
