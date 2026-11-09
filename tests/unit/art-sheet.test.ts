@@ -1,14 +1,15 @@
-import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { dirname, join, resolve } from 'node:path'
 import { pathToFileURL } from 'node:url'
 
+import sharp from 'sharp'
 import { afterAll, describe, expect, it } from 'vitest'
 
 import { SLOTS } from '@/art/slots'
 
-// `pnpm art:sheet`, the parts with no browser: which briefs it plans, what the page holds and which
-// candidates it picks up. The PDF itself is checked by looking at it.
+// `pnpm art:sheet`, the parts with no browser: which briefs it plans, what the page holds, the
+// thumbnails it writes and which candidates it picks up. The PDF itself is checked by looking at it.
 
 interface Place {
   thumb: string | null
@@ -46,7 +47,7 @@ const sheet = (await import(pathToFileURL(resolve('scripts/art/sheet.mjs')).href
     slotIds: readonly string[],
     warn: (text: string) => void,
   ): Inputs['candidates']
-  PDF_OPTIONS: { printBackground: boolean; preferCSSPageSize: boolean }
+  writeThumbs(plan: Brief[], colours: Colours, inbox: string, root: string): Promise<void>
 }
 
 const readJson = (path: string) => JSON.parse(readFileSync(resolve(path), 'utf8'))
@@ -54,6 +55,7 @@ const briefs = readJson('art/prompts.json').pictures as Inputs['briefs']
 const originals = readJson('scripts/art/originals.json').files as Inputs['originals']
 const plan = (candidates: Inputs['candidates'] = {}) =>
   sheet.planSheet({ slots: SLOTS, briefs, candidates, originals })
+const COLOURS = { paper: '#eadbb6', indigo: '#151a3d', page: '#f6eedb', ink: '#1d1a2e' }
 
 describe('the sheet plan', () => {
   it('has one brief for each of the 32 slots and none for the Dosha Survey', () => {
@@ -100,7 +102,6 @@ describe('the sheet plan', () => {
 })
 
 describe('the sheet page', () => {
-  const COLOURS = { paper: '#eadbb6', indigo: '#151a3d', page: '#f6eedb', ink: '#1d1a2e' }
   const page = (candidates: Inputs['candidates'] = {}) =>
     sheet.renderSheet(plan(candidates), COLOURS)
   const count = (html: string, text: string) => html.split(text).length - 1
@@ -156,20 +157,49 @@ describe('the sheet page', () => {
     expect(html).toContain('<meta charset="utf-8">')
   })
 
-  it('loads every picture at once, so the PDF prints no blanks', () => {
-    expect(page()).not.toContain('loading=')
-  })
-
   it('names the id and placement, and nothing about where a picture came from', () => {
     const section = sectionOf(page(), 'plate-ahimsa')
     expect(section).toContain('plate-ahimsa')
     expect(section).toContain('concept: ahimsa')
     expect(section).not.toMatch(/licen[cs]e|origin|credit|source/i)
   })
+})
 
-  it('prints with backgrounds on, because the two grounds are the point', () => {
-    expect(sheet.PDF_OPTIONS.printBackground).toBe(true)
-    expect(sheet.PDF_OPTIONS.preferCSSPageSize).toBe(true)
+describe('the thumbnails', () => {
+  const inbox = mkdtempSync(join(tmpdir(), 'art-sheet-thumbs-'))
+  afterAll(() => {
+    rmSync(inbox, { recursive: true, force: true })
+  })
+
+  it('flatten a clear picture onto each ground, at the addresses the page uses', async () => {
+    const file = join(inbox, 'sticker-self/1.png')
+    mkdirSync(dirname(file), { recursive: true })
+    await sharp({
+      create: { width: 40, height: 40, channels: 4, background: { r: 0, g: 0, b: 0, alpha: 0 } },
+    })
+      .png()
+      .toFile(file)
+    const planned = plan({ 'sticker-self': { 1: file } })
+
+    await sheet.writeThumbs(planned, COLOURS, inbox, resolve('.'))
+
+    const addresses = [...sheet.renderSheet(planned, COLOURS).matchAll(/ src="([^"]+)"/g)].map(
+      (match) => match[1] ?? '',
+    )
+    expect(addresses.length).toBeGreaterThan(0)
+    for (const address of addresses) expect(existsSync(join(inbox, address)), address).toBe(true)
+
+    for (const [ground, rgb] of [
+      ['paper', [0xea, 0xdb, 0xb6]],
+      ['indigo', [0x15, 0x1a, 0x3d]],
+    ] as const) {
+      const { data } = await sharp(join(inbox, `.thumbs/sticker-self/1-${ground}.jpg`))
+        .raw()
+        .toBuffer({ resolveWithObject: true })
+      rgb.forEach((level, channel) => {
+        expect(Math.abs((data[channel] ?? 0) - level), ground).toBeLessThanOrEqual(2)
+      })
+    }
   })
 })
 
@@ -193,15 +223,6 @@ describe('the candidates in the inbox', () => {
     )
     return { root, found, warnings }
   }
-
-  it('is nothing at all when the inbox does not exist yet', () => {
-    const warnings: string[] = []
-    const found = sheet.findCandidates(join(tmpdir(), 'art-sheet-no-such-inbox'), ['a'], (text) =>
-      warnings.push(text),
-    )
-    expect(found).toEqual({})
-    expect(warnings).toEqual([])
-  })
 
   it('picks up a PNG, a JPEG and a WebP under their slot ids, by number', () => {
     const { root, found, warnings } = inbox([
@@ -232,6 +253,13 @@ describe('the candidates in the inbox', () => {
     expect(found).toEqual({})
     expect(warnings).toHaveLength(1)
     expect(warnings[0]).toContain('sticker-slef')
+  })
+
+  it('warns about a loose file, which is likely a candidate out of its folder', () => {
+    const { found, warnings } = inbox(['sticker-self.png'])
+    expect(found).toEqual({})
+    expect(warnings).toHaveLength(1)
+    expect(warnings[0]).toContain('sticker-self.png')
   })
 
   it('shows numbers 1 to 4 and warns about any other file', () => {

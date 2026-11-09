@@ -4,7 +4,7 @@
 //
 //   pnpm art:sheet
 
-import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs'
+import { mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
 import { pathToFileURL } from 'node:url'
 
@@ -17,8 +17,11 @@ import { rootFrom, runTool, ToolError } from '../content/cli.mjs'
 const PLACES = 4
 /** Twice the largest tile, enough to count fingers. */
 const THUMB_PX = 480
-/** Chrome re-encodes a PNG losslessly in a PDF but passes a JPEG through, and the PDF is emailed. */
-const THUMB_JPEG = { quality: 82 }
+/**
+ * Chrome re-encodes a PNG losslessly in a PDF but passes a JPEG through, and the PDF is emailed.
+ * This quality keeps a full sheet near 17 MB, inside a 25 MB attachment limit once encoded.
+ */
+const THUMB_JPEG = { quality: 70 }
 const CANDIDATE_FILE = /^([1-4])\.(?:png|jpe?g|webp)$/i
 /** Two of the client's own pictures per kind of brief. A Pothi is judged against their books. */
 const REFERENCES = {
@@ -27,8 +30,9 @@ const REFERENCES = {
   plate: ['plate-jeweller-woman', 'plate-sculptor'],
 }
 
-/** Print the backgrounds, which Chrome leaves out by default, on the pages the sheet's CSS sizes. */
-export const PDF_OPTIONS = { printBackground: true, preferCSSPageSize: true }
+/** What the sheet writes to the inbox, beside the candidates. */
+const HTML_FILE = 'sheet.html'
+const PDF_FILE = 'sheet.pdf'
 
 /** The sizes a picture is used at, in CSS pixels. */
 const SIZES = [64, 120, 240]
@@ -96,7 +100,7 @@ export function renderSheet(plan, colours) {
 <style>
 @page { size: 1640px 1200px; margin: 0 }
 * { box-sizing: border-box; -webkit-print-color-adjust: exact; print-color-adjust: exact }
-body { margin: 0; font: 16px/1.4 Georgia, serif; background: ${colours.page}; color: ${colours.ink} }
+body { min-width: 1640px; margin: 0; font: 16px/1.4 Georgia, serif; background: ${colours.page}; color: ${colours.ink} }
 section { break-after: page; padding: 24px 32px }
 h2 { margin: 0; font-size: 22px }
 small { margin-left: 12px; font-size: 16px; font-weight: normal }
@@ -110,7 +114,7 @@ p { margin: 4px 0 16px; max-width: 72ch }
 .cell { display: grid; flex: 0 0 240px; place-items: center }
 .picture { display: block; object-fit: contain }
 .mask { border-radius: 50%; object-fit: cover }
-.empty { display: grid; place-items: center; border: 1px dashed; font-size: 14px }
+.empty { display: grid; place-items: center; border: 1px solid; font-size: 14px }
 </style>
 ${plan.map(section).join('\n')}
 </html>
@@ -151,10 +155,13 @@ export function planSheet({ slots, briefs, candidates, originals }) {
 
 /** The candidates in the inbox, by slot id and number. Anything else there earns a warning. */
 export function findCandidates(inbox, slotIds, warn) {
-  if (!existsSync(inbox)) return {}
   const found = {}
   for (const folder of readdirSync(inbox, { withFileTypes: true })) {
-    if (!folder.isDirectory() || folder.name.startsWith('.')) continue
+    if (folder.name.startsWith('.') || [HTML_FILE, PDF_FILE].includes(folder.name)) continue
+    if (!folder.isDirectory()) {
+      warn(`${folder.name} in the inbox is not in a slot's folder, so the sheet leaves it out.`)
+      continue
+    }
     if (!slotIds.includes(folder.name)) {
       warn(`${folder.name} in the inbox is not a slot id, so the sheet leaves it out.`)
       continue
@@ -174,7 +181,7 @@ export function findCandidates(inbox, slotIds, warn) {
 }
 
 /** A small copy of every picture on the sheet, flattened onto each ground so halos show. */
-async function writeThumbs(plan, colours, inbox, root) {
+export async function writeThumbs(plan, colours, inbox, root) {
   const files = new Map(
     plan
       .flatMap((brief) => [...brief.candidates, ...brief.references])
@@ -200,7 +207,7 @@ async function writeThumbs(plan, colours, inbox, root) {
   }
 }
 
-/** Open the written page and print it. */
+/** Open the written page and print it, with the backgrounds Chrome leaves out by default. */
 async function printSheet(html, pdf) {
   const { chromium } = await import('@playwright/test')
   const browser = await chromium.launch()
@@ -211,7 +218,7 @@ async function printSheet(html, pdf) {
       [...document.images].filter((image) => image.naturalWidth === 0).map((image) => image.src),
     )
     if (broken.length > 0) throw new ToolError(`These did not load:\n${broken.join('\n')}`)
-    await page.pdf({ ...PDF_OPTIONS, path: pdf })
+    await page.pdf({ path: pdf, printBackground: true, preferCSSPageSize: true })
   } finally {
     await browser.close()
   }
@@ -234,8 +241,8 @@ async function main(args) {
     originals: JSON.parse(read('scripts/art/originals.json')).files,
   })
   await writeThumbs(plan, colours, inbox, root)
-  const html = join(inbox, 'sheet.html')
-  const pdf = join(inbox, 'sheet.pdf')
+  const html = join(inbox, HTML_FILE)
+  const pdf = join(inbox, PDF_FILE)
   writeFileSync(html, renderSheet(plan, colours))
   await printSheet(html, pdf)
   console.log(html)
