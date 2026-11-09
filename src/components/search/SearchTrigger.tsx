@@ -32,9 +32,10 @@ export function SearchTrigger({
   children,
   className,
 }: SearchTriggerProps) {
-  const search = hrefFor({ page: 'search' })
-  const href =
-    initialQuery === undefined ? search : { pathname: search, query: { q: initialQuery } }
+  const href = {
+    pathname: hrefFor({ page: 'search' }),
+    query: initialQuery === undefined ? {} : { q: initialQuery },
+  }
   const label = children ?? 'Search'
   if (placement === 'page') {
     return (

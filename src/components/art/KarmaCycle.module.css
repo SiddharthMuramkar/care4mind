@@ -16,7 +16,7 @@
   margin: 0;
   max-width: 45rem;
   /* The old picture's address lands here, with the heading above it clear of the header. */
-  scroll-margin-top: 3rem;
+  scroll-margin-top: 3.25rem;
 }
 
 /*

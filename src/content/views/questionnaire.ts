@@ -54,11 +54,14 @@ export function questionnaireCard(
     sourceTitle: record.sourceTitle,
     status: record.status,
     shownStatus: shownStatus(record.status, flags),
-    ...present({
-      summary: record.summary,
-      takeHref: canTake(record, flags)
-        ? hrefFor({ kind: 'questionnaire', id: record.slug, status: record.status, flow: true })
-        : undefined,
+    ...present({ summary: record.summary }),
+    ...(canTake(record, flags) && {
+      takeHref: hrefFor({
+        kind: 'questionnaire',
+        id: record.slug,
+        status: record.status,
+        flow: true,
+      }),
     }),
     anchor: record.slug,
     href: questionnaireHref(record),

@@ -340,17 +340,16 @@ async function anchorsByPage(): Promise<Map<string, Set<string>>> {
   for (const { slug } of await concepts.list()) {
     const concept = await concepts.get(slug)
     if (!concept) continue
-    links.push(...concept.toc.flatMap(({ href, terms }) => [href, ...terms.map((t) => t.href)]))
+    links.push(...concept.toc.flatMap(({ href, terms }) => [href].concat(terms.map((t) => t.href))))
     links.push(...concept.references.map(({ anchor }) => `${concept.href}#${anchor}`))
     links.push(...concept.verses.map(({ href }) => href))
   }
   for (const { slug } of await topics.list()) {
     const topic = await topics.get(slug)
     links.push(
-      ...(topic?.intro?.toc ?? []).flatMap(({ href, terms }) => [
-        href,
-        ...terms.map((t) => t.href),
-      ]),
+      ...(topic?.intro?.toc ?? []).flatMap(({ href, terms }) =>
+        [href].concat(terms.map((t) => t.href)),
+      ),
     )
     links.push(...(topic?.intro?.references ?? []).map(({ anchor }) => `${topic?.href}#${anchor}`))
     links.push(...(topic?.works ?? []).flatMap((work) => work.verses.map(({ href }) => href)))
