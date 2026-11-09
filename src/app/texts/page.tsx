@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 
+import { SectionSticker } from '@/components/art'
 import { Fleuron } from '@/components/Fleuron'
 import { ReadingPage } from '@/components/ReadingPage'
 import { TextCard } from '@/components/texts'
@@ -29,6 +30,7 @@ export default async function TextsPage() {
     <ReadingPage
       path={PATH}
       width="shelf"
+      beforeTitle={<SectionSticker section="texts" />}
       title="Traditional texts"
       afterTitle={
         <>

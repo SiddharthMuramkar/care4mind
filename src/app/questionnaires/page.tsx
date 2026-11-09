@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 
+import { SectionSticker } from '@/components/art'
 import { OrnamentRule } from '@/components/OrnamentRule'
 import { turnForward } from '@/components/PageTurn'
 import { ReadingPage } from '@/components/ReadingPage'
@@ -70,6 +71,7 @@ export default async function QuestionnairesPage() {
     <ReadingPage
       path={PATH}
       titleId="questionnaires-title"
+      beforeTitle={<SectionSticker section="questionnaires" />}
       title="Questionnaires"
       titleClassName={styles.title}
       afterTitle={

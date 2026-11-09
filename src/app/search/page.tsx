@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 
+import { SectionSticker } from '@/components/art'
 import { HelpLine } from '@/components/HelpLine'
 import { turnForward } from '@/components/PageTurn'
 import { ReadingPage } from '@/components/ReadingPage'
@@ -46,6 +47,7 @@ export default async function SearchPage({ searchParams }: PageProps<'/search'>)
     <ReadingPage
       path={PATH}
       titleId="search-title"
+      beforeTitle={query === '' || found.length === 0 ? <SectionSticker section="search" /> : null}
       title="Search"
       afterTitle={<SearchForm query={query} />}
     >

@@ -1,5 +1,6 @@
 import type { Page } from '@playwright/test'
 
+import { expectNoAxeViolations } from './axe'
 import { expect, gotoReady, test } from './fixtures'
 
 /** The homepage's hero Plate: the one picture allowed a `sizes` attribute. */
@@ -116,6 +117,133 @@ for (const { path, name } of PAGES) {
     await expectPicturesBehave(page)
   })
 }
+
+/**
+ * The picture at the head of each section page, as the pictures spec's table names it. Three stand
+ * as their Interim picture, the clasped book, until their own Sticker is made.
+ */
+const SECTION_STICKERS = [
+  { path: '/concepts/', file: 'cosmos' },
+  { path: '/concepts/map/', file: 'cosmos' },
+  { path: '/texts/', file: 'book-ornate' },
+  { path: '/questionnaires/', file: 'clipboard' },
+  { path: '/library/', file: 'book-clasp' },
+  { path: '/library/textbooks/', file: 'book-clasp' },
+  { path: '/library/inspirational-books/', file: 'book-clasp' },
+  { path: '/library/courses/', file: 'gear' },
+  { path: '/library/methods/', file: 'mind-tools' },
+  { path: '/library/references/', file: 'book-clasp' },
+  { path: '/start/', file: 'cosmos' },
+  { path: '/search/', file: 'mind-dome' },
+] as const
+
+/** A query with no results. */
+const NOTHING_FOUND = '/search/?q=zzqxqzzqx'
+
+/** The picture at the head of the page: the only one a section page's header holds. */
+const headSticker = (page: Page) => page.getByRole('main').locator('header img')
+
+test.describe('section pages', () => {
+  // The shared check at each section page, with the web fonts held back. Their late swap rewraps
+  // some headings by itself, a shift the Sticker has no part in, so without them only a picture
+  // that holds no space can move the page.
+  for (const { path } of SECTION_STICKERS) {
+    test(`${path}: the Sticker loads, keeps its width list short and shifts nothing`, async ({
+      page,
+    }) => {
+      await page.route('**/*.woff2', (route) => route.abort())
+      await watchLayoutShifts(page)
+      const response = await gotoReady(page, path)
+      expect(response?.status(), 'the page exists').toBe(200)
+      await expectSomePicture(page)
+      await expectPicturesBehave(page)
+    })
+  }
+
+  for (const { path, file } of SECTION_STICKERS) {
+    test(
+      `${path} shows the ${file} Sticker, decorative, above its heading`,
+      { tag: '@one-width' },
+      async ({ page }) => {
+        await gotoReady(page, path)
+        const sticker = headSticker(page)
+        await expect(sticker).toHaveCount(1)
+        await expect(sticker).toHaveAttribute('alt', '')
+        expect(decodeURIComponent((await sticker.getAttribute('src')) ?? '')).toContain(
+          `/art/stickers/${file}.png`,
+        )
+        const [picture, heading] = await Promise.all([
+          sticker.boundingBox(),
+          page.getByRole('heading', { level: 1 }).boundingBox(),
+        ])
+        expect(picture?.y ?? Infinity, 'the Sticker comes before the heading').toBeLessThan(
+          heading?.y ?? 0,
+        )
+      },
+    )
+  }
+
+  test('a Sticker keeps its size, lists two files and never takes a click', async ({ page }) => {
+    await gotoReady(page, '/concepts/')
+    const sticker = headSticker(page)
+    await expect(sticker).toHaveAttribute('width', '112')
+    await expect(sticker).toHaveAttribute('height', '112')
+    await expect(sticker).not.toHaveAttribute('sizes')
+    await expect(sticker).toHaveCSS('pointer-events', 'none')
+    const files = ((await sticker.getAttribute('srcset')) ?? '').split(', ')
+    expect(files).toHaveLength(2)
+    expect(files[0]).toMatch(/&w=112&.* 1x$/)
+    expect(files[1]).toMatch(/&w=224&.* 2x$/)
+    await expect
+      .poll(() => sticker.evaluate((image: HTMLImageElement) => image.naturalWidth))
+      .toBeGreaterThan(0)
+    const box = await sticker.boundingBox()
+    const expected = (page.viewportSize()?.width ?? 0) < 640 ? 88 : 112
+    expect(box?.width).toBe(expected)
+    expect(box?.height).toBe(expected)
+  })
+
+  test('Search shows its Sticker only when nothing is listed', async ({ page }) => {
+    await gotoReady(page, '/search/')
+    await expect(headSticker(page)).toHaveCount(1)
+    await gotoReady(page, NOTHING_FOUND)
+    await expect(page.getByRole('heading', { name: /^No results for/ })).toBeVisible()
+    await expect(headSticker(page)).toHaveCount(1)
+    await gotoReady(page, '/search/?q=karma')
+    await expect(page.getByRole('heading', { name: /results? for/ })).toBeVisible()
+    await expect(headSticker(page)).toHaveCount(0)
+  })
+
+  test('Search with nothing found passes axe, its Sticker in place', async ({ page }) => {
+    await gotoReady(page, NOTHING_FOUND)
+    await expect(headSticker(page)).toHaveCount(1)
+    await expectNoAxeViolations(page)
+  })
+
+  test('the proposals page has no Sticker', { tag: '@one-width' }, async ({ page }) => {
+    await gotoReady(page, '/proposals/')
+    await expect(headSticker(page)).toHaveCount(0)
+  })
+
+  const stickerFiles = [...new Set(SECTION_STICKERS.map(({ file }) => file))]
+  for (const file of stickerFiles) {
+    for (const format of ['avif', 'webp']) {
+      test(
+        `the ${file} Sticker weighs at most 20 KB at 2x as ${format}`,
+        { tag: '@one-width' },
+        async ({ request }) => {
+          const response = await request.get(
+            `/_next/image/?url=%2Fart%2Fstickers%2F${file}.png&w=224&q=75`,
+            { headers: { Accept: `image/${format}` } },
+          )
+          expect(response.status()).toBe(200)
+          expect(response.headers()['content-type']).toBe(`image/${format}`)
+          expect((await response.body()).byteLength).toBeLessThanOrEqual(20_000)
+        },
+      )
+    }
+  }
+})
 
 // The check itself, on pages made here, so that a broken check cannot pass unnoticed.
 test.describe('the shared check', { tag: '@one-width' }, () => {

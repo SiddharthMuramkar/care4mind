@@ -73,6 +73,16 @@ test('a pressed map chip stands apart from the others', async ({ page }) => {
   expect(await seen(lines.nth(1))).not.toEqual(await seen(lines.nth(2)))
 })
 
+test('a section page keeps its Sticker', async ({ page }) => {
+  await gotoReady(page, hrefFor({ page: 'concepts' }))
+  const sticker = page.getByRole('main').locator('header img')
+  await expect(sticker).toBeVisible()
+  await expect
+    .poll(() => sticker.evaluate((image: HTMLImageElement) => image.naturalWidth))
+    .toBeGreaterThan(0)
+  await expect(page.getByRole('heading', { level: 1 })).toBeVisible()
+})
+
 test('a secondary call to action keeps its edge', async ({ page }) => {
   await gotoReady(page, FLOW)
   await expectVisibleEdge(

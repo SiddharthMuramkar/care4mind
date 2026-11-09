@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 
+import { SectionSticker } from '@/components/art'
 import { ConceptCard } from '@/components/ConceptCard'
 import { HelpLine } from '@/components/HelpLine'
 import { turnForward } from '@/components/PageTurn'
@@ -35,7 +36,12 @@ export default async function StartHerePage() {
     <ReadingPage
       path={PATH}
       titleId="start-title"
-      beforeTitle={<ProposalNote>Awaiting the Project owner’s decision</ProposalNote>}
+      beforeTitle={
+        <>
+          <SectionSticker section="start" />
+          <ProposalNote>Awaiting the Project owner’s decision</ProposalNote>
+        </>
+      }
       title="Start here"
     >
       <section className={reading.section} aria-labelledby="about-title">
