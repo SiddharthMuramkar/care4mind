@@ -9,8 +9,10 @@ const nextConfig: NextConfig = {
   typedRoutes: true,
   // Every address ends with a slash, as the current site's do; the bare one redirects to it.
   trailingSlash: true,
-  // Share cards read their fonts from disk at render time, which the file tracer cannot see.
-  outputFileTracingIncludes: { '/**/opengraph-image*': ['./src/fonts/**/*.woff'] },
+  // Share cards read their fonts and pictures from disk at render time, which the file tracer cannot see.
+  outputFileTracingIncludes: {
+    '/**/opengraph-image*': ['./src/fonts/**/*.woff', './art/cards/**'],
+  },
   images: {
     formats: ['image/avif', 'image/webp'],
     // Files under /art/ never change in place, so a long cache is safe. Next.js 16's default is 4 hours.
