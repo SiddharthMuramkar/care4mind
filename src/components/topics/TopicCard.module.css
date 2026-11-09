@@ -23,13 +23,6 @@
   overflow: clip;
 }
 
-/* Not a second `overflow` line above: the build drops that as dead for the browsers it targets. */
-@supports not (overflow: clip) {
-  .card {
-    overflow: hidden;
-  }
-}
-
 .art {
   grid-area: art;
 }
@@ -128,12 +121,17 @@
 
   /*
    * Lifted, the card would rise off a pointer at its bottom edge and drop back under it. So while
-   * it is up the link reaches past that edge, as far as the focus ring reaches.
+   * it is up the link reaches past that edge, as far as the focus ring reaches. Fixed, it measures
+   * from the lifted card, whose transform holds it, so the page gains nothing to scroll to.
    */
   .card:has(.link:hover) {
     overflow: visible;
-    clip-path: inset(-6px);
     transform: translateY(-3px);
+  }
+
+  .link:hover::after {
+    position: fixed;
+    inset: -6px;
   }
 
   .card:has(.link:active) {

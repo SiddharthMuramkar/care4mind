@@ -1,7 +1,7 @@
 import type { Page } from '@playwright/test'
 
 import { expectNoAxeViolations } from './axe'
-import { expect, gotoReady, test } from './fixtures'
+import { expect, gotoReady, scrollsSideways, test } from './fixtures'
 
 /** The homepage's hero Plate: the one picture allowed a `sizes` attribute. */
 const HERO = '[data-hero-plate]'
@@ -335,6 +335,13 @@ test.describe('topic cards', () => {
         )
         expect(count.y - (line.y + line.height), `${slug}: above the count`).toBeCloseTo(textGap, 0)
       }
+    })
+
+    test(`${path}: a lifted card leaves the page with no sideways scroll`, async ({ page }) => {
+      await gotoReady(page, path)
+      await cardLink(page, 'self').hover()
+      await expect(topicCard(page, 'self')).toHaveCSS('transform', 'matrix(1, 0, 0, 1, 0, -3)')
+      expect(await scrollsSideways(page)).toEqual([])
     })
   }
 
