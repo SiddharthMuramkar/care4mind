@@ -5,7 +5,9 @@
 // else, on stdout, so an agent can open exactly those.
 //
 //   pnpm shots [--only <paths or kinds>] [--widths <px,…>] [--full] [--reduced | --both]
+//              [--states <selector>]
 //   SHOTS_PORT=3120 pnpm shots --only /,concept
+//   pnpm shots --only / --widths 360,768,1440 --states 'main article a'
 //
 // The routes come from the route registry (`site.routes()`), the parts with no browser are
 // tested in tests/unit/shots.test.ts, and Playwright, which the repo has, takes the pictures.
@@ -22,6 +24,10 @@ const OUT = join(ROOT, '.shots')
 const WIDTHS = [360, 1440]
 /** Pages shot at once. */
 const AT_ONCE = 4
+/** What `--states` shoots an element in, each named for its CSS pseudo-class. */
+const STATES = ['hover', 'focus-visible', 'active']
+/** Longer than the site's slowest hover: a preview opens 450 ms after the pointer arrives. */
+const STATE_PAUSE = 700
 
 const USAGE = `Usage: pnpm shots [options]
 
@@ -35,6 +41,11 @@ of each file it wrote, one per line.
   --full                   whole pages, not just the screen's worth
   --reduced                with reduced motion
   --both                   each page with motion and with reduced motion
+  --states <selector>      instead of the plain shots, the first element matching this CSS
+                           selector in its hover, focus-visible and active states, three shots
+                           each, the screen's worth with the element centred (--full doesn't
+                           apply), such as --only / --widths 360,768,1440 --states 'main article a'.
+                           A page where it can't reach a state stops the command
   --help                   this
 
 SHOTS_PORT (default 3100): it shoots the server listening there, and says on stderr whether that
@@ -46,13 +57,14 @@ export class UsageError extends Error {}
 
 /** The command line, as options. */
 export function parseArgs(argv) {
-  const options = { full: false, reduced: 'off', only: null, widths: WIDTHS }
+  const options = { full: false, reduced: 'off', only: null, widths: WIDTHS, states: null }
   for (let index = 0; index < argv.length; index += 1) {
     const [name, inline] = argv[index].split(/=(.*)/s)
     // An option's value follows it, or its = sign.
     const value = () => inline ?? argv[(index += 1)] ?? ''
     if (name === '--only') options.only = list(value())
     else if (name === '--widths') options.widths = widths(value())
+    else if (name === '--states') options.states = oneSelector(value())
     else if (name === '--full' && inline === undefined) options.full = true
     else if (name === '--reduced' && inline === undefined) options.reduced = 'on'
     else if (name === '--both' && inline === undefined) options.reduced = 'both'
@@ -81,6 +93,13 @@ function widths(value) {
   return [...new Set(items.map(Number))]
 }
 
+/** `--states`: one CSS selector, whole, since a comma is legal in one. */
+function oneSelector(value) {
+  const trimmed = value.trim()
+  if (trimmed !== '') return trimmed
+  throw new UsageError(`--states takes one CSS selector, such as --states 'main article a'.`)
+}
+
 /** How tall the screen is at a width: a phone's, a tablet's held upright, or a laptop's. */
 function heightFor(width) {
   if (width < 768) return 800
@@ -88,10 +107,19 @@ function heightFor(width) {
   return 900
 }
 
-/** A shot's file: the path's parts joined by hyphens (`home` for `/`), its width and motion. */
-function fileFor(path, width, reducedMotion) {
+/**
+ * A shot's file: the path's parts joined by hyphens (`home` for `/`), its width and motion, and
+ * for a state its name and the selector's letters and digits, so runs on one page don't collide.
+ */
+function fileFor(path, width, reducedMotion, state, selector = '') {
   const slug = path.split('/').filter(Boolean).join('-') || 'home'
-  return `${slug}-${width}${reducedMotion ? '-reduced' : ''}.jpg`
+  const named = selector
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '')
+    .slice(0, 40)
+  const parts = [slug, width, reducedMotion && 'reduced', state, named]
+  return `${parts.filter(Boolean).join('-')}.jpg`
 }
 
 /**
@@ -123,15 +151,20 @@ function pick(only, routes) {
 export function planShots(options, routes) {
   const picked = pick(options.only, routes)
   const motions = { off: [false], on: [true], both: [false, true] }[options.reduced]
+  const selector = options.states
+  const states = selector === null ? [undefined] : STATES
   return picked.flatMap((route) =>
     options.widths.flatMap((width) =>
-      motions.map((reducedMotion) => ({
-        path: route.path,
-        width,
-        height: heightFor(width),
-        reducedMotion,
-        file: fileFor(route.path, width, reducedMotion),
-      })),
+      motions.flatMap((reducedMotion) =>
+        states.map((state) => ({
+          path: route.path,
+          width,
+          height: heightFor(width),
+          reducedMotion,
+          file: fileFor(route.path, width, reducedMotion, state, selector ?? ''),
+          ...(state === undefined ? {} : { state, selector }),
+        })),
+      ),
     ),
   )
 }
@@ -145,10 +178,12 @@ function shotsPort(value = '3100') {
 /**
  * The route registry, for this run's feature flags. It is TypeScript behind the `@/content`
  * alias, which plain Node can't load, so Vite (the unit tests' loader) loads it, taking the
- * alias from tsconfig.json. The registry reads its records lazily and Vite's runner closes once
+ * alias from tsconfig.json. Plain Node has no React Server condition, so the real `server-only`
+ * marker would throw here, and the tsconfig path doesn't reach a bare import Vite's runner leaves
+ * external: the alias does. The registry reads its records lazily and Vite's runner closes once
  * its import ends, so the routes are read within that import: a two-line module made here.
  */
-async function loadRoutes() {
+export async function loadRoutes() {
   if (!existsSync(join(ROOT, 'src/content/generated/registry.ts'))) {
     throw new Error(
       'The content registry is missing: run node scripts/content/registry.mjs (pnpm build runs it).',
@@ -160,7 +195,7 @@ async function loadRoutes() {
   const { module } = await runnerImport(id, {
     root: ROOT,
     logLevel: 'silent',
-    resolve: { tsconfigPaths: true },
+    resolve: { tsconfigPaths: true, alias: { 'server-only': join(ROOT, 'tests/server-only.ts') } },
     plugins: [
       {
         name: 'shots-routes',
@@ -272,9 +307,14 @@ async function ready(page, path) {
       throw new Error(`${path} didn’t hydrate within 15 s (html[data-hydrated] never appeared).`)
     })
   await page.waitForLoadState('networkidle', { timeout: 5_000 }).catch(() => {})
+  await page.evaluate(() => document.fonts.ready.then(() => undefined))
+  await animationsDone(page)
+}
+
+/** Wait for the running animations and transitions that end. Scroll-driven ones never do. */
+async function animationsDone(page) {
   await page.evaluate(async () => {
-    await document.fonts.ready
-    const opening = document
+    const running = document
       .getAnimations()
       .filter(
         (animation) =>
@@ -283,10 +323,36 @@ async function ready(page, path) {
           Number.isFinite(animation.effect?.getComputedTiming().endTime ?? Infinity),
       )
     await Promise.race([
-      Promise.allSettled(opening.map((animation) => animation.finished)),
+      Promise.allSettled(running.map((animation) => animation.finished)),
       new Promise((resolve) => setTimeout(resolve, 5_000)),
     ])
   })
+}
+
+/**
+ * Put the shot's element in its state, in the middle of the screen, clear of the sticky header,
+ * and see that it got there, so nobody judges a picture of the wrong state. A pressed mouse is
+ * never released: the context closes first, so a link doesn't navigate.
+ */
+async function enterState(page, { path, selector, state }) {
+  const target = page.locator(selector).first()
+  if ((await target.count()) === 0) throw new Error(`No element on ${path} matches “${selector}”.`)
+  await target.evaluate((element) => {
+    // The page scrolls smoothly, which would still be moving when the state is entered.
+    document.documentElement.style.scrollBehavior = 'auto'
+    element.scrollIntoView({ block: 'center', behavior: 'instant' })
+  })
+  if (state === 'focus-visible') await target.focus()
+  else await target.hover()
+  if (state === 'active') await page.mouse.down()
+  await delay(STATE_PAUSE)
+  await animationsDone(page)
+  const pseudo = `:${state}`
+  if (!(await target.evaluate((element, name) => element.matches(name), pseudo))) {
+    throw new Error(
+      `“${selector}” on ${path} never became ${pseudo}. Can it be hovered, focused and pressed?`,
+    )
+  }
 }
 
 /** Take one shot in a fresh browser context; the file it wrote. */
@@ -306,8 +372,14 @@ async function take(browser, baseURL, full, shot) {
       throw new Error(`${baseURL}${shot.path} answered ${status}${flags}`)
     }
     await ready(page, shot.path)
+    if (shot.state !== undefined) await enterState(page, shot)
     const file = join(OUT, shot.file)
-    await page.screenshot({ path: file, type: 'jpeg', quality: 70, fullPage: full })
+    await page.screenshot({
+      path: file,
+      type: 'jpeg',
+      quality: 70,
+      fullPage: full && shot.state === undefined,
+    })
     return file
   } finally {
     await context.close()

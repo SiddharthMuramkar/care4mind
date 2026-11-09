@@ -15,6 +15,7 @@ interface Options {
   reduced: 'off' | 'on' | 'both'
   only: string[] | null
   widths: number[]
+  states: string | null
 }
 
 interface Shot {
@@ -23,12 +24,15 @@ interface Shot {
   height: number
   reducedMotion: boolean
   file: string
+  state?: 'hover' | 'focus-visible' | 'active'
+  selector?: string
 }
 
 const shots = (await import(pathToFileURL(resolve('scripts/shots.mjs')).href)) as {
   parseArgs(argv: readonly string[]): Options
   planShots(options: Options, routes: readonly RouteEntry[]): Shot[]
   describeServer(port: number, buildId: string | null): Promise<string>
+  loadRoutes(): Promise<readonly RouteEntry[]>
 }
 
 const route = (path: RouteEntry['path'], kind: RouteEntry['kind'], sample?: true): RouteEntry => ({
@@ -165,6 +169,70 @@ describe('pnpm shots', () => {
     expect(shots.parseArgs(['--full']).full).toBe(true)
   })
 
+  it('shoots a selector in its hover, focus-visible and active states at each width', () => {
+    expect(plan('--only', '/', '--widths', '360', '--states', 'main article a')).toEqual([
+      {
+        path: '/',
+        width: 360,
+        height: 800,
+        reducedMotion: false,
+        file: 'home-360-hover-main-article-a.jpg',
+        state: 'hover',
+        selector: 'main article a',
+      },
+      {
+        path: '/',
+        width: 360,
+        height: 800,
+        reducedMotion: false,
+        file: 'home-360-focus-visible-main-article-a.jpg',
+        state: 'focus-visible',
+        selector: 'main article a',
+      },
+      {
+        path: '/',
+        width: 360,
+        height: 800,
+        reducedMotion: false,
+        file: 'home-360-active-main-article-a.jpg',
+        state: 'active',
+        selector: 'main article a',
+      },
+    ])
+  })
+
+  it('keeps a selector whole, commas and quotes included, and stops at an empty one', () => {
+    const selector = 'nav a, main a[href="/concepts/"]'
+    expect(plan('--only', '/', '--widths', '360', `--states=${selector}`)[0]).toMatchObject({
+      selector,
+      file: 'home-360-hover-nav-a-main-a-href-concepts.jpg',
+    })
+    expect(() => plan('--states', '')).toThrow(/--states takes/)
+    expect(() => plan('--states')).toThrow(/--states takes/)
+    expect(() => plan('--states=  ')).toThrow(/--states takes/)
+  })
+
+  it('shoots the states with and without motion under --both', () => {
+    expect(
+      files('--only', '/concepts/vikshepa/', '--widths', '1440', '--both', '--states', 'main a'),
+    ).toEqual([
+      'concepts-vikshepa-1440-hover-main-a.jpg',
+      'concepts-vikshepa-1440-focus-visible-main-a.jpg',
+      'concepts-vikshepa-1440-active-main-a.jpg',
+      'concepts-vikshepa-1440-reduced-hover-main-a.jpg',
+      'concepts-vikshepa-1440-reduced-focus-visible-main-a.jpg',
+      'concepts-vikshepa-1440-reduced-active-main-a.jpg',
+    ])
+  })
+
+  it('leaves a selector with no letters or digits out of the file’s name', () => {
+    expect(files('--only', '/', '--widths', '360', '--states', '*')).toEqual([
+      'home-360-hover.jpg',
+      'home-360-focus-visible.jpg',
+      'home-360-active.jpg',
+    ])
+  })
+
   it('stops at an option it doesn’t know', () => {
     expect(() => shots.parseArgs(['--fullpage'])).toThrow(/Unknown option: --fullpage/)
     expect(() => shots.parseArgs(['/'])).toThrow(/Unknown option: \//)
@@ -190,6 +258,16 @@ describe('pnpm shots over the route registry', () => {
     const names = shots.planShots(shots.parseArgs(['--only', everyPath, '--widths', '360']), routes)
     expect(names).toHaveLength(routes.length)
     expect(new Set(names.map((shot) => shot.file)).size).toBe(routes.length)
+  })
+})
+
+describe('pnpm shots loading the route registry itself', () => {
+  // The command has its own loader, outside Vitest's aliases, so it needs a test of its own.
+  it('reads the same routes the site has', async () => {
+    const loaded = await shots.loadRoutes()
+    expect(loaded.map((entry) => entry.path)).toEqual(
+      (await site.routes()).map((entry) => entry.path),
+    )
   })
 })
 
