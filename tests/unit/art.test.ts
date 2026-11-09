@@ -144,7 +144,8 @@ describe('the Emblem', () => {
 
 describe('the art registry', () => {
   it('holds the 22 kept pictures', () => {
-    expect(ART).toHaveLength(22)
+    // Counted by origin, so a generated picture joining the registry leaves this alone.
+    expect(ART.filter((record) => record.origin.kind === 'care4mind')).toHaveLength(22)
   })
 
   it('has a unique kebab-case id for every picture', () => {
@@ -156,9 +157,10 @@ describe('the art registry', () => {
   it('has a record, with its address and old id, for every picture kept from the old site', () => {
     expect(KEPT).toHaveLength(22)
     for (const kept of KEPT) {
-      const record = ART.find((candidate) => candidate.id === kept.newId)
+      const record = (ART as readonly ArtRecord[]).find(({ id }) => id === kept.newId)
+      const origin = record?.origin
       expect(record?.src, kept.newId).toBe(kept.newSrc)
-      expect(record?.origin.wpId, kept.newId).toBe(kept.wpId)
+      expect(origin?.kind === 'care4mind' ? origin.wpId : undefined, kept.newId).toBe(kept.wpId)
       expect(record?.approved, kept.newId).toBe(true)
       expect(record?.licence, kept.newId).toBe(LICENCE)
     }
@@ -670,7 +672,10 @@ describe('shipped', () => {
   })
 
   it('includes an approved picture whichever the flag, in registry order', () => {
-    const records = [...ART, draft('plate-ahimsa', { approved: true })]
+    const records = [
+      ...ART.filter(({ approved }) => approved),
+      draft('plate-ahimsa', { approved: true }),
+    ]
     for (const flags of [flagsOn(), flagsOff()]) {
       expect(
         createArt(records, flags)
