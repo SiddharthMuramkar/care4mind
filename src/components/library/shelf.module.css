@@ -145,10 +145,10 @@
   }
 
   /*
-   * Pressed or dismissed with Escape, it goes at once: still fading, it would cut short the page
-   * turn a press starts.
+   * However it closes, it goes at once: still fading, it would cut short the page turn a press
+   * starts, on this volume or on any other link.
    */
-  .hoverLabel[data-instant='dismiss'] {
+  .hoverLabel[data-ending-style] {
     transition: none;
   }
 }
