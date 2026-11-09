@@ -2,6 +2,8 @@ import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import type { CSSProperties } from 'react'
 
+import { artFor } from '@/art'
+import { Sticker } from '@/components/art'
 import { Fleuron } from '@/components/Fleuron'
 import { OrnamentRule } from '@/components/OrnamentRule'
 import { ReadingPage } from '@/components/ReadingPage'
@@ -43,6 +45,7 @@ export default async function WorkPage({ params }: PageProps<'/texts/[slug]'>) {
       pageClassName={styles.page}
       articleClassName={styles.article}
       beforeTrail={<ReadingThread />}
+      beforeTitle={<Sticker art={artFor({ kind: 'work', slug: work.slug })} size={120} />}
       kicker="Traditional text"
       titleClassName={styles.title}
       title={
