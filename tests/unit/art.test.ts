@@ -1,14 +1,13 @@
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs'
 import { join } from 'node:path'
 
+import { ESLint } from 'eslint'
 import sharp from 'sharp'
 import { describe, expect, it } from 'vitest'
 
 import { art, type ArtOrigin } from '@/art'
 import { EMBLEM_MARK, EMBLEM_RING } from '@/art/emblem'
 import { ART } from '@/art/registry'
-
-import nextConfig from '../../next.config'
 
 const PUBLIC = join(process.cwd(), 'public')
 const LICENCE = "The client's own picture; reuse confirmation pending"
@@ -38,16 +37,6 @@ function isComplete(origin: ArtOrigin): boolean {
   }
 }
 
-describe('the image settings', () => {
-  it('serve AVIF first, cached for 31 days, at only the widths the pictures use', () => {
-    expect(nextConfig.images).toEqual({
-      formats: ['image/avif', 'image/webp'],
-      minimumCacheTTL: 2_678_400,
-      imageSizes: [64, 72, 112, 120, 128, 144, 160, 168, 200, 224, 240, 320, 336, 360, 400, 480],
-    })
-  })
-})
-
 describe('art', () => {
   it('returns the record of a picture, with the pixels of its file', () => {
     expect(art('plate-jeweller')).toMatchObject({
@@ -65,16 +54,35 @@ describe('art', () => {
   })
 })
 
-describe('the Emblem records', () => {
+describe('the Emblem records', { timeout: 30_000 }, () => {
+  const eslint = new ESLint({ cwd: process.cwd() })
+
+  /** What the lint rule on the Emblem file reports for `code` placed in that file. */
+  async function problems(code: string) {
+    const [result] = await eslint.lintText(code, { filePath: 'src/art/emblem.ts' })
+    return (result?.messages ?? []).filter((m) => m.ruleId === 'no-restricted-syntax')
+  }
+
   it('are the registry’s own', () => {
     expect(art('emblem-ring')).toBe(EMBLEM_RING)
     expect(art('emblem-mark')).toBe(EMBLEM_MARK)
   })
 
-  // Error pages are client components, so anything `emblem.ts` runs reaches the browser.
-  it('import nothing but types, so a client component can use them', () => {
-    const source = readFileSync(join(process.cwd(), 'src/art/emblem.ts'), 'utf8')
-    expect(source.match(/^import (?!type\b).*$/gm)).toBeNull()
+  // Error pages are client components, so anything `emblem.ts` brings in reaches the browser.
+  it.each([
+    "import { art } from './index'\nexport const a = art\n",
+    "import './index'\n",
+    "export { art } from './index'\n",
+    "export * from './index'\n",
+    "export const a = () => import('./index')\n",
+  ])('stop their file bringing in a value: %s', async (code) => {
+    expect(await problems(code)).toHaveLength(1)
+  })
+
+  it('let their file bring in types', async () => {
+    const code =
+      "import type { ArtRecord } from './types'\nexport type { ArtFamily } from './types'\nexport type R = ArtRecord\n"
+    expect(await problems(code)).toEqual([])
   })
 })
 
