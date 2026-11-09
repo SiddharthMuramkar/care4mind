@@ -10,9 +10,11 @@
 //   pnpm shots --only / --widths 360,768,1440 --states 'main article a'
 //
 // The routes come from the route registry (`site.routes()`), the parts with no browser are
-// tested in tests/unit/shots.test.ts, and Playwright, which the repo has, takes the pictures.
+// tested in tests/unit/shots.test.ts, the states and the wait for pictures in
+// tests/e2e/shots.spec.ts, and Playwright, which the repo has, takes the pictures.
 
 import { spawn } from 'node:child_process'
+import { createHash } from 'node:crypto'
 import { existsSync, mkdirSync, readFileSync } from 'node:fs'
 import { connect } from 'node:net'
 import { dirname, join, resolve } from 'node:path'
@@ -28,6 +30,10 @@ const AT_ONCE = 4
 const STATES = ['hover', 'focus-visible', 'active']
 /** Longer than the site's slowest hover: a preview opens 450 ms after the pointer arrives. */
 const STATE_PAUSE = 700
+/** How long a hover waits for its element to be under the pointer. */
+const HOVER_WAIT = 5_000
+/** How long a shot waits for its pictures, which the image optimizer can make slow. */
+const PICTURE_WAIT = 20_000
 
 const USAGE = `Usage: pnpm shots [options]
 
@@ -41,8 +47,8 @@ of each file it wrote, one per line.
   --full                   whole pages, not just the screen's worth
   --reduced                with reduced motion
   --both                   each page with motion and with reduced motion
-  --states <selector>      instead of the plain shots, the first element matching this CSS
-                           selector in its hover, focus-visible and active states, three shots
+  --states <selector>      instead of the plain shots, the first visible element matching this
+                           CSS selector in its hover, focus-visible and active states, three shots
                            each, the screen's worth with the element centred (--full doesn't
                            apply), such as --only / --widths 360,768,1440 --states 'main article a'.
                            A page where it can't reach a state stops the command
@@ -109,16 +115,18 @@ function heightFor(width) {
 
 /**
  * A shot's file: the path's parts joined by hyphens (`home` for `/`), its width and motion, and
- * for a state its name and the selector's letters and digits, so runs on one page don't collide.
+ * for a state its name, the selector's letters and digits to read, and a short hash of the exact
+ * selector, so runs on one page with different selectors don't share a file.
  */
-function fileFor(path, width, reducedMotion, state, selector = '') {
+function fileFor(path, width, reducedMotion, state, selector) {
   const slug = path.split('/').filter(Boolean).join('-') || 'home'
   const named = selector
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-|-$/g, '')
     .slice(0, 40)
-  const parts = [slug, width, reducedMotion && 'reduced', state, named]
+    .replace(/^-|-$/g, '')
+  const hash = selector && createHash('sha256').update(selector).digest('hex').slice(0, 6)
+  const parts = [slug, width, reducedMotion && 'reduced', state, named, hash]
   return `${parts.filter(Boolean).join('-')}.jpg`
 }
 
@@ -330,20 +338,50 @@ async function animationsDone(page) {
 }
 
 /**
+ * Load every picture, lazy ones included, and wait until each has decoded or failed: a lazy
+ * picture far off the screen is otherwise never requested, and shows as a blank. Past the time
+ * limit it says so on stderr and lets the shot go ahead.
+ */
+export async function picturesDone(page, path) {
+  const finished = await page.evaluate(async (limit) => {
+    const pictures = [...document.images]
+    for (const picture of pictures) if (picture.loading === 'lazy') picture.loading = 'eager'
+    return Promise.race([
+      Promise.allSettled(pictures.map((picture) => picture.decode())).then(() => true),
+      new Promise((resolve) => setTimeout(() => resolve(false), limit)),
+    ])
+  }, PICTURE_WAIT)
+  if (!finished) {
+    console.error(
+      `pnpm shots: pictures on ${path} were still loading after ${PICTURE_WAIT / 1000} s, so the shot may show blanks.`,
+    )
+  }
+}
+
+/**
  * Put the shot's element in its state, in the middle of the screen, clear of the sticky header,
  * and see that it got there, so nobody judges a picture of the wrong state. A pressed mouse is
  * never released: the context closes first, so a link doesn't navigate.
  */
-async function enterState(page, { path, selector, state }) {
-  const target = page.locator(selector).first()
-  if ((await target.count()) === 0) throw new Error(`No element on ${path} matches “${selector}”.`)
+export async function enterState(page, { path, selector, state }) {
+  const target = page.locator(selector).visible().first()
+  if ((await target.count()) === 0) {
+    throw new Error(`No visible element on ${path} matches “${selector}”.`)
+  }
   await target.evaluate((element) => {
     // The page scrolls smoothly, which would still be moving when the state is entered.
     document.documentElement.style.scrollBehavior = 'auto'
     element.scrollIntoView({ block: 'center', behavior: 'instant' })
   })
   if (state === 'focus-visible') await target.focus()
-  else await target.hover()
+  else {
+    await target.hover({ timeout: HOVER_WAIT }).catch(() => {
+      throw new Error(
+        `“${selector}” on ${path} couldn’t be hovered within ${HOVER_WAIT / 1000} s: its first ` +
+          'visible match is covered or off the screen. Narrow the selector.',
+      )
+    })
+  }
   if (state === 'active') await page.mouse.down()
   await delay(STATE_PAUSE)
   await animationsDone(page)
@@ -373,6 +411,8 @@ async function take(browser, baseURL, full, shot) {
     }
     await ready(page, shot.path)
     if (shot.state !== undefined) await enterState(page, shot)
+    await picturesDone(page, shot.path)
+    await animationsDone(page)
     const file = join(OUT, shot.file)
     await page.screenshot({
       path: file,

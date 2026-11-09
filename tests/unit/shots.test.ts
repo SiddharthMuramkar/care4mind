@@ -169,14 +169,14 @@ describe('pnpm shots', () => {
     expect(shots.parseArgs(['--full']).full).toBe(true)
   })
 
-  it('shoots a selector in its hover, focus-visible and active states at each width', () => {
+  it('shoots a selector in its hover, focus-visible and active states', () => {
     expect(plan('--only', '/', '--widths', '360', '--states', 'main article a')).toEqual([
       {
         path: '/',
         width: 360,
         height: 800,
         reducedMotion: false,
-        file: 'home-360-hover-main-article-a.jpg',
+        file: 'home-360-hover-main-article-a-572cdb.jpg',
         state: 'hover',
         selector: 'main article a',
       },
@@ -185,7 +185,7 @@ describe('pnpm shots', () => {
         width: 360,
         height: 800,
         reducedMotion: false,
-        file: 'home-360-focus-visible-main-article-a.jpg',
+        file: 'home-360-focus-visible-main-article-a-572cdb.jpg',
         state: 'focus-visible',
         selector: 'main article a',
       },
@@ -194,18 +194,51 @@ describe('pnpm shots', () => {
         width: 360,
         height: 800,
         reducedMotion: false,
-        file: 'home-360-active-main-article-a.jpg',
+        file: 'home-360-active-main-article-a-572cdb.jpg',
         state: 'active',
         selector: 'main article a',
       },
     ])
   })
 
+  it('shoots the states at each width', () => {
+    expect(files('--only', '/', '--widths', '360,1440', '--states', 'main article a')).toEqual([
+      'home-360-hover-main-article-a-572cdb.jpg',
+      'home-360-focus-visible-main-article-a-572cdb.jpg',
+      'home-360-active-main-article-a-572cdb.jpg',
+      'home-1440-hover-main-article-a-572cdb.jpg',
+      'home-1440-focus-visible-main-article-a-572cdb.jpg',
+      'home-1440-active-main-article-a-572cdb.jpg',
+    ])
+  })
+
+  it('gives different selectors different files, even when their letters match', () => {
+    const fileOf = (selector: string) =>
+      plan('--only', '/', '--widths', '360', '--states', selector)[0]?.file
+    expect(fileOf('.card a')).toBe('home-360-hover-card-a-3cfe3a.jpg')
+    expect(fileOf('.card-a')).toBe('home-360-hover-card-a-573f94.jpg')
+    const start = 'main section:nth-of-type(2) article:nth-of-type'
+    expect(fileOf(`${start}(1) a`)).not.toBe(fileOf(`${start}(2) a`))
+  })
+
+  it('leaves no hyphen dangling where it cuts a long selector', () => {
+    expect(
+      files(
+        '--only',
+        '/',
+        '--widths',
+        '360',
+        '--states',
+        'main article a[href="/concepts/karma-yoga/xyz"]',
+      )[0],
+    ).toBe('home-360-hover-main-article-a-href-concepts-karma-yoga-af9247.jpg')
+  })
+
   it('keeps a selector whole, commas and quotes included, and stops at an empty one', () => {
     const selector = 'nav a, main a[href="/concepts/"]'
     expect(plan('--only', '/', '--widths', '360', `--states=${selector}`)[0]).toMatchObject({
       selector,
-      file: 'home-360-hover-nav-a-main-a-href-concepts.jpg',
+      file: 'home-360-hover-nav-a-main-a-href-concepts-67494b.jpg',
     })
     expect(() => plan('--states', '')).toThrow(/--states takes/)
     expect(() => plan('--states')).toThrow(/--states takes/)
@@ -216,21 +249,24 @@ describe('pnpm shots', () => {
     expect(
       files('--only', '/concepts/vikshepa/', '--widths', '1440', '--both', '--states', 'main a'),
     ).toEqual([
-      'concepts-vikshepa-1440-hover-main-a.jpg',
-      'concepts-vikshepa-1440-focus-visible-main-a.jpg',
-      'concepts-vikshepa-1440-active-main-a.jpg',
-      'concepts-vikshepa-1440-reduced-hover-main-a.jpg',
-      'concepts-vikshepa-1440-reduced-focus-visible-main-a.jpg',
-      'concepts-vikshepa-1440-reduced-active-main-a.jpg',
+      'concepts-vikshepa-1440-hover-main-a-4f5cba.jpg',
+      'concepts-vikshepa-1440-focus-visible-main-a-4f5cba.jpg',
+      'concepts-vikshepa-1440-active-main-a-4f5cba.jpg',
+      'concepts-vikshepa-1440-reduced-hover-main-a-4f5cba.jpg',
+      'concepts-vikshepa-1440-reduced-focus-visible-main-a-4f5cba.jpg',
+      'concepts-vikshepa-1440-reduced-active-main-a-4f5cba.jpg',
     ])
   })
 
-  it('leaves a selector with no letters or digits out of the file’s name', () => {
+  it('names a selector with no letters or digits by its hash alone', () => {
     expect(files('--only', '/', '--widths', '360', '--states', '*')).toEqual([
-      'home-360-hover.jpg',
-      'home-360-focus-visible.jpg',
-      'home-360-active.jpg',
+      'home-360-hover-684888.jpg',
+      'home-360-focus-visible-684888.jpg',
+      'home-360-active-684888.jpg',
     ])
+    expect(files('--only', '/', '--widths', '360', '--states', '#')[0]).toBe(
+      'home-360-hover-334359.jpg',
+    )
   })
 
   it('stops at an option it doesn’t know', () => {
