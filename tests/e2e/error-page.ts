@@ -5,7 +5,7 @@ import { expect } from './fixtures'
 const PATH = '/concepts/vikshepa/'
 
 /** Where each error page takes over: inside the page, or at the root layout it sits in. */
-export type ErrorPageKind = 'segment' | 'global'
+type ErrorPageKind = 'segment' | 'global'
 
 /** Text unique to the inline data row whose failure brings up each page. */
 const MARKER: Record<ErrorPageKind, string> = {

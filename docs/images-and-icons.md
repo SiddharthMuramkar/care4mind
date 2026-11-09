@@ -323,8 +323,9 @@ scripts/art/
   sheet.mjs         builds the contact sheet and its PDF for review (7.9)
 art/cards/          committed. 320 px PNG and JPEG copies that share cards draw (6.7)
 src/art/            the art registry (6.4). Imports content only through @/content
-src/components/art/ Emblem, Sticker, Medallion, MedallionRing, ArtFigure, PlateViewer, FolkBorder,
+src/components/art/ Sticker, Medallion, MedallionRing, ArtFigure, PlateViewer, FolkBorder,
                     KarmaCycle: one folder with an index.ts, like components/library
+src/components/Emblem/  Emblem, in its own folder (6.5)
 ```
 
 - `public/art/` keeps stable addresses (`/art/stickers/cosmos.png`). Old media addresses redirect to them (6.8). A Pothi lives in `public/art/stickers/` as `pothi-<slug>.png`, since a Pothi is a Sticker.
@@ -425,6 +426,8 @@ export interface ArtRecord {
 - **Add a flag `draftArt`** (`FEATURE_DRAFT_ART`) to `src/config/features.ts`, following its pattern, and to the three lists in `tests/unit/features.test.ts`. There is no `.env.example` to update. Off in production, on everywhere else. Branch previews are off in this repo (`vercel.json`), so drafts are seen in local runs and in the contact-sheet PDF, and production never shows a draft.
 
 ### 6.5 Components (`src/components/art/`)
+
+`Emblem` alone lives in `src/components/Emblem/`, so the error pages, which are client components, import it without the art folder's index and the server-only members behind it.
 
 Each one is a server component unless marked otherwise. Each uses `next/image` with explicit `width` and `height`, and no `sizes` (section 5.11). Only `PlateViewer` sets `sizes`, `(min-width: 64rem) 360px, 168px`, because its displayed width changes at 64rem. Everywhere else, a `sizes` value would make the page list about 24 file sizes per picture. A CSS module reads tokens from `globals.css`. New decorative colour tokens go in `globals.css` under the "Decorative only" comment: `--color-ring` (an alias of `--press-rule`) and `--color-sticker-shadow` (`color-mix(in srgb, var(--press-night) 18%, transparent)`, following `--color-scroll-shadow`), so `tests/unit/contrast.test.ts` passes. Never put a primitive `--press-*` colour in a module, and never set a module `color:` to `--color-surface-rule`. Every id inside an inline SVG comes from `useId`, so two pictures on a page never share one.
 

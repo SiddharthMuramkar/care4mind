@@ -23,11 +23,18 @@ function buttonIn(node: ReactNode): ReactElement<{ onClick: () => void }> | unde
   return buttonIn(node.props.children)
 }
 
-/** The one picture in rendered markup. */
-function emblemIn(html: string) {
-  const pictures = html.match(/<img[^>]*>/g) ?? []
-  expect(pictures).toHaveLength(1)
-  return pictures[0]
+/** The test both error pages share: their markup holds one picture, the Emblem. */
+function itShowsTheEmblem(html: string) {
+  it('shows the decorative Emblem at its fixed size, with no list of widths', () => {
+    const pictures = html.match(/<img[^>]*>/g) ?? []
+    expect(pictures).toHaveLength(1)
+    const [emblem] = pictures
+    expect(emblem).toMatch(/alt=""/)
+    expect(emblem).toMatch(/width="96"/)
+    expect(emblem).toMatch(/height="96"/)
+    expect(emblem).toContain('emblem-mark')
+    expect(emblem).not.toMatch(/\ssizes=/)
+  })
 }
 
 describe('the error page', () => {
@@ -42,13 +49,7 @@ describe('the error page', () => {
     expect(html).toMatch(/<button type="button"[^>]*>Try again<\/button>/)
   })
 
-  it('shows the decorative Emblem at its fixed size, with no list of widths', () => {
-    expect(emblemIn(html)).toMatch(/alt=""/)
-    expect(emblemIn(html)).toMatch(/width="96"/)
-    expect(emblemIn(html)).toMatch(/height="96"/)
-    expect(emblemIn(html)).toContain('emblem-mark')
-    expect(emblemIn(html)).not.toMatch(/\ssizes=/)
-  })
+  itShowsTheEmblem(html)
 
   it('asks Next to render the page again when the button is pressed', () => {
     const retry = vi.fn()
@@ -82,13 +83,7 @@ describe('the global error page', () => {
     expect(html).toContain('<a href="#main" class="skip-link">')
   })
 
-  it('shows the decorative Emblem at its fixed size, with no list of widths', () => {
-    expect(emblemIn(html)).toMatch(/alt=""/)
-    expect(emblemIn(html)).toMatch(/width="96"/)
-    expect(emblemIn(html)).toMatch(/height="96"/)
-    expect(emblemIn(html)).toContain('emblem-mark')
-    expect(emblemIn(html)).not.toMatch(/\ssizes=/)
-  })
+  itShowsTheEmblem(html)
 
   it('asks Next to render the site again when the button is pressed', () => {
     const retry = vi.fn()

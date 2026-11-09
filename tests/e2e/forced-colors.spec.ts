@@ -109,12 +109,14 @@ test('the footer keeps its Emblem and motto', async ({ page }) => {
   await expect(footer.locator('[lang="sa-Deva"]')).toBeVisible()
 })
 
-test('the error pages keep their Emblem', async ({ page }) => {
+test('the error pages keep their Emblem and the edge of their button', async ({ page }) => {
   await gotoErrorPage(page, 'segment')
   await expect(page.getByRole('main').locator('img')).toBeVisible()
+  await expectVisibleEdge(page.getByRole('button', { name: 'Try again' }), 'Try again')
   await page.unrouteAll()
   await gotoErrorPage(page, 'global')
   await expect(page.getByRole('main').locator('img')).toBeVisible()
+  await expectVisibleEdge(page.getByRole('button', { name: 'Reload the page' }), 'Reload the page')
 })
 
 const PARTS = [

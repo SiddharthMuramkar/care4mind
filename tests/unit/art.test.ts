@@ -111,7 +111,12 @@ describe('the Emblem', () => {
   })
 
   it('leaves its width list to the size, so the page lists two files', () => {
-    expect(render({ variant: 'ring', size: 72 })).not.toMatch(/\ssizes=/)
+    const html = render({ variant: 'ring', size: 72 })
+    expect(html).not.toMatch(/\ssizes=/)
+    const candidates = (/srcSet="([^"]*)"/.exec(html)?.[1] ?? '').split(', ')
+    expect(candidates).toHaveLength(2)
+    expect(candidates[0]).toMatch(/ 1x$/)
+    expect(candidates[1]).toMatch(/ 2x$/)
   })
 })
 

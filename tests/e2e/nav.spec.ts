@@ -229,6 +229,10 @@ test.describe('without JavaScript', () => {
     await expect(emblem).toHaveAttribute('width', '72')
     await expect(emblem).toHaveAttribute('src', /emblem-ring/)
     expect(await emblem.getAttribute('sizes')).toBeNull()
+    const candidates = (await emblem.getAttribute('srcset'))?.split(', ') ?? []
+    expect(candidates).toHaveLength(2)
+    expect(candidates[0]).toMatch(/[?&]w=72&.* 1x$/)
+    expect(candidates[1]).toMatch(/[?&]w=144&.* 2x$/)
     await expect
       .poll(() => emblem.evaluate((image: HTMLImageElement) => image.naturalWidth))
       .toBeGreaterThan(0)
