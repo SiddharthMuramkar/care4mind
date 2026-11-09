@@ -144,7 +144,10 @@
     transform: translateY(0.25rem);
   }
 
-  /* Pressed, it goes at once: still fading, it would cut short the page turn the press starts. */
+  /*
+   * Pressed or dismissed with Escape, it goes at once: still fading, it would cut short the page
+   * turn a press starts.
+   */
   .hoverLabel[data-instant='dismiss'] {
     transition: none;
   }
