@@ -46,10 +46,11 @@
   text-anchor: middle;
 }
 
+/* A touch larger than the labels, and no more: on a phone it leaves a clear gap before Dharmabaddha. */
 .centre {
   fill: var(--color-surface-muted);
   font-family: var(--font-display);
-  font-size: 1.15em;
+  font-size: 1.05em;
   text-anchor: middle;
 }
 
