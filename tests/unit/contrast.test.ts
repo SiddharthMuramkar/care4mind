@@ -263,6 +263,8 @@ describe('controls on paper', () => {
     ['src/components/search/StartingPoints.module.css', '.chip'],
     ['src/components/art/PlateViewer.module.css', '.button'],
     ['src/components/questionnaire/Statement.module.css', '.option'],
+    ['src/components/library/references.module.css', '.chip'],
+    ['src/components/texts/Passage.module.css', '.chip'],
   ])('%s %s draws its edge in the control edge colour', (file, selector) => {
     expect(declared(rule(file, selector), 'border')).toBe('1px solid var(--color-control-edge)')
   })
