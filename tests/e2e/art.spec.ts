@@ -1094,6 +1094,12 @@ test.describe('the first screen', { tag: '@one-width' }, () => {
       await expect
         .poll(() => head.evaluate((image: HTMLImageElement) => image.naturalWidth))
         .toBeGreaterThan(0)
+      // A busy browser can report the first paint a little after drawing it.
+      await expect
+        .poll(() => askedFor(head).then(({ painted }) => painted), {
+          message: 'the browser reports its first paint',
+        })
+        .toBeGreaterThan(0)
       const asked = await askedFor(head)
       expect(asked.loading).toBe(loading)
       expect(asked.priority).toBe('high')
