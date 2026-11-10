@@ -86,6 +86,14 @@
     transform: translateY(-3px);
   }
 
+  /*
+   * Lifted, the card would rise off a pointer at its bottom edge and drop back under it. So while
+   * it is up the action reaches past that edge, as far as a topic card's link does.
+   */
+  .action :is(a, button):hover::after {
+    inset: -6px;
+  }
+
   .card:has(.action :is(a, button):active) {
     transform: translateY(2px);
   }

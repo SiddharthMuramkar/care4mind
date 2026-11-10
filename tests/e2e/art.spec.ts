@@ -763,6 +763,31 @@ test.describe('Concept cards', () => {
       },
     )
   })
+
+  // A Questionnaire card wears the Concept card's styles, lift included.
+  for (const path of ['/', '/questionnaires/'] as const) {
+    test(`on ${path} a pointer at a card’s bottom edge keeps it lifted`, async ({ page }) => {
+      await gotoReady(page, path)
+      const card = cardsOn(page)
+        .filter({ has: page.getByRole('heading', { level: 3 }) })
+        .first()
+      await card.evaluate((el) => el.scrollIntoView({ block: 'center', behavior: 'instant' }))
+      const box = await card.boundingBox()
+      if (!box) throw new Error('The card is laid out.')
+      const x = box.x + box.width / 2
+      const y = box.y + box.height - 1.5
+
+      await page.mouse.move(x, y)
+      await expect(card).toHaveCSS('transform', 'matrix(1, 0, 0, 1, 0, -3)')
+      // The same point again, now that the card is up: the browser tests what is under the pointer.
+      await page.mouse.move(x, y)
+      expect(await card.evaluate((el) => el.matches(':hover')), 'the card keeps the pointer').toBe(
+        true,
+      )
+      await expect(card).toHaveCSS('transform', 'matrix(1, 0, 0, 1, 0, -3)')
+      expect(await scrollsSideways(page)).toEqual([])
+    })
+  }
 })
 
 const WORKS = await works.list()
@@ -1058,6 +1083,15 @@ test.describe('the hero Plate', () => {
     paintings(page).getByRole('button', { name: 'Previous painting', exact: true })
   const next = (page: Page) =>
     paintings(page).getByRole('button', { name: 'Next painting', exact: true })
+
+  test('prints its Plate and caption without the buttons paper cannot press', async ({ page }) => {
+    await gotoReady(page, '/')
+    await expect(paintings(page)).toBeVisible()
+    await page.emulateMedia({ media: 'print' })
+    await expect(paintings(page)).toBeHidden()
+    await expect(caption(page)).toHaveText('The jeweller · 1 of 7')
+    await expect(page.locator(HERO)).toBeVisible()
+  })
 
   /** The file of the Plate on top, the one that keeps its alt text. */
   const shownFile = (page: Page) =>
