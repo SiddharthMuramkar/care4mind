@@ -652,7 +652,11 @@ test.describe('motion', () => {
     }
     await expect(page.getByRole('heading', { level: 2, name: 'Review your answers' })).toBeVisible()
     const turned = (await transitions(page)).length
-    await page.getByRole('button', { name: 'Finish' }).click()
+    // A lotus leans toward a pointer resting near it, wherever the layout happens to put it, so
+    // the pointer waits in a corner clear of the end screen's lotus and Finish is pressed from the
+    // keyboard: what is checked is motion the page starts by itself.
+    await page.mouse.move(0, (page.viewportSize()?.height ?? 800) - 1)
+    await page.getByRole('button', { name: 'Finish' }).press('Enter')
     const end = page
       .locator('section')
       .filter({ has: page.getByRole('heading', { name: 'Your result' }) })
