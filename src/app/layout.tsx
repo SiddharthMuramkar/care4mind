@@ -33,6 +33,8 @@ export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
   themeColor: '#151a3d',
+  // Dark from the first byte, before the stylesheet arrives: no white canvas on the indigo page.
+  colorScheme: 'dark',
 }
 
 export default function RootLayout({ children }: { children: ReactNode }) {

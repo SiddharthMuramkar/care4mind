@@ -219,6 +219,8 @@
     text-rendering: optimizeLegibility;
     /* In-page links and focus land clear of the sticky header. */
     scroll-padding-top: calc(var(--header-height) + 1rem);
+    /* The browser draws its canvas, scrollbars and native controls dark, to suit the indigo page. */
+    color-scheme: dark;
   }
 
   /* In-page links glide to their section. The layout's data-scroll-behavior makes page changes jump. */
@@ -284,12 +286,16 @@
     border-radius: 2px;
   }
 
-  /* A paper surface, marked data-paper: the page's turmeric ring and links all but vanish on it. */
+  /*
+   * A paper surface, marked data-paper: the page's turmeric ring and links all but vanish on it,
+   * and its scrollbars and native controls are drawn light, to match the paper.
+   */
   [data-paper] {
     --color-focus: var(--color-surface-focus);
     --color-link: var(--color-surface-link);
   }
 
+    color-scheme: light;
   /*
    * A part names its topic or Questionnaire status with a data attribute and reads the colour
    * back as --topic or --status/--status-ink, so a slug from content picks its token without the
