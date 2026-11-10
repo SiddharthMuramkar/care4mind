@@ -143,10 +143,12 @@ test.describe('interface text', { tag: '@self-width' }, () => {
     await gotoReady(page, '/concepts/vikshepa/')
     const serif = await face(page.locator('body'))
     const trail = page.getByRole('navigation', { name: 'Breadcrumb', exact: true })
-    expect(await face(trail.getByRole('link', { name: 'Go to home', exact: true }))).toBe(UI)
+    await expect
+      .poll(() => face(trail.getByRole('link', { name: 'Go to home', exact: true })))
+      .toBe(UI)
     const name = trail.locator('[aria-current="page"] [lang="sa-Latn"]')
     await expect(name).toBeVisible()
-    expect(await face(name)).toBe(serif)
+    await expect.poll(() => face(name)).toBe(serif)
     expect(serif).not.toBe(UI)
   })
 
@@ -155,12 +157,12 @@ test.describe('interface text', { tag: '@self-width' }, () => {
     const main = page.getByRole('main')
     const chip = main.locator('button[aria-pressed]').first()
     await expect(chip).toBeVisible()
-    expect(await face(chip)).toBe(UI)
+    await expect.poll(() => face(chip)).toBe(UI)
     const group = main.locator(`[id^="chips-"]`).first()
-    expect(await face(group)).toBe(UI)
+    await expect.poll(() => face(group)).toBe(UI)
     const count = main.getByText(/^\d+ entr(?:y|ies)$/).first()
     await expect(count).toBeVisible()
-    expect(await face(count)).toBe(UI)
+    await expect.poll(() => face(count)).toBe(UI)
   })
 
   test('sets a Concept chip in the sans, its transliterated name in the serif', async ({
@@ -175,8 +177,8 @@ test.describe('interface text', { tag: '@self-width' }, () => {
       .getByRole('link')
       .first()
     await expect(chip).toBeVisible()
-    expect(await face(chip)).toBe(UI)
-    expect(await face(chip.locator('[lang="sa-Latn"]'))).toBe(serif)
+    await expect.poll(() => face(chip)).toBe(UI)
+    await expect.poll(() => face(chip.locator('[lang="sa-Latn"]'))).toBe(serif)
   })
 
   test('sets a status badge, a topic chip and a form’s label in the sans', async ({ page }) => {
@@ -186,16 +188,16 @@ test.describe('interface text', { tag: '@self-width' }, () => {
       .getByText(/^(?:Open|Preview|In preparation)$/)
       .first()
     await expect(badge).toBeVisible()
-    expect(await face(badge)).toBe(UI)
+    await expect.poll(() => face(badge)).toBe(UI)
 
     await gotoReady(page, '/')
     const card = page.locator('#featured').getByRole('article').first()
     const topic = card.locator('[data-topic]').first()
     await expect(topic).toBeVisible()
-    expect(await face(topic)).toBe(UI)
+    await expect.poll(() => face(topic)).toBe(UI)
 
     await gotoReady(page, '/search/')
     const label = page.getByText('A Concept, a term, a verse, a text or an author', { exact: true })
-    expect(await face(label)).toBe(UI)
+    await expect.poll(() => face(label)).toBe(UI)
   })
 })
