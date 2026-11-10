@@ -49,4 +49,10 @@ describe('the picture on a share card', () => {
   it('refuses a route nobody chose a picture for', async () => {
     await expect(cardPicture('/nonesuch/', '')).rejects.toThrow('/nonesuch/')
   })
+
+  it('refuses a Library slug that names no section, even one every object has', async () => {
+    for (const slug of ['nonesuch', 'toString']) {
+      await expect(cardPicture('/library/[slug]/', slug)).rejects.toThrow(`page ${slug} has`)
+    }
+  })
 })
