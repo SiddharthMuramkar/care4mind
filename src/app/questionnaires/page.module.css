@@ -40,7 +40,7 @@
   margin: 0;
   font-family: var(--font-display);
   font-weight: 500;
-  font-size: var(--text-heading);
+  font-size: var(--text-subsection);
   line-height: 1.2;
 }
 
@@ -115,12 +115,4 @@
 
 .slipLabel {
   color: var(--color-surface-muted);
-}
-
-/*
- * The title is one long word: on a phone it is set to fit the folio rather than break, and with
- * room it is as large as the other indexes' titles (reading.module.css).
- */
-h1.title {
-  font-size: clamp(2.25rem, 10.5vw, 5.75rem);
 }

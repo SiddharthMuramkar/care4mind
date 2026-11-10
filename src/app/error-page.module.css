@@ -14,8 +14,8 @@
   margin: 0;
   font-family: var(--font-display);
   font-weight: 500;
-  font-size: clamp(2.25rem, 8vw, 4rem);
-  line-height: 1.05;
+  font-size: var(--text-page-title);
+  line-height: 1.15;
   max-width: 16ch;
 }
 

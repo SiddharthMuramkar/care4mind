@@ -101,7 +101,7 @@ test.describe('The Karma Yoga cycle', () => {
   })
 
   test(
-    'sets every label at 14 px or more on a 360 px phone and where the type steps down',
+    'sets every label at 15 px or more on a 360 px phone and where the type steps down',
     { tag: '@self-width' },
     async ({ page }) => {
       for (const width of [360, 544]) {
@@ -114,7 +114,7 @@ test.describe('The Karma Yoga cycle', () => {
           )
         })
         expect(sizes).toHaveLength(17)
-        for (const size of sizes) expect(size, `at ${width} px`).toBeGreaterThanOrEqual(14)
+        for (const size of sizes) expect(size, `at ${width} px`).toBeGreaterThanOrEqual(15)
       }
     },
   )

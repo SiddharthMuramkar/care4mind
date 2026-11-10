@@ -23,7 +23,7 @@
   padding-inline-end: 0.5em;
   color: var(--color-highlight-ink);
   font-family: var(--font-text);
-  font-size: 0.78em;
+  font-size: max(var(--text-small), 0.78em);
   font-weight: 600;
   vertical-align: 0.16em;
 }

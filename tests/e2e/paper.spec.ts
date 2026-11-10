@@ -4,8 +4,7 @@ import { expect, gotoReady, test } from './fixtures'
 import { expectPaperFocusRing } from './paper'
 
 /** The colour scheme the browser draws an element's scrollbars and native controls in. */
-const scheme = (element: Locator) =>
-  element.evaluate((node) => getComputedStyle(node).colorScheme)
+const scheme = (element: Locator) => element.evaluate((node) => getComputedStyle(node).colorScheme)
 
 // The indigo page asks for dark scrollbars, controls and canvas; every paper surface on it for light ones.
 test.describe('the colour scheme', () => {

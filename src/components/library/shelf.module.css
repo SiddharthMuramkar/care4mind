@@ -199,7 +199,7 @@
   flex: none;
   max-inline-size: 48%;
   font-family: var(--font-text);
-  font-size: 0.875rem;
+  font-size: var(--text-small);
   line-height: 1.1;
 }
 

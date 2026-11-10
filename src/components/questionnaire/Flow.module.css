@@ -42,7 +42,7 @@
   margin: 0;
   font-family: var(--font-display);
   font-weight: 500;
-  font-size: clamp(1.875rem, 5vw, 2.5rem);
+  font-size: var(--text-section);
   line-height: 1.1;
   text-wrap: balance;
   /* Clear of the header and the progress strip, with the kicker above it in view. */

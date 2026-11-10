@@ -17,7 +17,7 @@
 }
 
 .titleDeva {
-  font-size: 0.4em;
+  font-size: max(var(--text-small), 0.4em);
   line-height: 1.5;
   color: var(--color-surface-muted);
 }
