@@ -1,7 +1,7 @@
 import type { LateFace } from './late-faces'
 import tiro from './tiro-devanagari-sanskrit/TiroDevanagariSanskrit-Regular.woff2' with { turbopackModuleType: 'asset' }
 
-// Built by scripts/fonts/subset.py: Devanagari only, about 110 kB. It is added once the page's
+// Built by scripts/fonts/subset.py: Devanagari only, about 93 kB. It is added once the page's
 // text is painted, and every page with the footer fetches it, for the motto. Until then that text
 // is set in a system font, with the same line height (globals.css), so the swap moves nothing.
 
@@ -14,7 +14,8 @@ export const tiroDevanagariSanskrit: LateFace = {
     style: 'normal',
     weight: '400',
     display: 'swap',
-    unicodeRange: 'U+0900-097F, U+1CD0-1CFF, U+200C-200D, U+25CC, U+A8E0-A8FF',
+    // The ranges the subset keeps, so a page asks for the face only for text it can set.
+    unicodeRange: 'U+0900-097F, U+200C-200D, U+25CC',
     // Tiro's Devanagari runs large beside Playfair; measured, it needs about 87%.
     sizeAdjust: '87%',
   },

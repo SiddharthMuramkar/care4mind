@@ -1,3 +1,5 @@
 # Python 3.14: the version these pins were built and checked with.
+# Nothing more: with uharfbuzz installed, fontTools packs the layout tables another way, and Tiro's
+# file comes out a few kilobytes larger.
 fonttools==4.67.0
 brotli==1.2.1
