@@ -63,3 +63,13 @@ describe('the type scale', () => {
     expect(hits).toEqual([])
   })
 })
+
+describe('press feedback', () => {
+  // A press answers within the span a small change of state takes: soon enough to feel direct,
+  // long enough to be seen.
+  it('takes 120 to 180 ms', () => {
+    const duration = /^(\d+)ms$/.exec(tokens['--duration-instant'] ?? '')
+    expect(Number(duration?.[1])).toBeGreaterThanOrEqual(120)
+    expect(Number(duration?.[1])).toBeLessThanOrEqual(180)
+  })
+})
