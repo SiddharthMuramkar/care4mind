@@ -377,6 +377,30 @@ test.describe('the KarmaYoga flow', () => {
     await expectNoAxeViolations(page, 'the end screen')
   })
 
+  test('steps the end screen’s headings down: the result above its sections, each above its parts', async ({
+    page,
+  }) => {
+    await gotoReady(page, FLOW)
+    await toEnd(page)
+    const size = (heading: Locator) =>
+      heading.evaluate((node) => parseFloat(getComputedStyle(node).fontSize))
+    const end = page
+      .locator('section')
+      .filter({ has: page.getByRole('heading', { level: 2, name: 'Your result' }) })
+    const result = await size(end.getByRole('heading', { level: 2 }))
+    const sections = await end.getByRole('heading', { level: 3 }).all()
+    expect(sections.length).toBeGreaterThanOrEqual(4)
+    for (const heading of sections) {
+      expect.soft(await size(heading), await heading.innerText()).toBeLessThan(result)
+    }
+    const yourAnswers = await size(end.getByRole('heading', { level: 3, name: 'Your answers' }))
+    const parts = await end.getByRole('heading', { level: 4 }).all()
+    expect(parts).toHaveLength(PARTS.length)
+    for (const heading of parts) {
+      expect.soft(await size(heading), await heading.innerText()).toBeLessThan(yourAnswers)
+    }
+  })
+
   test('prints the placeholder and the answers, without the controls', async ({ page }) => {
     await gotoReady(page, FLOW)
     await toEnd(page)
