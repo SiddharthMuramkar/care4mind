@@ -9,17 +9,21 @@ interface StickerProps {
   art: ArtRecord
   /** The size in CSS pixels. A width with no `sizes` lists two files, 1x and 2x. */
   size: number
+  /** In the first screen, so it loads at once and ahead of the rest, there when the text paints. */
+  firstScreen?: boolean
   className?: string
 }
 
 /** A folk-art Sticker. Always decorative: the words beside it name the thing. */
-export function Sticker({ art, size, className }: StickerProps) {
+export function Sticker({ art, size, firstScreen = false, className }: StickerProps) {
   return (
     <Image
       src={art.src}
       alt=""
       width={size}
       height={Math.round((size * art.height) / art.width)}
+      loading={firstScreen ? 'eager' : undefined}
+      fetchPriority={firstScreen ? 'high' : undefined}
       className={cx(styles.sticker, className)}
     />
   )

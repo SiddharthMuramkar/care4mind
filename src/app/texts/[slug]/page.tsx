@@ -49,6 +49,7 @@ export default async function WorkPage({ params }: PageProps<'/texts/[slug]'>) {
         <Sticker
           art={artFor({ kind: 'work', slug: work.slug })}
           size={120}
+          firstScreen
           className={styles.picture}
         />
       }

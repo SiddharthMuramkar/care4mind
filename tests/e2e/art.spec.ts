@@ -10,7 +10,7 @@ import { expectNoAxeViolations } from './axe'
 import { openingFolio } from './drawings'
 import { gotoErrorPage } from './error-page'
 import { expect, gotoReady, scrollsSideways, test } from './fixtures'
-import { MISSING, ROUTES_IN_SCOPE } from './routes'
+import { MISSING, ROUTES, ROUTES_IN_SCOPE } from './routes'
 
 /** The homepage's hero Plate: the one picture allowed a `sizes` attribute. */
 const HERO = '[data-hero-plate]'
@@ -964,6 +964,76 @@ test.describe('every page, whatever has been made so far', () => {
   }
 })
 
+/**
+ * One page of each kind the route registry lists, with the picture standing at its head: the
+ * homepage's first Plate, or the picture above the title. The 404 has its picture first in `main`.
+ */
+const FIRST_SCREENS: { path: string; picture: (page: Page) => Locator }[] = [
+  ...(
+    await Promise.all(
+      ROUTES.filter((route) => route.sample).map(async (route) => {
+        if (route.kind === 'home')
+          return { path: route.path, picture: (page: Page) => page.locator(HERO) }
+        return (await headPicture(route)) ? { path: route.path, picture: headImage } : null
+      }),
+    )
+  ).filter((entry) => entry !== null),
+  { path: MISSING, picture: (page: Page) => page.getByRole('main').locator('img').first() },
+]
+
+/** How a picture was asked for: its loading and priority, and when its file was requested. */
+const askedFor = (picture: Locator) =>
+  picture.evaluate((image: HTMLImageElement) => {
+    const request = performance.getEntriesByName(image.currentSrc, 'resource')[0]
+    const paint = performance.getEntriesByName('first-contentful-paint')[0]
+    return {
+      loading: image.loading,
+      priority: image.fetchPriority,
+      requested: request?.startTime ?? Infinity,
+      painted: paint?.startTime ?? 0,
+    }
+  })
+
+test.describe('the first screen', { tag: '@one-width' }, () => {
+  for (const { path, picture } of FIRST_SCREENS) {
+    test(`${path} asks for the picture at its head at once, before any text paints`, async ({
+      page,
+    }) => {
+      await gotoReady(page, path)
+      const head = picture(page)
+      await expect(head).toHaveCount(1)
+      await expect
+        .poll(() => head.evaluate((image: HTMLImageElement) => image.naturalWidth))
+        .toBeGreaterThan(0)
+      const asked = await askedFor(head)
+      expect(asked.loading).toBe('eager')
+      expect(asked.priority).toBe('high')
+      expect(asked.requested, 'requested before the first contentful paint').toBeLessThan(
+        asked.painted,
+      )
+      // Everything else still waits until it nears the screen.
+      const atOnce = await head.evaluate(
+        (head, pictures) =>
+          [...document.querySelectorAll<HTMLImageElement>(pictures)]
+            .filter((image) => image !== head)
+            .filter((image) => image.loading !== 'lazy' || image.fetchPriority === 'high')
+            .map((image) => image.src),
+        PICTURES,
+      )
+      expect(atOnce, 'other pictures asked for at once').toEqual([])
+    })
+  }
+
+  for (const kind of ['segment', 'global'] as const) {
+    test(`the ${kind} error page asks for its Emblem at once`, async ({ page }) => {
+      await gotoErrorPage(page, kind)
+      const asked = await askedFor(page.getByRole('main').locator('img'))
+      expect(asked.loading).toBe('eager')
+      expect(asked.priority).toBe('high')
+    })
+  }
+})
+
 test.describe('the hero Plate', () => {
   const figure = (page: Page) => page.locator(`figure:has(${HERO})`)
 
@@ -1078,7 +1148,7 @@ test.describe('the hero Plate', () => {
   const SIZES = '(min-width: 64rem) 360px, 168px'
 
   test(
-    'is the only picture preloaded, and the only one that sets sizes',
+    'is the only picture preloaded, at high priority, and the only one that sets sizes',
     { tag: '@one-width' },
     async ({ page }) => {
       await gotoReady(page, '/')
@@ -1086,6 +1156,7 @@ test.describe('the hero Plate', () => {
       await expect(preloads).toHaveCount(1)
       await expect(preloads).toHaveAttribute('imagesizes', SIZES)
       await expect(preloads).toHaveAttribute('imagesrcset', /%2Fart%2Fplates%2Fjeweller\.jpg/)
+      await expect(preloads).toHaveAttribute('fetchpriority', 'high')
       const withSizes = page.locator('img[sizes]')
       await expect(withSizes).toHaveCount(1)
       await expect(withSizes).toHaveAttribute('sizes', SIZES)
