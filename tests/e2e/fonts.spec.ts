@@ -49,6 +49,62 @@ function preloadedFaces(page: Page) {
   })
 }
 
+/**
+ * How wide runs of figures set in one face, at a size that makes a unit's difference show, in
+ * each figure style the site's styles ask for. Also how many loaded faces match it, so a width
+ * read from a fallback font isn't taken for the face's own.
+ */
+function figureWidths(page: Page, [family, style, weight]: readonly [string, string, string]) {
+  return page.evaluate(
+    async ([family, style, weight]) => {
+      const shorthand = `${style} ${weight} 100px "${family}"`
+      const faces = await document.fonts.load(shorthand, '0123456789')
+      const width = (figures: string, numeric: string) => {
+        const probe = document.createElement('span')
+        probe.textContent = figures
+        probe.style.cssText = `position: absolute; white-space: nowrap; font: ${shorthand}; font-variant-numeric: ${numeric}`
+        document.body.append(probe)
+        const { width } = probe.getBoundingClientRect()
+        probe.remove()
+        return width
+      }
+      return {
+        faces: faces.length,
+        tabularOnes: width('1111111111', 'tabular-nums'),
+        tabularNoughts: width('0000000000', 'tabular-nums'),
+        lining: width('0123456789', 'lining-nums'),
+        oldstyle: width('0123456789', 'oldstyle-nums'),
+      }
+    },
+    [family, style, weight] as const,
+  )
+}
+
+// The figure styles the pages ask for come from the faces themselves: tabular figures share one
+// width, and lining figures, the height of capitals, set wider than old-style ones.
+test.describe('figure styles', { tag: '@one-width' }, () => {
+  test('are set by every face of running text and headings', async ({ page }) => {
+    await page.goto('/')
+    const { text, heading } = await pageFonts(page)
+    const first = (stack: string) => stack.split(',')[0]?.replace(/["']/g, '').trim() ?? ''
+    const faces: (readonly [string, string, string])[] = [
+      [first(text[0]), 'normal', '400'],
+      [first(text[0]), 'italic', '400'],
+      [first(text[0]), 'normal', '600'],
+      [first(heading[0]), heading[1], heading[2]],
+    ]
+    await expect
+      .poll(async () => (await loadedFaces(page)).map((face) => font(...face)))
+      .toEqual(expect.arrayContaining(faces.map((face) => font(...face))))
+    for (const face of faces) {
+      const widths = await figureWidths(page, face)
+      expect(widths.faces, font(...face)).toBeGreaterThan(0)
+      expect(widths.tabularOnes, `${font(...face)}, tabular`).toBeCloseTo(widths.tabularNoughts, 0)
+      expect(widths.lining, `${font(...face)}, lining`).toBeGreaterThan(widths.oldstyle)
+    }
+  })
+})
+
 for (const { path, name } of PAGES) {
   test.describe(name, { tag: '@one-width' }, () => {
     // Only the type that sets most of the page loads ahead of everything else.
