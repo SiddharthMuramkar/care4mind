@@ -20,7 +20,7 @@ test.describe('the colour scheme', () => {
   })
 
   test('is light inside a form on paper', async ({ page }) => {
-    await gotoReady(page, '/concepts/')
+    await gotoReady(page, '/search/')
     expect(await scheme(page.locator('html'))).toBe('dark')
     expect(await scheme(page.getByRole('main').getByRole('searchbox').first())).toBe('light')
   })
