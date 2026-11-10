@@ -1016,6 +1016,45 @@ test.describe('the hero Plate', () => {
     },
   )
 
+  test(
+    'from 64rem stands with the Fleuron under it, the pair centred beside the words',
+    { tag: '@self-width' },
+    async ({ page }) => {
+      await gotoReady(page, '/')
+      for (const width of [1024, 1440]) {
+        await page.setViewportSize({ width, height: 900 })
+        const heading = page.getByRole('heading', { level: 1 })
+        const [plate, fleuron, motto, intro] = await Promise.all([
+          figure(page).boundingBox(),
+          openingFolio(page).locator('svg[data-lotus]').boundingBox(),
+          heading.locator('xpath=preceding-sibling::p[1]').boundingBox(),
+          openingFolio(page).locator('xpath=./p').last().boundingBox(),
+        ])
+        if (!plate || !fleuron || !motto || !intro) throw new Error('the hero is laid out')
+        const gap = fleuron.y - (plate.y + plate.height)
+        expect(gap, `at ${width} px the Fleuron sits just under the Plate`).toBeGreaterThan(20)
+        expect(gap, `at ${width} px`).toBeLessThan(28)
+        const above = plate.y - motto.y
+        const below = intro.y + intro.height - (fleuron.y + fleuron.height)
+        expect(Math.abs(above - below), `at ${width} px the pair is centred`).toBeLessThan(2)
+      }
+    },
+  )
+
+  test('sets the paragraph under the buttons at the same leading as the one above them', async ({
+    page,
+  }) => {
+    await gotoReady(page, '/')
+    const leading = (paragraph: Locator) =>
+      paragraph.evaluate((element) => {
+        const { lineHeight, fontSize } = getComputedStyle(element)
+        return Math.round((parseFloat(lineHeight) / parseFloat(fontSize)) * 100) / 100
+      })
+    const paragraphs = openingFolio(page).locator('xpath=./p')
+    const subhead = page.getByRole('heading', { level: 1 }).locator('xpath=following-sibling::p[1]')
+    expect(await leading(paragraphs.last())).toBe(await leading(subhead))
+  })
+
   for (const width of [360, 768]) {
     test(
       `at ${width} px stands at 168 px above the motto`,
@@ -1542,6 +1581,18 @@ test.describe('the homepage around its pictures', () => {
     expect(box.height).toBe(12)
     expect(Math.abs(box.width - inner)).toBeLessThan(1)
     expect(box.y + box.height).toBeLessThanOrEqual(line.y)
+    // As far from the section above as from the line below.
+    const previous = await section.evaluate((element) => {
+      const sibling = element.previousElementSibling
+      if (!sibling) throw new Error('A section stands above the closing one.')
+      return sibling.getBoundingClientRect().bottom
+    })
+    expect(Math.abs(box.y - previous - (line.y - box.y - box.height))).toBeLessThan(1)
+  })
+
+  test('the closing line breaks evenly, never leaving one word alone', async ({ page }) => {
+    await gotoReady(page, '/')
+    await expect(homeSection(page, CLOSING).locator('p').first()).toHaveCSS('text-wrap', 'balance')
   })
 
   test('the sections widen to 72rem from 64rem', { tag: '@self-width' }, async ({ page }) => {
@@ -1891,7 +1942,7 @@ test.describe('the homepage, section and topic pages as a set', () => {
     })
   }
 
-  for (const { name, path, controls } of [
+  for (const { name, path, controls, ready } of [
     {
       name: 'the viewer’s buttons',
       path: '/',
@@ -1911,6 +1962,10 @@ test.describe('the homepage, section and topic pages as a set', () => {
       name: 'the filter chips under the Sticker',
       path: '/concepts/',
       controls: (page: Page) => main(page).locator('button[aria-pressed]'),
+      // The plain chips give way to Base UI's when the browser is idle, the rail with them:
+      // measured mid-swap, a chip has no box.
+      ready: (page: Page) =>
+        expect(page.getByRole('toolbar', { name: 'Jump to a letter' })).toBeVisible(),
     },
     {
       name: 'the switch between book lists',
@@ -1930,9 +1985,11 @@ test.describe('the homepage, section and topic pages as a set', () => {
       async ({ page }) => {
         await page.setViewportSize({ width: 360, height: 800 })
         await gotoReady(page, path)
+        await ready?.(page)
         const found = await controls(page).all()
         expect(found.length).toBeGreaterThan(0)
         for (const control of found) {
+          await expect(control).toBeVisible()
           const box = await control.boundingBox()
           expect(box?.height).toBeGreaterThanOrEqual(44)
           expect(box?.width).toBeGreaterThanOrEqual(44)
