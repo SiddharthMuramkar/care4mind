@@ -1,6 +1,7 @@
 /*
- * The reading measure for the error pages, which set their own main, and the type the
- * reading pages share below their title pages. The shell itself is the ReadingPage.
+ * The reading measure for the error pages, which set their own main, the type the reading
+ * pages share below their title pages, and the picture above a Concept's or a Questionnaire's
+ * name. The shell itself is the ReadingPage.
  */
 .page {
   display: grid;
@@ -15,6 +16,27 @@
 @media (width < 40rem) {
   .page {
     padding-inline: 1rem;
+  }
+}
+
+/* The picture above the name. A phone shows it smaller, and with no extra room below. */
+@media (width >= 40rem) {
+  .headPicture {
+    margin-block-end: 1rem;
+  }
+}
+
+@media (width < 40rem) {
+  .headPicture {
+    max-width: 5.5rem;
+    height: auto;
+  }
+}
+
+/* The printout goes without it. The element name outranks a Medallion's own `display`. */
+@media print {
+  header .headPicture {
+    display: none;
   }
 }
 

@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 
+import { SectionSticker } from '@/components/art'
 import { azModel, ConceptsAz } from '@/components/az'
 import { turnForward } from '@/components/PageTurn'
 import { ReadingPage } from '@/components/ReadingPage'
@@ -39,6 +40,7 @@ export default async function ConceptsPage() {
       path={PATH}
       titleId="concepts-title"
       width="plate"
+      beforeTitle={<SectionSticker section="concepts" />}
       kicker="From A to Z"
       title="Concepts"
       afterTitle={

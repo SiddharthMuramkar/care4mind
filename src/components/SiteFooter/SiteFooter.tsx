@@ -4,18 +4,20 @@ import { siteNav } from '@/components/nav'
 import { ProposalNote } from '@/components/proposals'
 import { home } from '@/content'
 
+import { Emblem } from '../Emblem'
 import { Fleuron } from '../Fleuron'
 import { HelpLine } from '../HelpLine'
 import { Logo } from '../Logo'
 import styles from './SiteFooter.module.css'
 
 /**
- * The colophon every page ends with: the wordmark and tagline, the full navigation (every
- * section, Questionnaires, the topics and every Library page, and the proposals while one is
- * on), the credit and the preview notice. Without JavaScript, the header's Menu leads here.
+ * The colophon every page ends with: the Emblem beside the wordmark with the motto under them,
+ * the tagline, the full navigation (every section, Questionnaires, the topics, every Library
+ * page, the Picture credits and the proposals while one is on), the credit and the preview
+ * notice. Without JavaScript, the header's Menu leads here.
  */
 export async function SiteFooter() {
-  const [nav, { tagline }] = await Promise.all([siteNav(), home.get()])
+  const [nav, { tagline, shloka }] = await Promise.all([siteNav(), home.get()])
   const section = (id: string) => nav.sections.find((entry) => entry.id === id)
   const concepts = section('concepts')
   const texts = section('texts')
@@ -26,7 +28,13 @@ export async function SiteFooter() {
       <Fleuron className={styles.fleuron} />
       <div className={styles.inner}>
         <div className={styles.colophon}>
-          <Logo />
+          <div className={styles.signature}>
+            <Emblem variant="ring" size={72} />
+            <Logo />
+            <p lang="sa-Deva" className={styles.motto}>
+              {shloka.devanagari}
+            </p>
+          </div>
           <p className={styles.tagline}>{tagline}</p>
         </div>
         <nav id="site-nav" aria-label="All sections">
@@ -83,6 +91,9 @@ export async function SiteFooter() {
                     <Link href={nav.privacy.href}>{nav.privacy.label}</Link>
                   </li>
                 ) : null}
+                <li>
+                  <Link href={nav.credits.href}>{nav.credits.label}</Link>
+                </li>
               </ul>
             </li>
             {nav.proposals ? (

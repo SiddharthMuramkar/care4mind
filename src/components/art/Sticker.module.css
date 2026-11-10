@@ -1,0 +1,41 @@
+.sticker {
+  /* So a Sticker never takes a click meant for what it stands in. */
+  pointer-events: none;
+  filter: drop-shadow(0 1px 2px var(--color-sticker-shadow));
+}
+
+/*
+ * At a page's head, above its title. `height: auto` keeps the shape when the width narrows. The
+ * margin is the one a topic's Frontispiece has, so every head keeps the same room under its picture.
+ */
+.head {
+  width: 7rem;
+  height: auto;
+  margin-block-end: 1rem;
+}
+
+@media (width < 40rem) {
+  .head {
+    width: 5.5rem;
+  }
+}
+
+/*
+ * On a card, the Sticker lifts at a corner with its card and presses with it. Only a direct child
+ * of an `article` moves: a page's Folio is an `article` too, and its Stickers stay still. A mouse
+ * press focuses the card's link as well, so only focus that shows its ring lifts the Sticker.
+ */
+@media (prefers-reduced-motion: no-preference) {
+  .sticker {
+    transition: transform var(--duration-quick) var(--ease-out);
+  }
+
+  article:is(:hover, :has(:focus-visible)) > .sticker {
+    transform: translateY(-3px) rotate(-3deg);
+  }
+
+  article:active > .sticker {
+    transform: scale(0.97);
+    transition-duration: var(--duration-instant);
+  }
+}

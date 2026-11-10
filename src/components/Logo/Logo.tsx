@@ -3,7 +3,7 @@ import styles from './Logo.module.css'
 /**
  * The Press wordmark: Care4Mind in Playfair, with the 4 set in a vermilion
  * ring. Type and its ring only, still: the header sets the lotus beside
- * it, and the footer shows it alone.
+ * it, and the footer the Emblem.
  */
 export function Logo() {
   return (

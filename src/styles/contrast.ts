@@ -145,6 +145,10 @@ export const CONTRAST_PAIRS = [
   // Drawings in vermilion on the indigo page and on the Drawer's paper: the lotus.
   { foreground: 'highlight', background: 'ground', minimum: 3 },
   { foreground: 'highlight', background: 'drawer', minimum: 3 },
+  // The Karma Yoga cycle's arrows, drawings on the paper: its text colours are the surface pairs above.
+  ...(['1', '2', '3', '4', '5'] as const).map(
+    (tone) => ({ foreground: `cycle-arrow-${tone}`, background: 'surface', minimum: 3 }) as const,
+  ),
   // Badges: a Questionnaire's status and the Proposal label, each written on its own ground.
   { foreground: 'status-live-ink', background: 'status-live', minimum: 4.5 },
   { foreground: 'status-preview-ink', background: 'status-preview', minimum: 4.5 },

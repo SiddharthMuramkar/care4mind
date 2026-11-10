@@ -2,6 +2,8 @@ import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import type { CSSProperties } from 'react'
 
+import { artFor } from '@/art'
+import { HeadPicture } from '@/components/art'
 import { AtAGlance, Contents, type ContentsEntry } from '@/components/concept'
 import { LinkedKnowledge } from '@/components/concept'
 import { TitleSpellings } from '@/components/concept'
@@ -91,6 +93,14 @@ export default async function ConceptPage({ params }: PageProps<'/concepts/[slug
       pageClassName={styles.page}
       articleClassName={styles.article}
       beforeTrail={<ReadingThread />}
+      beforeTitle={
+        <HeadPicture
+          art={artFor({ kind: 'concept', slug: concept.slug, topic: concept.topic.slug })}
+          size={120}
+          phoneSize={88}
+          className={reading.headPicture}
+        />
+      }
       longTitle={!concept.term}
       title={
         // A Concept card's title flies into the heading's IAST spelling, or its English title.

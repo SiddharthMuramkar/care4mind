@@ -4,6 +4,8 @@ pnpm-lock.yaml
 pnpm-workspace.yaml
 src/fonts/
 src/content/generated/
+/art/
+scripts/art/originals.json
 .next/
 playwright-report/
 test-results/

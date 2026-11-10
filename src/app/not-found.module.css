@@ -1,3 +1,20 @@
+/* The page's picture, centred above the kicker, with room before the words begin. */
+.picture {
+  margin-block-end: 1rem;
+}
+
+@media (width < 40rem) {
+  .picture {
+    max-width: 10rem;
+    height: auto;
+  }
+}
+
+/* The heading's lines evened out, so no word is left alone on the last one. */
+.title {
+  text-wrap: balance;
+}
+
 /* The lotus Fleuron at rest, as on every page but the home page: a wrong turn is still a page of the book. */
 .fleuron {
   width: min(10rem, 50%);
@@ -15,11 +32,21 @@
   padding: 0;
 }
 
-/* The search box and its chips, as wide as the box, left-aligned inside the centred folio. */
+/* The search box and its chips, as wide as the box, centred on the heading's axis. */
 .search {
   display: grid;
   gap: 1rem;
   width: min(32rem, 100%);
+}
+
+/* The box's label and the chip rows, centred over the box, as the text above and the links below. */
+.search label {
+  text-align: center;
+  text-wrap: balance;
+}
+
+.search ul {
+  justify-content: center;
 }
 
 /* The links beside the call to action, which brings its own style. */

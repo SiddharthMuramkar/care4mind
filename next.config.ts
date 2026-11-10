@@ -16,11 +16,22 @@ const securityHeaders = [
 const nextConfig: NextConfig = {
   poweredByHeader: false,
   // Next generates typedRoutes without trailing slashes despite trailingSlash, so it cannot check slashed paths.
+  // Every redirect source joins the Route union, which tsc is unable to reduce any more: some Route
+  // ternaries and spread literals fail with TS2590, and those are written another way.
   typedRoutes: true,
   // Every address ends with a slash, as the current site's do; the bare one redirects to it.
   trailingSlash: true,
-  // Share cards read their fonts from disk at render time, which the file tracer cannot see.
-  outputFileTracingIncludes: { '/**/opengraph-image*': ['./src/fonts/**/*.woff'] },
+  // Share cards read their fonts and pictures from disk at render time, which the file tracer cannot see.
+  outputFileTracingIncludes: {
+    '/**/opengraph-image*': ['./src/fonts/**/*.woff', './art/cards/**'],
+  },
+  images: {
+    formats: ['image/avif', 'image/webp'],
+    // Files under /art/ never change in place, so a long cache is safe. Next.js 16's default is 4 hours.
+    minimumCacheTTL: 2_678_400, // 31 days
+    // The widths the pictures use, so each is transformed at only a few sizes. 720 is served by the 750 device size.
+    imageSizes: [64, 72, 112, 120, 128, 144, 160, 168, 200, 224, 240, 320, 336, 360, 400, 480],
+  },
   async headers() {
     const secure = { source: '/:path*', headers: securityHeaders }
     if (siteConfig.indexable) return [secure]

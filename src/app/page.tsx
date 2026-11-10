@@ -1,7 +1,10 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 
+import { art, heroPlates } from '@/art'
+import { FolkBorder, MedallionRing, PlateViewer, Sticker } from '@/components/art'
 import { ConceptCard } from '@/components/ConceptCard'
+import { Emblem } from '@/components/Emblem'
 import { Fleuron } from '@/components/Fleuron'
 import { Folio } from '@/components/Folio'
 import { OrnamentRule } from '@/components/OrnamentRule'
@@ -24,12 +27,21 @@ export default async function HomePage() {
   const [page, topicCards, routes] = await Promise.all([home.get(), topics.list(), site.routes()])
   const startHereListed = routes.some((route) => route.kind === 'start')
   const closingLink = heroLinks(page.hero, startHereListed)[0]
+  const plates = heroPlates.map((id) => {
+    const { src, width, height, alt, caption } = art(id)
+    return { id, src, width, height, alt, caption }
+  })
 
   return (
     <PageTurn>
       <main id="main" className={styles.main}>
         <section className={styles.hero} aria-labelledby="home-title">
           <Folio className={styles.heroFolio}>
+            <PlateViewer
+              plates={plates}
+              ring={<MedallionRing size={360} still />}
+              className={styles.heroPlate}
+            />
             <p className={styles.motto}>
               <span lang="sa-Deva" className={styles.heroDeva}>
                 {page.shloka.devanagari}
@@ -70,9 +82,16 @@ export default async function HomePage() {
               className={styles.section}
               aria-labelledby="on-your-mind-title"
             >
-              <h2 id="on-your-mind-title" className={styles.sectionTitle}>
-                What’s on your mind?
-              </h2>
+              <div className={styles.sectionHead}>
+                <h2 id="on-your-mind-title" className={styles.sectionTitle}>
+                  What’s on your mind?
+                </h2>
+                <Sticker
+                  art={art('sticker-mind-dome')}
+                  size={56}
+                  className={styles.sectionSticker}
+                />
+              </div>
               <ul className={styles.mindChips}>
                 {page.onYourMind.map(({ label, concept }) => (
                   <li key={label}>
@@ -117,6 +136,7 @@ export default async function HomePage() {
               <li key={concept.slug}>
                 <ConceptCard
                   featured
+                  pictureSize={72}
                   concept={concept}
                   action={
                     <Link
@@ -145,7 +165,12 @@ export default async function HomePage() {
 
         <OrnamentRule className={styles.rule} />
 
-        <section id="who-behind" className={styles.section} aria-labelledby="who-behind-title">
+        <section
+          id="who-behind"
+          className={cx(styles.section, styles.whoBehind)}
+          aria-labelledby="who-behind-title"
+        >
+          <Emblem variant="ring" size={120} decorative={false} className={styles.emblem} />
           <h2 id="who-behind-title" className={styles.sectionTitle}>
             Who’s behind this
           </h2>
@@ -155,6 +180,7 @@ export default async function HomePage() {
         </section>
 
         <section className={styles.closingSection} aria-label="Closing">
+          <FolkBorder variant="dot-line" />
           <p className={styles.closing}>
             <Text text={page.closing} />
           </p>

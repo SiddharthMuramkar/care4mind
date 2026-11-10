@@ -205,6 +205,11 @@ a.letter:focus-visible {
   gap: 0.25rem;
 }
 
+/* Its label stands above the box at every width, not in a margin as a chip group's does. */
+.search .groupLabel {
+  position: static;
+}
+
 .searchBox {
   inline-size: 100%;
   max-inline-size: 32rem;

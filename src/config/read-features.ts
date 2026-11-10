@@ -14,6 +14,8 @@ export interface Features {
   whatsOnYourMind: boolean
   /** Sign up and Log in: Log in beside Search, the auth routes, and login before Start. */
   login: boolean
+  /** A picture not yet approved by the client can show. Seen in local runs and the contact sheet: branch previews are off and production stays off. */
+  draftArt: boolean
 }
 
 const VARIABLES = {
@@ -22,6 +24,7 @@ const VARIABLES = {
   startHere: 'FEATURE_START_HERE',
   whatsOnYourMind: 'FEATURE_WHATS_ON_YOUR_MIND',
   login: 'FEATURE_LOGIN',
+  draftArt: 'FEATURE_DRAFT_ART',
 } as const satisfies Record<keyof Features, string>
 
 type Environment = Readonly<Record<string, string | undefined>>
@@ -42,5 +45,6 @@ export function readFeatures(env: Environment): Features {
     startHere: flag(VARIABLES.startHere),
     whatsOnYourMind: flag(VARIABLES.whatsOnYourMind),
     login: flag(VARIABLES.login),
+    draftArt: flag(VARIABLES.draftArt),
   }
 }

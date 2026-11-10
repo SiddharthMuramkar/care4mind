@@ -27,4 +27,8 @@ describe('the site navigation', () => {
       inWords(all.length, 'Reference', 'References'),
     )
   })
+
+  it('hands the footer its link to the Picture credits page', async () => {
+    expect((await siteNav()).credits).toEqual({ label: 'Picture credits', href: '/credits/' })
+  })
 })

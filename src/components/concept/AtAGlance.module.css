@@ -21,17 +21,52 @@
   line-height: 1.15;
 }
 
+/* Two slips a row, three on a wider screen; boxes in a row stand the same height. */
 .grid {
   list-style: none;
   margin: 0;
   padding: 0;
   display: grid;
   gap: 0.4rem;
-  grid-template-columns: repeat(auto-fill, minmax(min(8.5rem, 100%), 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.grid > li {
+  display: grid;
+}
+
+@media (width >= 48rem) {
+  .grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  /* A count that would leave one slip alone on the last row of three keeps to two a row. */
+  .grid:has(> li:nth-child(3n + 4):last-child) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* Below 480 px a long name takes a whole row, and the next slip fills the gap it leaves. */
+@media (width < 30rem) {
+  .grid {
+    grid-auto-flow: row dense;
+  }
+
+  .long {
+    grid-column: 1 / -1;
+  }
+}
+
+/* Narrower than 360 px, as at 400% zoom, each name keeps its box whole, one slip a row. */
+@media (width < 22.5rem) {
+  .grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 
 .term {
   display: grid;
+  align-content: start;
   gap: 0.1rem;
   padding: 0.45rem 0.6rem;
   border: 1px solid var(--color-surface-rule);
@@ -47,11 +82,22 @@
   font-family: var(--font-display);
   font-size: var(--text-base);
   line-height: 1.25;
-  overflow-wrap: anywhere;
 }
 
 .gloss {
   font-size: var(--text-small);
   line-height: 1.35;
   color: var(--color-surface-muted);
+}
+
+/* On a phone the slips sit closer under their heading and stand a little shorter, so the
+   text still starts a short scroll down the inset, narrower column. */
+@media (width < 40rem) {
+  .glance {
+    gap: 0.75rem;
+  }
+
+  .term {
+    padding-block: 0.35rem;
+  }
 }

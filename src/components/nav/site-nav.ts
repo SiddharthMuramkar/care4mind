@@ -71,7 +71,7 @@ async function build(): Promise<SiteNav> {
         id: 'concepts',
         ...link('Concepts', hrefFor({ page: 'concepts' })),
         // A topic sits under Concepts, wherever its own address is.
-        within: [hrefFor({ page: 'concepts' }), ...topicLinks.map((topic) => topic.href)],
+        within: [hrefFor({ page: 'concepts' })].concat(topicLinks.map((topic) => topic.href)),
       },
       {
         id: 'texts',
@@ -105,6 +105,7 @@ async function build(): Promise<SiteNav> {
       hrefFor({ page: 'questionnaires' }),
     ),
     search: link('Search', hrefFor({ page: 'search' })),
+    credits: link('Picture credits', hrefFor({ page: 'credits' })),
     ...(has('start') ? { start: link('Start here', hrefFor({ page: 'start' })) } : {}),
     ...(has('log-in') ? { login: link('Log in', hrefFor({ page: 'log-in' })) } : {}),
     ...(has('privacy') ? { privacy: link('Privacy', hrefFor({ page: 'privacy' })) } : {}),

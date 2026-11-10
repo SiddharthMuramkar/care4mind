@@ -21,6 +21,10 @@ next-env.d.ts
 # local notes and tool output, such as the content flags pack (scripts/content/report.mjs)
 /.scratch/
 
+# pictures waiting for review, and the old site's whole media library (too big, and not ours to publish)
+/art/inbox/
+/art/wp-export/
+
 # local tooling
 .venv-fonts/
 .vercel/

@@ -1,6 +1,8 @@
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 
+import { artFor } from '@/art'
+import { Medallion } from '@/components/art'
 import { Numeral } from '@/components/Numeral'
 import { ReadingPage } from '@/components/ReadingPage'
 import { citationLinks, Provenance, Sections } from '@/components/prose'
@@ -41,6 +43,14 @@ export default async function TopicPage({ params }: PageProps<'/topics/[slug]'>)
       path={hrefFor({ kind: 'topic', id: topic.slug })}
       titleId="topic-title"
       width="plate"
+      beforeTitle={
+        <Medallion
+          art={artFor({ kind: 'topic', slug: topic.slug })}
+          size={240}
+          topic={topic.slug}
+          className={styles.frontispiece}
+        />
+      }
       kicker={
         <>
           Topic {topic.order}

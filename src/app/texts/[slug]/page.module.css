@@ -1,3 +1,10 @@
+/* Its picture, above the name, with the room a Concept's or a Questionnaire's head leaves. */
+@media (width >= 40rem) {
+  .picture {
+    margin-block-end: 1rem;
+  }
+}
+
 .title {
   text-wrap: balance;
 }
@@ -97,7 +104,8 @@
     padding: 0;
   }
 
-  .article > [aria-hidden] {
+  .article > [aria-hidden],
+  .article header img {
     display: none;
   }
 

@@ -2,6 +2,8 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 
+import { artFor } from '@/art'
+import { HeadPicture, KarmaCycle } from '@/components/art'
 import { Citation } from '@/components/Citation'
 import { HelpLine } from '@/components/HelpLine'
 import { TitleMorph, turnForward } from '@/components/PageTurn'
@@ -46,6 +48,18 @@ export default async function QuestionnairePage({ params }: PageProps<'/question
       path={hrefFor({ kind: 'questionnaire', id: slug, status })}
       titleId="questionnaire-title"
       beforeTrail={<ReadingThread />}
+      beforeTitle={
+        <HeadPicture
+          art={artFor({
+            kind: 'questionnaire',
+            slug,
+            firstConcept: questionnaire.concepts[0]?.slug,
+          })}
+          size={120}
+          phoneSize={88}
+          className={reading.headPicture}
+        />
+      }
       kicker="Questionnaire"
       title={
         <>
@@ -76,6 +90,7 @@ export default async function QuestionnairePage({ params }: PageProps<'/question
               <Text text={paragraph} />
             </p>
           ))}
+          {slug === 'karmayoga-scale' ? <KarmaCycle /> : null}
         </section>
       ) : null}
 

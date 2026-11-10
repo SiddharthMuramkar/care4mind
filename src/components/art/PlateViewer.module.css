@@ -1,0 +1,147 @@
+.viewer {
+  display: grid;
+  justify-items: center;
+  gap: 0.5rem;
+  margin: 0;
+}
+
+/* Isolated so that the Plates and the ring stack among themselves. */
+.medallion {
+  position: relative;
+  isolation: isolate;
+  width: 168px;
+  aspect-ratio: 1;
+}
+
+/* Each Plate sits in the ring as a Medallion's picture does. */
+.plate {
+  composes: picture from './Medallion.module.css';
+  opacity: 0;
+}
+
+.current {
+  z-index: 1;
+  opacity: 1;
+}
+
+.medallion > svg {
+  z-index: 2;
+}
+
+.caption {
+  order: 1;
+  color: var(--color-surface-muted);
+  font-size: var(--text-small);
+  font-style: italic;
+}
+
+/*
+ * Held at a fixed height the buttons fit in, from first paint, so that nothing below it moves. A
+ * figcaption has to come last in its figure, so `order` is what stands this row under the caption.
+ */
+.controls {
+  order: 2;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.75rem;
+  height: 3rem;
+  visibility: hidden;
+}
+
+.ready {
+  visibility: visible;
+}
+
+/* Paper can't press a button. The Plate and its caption print. */
+@media print {
+  .controls {
+    display: none;
+  }
+}
+
+/* A real border, because forced colours drop box-shadows. */
+.button {
+  display: grid;
+  place-items: center;
+  inline-size: 2.75rem;
+  block-size: 2.75rem;
+  border: 1px solid color-mix(in srgb, var(--color-surface-ink) 45%, transparent);
+  border-radius: 50%;
+  background: transparent;
+  color: var(--color-surface-ink);
+  cursor: pointer;
+}
+
+/* Only where a pointer can rest: a touch screen would hold the hover after a tap. */
+@media (hover: hover) {
+  .button:hover {
+    border-color: var(--color-surface-ink);
+  }
+}
+
+.button:focus-visible {
+  border-color: var(--color-surface-ink);
+}
+
+.button:active {
+  box-shadow: inset 0 2px 4px rgb(0 0 0 / 0.2);
+}
+
+/* The only arrow drawn points right. */
+.previous .arrow {
+  transform: scaleX(-1);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  /* The Plate leaving stays whole under the one arriving, then goes. */
+  .plate {
+    transition: opacity 0s linear var(--duration-move);
+  }
+
+  .current {
+    transition: opacity var(--duration-move) var(--ease-out);
+  }
+
+  /*
+   * A file the browser already holds loads before its Plate is first painted, and a transition then
+   * has nothing to start from. Never the first Plate, which is on the page from the start.
+   */
+  @starting-style {
+    .current:not(:first-child) {
+      opacity: 0;
+    }
+  }
+
+  .arrow {
+    transition: transform var(--duration-quick) var(--ease-out);
+  }
+
+  @media (hover: hover) {
+    .button:hover .arrow {
+      transform: translateX(3px);
+    }
+
+    .previous:hover .arrow {
+      transform: translateX(-3px) scaleX(-1);
+    }
+  }
+
+  .button:focus-visible .arrow {
+    transform: translateX(3px);
+  }
+
+  .previous:focus-visible .arrow {
+    transform: translateX(-3px) scaleX(-1);
+  }
+
+  .button:active {
+    transform: translateY(1px);
+  }
+}
+
+@media (width >= 64rem) {
+  .medallion {
+    width: 360px;
+  }
+}

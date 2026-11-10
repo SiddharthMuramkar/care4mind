@@ -21,3 +21,12 @@
 .item {
   display: grid;
 }
+
+/*
+ * While only some works have a Pothi, a card with one takes a row of its own: beside bare cards its
+ * title would stand a Pothi lower than theirs. Once every work has one, no card is bare and the
+ * shelf keeps its columns.
+ */
+.shelf:has([data-bare]) .item:not([data-bare]) {
+  grid-column: 1 / -1;
+}

@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 
+import { SectionSticker } from '@/components/art'
 import { ConceptMap } from '@/components/map'
 import { layoutMap } from '@/components/map'
 import { ProposalNote } from '@/components/proposals'
@@ -32,7 +33,12 @@ export default async function ConceptMapPage() {
       path={PATH}
       titleId="map-title"
       width="map"
-      beforeTitle={<ProposalNote>Awaiting the Project owner’s decision</ProposalNote>}
+      beforeTitle={
+        <>
+          <SectionSticker section="map" />
+          <ProposalNote>Awaiting the Project owner’s decision</ProposalNote>
+        </>
+      }
       title="Concept map"
       longTitle
       afterTitle={

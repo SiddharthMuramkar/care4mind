@@ -1,6 +1,9 @@
 .main {
+  /* The space between sections, and on both sides of the closing section's border. */
+  --section-gap: clamp(3rem, 8vw, 5rem);
+
   display: grid;
-  gap: clamp(3rem, 8vw, 5rem);
+  gap: var(--section-gap);
 }
 
 /* Hero: a folio page floating on indigo ink, the ground faintly ruled like a ledger. */
@@ -14,9 +17,17 @@
 }
 
 .heroFolio {
+  /* One leading for the hero's two paragraphs, so the words under the buttons read like those above. */
+  --hero-leading: 1.45;
+
   max-width: var(--measure-page);
   margin-inline: auto;
   text-align: center;
+}
+
+/* The first Plate above the motto, with a clear gap before the words start. */
+.heroPlate {
+  margin-bottom: 1rem;
 }
 
 /* The motto: a small label above the promise, its words carried over unchanged. */
@@ -57,7 +68,7 @@
   margin: 1rem auto 0;
   max-width: 40ch;
   font-size: clamp(1.0625rem, 2.2vw, 1.25rem);
-  line-height: 1.45;
+  line-height: var(--hero-leading);
 }
 
 .textLink {
@@ -66,6 +77,16 @@
   min-height: 48px;
   color: var(--color-link);
   text-decoration-line: underline;
+  text-underline-offset: 0.18em;
+}
+
+/* The line thickens under the pointer and thickens again when pressed, moving nothing. */
+.textLink:hover {
+  text-decoration-thickness: 2px;
+}
+
+.textLink:active {
+  text-decoration-thickness: 3px;
 }
 
 .heroFleuron {
@@ -78,7 +99,7 @@
   margin: 0 auto;
   max-width: var(--measure-lede);
   font-size: var(--text-large);
-  line-height: 1.65;
+  line-height: var(--hero-leading);
 }
 
 .ctas {
@@ -88,6 +109,61 @@
   align-items: center;
   gap: 0.75rem 1.25rem;
   margin: 1.5rem 0 0;
+}
+
+/*
+ * From 64rem the Folio splits in two: the Plate in its own column on the left, the words on the
+ * right. Every child is placed by hand, because the heading must stay a direct child of the Folio.
+ */
+@media (width >= 64rem) {
+  .heroFolio {
+    /* The Plate's figure here: its 360 px ring, caption line and controls, with the gaps between. */
+    --hero-plate-height: calc(360px + 0.5rem + 1.5 * var(--text-small) + 0.5rem + 3rem);
+    /* The Fleuron, 12rem wide at its drawing's 4:1. */
+    --hero-fleuron-height: 3rem;
+    --hero-pair-gap: 1.5rem;
+
+    display: grid;
+    grid-template-columns: 360px minmax(0, 1fr);
+    column-gap: clamp(2rem, 4vw, 4rem);
+    max-width: 72rem;
+  }
+
+  /*
+   * The Plate and the Fleuron share one area beside all five rows of words, centred there as one
+   * group: each keeps the other's room as a margin, so neither can overlap the other.
+   */
+  .heroPlate {
+    grid-column: 1;
+    grid-row: 1 / span 5;
+    align-self: center;
+    margin-block: 0 calc(var(--hero-fleuron-height) + var(--hero-pair-gap));
+  }
+
+  .motto,
+  .heroTitle,
+  .subhead,
+  .ctas,
+  .intro {
+    grid-column: 2;
+  }
+
+  /* Narrower here, so that the two-line heading fits its column and the button stays on screen. */
+  .heroTitle {
+    font-size: clamp(2.5rem, 4.6vw, 4rem);
+  }
+
+  .heroFleuron {
+    grid-column: 1;
+    grid-row: 1 / span 5;
+    align-self: center;
+    margin-block: calc(var(--hero-plate-height) + var(--hero-pair-gap)) 0;
+  }
+
+  /* The Fleuron no longer stands between the buttons and the introduction, so this keeps them apart. */
+  .intro {
+    margin-top: 1.5rem;
+  }
 }
 
 /* An empty slot takes no room until its own work fills it. */
@@ -118,9 +194,20 @@
   text-decoration: none;
 }
 
-.mindChip:hover {
+.mindChip:is(:hover, :active) {
   border-color: var(--color-ink);
   color: var(--color-link);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .mindChip {
+    transition: transform var(--duration-quick) var(--ease-out);
+  }
+
+  .mindChip:active {
+    transform: translateY(1px);
+    transition-duration: var(--duration-instant);
+  }
 }
 
 /* Sections on the indigo ground */
@@ -140,6 +227,17 @@
   font-weight: 500;
   font-size: clamp(2.25rem, 6vw, 3.25rem);
   line-height: 1.1;
+}
+
+/* A heading with its Sticker after it, so every heading keeps the same left edge. */
+.sectionHead {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.sectionSticker {
+  flex: none;
 }
 
 .sectionIntro {
@@ -166,7 +264,7 @@
 
 @media (width >= 40rem) {
   .topics {
-    grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(11.25rem, 1fr));
     gap: 1rem;
   }
 }
@@ -185,9 +283,33 @@
   grid-template-columns: repeat(auto-fill, minmax(min(100%, 26rem), 1fr));
 }
 
+/* A card with a Plate has an extra row, so beside a bare card it takes a row of its own. */
+.cards:has(article:not([data-plate])) > li:has(article[data-plate]) {
+  grid-column: 1 / -1;
+}
+
+/* Each card fills its row's height, so a row's cards end level. */
+.cards > li {
+  display: grid;
+  min-width: 0;
+}
+
+/* The Emblem above the words on a phone, and beside them from 48rem. */
+@media (width >= 48rem) {
+  .whoBehind {
+    grid-template-columns: auto minmax(0, 1fr);
+    column-gap: 2rem;
+    align-items: center;
+  }
+
+  .emblem {
+    grid-row: 1 / span 2;
+  }
+}
+
+/* The border stands as far from the closing line as from the section above it. */
 .closingSection {
   display: grid;
-  gap: 1.5rem;
   justify-items: center;
   width: 100%;
   max-width: 60rem;
@@ -203,13 +325,41 @@
 }
 
 .closing {
-  margin: 0;
+  margin: var(--section-gap) 0 1.5rem;
   max-width: 24ch;
   font-family: var(--font-display);
   font-size: clamp(1.75rem, 5vw, 2.75rem);
   line-height: 1.2;
+  text-wrap: balance;
 }
 
 .closingCta {
   margin: 0;
+}
+
+/*
+ * From 64rem the sections widen with the hero's Folio, and the cards take explicit columns: at
+ * these widths `auto-fill` leaves the five topics at four and one, and the three featured at two.
+ * Last, so it overrides the rules above at equal specificity.
+ */
+@media (width >= 64rem) {
+  .section,
+  .closingSection {
+    max-width: 72rem;
+  }
+
+  .topics {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+
+  .cards {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+/* Five to a row before the sections reach full width, the longest title needs a phone's size to stay whole. */
+@media (width >= 64rem) and (width < 72rem) {
+  .topics h3 {
+    font-size: 1.3125rem;
+  }
 }

@@ -36,6 +36,19 @@ const dynamicImportOf = (source, message) => [
   { selector: `TSImportType[source.value=${source}]`, message },
 ]
 
+// The art module's boundary. Outside src/art, code reads pictures through `@/art`, which is
+// server-only, so no record reaches the browser bundle. The Emblem's plain data, `@/art/emblem`,
+// is the one exception, for the client error pages.
+const ART_MESSAGE =
+  'The picture registry is private: import @/art, or @/art/emblem for the Emblem records.'
+
+const artPatterns = [
+  { regex: '^@/art/(?!emblem$)', caseSensitive: true, message: ART_MESSAGE },
+  { regex: '^\\.{1,2}/(?:.+/)?art/(?!emblem$)', caseSensitive: true, message: ART_MESSAGE },
+]
+
+const ART_REACH_SOURCE = String.raw`/^(?:@\/art\/(?!emblem$)|\.{1,2}\/(?:.+\/)?art\/(?!emblem$))/`
+
 const contentBoundary = {
   files: ['src/**/*.{ts,tsx}'],
   ignores: ['src/content/**'],
@@ -54,11 +67,13 @@ const contentBoundary = {
             caseSensitive: true,
             message: 'Reach the content module through @/content, never by a relative path.',
           },
+          ...artPatterns,
         ],
       },
     ],
     'no-restricted-syntax': [
       'error',
+      ...dynamicImportOf(ART_REACH_SOURCE, ART_MESSAGE),
       ...clientTypesOnly(
         CONTENT_PUBLIC_SOURCE,
         "A 'use client' file may import @/content for types only: use `import type`.",
@@ -98,6 +113,26 @@ const graphBelowViews = {
         String.raw`/^(?:@\/content|\.\.)\/(?:views|derive)(?:\/|$)/`,
         'The graph is below the views and the derivations, dynamically too: never import from them.',
       ),
+    ],
+  },
+}
+
+// The client error pages show the Emblem, so its records' file may bring in types and nothing
+// else: a value imported or re-exported from the art module would carry `server-only` with it.
+const emblemPlainData = {
+  files: ['src/art/emblem.ts'],
+  rules: {
+    'no-restricted-syntax': [
+      'error',
+      ...[
+        'ImportDeclaration[importKind!="type"]',
+        'ExportNamedDeclaration[source][exportKind!="type"]',
+        'ExportAllDeclaration[exportKind!="type"]',
+        'ImportExpression',
+      ].map((selector) => ({
+        selector,
+        message: 'The Emblem records are plain data for client pages: bring in types only.',
+      })),
     ],
   },
 }
@@ -191,7 +226,10 @@ const componentStructure = [
   {
     files: ['src/app/**/*.{ts,tsx}', 'src/lib/**/*.{ts,tsx}'],
     rules: {
-      'no-restricted-imports': ['error', { patterns: [...contentPatterns, ...componentPatterns] }],
+      'no-restricted-imports': [
+        'error',
+        { patterns: [...contentPatterns, ...artPatterns, ...componentPatterns] },
+      ],
     },
   },
   {
@@ -202,6 +240,7 @@ const componentStructure = [
         {
           patterns: [
             ...contentPatterns,
+            ...artPatterns,
             ...componentPatterns,
             {
               regex: '^@/app/',
@@ -307,6 +346,7 @@ export default defineConfig([
   ...tseslint.configs.strict.map((config) => ({ ...config, files: ['**/*.{ts,tsx}'] })),
   contentBoundary,
   graphBelowViews,
+  emblemPlainData,
   ...componentStructure,
   internalLinks,
   prettier,

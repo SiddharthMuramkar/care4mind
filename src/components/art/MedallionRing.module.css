@@ -1,0 +1,63 @@
+/* The ring takes its topic's colour where a Medallion sets one. */
+.ring {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  color: var(--topic, var(--color-ring));
+  pointer-events: none;
+}
+
+/* An SVG root keeps a colour set on it even in forced colours, so hand it the theme's own. */
+@media (forced-colors: active) {
+  .ring {
+    color: CanvasText;
+  }
+}
+
+/*
+ * Inks in with the scroll, and scrubs back if the visitor scrolls back. It is done once the ring
+ * is wholly in view, so a ring at rest on the first screen is never left half-drawn. Every line
+ * follows the one timeline named on the ring, so the flower and the laurels stay in step. The
+ * dash is there only while it draws: `backwards` drops it once drawn, because a dash can leave a
+ * gap at a closed ring's join. Firefox (no support yet) shows the finished ring, as does reduced
+ * motion.
+ */
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    @keyframes ink {
+      from {
+        stroke-dasharray: 1 1.1;
+        stroke-dashoffset: 1.05;
+      }
+      to {
+        stroke-dasharray: 1 1.1;
+        stroke-dashoffset: 0;
+      }
+    }
+
+    /* The dots can't ink in by dash: a dash pattern would turn them into a solid line. */
+    @keyframes appear {
+      from {
+        opacity: 0;
+      }
+    }
+
+    .inks {
+      view-timeline-name: --ring;
+    }
+
+    .inks .stroke {
+      animation: ink linear backwards;
+      animation-timeline: --ring;
+      animation-range: entry 0% entry 100%;
+    }
+
+    .inks .dots {
+      animation: appear linear backwards;
+      animation-timeline: --ring;
+      animation-range: entry 0% entry 100%;
+    }
+  }
+}

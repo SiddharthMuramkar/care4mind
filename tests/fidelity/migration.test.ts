@@ -77,6 +77,8 @@ const PAGES = [
   ...['textbooks', 'inspirational-books', 'courses', 'methods'].map((slug) => `/library/${slug}/`),
   '/search/',
   '/proposals/',
+  '/credits/',
+  '/credits/sources/',
 ]
 
 /** The 16 old pages that each describe a Concept and a Questionnaire. */
@@ -204,13 +206,13 @@ describe('the links the migration made', () => {
 })
 
 describe('what the site derives from them', () => {
-  it('is 46 pages, every flag on', async () => {
+  it('is 48 pages, every flag on', async () => {
     const paths = (await site.site.routes()).map(({ path }) => path)
-    expect(paths).toHaveLength(46)
+    expect(paths).toHaveLength(48)
     expect(paths.toSorted()).toEqual(PAGES.toSorted())
   })
 
-  it('is 42 pages with the flags off', async () => {
+  it('is 44 pages with the flags off', async () => {
     const paths = (await createContent(localSource, OFF).site.routes()).map(({ path }) => path)
     expect(paths.toSorted()).toEqual(
       PAGES.filter((page) => !FLAGGED_PAGES.includes(page)).toSorted(),

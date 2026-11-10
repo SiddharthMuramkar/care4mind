@@ -1,5 +1,6 @@
 'use client'
 
+import { Emblem } from '@/components/Emblem'
 import { Folio } from '@/components/Folio'
 import { siteConfig } from '@/config/site'
 import { playfairText } from '@/fonts/playfair'
@@ -31,6 +32,7 @@ export default function GlobalError({
         </a>
         <main id="main" className={reading.page}>
           <Folio variant="page" className={styles.folio}>
+            <Emblem variant="mark" size={96} className={styles.emblem} />
             <p className={reading.kicker}>Error · Page not shown</p>
             <h1 className={styles.title}>This page couldn’t be set</h1>
             <p className={styles.text}>

@@ -11,6 +11,7 @@ const FLAGS = [
   { flag: 'startHere', variable: 'FEATURE_START_HERE' },
   { flag: 'whatsOnYourMind', variable: 'FEATURE_WHATS_ON_YOUR_MIND' },
   { flag: 'login', variable: 'FEATURE_LOGIN' },
+  { flag: 'draftArt', variable: 'FEATURE_DRAFT_ART' },
 ] as const satisfies readonly { flag: keyof Features; variable: string }[]
 
 // The three environments a build runs in, as Vercel names them in VERCEL_ENV.
@@ -77,6 +78,7 @@ describe('feature flags', () => {
       startHere: true,
       whatsOnYourMind: true,
       login: true,
+      draftArt: true,
     })
   })
 
@@ -87,13 +89,15 @@ describe('feature flags', () => {
       startHere: false,
       whatsOnYourMind: false,
       login: false,
+      draftArt: false,
     })
   })
 
-  it('shows the proposals page while any proposal is on, and the preview flag has no say', () => {
+  it('shows the proposals page while any proposal is on, and the other flags have no say', () => {
     const off = flagsOff()
     expect(proposalsPageOn(off)).toBe(false)
     expect(proposalsPageOn({ ...off, questionnairePreview: true })).toBe(false)
+    expect(proposalsPageOn({ ...off, draftArt: true })).toBe(false)
     expect(proposalsPageOn({ ...off, conceptMap: true })).toBe(true)
     expect(proposalsPageOn({ ...off, startHere: true })).toBe(true)
     expect(proposalsPageOn({ ...off, whatsOnYourMind: true })).toBe(true)

@@ -144,3 +144,49 @@ describe('the content boundary', { timeout: 30_000 }, () => {
     expect(await boundaryProblems('src/content/fixture.ts', code)).toEqual([])
   })
 })
+
+// `@/art` is server-only, so a file that reaches past it could put every record in the browser.
+describe('the art boundary', { timeout: 30_000 }, () => {
+  it("stops a 'use client' file importing the registry", async () => {
+    const code = "'use client'\nimport { ART } from '@/art/registry'\nexport const a = ART\n"
+    expect(await boundaryProblems(COMPONENT, code)).toHaveLength(1)
+  })
+
+  it('stops a page or a font file importing an art internal by alias', async () => {
+    const registry = "import { ART } from '@/art/registry'\nexport const a = ART\n"
+    const types = "import type { ArtRecord } from '@/art/types'\nexport type A = ArtRecord\n"
+    expect(await boundaryProblems(PAGE, registry)).toHaveLength(1)
+    expect(await boundaryProblems(PAGE, types)).toHaveLength(1)
+    expect(await boundaryProblems('src/fonts/fixture.ts', registry)).toHaveLength(1)
+  })
+
+  it('stops a page importing an art internal by relative path', async () => {
+    const code = "import { ART } from '../../art/registry'\nexport const a = ART\n"
+    expect(await boundaryProblems(PAGE, code)).toHaveLength(1)
+  })
+
+  it('stops a dynamic import of an art internal, however the source is written', async () => {
+    const alias = "export const a = () => import('@/art/registry')\n"
+    const template = 'export const a = () => import(`@/art/registry`)\n'
+    const typeQuery = "export type A = typeof import('@/art/registry')\n"
+    expect(await boundaryProblems(PAGE, alias)).toHaveLength(1)
+    expect(await boundaryProblems(PAGE, template)).toHaveLength(1)
+    expect(await boundaryProblems(PAGE, typeQuery)).toHaveLength(1)
+  })
+
+  it('lets a page import the public interface', async () => {
+    const code = "import { art } from '@/art'\nexport const a = art\n"
+    expect(await boundaryProblems(PAGE, code)).toEqual([])
+  })
+
+  it("lets a 'use client' file import the Emblem records", async () => {
+    const code =
+      "'use client'\nimport { EMBLEM_RING } from '@/art/emblem'\nexport const e = EMBLEM_RING\n"
+    expect(await boundaryProblems(COMPONENT, code)).toEqual([])
+  })
+
+  it('lets files inside the art module import its internals', async () => {
+    const code = "import { ART } from './registry'\nexport const a = ART\n"
+    expect(await boundaryProblems('src/art/fixture.ts', code)).toEqual([])
+  })
+})

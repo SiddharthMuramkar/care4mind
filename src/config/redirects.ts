@@ -1,6 +1,6 @@
 /**
  * The redirect table: every address the site moves elsewhere, in one place. Each leads to
- * its page in one hop, and next.config.ts answers each with a 301 (moved permanently), which
+ * its page or file in one hop, and next.config.ts answers each with a 301 (moved permanently), which
  * browsers follow and search engines remember.
  *
  * Next matches a source ignoring case, so `/VIKSHEPA/` takes one hop too. It adds a missing
@@ -9,14 +9,17 @@
  *
  * Destinations are written out rather than made by hrefFor(): next.config.ts loads this file
  * through a loader that can't follow the `@/` imports the content module uses. The unit test
- * (tests/unit/redirects.test.ts) holds each one to hrefFor() and to the content's provenance.
+ * (tests/unit/redirects.test.ts) holds each page to hrefFor() and to the content's provenance,
+ * and each file to `public/`.
  *
  * Each old page is declared once below. The feed the old site served under every page and
  * archive is derived from that declaration, and leads where its page leads, so it stays one
  * hop without a hand-copied row. Which old addresses there are is the checked-in inventory,
- * `src/config/old-site-urls.ts`, whose media addresses and shortlinks lead where their page leads.
+ * `src/config/old-site-urls.ts`. Its shortlinks lead where their page leads, and so do its media
+ * addresses, unless the picture survives and `src/config/old-media-art.ts` names its new home.
  */
 
+import { artFileOf } from './old-media-art'
 import { oldMedia, oldShortlinks } from './old-site-urls'
 
 /**
@@ -35,7 +38,10 @@ export interface Redirect {
    * pattern (`:name*`) for a class of them.
    */
   source: string
-  /** Its new page, as hrefFor() makes it: a route in the registry, or an anchor on one. */
+  /**
+   * Its new page, as hrefFor() makes it: a route in the registry, or an anchor on one. An old
+   * media file that survives leads to its file under `public/` instead.
+   */
   destination: string
   /** Conditions a request must also meet, for addresses a path alone can't tell apart. */
   has?: RouteHas[]
@@ -119,10 +125,10 @@ const itsFeed = ({ source, destination }: Redirect): Redirect => ({
 const newPageOf = (old: string) =>
   movedPages.find(({ source }) => source === old)?.destination ?? old
 
-/** Each uploaded file, to where the first page that showed it now leads. */
-const media: readonly Redirect[] = oldMedia.map(({ address, shownOn }) => ({
+/** Each uploaded file, to its new file if it survives, or where the page that showed it leads. */
+const media: readonly Redirect[] = oldMedia.map(({ address, wpId, shownOn }) => ({
   source: address,
-  destination: newPageOf(shownOn[0] ?? '/'),
+  destination: artFileOf[wpId] ?? newPageOf(shownOn[0] ?? '/'),
 }))
 
 /** Each post's `/?p=<id>`, to that post's new page; Next passes the query through. */

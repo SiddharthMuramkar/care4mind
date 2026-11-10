@@ -138,35 +138,41 @@ for (const path of ['/', '/concepts/vikshepa/', MISSING]) {
   })
 }
 
-test('the References plus becomes a minus at once, with nothing moving, with reduced motion', async ({
-  page,
-}) => {
-  await recordAnimationStarts(page)
-  await gotoReady(page, '/concepts/vikshepa/')
-  const toggle = page.locator('summary', { hasText: 'References' })
-  const disclosure = page.locator('details', { has: toggle })
-  const rules = toggle.locator('[aria-hidden="true"] > *')
-  await expect(rules).toHaveCount(2)
-  expect(await turns(rules), 'a plus while closed').toEqual([0, 90])
+for (const { name, path, label } of [
+  { name: 'References', path: '/concepts/vikshepa/', label: 'References' },
+  {
+    name: 'Karma Yoga list',
+    path: '/questionnaires/karmayoga-scale/',
+    label: 'Read the cycle as a list',
+  },
+]) {
+  test(`the ${name} plus becomes a minus at once, with nothing moving, with reduced motion`, async ({
+    page,
+  }) => {
+    await recordAnimationStarts(page)
+    await gotoReady(page, path)
+    const toggle = page.locator('summary', { hasText: label })
+    const disclosure = page.locator('details', { has: toggle })
+    const rules = toggle.locator('[aria-hidden="true"] > *')
+    await expect(rules).toHaveCount(2)
+    expect(await turns(rules), 'a plus while closed').toEqual([0, 90])
 
-  await toggle.click()
-  await expect(disclosure).toHaveAttribute('open')
-  // At once: read two frames on, not polled.
-  await nextFrames(page)
-  expect(await turns(rules), 'a minus once open').toEqual([0, 0])
-  // The reduce rule cuts every transition to 1 ms, so nothing may run longer than that.
-  for (const rule of await rules.all()) {
-    for (const { duration } of await animationsStartedOn(rule)) {
-      expect(duration, 'it folds flat at once').toBeLessThanOrEqual(1)
+    await toggle.click()
+    await expect(disclosure).toHaveAttribute('open')
+    // At once: read two frames on, not polled.
+    await nextFrames(page)
+    expect(await turns(rules), 'a minus once open').toEqual([0, 0])
+    for (const rule of await rules.all()) {
+      expect(await animationsStartedOn(rule), 'nothing starts on it').toEqual([])
     }
-  }
-  expect(await movingAnimations(page)).toEqual([])
+    expect(await movingAnimations(page)).toEqual([])
 
-  await toggle.click()
-  await expect(disclosure).not.toHaveAttribute('open')
-  await nextFrames(page)
-  expect(await turns(rules), 'a plus again').toEqual([0, 90])
-})
+    await toggle.click()
+    await expect(disclosure).not.toHaveAttribute('open')
+    await nextFrames(page)
+    expect(await turns(rules), 'a plus again').toEqual([0, 90])
+  })
+}
 
 test('pressing a call to action spreads no ink and moves nothing, with reduced motion', async ({
   page,
@@ -225,6 +231,7 @@ test("pointing at and pressing a lotus moves nothing, with reduced motion, and t
     .getByRole('link', { name: 'Care4Mind home', exact: true })
     .locator('svg[data-lotus]')
   for (const lotus of [main.first(), main.last(), logo]) {
+    await lotus.scrollIntoViewIfNeeded()
     const box = await lotus.boundingBox()
     if (!box) continue
     await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2)

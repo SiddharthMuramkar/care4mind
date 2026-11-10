@@ -17,15 +17,17 @@ export function LoginGate({ logIn, children }: { logIn: Route; children: ReactNo
   const hydrated = useHydrated()
   const [loggedIn, setLoggedIn] = useState(false)
   const router = useRouter()
+  // A plain string: the old-address redirects make Route too long a union for a dependency array.
+  const logInPath: string = logIn
 
   useEffect(() => {
     void isLoggedIn().then((answer) => {
       if (answer) setLoggedIn(true)
       else {
-        router.replace(`${logIn}?next=${encodeURIComponent(window.location.pathname)}` as Route)
+        router.replace(`${logInPath}?next=${encodeURIComponent(window.location.pathname)}` as Route)
       }
     })
-  }, [logIn, router])
+  }, [logInPath, router])
 
   if (loggedIn) return children
   // Before hydration there is nothing to say: this page already explains that it needs JavaScript.

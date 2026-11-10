@@ -28,7 +28,9 @@ for (const { path } of CONCEPTS) {
 
     const wanted = [
       ...concept.linked.related.map((other) => other.href),
-      ...concept.linked.works.flatMap((work) => [work.href, ...work.passages.map((p) => p.href)]),
+      ...concept.linked.works.flatMap((work) =>
+        [work.href].concat(work.passages.map((p) => p.href)),
+      ),
       ...concept.linked.sections.map((section) => `#${section.id}`),
       ...concept.references.map((reference) => `#${reference.anchor}`),
       ...concept.linked.questionnaires.map((questionnaire) => questionnaire.href),

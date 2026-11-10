@@ -1,5 +1,7 @@
 import type { Metadata } from 'next'
 
+import { ownArt } from '@/art'
+import { SectionSticker } from '@/components/art'
 import { Fleuron } from '@/components/Fleuron'
 import { ReadingPage } from '@/components/ReadingPage'
 import { TextCard } from '@/components/texts'
@@ -24,11 +26,15 @@ export default async function TextsPage() {
     (work): work is WorkView => work !== undefined,
   )
   const verses = shelf.reduce((sum, work) => sum + work.passageCount, 0)
+  const hasPothi = (work: WorkView) => ownArt({ kind: 'work', slug: work.slug }) !== undefined
+  // A card with a Pothi can take a whole row, so those lead and leave no hole in a row of bare cards.
+  const ordered = [...shelf.filter(hasPothi), ...shelf.filter((work) => !hasPothi(work))]
 
   return (
     <ReadingPage
       path={PATH}
       width="shelf"
+      beforeTitle={<SectionSticker section="texts" />}
       title="Traditional texts"
       afterTitle={
         <>
@@ -43,8 +49,8 @@ export default async function TextsPage() {
       }
     >
       <ul className={styles.shelf}>
-        {shelf.map((work) => (
-          <li key={work.slug} className={styles.item}>
+        {ordered.map((work) => (
+          <li key={work.slug} className={styles.item} data-bare={hasPothi(work) ? undefined : ''}>
             <TextCard work={work} />
           </li>
         ))}

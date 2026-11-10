@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 
+import { SectionSticker } from '@/components/art'
 import { AzIndex, type ChipGroup, type RailLetter } from '@/components/az'
 import { conceptPreview } from '@/components/preview'
 import {
@@ -81,6 +82,7 @@ export default async function ReferencesPage() {
       path={PATH}
       titleId="references-title"
       width="library"
+      beforeTitle={<SectionSticker section="references" />}
       kicker="Library"
       title="References"
       afterTitle={

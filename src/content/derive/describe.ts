@@ -27,6 +27,8 @@ const ABOUT: Partial<Record<RouteEntry['kind'], string>> = {
   'log-in': 'Log in to Care4Mind with a code sent to your email.',
   'sign-up': 'Sign up to Care4Mind with your name and a code sent to your email.',
   privacy: 'What Care4Mind keeps about you, who helps run the site and how to delete your account.',
+  credits: 'Every picture on Care4Mind, grouped by family, with its caption.',
+  'credits-sources': 'Where each picture on Care4Mind came from, and its licence.',
 }
 
 function described(graph: ContentGraph, route: RouteEntry): { name: string; description: string } {

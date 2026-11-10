@@ -20,6 +20,32 @@
     box-shadow var(--duration-instant) var(--ease-press);
 }
 
+/*
+ * A card with its own Plate gives it a row above the title; a bare card keeps no such row. Two
+ * classes, so it also outranks the phone's one-column `.card` below.
+ */
+.card.withArt {
+  grid-template-columns: 1fr auto;
+  grid-template-areas:
+    'art deva'
+    'title title'
+    'gloss gloss'
+    'meta meta'
+    'summary summary'
+    'action action';
+}
+
+/* The whole card is the card's one link, so the picture never takes the click. */
+.art {
+  grid-area: art;
+  align-self: center;
+  pointer-events: none;
+}
+
+.withArt .deva {
+  align-self: center;
+}
+
 /* A featured card takes the Folio's double frame, diamond corners included. */
 .featured {
   box-shadow:
@@ -27,11 +53,54 @@
     inset 0 0 0 11px color-mix(in srgb, var(--color-surface-ink) 60%, transparent),
     inset 0 0 0 15px var(--color-surface),
     inset 0 0 0 16px color-mix(in srgb, var(--color-surface-ink) 35%, transparent);
+  /* The summary's row takes any spare height, so the links of a row of cards sit level. */
+  grid-template-rows: repeat(3, auto) 1fr auto;
 }
 
-/* Pressing the card presses it into the page, like type into paper. */
+.featured.withArt {
+  grid-template-rows: repeat(4, auto) 1fr auto;
+}
+
+/*
+ * Three to a row, a bare card has no room for the Devanagari beside the title, so it goes below.
+ * Its row keeps one line's height even when a Concept has no Devanagari, so the rows of three cards
+ * stay level.
+ */
+@media (width >= 64rem) {
+  .featured:not(.withArt) {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto minmax(calc(var(--text-heading) * 1.75), auto) repeat(2, auto) 1fr auto;
+    grid-template-areas:
+      'title'
+      'deva'
+      'gloss'
+      'meta'
+      'summary'
+      'action';
+  }
+}
+
+/* The card lifts under the pointer, as a topic card does, and the press, which comes last, wins. */
+@media (prefers-reduced-motion: no-preference) {
+  .card:has(.action :is(a, button):hover) {
+    transform: translateY(-3px);
+  }
+
+  /*
+   * Lifted, the card would rise off a pointer at its bottom edge and drop back under it. So while
+   * it is up the action reaches past that edge, as far as a topic card's link does.
+   */
+  .action :is(a, button):hover::after {
+    inset: -6px;
+  }
+
+  .card:has(.action :is(a, button):active) {
+    transform: translateY(2px);
+  }
+}
+
+/* Pressing the card presses it into the page, like type into paper, and this part never moves. */
 .card:has(.action :is(a, button):active) {
-  transform: translateY(2px);
   box-shadow:
     0 0 0 1px color-mix(in srgb, var(--color-surface-ink) 35%, transparent),
     inset 0 3px 8px rgb(0 0 0 / 0.18);
@@ -44,6 +113,13 @@
     inset 0 0 0 15px var(--color-surface),
     inset 0 0 0 16px color-mix(in srgb, var(--color-surface-ink) 35%, transparent),
     inset 0 3px 8px rgb(0 0 0 / 0.18);
+}
+
+/* The edge and the double frame are drawn in shadows, which forced colours drop. */
+@media (forced-colors: active) {
+  .card {
+    border: 1px solid CanvasText;
+  }
 }
 
 .title {

@@ -2,6 +2,7 @@ import type { CSSProperties } from 'react'
 
 import { Numeral } from '@/components/Numeral'
 import type { Inline } from '@/content'
+import { cx } from '@/lib/cx'
 
 import { SECTION_ROLES, Text, type SectionRole } from '../prose'
 import styles from './Contents.module.css'
@@ -27,9 +28,20 @@ const CURRENT = `[data-contents] a:target-current { color: var(--color-surface-i
  * the section being read is marked in CSS alone: `:target-current` where the browser has scroll
  * markers, otherwise each section's view timeline, otherwise not at all.
  */
-export function Contents({ entries }: { entries: readonly ContentsEntry[] }) {
+export function Contents({
+  entries,
+  tallLines = false,
+}: {
+  entries: readonly ContentsEntry[]
+  /** Lines a finger can take on a phone. A Concept page goes without, to reach its text sooner. */
+  tallLines?: boolean
+}) {
   return (
-    <nav className={styles.contents} aria-labelledby="contents-title" data-contents>
+    <nav
+      className={cx(styles.contents, tallLines && styles.tallLines)}
+      aria-labelledby="contents-title"
+      data-contents
+    >
       <style href="concept-contents" precedence="default">
         {CURRENT}
       </style>

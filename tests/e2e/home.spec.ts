@@ -18,7 +18,7 @@ import { placeOnScreen, scrollPath } from './scrolling'
 const section = (page: Page, name: string) => page.getByRole('region', { name, exact: true })
 
 /** The lotus Fleuron printed in the opening folio. */
-const heroFleuron = (page: Page) => openingFolio(page).locator('svg')
+const heroFleuron = (page: Page) => openingFolio(page).locator('svg[data-lotus]')
 
 /**
  * What has started on a drawing or any part of it since the page began: how long after being
@@ -74,7 +74,15 @@ test.describe('the opening folio', () => {
     const fleuron = heroFleuron(page)
     await expect(fleuron).toBeVisible()
     await expect(fleuron).toHaveAttribute('aria-hidden', 'true')
-    await expect(page.getByRole('main').getByRole('img')).toHaveCount(0)
+    // The hero Plate and the Emblem are the two pictures that speak; the rest stay out of the way.
+    const main = page.getByRole('main')
+    await expect(main.getByRole('img')).toHaveCount(2)
+    await expect(main.getByRole('img', { name: /^A jeweller in a maroon turban/ })).toBeVisible()
+    await expect(page.locator('figure:has([data-hero-plate]) figcaption')).toBeVisible()
+    await expect(main.getByRole('img', { name: /^Care4Mind's emblem/ })).toHaveCount(1)
+    await expect(
+      page.locator('main img:not([data-hero-plate]):not(#who-behind img):not([alt=""])'),
+    ).toHaveCount(0)
     const strokes = await fleuron.locator('path').all()
     expect(strokes.length, 'drawn in more than one stroke').toBeGreaterThan(1)
     for (const stroke of strokes) {
@@ -148,19 +156,20 @@ test.describe('the opening folio', () => {
     await gotoReady(page, '/')
     const largest = await page.evaluate(
       () =>
-        new Promise<{ inDrawing: boolean; text: string }>((resolve) => {
+        new Promise<{ inDrawing: boolean; text: string; isFirstPlate: boolean }>((resolve) => {
           new PerformanceObserver((list) => {
             const element = (list.getEntries().at(-1) as LargestContentfulPaint | undefined)
               ?.element
             resolve({
               inDrawing: Boolean(element?.closest('svg')),
               text: element?.textContent?.trim() ?? '',
+              isFirstPlate: Boolean(element?.matches('[data-hero-plate]')),
             })
           }).observe({ type: 'largest-contentful-paint', buffered: true })
         }),
     )
     expect(largest.inDrawing).toBe(false)
-    expect(largest.text).not.toBe('')
+    expect(largest.text !== '' || largest.isFirstPlate, 'text or the first Plate').toBe(true)
   })
 })
 
@@ -286,6 +295,7 @@ test.describe('the opening folio says what the site is', () => {
 
   for (const viewport of [
     { width: 1366, height: 768 },
+    { width: 1024, height: 768 },
     { width: 390, height: 844 },
   ]) {
     test(
@@ -306,6 +316,16 @@ test.describe('the opening folio says what the site is', () => {
       },
     )
   }
+
+  test(
+    'at 360×740, the H1 shows without scrolling, under the small Medallion',
+    { tag: '@self-width' },
+    async ({ page }) => {
+      await page.setViewportSize({ width: 360, height: 740 })
+      await gotoReady(page, '/')
+      await expect(page.getByRole('heading', { level: 1 })).toBeInViewport({ ratio: 1 })
+    },
+  )
 })
 
 test('links to another page open it at once, without gliding from where you were', async ({
