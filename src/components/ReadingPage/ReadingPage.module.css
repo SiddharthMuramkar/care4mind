@@ -71,10 +71,11 @@
   min-width: 0;
 }
 
-/* A paragraph avoids ending on a lone word. */
+/* A paragraph avoids ending on a lone word, and an opening quotation mark hangs in the margin where the browser can. */
 .article :where(p) {
   margin: 0;
   text-wrap: pretty;
+  hanging-punctuation: first;
 }
 
 .titlePage {
