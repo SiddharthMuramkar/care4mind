@@ -36,6 +36,8 @@
   border-radius: 2px;
   color: var(--color-surface-ink);
   text-decoration: none;
+  font-family: var(--font-ui);
+  --font-iast: var(--font-text);
 }
 
 /* A finger needs more than a pointer does. */

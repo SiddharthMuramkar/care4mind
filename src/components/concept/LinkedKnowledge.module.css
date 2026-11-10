@@ -45,6 +45,8 @@
 .count {
   font-weight: 400;
   font-variant-numeric: oldstyle-nums;
+  font-family: var(--font-ui);
+  --font-iast: var(--font-text);
 }
 
 .rows {

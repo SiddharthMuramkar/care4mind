@@ -204,6 +204,8 @@
   text-decoration: none;
   line-height: 1.3;
   overflow-wrap: anywhere;
+  font-family: var(--font-ui);
+  --font-iast: var(--font-text);
 }
 
 .chip::before {

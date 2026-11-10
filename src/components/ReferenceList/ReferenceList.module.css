@@ -26,9 +26,10 @@
 }
 
 .count {
-  font-family: var(--font-text);
   font-size: var(--text-large);
   color: var(--color-surface-muted);
+  font-family: var(--font-ui);
+  --font-iast: var(--font-text);
 }
 
 /*

@@ -101,6 +101,12 @@
   --font-display: var(--font-playfair-display), var(--font-playfair-text), var(--font-tiro), serif;
   --font-deva:
     var(--font-tiro), 'Noto Serif Devanagari', 'Kohinoor Devanagari', 'Nirmala UI', serif;
+  /*
+   * Interface text (chips, badges, breadcrumbs, labels, counts) in the system's own sans, which
+   * costs no download. Text set in it also sets --font-iast, so any transliteration inside keeps
+   * the serif that has its diacritics: Roboto, Android's system face, lacks some of them.
+   */
+  --font-ui: system-ui, -apple-system, 'Segoe UI', Roboto, 'Noto Sans', sans-serif;
 
   /* The type scale: the sizes already set most often, so adopting one changes nothing. Nothing is set below the small size. */
   --text-small: 0.9375rem;
@@ -263,6 +269,15 @@
     font-weight: 400;
     line-height: 1.75;
     font-synthesis: none;
+  }
+
+  /*
+   * Transliteration in interface text takes the serif the interface sets in --font-iast. Elsewhere
+   * that is unset, and the declaration falls back to inheriting: the text keeps its surroundings' face.
+   */
+  :lang(sa-Latn),
+  :lang(pi-Latn) {
+    font-family: var(--font-iast);
   }
 
   /* Headings break into lines of even length. */

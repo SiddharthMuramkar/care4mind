@@ -93,6 +93,8 @@
   padding-top: 0.5rem;
   border-top: 1px solid color-mix(in srgb, var(--color-surface-rule) 60%, transparent);
   color: var(--color-surface-muted);
+  font-family: var(--font-ui);
+  --font-iast: var(--font-text);
 }
 
 /* On a phone the card is tighter, and its count loses the rule above it. */

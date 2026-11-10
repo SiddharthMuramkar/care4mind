@@ -20,6 +20,8 @@
   text-align: start;
   cursor: pointer;
   overflow: hidden;
+  font-family: var(--font-ui);
+  --font-iast: var(--font-text);
 }
 
 .chip:hover {
@@ -51,6 +53,8 @@
   margin: 0;
   font-size: 1.125rem;
   color: var(--color-surface-muted);
+  font-family: var(--font-ui);
+  --font-iast: var(--font-text);
 }
 
 .clear {

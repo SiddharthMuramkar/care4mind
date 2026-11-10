@@ -6,6 +6,8 @@
   color: var(--status-ink);
   font-size: var(--text-body);
   white-space: nowrap;
+  font-family: var(--font-ui);
+  --font-iast: var(--font-text);
 }
 
 .small {
