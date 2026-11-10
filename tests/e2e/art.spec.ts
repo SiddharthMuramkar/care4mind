@@ -249,7 +249,7 @@ test.describe('section pages', () => {
       return colour
     })
 
-  test('a Sticker stands on the pale paper until its file has loaded, and nothing moves as it goes', async ({
+  test('a card’s Sticker stands on the pale paper until its file has loaded, and nothing moves as it goes', async ({
     page,
   }) => {
     // Late web fonts move the text as they arrive, so without them the sum measures only pictures.
@@ -258,20 +258,37 @@ test.describe('section pages', () => {
     await watchLayoutShifts(page)
     // Not the load event: it waits for the pictures held back.
     await gotoReady(page, '/concepts/', { waitUntil: 'domcontentloaded' })
-    const stickers = [headImage(page), cardSticker(page, 'self')]
-    for (const sticker of stickers) {
-      await sticker.scrollIntoViewIfNeeded()
-      await expect(sticker).toHaveCSS('background-color', await paperBeside(sticker))
-    }
+    const sticker = cardSticker(page, 'self')
+    await sticker.scrollIntoViewIfNeeded()
+    await expect(sticker).toHaveCSS('background-color', await paperBeside(sticker))
+    // The head's Sticker is asked for at once, so it never stands on paper only React could take away.
+    await expect(headImage(page)).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)')
     const shifted = await layoutShiftSoFar(page)
     release()
-    for (const sticker of stickers) {
-      await expect
-        .poll(() => sticker.evaluate((image: HTMLImageElement) => image.naturalWidth))
-        .toBeGreaterThan(0)
-      await expect(sticker).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)')
-    }
+    await expect
+      .poll(() => sticker.evaluate((image: HTMLImageElement) => image.naturalWidth))
+      .toBeGreaterThan(0)
+    await expect(sticker).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)')
     expect(await layoutShiftSoFar(page), 'layout shift as the paper goes').toBe(shifted)
+  })
+
+  test('the head’s Sticker shows no paper once its file is in, before the page’s script has run', async ({
+    page,
+  }) => {
+    let release = () => {}
+    const held = new Promise<void>((resolve) => (release = resolve))
+    await page.route(/\/_next\/static\/chunks\/[^?]+\.js($|\?)/, async (route) => {
+      await held
+      await route.continue()
+    })
+    await page.goto('/concepts/', { waitUntil: 'domcontentloaded' })
+    const sticker = headImage(page)
+    await expect
+      .poll(() => sticker.evaluate((image: HTMLImageElement) => image.naturalWidth))
+      .toBeGreaterThan(0)
+    await expect(sticker).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)')
+    await expect(page.locator('html'), 'React has not started').not.toHaveAttribute('data-hydrated')
+    release()
   })
 
   test('without the script a Sticker shows no paper, which nothing would take away', async ({
@@ -282,7 +299,7 @@ test.describe('section pages', () => {
     const bare = await context.newPage()
     const release = await holdStickerFiles(bare)
     await bare.goto('/concepts/', { waitUntil: 'domcontentloaded' })
-    await expect(headImage(bare)).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)')
+    await expect(cardSticker(bare, 'self')).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)')
     release()
     await context.close()
   })

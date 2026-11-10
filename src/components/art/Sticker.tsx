@@ -1,3 +1,5 @@
+import Image from 'next/image'
+
 import type { ArtRecord } from '@/art'
 import { cx } from '@/lib/cx'
 
@@ -13,15 +15,21 @@ interface StickerProps {
   className?: string
 }
 
-/** A folk-art Sticker. Always decorative: the words beside it name the thing. */
-export function Sticker({ art, size, firstScreen, className }: StickerProps) {
-  return (
-    <StickerImage
-      src={art.src}
-      width={size}
-      height={Math.round((size * art.height) / art.width)}
-      firstScreen={firstScreen}
-      className={cx(styles.sticker, className)}
-    />
+/**
+ * A folk-art Sticker. Always decorative: the words beside it name the thing. Lower down it stands
+ * on the pale paper until its file is in. In the first screen it has none: its file usually
+ * arrives before the page's script, which is all that could take the paper away.
+ */
+export function Sticker({ art, size, firstScreen = false, className }: StickerProps) {
+  const shown = {
+    src: art.src,
+    width: size,
+    height: Math.round((size * art.height) / art.width),
+    className: cx(styles.sticker, className),
+  }
+  return firstScreen ? (
+    <Image {...shown} alt="" loading="eager" fetchPriority="high" />
+  ) : (
+    <StickerImage {...shown} />
   )
 }

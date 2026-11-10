@@ -5,8 +5,8 @@
 }
 
 /*
- * Until its file is in, a Sticker stands on the pale paper a Medallion shows. Without the script
- * nothing would take the paper away, so it shows only where the script runs.
+ * Until its file is in, a Sticker below the first screen stands on the pale paper a Medallion
+ * shows. Without the script nothing would take the paper away, so it shows only where it runs.
  */
 @media (scripting: enabled) {
   .loading {
