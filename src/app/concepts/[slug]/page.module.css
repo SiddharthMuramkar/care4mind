@@ -45,6 +45,11 @@
   min-width: 0;
 }
 
+/* "In short" reads at the measure of the text below it, not at a lede's. */
+.lead > p {
+  max-width: var(--measure-text);
+}
+
 /* The view timeline a table of contents follows where it lacks :target-current. */
 @supports (timeline-scope: none) and (not (scroll-target-group: auto)) {
   .lead {
@@ -117,7 +122,17 @@
 @media (width < 40rem) {
   .scope,
   .body {
-    gap: 2rem;
+    gap: 1.5rem;
+  }
+
+  /* The folio has no frame here, so the text keeps off the paper's edges as a card's does. */
+  .scope {
+    padding-inline: var(--inset-phone);
+  }
+
+  /* "In short" sits as close under its heading as the slips of "At a glance" do. */
+  .lead {
+    gap: 0.75rem;
   }
 
   .meta {

@@ -4,6 +4,9 @@ import type { ConceptView } from '@/content'
 
 import styles from './AtAGlance.module.css'
 
+/** The most letters a Term's name sets on half a phone's row. */
+const LONG_NAME = 15
+
 /**
  * The Terms a Concept explains, at a glance: each one's Sanskrit name and gloss on a slip
  * linking to its place in the sections below. A Concept with no Terms shows nothing.
@@ -22,7 +25,8 @@ export function AtAGlance({ terms }: { terms: ConceptView['glance'] }) {
       </h2>
       <ul className={styles.grid}>
         {terms.map((term) => (
-          <li key={term.id}>
+          // A name too long for half a phone's width takes the whole row there, never breaking.
+          <li key={term.id} className={term.name.length > LONG_NAME ? styles.long : undefined}>
             <a href={`#${term.id}`} className={styles.term}>
               <span lang="sa-Latn" className={styles.name}>
                 {term.name}
