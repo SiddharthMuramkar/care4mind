@@ -4,7 +4,7 @@ import { extname, join } from 'node:path'
 import { notFound } from 'next/navigation'
 import { ImageResponse } from 'next/og'
 
-import { art, artFor, type ArtRecord, type SectionKey } from '@/art'
+import { art, artFor, isSectionKey, type ArtRecord } from '@/art'
 import { siteConfig as config } from '@/config/site'
 import { concepts, questionnaires } from '@/content'
 import { cardFaces } from '@/fonts/card-faces'
@@ -60,7 +60,8 @@ export async function cardPicture(pattern: string, slug: string): Promise<ArtRec
       return artFor({ kind: 'section', key: 'search' })
     // Each Library list and page has a section picture under its own slug.
     case '/library/[slug]/':
-      return artFor({ kind: 'section', key: slug as SectionKey })
+      if (!isSectionKey(slug)) throw new Error(`The Library's page ${slug} has no Sticker.`)
+      return artFor({ kind: 'section', key: slug })
     case '/topics/[slug]/':
       return artFor({ kind: 'topic', slug })
     case '/texts/[slug]/':

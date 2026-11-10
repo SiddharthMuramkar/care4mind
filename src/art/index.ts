@@ -14,7 +14,7 @@ export type * from './types'
 export type { ArtId }
 export type { SectionKey } from './assign'
 export type { ArtTarget, OwnArtTarget } from './resolve'
-export { heroPlates } from './assign'
+export { heroPlates, isSectionKey } from './assign'
 export { originLine } from './origin'
 
 const pictures = createArt(ART, features)

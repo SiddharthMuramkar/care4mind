@@ -6,22 +6,16 @@
 }
 
 /* Isolated so that the Plates and the ring stack among themselves. */
-.circle {
+.medallion {
   position: relative;
   isolation: isolate;
   width: 168px;
   aspect-ratio: 1;
 }
 
-/* Inset so the ring has its own band, as on every Medallion. The pale paper shows until it loads. */
+/* Each Plate sits in the ring as a Medallion's picture does. */
 .plate {
-  position: absolute;
-  inset: 5%;
-  width: 90%;
-  height: 90%;
-  border-radius: 50%;
-  object-fit: cover;
-  background: var(--color-surface-pale-18);
+  composes: picture from './Medallion.module.css';
   opacity: 0;
 }
 
@@ -30,7 +24,7 @@
   opacity: 1;
 }
 
-.circle > svg {
+.medallion > svg {
   z-index: 2;
 }
 
@@ -140,7 +134,7 @@
 }
 
 @media (width >= 64rem) {
-  .circle {
+  .medallion {
     width: 360px;
   }
 }
