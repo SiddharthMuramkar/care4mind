@@ -39,12 +39,28 @@ ROOT = Path(__file__).resolve().parents[2]
 OUT_DIR = ROOT / "src" / "fonts"
 LOCK_FILE = Path(__file__).with_name("fonts.lock.json")
 
+# The letters of Latin Extended Additional that IAST and ISO 15919 use, in both cases. The rest of
+# the block (Vietnamese, Welsh and the like) is set on no page, and with its small capitals it was
+# a tenth of each Playfair cut.
+IAST_EXTENDED = [
+    (0x1E0C, 0x1E0D),  # Ḍ ḍ
+    (0x1E24, 0x1E25),  # Ḥ ḥ
+    (0x1E2A, 0x1E2B),  # Ḫ ḫ, the upadhmānīya
+    (0x1E36, 0x1E3B),  # Ḷ ḷ Ḹ ḹ Ḻ ḻ
+    (0x1E40, 0x1E49),  # Ṁ ṁ Ṃ ṃ Ṅ ṅ Ṇ ṇ Ṉ ṉ
+    (0x1E5A, 0x1E5F),  # Ṛ ṛ Ṝ ṝ Ṟ ṟ
+    (0x1E62, 0x1E63),  # Ṣ ṣ
+    (0x1E6C, 0x1E6D),  # Ṭ ṭ
+    (0x1E8E, 0x1E8F),  # Ẏ ẏ
+    (0x1E96, 0x1E96),  # ẖ, the jihvāmūlīya
+]
+
 # IAST and the ISO 15919 extras, plus everyday Latin and punctuation.
 LATIN = [
     (0x0000, 0x00FF),  # Basic Latin and Latin-1
     (0x0100, 0x017F),  # Latin Extended-A: ā ī ū ś ...
     (0x0300, 0x036F),  # combining marks: ring below in r̥, candrabindu in m̐
-    (0x1E00, 0x1EFF),  # Latin Extended Additional: ḍ ḥ ḷ ṃ ṅ ṇ ṛ ṝ ṣ ṭ ...
+    *IAST_EXTENDED,
     (0x2000, 0x206F),  # general punctuation: dashes, curly quotes, ellipsis
     (0x20B9, 0x20B9),  # rupee sign
     (0x2122, 0x2122),
@@ -55,21 +71,27 @@ LATIN = [
 ]
 
 # The OpenType features browsers apply to Latin text by default: kerning, ligatures and
-# contextual forms, and mark placement for IAST and the ISO 15919 marks. The site's CSS turns on
-# no others, so glyphs only other features reach (figure styles, swashes, stylistic sets) are
-# dropped, about a quarter of each Playfair cut (ticket 05).
+# contextual forms, and mark placement for IAST and the ISO 15919 marks. Glyphs reached only by
+# features the site's CSS never turns on (swashes, stylistic sets, fractions) are dropped, about a
+# quarter of each Playfair cut.
 LATIN_FEATURES = ["calt", "ccmp", "clig", "curs", "dist", "kern", "liga", "locl", "mark", "mkmk", "rclt", "rlig", "rvrn"]
 # all-small-caps, for labels and kickers, which are set in running text only.
 SMALL_CAPS = ["smcp", "c2sc"]
-# Every feature: Devanagari conjuncts and mark placement depend on them.
-ALL_FEATURES = ["*"]
+# The figure styles the CSS asks for with font-variant-numeric: lining, old-style, proportional
+# and tabular (tests/unit/fonts.test.ts). Playfair's own figures are proportional old-style.
+FIGURES = ["lnum", "onum", "pnum", "tnum"]
+# What browsers apply on their own, every stage of Devanagari shaping among them (nukta, reph,
+# half forms, conjuncts, mark placement): fontTools' default set. Tiro's stylistic sets and
+# superiors, which no style turns on, are dropped.
+SHAPING_FEATURES = subset.Options().layout_features
 
+# The Vedic extensions and Devanagari Extended, the accents and signs of chanted texts, are set on
+# no page, and were a seventh of the file. Content that needs them fails the font check in
+# tests/unit/content-integrity.test.ts until they are added back here.
 DEVANAGARI = [
     (0x0900, 0x097F),  # Devanagari, including the dandas । ॥
-    (0x1CD0, 0x1CFF),  # Vedic extensions
     (0x200C, 0x200D),  # zero-width non-joiner and joiner, used in conjunct control
     (0x25CC, 0x25CC),  # dotted circle, shown for a stray vowel sign
-    (0xA8E0, 0xA8FF),  # Devanagari extended
 ]
 
 
@@ -83,7 +105,7 @@ class Source:
     # Pinning every axis gives a small static font; variable files are four times the size.
     axes: dict[str, float | tuple[float, float]] = field(default_factory=dict)
     # OpenType features to keep, with the glyphs they reach.
-    features: list[str] = field(default_factory=lambda: ALL_FEATURES)
+    features: list[str] = field(default_factory=lambda: SHAPING_FEATURES)
     # Also written as WOFF, for the share-card renderer (src/fonts/card-faces.ts).
     card: bool = False
 
@@ -97,7 +119,8 @@ class Family:
 
 PLAYFAIR = "Playfair[opsz,wdth,wght].ttf"
 PLAYFAIR_ITALIC = "Playfair-Italic[opsz,wdth,wght].ttf"
-TEXT = LATIN_FEATURES + SMALL_CAPS
+TEXT = LATIN_FEATURES + SMALL_CAPS + FIGURES
+DISPLAY = LATIN_FEATURES + FIGURES
 
 FAMILIES = [
     # Playfair as four static cuts: its variable file is 210 kB, each cut 35-55 kB.
@@ -109,7 +132,7 @@ FAMILIES = [
             Source("playfair", PLAYFAIR, "PlayfairText-Regular", {"wdth": 100, "opsz": 14, "wght": 400}, TEXT, card=True),
             Source("playfair", PLAYFAIR_ITALIC, "PlayfairText-Italic", {"wdth": 100, "opsz": 14, "wght": 400}, TEXT),
             Source("playfair", PLAYFAIR, "PlayfairText-SemiBold", {"wdth": 100, "opsz": 14, "wght": 600}, TEXT),
-            Source("playfair", PLAYFAIR, "PlayfairDisplay-Medium", {"wdth": 100, "opsz": 64, "wght": 500}, LATIN_FEATURES, card=True),
+            Source("playfair", PLAYFAIR, "PlayfairDisplay-Medium", {"wdth": 100, "opsz": 64, "wght": 500}, DISPLAY, card=True),
         ],
     ),
     Family(
