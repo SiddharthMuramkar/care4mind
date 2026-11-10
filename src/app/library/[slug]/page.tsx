@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import type { CSSProperties } from 'react'
 
+import { isSectionKey } from '@/art'
 import { SectionSticker } from '@/components/art'
 import { Contents } from '@/components/concept'
 import { BookGroup, CourseGroup, holdingsOf, libraryStyles as styles } from '@/components/library'
@@ -34,13 +35,12 @@ const BOOK_LISTS = [
   { slug: 'textbooks', label: 'Academic' },
 ] as const
 
-/** The Library's pages, each of which names its Sticker by its slug. */
-const LIBRARY_SECTIONS = ['textbooks', 'inspirational-books', 'courses', 'methods'] as const
-
+/** The Library's pages each name their Sticker by their slug. */
 function sectionOf(slug: string) {
-  const section = LIBRARY_SECTIONS.find((key) => key === slug)
-  if (!section) throw new Error(`The Library's page ${slug} has no Sticker.`)
-  return section
+  if (!isSectionKey(slug) || slug === 'notFound') {
+    throw new Error(`The Library's page ${slug} has no Sticker.`)
+  }
+  return slug
 }
 
 /** A reading list: its books on their shelves, or its courses as cards, group by group. */

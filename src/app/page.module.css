@@ -1,6 +1,9 @@
 .main {
+  /* The space between sections, and on both sides of the closing section's border. */
+  --section-gap: clamp(3rem, 8vw, 5rem);
+
   display: grid;
-  gap: clamp(3rem, 8vw, 5rem);
+  gap: var(--section-gap);
 }
 
 /* Hero: a folio page floating on indigo ink, the ground faintly ruled like a ledger. */
@@ -14,6 +17,9 @@
 }
 
 .heroFolio {
+  /* One leading for the hero's two paragraphs, so the words under the buttons read like those above. */
+  --hero-leading: 1.45;
+
   max-width: var(--measure-page);
   margin-inline: auto;
   text-align: center;
@@ -62,7 +68,7 @@
   margin: 1rem auto 0;
   max-width: 40ch;
   font-size: clamp(1.0625rem, 2.2vw, 1.25rem);
-  line-height: 1.45;
+  line-height: var(--hero-leading);
 }
 
 .textLink {
@@ -93,7 +99,7 @@
   margin: 0 auto;
   max-width: var(--measure-lede);
   font-size: var(--text-large);
-  line-height: 1.65;
+  line-height: var(--hero-leading);
 }
 
 .ctas {
@@ -111,17 +117,27 @@
  */
 @media (width >= 64rem) {
   .heroFolio {
+    /* The Plate's figure here: its 360 px ring, caption line and controls, with the gaps between. */
+    --hero-plate-height: calc(360px + 0.5rem + 1.5 * var(--text-small) + 0.5rem + 3rem);
+    /* The Fleuron, 12rem wide at its drawing's 4:1. */
+    --hero-fleuron-height: 3rem;
+    --hero-pair-gap: 1.5rem;
+
     display: grid;
     grid-template-columns: 360px minmax(0, 1fr);
     column-gap: clamp(2rem, 4vw, 4rem);
     max-width: 72rem;
   }
 
+  /*
+   * The Plate and the Fleuron share one area beside all five rows of words, centred there as one
+   * group: each keeps the other's room as a margin, so neither can overlap the other.
+   */
   .heroPlate {
     grid-column: 1;
-    grid-row: 1 / span 4;
+    grid-row: 1 / span 5;
     align-self: center;
-    margin-bottom: 0;
+    margin-block: 0 calc(var(--hero-fleuron-height) + var(--hero-pair-gap));
   }
 
   .motto,
@@ -139,9 +155,9 @@
 
   .heroFleuron {
     grid-column: 1;
-    grid-row: 5;
+    grid-row: 1 / span 5;
     align-self: center;
-    margin-block: 1.5rem 0;
+    margin-block: calc(var(--hero-plate-height) + var(--hero-pair-gap)) 0;
   }
 
   /* The Fleuron no longer stands between the buttons and the introduction, so this keeps them apart. */
@@ -291,9 +307,9 @@
   }
 }
 
+/* The border stands as far from the closing line as from the section above it. */
 .closingSection {
   display: grid;
-  gap: 1.5rem;
   justify-items: center;
   width: 100%;
   max-width: 60rem;
@@ -309,11 +325,12 @@
 }
 
 .closing {
-  margin: 0;
+  margin: var(--section-gap) 0 1.5rem;
   max-width: 24ch;
   font-family: var(--font-display);
   font-size: clamp(1.75rem, 5vw, 2.75rem);
   line-height: 1.2;
+  text-wrap: balance;
 }
 
 .closingCta {

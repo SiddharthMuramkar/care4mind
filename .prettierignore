@@ -6,7 +6,6 @@ src/fonts/
 src/content/generated/
 /art/
 scripts/art/originals.json
-/art/
 .next/
 playwright-report/
 test-results/
