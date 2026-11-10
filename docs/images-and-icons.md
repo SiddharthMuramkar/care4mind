@@ -518,8 +518,8 @@ Every old media address answers with one 301, to a page or a file that answers 2
 | What | Budget |
 |---|---|
 | Layout shift from pictures and the Plate viewer | none: every `<Image>` has its size reserved, and the viewer's button row holds its height from first paint |
-| Preloaded pictures | one, the homepage's first hero Plate, at high priority |
-| Pictures in the first screen | the picture at each page's head (`HeadPicture`, `SectionSticker`, a Traditional text's Pothi, a topic's Frontispiece, the 404's and the error pages') takes `firstScreen`: `loading="eager"` and `fetchPriority="high"`, with no preload, so it is requested before the first text paints. Everything else lazy-loads (the default) |
+| Preloaded pictures | at most one a page, the picture at its head. The homepage's is its first hero Plate, through Next's `preload`, at high priority. Elsewhere React adds it: while server rendering, React 19 preloads every `<img>` that isn't lazy, and the head picture is the only one |
+| Pictures in the first screen | the picture at each page's head (`HeadPicture`, `SectionSticker`, a Traditional text's Pothi, a topic's Frontispiece, the 404's and the error pages') takes `firstScreen`: `loading="eager"` and `fetchPriority="high"`, never Next's `preload`, so it is requested before the first text paints. Everything else lazy-loads (the default) |
 | Hero Plate | ≤ 120 KB at 750 px (AVIF, measured 74 to 118 KB across the seven) |
 | Medallion at 120 px | ≤ 25 KB at 2× |
 | Sticker at 112 px | ≤ 20 KB at 2× |

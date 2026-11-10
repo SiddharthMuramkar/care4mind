@@ -1048,19 +1048,27 @@ test.describe('every page, whatever has been made so far', () => {
 /**
  * One page of each kind the route registry lists, with the picture standing at its head: the
  * homepage's first Plate, or the picture above the title. The 404 has its picture first in `main`.
+ * The first Plate sets no `loading`: Next's preload already asks for it at once.
  */
-const FIRST_SCREENS: { path: string; picture: (page: Page) => Locator }[] = [
-  ...(
-    await Promise.all(
-      ROUTES.filter((route) => route.sample).map(async (route) => {
-        if (route.kind === 'home')
-          return { path: route.path, picture: (page: Page) => page.locator(HERO) }
-        return (await headPicture(route)) ? { path: route.path, picture: headImage } : null
-      }),
-    )
-  ).filter((entry) => entry !== null),
-  { path: MISSING, picture: (page: Page) => page.getByRole('main').locator('img').first() },
-]
+const FIRST_SCREENS: { path: string; picture: (page: Page) => Locator; loading: string | null }[] =
+  [
+    ...(
+      await Promise.all(
+        ROUTES.filter((route) => route.sample).map(async (route) => {
+          if (route.kind === 'home')
+            return { path: route.path, picture: (page: Page) => page.locator(HERO), loading: null }
+          return (await headPicture(route))
+            ? { path: route.path, picture: headImage, loading: 'eager' }
+            : null
+        }),
+      )
+    ).filter((entry) => entry !== null),
+    {
+      path: MISSING,
+      picture: (page: Page) => page.getByRole('main').locator('img').first(),
+      loading: 'eager',
+    },
+  ]
 
 /** How a picture was asked for: its loading and priority, and when its file was requested. */
 const askedFor = (picture: Locator) =>
@@ -1068,7 +1076,7 @@ const askedFor = (picture: Locator) =>
     const request = performance.getEntriesByName(image.currentSrc, 'resource')[0]
     const paint = performance.getEntriesByName('first-contentful-paint')[0]
     return {
-      loading: image.loading,
+      loading: image.getAttribute('loading'),
       priority: image.fetchPriority,
       requested: request?.startTime ?? Infinity,
       painted: paint?.startTime ?? 0,
@@ -1076,7 +1084,7 @@ const askedFor = (picture: Locator) =>
   })
 
 test.describe('the first screen', { tag: '@one-width' }, () => {
-  for (const { path, picture } of FIRST_SCREENS) {
+  for (const { path, picture, loading } of FIRST_SCREENS) {
     test(`${path} asks for the picture at its head at once, before any text paints`, async ({
       page,
     }) => {
@@ -1087,10 +1095,17 @@ test.describe('the first screen', { tag: '@one-width' }, () => {
         .poll(() => head.evaluate((image: HTMLImageElement) => image.naturalWidth))
         .toBeGreaterThan(0)
       const asked = await askedFor(head)
-      expect(asked.loading).toBe('eager')
+      expect(asked.loading).toBe(loading)
       expect(asked.priority).toBe('high')
       expect(asked.requested, 'requested before the first contentful paint').toBeLessThan(
         asked.painted,
+      )
+      // React preloads a picture that isn't lazy, so the head's must be the page's one preload.
+      const preloads = page.locator('link[rel="preload"][as="image"]')
+      await expect(preloads).toHaveCount(1)
+      await expect(preloads).toHaveAttribute(
+        'imagesrcset',
+        (await head.getAttribute('srcset')) ?? '',
       )
       // Everything else still waits until it nears the screen.
       const atOnce = await head.evaluate(

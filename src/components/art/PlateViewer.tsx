@@ -91,7 +91,7 @@ export function PlateViewer({
                 alt={index === shown ? alt : ''}
                 // The first Plate is the homepage's one preload, asked for ahead of every other file.
                 preload={index === 0}
-                loading="eager"
+                loading={index === 0 ? undefined : 'eager'}
                 fetchPriority={index === 0 ? 'high' : undefined}
                 onLoad={() => {
                   loaded.current.add(index)
