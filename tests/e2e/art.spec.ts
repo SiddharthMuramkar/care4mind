@@ -61,6 +61,13 @@ function watchLayoutShifts(page: Page) {
   })
 }
 
+/** The page's layout shifts so far, summed. Call `watchLayoutShifts` before opening the page. */
+function layoutShiftSoFar(page: Page) {
+  return page.evaluate(() =>
+    (window as unknown as { __layoutShifts: number[] }).__layoutShifts.reduce((a, b) => a + b, 0),
+  )
+}
+
 /** Scroll to the foot of the page in steps, so that every lazy picture starts to load. */
 async function scrollToFoot(page: Page) {
   const height = await page.evaluate(() => document.documentElement.scrollHeight)
@@ -134,10 +141,7 @@ async function expectPicturesBehave(page: Page) {
   expect((await pictureStates(page)).broken, 'pictures that failed to load').toEqual([])
   expect(await picturesWithSizes(page), 'pictures that set sizes').toEqual([])
   expect(await picturesWithoutSpace(page), 'pictures with no reserved space').toEqual([])
-  const shift = await page.evaluate(() =>
-    (window as unknown as { __layoutShifts: number[] }).__layoutShifts.reduce((a, b) => a + b, 0),
-  )
-  expect(shift, 'layout shift').toBeLessThan(0.01)
+  expect(await layoutShiftSoFar(page), 'layout shift').toBeLessThan(0.01)
 }
 
 for (const { path, name, status = 200 } of PAGES) {
@@ -221,6 +225,66 @@ test.describe('section pages', () => {
     const expected = (page.viewportSize()?.width ?? 0) < 640 ? 88 : 112
     expect(box?.width).toBe(expected)
     expect(box?.height).toBe(expected)
+  })
+
+  /** Hold back every Sticker's file until the returned function lets them through. */
+  async function holdStickerFiles(page: Page) {
+    let release = () => {}
+    const held = new Promise<void>((resolve) => (release = resolve))
+    await page.route(/\/_next\/image\/?\?url=%2Fart%2Fstickers%2F/, async (route) => {
+      await held
+      await route.continue()
+    })
+    return release
+  }
+
+  /** The pale paper's colour as the page computes it beside `picture`. */
+  const paperBeside = (picture: Locator) =>
+    picture.evaluate((image) => {
+      const probe = document.createElement('i')
+      probe.style.backgroundColor = 'var(--color-surface-pale-18)'
+      image.after(probe)
+      const colour = getComputedStyle(probe).backgroundColor
+      probe.remove()
+      return colour
+    })
+
+  test('a Sticker stands on the pale paper until its file has loaded, and nothing moves as it goes', async ({
+    page,
+  }) => {
+    // Late web fonts move the text as they arrive, so without them the sum measures only pictures.
+    await page.route(/\.woff2?($|\?)/, (route) => route.abort())
+    const release = await holdStickerFiles(page)
+    await watchLayoutShifts(page)
+    // Not the load event: it waits for the pictures held back.
+    await gotoReady(page, '/concepts/', { waitUntil: 'domcontentloaded' })
+    const stickers = [headImage(page), cardSticker(page, 'self')]
+    for (const sticker of stickers) {
+      await sticker.scrollIntoViewIfNeeded()
+      await expect(sticker).toHaveCSS('background-color', await paperBeside(sticker))
+    }
+    const shifted = await layoutShiftSoFar(page)
+    release()
+    for (const sticker of stickers) {
+      await expect
+        .poll(() => sticker.evaluate((image: HTMLImageElement) => image.naturalWidth))
+        .toBeGreaterThan(0)
+      await expect(sticker).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)')
+    }
+    expect(await layoutShiftSoFar(page), 'layout shift as the paper goes').toBe(shifted)
+  })
+
+  test('without the script a Sticker shows no paper, which nothing would take away', async ({
+    browser,
+    viewport,
+  }) => {
+    const context = await browser.newContext({ javaScriptEnabled: false, viewport })
+    const bare = await context.newPage()
+    const release = await holdStickerFiles(bare)
+    await bare.goto('/concepts/', { waitUntil: 'domcontentloaded' })
+    await expect(headImage(bare)).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)')
+    release()
+    await context.close()
   })
 
   test('Search shows its Sticker only when nothing is listed', async ({ page }) => {

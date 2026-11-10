@@ -1,9 +1,8 @@
-import Image from 'next/image'
-
 import type { ArtRecord } from '@/art'
 import { cx } from '@/lib/cx'
 
 import styles from './Sticker.module.css'
+import { StickerImage } from './StickerImage'
 
 interface StickerProps {
   art: ArtRecord
@@ -15,15 +14,13 @@ interface StickerProps {
 }
 
 /** A folk-art Sticker. Always decorative: the words beside it name the thing. */
-export function Sticker({ art, size, firstScreen = false, className }: StickerProps) {
+export function Sticker({ art, size, firstScreen, className }: StickerProps) {
   return (
-    <Image
+    <StickerImage
       src={art.src}
-      alt=""
       width={size}
       height={Math.round((size * art.height) / art.width)}
-      loading={firstScreen ? 'eager' : undefined}
-      fetchPriority={firstScreen ? 'high' : undefined}
+      firstScreen={firstScreen}
       className={cx(styles.sticker, className)}
     />
   )
