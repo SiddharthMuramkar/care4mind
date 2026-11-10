@@ -46,6 +46,11 @@ export const sectionArt: Readonly<Record<SectionKey, SectionPicture>> = {
   notFound: { art: 'plate-404', interim: 'emblem-mark' },
 }
 
+/** Whether `key` names a section with a picture, such as a Library page's slug. */
+export function isSectionKey(key: string): key is SectionKey {
+  return Object.hasOwn(sectionArt, key)
+}
+
 export const topicArt: Readonly<Record<string, TopicPicture>> = {
   self: {
     sticker: 'sticker-self',

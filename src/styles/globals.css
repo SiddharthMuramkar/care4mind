@@ -111,6 +111,9 @@
   --measure-text: 62ch;
   --measure-page: 52rem;
 
+  /* How far text keeps off the paper's edges on a phone, where a folio has no frame. */
+  --inset-phone: 1.5rem;
+
   --duration-instant: 100ms;
   --duration-quick: 160ms;
   --duration-move: 320ms;

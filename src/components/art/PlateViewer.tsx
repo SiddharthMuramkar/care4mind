@@ -77,7 +77,7 @@ export function PlateViewer({
 
   return (
     <figure className={cx(styles.viewer, className)}>
-      <div className={styles.circle}>
+      <div className={styles.medallion}>
         {plates.map(
           ({ id, src, width, height, alt }, index) =>
             mounted.includes(index) && (
