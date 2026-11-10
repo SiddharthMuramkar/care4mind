@@ -1857,7 +1857,7 @@ test.describe('the homepage, section and topic pages as a set', () => {
     })
   }
 
-  for (const { name, path, controls } of [
+  for (const { name, path, controls, ready } of [
     {
       name: 'the viewer’s buttons',
       path: '/',
@@ -1877,6 +1877,10 @@ test.describe('the homepage, section and topic pages as a set', () => {
       name: 'the filter chips under the Sticker',
       path: '/concepts/',
       controls: (page: Page) => main(page).locator('button[aria-pressed]'),
+      // The plain chips give way to Base UI's when the browser is idle, the rail with them:
+      // measured mid-swap, a chip has no box.
+      ready: (page: Page) =>
+        expect(page.getByRole('toolbar', { name: 'Jump to a letter' })).toBeVisible(),
     },
     {
       name: 'the switch between book lists',
@@ -1896,9 +1900,11 @@ test.describe('the homepage, section and topic pages as a set', () => {
       async ({ page }) => {
         await page.setViewportSize({ width: 360, height: 800 })
         await gotoReady(page, path)
+        await ready?.(page)
         const found = await controls(page).all()
         expect(found.length).toBeGreaterThan(0)
         for (const control of found) {
+          await expect(control).toBeVisible()
           const box = await control.boundingBox()
           expect(box?.height).toBeGreaterThanOrEqual(44)
           expect(box?.width).toBeGreaterThanOrEqual(44)
