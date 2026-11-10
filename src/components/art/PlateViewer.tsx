@@ -89,8 +89,10 @@ export function PlateViewer({
                 height={height}
                 sizes={SIZES}
                 alt={index === shown ? alt : ''}
+                // The first Plate is the homepage's one preload, asked for ahead of every other file.
                 preload={index === 0}
                 loading={index === 0 ? undefined : 'eager'}
+                fetchPriority={index === 0 ? 'high' : undefined}
                 onLoad={() => {
                   loaded.current.add(index)
                   if (index === asked) setShown(index)

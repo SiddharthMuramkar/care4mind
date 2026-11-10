@@ -10,7 +10,7 @@ import { expectNoAxeViolations } from './axe'
 import { openingFolio } from './drawings'
 import { gotoErrorPage } from './error-page'
 import { expect, gotoReady, scrollsSideways, test } from './fixtures'
-import { MISSING, ROUTES_IN_SCOPE } from './routes'
+import { MISSING, ROUTES, ROUTES_IN_SCOPE } from './routes'
 
 /** The homepage's hero Plate: the one picture allowed a `sizes` attribute. */
 const HERO = '[data-hero-plate]'
@@ -59,6 +59,13 @@ function watchLayoutShifts(page: Page) {
       }
     }).observe({ type: 'layout-shift', buffered: true })
   })
+}
+
+/** The page's layout shifts so far, summed. Call `watchLayoutShifts` before opening the page. */
+function layoutShiftSoFar(page: Page) {
+  return page.evaluate(() =>
+    (window as unknown as { __layoutShifts: number[] }).__layoutShifts.reduce((a, b) => a + b, 0),
+  )
 }
 
 /** Scroll to the foot of the page in steps, so that every lazy picture starts to load. */
@@ -134,10 +141,7 @@ async function expectPicturesBehave(page: Page) {
   expect((await pictureStates(page)).broken, 'pictures that failed to load').toEqual([])
   expect(await picturesWithSizes(page), 'pictures that set sizes').toEqual([])
   expect(await picturesWithoutSpace(page), 'pictures with no reserved space').toEqual([])
-  const shift = await page.evaluate(() =>
-    (window as unknown as { __layoutShifts: number[] }).__layoutShifts.reduce((a, b) => a + b, 0),
-  )
-  expect(shift, 'layout shift').toBeLessThan(0.01)
+  expect(await layoutShiftSoFar(page), 'layout shift').toBeLessThan(0.01)
 }
 
 for (const { path, name, status = 200 } of PAGES) {
@@ -221,6 +225,83 @@ test.describe('section pages', () => {
     const expected = (page.viewportSize()?.width ?? 0) < 640 ? 88 : 112
     expect(box?.width).toBe(expected)
     expect(box?.height).toBe(expected)
+  })
+
+  /** Hold back every Sticker's file until the returned function lets them through. */
+  async function holdStickerFiles(page: Page) {
+    let release = () => {}
+    const held = new Promise<void>((resolve) => (release = resolve))
+    await page.route(/\/_next\/image\/?\?url=%2Fart%2Fstickers%2F/, async (route) => {
+      await held
+      await route.continue()
+    })
+    return release
+  }
+
+  /** The pale paper's colour as the page computes it beside `picture`. */
+  const paperBeside = (picture: Locator) =>
+    picture.evaluate((image) => {
+      const probe = document.createElement('i')
+      probe.style.backgroundColor = 'var(--color-surface-pale-18)'
+      image.after(probe)
+      const colour = getComputedStyle(probe).backgroundColor
+      probe.remove()
+      return colour
+    })
+
+  test('a card’s Sticker stands on the pale paper until its file has loaded, and nothing moves as it goes', async ({
+    page,
+  }) => {
+    // Late web fonts move the text as they arrive, so without them the sum measures only pictures.
+    await page.route(/\.woff2?($|\?)/, (route) => route.abort())
+    const release = await holdStickerFiles(page)
+    await watchLayoutShifts(page)
+    // Not the load event: it waits for the pictures held back.
+    await gotoReady(page, '/concepts/', { waitUntil: 'domcontentloaded' })
+    const sticker = cardSticker(page, 'self')
+    await sticker.scrollIntoViewIfNeeded()
+    await expect(sticker).toHaveCSS('background-color', await paperBeside(sticker))
+    // The head's Sticker is asked for at once, so it never stands on paper only React could take away.
+    await expect(headImage(page)).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)')
+    const shifted = await layoutShiftSoFar(page)
+    release()
+    await expect
+      .poll(() => sticker.evaluate((image: HTMLImageElement) => image.naturalWidth))
+      .toBeGreaterThan(0)
+    await expect(sticker).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)')
+    expect(await layoutShiftSoFar(page), 'layout shift as the paper goes').toBe(shifted)
+  })
+
+  test('the head’s Sticker shows no paper once its file is in, before the page’s script has run', async ({
+    page,
+  }) => {
+    let release = () => {}
+    const held = new Promise<void>((resolve) => (release = resolve))
+    await page.route(/\/_next\/static\/chunks\/[^?]+\.js($|\?)/, async (route) => {
+      await held
+      await route.continue()
+    })
+    await page.goto('/concepts/', { waitUntil: 'domcontentloaded' })
+    const sticker = headImage(page)
+    await expect
+      .poll(() => sticker.evaluate((image: HTMLImageElement) => image.naturalWidth))
+      .toBeGreaterThan(0)
+    await expect(sticker).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)')
+    await expect(page.locator('html'), 'React has not started').not.toHaveAttribute('data-hydrated')
+    release()
+  })
+
+  test('without the script a Sticker shows no paper, which nothing would take away', async ({
+    browser,
+    viewport,
+  }) => {
+    const context = await browser.newContext({ javaScriptEnabled: false, viewport })
+    const bare = await context.newPage()
+    const release = await holdStickerFiles(bare)
+    await bare.goto('/concepts/', { waitUntil: 'domcontentloaded' })
+    await expect(cardSticker(bare, 'self')).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)')
+    release()
+    await context.close()
   })
 
   test('Search shows its Sticker only when nothing is listed', async ({ page }) => {
@@ -964,6 +1045,97 @@ test.describe('every page, whatever has been made so far', () => {
   }
 })
 
+/**
+ * One page of each kind the route registry lists, with the picture standing at its head: the
+ * homepage's first Plate, or the picture above the title. The 404 has its picture first in `main`.
+ * The first Plate sets no `loading`: Next's preload already asks for it at once.
+ */
+const FIRST_SCREENS: { path: string; picture: (page: Page) => Locator; loading: string | null }[] =
+  [
+    ...(
+      await Promise.all(
+        ROUTES.filter((route) => route.sample).map(async (route) => {
+          if (route.kind === 'home')
+            return { path: route.path, picture: (page: Page) => page.locator(HERO), loading: null }
+          return (await headPicture(route))
+            ? { path: route.path, picture: headImage, loading: 'eager' }
+            : null
+        }),
+      )
+    ).filter((entry) => entry !== null),
+    {
+      path: MISSING,
+      picture: (page: Page) => page.getByRole('main').locator('img').first(),
+      loading: 'eager',
+    },
+  ]
+
+/** How a picture was asked for: its loading and priority, and when its file was requested. */
+const askedFor = (picture: Locator) =>
+  picture.evaluate((image: HTMLImageElement) => {
+    const request = performance.getEntriesByName(image.currentSrc, 'resource')[0]
+    const paint = performance.getEntriesByName('first-contentful-paint')[0]
+    return {
+      loading: image.getAttribute('loading'),
+      priority: image.fetchPriority,
+      requested: request?.startTime ?? Infinity,
+      painted: paint?.startTime ?? 0,
+    }
+  })
+
+test.describe('the first screen', { tag: '@one-width' }, () => {
+  for (const { path, picture, loading } of FIRST_SCREENS) {
+    test(`${path} asks for the picture at its head at once, before any text paints`, async ({
+      page,
+    }) => {
+      await gotoReady(page, path)
+      const head = picture(page)
+      await expect(head).toHaveCount(1)
+      await expect
+        .poll(() => head.evaluate((image: HTMLImageElement) => image.naturalWidth))
+        .toBeGreaterThan(0)
+      // A busy browser can report the first paint a little after drawing it.
+      await expect
+        .poll(() => askedFor(head).then(({ painted }) => painted), {
+          message: 'the browser reports its first paint',
+        })
+        .toBeGreaterThan(0)
+      const asked = await askedFor(head)
+      expect(asked.loading).toBe(loading)
+      expect(asked.priority).toBe('high')
+      expect(asked.requested, 'requested before the first contentful paint').toBeLessThan(
+        asked.painted,
+      )
+      // React preloads a picture that isn't lazy, so the head's must be the page's one preload.
+      const preloads = page.locator('link[rel="preload"][as="image"]')
+      await expect(preloads).toHaveCount(1)
+      await expect(preloads).toHaveAttribute(
+        'imagesrcset',
+        (await head.getAttribute('srcset')) ?? '',
+      )
+      // Everything else still waits until it nears the screen.
+      const atOnce = await head.evaluate(
+        (head, pictures) =>
+          [...document.querySelectorAll<HTMLImageElement>(pictures)]
+            .filter((image) => image !== head)
+            .filter((image) => image.loading !== 'lazy' || image.fetchPriority === 'high')
+            .map((image) => image.src),
+        PICTURES,
+      )
+      expect(atOnce, 'other pictures asked for at once').toEqual([])
+    })
+  }
+
+  for (const kind of ['segment', 'global'] as const) {
+    test(`the ${kind} error page asks for its Emblem at once`, async ({ page }) => {
+      await gotoErrorPage(page, kind)
+      const asked = await askedFor(page.getByRole('main').locator('img'))
+      expect(asked.loading).toBe('eager')
+      expect(asked.priority).toBe('high')
+    })
+  }
+})
+
 test.describe('the hero Plate', () => {
   const figure = (page: Page) => page.locator(`figure:has(${HERO})`)
 
@@ -1078,7 +1250,7 @@ test.describe('the hero Plate', () => {
   const SIZES = '(min-width: 64rem) 360px, 168px'
 
   test(
-    'is the only picture preloaded, and the only one that sets sizes',
+    'is the only picture preloaded, at high priority, and the only one that sets sizes',
     { tag: '@one-width' },
     async ({ page }) => {
       await gotoReady(page, '/')
@@ -1086,6 +1258,7 @@ test.describe('the hero Plate', () => {
       await expect(preloads).toHaveCount(1)
       await expect(preloads).toHaveAttribute('imagesizes', SIZES)
       await expect(preloads).toHaveAttribute('imagesrcset', /%2Fart%2Fplates%2Fjeweller\.jpg/)
+      await expect(preloads).toHaveAttribute('fetchpriority', 'high')
       const withSizes = page.locator('img[sizes]')
       await expect(withSizes).toHaveCount(1)
       await expect(withSizes).toHaveAttribute('sizes', SIZES)

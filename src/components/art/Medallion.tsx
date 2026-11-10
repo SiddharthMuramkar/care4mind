@@ -14,7 +14,8 @@ import { MedallionRing } from './MedallionRing'
  * Its width is inline, so a page sets a narrower one with `max-width` in `className`; the ring and
  * the picture fill the box, whose width and aspect-ratio hold it steady as the picture loads.
  * Where that narrowing crosses the ring's 96 px line, `phoneSize` names the phone width, and below
- * 40rem the ring drawn for that size shows instead.
+ * 40rem the ring drawn for that size shows instead. With `firstScreen` the picture loads at once,
+ * ahead of the rest, so it is there when the text paints.
  */
 export function Medallion({
   art,
@@ -22,6 +23,7 @@ export function Medallion({
   phoneSize,
   topic,
   decorative = true,
+  firstScreen = false,
   className,
 }: {
   art: Pick<ArtRecord, 'src' | 'alt'>
@@ -29,6 +31,7 @@ export function Medallion({
   phoneSize?: number
   topic?: string
   decorative?: boolean
+  firstScreen?: boolean
   className?: string
 }) {
   const style = {
@@ -43,6 +46,8 @@ export function Medallion({
         width={size}
         height={size}
         alt={decorative ? '' : art.alt}
+        loading={firstScreen ? 'eager' : undefined}
+        fetchPriority={firstScreen ? 'high' : undefined}
       />
       {phoneSize === undefined ? (
         <MedallionRing size={size} />

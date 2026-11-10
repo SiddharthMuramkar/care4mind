@@ -48,6 +48,7 @@ export default async function TopicPage({ params }: PageProps<'/topics/[slug]'>)
           art={artFor({ kind: 'topic', slug: topic.slug })}
           size={240}
           topic={topic.slug}
+          firstScreen
           className={styles.frontispiece}
         />
       }
