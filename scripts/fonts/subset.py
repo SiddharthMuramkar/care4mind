@@ -5,8 +5,8 @@ checks it against fonts.lock.json, trims variable axes, and writes one
 Latin and/or one Devanagari subset per style into src/fonts/, as WOFF2 for
 browsers, and also as WOFF for the faces the share-card renderer sets.
 
-Google's own served subsets drop the combining marks ISO 15919 needs
-(ticket 07), which is why the site builds its own.
+Google's own served subsets drop the combining marks ISO 15919 needs,
+which is why the site builds its own.
 
 Usage (from the repo root):
     python -m venv .venv-fonts && .venv-fonts/bin/pip install -r scripts/fonts/requirements.txt
