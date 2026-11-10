@@ -6,11 +6,38 @@
   gap: 2rem;
 }
 
+/* Three columns from 768px, though four would fit wider: nine Stickers then stand 3 x 3 and
+   eleven Plates 3 + 3 + 3 + 2, so no family ends on a lone picture. */
+@media (width >= 48rem) {
+  .gallery {
+    grid-template-columns: repeat(3, 160px);
+  }
+}
+
+/* A family of one or two pictures, the Emblem, stands as one centred row, not half a row. */
+.gallery:not(:has(> :nth-child(3))) {
+  grid-template-columns: none;
+  grid-auto-flow: column;
+  grid-auto-columns: 160px;
+  justify-content: center;
+}
+
+/* Its pictures stand as far apart as the three columns' do, so the page keeps one spacing. */
+@media (width >= 48rem) {
+  .gallery:not(:has(> :nth-child(3))) {
+    column-gap: calc((100% - 3 * 160px) / 2);
+  }
+}
+
 /* At 360px the text is 328px wide: ArtFigure draws at 150px here, so two columns keep their room. */
 @media (width < 40rem) {
   .gallery {
     grid-template-columns: repeat(auto-fill, 150px);
     column-gap: 1.75rem;
+  }
+
+  .gallery:not(:has(> :nth-child(3))) {
+    grid-auto-columns: 150px;
   }
 }
 
@@ -18,6 +45,10 @@
 @media (width < 22.5rem) {
   .gallery {
     justify-content: center;
+  }
+
+  .gallery:not(:has(> :nth-child(3))) {
+    grid-auto-flow: row;
   }
 }
 
