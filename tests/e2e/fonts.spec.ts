@@ -208,6 +208,20 @@ test.describe('interface text', { tag: '@self-width' }, () => {
     expect(serif).not.toBe(UI)
   })
 
+  test('sets a Concept’s reading time in the sans, as on its card', async ({ page }) => {
+    await gotoReady(page, '/concepts/vikshepa/')
+    const main = page.getByRole('main')
+    const time = main.getByText(/^About \d+ minutes? to read$/).first()
+    await expect(time).toBeVisible()
+    await expect.poll(() => face(time)).toBe(UI)
+
+    await gotoReady(page, '/')
+    const card = page.locator('#featured').getByRole('article').first()
+    const onCard = card.getByText(/^About \d+ minutes? to read$/)
+    await expect(onCard).toBeVisible()
+    await expect.poll(() => face(onCard)).toBe(UI)
+  })
+
   test('sets the filter chips, their group labels and the count in the sans', async ({ page }) => {
     await gotoReady(page, '/concepts/')
     const main = page.getByRole('main')
@@ -226,15 +240,12 @@ test.describe('interface text', { tag: '@self-width' }, () => {
   }) => {
     await gotoReady(page, '/texts/yoga-sutra/')
     const serif = await face(page.locator('body'))
-    const chip = page
-      .getByRole('main')
-      .getByRole('list', { name: 'Quoted in' })
-      .first()
-      .getByRole('link')
-      .first()
+    const main = page.getByRole('main')
+    const chip = main.getByRole('list', { name: 'Quoted in' }).first().getByRole('link').first()
     await expect(chip).toBeVisible()
     await expect.poll(() => face(chip)).toBe(UI)
     await expect.poll(() => face(chip.locator('[lang="sa-Latn"]'))).toBe(serif)
+    await expect.poll(() => face(main.getByText('Quoted in', { exact: true }).first())).toBe(UI)
   })
 
   test('sets a status badge, a topic chip and a form’s label in the sans', async ({ page }) => {

@@ -6,6 +6,8 @@
   margin: 0;
   font-size: var(--text-base);
   color: var(--color-surface-muted);
+  font-family: var(--font-ui);
+  --font-iast: var(--font-text);
 }
 
 /* A result's gloss, set after its name as a Concept is named everywhere. */

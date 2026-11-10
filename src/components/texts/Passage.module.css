@@ -162,6 +162,11 @@
   color: var(--color-surface-muted);
 }
 
+.quotedLabel {
+  font-family: var(--font-ui);
+  --font-iast: var(--font-text);
+}
+
 .credit {
   padding-inline-start: 1rem;
 }

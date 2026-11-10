@@ -87,6 +87,8 @@
   color: var(--color-surface-muted);
   font-size: var(--text-base);
   line-height: 1.45;
+  font-family: var(--font-ui);
+  --font-iast: var(--font-text);
 }
 
 .note {

@@ -119,6 +119,8 @@
   gap: 0.5rem 0.75rem;
   font-size: var(--text-base);
   color: var(--color-surface-muted);
+  font-family: var(--font-ui);
+  --font-iast: var(--font-text);
 }
 
 .gloss {
