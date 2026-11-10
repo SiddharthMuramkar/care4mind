@@ -18,7 +18,7 @@ export default function ErrorPage({
   return (
     <main id="main" className={reading.page}>
       <Folio variant="page" className={styles.folio}>
-        <Emblem variant="mark" size={96} className={styles.emblem} />
+        <Emblem variant="mark" size={96} firstScreen className={styles.emblem} />
         <p className={reading.kicker}>Error · Page not shown</p>
         <h1 className={styles.title}>This page couldn’t be set</h1>
         <p className={styles.text}>

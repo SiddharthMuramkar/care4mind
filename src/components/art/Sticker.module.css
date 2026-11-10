@@ -5,6 +5,16 @@
 }
 
 /*
+ * Until its file is in, a Sticker below the first screen stands on the pale paper a Medallion
+ * shows. Without the script nothing would take the paper away, so it shows only where it runs.
+ */
+@media (scripting: enabled) {
+  .loading {
+    background: var(--color-surface-pale-18);
+  }
+}
+
+/*
  * At a page's head, above its title. `height: auto` keeps the shape when the width narrows. The
  * margin is the one a topic's Frontispiece has, so every head keeps the same room under its picture.
  */

@@ -28,9 +28,9 @@ export default async function NotFound() {
       <main id="main" className={reading.page}>
         <Folio variant="page" className={page.folio}>
           {picture.family === 'plate' ? (
-            <Medallion art={picture} size={200} className={styles.picture} />
+            <Medallion art={picture} size={200} firstScreen className={styles.picture} />
           ) : (
-            <Emblem variant="mark" size={200} className={styles.picture} />
+            <Emblem variant="mark" size={200} firstScreen className={styles.picture} />
           )}
           <p className={reading.kicker}>Error 404 · Page not found</p>
           <h1 className={cx(page.title, styles.title)}>This page isn’t in the book</h1>
