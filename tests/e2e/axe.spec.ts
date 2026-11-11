@@ -125,6 +125,20 @@ test(
   },
 )
 
+test(
+  'passes unsettled text that reaches only an edge sliver of a scroll shadow',
+  { tag: '@from-1440' },
+  async ({ page }) => {
+    // A line of link text running on to a table frame's cut edge: the shade tile there, 1rem wide and as tall as the frame, lies under a few of its glyphs, as a frame's own shade does.
+    await page.setContent(
+      html(
+        '<main style="background: #eadbb6"><h1>Title</h1><p style="display: inline-block; color: #9c2a1f; background: linear-gradient(to left, rgba(11, 13, 31, 0.35), rgba(0, 0, 0, 0)) 100% 0 / 1rem 100% no-repeat, #eadbb6">A line of linked words that runs on to the cut edge of a frame</p></main>',
+      ),
+    )
+    await expectNoAxeViolations(page)
+  },
+)
+
 test('fails a page with two unnamed main landmarks', { tag: '@from-1440' }, async ({ page }) => {
   await page.setContent(
     html('<main><h1>Title</h1><p>Text.</p></main><div role="main"><p>More.</p></div>'),

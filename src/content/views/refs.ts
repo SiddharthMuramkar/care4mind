@@ -25,6 +25,18 @@ export function topicRef(topic: TopicRecord): TopicRef {
   }
 }
 
+/** The topics before and after one, in the topics' order: the first has none before it. */
+export function topicsAround(
+  slug: string,
+  graph: ContentGraph,
+): { previous?: TopicRef; next?: TopicRef } {
+  const ordered = [...graph.records('topic')].sort((a, b) => a.order - b.order)
+  const at = ordered.findIndex((topic) => topic.slug === slug)
+  if (at < 0) return {}
+  const ref = (topic: TopicRecord | undefined) => topic && topicRef(topic)
+  return present({ previous: ref(ordered[at - 1]), next: ref(ordered[at + 1]) })
+}
+
 /** The language tag of a work's transliterated text: Sanskrit unless the work says Pali. */
 export function latinScript(work: WorkRecord): LatinScript {
   return work.language === 'pi' ? 'pi-Latn' : 'sa-Latn'

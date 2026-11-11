@@ -1,6 +1,7 @@
 import { hrefFor } from '@/content'
 
 import { expectNoAxeViolations } from './axe'
+import { expectTrail } from './breadcrumbs'
 import { expect, gotoReady, test } from './fixtures'
 import { expectPageTurned, pageTurns, prefetched, recordPageTurns } from './page-turns'
 
@@ -70,8 +71,7 @@ test.describe('the proposals page', () => {
       const header = page.getByRole('main').locator('header').first()
       await expect(header).toContainText('Proposal')
       await expect(header).toContainText('Each awaits the Project owner’s decision')
-      const crumbs = page.getByRole('navigation', { name: 'Breadcrumb' }).getByRole('listitem')
-      await expect(crumbs).toHaveText(['Go to home', 'Proposals'])
+      await expectTrail(page, ['Go to home', 'Proposals'])
     },
   )
 

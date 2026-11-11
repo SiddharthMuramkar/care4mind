@@ -308,6 +308,8 @@ export interface ConceptView extends ConceptCard, CarriedOver {
   /** The Concepts before and after it in its primary topic, alphabetically for now. */
   previous?: ConceptCard
   next?: ConceptCard
+  /** Where it is the last Concept in its topic, the topic after it in the topics' order. */
+  nextTopic?: TopicRef
   /** Links that leave the site, such as its own DharmaWiki article. */
   external: readonly { label: string; url: string }[]
 }
@@ -339,6 +341,9 @@ export interface TopicView extends TopicCard {
   /** The works its Concepts quote, each with the verses quoted from it, in the work's order. */
   works: readonly QuotedWork[]
   intro?: TopicIntroView
+  /** The topics before and after it, in the topics' order. */
+  previous?: TopicRef
+  next?: TopicRef
 }
 
 /** A work, with the verses a page's Concepts quote from it. */

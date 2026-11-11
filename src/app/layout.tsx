@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next'
 import type { ReactNode } from 'react'
 
+import { BackToTop } from '@/components/BackToTop'
 import { HydrationMarker } from '@/components/HydrationMarker'
 import { InkSpread } from '@/components/InkSpread'
 import { LateFonts } from '@/components/LateFonts'
@@ -53,6 +54,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <SiteHeader />
         {children}
         <SiteFooter />
+        <BackToTop />
         <Toaster />
         <LinkPreviewRoot />
         <InkSpread />
