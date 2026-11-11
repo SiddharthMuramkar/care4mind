@@ -1,5 +1,6 @@
 import type { Page } from '@playwright/test'
 
+import { expectTrail } from './breadcrumbs'
 import { undrawn } from './drawings'
 import { expect, gotoReady, test } from './fixtures'
 import { LOGGED_IN } from './login'
@@ -375,8 +376,6 @@ test('names each Questionnaire page’s place in its breadcrumbs', async ({ page
     ],
   ] as const) {
     await page.goto(path)
-    const crumbs = page.getByRole('navigation', { name: 'Breadcrumb' }).getByRole('listitem')
-    await expect(crumbs).toHaveText([...trail])
-    await expect(crumbs.last().locator('[aria-current="page"]')).toHaveText(trail.at(-1) ?? '')
+    await expectTrail(page, trail, path)
   }
 })

@@ -119,8 +119,7 @@
   color: var(--color-surface-muted);
 }
 
-/* On a phone the trail is one line back to its topic: "← Mind: states and obstacles".
-   The lead also stands closer together, so the first section is a short scroll away. */
+/* On a phone the lead stands closer together, so the first section is a short scroll away. */
 @media (width < 48rem) {
   .scope,
   .body {
@@ -139,31 +138,6 @@
 
   .meta {
     font-size: var(--text-body);
-  }
-  main.page nav[aria-label='Breadcrumb'] ol {
-    flex-wrap: nowrap;
-  }
-
-  main.page nav[aria-label='Breadcrumb'] li {
-    display: none;
-  }
-
-  main.page nav[aria-label='Breadcrumb'] li:nth-last-child(2) {
-    display: inline-flex;
-    min-width: 0;
-  }
-
-  main.page nav[aria-label='Breadcrumb'] li:nth-last-child(2)::before {
-    content: '←' / '';
-    margin-inline: 0 0.5em;
-    color: var(--color-highlight);
-    font-weight: 600;
-  }
-
-  main.page nav[aria-label='Breadcrumb'] a {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
   }
 }
 
