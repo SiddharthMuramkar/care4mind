@@ -29,6 +29,7 @@ import {
   toChips,
   writeSelection,
 } from './filter'
+import { useRail } from './rail'
 import type { ChipGroup, ChipsProps, KeyboardParts, RailLetter, RailProps } from './types'
 
 let keyboard: Promise<KeyboardParts> | undefined
@@ -45,6 +46,9 @@ const NAMED = 40
 
 /** Set on the page while its list reorders. */
 const REORDERING = 'data-az-reorder'
+
+/** The rail sticks under the header while at least this many entries show: fewer are soon passed. */
+const STICKS_FROM = 15
 
 /** Move to a new address, and let the filters read it at once. */
 function go(selection: Selection, defaultKinds: readonly string[]) {
@@ -308,8 +312,9 @@ interface Props {
 }
 
 /**
- * The A–Z's controls round its server-rendered list: a rail of letters that stays in view, and
- * filter chips whose state lives in the address. A filter hides the entries whose attributes
+ * The A–Z's controls round its server-rendered list: a rail of letters that stays in view while
+ * the list showing is long (on a phone one row that scrolls sideways, see useRail), and filter
+ * chips whose state lives in the address. A filter hides the entries whose attributes
  * don't match it, so the list itself never re-renders. Base UI's Toolbar and ToggleGroup (one Tab
  * stop each, arrow keys between) load when the browser is idle or a pointer or focus comes near;
  * until then the letters are plain links and the chips plain toggle buttons. A plain address
@@ -444,6 +449,7 @@ export function AzIndex({
   )
   const pressed = useMemo(() => toChips(selection), [selection])
   const tally = showing?.count ?? total
+  const bandRef = useRail(listRef, Rail)
 
   return (
     <div ref={controls} className={styles.index} {...handlers}>
@@ -478,7 +484,12 @@ export function AzIndex({
           clearClassName={styles.clear}
         />
       </div>
-      <nav aria-label="Letters" className={styles.railBand}>
+      <nav
+        ref={bandRef}
+        aria-label="Letters"
+        className={styles.railBand}
+        {...(tally < STICKS_FROM ? { 'data-short': '' } : {})}
+      >
         {rail}
       </nav>
       {tally === 0 ? (
@@ -487,7 +498,7 @@ export function AzIndex({
           back in, or clear the filters.
         </p>
       ) : null}
-      <div id={LIST} ref={listRef}>
+      <div id={LIST} ref={listRef} className={styles.list}>
         {children}
       </div>
     </div>

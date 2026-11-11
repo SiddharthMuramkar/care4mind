@@ -4,7 +4,7 @@
  * and copies it.
  */
 
-/* A letter's section: its capital, then its entries. */
+/* A letter's section: its capital, then its entries. A link to it lands clear of the header and the rail's one row. */
 .letter {
   display: grid;
   gap: 0.5rem;
@@ -259,21 +259,6 @@
 @keyframes rule-down {
   from {
     transform: scaleY(0);
-  }
-}
-
-/* The wrapped rail is taller, so a letter or entry it leads to lands further down. */
-@media (width < 48rem) {
-  .letter,
-  .entry {
-    scroll-margin-top: calc(var(--sticky-top) + 8rem);
-  }
-}
-
-@media (width < 30rem) {
-  .letter,
-  .entry {
-    scroll-margin-top: calc(var(--sticky-top) + 12rem);
   }
 }
 

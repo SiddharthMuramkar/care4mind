@@ -14,6 +14,7 @@ import {
 import { expectNoAxeViolations } from './axe'
 import { expect, gotoReady, scrollsSideways, test } from './fixtures'
 import { expectPageTurned, pageTurns, prefetched, recordPageTurns } from './page-turns'
+import { letterBoxes, swipeAcross } from './rail'
 
 // The Library: its shelf, every Reference in one style with a search box and filters, an author
 // rail, "cited in" chips and "Copy citation", the two book lists as spines, the course cards and
@@ -363,28 +364,31 @@ test.describe('References: the author rail', () => {
     }
   })
   test(
-    'at 390 px, every filled letter is on screen without swiping the rail',
+    'at 390 px, the rail is one row of 44 px letters at most 56 px tall, a swipe bringing each on screen',
     { tag: '@self-width' },
     async ({ page }) => {
       await page.setViewportSize({ width: 390, height: 844 })
       await gotoReady(page, REFERENCES)
       await expect(toolbar(page)).toBeVisible()
-      const boxes = await toolbar(page)
-        .getByRole('link')
-        .evaluateAll((links) =>
-          links.map((link) => {
-            const { x, width } = link.getBoundingClientRect()
-            return { x, right: x + width }
-          }),
-        )
+      const band = await page.getByRole('navigation', { name: 'Letters' }).boundingBox()
+      expect(band?.height ?? Infinity, 'the band, rule to rule').toBeLessThanOrEqual(56)
+      const boxes = await letterBoxes(toolbar(page))
       expect(boxes.length).toBeGreaterThan(0)
-      for (const { x, right } of boxes) {
-        expect(x).toBeGreaterThanOrEqual(0)
-        expect(right).toBeLessThanOrEqual(390)
+      expect(new Set(boxes.map(({ top }) => top)).size, 'one row').toBe(1)
+      for (const { width, height } of boxes) {
+        expect(width).toBeGreaterThanOrEqual(44)
+        expect(height).toBeGreaterThanOrEqual(44)
       }
-      expect(await toolbar(page).evaluate((rail) => rail.scrollWidth <= rail.clientWidth + 1)).toBe(
-        true,
-      )
+      expect(
+        await toolbar(page).evaluate((rail) => rail.scrollWidth > rail.clientWidth + 1),
+        'the row scrolls sideways instead of wrapping',
+      ).toBe(true)
+      const every = await toolbar(page).locator(':scope > *').allTextContents()
+      expect(
+        (await swipeAcross(page, toolbar(page))).toSorted(),
+        'every letter seen whole',
+      ).toEqual(every.toSorted())
+      expect(await scrollsSideways(page)).toEqual([])
     },
   )
   test(
