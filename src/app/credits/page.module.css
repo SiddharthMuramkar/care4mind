@@ -33,11 +33,11 @@
   }
 }
 
-/* At 360px the text is 328px wide: ArtFigure draws at 150px here, so two columns keep their room. */
+/* At 360px the text is 320px wide: ArtFigure draws at 150px here, so two columns keep their room. */
 @media (width < 48rem) {
   .gallery {
     grid-template-columns: repeat(auto-fill, 150px);
-    column-gap: 1.75rem;
+    column-gap: 1.25rem;
   }
 
   .gallery:not(:has(> :nth-child(3))) {
@@ -46,8 +46,8 @@
 }
 
 /* Too narrow for two columns: the one column stands in the middle. */
-/* The gallery's own width: 20.5rem is its width on a 360 px phone. */
-@container credits-gallery (width < 20.5rem) {
+/* The gallery's own width: 20rem is its width on a 360 px phone. */
+@container credits-gallery (width < 20rem) {
   .gallery {
     justify-content: center;
   }

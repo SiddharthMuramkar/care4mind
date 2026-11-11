@@ -20,14 +20,14 @@
 }
 
 /*
- * Sized in the drawing's own units, so the type scales with the column: 50 units is 15 px at the
- * 328 px column of a 360 px phone, and a wider column can afford 32, 15 px at a 512 px column.
+ * Sized in the drawing's own units, so the type scales with the column: 51 units is 15 px at the
+ * 320 px column of a 360 px phone, and a wider column can afford 32, 15 px at a 512 px column.
  */
 .drawing {
   display: block;
   width: 100%;
   height: auto;
-  font-size: 50px;
+  font-size: 51px;
 }
 
 @media (width >= 48rem) {
