@@ -25,8 +25,8 @@ function channelsOf(color: string): [number, number, number] {
   return [Number(match[1]), Number(match[2]), Number(match[3])]
 }
 
-/** The colour of one CSS pixel. */
-async function pixel(page: Page, x: number, y: number): Promise<[number, number, number]> {
+/** The colour of one CSS pixel, as painted on screen. */
+export async function pixel(page: Page, x: number, y: number): Promise<[number, number, number]> {
   const png = (
     await page.screenshot({
       scale: 'css',
