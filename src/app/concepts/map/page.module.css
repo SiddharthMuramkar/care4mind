@@ -3,4 +3,6 @@
   margin: 0;
   font-size: var(--text-body);
   color: var(--color-surface-muted);
+  font-family: var(--font-ui);
+  --font-iast: var(--font-text);
 }

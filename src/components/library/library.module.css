@@ -6,6 +6,8 @@
   font-size: var(--text-body);
   color: var(--color-surface-muted);
   text-wrap: balance;
+  font-family: var(--font-ui);
+  --font-iast: var(--font-text);
 }
 
 /* "archive.org, another site ↗": the words that say the link leaves, a size down. */
