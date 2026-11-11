@@ -245,3 +245,19 @@ test("pointing at and pressing a lotus moves nothing, with reduced motion, and t
   await logo.click()
   await expect(page).toHaveURL('/')
 })
+
+test('Back to top jumps to the top at once and fades nothing in or out, with reduced motion', async ({
+  page,
+}) => {
+  await gotoReady(page, '/concepts/vikshepa/')
+  await page.evaluate(() => window.scrollTo({ top: 3 * window.innerHeight, behavior: 'instant' }))
+  const button = page.getByRole('button', { name: 'Back to top', exact: true })
+  await expect(button).toBeVisible()
+  expect(await movingAnimations(page)).toEqual([])
+  await button.click()
+  // At once: read two frames on, not polled.
+  await nextFrames(page)
+  expect(await page.evaluate(() => window.scrollY)).toBe(0)
+  await expect(button).toBeHidden()
+  expect(await movingAnimations(page)).toEqual([])
+})
