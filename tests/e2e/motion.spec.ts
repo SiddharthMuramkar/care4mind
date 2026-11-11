@@ -192,8 +192,8 @@ test('pressing a call to action spreads no ink and moves nothing, with reduced m
 
 for (const { from, link, to } of [
   { from: '/', link: 'Read about Vikṣepa', to: '/concepts/vikshepa/' },
-  // A Concept page's phone breadcrumb shows only its topic, so the "Go to home" leg starts
-  // from the Concepts index, whose breadcrumb links Home at every width.
+  // A phone's breadcrumb shows only the page above, so the "Go to home" leg starts from the
+  // Concepts index, the one page above it being the homepage.
   { from: '/concepts/', link: 'Go to home', to: '/' },
 ]) {
   test(`following "${link}" changes the page at once, with reduced motion`, async ({ page }) => {
@@ -244,4 +244,20 @@ test("pointing at and pressing a lotus moves nothing, with reduced motion, and t
   await gotoReady(page, '/concepts/')
   await logo.click()
   await expect(page).toHaveURL('/')
+})
+
+test('Back to top jumps to the top at once and fades nothing in or out, with reduced motion', async ({
+  page,
+}) => {
+  await gotoReady(page, '/concepts/vikshepa/')
+  await page.evaluate(() => window.scrollTo({ top: 3 * window.innerHeight, behavior: 'instant' }))
+  const button = page.getByRole('button', { name: 'Back to top', exact: true })
+  await expect(button).toBeVisible()
+  expect(await movingAnimations(page)).toEqual([])
+  await button.click()
+  // At once: read two frames on, not polled.
+  await nextFrames(page)
+  expect(await page.evaluate(() => window.scrollY)).toBe(0)
+  await expect(button).toBeHidden()
+  expect(await movingAnimations(page)).toEqual([])
 })

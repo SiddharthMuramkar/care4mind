@@ -65,7 +65,7 @@ const IN_TEXT = [
     name: 'Yoga Sūtra',
     in: (page: Page) => page.getByRole('region', { name: 'Linked knowledge' }),
   },
-  // At this test's one (phone) width a Concept's breadcrumb is its topic link alone.
+  // At this test's one (phone) width a breadcrumb is its link to the page above alone.
   {
     page: '/concepts/vikshepa/',
     name: 'Mind: states and obstacles',

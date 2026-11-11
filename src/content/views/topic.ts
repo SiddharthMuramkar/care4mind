@@ -5,7 +5,7 @@ import { sectionViews, tocOf, type Owner } from './blocks'
 import { byName, carriedOver, must, nameCopy, present } from './common'
 import { conceptCard } from './concept'
 import { inReadingOrder, passageView } from './passage'
-import { topicRef, workRef } from './refs'
+import { topicRef, topicsAround, workRef } from './refs'
 import { citationMap, numberedReferences } from './reference'
 
 /** A topic in brief: its name, its place among the topics and how many Concepts it has. */
@@ -47,6 +47,7 @@ export function topicView(record: TopicRecord, graph: ContentGraph): TopicView {
     concepts: cards(primary),
     secondaryConcepts: cards(also),
     works: [...works.values()],
+    ...topicsAround(record.slug, graph),
     ...(intro === undefined
       ? {}
       : {

@@ -1,7 +1,7 @@
 import type { Locator, Page } from '@playwright/test'
 
 import { CLOSE_DELAY, OPEN_DELAY } from '@/components/preview'
-import { concepts } from '@/content'
+import { concepts, topics } from '@/content'
 
 import { expectNoAxeViolations } from './axe'
 import { recordAnimationStarts, transitionedOn } from './drawings'
@@ -614,7 +614,9 @@ test.describe('Concept page v2: linked knowledge', () => {
     await gotoReady(page, '/concepts/atman/')
     const panel = linked(page)
     await expect(panel.getByRole('heading', { level: 3 })).toHaveText([/^Related Concepts/])
-    await expect(page.locator('details', { hasText: 'References' })).toHaveCount(0)
+    // The page's own list: the footer's folded Library list names the References page too.
+    const main = page.getByRole('main')
+    await expect(main.locator('details', { hasText: 'References' })).toHaveCount(0)
   })
 
   test('its cross-reference rules ink in from the centre as they scroll into view', async ({
@@ -1085,17 +1087,96 @@ test.describe('Concept page v2: previous and next', () => {
     expectPageTurned(back, 'back')
   })
 
-  test('the first Concept of a topic has no "previous", and the last no "next"', async ({
+  test(
+    'on a wide screen "previous" takes the left half and "next" the right, over the line back to the topic',
+    { tag: '@from-1440' },
+    async ({ page }) => {
+      await gotoReady(page, '/concepts/upa-vikshepa/')
+      const pager = page.getByRole('navigation', { name: /^Concepts in / })
+      const box = async (name: RegExp) => {
+        const found = await pager.getByRole('link', { name }).boundingBox()
+        if (!found) throw new Error(`${name} is on the page`)
+        return found
+      }
+      const nav = await pager.boundingBox()
+      if (!nav) throw new Error('the pager is on the page')
+      const previous = await box(/^Previous/)
+      const next = await box(/^Next/)
+      const all = await box(/^All concepts in this topic$/)
+      expect(Math.abs(previous.x - nav.x), 'previous at the left edge').toBeLessThanOrEqual(1)
+      expect(
+        Math.abs(next.x + next.width - (nav.x + nav.width)),
+        'next at the right edge',
+      ).toBeLessThanOrEqual(1)
+      expect(Math.abs(previous.width - next.width), 'the two share the row').toBeLessThanOrEqual(1)
+      expect(previous.width + next.width, 'half each').toBeGreaterThan(nav.width - 40)
+      expect(all.y, 'the line back stands under them').toBeGreaterThan(next.y + next.height)
+    },
+  )
+
+  test('the first Concept of a topic has no "previous", and the last leads on to the next topic instead of a "next"', async ({
     page,
   }) => {
+    // Recorded from the page's first load: a page turn happens in the page, with no new load.
+    await recordPageTurns(page)
     await gotoReady(page, '/concepts/chittabhumi/')
     const pager = page.getByRole('navigation', { name: /^Concepts in / })
     await expect(pager.getByRole('link', { name: /^Previous/ })).toHaveCount(0)
     await expect(pager.getByRole('link', { name: /^Next/ })).toHaveCount(1)
+    await expect(pager.getByRole('link', { name: /^Next topic/ })).toHaveCount(0)
     await gotoReady(page, '/concepts/vikshepa/')
     const last = page.getByRole('navigation', { name: /^Concepts in / })
-    await expect(last.getByRole('link', { name: /^Next/ })).toHaveCount(0)
     await expect(last.getByRole('link', { name: /^Previous/ })).toHaveCount(1)
+    // Its one way on is the next topic's page, which turns the page forward.
+    const onward = last.getByRole('link', { name: /^Next/ })
+    await expect(onward).toHaveCount(1)
+    await expect(onward).toHaveAccessibleName(/^Next topic/)
+    await expect(onward).toContainText('Practice and progress')
+    await expect(onward).toHaveAttribute('href', '/topics/practice/')
+    await prefetched(onward)
+    await onward.click()
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText('Practice and progress')
+    expectPageTurned((await pageTurns(page))[0], 'forward')
+  })
+
+  test(
+    'every Concept page leads to all the Concepts in its topic, and the last in a topic on to the next',
+    { tag: '@one-width' },
+    async ({ page }) => {
+      const all = await topics.list()
+      for (const [index, topic] of all.entries()) {
+        const inTopic = (await topics.get(topic.slug))?.concepts ?? []
+        expect(inTopic.length, topic.slug).toBeGreaterThan(0)
+        for (const [at, concept] of inTopic.entries()) {
+          await page.goto(concept.href)
+          const pager = page.getByRole('navigation', {
+            name: `Concepts in ${topic.name}`,
+            exact: true,
+          })
+          await expect(
+            pager.getByRole('link', { name: 'All concepts in this topic', exact: true }),
+            concept.slug,
+          ).toHaveAttribute('href', `${topic.href}#its-concepts`)
+          const onward = pager.getByRole('link', { name: /^Next topic/ })
+          const nextTopic = at === inTopic.length - 1 ? all[index + 1] : undefined
+          if (nextTopic) await expect(onward, concept.slug).toHaveAttribute('href', nextTopic.href)
+          else await expect(onward, concept.slug).toHaveCount(0)
+        }
+      }
+    },
+  )
+
+  test('"All concepts in this topic" opens the topic at its Concepts', async ({ page }) => {
+    await gotoReady(page, '/concepts/vikshepa/')
+    const all = page
+      .getByRole('navigation', { name: /^Concepts in / })
+      .getByRole('link', { name: 'All concepts in this topic', exact: true })
+    await prefetched(all)
+    await all.click()
+    await expect(page).toHaveURL('/topics/mind/#its-concepts')
+    await expect(
+      page.getByRole('heading', { level: 2, name: 'Its Concepts', exact: true }),
+    ).toBeInViewport()
   })
 })
 

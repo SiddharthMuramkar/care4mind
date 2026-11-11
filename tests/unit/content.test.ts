@@ -5,6 +5,7 @@ import {
   home,
   questionnaires,
   site,
+  topics,
   type ConceptView,
   type QuestionnaireView,
 } from '@/content'
@@ -52,6 +53,20 @@ describe('content module', () => {
   it('lists every ASCII spelling of a term, starting with IAST minus diacritics', async () => {
     const term = (await concepts.get('vikshepa'))?.term
     expect(term && asciiSpellings(term)).toEqual(['viksepa', 'Vikshepa'])
+  })
+
+  it('leads the last Concept of every topic but the last on to the next topic', async () => {
+    const all = await topics.list()
+    expect(all.length).toBeGreaterThan(1)
+    for (const [index, topic] of all.entries()) {
+      const last = (await topics.get(topic.slug))?.concepts.at(-1)
+      const page = last ? await concepts.get(last.slug) : null
+      expect(page, topic.slug).not.toBeNull()
+      expect(page?.next, `${last?.slug} is the last in ${topic.slug}`).toBeUndefined()
+      expect(page?.nextTopic?.slug, `${last?.slug} leads on`).toBe(all[index + 1]?.slug)
+    }
+    // Vikṣepa ends the mind topic, and practice comes after it.
+    expect((await concepts.get('vikshepa'))?.nextTopic?.href).toBe('/topics/practice/')
   })
 })
 
