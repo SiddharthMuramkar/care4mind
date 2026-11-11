@@ -1,6 +1,6 @@
 import type { Route } from 'next'
 
-/** The sections the header links to, besides Search; Questionnaires only while one can be taken. */
+/** The sections the header links to, besides Search; Questionnaires is always the last. */
 export type SectionId = 'concepts' | 'texts' | 'questionnaires' | 'library'
 
 /** The two sections whose header item opens a panel on a computer, and a list in the Drawer. */
@@ -53,8 +53,8 @@ export interface SiteNav {
   library: { index: NavLink; pages: readonly LibraryLink[] }
   /**
    * The footer's plain link to the Questionnaires page, always listed there. While none can be
-   * taken it carries the home record's drafted label; the header and the phone menu list
-   * Questionnaires only while one can be taken, as a section above.
+   * taken it carries the home record's drafted label; the header and the phone menu always list
+   * Questionnaires by name, as a section above.
    */
   questionnaires: NavLink
   search: NavLink
