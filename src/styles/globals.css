@@ -131,8 +131,8 @@
   --measure-text: 62ch;
   --measure-page: 52rem;
 
-  /* How far text keeps off the paper's edges on a phone, where a folio has no frame. */
-  --inset-phone: 1.5rem;
+  /* How far text keeps off the screen's sides on a phone, where the paper runs edge to edge. */
+  --inset-phone: 1.25rem;
 
   /* A press: quick enough to feel direct, long enough to be seen. */
   --duration-instant: 140ms;

@@ -6,6 +6,7 @@ import { turnForward } from '@/components/PageTurn'
 import { Text } from '@/components/prose'
 import { ScriptPair } from '@/components/script'
 import type { PassageView, RecordRef } from '@/content'
+import { keepDandasWithWords } from '@/lib/sanskrit'
 import { listSeparator, toDevanagariDigits } from '@/lib/text'
 
 import styles from './Passage.module.css'
@@ -21,14 +22,17 @@ function Listed({ records }: { records: readonly RecordRef[] }) {
   ))
 }
 
-/** Lines of a verse, one to a line, the last closed with its number as a manuscript does. */
+/**
+ * Lines of a verse, one to a line, the last closed with its number as a manuscript does. A danda,
+ * the number's included, stays on the line of the word it closes.
+ */
 function Lines({ lines, end }: { lines: readonly string[]; end: string }) {
   return lines.map((line, index) => (
-    <span key={index} className={styles.line}>
-      {line}
+    <span key={index} className={styles.line} data-verse-line>
+      {keepDandasWithWords(line)}
       {index === lines.length - 1 ? (
         <>
-          {' '}
+          {'\u00A0'}
           <span className={styles.end}>{end}</span>
         </>
       ) : null}

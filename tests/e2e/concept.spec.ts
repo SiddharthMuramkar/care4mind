@@ -5,6 +5,7 @@ import { concepts, topics } from '@/content'
 
 import { expectNoAxeViolations } from './axe'
 import { recordAnimationStarts, transitionedOn } from './drawings'
+import { contentsPastThePadding } from './edges'
 import { expect, gotoReady, scrollsSideways, test } from './fixtures'
 import { pixel } from './focus-ring'
 import { expectPageTurned, pageTurns, prefetched, recordPageTurns } from './page-turns'
@@ -527,6 +528,16 @@ test.describe('Concept page v2: contents', () => {
     await expect.poll(current).toBe(true)
   })
 })
+
+test(
+  'on a phone every part of the contents, the marker beside the section being read too, sits inside the paper’s padding',
+  { tag: '@self-width' },
+  async ({ page }) => {
+    await page.setViewportSize({ width: 360, height: 800 })
+    await gotoReady(page, '/concepts/vikshepa/')
+    expect(await contentsPastThePadding(contents(page))).toEqual([])
+  },
+)
 
 test.describe('Concept page v2: linked knowledge', () => {
   test('gathers related Concepts with their reasons, the passages, sections, References and Questionnaire', async ({

@@ -22,9 +22,11 @@
   min-width: 0;
 }
 
+/* Running text keeps to the reading measure, however wide its column. */
 .section :where(p),
 .term :where(p) {
   margin: 0;
+  max-width: var(--measure-text);
 }
 
 .sectionTitle {
@@ -101,6 +103,7 @@
 
 .list {
   margin: 0;
+  max-width: var(--measure-text);
   padding-inline-start: 1.25rem;
   display: grid;
   gap: 0.6rem;
@@ -302,6 +305,13 @@
     inset 0 0 0 11px color-mix(in srgb, var(--color-surface-ink) 60%, transparent),
     inset 0 0 0 15px var(--color-surface),
     inset 0 0 0 16px color-mix(in srgb, var(--color-surface-ink) 35%, transparent);
+}
+
+/* On a phone the verse stands clear of the frame's outer rule, 10 px in, by more than 12 px. */
+@media (width < 48rem) {
+  .verseCard {
+    padding-inline: 1.5rem;
+  }
 }
 
 .verse {

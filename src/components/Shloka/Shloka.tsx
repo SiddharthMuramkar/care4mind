@@ -2,6 +2,7 @@ import Link from 'next/link'
 
 import { hrefFor, type VerseView } from '@/content'
 import { cx } from '@/lib/cx'
+import { keepDandasWithWords } from '@/lib/sanskrit'
 import { toDevanagariDigits } from '@/lib/text'
 
 import { turnForward } from '../PageTurn'
@@ -9,10 +10,10 @@ import { Text } from '../prose'
 import styles from './Shloka.module.css'
 
 /**
- * A verse in Devanagari and transliteration, with its translation and its source, which leads to
- * the verse on its text's page. With `foldOriginal`, the translation leads instead and the
- * Devanagari and transliteration sit behind a "Show original" disclosure, which a wide screen
- * and print show open (see the stylesheet).
+ * A verse in Devanagari and transliteration, each danda held to the word it closes, with its
+ * translation and its source, which leads to the verse on its text's page. With `foldOriginal`,
+ * the translation leads instead and the Devanagari and transliteration sit behind a "Show
+ * original" disclosure, which a wide screen and print show open (see the stylesheet).
  */
 export function Shloka({
   verse,
@@ -31,11 +32,11 @@ export function Shloka({
         {verse.devanagari.length > 0 ? (
           <p lang="sa-Deva" className={styles.deva}>
             {verse.devanagari.map((line, index) => (
-              <span key={index} className={styles.line}>
-                {line}
+              <span key={index} className={styles.line} data-verse-line>
+                {keepDandasWithWords(line)}
                 {index === lastLine ? (
                   <>
-                    {' '}
+                    {'\u00A0'}
                     <span className={styles.number}>॥ {toDevanagariDigits(verse.verse)} ॥</span>
                   </>
                 ) : null}
@@ -46,11 +47,11 @@ export function Shloka({
         {verse.transliteration.length > 0 ? (
           <p lang={verse.work.lang} className={styles.transliteration}>
             {verse.transliteration.map((line, index) => (
-              <span key={index} className={styles.line}>
-                {line}
+              <span key={index} className={styles.line} data-verse-line>
+                {keepDandasWithWords(line)}
                 {index === lastTransliteration ? (
                   <>
-                    {' '}
+                    {'\u00A0'}
                     <span className={styles.number}>‖ {verse.verse} ‖</span>
                   </>
                 ) : null}

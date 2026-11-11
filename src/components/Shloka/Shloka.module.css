@@ -10,10 +10,12 @@
   gap: 0.75rem;
 }
 
+/* A long compound wraps between letters rather than run past its card's edge. */
 .deva {
   margin: 0;
   font-size: clamp(1.125rem, 5.5vw, 1.5rem);
   line-height: 1.7;
+  overflow-wrap: anywhere;
 }
 
 .transliteration {
