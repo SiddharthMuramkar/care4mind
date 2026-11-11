@@ -1,7 +1,13 @@
 import type { PanelId } from './types'
 
-/** The width from which the header shows its sections and Search on one line (SiteHeader.module.css). */
-export const WIDE = '(min-width: 80rem)'
+/**
+ * The width from which the header lists the sections as links beside Search, and the Menu and its
+ * Drawer go (nav.module.css, SiteHeader.module.css, MenuButton.module.css).
+ */
+export const TABLET = '(min-width: 48rem)'
+
+/** The width from which Concepts and Library open panels, and Search is a labelled field. */
+export const WIDE = '(min-width: 64rem)'
 
 const PANELS: readonly string[] = ['concepts', 'library'] satisfies PanelId[]
 

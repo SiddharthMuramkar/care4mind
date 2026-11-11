@@ -22,12 +22,17 @@ export interface MenuDrawerProps {
   search?: ReactNode
   login?: ReactNode
   mapNote?: ReactNode
+  /** The help line, the sheet's last line. */
+  help?: ReactNode
 }
 
 /**
  * The Drawer (Base UI): a leaf of paper that slides in from the right with the whole navigation,
- * set like a book's contents. It keeps focus inside while open; Escape, Close or a swipe to the
- * right puts it away, and following a link closes it as the next page opens.
+ * set like a book's contents: Home first, then Search, the numbered sections and the pages every
+ * page's footer lists, so each is two presses from anywhere, and last the help line. It is modal:
+ * focus stays inside while it is open and the page behind is hidden from assistive technology.
+ * Escape, Close or a swipe to the right puts it away, and following a link closes it as the next
+ * page opens.
  */
 export function MenuDrawer({
   nav,
@@ -37,12 +42,16 @@ export function MenuDrawer({
   search,
   login,
   mapNote,
+  help,
 }: MenuDrawerProps) {
   const pathname = usePathname()
   const closeOnLink = (event: MouseEvent) => {
-    if (event.target instanceof Element && event.target.closest('a[href]')) onOpenChange(false)
+    // A link that leads on; the help line's numbers start a call and leave the Menu open.
+    if (event.target instanceof Element && event.target.closest('a[href]:not([href^="tel:"])'))
+      onOpenChange(false)
   }
-  // The Menu link is display:none on a wide header, and a hidden link can't take focus.
+  // The Menu link is display:none from 48rem, where the sections stand in the header, and a
+  // hidden link can't take focus.
   const focusOnClose = () => {
     const menu = returnFocus.current
     if (menu?.checkVisibility()) return menu
@@ -55,7 +64,7 @@ export function MenuDrawer({
       <Drawer.Portal>
         <Drawer.Backdrop className={styles.backdrop} />
         <Drawer.Viewport className={styles.viewport}>
-          <Drawer.Popup className={styles.sheet} data-paper finalFocus={focusOnClose}>
+          <Drawer.Popup className={styles.sheet} data-paper aria-modal finalFocus={focusOnClose}>
             {/* A link click closes the Drawer; a mouse drag selects text here instead of swiping the sheet. */}
             <Drawer.Content className={styles.body} onClick={closeOnLink}>
               <div className={styles.head}>
@@ -66,14 +75,20 @@ export function MenuDrawer({
                 </Drawer.Close>
               </div>
 
-              {search || login ? (
-                <div className={styles.tools}>
-                  {search}
-                  {login}
-                </div>
-              ) : null}
-
-              <nav aria-label="Main">
+              <nav aria-label="Main" className={styles.nav}>
+                <Link
+                  href={nav.home.href}
+                  className={styles.sectionLink}
+                  aria-current={currentFor(pathname, nav.home.href)}
+                >
+                  {nav.home.label}
+                </Link>
+                {search || login ? (
+                  <div className={styles.tools}>
+                    {search}
+                    {login}
+                  </div>
+                ) : null}
                 {nav.start ? (
                   <Link
                     href={nav.start.href}
@@ -110,8 +125,25 @@ export function MenuDrawer({
                     )
                   })}
                 </ol>
+                {/* The footer's last pages, quieter than the sections. */}
+                <ul className={styles.more}>
+                  {[nav.privacy, nav.credits, nav.proposals].map((page) =>
+                    page ? (
+                      <li key={page.href}>
+                        <Link
+                          href={page.href}
+                          className={styles.page}
+                          aria-current={currentFor(pathname, page.href)}
+                        >
+                          <span className={styles.name}>{page.label}</span>
+                        </Link>
+                      </li>
+                    ) : null,
+                  )}
+                </ul>
               </nav>
               <Fleuron className={styles.fleuron} />
+              {help}
             </Drawer.Content>
           </Drawer.Popup>
         </Drawer.Viewport>

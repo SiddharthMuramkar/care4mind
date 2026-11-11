@@ -162,19 +162,15 @@ test.describe('pointing and pressing', () => {
     await expect(logoLotus(page)).toHaveAttribute('data-lotus-bloom', 'a')
   })
 
-  test(
-    "pressing the Menu's lotus leaves the Menu open",
-    { tag: '@below-1440' },
-    async ({ page }) => {
-      await page.getByRole('banner').getByRole('button', { name: 'Menu', exact: true }).click()
-      const menu = page.getByRole('dialog', { name: 'Menu' })
-      const lotus = menu.locator('svg[data-lotus]').first()
-      test.skip((await lotus.count()) === 0, 'this Menu holds no lotus')
-      await lotus.click()
-      await expect(lotus).toHaveAttribute('data-lotus-bloom', 'a')
-      await expect(menu).toBeVisible()
-    },
-  )
+  test("pressing the Menu's lotus leaves the Menu open", { tag: '@only-360' }, async ({ page }) => {
+    await page.getByRole('banner').getByRole('button', { name: 'Menu', exact: true }).click()
+    const menu = page.getByRole('dialog', { name: 'Menu' })
+    const lotus = menu.locator('svg[data-lotus]').first()
+    test.skip((await lotus.count()) === 0, 'this Menu holds no lotus')
+    await lotus.click()
+    await expect(lotus).toHaveAttribute('data-lotus-bloom', 'a')
+    await expect(menu).toBeVisible()
+  })
 
   test('a lotus is moved by CSS alone', async ({ page }) => {
     const lotus = heroLotus(page)
