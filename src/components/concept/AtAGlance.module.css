@@ -1,6 +1,6 @@
 /* The Terms a Concept explains, each on a slip linking to its place below. */
 .glance {
-  /* The slips fold to one column by the box's own width (17.5rem is a 360 px phone's). */
+  /* The slips fold to one column by the box's own width (17.5rem is a 320 px phone's). */
   container: at-a-glance / inline-size;
   display: grid;
   gap: 1rem;
@@ -59,7 +59,7 @@
   }
 }
 
-/* Narrower than 360 px, as at 400% zoom, each name keeps its box whole, one slip a row. */
+/* Narrower than 320 px, as at 400% zoom, each name keeps its box whole, one slip a row. */
 @container at-a-glance (width < 17.5rem) {
   .grid {
     grid-template-columns: minmax(0, 1fr);

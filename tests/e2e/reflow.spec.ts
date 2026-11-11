@@ -1,3 +1,4 @@
+import { cutOffOrOverlapping, measureLayout, settle, showDeferred } from './edges'
 import { expect, gotoReady, scrollsSideways, test } from './fixtures'
 import { at, ROUTES, ROUTES_IN_SCOPE } from './routes'
 
@@ -25,4 +26,21 @@ for (const route of ROUTES.filter((entry) => entry.sample)) {
       ).toEqual([])
     })
   }
+}
+
+// WCAG 1.4.4 and 1.4.10 together: a 640 px window zoomed to 200% is 320 CSS px wide, the width
+// this project runs at. There no word or control in a page's content or its footer is cut off
+// or runs off the screen, and no two words are drawn over each other. One page of each kind. The
+// Concept map's plate shortens its labels where they can't fit, by design, beside the list that
+// names each in full, so its page is left out here.
+for (const route of ROUTES.filter((entry) => entry.sample && entry.kind !== 'concept-map')) {
+  test(`${route.path} zoomed to 200%, 320 px wide, cuts off nothing and overlaps nothing`, async ({
+    page,
+  }) => {
+    await gotoReady(page, route.path)
+    await page.evaluate(() => document.fonts.ready)
+    await showDeferred(page)
+    await settle(page)
+    expect(cutOffOrOverlapping(await measureLayout(page))).toEqual([])
+  })
 }

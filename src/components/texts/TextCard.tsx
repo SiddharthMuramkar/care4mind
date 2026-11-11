@@ -6,6 +6,7 @@ import { turnForward } from '@/components/PageTurn'
 import { Text } from '@/components/prose'
 import { hrefFor, type WorkView } from '@/content'
 import { cx } from '@/lib/cx'
+import { keepDandasWithWords } from '@/lib/sanskrit'
 import { count } from '@/lib/text'
 
 import styles from './TextCard.module.css'
@@ -68,8 +69,8 @@ export function TextCard({ work, className }: { work: WorkView; className?: stri
       {incipit ? (
         <p className={styles.incipit}>
           <span className={styles.at}>{incipit.at}</span>{' '}
-          <span lang={incipit.lang} className={styles.line}>
-            {incipit.line}
+          <span lang={incipit.lang} className={styles.line} data-verse-line>
+            {keepDandasWithWords(incipit.line)}
             {incipit.more ? ' …' : null}
           </span>
         </p>

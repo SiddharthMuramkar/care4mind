@@ -4,8 +4,8 @@
  * that quote it. The verse an address lands on is washed in vermilion and ruled in the margin.
  */
 .passage {
-  /* The wash reaches a little past the text, never past the folio's own padding. */
-  --bleed: min(1.25rem, max(1.25rem, 6vw) - 1.125rem);
+  /* The wash reaches a little past the text, into the folio's own padding and never across it. */
+  --bleed: 1.25rem;
   position: relative;
   display: grid;
   gap: 1.25rem;
@@ -17,12 +17,10 @@
   scroll-margin-top: 1.5rem;
 }
 
-/* Below 768px the folio has no side padding for the wash to reach into; the margin rule
-   still stands clear of the text. */
+/* Below 768px the folio's padding is the phone's inset: the wash leaves 0.5rem of it bare. */
 @media (width < 48rem) {
   .passage {
-    --bleed: 0rem;
-    padding-inline-start: 1rem;
+    --bleed: calc(var(--inset-phone) - 0.5rem);
   }
 }
 
@@ -140,7 +138,7 @@
   display: grid;
   gap: 1rem;
   justify-self: center;
-  width: min(100%, 62ch);
+  width: min(100%, var(--measure-text));
 }
 
 .translation {
