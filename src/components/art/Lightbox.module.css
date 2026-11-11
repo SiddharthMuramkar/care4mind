@@ -1,0 +1,140 @@
+/* The page dims behind the lightbox, as it does behind the Drawer. */
+.backdrop {
+  position: fixed;
+  inset: 0;
+  /* Tall enough for the strips under iOS 26's translucent toolbars. */
+  min-height: 100dvh;
+  z-index: var(--layer-popup);
+  background: var(--color-backdrop);
+}
+
+/* Fixed stops short of those strips; absolute covers them once the body is positioned. */
+@supports (-webkit-touch-callout: none) {
+  .backdrop {
+    position: absolute;
+  }
+}
+
+/*
+ * A leaf of paper laid over the page, framed by the folio's double rule, holding Close, the
+ * picture and its caption. It never stands wider or taller than the screen leaves room for.
+ */
+.popup {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  z-index: var(--layer-popup);
+  display: grid;
+  justify-items: center;
+  gap: 0.5rem;
+  /* As wide as the picture asks: centred from the middle, it would otherwise shrink to half the screen. */
+  width: max-content;
+  max-width: calc(100vw - 2rem);
+  max-height: calc(100dvh - 2rem);
+  overflow-y: auto;
+  padding: 1.25rem;
+  background: var(--color-surface);
+  color: var(--color-surface-ink);
+  transform: translate(-50%, -50%);
+  outline: 0;
+  box-shadow:
+    inset 0 0 0 8px var(--color-surface),
+    inset 0 0 0 9px color-mix(in srgb, var(--color-surface-ink) 55%, transparent),
+    inset 0 0 0 12px var(--color-surface),
+    inset 0 0 0 13px color-mix(in srgb, var(--color-surface-ink) 30%, transparent),
+    0 30px 60px -20px var(--color-backdrop);
+}
+
+/* Close in the leaf's top corner, where a reader looks for it. A real border, as forced colours drop shadows. */
+.close {
+  justify-self: end;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0 0.75rem 0 0.55rem;
+  border: 1px solid var(--color-control-edge);
+  border-radius: 2px;
+  background: none;
+  color: var(--color-surface-ink);
+  font: inherit;
+  font-size: var(--text-body);
+  cursor: pointer;
+}
+
+/* Only where a pointer can rest: a touch screen would hold the hover after a tap. */
+@media (hover: hover) {
+  .close:hover {
+    border-color: var(--color-surface-ink);
+  }
+}
+
+.closeGlyph {
+  width: 18px;
+  height: 18px;
+}
+
+/* The picture's width, so the caption wraps under it rather than widening the leaf. */
+.figure {
+  display: grid;
+  justify-items: center;
+  gap: 0.5rem;
+  width: min-content;
+  margin: 0;
+}
+
+/*
+ * Whole and square, at up to `--whole`, the most its file shows sharply; narrower where the screen
+ * leaves less beside the leaf's margins, or less height above and below Close and the caption.
+ */
+.picture {
+  display: block;
+  width: min(var(--whole), calc(100vw - 4.5rem), calc(100dvh - 10rem));
+  /* Its width is capped above, so the leaf can take its measure from it. */
+  max-width: none;
+  height: auto;
+}
+
+/* The pale paper a Medallion shows, until the file is in. */
+.loading {
+  background: var(--color-surface-pale-18);
+}
+
+/* Set as the hero's caption is, under its Plate. */
+.caption {
+  color: var(--color-surface-muted);
+  font-size: var(--text-small);
+  font-style: italic;
+  text-align: center;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .backdrop {
+    transition: opacity var(--duration-panel) var(--ease-out);
+  }
+
+  .backdrop[data-starting-style],
+  .backdrop[data-ending-style] {
+    opacity: 0;
+  }
+
+  .popup {
+    transition:
+      opacity var(--duration-panel) var(--ease-out),
+      transform var(--duration-sheet) var(--ease-sheet);
+  }
+
+  .popup[data-starting-style],
+  .popup[data-ending-style] {
+    opacity: 0;
+    transform: translate(-50%, calc(-50% + 1rem));
+  }
+}
+
+/* Windows' contrast themes drop box-shadows, the leaf's only edge: give it a border they paint. */
+@media (forced-colors: active) {
+  .popup {
+    border: 1px solid CanvasText;
+  }
+}
