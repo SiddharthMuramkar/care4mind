@@ -6,27 +6,61 @@
   margin: 0;
 }
 
+/* The picture's own box, which the button that opens it whole lies over. */
+.frame {
+  position: relative;
+}
+
+/*
+ * 150 px on a phone, 180 from 48rem and 240 from 64rem: the gallery's three column widths. The
+ * width attribute stays 240, so the same two files serve at each.
+ */
 .picture {
   display: block;
-  width: 160px;
+  width: 150px;
   height: auto;
 }
 
 .circle {
-  height: 160px;
+  height: 150px;
   border-radius: 50%;
   object-fit: cover;
 }
 
-/* Drawn a little smaller on a phone. The width attribute stays 160, so the same two files serve. */
-@media (width < 48rem) {
+@media (width >= 48rem) {
   .picture {
-    width: 150px;
+    width: 180px;
   }
 
   .circle {
-    height: 150px;
+    height: 180px;
   }
+}
+
+@media (width >= 64rem) {
+  .picture {
+    width: 240px;
+  }
+
+  .circle {
+    height: 240px;
+  }
+}
+
+/* Shows only its focus ring and a magnifier pointer: the picture itself is what a visitor presses. */
+.open {
+  position: absolute;
+  inset: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 2px;
+  background: transparent;
+  cursor: zoom-in;
+}
+
+/* Round over a round picture, so that its focus ring follows the circle. */
+.circle + .open {
+  border-radius: 50%;
 }
 
 .caption {

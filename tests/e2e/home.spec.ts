@@ -296,7 +296,6 @@ test.describe('the opening folio says what the site is', () => {
   for (const viewport of [
     { width: 1366, height: 768 },
     { width: 1024, height: 768 },
-    { width: 390, height: 844 },
   ]) {
     test(
       `at ${viewport.width}×${viewport.height}, the H1, the subhead and the primary button show without scrolling`,
@@ -317,15 +316,27 @@ test.describe('the opening folio says what the site is', () => {
     )
   }
 
-  test(
-    'at 360×740, the H1 shows without scrolling, under the small Medallion',
-    { tag: '@self-width' },
-    async ({ page }) => {
-      await page.setViewportSize({ width: 360, height: 740 })
-      await gotoReady(page, '/')
-      await expect(page.getByRole('heading', { level: 1 })).toBeInViewport({ ratio: 1 })
-    },
-  )
+  // On a phone the Plate stands above the motto at 72vw, so the subhead and the buttons follow
+  // below the first screen; the heading stays on it.
+  for (const viewport of [
+    { width: 360, height: 740 },
+    { width: 390, height: 844 },
+  ]) {
+    test(
+      `at ${viewport.width}×${viewport.height}, the H1 shows without scrolling, under the Medallion`,
+      { tag: '@self-width' },
+      async ({ page }) => {
+        await page.setViewportSize(viewport)
+        await gotoReady(page, '/')
+        const plate = page.locator('[data-hero-plate]').locator('xpath=..')
+        const heading = page.getByRole('heading', { level: 1 })
+        await expect(heading).toBeInViewport({ ratio: 1 })
+        const [ring, title] = await Promise.all([plate.boundingBox(), heading.boundingBox()])
+        expect(ring?.width).toBeCloseTo(Math.min(0.72 * viewport.width, 300), 1)
+        expect((ring?.y ?? Infinity) + (ring?.height ?? 0)).toBeLessThan(title?.y ?? 0)
+      },
+    )
+  }
 })
 
 test('links to another page open it at once, without gliding from where you were', async ({

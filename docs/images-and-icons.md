@@ -141,7 +141,7 @@ The client's choice of themes is consistent, and new pictures keep to it:
 5. **No layout shift, no slow pages.** Every picture has fixed dimensions and stays inside the budget in section 6.10. NFR-02 still passes.
 6. **Motion follows #166.** Nothing moves on its own for more than 5 s after load. Anything else moves only when the visitor scrolls, hovers, focuses or presses.
 7. **A new picture is approved by the client before it ships,** from the contact-sheet PDF (section 7.9). Until then it stays behind the `draftArt` flag. The Project owner and Research editor are not yet named, so the drafted alt text and captions ship as written assumptions, listed in #25.
-8. **No source, origin, licence or credit text sits beside any picture on the site,** including on the `/credits/` gallery. Origin and licence stay required in the registry, and appear only on the plain list linked from the end of `/credits/` (section 5.10).
+8. **No source, origin, licence or credit text sits beside any picture on the site,** including on the `/credits/` gallery and in the lightbox. Origin and licence stay required in the registry, and appear only on the plain list linked from the end of `/credits/` (section 5.10).
 
 **The design bar.** The site stays minimal, and the client's folk art should feel as if it had always been there.
 
@@ -193,7 +193,7 @@ From 64rem the homepage's Folio and its sections widen to 72rem, on the homepage
 
 | Section | Picture | Size | Notes |
 |---|---|---|---|
-| Hero Folio | **Plate viewer**: `plate-jeweller`, `plate-sculptor`, `plate-farmers`, `plate-jeweller-woman`, `plate-painter-bowl`, `plate-painter-birds`, `plate-karma-yoga`, in that order. The first three are the old carousel's own order | 360 from 64rem; 168 below | From 64rem the Folio splits into two columns, the Plate on the left as a Medallion and the motto and heading on the right, as on the old site, so the main button shows without scrolling. Below 64rem a small Medallion sits above the motto, so the heading stays on the first screen at 360 × 740. One Plate shows at a time. The visitor moves on with buttons; it never moves on its own (6.5, 6.11) |
+| Hero Folio | **Plate viewer**: `plate-jeweller`, `plate-sculptor`, `plate-farmers`, `plate-jeweller-woman`, `plate-painter-bowl`, `plate-painter-birds`, `plate-karma-yoga`, in that order. The first three are the old carousel's own order | 480 from 64rem; 360 from 48rem; 72vw up to 300 below | From 64rem the Folio splits into two columns, the Plate on the left as a Medallion and the motto and heading on the right, as on the old site, so the main button shows without scrolling. Below 64rem the Medallion sits above the motto, so the heading stays on the first screen at 360 × 740; on a phone the subhead and buttons follow below it. One Plate shows at a time. The visitor moves on with buttons; it never moves on its own (6.5, 6.11). Pressing the Plate opens it whole in the lightbox (6.5) |
 | What's on your mind? | `sticker-mind-dome` beside the heading | 56 | Decorative |
 | Explore by topic | Each topic's Sticker on its card (5.4) | 64 | In its own row above the title, with the topic's numeral to its right. Decorative. The five topics fit one row |
 | Start with these | Each featured Concept's Plate, as a Medallion (5.5) | 72 | In its own row above the title, with the Devanagari to its right. Decorative. The three featured cards fit one row. Until a Concept has its own Plate, its card shows no picture |
@@ -276,7 +276,7 @@ The 404 page asks `artFor` for its picture and shows a Medallion when it gets a 
 
 ### 5.10 Credits page (new)
 
-`/credits/` is a gallery of every shipped picture, grouped by family. Each entry shows the picture at 160 px with its caption from Appendix B, where it has one, and nothing else: no origin, licence or credit text beside any picture. A "Picture credits" link goes in the footer, and the page's `h1` reads the same.
+`/credits/` is a gallery of every shipped picture, grouped by family. Each entry shows the picture at 240 px from 64rem (180 from 48rem, 150 on a phone) with its caption from Appendix B, where it has one, and nothing else: no origin, licence or credit text beside any picture. Pressing a picture opens it whole in the lightbox (6.5), with its caption and nothing else. A "Picture credits" link goes in the footer, and the page's `h1` reads the same.
 
 One quiet link at the end of `/credits/`, "Where these pictures come from", leads to **`/credits/sources/`**: a plain list built from the registry, with no pictures, giving every picture's name (its caption, or its alt text where it has none), origin and licence. The wording for the client's own pictures, "From the Care4Mind website", appears only on this list. A generated picture reads "Made with Recraft from the Care4Mind style, November 2026". A licensed picture gives its licence and credit line. Neither page links to a file under `/art/`. Both pages render `ReadingPage` and are registered in the route registry (6.12).
 
@@ -284,11 +284,11 @@ One quiet link at the end of `/credits/`, "Where these pictures come from", lead
 
 ### 5.11 Sizes at a glance
 
-Only the homepage hero Plate sets `sizes`, because its displayed width changes at 64rem. Every other picture has a numeric `width` and no `sizes`, so `next/image` lists two files, 1× and 2×.
+Only the homepage hero Plate sets `sizes`, because its displayed width changes at 48rem and 64rem and follows the screen on a phone. Every other picture has a numeric `width` and no `sizes`, so `next/image` lists two files, 1× and 2×.
 
 | Use | CSS px (wide / narrow) | Served widths (1× and 2×) | Shape |
 |---|---|---|---|
-| Hero Plate | 360 / 168 | 360, 720 (served as 750) / 168, 336 | circle |
+| Hero Plate | 480 / 360 / 72vw up to 300 | from `sizes`, whichever the screen needs, up to the whole 1024 px master at 480 on a 2× screen | circle |
 | Topic Frontispiece | 240 / 200 | 240, 480 | circle |
 | 404 picture | 200 / 160 | 200, 400 | circle |
 | Concept or Questionnaire Medallion on its page | 120 / 88 | 120, 240 | circle |
@@ -299,7 +299,8 @@ Only the homepage hero Plate sets `sizes`, because its displayed width changes a
 | Emblem in "Who's behind this" | 120 | 120, 240 | Emblem |
 | Sticker beside "What's on your mind?" | 56 | 64, 112 (56 rounds up) | Sticker |
 | Error-page Emblem | 96 | 112, 200 (both round up) | Emblem |
-| Credits thumbnail | 160 | 160, 320 | as the picture |
+| Credits thumbnail | 240 / 180 / 150 | 240, 480 | as the picture |
+| Lightbox | half the file's width (512 for a Plate), narrower on a small screen | that width and twice it, e.g. 640 and 1080 for a Plate | whole, never cut |
 
 ## 6. How to build it
 
@@ -429,7 +430,7 @@ export interface ArtRecord {
 
 `Emblem` alone lives in `src/components/Emblem/`, so the error pages, which are client components, import it without the art folder's index and the server-only members behind it.
 
-Each one is a server component unless marked otherwise. Each uses `next/image` with explicit `width` and `height`, and no `sizes` (section 5.11). Only `PlateViewer` sets `sizes`, `(min-width: 64rem) 360px, 168px`, because its displayed width changes at 64rem. Everywhere else, a `sizes` value would make the page list about 24 file sizes per picture. A CSS module reads tokens from `globals.css`. New decorative colour tokens go in `globals.css` under the "Decorative only" comment: `--color-ring` (an alias of `--press-rule`) and `--color-sticker-shadow` (`color-mix(in srgb, var(--press-night) 18%, transparent)`, following `--color-scroll-shadow`), so `tests/unit/contrast.test.ts` passes. Never put a primitive `--press-*` colour in a module, and never set a module `color:` to `--color-surface-rule`. Every id inside an inline SVG comes from `useId`, so two pictures on a page never share one.
+Each one is a server component unless marked otherwise. Each uses `next/image` with explicit `width` and `height`, and no `sizes` (section 5.11). Only `PlateViewer` sets `sizes`, `(min-width: 64rem) 480px, (min-width: 48rem) 360px, min(72vw, 300px)`, because its displayed width changes at 48rem and 64rem and follows the screen on a phone. Everywhere else, a `sizes` value would make the page list about 24 file sizes per picture. A CSS module reads tokens from `globals.css`. New decorative colour tokens go in `globals.css` under the "Decorative only" comment: `--color-ring` (an alias of `--press-rule`) and `--color-sticker-shadow` (`color-mix(in srgb, var(--press-night) 18%, transparent)`, following `--color-scroll-shadow`), so `tests/unit/contrast.test.ts` passes. Never put a primitive `--press-*` colour in a module, and never set a module `color:` to `--color-surface-rule`. Every id inside an inline SVG comes from `useId`, so two pictures on a page never share one.
 
 | Component | Props | Renders | Notes |
 |---|---|---|---|
@@ -437,8 +438,11 @@ Each one is a server component unless marked otherwise. Each uses `next/image` w
 | `Sticker` | `art`, `size`, `firstScreen = false` | the Sticker, aspect ratio from the record | Always decorative (the credits page shows Stickers through `ArtFigure`, with their alt). A soft drop-shadow (`filter: drop-shadow(...)` with `--color-sticker-shadow`). Lifts when its own card is hovered or focused (6.11). `pointer-events: none`, so it never steals a card's click. A card's Sticker is a direct child of its `<article>`, selected with `article:is(:hover, :has(:focus-visible)) > .sticker` (and `article:active > .sticker` for the press). The `>` matters: `ReadingPage`'s Folio is an `<article>` too, so a plain descendant selector would lift every Sticker on the page at once. A page-head Sticker sits inside `<header>`, so it stays still, and no other Sticker may be a direct child of an `<article>`. Don't select a `.card` class, because `tests/unit/css-module-classes.test.ts` requires each module's classes to be read by its markup. Don't add `data-paper` to `TopicCard` or `TextCard`: it remaps their link and focus colours, and `tests/e2e/pages.spec.ts` would then require corners on them. Below the first screen, a Sticker stands on the pale paper colour while loading, which its client part, `StickerImage`, takes away once the file has loaded: a Sticker is cut out, so it never covers the paper. The paper shows only where the script runs (`@media (scripting: enabled)`), since nothing else would take it away. A `firstScreen` Sticker has no paper: its file usually arrives before the script, so the paper would show on the loaded picture until React took it away, and for good if the script failed |
 | `Medallion` | `art`, `size`, `topic?`, `decorative = true`, `firstScreen = false` | a circle: the Plate with `border-radius: 50%` and `object-fit: cover`, inside a `MedallionRing` | The ring takes `--topic` when `topic` is given, set as an inline `--topic: var(--color-topic-<slug>)`, otherwise `--color-ring`. Never add a `data-topic` attribute: a Concept card's `TopicChip` must stay the only one, because `tests/e2e/topics.spec.ts` finds it strictly. While loading, the circle shows the pale paper colour, which the opaque Plate covers |
 | `MedallionRing` | `size`, `still?` | inline SVG, `aria-hidden`: an outer ring of small dots, an inner hairline ring, a small flower at the top between two leaves, and two laurel sprigs meeting at the bottom | The Emblem's frame, redrawn by Opus in 10–14 paths with `pathLength="1"`. When its `size` is below 96 it draws only the two rings. Strokes in `currentColor`, so forced colours work. `still` leaves out the scroll ink-in (6.11), and the homepage passes it to `PlateViewer` already `still` |
-| `ArtFigure` | `art`, `shape: 'circle' \| 'square'` | `<figure>` with the picture and a `<figcaption>` holding the caption | Used on `/credits/` for every family, with the record's alt (Emblems, Stickers and Pothis with `shape: 'square'`). The `figcaption` renders only when the record has a caption |
-| `PlateViewer` | `plates` (the fields it shows), `ring`, `className?` | the hero's figure (the Plate cropped to a circle inside a `MedallionRing`), caption and two buttons | **Client component**, under 3 KB gzipped, no carousel library. Details below |
+| `ArtFigure` | `art`, `shape: 'circle' \| 'square'` | `<figure>` with the picture, a `LightboxButton` over it, and a `<figcaption>` holding the caption | Used on `/credits/` for every family, with the record's alt (Emblems, Stickers and Pothis with `shape: 'square'`). The `figcaption` renders only when the record has a caption. It hands the button only the picture's file, size, alt and caption, never its origin |
+| `PlateViewer` | `plates` (the fields it shows), `ring`, `className?`, `onOpen?`, `onApproach?` | the hero's figure (the Plate cropped to a circle inside a `MedallionRing`), caption and two buttons, and with `onOpen` a button over the Plate | **Client component**, under 3 KB gzipped, no carousel library, importing only `next/image` and `react`. Details below |
+| `HeroPlates` | as `PlateViewer`, less `onOpen` and `onApproach` | `PlateViewer`, and the lightbox once its Plate is pressed | **Client component.** What the homepage renders. Holds the lightbox outside the viewer, so the viewer's script stays within its budget |
+| `LightboxButton` | `picture` (file, size, alt and caption), `className?` | a button laid over a picture, and the lightbox once pressed | **Client component.** Named "Open whole: " and the caption, or the alt where there is none, with `aria-haspopup="dialog"`. It shows only a focus ring and a `zoom-in` pointer, and stays `hidden` until `useHydrated` is true, since without the script nothing could open |
+| `Lightbox` | `picture`, `open`, `onOpenChange`, `returnFocus` | Base UI's modal `Dialog`: a leaf of paper over a dimmed page, with Close, the picture whole and its caption | **Client component**, loaded by `import()` only when a visitor points at or focuses an opener, or presses one, never with the page. The picture is never cut to a circle, and stands at up to half its file's width, the most that stays sharp at 2× (512 px for a Plate), narrower where the screen is. The caption names the dialog, or the alt where there is none. Escape, Close or a press on the dimmed page close it, and focus goes back to the opener. No origin, licence or credit text, and no link to `/credits/` (rule 8) |
 | `FolkBorder` | `variant: 'dot-line' \| 'dot-band' \| 'rule-dots'` | inline SVG, `aria-hidden`, full width × 12 px, a repeating `<pattern>` with its id from `useId` | Redraws the three old borders (2.4) in token colours |
 | `KarmaCycle` | none | the Karma Yoga cycle (6.6) | |
 
@@ -450,6 +454,7 @@ Each one is a server component unless marked otherwise. Each uses `next/image` w
 - **Changing Plates:** the new Plate fades in over the old in `--duration-move` with `--ease-out`. With reduced motion it swaps at once.
 - **Loading:** the next and previous Plates' files are fetched when a button is hovered or focused (`getImageProps` gives the `srcSet`), never before.
 - **It never moves on its own** (#166). No autoplay, no timer, no swipe-only control. A swipe may also work, but the buttons are always there.
+- **Opening whole:** with `onOpen`, a button lies over the Plate's circle, named "Open whole: " and the caption of the Plate on screen. Pressing it hands that Plate's index and the button to `HeroPlates`, which opens the lightbox; `onApproach` lets it fetch the lightbox's script as a pointer or focus reaches the button.
 - **Without JavaScript:** the first Plate and its caption show, and the buttons are not visible or usable. They stay `visibility: hidden` until `useHydrated` (`components/browser`) is true, which holds their row's height. Don't use `html[data-hydrated]`: nothing a visitor sees may depend on it.
 
 ### 6.6 The Karma Yoga cycle, rebuilt (`KarmaCycle`)
@@ -526,6 +531,7 @@ Every old media address answers with one 301, to a page or a file that answers 2
 | Homepage, mobile, first screen | ≤ 120 KB of pictures |
 | Homepage, whole page | ≤ 350 KB of pictures |
 | Plate viewer script | ≤ 3 KB gzipped |
+| Lightbox script | never with the page: fetched when a visitor points at, focuses or presses a picture that opens it |
 | Lighthouse (`lighthouserc.cjs`, unchanged) | LCP ≤ 2.5 s, CLS ≤ 0.1, TBT ≤ 200 ms and accessibility ≥ 0.95 on `/`, `/concepts/vikshepa/` and `/questionnaires/karmayoga-scale/` |
 
 **What it costs on Vercel:** about 60 pictures × 3 widths × 2 formats is roughly 400 image transformations per 31-day cache period. Hobby includes 5,000 a month. Pro charges $0.05 per 1,000. So it comes to a few cents a month at most.
@@ -540,6 +546,7 @@ Everything here sits inside `@media (prefers-reduced-motion: no-preference)` and
 | Sticker on a card | the card is pressed | `scale(0.97)`, alongside the card's existing ink spread |
 | Medallion ring | scrolls through view | the rings ink in with the scroll (stroke-dashoffset 1 → 0 on a `view()` timeline) and scrub back if the visitor scrolls back, like `OrnamentRule`, which is `view()` on `scaleX` |
 | Plate viewer | a button is pressed | the new Plate fades in over `--duration-move` |
+| Lightbox | a picture is pressed, or the lightbox closed | the page dims and the leaf fades in, settling 1rem up, in `--duration-panel` and `--duration-sheet`; it goes the same way. With reduced motion it appears and goes at once |
 | Karma cycle | scrolls through view | the arrows draw in one after another, scrubbing both ways (6.6) |
 | Hero Plate on load | — | **nothing.** It is the LCP element and must paint at once. Its ring stays fully drawn, with no scroll ink-in |
 
