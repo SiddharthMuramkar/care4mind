@@ -118,8 +118,24 @@
   scroll-margin-top: 1.5rem;
 }
 
-/* A data table keeps its columns; on narrow screens it scrolls inside its own frame
-   (WCAG 1.4.10 lets two-dimensional tables do this). Its first column stays in view. */
+/*
+ * From 64rem a table too wide for the text column reaches back across the contents beside it
+ * to the paper's full width (--table-reach, which a page with contents sets), and lies over
+ * the contents while it passes them; a table that fits keeps to the column. Its overflow,
+ * scaled up and clamped, works as a switch: no reach at all, or the whole of it.
+ */
+@media screen and (width >= 64rem) {
+  .figure {
+    position: relative;
+    z-index: var(--layer-raised);
+    margin-inline-start: calc(
+      -1 * clamp(0px, (var(--columns) * 11rem + 2px - 100%) * 1000, var(--table-reach, 0px))
+    );
+  }
+}
+
+/* A data table keeps its columns above a phone; where they don't fit, it scrolls inside its own
+   frame (WCAG 1.4.10 lets two-dimensional tables do this). Its first column stays in view. */
 .frame {
   --head: clamp(9rem, 36vw, 13rem);
   --paper: var(--color-surface);
@@ -129,17 +145,16 @@
   border: 1px solid var(--color-surface-rule);
   /*
    * Scroll shadows, in CSS alone: a shade fixed at each edge of the frame (the left one just
-   * past the first column), and paper that scrolls with the table to cover it while that end
-   * of the table is in view. Scrolled away from an end, its shade shows.
+   * past the first column), as dark from top to bottom as at the middle, and paper that scrolls
+   * with the table to cover it while that end of the table is in view. Scrolled away from an
+   * end, its shade shows the whole height of the cut edge.
    */
   background:
-    linear-gradient(to right, var(--paper) 40%, transparent) var(--head) 0 / 2.5rem 100% no-repeat
-      local,
-    linear-gradient(to left, var(--paper) 40%, transparent) 100% 0 / 2.5rem 100% no-repeat local,
-    radial-gradient(farthest-side at 0 50%, var(--shade), transparent) var(--head) 0 / 0.875rem 100%
-      no-repeat scroll,
-    radial-gradient(farthest-side at 100% 50%, var(--shade), transparent) 100% 0 / 0.875rem 100%
-      no-repeat scroll,
+    linear-gradient(to right, var(--paper) 1.25rem, transparent) var(--head) 0 / 2.5rem 100%
+      no-repeat local,
+    linear-gradient(to left, var(--paper) 1.25rem, transparent) 100% 0 / 2.5rem 100% no-repeat local,
+    linear-gradient(to right, var(--shade), transparent) var(--head) 0 / 1rem 100% no-repeat scroll,
+    linear-gradient(to left, var(--shade), transparent) 100% 0 / 1rem 100% no-repeat scroll,
     var(--paper);
 }
 
@@ -149,6 +164,7 @@
 
 .table {
   width: 100%;
+  /* Wide enough for its columns to stay readable; the frame scrolls beyond that. */
   min-width: calc(var(--columns, 4) * 11rem);
   border-collapse: collapse;
   font-size: var(--text-base);
@@ -163,12 +179,15 @@
   color: var(--color-surface-muted);
 }
 
+/* A word too long for its cell breaks rather than overflow it, but no break falls inside a word
+   that fits, and a cell keeps its column as wide as its longest word. */
 .table th,
 .table td {
   padding: 0.75rem clamp(0.75rem, 2.5vw, 1rem);
   text-align: start;
   vertical-align: top;
   border-top: 1px solid var(--color-surface-rule);
+  overflow-wrap: break-word;
 }
 
 .table thead th {
@@ -191,48 +210,47 @@
   max-width: var(--head);
   background: var(--paper);
   box-shadow: inset -1px 0 var(--color-surface-rule);
-  overflow-wrap: anywhere;
 }
 
 .table thead th {
   vertical-align: bottom;
 }
 
-/* A comparison table on a phone: no frame to scroll; each row a card, each cell under its
-   column's name, which the hidden head row still names for a screen reader. */
+/* On a phone: no frame to scroll; each row a card, each cell under its column's name, which
+   the hidden head row still names for a screen reader. */
 @media screen and (width < 48rem) {
-  .frameStacked {
+  .frame {
     overflow: visible;
     border: 0;
     background: none;
   }
 
-  .tableStacked {
+  .table {
     display: block;
     min-width: 0;
   }
 
-  .tableStacked .caption {
+  .caption {
     display: block;
     padding-inline: 0;
   }
 
-  .tableStacked tbody {
+  .table tbody {
     display: grid;
     gap: 1rem;
   }
 
-  .tableStacked tr {
+  .table tr {
     display: grid;
     padding-block: 0.25rem;
     border: 1px solid var(--color-surface-rule);
   }
 
-  .tableStacked :is(th, td) {
+  .table :is(th, td) {
     border-top: 0;
   }
 
-  .tableStacked :is(th, td):first-child {
+  .table :is(th, td):first-child {
     position: static;
     width: auto;
     min-width: 0;
@@ -241,22 +259,24 @@
     box-shadow: none;
   }
 
-  .tableStacked td {
-    display: grid;
-    gap: 0.15rem;
+  /* A block, not a grid: its words, links and Devanagari run on as one paragraph. */
+  .table td {
+    display: block;
   }
 
-  .tableStacked td::before {
+  .table td::before {
     content: attr(data-label);
+    display: block;
+    margin-bottom: 0.15rem;
     font-size: var(--text-small);
     font-weight: 600;
     color: var(--color-surface-muted);
   }
 }
 
-/* A stacked table's head row carries sr-only on a phone; above one, and on paper, it is itself again. */
+/* A table's head row carries sr-only, for a phone; above one, and on paper, it is itself again. */
 @media print, (width >= 48rem) {
-  .stackedHead {
+  .head {
     position: static;
     width: auto;
     height: auto;
