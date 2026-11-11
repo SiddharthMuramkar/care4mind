@@ -1018,6 +1018,29 @@ test.describe('Concept page v2: tables', () => {
           line: true,
           table: false,
         })
+        // Following a line moves focus on to the page, so the contents drop back under the table:
+        // a reader who jumps to the comparison by keyboard sees its row heads.
+        const id = await frame.evaluate((element) => element.closest('section[id]')?.id ?? '')
+        expect(id, 'the table stands in a section the contents lead to').not.toBe('')
+        await page.getByRole('navigation', { name: 'Contents' }).locator(`a[href="#${id}"]`).focus()
+        await page.keyboard.press('Enter')
+        await expect(page).toHaveURL(new RegExp(`#${id}$`))
+        await expect
+          .poll(() =>
+            page.evaluate(() => Boolean(document.querySelector('[data-contents] :focus-visible'))),
+          )
+          .toBe(false)
+        const head = frame.locator('tbody th').first()
+        await head.scrollIntoViewIfNeeded()
+        expect(
+          await head.evaluate((element) => {
+            const rect = element.getBoundingClientRect()
+            return element.contains(
+              document.elementFromPoint(rect.left + 8, rect.top + rect.height / 2),
+            )
+          }),
+          'the first row head shows over the contents',
+        ).toBe(true)
       }
       // The review's own case: at 1118 px the text column is narrower than the table.
       expect(narrow).toContain(1118)
