@@ -33,3 +33,39 @@
 .breadcrumbs [aria-current='page'] {
   color: var(--color-ink);
 }
+
+/*
+ * On a phone every trail is one line back to the page above: "← Mind: states and obstacles".
+ * The crumbs above that one and the page itself are left off; a long name ends in an ellipsis.
+ */
+@media (width < 48rem) {
+  .breadcrumbs ol {
+    flex-wrap: nowrap;
+  }
+
+  .breadcrumbs li {
+    display: none;
+  }
+
+  .breadcrumbs li:nth-last-child(2) {
+    display: flex;
+    min-width: 0;
+  }
+
+  .breadcrumbs li:nth-last-child(2)::before {
+    content: '←' / '';
+    margin-inline: 0 0.5em;
+    color: var(--color-highlight);
+    font-weight: 600;
+  }
+
+  /* A block, so its ellipsis can show; its one line is the 44 px target. */
+  .breadcrumbs li:nth-last-child(2) a {
+    display: block;
+    min-width: 0;
+    line-height: 44px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}

@@ -31,43 +31,40 @@ function SharedFrom({ topic }: { topic: TopicRef }) {
 }
 
 /**
- * A table, scrolling sideways in its own frame on a narrow screen (WCAG 1.4.10 allows it for data
- * tables): its first column stays in view, and shadows at the edges show there is more. A
- * comparison table stacks as cards on a phone instead, each cell under its column's name.
+ * A data table, readable whole at every width. On a phone each row is a card, each cell under
+ * its column's name, so nothing scrolls sideways. Above one the table keeps its columns; from
+ * 64rem one too wide for the text column reaches across the paper's full width (see the
+ * stylesheet), and where it still doesn't fit it scrolls sideways in its own frame (WCAG 1.4.10
+ * allows it for data tables), its first column staying in view and its cut edges shaded. A
+ * line in a cell may break after a slash between two words, and inside a word only where the
+ * word alone is wider than its cell.
  */
-function DataTable({
-  table,
-  citations,
-  stacked = false,
-}: {
-  table: Table
-  citations?: CitationLinks
-  stacked?: boolean
-}) {
+function DataTable({ table, citations }: { table: Table; citations?: CitationLinks }) {
   const caption = `${table.id}-caption`
   return (
-    <figure id={table.id} className={styles.figure}>
+    <figure
+      id={table.id}
+      className={styles.figure}
+      // How many columns it keeps, which sets how wide it stands before its frame scrolls.
+      style={{ '--columns': table.columns.length } as CSSProperties}
+    >
       <div
-        className={cx(styles.frame, stacked && styles.frameStacked)}
+        className={styles.frame}
         role="region"
         aria-labelledby={caption}
         // A frame that scrolls takes focus, so it can be scrolled from the keyboard.
         tabIndex={0}
       >
-        <table
-          className={cx(styles.table, stacked && styles.tableStacked)}
-          // Wide enough for its columns to stay readable; the frame scrolls beyond that.
-          style={{ '--columns': table.columns.length } as CSSProperties}
-        >
+        <table className={styles.table}>
           <caption id={caption} className={styles.caption}>
-            <Text text={table.caption} citations={citations} />
+            <Text text={table.caption} citations={citations} breakAfterSlash />
           </caption>
-          {/* Where the table stacks, its head row is read rather than seen (see the stylesheet). */}
-          <thead className={stacked ? cx('sr-only', styles.stackedHead) : undefined}>
+          {/* On a phone its head row is read rather than seen (see the stylesheet). */}
+          <thead className={cx('sr-only', styles.head)}>
             <tr>
               {table.columns.map((column, index) => (
                 <th key={index} scope="col">
-                  {column}
+                  <Text text={column} breakAfterSlash />
                 </th>
               ))}
             </tr>
@@ -78,7 +75,7 @@ function DataTable({
                 {row.head === undefined ? null : (
                   <th scope="row">
                     {typeof row.head === 'string' ? (
-                      <Text text={row.head} citations={citations} />
+                      <Text text={row.head} citations={citations} breakAfterSlash />
                     ) : (
                       <SanskritName
                         term={row.head.term}
@@ -92,10 +89,10 @@ function DataTable({
                 {row.cells.map((cell, column) => (
                   <td
                     key={column}
-                    // Its column's name, which heads the cell where the table stacks.
+                    // Its column's name, which heads the cell on a phone.
                     data-label={table.columns[row.head === undefined ? column : column + 1]}
                   >
-                    <Text text={cell} citations={citations} />
+                    <Text text={cell} citations={citations} breakAfterSlash />
                   </td>
                 ))}
               </tr>
@@ -111,12 +108,10 @@ function Block({
   block,
   citations,
   level,
-  stackedTables = false,
 }: {
   block: BlockView
   citations?: CitationLinks
   level: Level
-  stackedTables?: boolean
 }) {
   switch (block.kind) {
     case 'paragraph':
@@ -152,17 +147,12 @@ function Block({
               </span>
             </a>
           </div>
-          <Blocks
-            blocks={block.blocks}
-            citations={citations}
-            level={below(level)}
-            stackedTables={stackedTables}
-          />
+          <Blocks blocks={block.blocks} citations={citations} level={below(level)} />
         </div>
       )
     }
     case 'table':
-      return <DataTable table={block} citations={citations} stacked={stackedTables} />
+      return <DataTable table={block} citations={citations} />
     case 'verse':
       return <VerseCard verse={block.verse} />
     case 'topic-intro': {
@@ -174,12 +164,7 @@ function Block({
               <Heading className={styles.termTitle}>
                 <Text text={section.heading} citations={citations} />
               </Heading>
-              <Blocks
-                blocks={section.blocks}
-                citations={citations}
-                level={below(level)}
-                stackedTables={stackedTables}
-              />
+              <Blocks blocks={section.blocks} citations={citations} level={below(level)} />
             </div>
           ))}
           <SharedFrom topic={block.topic} />
@@ -192,27 +177,18 @@ function Block({
 /**
  * A record's blocks, every kind drawn: paragraphs and lists, terms anchored at their own ids,
  * tables, verses and shared topic introductions. Terms take headings from `level` down.
- * A comparison section's tables stack as cards on a phone.
  */
 export function Blocks({
   blocks,
   citations,
   level = 3,
-  stackedTables = false,
 }: {
   blocks: readonly BlockView[]
   citations?: CitationLinks
   level?: Level
-  stackedTables?: boolean
 }) {
   return blocks.map((block, index) => (
-    <Block
-      key={index}
-      block={block}
-      citations={citations}
-      level={level}
-      stackedTables={stackedTables}
-    />
+    <Block key={index} block={block} citations={citations} level={level} />
   ))
 }
 
@@ -243,27 +219,18 @@ export function Sections({
         </h2>
         {shared ? (
           <>
-            <Blocks
-              blocks={shared.own.blocks}
-              citations={citations}
-              stackedTables={section.role === 'comparison'}
-            />
+            <Blocks blocks={shared.own.blocks} citations={citations} />
             {shared.others.length > 0 ? (
               <Blocks
                 blocks={[{ kind: 'topic-intro', topic: shared.topic, sections: shared.others }]}
                 citations={citations}
-                stackedTables={section.role === 'comparison'}
               />
             ) : (
               <SharedFrom topic={shared.topic} />
             )}
           </>
         ) : (
-          <Blocks
-            blocks={section.blocks}
-            citations={citations}
-            stackedTables={section.role === 'comparison'}
-          />
+          <Blocks blocks={section.blocks} citations={citations} />
         )}
       </section>
     )

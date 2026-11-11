@@ -1,0 +1,72 @@
+/*
+ * Back to top: an indigo disc edged in lilac, so it shows over the paper and the page alike, fixed
+ * at the lower right and kept clear of the screen's safe area (a phone's home bar, a rounded
+ * corner). Hidden, it is out of the tab order and out of the accessibility tree.
+ */
+.button {
+  position: fixed;
+  right: calc(1rem + env(safe-area-inset-right, 0px));
+  bottom: calc(1rem + env(safe-area-inset-bottom, 0px));
+  z-index: var(--layer-sticky);
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 1px solid var(--color-ink-muted);
+  border-radius: 50%;
+  background: var(--color-ground);
+  color: var(--color-ink);
+  cursor: pointer;
+  visibility: hidden;
+  opacity: 0;
+}
+
+/* Shown far down the page, and kept while it has focus, so focus never rests on nothing. */
+.button[data-shown],
+.button:focus-visible {
+  visibility: visible;
+  opacity: 1;
+}
+
+/* Further in from the corner of a larger screen, where the toasts stand too. */
+@media (width >= 48rem) {
+  .button {
+    right: calc(2rem + env(safe-area-inset-right, 0px));
+    bottom: calc(2rem + env(safe-area-inset-bottom, 0px));
+  }
+}
+
+/* Only where a pointer can rest: a touch screen would hold the hover after a tap. */
+@media (hover: hover) {
+  .button:hover {
+    border-color: var(--color-ink);
+  }
+}
+
+/* The focus ring is drawn inside the disc, on its own indigo, so it shows over any paper. */
+.button:focus-visible {
+  outline-offset: -5px;
+}
+
+/* The only arrow drawn points right: turned, it points up. */
+.arrow {
+  width: 16px;
+  height: 12px;
+  transform: rotate(-90deg);
+}
+
+/* It fades in and out, and only where motion is welcome; it never moves. */
+@media (prefers-reduced-motion: no-preference) {
+  .button {
+    transition:
+      opacity var(--duration-quick) var(--ease-out),
+      visibility var(--duration-quick);
+  }
+}
+
+@media print {
+  .button {
+    display: none;
+  }
+}

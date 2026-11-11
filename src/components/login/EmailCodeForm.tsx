@@ -17,6 +17,7 @@ import { authAddress, LOGIN_INTENT_HEADER } from '@/lib/auth/shared'
 
 import { useHydrated } from '../browser'
 import styles from './EmailCodeForm.module.css'
+import { GoogleMark } from './GoogleMark'
 import { type TurnstileHandle, TurnstileWidget } from './TurnstileWidget'
 
 const never = () => () => {}
@@ -445,10 +446,13 @@ export function EmailCodeForm({ mode, siteKey, otherScreen }: Props) {
             <p className={styles.other}>Or, without an emailed code:</p>
             <button
               type="button"
-              className={cta.secondary}
+              className={`${cta.secondary} ${styles.googleButton}`}
               onClick={() => void continueWithGoogle()}
               disabled={busy || !hydrated}
             >
+              <span className={styles.googleMark}>
+                <GoogleMark />
+              </span>
               Continue with Google
             </button>
           </div>

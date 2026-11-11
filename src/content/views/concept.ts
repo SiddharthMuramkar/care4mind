@@ -20,7 +20,7 @@ import { asciiSpellings, displayName, passageLabel } from '../names'
 import { compareOrder, verseView } from './passage'
 import { questionnaireCard } from './questionnaire'
 import { citationMap, numberedReferences } from './reference'
-import { conceptRef, topicRef, workRef } from './refs'
+import { conceptRef, topicRef, topicsAround, workRef } from './refs'
 
 /** A Concept in brief, its reading time already counted from its page's sections and verses. */
 function cardWith(record: ConceptRecord, graph: ContentGraph, readingMinutes: number): ConceptCard {
@@ -129,7 +129,10 @@ function linkedQuestionnaires(
   )
 }
 
-/** The Concepts before and after this one in its primary topic, alphabetically. */
+/**
+ * The Concepts before and after this one in its primary topic, alphabetically. The last one in
+ * its topic leads on to the next topic instead, where there is one.
+ */
 function neighbours(record: ConceptRecord, graph: ContentGraph) {
   const inTopic = graph
     .conceptsInTopic(record.topics.primary)
@@ -138,7 +141,12 @@ function neighbours(record: ConceptRecord, graph: ContentGraph) {
   const at = inTopic.findIndex((concept) => concept.slug === record.slug)
   const card = (concept: ConceptRecord | undefined): ConceptCard | undefined =>
     concept && conceptCard(concept, graph)
-  return present({ previous: card(inTopic[at - 1]), next: card(inTopic[at + 1]) })
+  const next = card(inTopic[at + 1])
+  return present({
+    previous: card(inTopic[at - 1]),
+    next,
+    nextTopic: next ? undefined : topicsAround(record.topics.primary, graph).next,
+  })
 }
 
 /** The in-text citations on a Concept's page: its own, then those of any introduction it shows. */

@@ -4,6 +4,7 @@ import { ownArt } from '@/art'
 import { hrefFor, works, type PassageView, type WorkView } from '@/content'
 
 import { expectNoAxeViolations } from './axe'
+import { breadcrumb, expectTrail } from './breadcrumbs'
 import { expect, gotoReady, inScope, scrollsSideways, test } from './fixtures'
 import { expectPageTurned, pageTurns, prefetched, recordPageTurns } from './page-turns'
 import { ROUTES } from './routes'
@@ -170,17 +171,16 @@ test.describe('the shelf', () => {
     expect(turn?.flights.map(({ name }) => name)).toContain('work-title-yoga-sutra')
   })
 
-  test('its breadcrumbs read Go to home › Traditional texts, and a work’s Go to home › Traditional texts › the work', async ({
+  test('its breadcrumbs read Go to home › Traditional texts, and a work’s Go to home › Traditional texts › the work, or on a phone the one crumb above', async ({
     page,
   }) => {
-    const crumbs = page.getByRole('navigation', { name: 'Breadcrumb' }).getByRole('listitem')
     await gotoReady(page, TEXTS)
-    await expect(crumbs).toHaveText(['Go to home', 'Traditional texts'])
-    await expect(crumbs.last().locator('[aria-current="page"]')).toHaveText('Traditional texts')
+    await expectTrail(page, ['Go to home', 'Traditional texts'])
     await gotoReady(page, gita.href)
-    await expect(crumbs).toHaveText(['Go to home', 'Traditional texts', 'Bhagavad Gītā'])
-    await expect(crumbs.nth(1).getByRole('link')).toHaveAttribute('href', TEXTS)
-    await expect(crumbs.last().locator('[aria-current="page"]')).toHaveText('Bhagavad Gītā')
+    await expectTrail(page, ['Go to home', 'Traditional texts', 'Bhagavad Gītā'])
+    await expect(
+      breadcrumb(page).getByRole('link', { name: 'Traditional texts', exact: true }),
+    ).toHaveAttribute('href', TEXTS)
   })
 })
 
