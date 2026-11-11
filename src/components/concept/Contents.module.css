@@ -145,6 +145,14 @@
     margin-inline-start: -1rem;
   }
 
+  /* A table too wide for the text lies over the contents while it passes them (Prose.module.css).
+     Keyboard focus in the contents brings them back over it, so the focused line is never hidden;
+     a click, as on the line that leads to the table, leaves the table on top. */
+  .contents:has(:focus-visible) {
+    z-index: var(--layer-sticky);
+    background: var(--color-surface);
+  }
+
   .terms {
     display: grid;
   }

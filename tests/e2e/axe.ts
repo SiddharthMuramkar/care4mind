@@ -547,7 +547,7 @@ export async function expectNoAxeViolations(page: Page, where?: string) {
           unsettled.map((node) => node.target),
         )
   const pairs = reviewedPairs()
-  // One reviewed shade beside the pairs: a table frame's scroll shadow over a reviewed solid pair. It passes only at the ratio its text size requires of its own, or as an edge sliver: the frame's radial shade tile is 0.875rem wide and fades across it, so a fifth of the glyphs' area under the whole tile is a conservative bound on the glyphs its strongest stop could reach — glyphs at the frame's edge, which scroll onto the solid pair.
+  // One reviewed shade beside the pairs: a table frame's scroll shadow over a reviewed solid pair. It passes only at the ratio its text size requires of its own, or as an edge sliver: the frame's shade tile runs its full height but is 1rem wide and fades across it, so a fifth of the glyphs' area under the whole tile is a conservative bound on the glyphs its strongest stop could reach — glyphs at the frame's edge, which scroll onto the solid pair.
   const shade = palette()['scroll-shadow']
   const shadeSliver = 0.2
   const unreviewed: string[] = []

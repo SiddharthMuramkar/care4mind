@@ -6,6 +6,7 @@ import { concepts } from '@/content'
 import { expectNoAxeViolations } from './axe'
 import { recordAnimationStarts, transitionedOn } from './drawings'
 import { expect, gotoReady, scrollsSideways, test } from './fixtures'
+import { pixel } from './focus-ring'
 import { expectPageTurned, pageTurns, prefetched, recordPageTurns } from './page-turns'
 import { ROUTES_IN_SCOPE } from './routes'
 
@@ -875,6 +876,176 @@ test.describe('Concept page v2: tables', () => {
     expect(attachment).toContain('scroll')
     expect(await scrollsSideways(page)).toEqual([])
   })
+
+  test('where a table still scrolls, its cut edge is shaded from the frame’s top, and the shade follows the scroll', async ({
+    page,
+  }) => {
+    test.skip(page.viewportSize()?.width !== 768, 'the table is wider than its frame at 768 px')
+    await gotoReady(page, '/concepts/vikshepa/')
+    const frame = page.getByRole('region', { name: /Comparison between Indian and Western/ })
+    /** The frame's top brought on screen, clear of the sticky header, where a reader meets it. */
+    const spots = () =>
+      frame.evaluate((element) => {
+        window.scrollBy({ top: element.getBoundingClientRect().top - 150, behavior: 'instant' })
+        const box = element.getBoundingClientRect()
+        const firstColumn = element.querySelector('tbody th')?.getBoundingClientRect()
+        return {
+          // The caption's top padding: the frame's own paper, with no words or rules on it.
+          y: box.top + 8,
+          middle: box.left + box.width / 2,
+          // Just inside the right edge, and just past the first column, where the shades lie.
+          right: box.right - 3,
+          left: (firstColumn?.right ?? box.left) + 3,
+        }
+      })
+    /** How far each spot's colour stands from the frame's paper: by its least and its most. */
+    const sample = async () => {
+      const at = await spots()
+      const paper = await pixel(page, at.middle, at.y)
+      const against = async (x: number) => {
+        const darker = (await pixel(page, x, at.y)).map(
+          (channel, index) => (paper[index] ?? 0) - channel,
+        )
+        return { least: Math.min(...darker), most: Math.max(...darker.map(Math.abs)) }
+      }
+      return { right: await against(at.right), left: await against(at.left) }
+    }
+    // At rest the table runs on past the right edge, which is shaded; its start is in view.
+    const atRest = await sample()
+    expect(atRest.right.least, 'the right edge is shaded').toBeGreaterThanOrEqual(24)
+    expect(atRest.left.most, 'past the first column is clear').toBeLessThanOrEqual(6)
+    // Scrolled to its end, the shade moves to the left, where the table now runs on.
+    await frame.evaluate((element) =>
+      element.scrollTo({ left: element.scrollWidth, behavior: 'instant' }),
+    )
+    await expect
+      .poll(() =>
+        frame.evaluate((element) => element.scrollWidth - element.clientWidth - element.scrollLeft),
+      )
+      .toBeLessThanOrEqual(1)
+    const atEnd = await sample()
+    expect(atEnd.right.most, 'the right edge is clear').toBeLessThanOrEqual(6)
+    expect(atEnd.left.least, 'past the first column is shaded').toBeGreaterThanOrEqual(24)
+  })
+
+  test(
+    'from 64rem the comparison table reaches across the paper when the text column is too narrow, and shows whole',
+    { tag: '@self-width' },
+    async ({ page }) => {
+      const narrow: number[] = []
+      for (const width of [1024, 1118, 1280]) {
+        await page.setViewportSize({ width, height: 900 })
+        await gotoReady(page, '/concepts/vikshepa/')
+        const frame = page.getByRole('region', { name: /Comparison between Indian and Western/ })
+        await frame.scrollIntoViewIfNeeded()
+        const fit = await frame.evaluate((element) => {
+          const box = element.getBoundingClientRect()
+          const column = element.closest('section')?.getBoundingClientRect()
+          const article = element.closest('article')
+          const sheet = article?.getBoundingClientRect()
+          const style = article ? getComputedStyle(article) : undefined
+          const table = element.querySelector('table')
+          return {
+            scrolls: element.scrollWidth > element.clientWidth + 1,
+            left: box.left,
+            right: box.right,
+            columnLeft: column?.left ?? Number.NaN,
+            columnRight: column?.right ?? Number.NaN,
+            // The paper's text block: the folio inside its own margins.
+            paperLeft: (sheet?.left ?? Number.NaN) + Number.parseFloat(style?.paddingLeft ?? ''),
+            // Wide enough for its columns: the table's own least width, inside the frame's rule.
+            needs: Number.parseFloat(table ? getComputedStyle(table).minWidth : '') + 2,
+            screen: document.documentElement.clientWidth,
+          }
+        })
+        const where = `at ${width} px`
+        const off = (a: number, b: number) => Math.abs(a - b)
+        // The whole table is in view: nothing to scroll, nothing past the screen's edge.
+        expect(fit.scrolls, where).toBe(false)
+        expect(fit.right, where).toBeLessThanOrEqual(fit.screen)
+        expect(off(fit.right, fit.columnRight), where).toBeLessThanOrEqual(1)
+        if (fit.columnRight - fit.columnLeft < fit.needs) {
+          narrow.push(width)
+          // Too wide for the text column: it reaches back across the contents to the paper's edge.
+          expect(off(fit.left, fit.paperLeft), where).toBeLessThanOrEqual(1)
+        } else {
+          // It fits the text column, so it keeps to it.
+          expect(off(fit.left, fit.columnLeft), where).toBeLessThanOrEqual(1)
+        }
+        expect(await scrollsSideways(page), where).toEqual([])
+        if (width !== 1118) continue
+        // Laid over the contents while it passes them, the table shows whole; a keyboard reader
+        // in the contents brings them back over it, so the line with focus stays in sight.
+        await frame.evaluate((element) =>
+          window.scrollBy({ top: element.getBoundingClientRect().top - 100, behavior: 'instant' }),
+        )
+        const lines = page.getByRole('navigation', { name: 'Contents' }).getByRole('link')
+        const box = await frame.boundingBox()
+        // A line the table passes over: in view in the contents, and inside the table's height.
+        const under = await lines.evaluateAll(
+          (links, [top, bottom]) =>
+            links.findIndex((link) => {
+              const nav = link.closest('nav')?.getBoundingClientRect()
+              const rect = link.getBoundingClientRect()
+              const middle = rect.top + rect.height / 2
+              return (
+                nav !== undefined &&
+                middle > Math.max(nav.top, top ?? 0) + 4 &&
+                middle < Math.min(nav.bottom, bottom ?? 0) - 4
+              )
+            }),
+          [box?.y ?? 0, (box?.y ?? 0) + (box?.height ?? 0)],
+        )
+        expect(under, 'a line of the contents lies under the table').toBeGreaterThanOrEqual(0)
+        const line = lines.nth(under)
+        const atItsMiddle = () =>
+          line.evaluate((element) => {
+            const rect = element.getBoundingClientRect()
+            const hit = document.elementFromPoint(
+              rect.left + rect.width / 2,
+              rect.top + rect.height / 2,
+            )
+            return { line: element.contains(hit), table: Boolean(hit?.closest('[role="region"]')) }
+          })
+        expect(await atItsMiddle(), 'the table lies over the contents').toEqual({
+          line: false,
+          table: true,
+        })
+        // Focus from a script before any click shows as keyboard focus does.
+        await line.focus()
+        expect(await line.evaluate((element) => element.matches(':focus-visible'))).toBe(true)
+        expect(await atItsMiddle(), 'the focused line lies over the table').toEqual({
+          line: true,
+          table: false,
+        })
+        // Following a line moves focus on to the page, so the contents drop back under the table:
+        // a reader who jumps to the comparison by keyboard sees its row heads.
+        const id = await frame.evaluate((element) => element.closest('section[id]')?.id ?? '')
+        expect(id, 'the table stands in a section the contents lead to').not.toBe('')
+        await page.getByRole('navigation', { name: 'Contents' }).locator(`a[href="#${id}"]`).focus()
+        await page.keyboard.press('Enter')
+        await expect(page).toHaveURL(new RegExp(`#${id}$`))
+        await expect
+          .poll(() =>
+            page.evaluate(() => Boolean(document.querySelector('[data-contents] :focus-visible'))),
+          )
+          .toBe(false)
+        const head = frame.locator('tbody th').first()
+        await head.scrollIntoViewIfNeeded()
+        expect(
+          await head.evaluate((element) => {
+            const rect = element.getBoundingClientRect()
+            return element.contains(
+              document.elementFromPoint(rect.left + 8, rect.top + rect.height / 2),
+            )
+          }),
+          'the first row head shows over the contents',
+        ).toBe(true)
+      }
+      // The review's own case: at 1118 px the text column is narrower than the table.
+      expect(narrow).toContain(1118)
+    },
+  )
 })
 
 test.describe('Concept page v2: previous and next', () => {
