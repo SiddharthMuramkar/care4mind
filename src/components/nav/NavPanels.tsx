@@ -15,7 +15,7 @@ import { createPortal } from 'react-dom'
 
 import { Numeral } from '@/components/Numeral'
 
-import { currentFor, panelOf } from './current'
+import { currentFor, panelOf, WIDE } from './current'
 import { ArrowGlyph, ChevronGlyph } from '../glyphs'
 import nav from './nav.module.css'
 import styles from './NavPanels.module.css'
@@ -47,7 +47,8 @@ export type Slots = Partial<Record<PanelId, HTMLElement>>
  * Base UI's NavigationMenu behind the header's sections: its toggles stand in the
  * list beside Concepts and Library, and open their panels on hover, press or ArrowDown. Escape
  * closes a panel and gives focus back to its toggle; Tab runs through a panel and on, never
- * trapped; a new page closes it. The section links are the server's own and are never replaced.
+ * trapped; a press outside it, a new page, or a window narrowed below 64rem closes it. The
+ * section links are the server's own and are never replaced.
  */
 export function NavPanels({
   nav: site,
@@ -64,6 +65,16 @@ export function NavPanels({
     setShownOn(pathname)
     setValue(null)
   }
+
+  // Below 64rem the toggles are hidden, so a panel open as the window narrows has nothing to hang from.
+  useEffect(() => {
+    const wide = matchMedia(WIDE)
+    const close = () => {
+      if (!wide.matches) setValue(null)
+    }
+    wide.addEventListener('change', close)
+    return () => wide.removeEventListener('change', close)
+  }, [])
 
   // Focus that was on a toggle moves to the toggle that took its place.
   useLayoutEffect(() => {

@@ -1,4 +1,4 @@
-/* The narrow screen's Menu, gone from 64rem (WIDE in current.ts), where the sections fit. */
+/* The phone's Menu, gone from 48rem (TABLET in current.ts), where the sections stand in the header. */
 .menu {
   display: inline-flex;
   align-items: center;
@@ -40,7 +40,7 @@
   }
 }
 
-@media (width >= 64rem) {
+@media (width >= 48rem) {
   .menu {
     display: none;
   }

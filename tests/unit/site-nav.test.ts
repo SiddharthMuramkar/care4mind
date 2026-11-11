@@ -28,7 +28,20 @@ describe('the site navigation', () => {
     )
   })
 
-  it('hands the footer its link to the Picture credits page', async () => {
+  it('hands the footer and the Drawer their link to the Picture credits page', async () => {
     expect((await siteNav()).credits).toEqual({ label: 'Picture credits', href: '/credits/' })
+  })
+
+  it('hands the header and the Drawer the homepage, named Home', async () => {
+    expect((await siteNav()).home).toEqual({ label: 'Home', href: '/' })
+  })
+
+  it('lists Questionnaires last of the sections, after Library, whether or not one can be taken', async () => {
+    expect((await siteNav()).sections.map(({ id }) => id)).toEqual([
+      'concepts',
+      'texts',
+      'library',
+      'questionnaires',
+    ])
   })
 })

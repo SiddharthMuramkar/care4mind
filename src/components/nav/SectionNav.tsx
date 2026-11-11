@@ -28,11 +28,11 @@ interface Upgrade {
 }
 
 /**
- * The header's sections as server-rendered links, each marked when you are in it. On a
- * computer, Concepts and Library also open panels: Base UI's NavigationMenu loads when the
- * browser is idle, or as soon as a pointer or focus comes near, and puts its toggles in place of
- * these. The links themselves stay as they are. A toggle pressed before then opens its panel as
- * it arrives.
+ * The header's sections as server-rendered links, each marked when you are in it, shown from
+ * 48rem. From 64rem Concepts and Library also open panels: Base UI's NavigationMenu loads when
+ * the browser is idle, or as soon as a pointer or focus comes near, and puts its toggles in place
+ * of these. The links themselves stay as they are. A toggle pressed before then opens its panel
+ * as it arrives. Below 64rem, where the toggles are hidden, the panels' code doesn't load.
  */
 export function SectionNav({ nav, mapNote }: { nav: SiteNav; mapNote?: ReactNode }) {
   const hydrated = useHydrated()
@@ -40,6 +40,7 @@ export function SectionNav({ nav, mapNote }: { nav: SiteNav; mapNote?: ReactNode
   const [enhanced, setEnhanced] = useState<Enhanced>()
 
   const upgrade = useCallback(({ open, hover }: Upgrade = {}) => {
+    if (!matchMedia(WIDE).matches) return
     void loadPanels().then((Panels) => {
       const slots: Slots = {}
       for (const slot of list.current?.querySelectorAll<HTMLElement>('[data-panel]') ?? []) {

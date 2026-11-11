@@ -45,7 +45,8 @@ export interface LibraryLink extends NavLink {
  * feature (the Concept map, the proposals page) is absent, not hidden.
  */
 export interface SiteNav {
-  home: Route
+  /** The homepage: the header's wordmark, and the Drawer's first link. */
+  home: NavLink
   sections: readonly Section[]
   /** The Concepts panel: the A–Z, the topics with their Concept counts and, while it is on, the map. */
   concepts: { index: NavLink; topics: readonly TopicLink[]; map?: NavLink }
@@ -58,13 +59,13 @@ export interface SiteNav {
    */
   questionnaires: NavLink
   search: NavLink
-  /** The footer's link to the Picture credits, never beside a picture. */
+  /** The footer's and the Drawer's link to the Picture credits, never beside a picture. */
   credits: NavLink
   proposals?: NavLink
-  /** Start here, while its proposal is on: the header shows it after the wordmark. */
+  /** Start here, while its proposal is on: the header shows it after the wordmark where it fits. */
   start?: NavLink
   /** Log in, while the login switch is on: the header shows it beside Search. */
   login?: NavLink
-  /** The Privacy page, which exists only while the login switch is on: the footer lists it. */
+  /** The Privacy page, which exists only while the login switch is on: the footer and the Drawer list it. */
   privacy?: NavLink
 }

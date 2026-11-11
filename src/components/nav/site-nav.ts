@@ -65,7 +65,7 @@ async function build(): Promise<SiteNav> {
     }))
 
   return {
-    home: hrefFor({ page: 'home' }),
+    home: link('Home', hrefFor({ page: 'home' })),
     sections: [
       {
         id: 'concepts',

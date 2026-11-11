@@ -1,5 +1,6 @@
 'use client'
 
+import { usePathname } from 'next/navigation'
 import {
   type ComponentType,
   type KeyboardEvent,
@@ -14,8 +15,8 @@ import {
 import { cx } from '@/lib/cx'
 
 import { MenuGlyph } from '../glyphs'
-import { useHydrated, whenIdle } from '../browser'
-import { WIDE } from './current'
+import { whenIdle } from '../browser'
+import { TABLET } from './current'
 import styles from './MenuButton.module.css'
 import type { MenuDrawerProps } from './MenuDrawer'
 import type { SiteNav } from './types'
@@ -31,18 +32,29 @@ interface Props {
   login?: ReactNode
   /** The Proposal label beside the Concept map. */
   mapNote?: ReactNode
+  /** The help line the Drawer ends with, rendered on the server. */
+  help?: ReactNode
 }
 
 /**
- * The narrow screen's Menu. Without JavaScript it is a link to the full navigation in the
- * footer; with it, a button that opens the Drawer. The Drawer's code loads when the browser is
- * idle or on the first press, never with the page.
+ * The phone's Menu. Until the Drawer's code is in the page it is what it is without JavaScript, a
+ * link to the full navigation in the footer, so a press never goes unanswered while the page is
+ * still starting. Once the code is in, it is a button that opens the Drawer at once. The code
+ * loads when the browser is idle, or as soon as a pointer, focus or press comes to the Menu, never
+ * with the page. A new page closes the Drawer, however it came: a link in it, Back, or anything
+ * else.
  */
-export function MenuButton({ nav, search, login, mapNote }: Props) {
-  const hydrated = useHydrated()
+export function MenuButton({ nav, search, login, mapNote, help }: Props) {
   const button = useRef<HTMLAnchorElement>(null)
   const [open, setOpen] = useState(false)
   const [Drawer, setDrawer] = useState<ComponentType<MenuDrawerProps>>()
+
+  const pathname = usePathname()
+  const [shownOn, setShownOn] = useState(pathname)
+  if (shownOn !== pathname) {
+    setShownOn(pathname)
+    setOpen(false)
+  }
 
   const load = useCallback(
     () =>
@@ -53,24 +65,26 @@ export function MenuButton({ nav, search, login, mapNote }: Props) {
   )
 
   useEffect(() => {
-    if (matchMedia(WIDE).matches) return
+    if (matchMedia(TABLET).matches) return
     return whenIdle(() => void load())
   }, [load])
 
   const press = (event: MouseEvent | KeyboardEvent) => {
+    // Not here yet: the link goes to the footer's navigation, as it does without JavaScript.
+    if (!Drawer) return
     event.preventDefault()
-    void load().then(() => setOpen(true))
+    setOpen(true)
   }
 
-  // Once the header is wide the Menu link is display:none and can't take focus back.
+  // From 48rem the Menu link is display:none and can't take focus back.
   useEffect(() => {
     if (!open) return
-    const wide = matchMedia(WIDE)
+    const tablet = matchMedia(TABLET)
     const close = () => {
-      if (wide.matches) setOpen(false)
+      if (tablet.matches) setOpen(false)
     }
-    wide.addEventListener('change', close)
-    return () => wide.removeEventListener('change', close)
+    tablet.addEventListener('change', close)
+    return () => tablet.removeEventListener('change', close)
   }, [open])
 
   return (
@@ -79,11 +93,13 @@ export function MenuButton({ nav, search, login, mapNote }: Props) {
         ref={button}
         href="#site-nav"
         className={styles.menu}
-        // Once the page is interactive the link is a button that opens a dialog.
-        role={hydrated ? 'button' : undefined}
-        aria-haspopup={hydrated ? 'dialog' : undefined}
-        aria-expanded={hydrated ? open : undefined}
+        // Once the Drawer's code is in, the link is a button that opens a dialog.
+        role={Drawer ? 'button' : undefined}
+        aria-haspopup={Drawer ? 'dialog' : undefined}
+        aria-expanded={Drawer ? open : undefined}
         data-ink
+        onPointerEnter={() => void load()}
+        onFocus={() => void load()}
         onPointerDown={() => void load()}
         onClick={press}
         onKeyDown={(event) => {
@@ -102,6 +118,7 @@ export function MenuButton({ nav, search, login, mapNote }: Props) {
           search={search}
           login={login}
           mapNote={mapNote}
+          help={help}
         />
       ) : null}
     </>

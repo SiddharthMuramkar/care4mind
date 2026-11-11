@@ -79,11 +79,12 @@
   text-decoration: none;
 }
 
-/* Start here, while its proposal is on: set like the section links, beside the wordmark, from 30rem. */
-.home:has(+ .start) {
-  margin-inline-end: 0;
-}
-
+/*
+ * Start here, while its proposal is on: set like the section links, beside the wordmark, where
+ * the strip has room for it. That is from 30rem until the sections join the strip at 48rem, and
+ * again from 80rem; between, the sections take its room, and the homepage's first button still
+ * leads to it. On a phone the Drawer lists it too.
+ */
 .start {
   display: none;
   flex: none;
@@ -99,10 +100,11 @@
   color: var(--color-ink);
 }
 
-@media (width >= 30rem) {
+@media (width >= 30rem) and (width < 48rem), (width >= 80rem) {
   /* The wordmark's width in its stand-in font, so its late face doesn't shift Start here. */
   .home:has(+ .start) {
     min-width: 10.875rem;
+    margin-inline-end: 0;
   }
 
   .start {
@@ -151,7 +153,10 @@
   }
 }
 
-/* Below 64rem the sections are in the Drawer, so only Search and Log in stand here, side by side. */
+/*
+ * On a phone the sections are in the Drawer, so only Search and Log in stand here, side by side.
+ * From 48rem the sections come first; Search's glass keeps its own margin from them.
+ */
 .nav {
   display: flex;
   align-items: center;
@@ -232,15 +237,6 @@
     gap: 1.5rem;
   }
 
-  /* Start here takes the strip's spare width: tighter, or the strip overflows its padding. */
-  .strip:has(.start) {
-    gap: 1rem;
-  }
-
-  .start {
-    margin-inline-start: 0;
-  }
-
   .search {
     gap: 0.55rem;
     min-width: 0;
@@ -265,6 +261,17 @@
     overflow: visible;
     clip-path: none;
     font-size: 1.1875rem;
+  }
+}
+
+@media (width >= 80rem) {
+  /* Start here takes the strip's spare width: tighter, or the strip overflows its padding. */
+  .strip:has(.start) {
+    gap: 1rem;
+  }
+
+  .start {
+    margin-inline-start: 0;
   }
 }
 
@@ -303,6 +310,23 @@
 
 .drawerSearch[aria-current] {
   border-color: var(--color-highlight);
+}
+
+/*
+ * The Drawer's copy of the help line, the sheet's last line: small, in the sheet's ink, its
+ * numbers underlined as links in running text are.
+ */
+.drawerHelp {
+  margin: 0;
+  color: var(--color-drawer-ink);
+  font-size: var(--text-small);
+  line-height: 1.5;
+}
+
+.drawerHelp a {
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.18em;
 }
 
 /* Windows' contrast themes repaint backgrounds: draw the current section's lozenge in the text colour. */

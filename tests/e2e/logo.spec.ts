@@ -74,14 +74,15 @@ test('the mark adds no stop of its own to the tab order', async ({ page }) => {
   await page.keyboard.press('Tab')
   await expect(homeLink(page)).toBeFocused()
   await page.keyboard.press('Tab')
-  // Start here, while its route exists, follows the wordmark from 30rem (480 px).
+  // Start here, while its route exists, follows the wordmark where the strip has room for it:
+  // from 30rem (480 px) until the sections join at 48rem (768 px), and again from 80rem (1280 px).
   const width = page.viewportSize()?.width ?? 0
-  if (width >= 480 && PAGES_HAVE_START) {
+  if (((width >= 480 && width < 768) || width >= 1280) && PAGES_HAVE_START) {
     await expect(page.getByRole('banner').getByRole('link', { name: 'Start here' })).toBeFocused()
     await page.keyboard.press('Tab')
   }
-  // The header's next control: Concepts where the sections fit (from 64rem), else Search.
-  const next = (page.viewportSize()?.width ?? 0) >= 1024 ? 'Concepts' : 'Search'
+  // The header's next control: Concepts where the sections stand in it (from 48rem), else Search.
+  const next = width >= 768 ? 'Concepts' : 'Search'
   const main = page.getByRole('navigation', { name: 'Main' })
   await expect(main.getByRole('link', { name: next, exact: true })).toBeFocused()
 })
