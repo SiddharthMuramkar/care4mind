@@ -207,7 +207,10 @@
   width: max-content;
   max-width: calc(var(--room) * 100cqi);
   min-height: 24px;
-  /* layout.ts spaces the points for names this size (2.2cqi, never under the small size), its mark and gap 1.07em wide. */
+  /*
+   * layout.ts spaces the points for names 2.2cqi in size, their mark and gap 1.07em wide. The small
+   * size is a floor under that, so on a narrow plate the names run longer than it allows for.
+   */
   font-size: clamp(var(--text-small), 2.2cqi, 1.0625rem);
   line-height: 1.15;
   color: color-mix(
