@@ -347,7 +347,7 @@ export default defineQuestionnaire({
       },
       {
         for: 'psychology-expert',
-        note: 'Statements 34–42, the first nine of part 4, list their options from Strongly Agree to Strongly Disagree, the reverse of the other 15 agreement statements. They keep that order and are marked reversed, which records the display order only and says nothing about scoring. Confirm whether the order matters.',
+        note: 'Statements 34–42, the first nine of part 4, list their options from Strongly Agree to Strongly Disagree, the reverse of the other 15 agreement statements. They keep that order and are marked reversed, which records the display order only and says nothing about scoring. Confirm whether the order matters. The current site scored them reversed too: Strongly Agree 1 point through Strongly Disagree 5, so on every statement a higher point value means more karma-yoga-consistent (source: the current site’s WordPress admin, Quiz Maker quiz 3, read 2026-11-05; the full scoring rules are on the GitHub issue “Questionnaire launch scope and scoring sources”).',
         decidedBy: 'questionnaire-record',
       },
       {
