@@ -1136,6 +1136,37 @@ test.describe('the first screen', { tag: '@one-width' }, () => {
   }
 })
 
+/** Words that say where a picture came from, which belong only on the plain list of sources. */
+const WHERE_FROM = /licen[cs]e|origin|source|credit|care4mind website|recraft/i
+
+/**
+ * Check the open lightbox shows a picture whole: its file under its alt, in the file's own shape and
+ * uncut, no wider than its file stays sharp at 2×, all on screen, captioned where the record has a
+ * caption, and with no word of where it came from.
+ */
+async function expectWhole(lightbox: Locator, record: ArtRecord) {
+  await expect(lightbox).toBeVisible()
+  const picture = lightbox.getByRole('img', { name: record.alt, exact: true })
+  await expect(picture).toHaveCount(1)
+  expect(decodeURIComponent((await picture.getAttribute('src')) ?? '')).toContain(record.src)
+  await expect
+    .poll(() => picture.evaluate((image: HTMLImageElement) => image.naturalWidth))
+    .toBeGreaterThan(0)
+  await expect(picture).toHaveCSS('border-radius', '0px')
+  await expect(picture).toBeInViewport({ ratio: 1 })
+  const box = await picture.boundingBox()
+  if (!box) throw new Error('the picture in the lightbox is laid out')
+  expect(box.width / box.height, 'the file’s own shape').toBeCloseTo(
+    record.width / record.height,
+    2,
+  )
+  expect(box.width, 'sharp on a 2× screen').toBeLessThanOrEqual(record.width / 2 + 0.5)
+  const caption = lightbox.locator('figcaption')
+  if (record.caption) await expect(caption).toHaveText(record.caption)
+  else await expect(caption).toHaveCount(0)
+  await expect(lightbox).not.toContainText(WHERE_FROM)
+}
+
 test.describe('the hero Plate', () => {
   const figure = (page: Page) => page.locator(`figure:has(${HERO})`)
 
@@ -1172,15 +1203,15 @@ test.describe('the hero Plate', () => {
   }
 
   test(
-    'from 64rem stands at 360 px in its own column, left of the heading, on a 72rem Folio',
+    'from 64rem stands at 480 px in its own column, left of the heading, on a 72rem Folio',
     { tag: '@self-width' },
     async ({ page }) => {
       await gotoReady(page, '/')
       for (const width of [1024, 1440]) {
         await page.setViewportSize({ width, height: 900 })
         const { medallion, title } = await heroBoxes(page)
-        expect(medallion.width, `at ${width} px`).toBe(360)
-        expect(medallion.height, `at ${width} px`).toBe(360)
+        expect(medallion.width, `at ${width} px`).toBe(480)
+        expect(medallion.height, `at ${width} px`).toBe(480)
         expect(medallion.x + medallion.width, `at ${width} px`).toBeLessThan(title.x)
       }
       const { folio } = await heroBoxes(page)
@@ -1227,15 +1258,21 @@ test.describe('the hero Plate', () => {
     expect(await leading(paragraphs.last())).toBe(await leading(subhead))
   })
 
-  for (const width of [360, 768]) {
+  // On a phone 72vw, up to 300 px at 417 px and wider; from 48rem 360 px.
+  for (const { width, size } of [
+    { width: 360, size: 259.2 },
+    { width: 600, size: 300 },
+    { width: 768, size: 360 },
+  ]) {
     test(
-      `at ${width} px stands at 168 px above the motto`,
+      `at ${width} px stands at ${size} px above the motto`,
       { tag: '@self-width' },
       async ({ page }) => {
         await page.setViewportSize({ width, height: 900 })
         await gotoReady(page, '/')
         const { medallion, motto } = await heroBoxes(page)
-        expect(medallion.width).toBe(168)
+        expect(medallion.width).toBeCloseTo(size, 1)
+        expect(medallion.height).toBeCloseTo(size, 1)
         expect(medallion.y + medallion.height).toBeLessThanOrEqual(motto.y)
         expect(Math.abs(medallion.x + medallion.width / 2 - width / 2)).toBeLessThan(1)
       },
@@ -1247,7 +1284,7 @@ test.describe('the hero Plate', () => {
     await expect(page.locator('[data-paper] > h1')).toHaveCount(1)
   })
 
-  const SIZES = '(min-width: 64rem) 360px, 168px'
+  const SIZES = '(min-width: 64rem) 480px, (min-width: 48rem) 360px, min(72vw, 300px)'
 
   test(
     'is the only picture preloaded, at high priority, and the only one that sets sizes',
@@ -1486,6 +1523,8 @@ test.describe('the hero Plate', () => {
     await expect(buttons).toHaveCount(2)
     await expect(buttons.first()).toBeHidden()
     await expect(buttons.last()).toBeHidden()
+    // Nothing could open the Plate whole, so the Plate is a picture only.
+    await expect(figure(bare).locator('button[aria-haspopup="dialog"]')).toBeHidden()
     await context.close()
   })
 
@@ -1594,12 +1633,111 @@ test.describe('the hero Plate', () => {
       }
     },
   )
+
+  test('its sizes says the width it stands at', async ({ page }) => {
+    await gotoReady(page, '/')
+    // A copy with no width of its own lays out at the width the browser takes from `sizes`.
+    const fromSizes = await page.locator(HERO).evaluate(async (plate: HTMLImageElement) => {
+      const copy = new Image()
+      copy.alt = ''
+      copy.style.cssText = 'position: absolute; top: 0; left: 0; visibility: hidden'
+      copy.sizes = plate.sizes
+      copy.srcset = plate.srcset
+      document.body.append(copy)
+      await copy.decode()
+      const { width } = copy.getBoundingClientRect()
+      copy.remove()
+      return width
+    })
+    const medallion = await page.locator(HERO).locator('xpath=..').boundingBox()
+    expect(fromSizes).toBeCloseTo(medallion?.width ?? 0, 0)
+  })
+
+  /** The control laid over the Plate on screen, which opens it whole. */
+  const opener = (page: Page) => figure(page).getByRole('button', { name: /^Open whole: / })
+
+  test(
+    'opens the Plate on screen whole in a lightbox, captioned, and Escape gives focus back',
+    { tag: '@one-width' },
+    async ({ page }) => {
+      await gotoReady(page, '/')
+      await expect(opener(page)).toHaveAccessibleName('Open whole: The jeweller')
+      await expect(opener(page)).toHaveAttribute('aria-haspopup', 'dialog')
+      await opener(page).focus()
+      await page.keyboard.press('Enter')
+      const lightbox = page.getByRole('dialog', { name: 'The jeweller', exact: true })
+      await expectWhole(lightbox, art('plate-jeweller'))
+      // Bigger than the circle it opens from.
+      const [whole, circle] = await Promise.all([
+        lightbox.getByRole('img').boundingBox(),
+        page.locator(HERO).boundingBox(),
+      ])
+      expect(whole?.width ?? 0).toBeGreaterThan(circle?.width ?? 0)
+      await expect(lightbox.getByRole('button', { name: 'Close' })).toBeFocused()
+      await page.keyboard.press('Escape')
+      await expect(lightbox).toBeHidden()
+      await expect(opener(page)).toBeFocused()
+    },
+  )
+
+  test(
+    'opens whichever Plate is on screen, and Close gives focus back',
+    { tag: '@one-width' },
+    async ({ page }) => {
+      await gotoReady(page, '/')
+      await next(page).click()
+      await expect.poll(() => shownFile(page)).toContain('sculptor')
+      await expect(opener(page)).toHaveAccessibleName('Open whole: The sculptor')
+      await opener(page).click()
+      const lightbox = page.getByRole('dialog', { name: 'The sculptor', exact: true })
+      await expectWhole(lightbox, art('plate-sculptor'))
+      await lightbox.getByRole('button', { name: 'Close' }).click()
+      await expect(lightbox).toBeHidden()
+      await expect(opener(page)).toBeFocused()
+      await expect(caption(page)).toHaveText('The sculptor · 2 of 7')
+    },
+  )
+
+  test(
+    'closes when the dimmed page around it is pressed',
+    { tag: '@one-width' },
+    async ({ page }) => {
+      await gotoReady(page, '/')
+      await opener(page).click()
+      const lightbox = page.getByRole('dialog', { name: 'The jeweller', exact: true })
+      await expect(lightbox).toBeVisible()
+      await page.mouse.click(4, 4)
+      await expect(lightbox).toBeHidden()
+    },
+  )
+
+  test(
+    'opens and closes at once under reduced motion, with nothing moving',
+    { tag: '@one-width' },
+    async ({ page }) => {
+      await page.emulateMedia({ reducedMotion: 'reduce' })
+      await gotoReady(page, '/')
+      await opener(page).click()
+      const lightbox = page.getByRole('dialog', { name: 'The jeweller', exact: true })
+      await expect(lightbox).toBeVisible()
+      const moving = await lightbox.evaluate(
+        (popup) =>
+          document.getAnimations().filter((animation) => {
+            const target = (animation.effect as KeyframeEffect | null)?.target
+            return (
+              target instanceof Element &&
+              (popup.contains(target) || target.matches('[role="presentation"][data-open]'))
+            )
+          }).length,
+      )
+      expect(moving).toBe(0)
+      await page.keyboard.press('Escape')
+      await expect(lightbox).toBeHidden()
+    },
+  )
 })
 
 test.describe('the credits gallery', () => {
-  /** Words that say where a picture came from, which belong only on the plain list of sources. */
-  const WHERE_FROM = /licen[cs]e|origin|source|credit|care4mind website|recraft/i
-
   test('shows every picture, each with the record’s alt', async ({ page }) => {
     await gotoReady(page, '/credits/')
     const main = page.locator('main')
@@ -1642,6 +1780,86 @@ test.describe('the credits gallery', () => {
     await gotoReady(page, '/credits/')
     const box = await page.locator('main').getByRole('link').last().boundingBox()
     expect(box?.height ?? 0).toBeGreaterThanOrEqual(44)
+  })
+
+  for (const { width, size } of [
+    { width: 360, size: 150 },
+    { width: 768, size: 180 },
+    { width: 1440, size: 240 },
+  ]) {
+    test(
+      `at ${width} px shows every picture ${size} px wide, without scrolling sideways`,
+      { tag: '@self-width' },
+      async ({ page }) => {
+        await page.setViewportSize({ width, height: 900 })
+        await gotoReady(page, '/credits/')
+        const pictures = page.getByRole('main').locator('figure img')
+        await expect(pictures).toHaveCount(RECORDS.length)
+        for (const picture of await pictures.all()) {
+          expect((await picture.boundingBox())?.width).toBe(size)
+        }
+        expect(await scrollsSideways(page)).toEqual([])
+      },
+    )
+  }
+
+  test(
+    'opens every picture whole in a lightbox, with its caption, and Escape gives focus back',
+    { tag: '@one-width' },
+    async ({ page }) => {
+      test.slow()
+      await gotoReady(page, '/credits/')
+      const figures = page.getByRole('main').locator('figure')
+      await expect(figures).toHaveCount(RECORDS.length)
+      for (const figure of await figures.all()) {
+        const alt = await figure.locator('img').getAttribute('alt')
+        const record = RECORDS.find((candidate) => candidate.alt === alt)
+        if (!record) throw new Error(`No record has the alt “${alt}”.`)
+        const name = record.caption ?? record.alt
+        const opener = figure.getByRole('button', { name: `Open whole: ${name}`, exact: true })
+        await expect(opener).toHaveAttribute('aria-haspopup', 'dialog')
+        await opener.focus()
+        await page.keyboard.press('Enter')
+        const lightbox = page.getByRole('dialog', { name, exact: true })
+        await expectWhole(lightbox, record)
+        await page.keyboard.press('Escape')
+        await expect(lightbox).toBeHidden()
+        await expect(opener).toBeFocused()
+      }
+    },
+  )
+
+  test('opens a picture from a press of the mouse, and Close gives focus back', async ({
+    page,
+  }) => {
+    await gotoReady(page, '/credits/')
+    const [record] = RECORDS.filter(({ family }) => family === 'plate')
+    if (!record?.caption) throw new Error('the gallery has a captioned Plate')
+    const opener = page
+      .getByRole('main')
+      .getByRole('button', { name: `Open whole: ${record.caption}`, exact: true })
+    await opener.click()
+    const lightbox = page.getByRole('dialog', { name: record.caption, exact: true })
+    await expectWhole(lightbox, record)
+    await lightbox.getByRole('button', { name: 'Close' }).click()
+    await expect(lightbox).toBeHidden()
+    await expect(opener).toBeFocused()
+  })
+
+  test('without JavaScript shows every picture and no control to open one', async ({
+    browser,
+    viewport,
+  }) => {
+    const context = await browser.newContext({ javaScriptEnabled: false, viewport })
+    const bare = await context.newPage()
+    await bare.goto('/credits/')
+    const main = bare.locator('main')
+    await expect(main.locator('figure img')).toHaveCount(RECORDS.length)
+    await expect(main.locator('button[aria-haspopup="dialog"]')).toHaveCount(RECORDS.length)
+    for (const button of await main.locator('button[aria-haspopup="dialog"]').all()) {
+      await expect(button).toBeHidden()
+    }
+    await context.close()
   })
 
   test('passes axe', async ({ page }) => {
@@ -1912,6 +2130,30 @@ test.describe('the homepage’s picture weight', { tag: '@self-width' }, () => {
   })
 })
 
+test.describe('the hero Plate on a 2× screen', { tag: '@self-width' }, () => {
+  test.use({ deviceScaleFactor: 2 })
+
+  // A phone's browser may settle for a file a little under twice as wide, as its srcset rules allow.
+  for (const width of [768, 1440]) {
+    test(`at ${width} px stays sharp: its file is twice as wide as it stands, or the whole master`, async ({
+      page,
+    }) => {
+      await page.setViewportSize({ width, height: 900 })
+      await gotoReady(page, '/')
+      const plate = page.locator(HERO)
+      await expect
+        .poll(() => plate.evaluate((image: HTMLImageElement) => image.naturalWidth))
+        .toBeGreaterThan(0)
+      const medallion = await plate.locator('xpath=..').boundingBox()
+      if (!medallion) throw new Error('the Medallion is laid out')
+      const file = await plate.evaluate((image: HTMLImageElement) => image.naturalWidth)
+      expect(file).toBeGreaterThanOrEqual(
+        Math.min(2 * medallion.width, art('plate-jeweller').width),
+      )
+    })
+  }
+})
+
 // The check itself, on pages made here, so that a broken check cannot pass unnoticed.
 test.describe('the shared check', { tag: '@one-width' }, () => {
   const PIXEL =
@@ -2024,13 +2266,19 @@ test.describe('the homepage, section and topic pages as a set', () => {
     wide: number
     narrow: number
     narrowBelow: number
+    /** A third size, from this screen width up to `narrowBelow`. */
+    middle?: { from: number; size: number }
+    /** On a narrow screen this share of the screen's width, up to `narrow`. */
+    narrowShare?: number
   }[] = [
     {
       name: 'hero Plate',
       path: '/',
       box: (page) => ringOf(page.locator(HERO)),
-      wide: 360,
-      narrow: 168,
+      wide: 480,
+      middle: { from: 768, size: 360 },
+      narrow: 300,
+      narrowShare: 0.72,
       narrowBelow: 1024,
     },
     {
@@ -2083,12 +2331,24 @@ test.describe('the homepage, section and topic pages as a set', () => {
     },
   ]
 
-  for (const { name, path, box, wide, narrow, narrowBelow } of SIZES) {
-    test(`the ${name} on ${path} is ${wide} px wide, ${narrow} on a narrow screen`, async ({
+  for (const { name, path, box, wide, narrow, narrowBelow, middle, narrowShare } of SIZES) {
+    const between = middle ? `, ${middle.size} from ${middle.from} px` : ''
+    const onNarrow = narrowShare
+      ? `${Math.round(narrowShare * 100)}vw up to ${narrow}`
+      : `${narrow}`
+    test(`the ${name} on ${path} is ${wide} px wide${between}, ${onNarrow} on a narrow screen`, async ({
       page,
     }) => {
       await gotoReady(page, path)
-      const expected = (page.viewportSize()?.width ?? 0) < narrowBelow ? narrow : wide
+      const screen = page.viewportSize()?.width ?? 0
+      const expected =
+        screen >= narrowBelow
+          ? wide
+          : middle && screen >= middle.from
+            ? middle.size
+            : narrowShare
+              ? Math.min(narrowShare * screen, narrow)
+              : narrow
       expect((await box(page).boundingBox())?.width).toBeCloseTo(expected, 0)
     })
   }

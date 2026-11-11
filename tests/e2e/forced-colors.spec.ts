@@ -264,6 +264,15 @@ test("the Plate viewer's buttons keep their edges and their arrows", async ({ pa
   }
 })
 
+test('the lightbox keeps its edge, and its Close button its own', async ({ page }) => {
+  await gotoReady(page, '/')
+  await page.getByRole('button', { name: /^Open whole: / }).click()
+  const lightbox = page.getByRole('dialog', { name: 'The jeweller', exact: true })
+  await expect(lightbox).toBeVisible()
+  await expectVisibleEdge(lightbox, 'lightbox')
+  await expectVisibleEdge(lightbox.getByRole('button', { name: 'Close' }), 'Close')
+})
+
 test('the credits gallery keeps its pictures and its link', async ({ page }) => {
   await gotoReady(page, hrefFor({ page: 'credits' }))
   const main = page.getByRole('main')

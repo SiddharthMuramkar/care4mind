@@ -651,6 +651,24 @@ describe('ArtFigure', () => {
   it('has no caption when the record has none', () => {
     expect(render(draft('plate-ahimsa'))).not.toContain('<figcaption')
   })
+
+  it('lays a button over the picture that opens it whole, named by its caption', () => {
+    const html = render(draft('plate-ahimsa', { caption: 'The farmers', alt: 'Two farmers' }))
+    const button = /<button[^>]*>/.exec(html)?.[0] ?? ''
+    expect(button).toContain('aria-label="Open whole: The farmers"')
+    expect(button).toContain('aria-haspopup="dialog"')
+    expect(button).toContain('type="button"')
+  })
+
+  it('names the button by the alt where the picture has no caption', () => {
+    const html = render(draft('plate-ahimsa', { alt: 'Two farmers' }))
+    expect(html).toContain('aria-label="Open whole: Two farmers"')
+  })
+
+  it('keeps the button hidden until the page can open the lightbox', () => {
+    const button = /<button[^>]*>/.exec(render(draft('plate-ahimsa')))?.[0] ?? ''
+    expect(button).toMatch(/\shidden=""/)
+  })
 })
 
 describe('shipped', () => {
