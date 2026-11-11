@@ -18,8 +18,8 @@ const TAKEABLE = ROUTES.some(({ kind }) => kind === 'questionnaire-flow')
 const SECTIONS = [
   { name: 'Concepts', path: '/concepts/' },
   { name: 'Traditional texts', path: '/texts/' },
-  ...(TAKEABLE ? [{ name: 'Questionnaires', path: '/questionnaires/' }] : []),
   { name: 'Library', path: '/library/' },
+  { name: 'Questionnaires', path: '/questionnaires/' },
   { name: 'Search', path: '/search/' },
 ] as const
 
@@ -122,8 +122,8 @@ test.describe('without JavaScript', () => {
       await expect(menu).toHaveAttribute('href', '#site-nav')
       expect(await pathOf(banner(page).getByRole('link', { name: 'Search' }))).toBe('/search/')
     }
-    // The header lists Questionnaires only while one can be taken; the footer always does.
-    await expect(header(page).locator('a[href$="/questionnaires/"]')).toHaveCount(TAKEABLE ? 1 : 0)
+    // The header always lists Questionnaires, whether or not one can be taken yet.
+    await expect(header(page).locator('a[href$="/questionnaires/"]')).toHaveCount(1)
     // Panels need JavaScript, so their toggles don't show without it.
     await expect(banner(page).getByRole('button')).toHaveCount(0)
   })
@@ -190,7 +190,8 @@ test.describe('without JavaScript', () => {
   test('the footer carries the full navigation, the wordmark and the notices', async ({ page }) => {
     await page.goto('/')
     const nav = footerNav(page)
-    for (const { name, path } of SECTIONS) {
+    // Questionnaires keeps the footer's own label while none can be taken, so it is checked below.
+    for (const { name, path } of SECTIONS.filter(({ name }) => name !== 'Questionnaires')) {
       expect(await pathOf(nav.getByRole('link', { name, exact: true }))).toBe(path)
     }
     // The footer always keeps its Questionnaires link, saying so while none can be taken.
@@ -306,7 +307,7 @@ test.describe('the section you are in', () => {
     { path: '/texts/yoga-sutra/', current: { 'Traditional texts': 'true' } },
     {
       path: '/questionnaires/karmayoga-scale/',
-      current: TAKEABLE ? { Questionnaires: 'true' } : {},
+      current: { Questionnaires: 'true' },
     },
     { path: '/library/', current: { Library: 'page' } },
     { path: '/library/references/', current: { Library: 'true' } },
@@ -719,8 +720,8 @@ test.describe('the Drawer, on a phone', { tag: '@below-1440' }, () => {
     expect(await pathOf(drawer(page).getByRole('link', { name: 'Search' }))).toBe('/search/')
     // The menu opens with Search, before the sections.
     expect(await pathOf(drawer(page).getByRole('link').first())).toBe('/search/')
-    // The phone menu lists Questionnaires only while one can be taken, like the header.
-    await expect(drawer(page).locator('a[href$="/questionnaires/"]')).toHaveCount(TAKEABLE ? 1 : 0)
+    // The phone menu always lists Questionnaires, like the header.
+    await expect(drawer(page).locator('a[href$="/questionnaires/"]')).toHaveCount(1)
     // Under Concepts the five topics come first, then "All concepts A–Z" and the map.
     const conceptsList = nav.locator('ul', { hasText: 'All concepts A–Z' })
     const listed = await conceptsList.getByRole('link').all()
