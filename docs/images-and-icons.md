@@ -208,7 +208,7 @@ From 64rem the homepage's Folio and its sections widen to 72rem, on the homepage
 
 ### 5.3 Section pages
 
-A Sticker sits centred above the page's heading, at 112 px (88 px below 40rem). It is decorative, since the heading names the section.
+A Sticker sits centred above the page's heading, at 112 px (88 px below 48rem). It is decorative, since the heading names the section.
 
 | Page | Sticker | Interim picture |
 |---|---|---|
@@ -236,18 +236,18 @@ A Sticker sits centred above the page's heading, at 112 px (88 px below 40rem). 
 | Values: yama and niyama | `sticker-values` (new). Interim picture: `sticker-book-ornate` | `plate-tree-of-mind` |
 | Temperament (guṇa) | `sticker-gunas` (new). Interim picture: `sticker-gear`, so Cosmos does not appear twice in the topic row | `plate-farmers` |
 
-A topic page shows its Frontispiece only, centred above the heading (200 px below 40rem). Its ring takes the topic's colour. The Sticker stays on the topic's card, wherever that card appears, including on `/concepts/`. The Frontispiece is decorative. A–Z entries carry no picture.
+A topic page shows its Frontispiece only, centred above the heading (200 px below 48rem). Its ring takes the topic's colour. The Sticker stays on the topic's card, wherever that card appears, including on `/concepts/`. The Frontispiece is decorative. A–Z entries carry no picture.
 
 ### 5.5 Concept pages and cards
 
-- **Concept page:** the Concept's Medallion at 120 px (88 px below 40rem), centred above the title at every width. Decorative. The 88 px is set by `tests/e2e/concept.spec.ts`: at 390 px the first section sits at 1597 of its 1700 px limit, and a picture adds its height plus the title block's 12 px gap.
+- **Concept page:** the Concept's Medallion at 120 px (88 px below 48rem), centred above the title at every width. Decorative. The 88 px is set by `tests/e2e/concept.spec.ts`: at 390 px the first section sits at 1597 of its 1700 px limit, and a picture adds its height plus the title block's 12 px gap.
 - **Concept card** (homepage, topic pages, Start here): its Medallion at 64 px (72 on the homepage's featured cards), in its own row above the title. Decorative.
 - **A–Z index, the concept map, the "related Concepts" links on a Questionnaire page:** no picture on any entry or link. They stay clean indexes and plain links. The index and map pages keep their head Sticker (5.3).
 - **Which:** each Concept gets its own Plate (`plate-<slug>`, section 7.8). Interim picture: its topic's Sticker, or that topic's Interim picture from 5.4 until the Sticker exists, at the same sizes (120 / 88), at the head of the Concept page only, never on the card.
 
 ### 5.6 Questionnaire pages and cards
 
-- **Page:** a Medallion at 120 px (88 px below 40rem), centred above the title. Decorative.
+- **Page:** a Medallion at 120 px (88 px below 48rem), centred above the title. Decorative.
 - **Card:** its own Plate as a Medallion at 64 px, in its own row above the title, with the status badge to its right. Decorative. A card with no Plate of its own stays bare.
 - **Which, at the page head:** the Questionnaire's own Plate if it has one, otherwise its first Concept's Plate, otherwise `sticker-clipboard` as the Interim picture.
 - **Own Plates:** the KarmaYoga Scale gets `plate-karma-yoga`, the client's "Karmayoga Main image", which is made for it. The Dosha Survey's Plate waits until the Survey has a page (D11).
@@ -269,7 +269,7 @@ The old Courses page hot-linked five universities' logos from their own sites. T
 
 | Page | Picture | Size |
 |---|---|---|
-| 404 | `plate-404` (new, shown as a Medallion). Interim picture: `emblem-mark` | 200 (160 below 40rem) |
+| 404 | `plate-404` (new, shown as a Medallion). Interim picture: `emblem-mark` | 200 (160 below 48rem) |
 | Error and global error | `emblem-mark` | 96 |
 
 The 404 page asks `artFor` for its picture and shows a Medallion when it gets a Plate, or the decorative Emblem when it gets `emblem-mark`. The error pages show the Emblem directly.

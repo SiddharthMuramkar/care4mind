@@ -151,14 +151,14 @@
   }
 }
 
-/* Below 64rem the sections are in the Drawer, so only Search and Log in stand here, side by side. */
+/* Below 80rem the sections are in the Drawer, so only Search and Log in stand here, side by side. */
 .nav {
   display: flex;
   align-items: center;
   gap: 0;
 }
 
-/* Search: a reading glass on narrow screens, a labelled field from 64rem. */
+/* Search: a reading glass on narrow screens, a labelled field from 80rem. */
 .search {
   position: relative;
   display: inline-flex;
@@ -223,7 +223,7 @@
   }
 }
 
-@media (width >= 64rem) {
+@media (width >= 80rem) {
   .nav {
     gap: 1.25rem;
   }

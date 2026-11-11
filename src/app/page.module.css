@@ -288,6 +288,7 @@
 
 /* The five topics, as the cards the Concepts page shows. */
 .topics {
+  container: home-topics / inline-size;
   list-style: none;
   margin: 0;
   padding: 0;
@@ -390,9 +391,14 @@
   }
 }
 
-/* Five to a row before the sections reach full width, the longest title needs a phone's size to stay whole. */
-@media (width >= 64rem) and (width < 80rem) {
-  .topics h3 {
-    font-size: 1.3125rem;
+/*
+ * Five to a row before the sections reach full width (the list's 66rem), the longest title needs
+ * a phone's size to stay whole. The list asks its own width, so the step ends where it fills out.
+ */
+@media (width >= 64rem) {
+  @container home-topics (width < 66rem) {
+    .topics h3 {
+      font-size: 1.3125rem;
+    }
   }
 }

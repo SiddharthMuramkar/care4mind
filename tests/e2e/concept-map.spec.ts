@@ -45,7 +45,7 @@ const group = (page: Page, name: 'Lines' | 'Topics') => page.getByRole('group', 
 const keyboardReady = (page: Page) =>
   expect(page.locator('[data-map] [role="group"][data-orientation]')).toHaveCount(2)
 
-const wide = (page: Page) => (page.viewportSize()?.width ?? 0) >= 600
+const wide = (page: Page) => (page.viewportSize()?.width ?? 0) >= 768
 
 /** A colour as 0–255 channels, whichever notation the browser computes it in. */
 function channels(value: string) {
