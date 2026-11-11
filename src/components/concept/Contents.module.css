@@ -99,8 +99,9 @@
  * the padding added.
  */
 @media (width < 48rem) {
+  /* Room for the current section's lozenge, turned on its point. */
   .list {
-    padding-inline-start: 1rem;
+    padding-inline-start: 1.125rem;
   }
 
   .tallLines .entry {

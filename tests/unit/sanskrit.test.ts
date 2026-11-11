@@ -170,9 +170,11 @@ describe('keepDandasWithWords', () => {
       ...(passage.transliteration?.lines ?? []),
     ])
     expect(
-      lines.some((line) => / [।॥|‖]/u.test(line)),
+      lines.some((line) => / (?:[।॥|‖]|\.{1,2}(?:\s|$))/u.test(line)),
       'the content has such lines',
     ).toBe(true)
-    expect(lines.map(keepDandasWithWords).filter((line) => / [।॥|‖]/u.test(line))).toEqual([])
+    expect(
+      lines.map(keepDandasWithWords).filter((line) => / (?:[।॥|‖]|\.{1,2}(?:\s|$))/u.test(line)),
+    ).toEqual([])
   })
 })

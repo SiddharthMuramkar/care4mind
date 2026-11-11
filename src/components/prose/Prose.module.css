@@ -287,6 +287,13 @@
     inset 0 0 0 16px color-mix(in srgb, var(--color-surface-ink) 35%, transparent);
 }
 
+/* On a phone the verse stands clear of the frame's outer rule, 10 px in, by more than 12 px. */
+@media (width < 48rem) {
+  .verseCard {
+    padding-inline: 1.5rem;
+  }
+}
+
 .verse {
   text-align: center;
   justify-items: center;

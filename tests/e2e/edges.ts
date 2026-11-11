@@ -284,7 +284,8 @@ export function cutOffOrOverlapping({ screen, pieces, clips }: Layout): string[]
  */
 export async function verseTrouble(page: Page, clearance: number): Promise<string[]> {
   const findings = await page.evaluate((clearance) => {
-    const DANDAS = /^[।॥|‖]+$/u
+    // Dandas, and the full stops some transliterations write them with.
+    const DANDAS = /^[।॥|‖.]+$/u
     const found: string[] = []
     for (const line of document.querySelectorAll('main [data-verse-line]')) {
       if (!line.checkVisibility()) continue
@@ -294,7 +295,10 @@ export async function verseTrouble(page: Page, clearance: number): Promise<strin
         found.push(`${quoted} is set in no card`)
         continue
       }
-      const edge = card.getBoundingClientRect()
+      const box = card.getBoundingClientRect()
+      // A framed card draws its outer rule 10 px in: the edge a reader sees.
+      const frame = card.querySelector(':scope > [data-corner]') ? 10 : 0
+      const edge = { left: box.left + frame, right: box.right - frame }
       const words: { word: string; top: number; bottom: number }[] = []
       const walker = document.createTreeWalker(line, NodeFilter.SHOW_TEXT)
       for (let node = walker.nextNode(); node; node = walker.nextNode()) {

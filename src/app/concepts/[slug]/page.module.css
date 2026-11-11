@@ -155,9 +155,13 @@
     font-weight: 600;
   }
 
-  /* A topic's name too long for its line, as at a large text size, wraps, never cut short. */
+  /*
+   * A topic's name too long for its line, as at a large text size, wraps, never cut short: one
+   * block, so its words (a transliterated one among them) wrap together.
+   */
   main.page nav[aria-label='Breadcrumb'] a {
-    overflow-wrap: anywhere;
+    display: block;
+    overflow-wrap: break-word;
   }
 }
 

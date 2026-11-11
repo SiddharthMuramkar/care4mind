@@ -302,7 +302,6 @@ for (const route of ROUTES_IN_SCOPE) {
     { tag: '@self-width' },
     async ({ page }) => {
       await gotoReady(page, route.path)
-      await page.waitForLoadState('networkidle')
       await page.evaluate(() => document.fonts.ready)
       await showDeferred(page)
       for (const width of [360, 390, 412]) {

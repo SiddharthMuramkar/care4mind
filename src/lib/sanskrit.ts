@@ -41,7 +41,8 @@ export function openingLine(lines: readonly string[]): string | undefined {
 }
 
 /** The spaces before a danda: । and ॥ in Devanagari, | and ‖ in a transliteration. */
-const BEFORE_DANDA = /\s+(?=[।॥|‖])/gu
+// A danda, or the "." and ".." a transliteration may write one with, standing as a word.
+const BEFORE_DANDA = /\s+(?=[।॥|‖]|\.{1,2}(?:\s|$))/gu
 
 /**
  * A verse line as the screen sets it: each danda held to the word it closes by a non-breaking

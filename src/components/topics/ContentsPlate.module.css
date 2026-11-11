@@ -142,6 +142,8 @@
  */
 @media (width < 48rem) {
   .row {
+    /* The row's lit ground and its link's target stay inside the paper's padding. */
+    margin-inline: 0;
     grid-template-columns: 2.5rem minmax(0, 1fr);
     grid-template-areas:
       'numeral name'
