@@ -759,9 +759,59 @@ test('the book lists switch between Inspirational and Academic, and Courses has 
   await expect(page.getByRole('navigation', { name: 'Book lists' })).toHaveCount(0)
 })
 
+/**
+ * How a table reads in its frame on a phone: whether the frame scrolls sideways; the words of
+ * its rows cut off by the frame or the screen, and those broken across two lines; each row
+ * whose cells don't stand stacked under its head; and each row head with a slash between two
+ * words but no line break allowed after it.
+ */
+function reading(frame: Locator) {
+  return frame.evaluate((element) => {
+    const box = element.getBoundingClientRect()
+    const right = Math.min(box.right, document.documentElement.clientWidth)
+    const cut: string[] = []
+    const broken: string[] = []
+    const unstacked: string[] = []
+    const unbroken: string[] = []
+    for (const cell of element.querySelectorAll('tbody :is(th, td)')) {
+      const walker = document.createTreeWalker(cell, NodeFilter.SHOW_TEXT)
+      for (let node = walker.nextNode(); node; node = walker.nextNode()) {
+        // A word ends at a space, or after a slash, hyphen or dash, where a line may break.
+        for (const match of (node.textContent ?? '').matchAll(/[^\s/‐–—-]+[/‐–—-]*/gu)) {
+          const range = document.createRange()
+          range.setStart(node, match.index)
+          range.setEnd(node, match.index + match[0].length)
+          const rects = [...range.getClientRects()].filter((rect) => rect.width > 0)
+          if (rects.some((rect) => rect.left < box.left - 0.5 || rect.right > right + 0.5))
+            cut.push(match[0])
+          if (new Set(rects.map((rect) => Math.round(rect.top))).size > 1) broken.push(match[0])
+        }
+      }
+    }
+    for (const row of element.querySelectorAll('tbody tr')) {
+      const [head, ...cells] = [...row.children].map((cell) => cell.getBoundingClientRect())
+      if (
+        head &&
+        cells.some((cell) => cell.top < head.bottom - 1 || Math.abs(cell.left - head.left) > 1)
+      )
+        unstacked.push(row.textContent ?? '')
+      const th = row.querySelector('th')
+      const slashes = (th?.textContent ?? '').match(/\/(?=\S)/g)?.length ?? 0
+      if (th && th.querySelectorAll('wbr').length < slashes) unbroken.push(th.textContent ?? '')
+    }
+    return {
+      scrolls: element.scrollWidth > element.clientWidth + 1,
+      cut,
+      broken,
+      unstacked,
+      unbroken,
+    }
+  })
+}
+
 for (const textPage of textPages)
   test(
-    `${textPage.title}: its sections, each table scrolling in its own named, focusable frame`,
+    `${textPage.title}: its sections, each table a stack of cards in its own named, focusable frame, every word in view`,
     { tag: '@self-width' },
     async ({ page }) => {
       await page.setViewportSize({ width: 360, height: 800 })
@@ -780,16 +830,31 @@ for (const textPage of textPages)
       await expect(
         page.getByRole('main').getByText(textPage.summary, { exact: false }),
       ).toHaveCount(1)
+      await page.evaluate(() => document.fonts.ready)
       for (const table of tables) {
         const frame = page.getByRole('region', { name: table.caption })
         await frame.scrollIntoViewIfNeeded()
         await frame.focus()
         await expect(frame).toBeFocused()
-        expect(await frame.evaluate((element) => element.scrollWidth > element.clientWidth)).toBe(
-          true,
+        // Every word reads in place: nothing to scroll sideways, none cut off, none split.
+        expect(await reading(frame), table.caption).toEqual({
+          scrolls: false,
+          cut: [],
+          broken: [],
+          unstacked: [],
+          unbroken: [],
+        })
+        // Each cell is headed by its column's name.
+        const labels = await frame
+          .locator('tbody td')
+          .evaluateAll((cells) => cells.map((cell) => getComputedStyle(cell, '::before').content))
+        expect(labels).toEqual(
+          table.rows.flatMap((row) =>
+            row.cells.map((_, column) =>
+              JSON.stringify(table.columns[row.head === undefined ? column : column + 1]),
+            ),
+          ),
         )
-        await page.keyboard.press('ArrowRight')
-        await expect.poll(() => frame.evaluate((element) => element.scrollLeft)).toBeGreaterThan(0)
       }
       expect(await scrollsSideways(page)).toEqual([])
     },

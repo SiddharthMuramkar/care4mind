@@ -85,6 +85,41 @@
   gap: 0.5rem;
 }
 
+/*
+ * Continue with Google keeps the site's own outlined button, with Google's G at its start so it
+ * reads as Google at a glance. Two classes deep, so it wins over the call's own padding and
+ * underline whichever stylesheet loads first.
+ */
+.google .googleButton {
+  gap: 0.625rem;
+  padding-inline-start: 0.5rem;
+}
+
+/* The underline that draws in on hover and focus runs under the words, not under the G. */
+.google .googleButton::after {
+  inset-inline-start: calc(0.5rem + 2rem + 0.625rem);
+}
+
+/* Google's rules put its G on white: a white roundel, ringed like the wordmark's 4. */
+.googleMark {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: inset 0 0 0 1px currentColor;
+}
+
+/* Contrast themes would paint the roundel in the theme's colour: keep it white behind the G. */
+@media (forced-colors: active) {
+  .googleMark {
+    forced-color-adjust: none;
+    border: 1px solid CanvasText;
+  }
+}
+
 .sent {
   margin: 0;
 }

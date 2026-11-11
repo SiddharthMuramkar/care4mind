@@ -89,15 +89,19 @@
 
 @media (width >= 64rem) {
   .body {
-    grid-template-columns: 14.5rem minmax(0, 1fr);
-    column-gap: clamp(2rem, 4vw, 3.5rem);
+    --contents-width: 14.5rem;
+    --contents-gap: clamp(2rem, 4vw, 3.5rem);
+    grid-template-columns: var(--contents-width) minmax(0, 1fr);
+    column-gap: var(--contents-gap);
   }
 
   /* A hairline down the middle of the gap, between the contents and the text. */
   .text {
-    padding-inline-start: calc(0.5 * clamp(2rem, 4vw, 3.5rem));
-    margin-inline-start: calc(-0.5 * clamp(2rem, 4vw, 3.5rem));
+    padding-inline-start: calc(0.5 * var(--contents-gap));
+    margin-inline-start: calc(-0.5 * var(--contents-gap));
     border-inline-start: 1px solid color-mix(in srgb, var(--color-surface-rule) 50%, transparent);
+    /* How far back a table too wide for the text reaches: across the contents and the hairline. */
+    --table-reach: calc(var(--contents-width) + var(--contents-gap) + 1px);
   }
 }
 
