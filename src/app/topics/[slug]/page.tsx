@@ -4,10 +4,11 @@ import { notFound } from 'next/navigation'
 import { artFor } from '@/art'
 import { Medallion } from '@/components/art'
 import { Numeral } from '@/components/Numeral'
+import { Pager, Turn } from '@/components/Pager'
 import { ReadingPage } from '@/components/ReadingPage'
 import { citationLinks, Provenance, Sections } from '@/components/prose'
 import { ReferenceList } from '@/components/ReferenceList'
-import { ScriptPair } from '@/components/script'
+import { ScriptPair, Transliterated } from '@/components/script'
 import { ConceptSpread, inWords, VerseIndex } from '@/components/topics'
 import { hrefFor, site, topics } from '@/content'
 import { metadataFor } from '@/lib/metadata'
@@ -29,7 +30,8 @@ export async function generateMetadata({ params }: PageProps<'/topics/[slug]'>):
 /**
  * A topic: its Concepts as cards beside a contents plate, set like a book's, whose rows
  * light as their cards are pointed at; the introduction it shares where it has one (the values
- * topic's yama–niyama text, stored once); and the verses its Concepts quote. No JavaScript.
+ * topic's yama–niyama text, stored once); the verses its Concepts quote; and the topics before
+ * and after it. No JavaScript.
  */
 export default async function TopicPage({ params }: PageProps<'/topics/[slug]'>) {
   const topic = await topics.get((await params).slug)
@@ -98,7 +100,7 @@ export default async function TopicPage({ params }: PageProps<'/topics/[slug]'>)
         </div>
       ) : null}
 
-      <section className={reading.section} aria-labelledby="concepts-title">
+      <section id="its-concepts" className={reading.section} aria-labelledby="concepts-title">
         <h2 id="concepts-title" className={reading.sectionTitle}>
           Its Concepts
         </h2>
@@ -114,12 +116,30 @@ export default async function TopicPage({ params }: PageProps<'/topics/[slug]'>)
         </section>
       ) : null}
 
-      {topic.intro ? (
-        <>
-          <ReferenceList references={topic.intro.references} />
-          <Provenance of={topic.intro} />
-        </>
+      {topic.intro ? <ReferenceList references={topic.intro.references} /> : null}
+
+      {topic.previous || topic.next ? (
+        <Pager label="Topics" className={styles.pager}>
+          {topic.previous ? (
+            <Turn
+              href={topic.previous.href}
+              rel="prev"
+              direction="Previous topic"
+              name={<Transliterated text={topic.previous.name} />}
+            />
+          ) : null}
+          {topic.next ? (
+            <Turn
+              href={topic.next.href}
+              rel="next"
+              direction="Next topic"
+              name={<Transliterated text={topic.next.name} />}
+            />
+          ) : null}
+        </Pager>
       ) : null}
+
+      {topic.intro ? <Provenance of={topic.intro} /> : null}
     </ReadingPage>
   )
 }

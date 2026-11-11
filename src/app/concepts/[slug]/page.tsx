@@ -82,7 +82,7 @@ export default async function ConceptPage({ params }: PageProps<'/concepts/[slug
   if (!concept) notFound()
 
   const citations = citationLinks(concept.citations, concept.references)
-  const { previous, next } = concept
+  const { previous, next, nextTopic } = concept
   const contents = contentsOf(concept)
 
   return (
@@ -210,6 +210,7 @@ export default async function ConceptPage({ params }: PageProps<'/concepts/[slug
               topic={concept.topic}
               {...(previous ? { previous } : {})}
               {...(next ? { next } : {})}
+              {...(nextTopic ? { nextTopic } : {})}
             />
 
             <Provenance of={concept} />
