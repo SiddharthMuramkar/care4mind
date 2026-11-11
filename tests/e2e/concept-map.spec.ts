@@ -3,6 +3,7 @@ import type { Locator, Page } from '@playwright/test'
 import { hrefFor, site } from '@/content'
 
 import { expectNoAxeViolations } from './axe'
+import { expectTrail } from './breadcrumbs'
 import { expect, gotoReady, scrollsSideways, test } from './fixtures'
 import { expectPageTurned, pageTurns, prefetched, recordPageTurns } from './page-turns'
 
@@ -79,8 +80,7 @@ test.describe('the Concept map', () => {
       hrefFor({ page: 'proposals' }),
     )
     await expect(header).toContainText('Awaiting the Project owner’s decision')
-    const crumbs = page.getByRole('navigation', { name: 'Breadcrumb' }).getByRole('listitem')
-    await expect(crumbs).toHaveText(['Go to home', 'Concepts', 'Concept map'])
+    await expectTrail(page, ['Go to home', 'Concepts', 'Concept map'])
   })
 
   test('lists every connection with its reasons, both Concepts as links', async ({ page }) => {

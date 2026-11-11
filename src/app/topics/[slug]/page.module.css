@@ -57,3 +57,10 @@
   max-width: 46rem;
   justify-self: center;
 }
+
+/* The topics before and after this one, at the reading measure the introduction keeps. */
+.pager {
+  width: 100%;
+  max-width: 46rem;
+  justify-self: center;
+}

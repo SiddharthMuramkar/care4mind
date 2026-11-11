@@ -970,6 +970,23 @@ describe('the rest of a Concept’s page', () => {
     expect(card('obstacles')).toMatchObject({ name: 'Vighna', href: '/concepts/obstacles/' })
   })
 
+  it('leads the last Concept in its topic on to the next topic, in the topics’ order', async () => {
+    const content = createContent(memorySource(...records), ON)
+    // The made-up topics are mind (1) and self (3): the next one after mind is self.
+    expect((await content.concepts.get('obstacles'))?.nextTopic).toEqual({
+      slug: 'self',
+      name: 'Self',
+      href: '/topics/self/',
+    })
+    // A Concept with a next one in its topic leads there instead.
+    for (const slug of ['first', 'calm'])
+      expect(await content.concepts.get(slug), slug).not.toHaveProperty('nextTopic')
+    // The last topic has no topic after it.
+    const last = await content.concepts.get('elsewhere')
+    expect(last).not.toHaveProperty('next')
+    expect(last).not.toHaveProperty('nextTopic')
+  })
+
   it('carries its names, topics, external links, provenance and review status', async () => {
     const found = await view()
     expect(found).toMatchObject({
@@ -1088,6 +1105,24 @@ describe('topics', () => {
       { slug: 'values', name: 'Values', href: '/topics/values/', order: 2, conceptCount: 1 },
       { slug: 'self', name: 'Self', href: '/topics/self/', order: 3, conceptCount: 1 },
     ])
+  })
+
+  it('gives a topic the topics before and after it, in their order', async () => {
+    const around = async (slug: string) => {
+      const view = await content().topics.get(slug)
+      return [view?.previous?.slug, view?.next?.slug]
+    }
+    expect(await around('mind')).toEqual([undefined, 'values'])
+    expect(await around('values')).toEqual(['mind', 'self'])
+    expect(await around('self')).toEqual(['values', undefined])
+    expect((await content().topics.get('values'))?.next).toEqual({
+      slug: 'self',
+      name: 'Self',
+      href: '/topics/self/',
+    })
+    // The first has nothing before it and the last nothing after it, not an empty field.
+    expect(await content().topics.get('mind')).not.toHaveProperty('previous')
+    expect(await content().topics.get('self')).not.toHaveProperty('next')
   })
 
   it('gives a topic its Concepts, then those also in it, and the verses its Concepts quote', async () => {

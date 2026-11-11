@@ -12,6 +12,7 @@ import {
 } from '@/content'
 
 import { expectNoAxeViolations } from './axe'
+import { expectTrail } from './breadcrumbs'
 import { expect, gotoReady, scrollsSideways, test } from './fixtures'
 import { expectPageTurned, pageTurns, prefetched, recordPageTurns } from './page-turns'
 
@@ -491,17 +492,17 @@ test.describe('The Library home', () => {
   })
 })
 
-test('every Library page has its breadcrumbs: Go to home › Library › the page', async ({
+test('every Library page has its breadcrumbs: Go to home › Library › the page, or on a phone the one crumb above', async ({
   page,
 }) => {
   for (const path of LIBRARY_PAGES) {
     await gotoReady(page, path)
-    const crumbs = page.getByRole('navigation', { name: 'Breadcrumb' }).getByRole('listitem')
     const title = VOLUMES.find(({ href }) => href === path)?.title
-    await expect(crumbs, path).toHaveText(
+    await expectTrail(
+      page,
       title ? ['Go to home', 'Library', title] : ['Go to home', 'Library'],
+      path,
     )
-    await expect(crumbs.last().locator('[aria-current="page"]')).toHaveCount(1)
   }
 })
 
