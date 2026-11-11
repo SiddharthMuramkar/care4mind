@@ -1,4 +1,4 @@
-/* The narrow screen's Menu, gone from 64rem (WIDE in current.ts), where the sections fit. */
+/* The narrow screen's Menu, gone from 80rem (WIDE in current.ts), where the sections fit. */
 .menu {
   display: inline-flex;
   align-items: center;
@@ -40,7 +40,7 @@
   }
 }
 
-@media (width >= 64rem) {
+@media (width >= 80rem) {
   .menu {
     display: none;
   }

@@ -64,7 +64,7 @@ for (const route of ROUTES_IN_SCOPE) {
     if (route.kind !== 'home') {
       const trail = page.getByRole('navigation', { name: 'Breadcrumb', exact: true })
       await expect.soft(trail, `${where}: one Breadcrumb landmark`).toHaveCount(1)
-      if (route.kind === 'concept' && (page.viewportSize()?.width ?? 0) <= 640) {
+      if (route.kind === 'concept' && (page.viewportSize()?.width ?? 0) < 768) {
         const topic = trail.getByRole('link')
         await expect
           .soft(topic, `${where}: Breadcrumb’s one phone link, to its topic`)
@@ -213,20 +213,22 @@ test.describe('the double frame', { tag: '@self-width' }, () => {
       }
     })
 
-  test('a reading page below 768 px runs its paper edge to edge, unframed, its text 20 px in', async ({
-    page,
-  }) => {
-    await page.setViewportSize({ width: 360, height: 800 })
-    await gotoReady(page, '/concepts/')
-    const panel = folio(page)
-    await expect(panel.locator('[data-corner]')).toHaveCount(0)
-    const box = await across(panel)
-    expect(box.shadow).toBe('none')
-    expect(box.fromLeft).toBeCloseTo(0, 0)
-    expect(box.fromRight).toBeCloseTo(0, 0)
-    expect(box.textFromLeft).toBeCloseTo(20, 0)
-    expect(box.textFromRight).toBeCloseTo(20, 0)
-  })
+  for (const width of [360, 700]) {
+    test(`a reading page at ${width} px (below 768) runs its paper edge to edge, unframed, its text 20 px in`, async ({
+      page,
+    }) => {
+      await page.setViewportSize({ width, height: 800 })
+      await gotoReady(page, '/concepts/')
+      const panel = folio(page)
+      await expect(panel.locator('[data-corner]')).toHaveCount(0)
+      const box = await across(panel)
+      expect(box.shadow).toBe('none')
+      expect(box.fromLeft).toBeCloseTo(0, 0)
+      expect(box.fromRight).toBeCloseTo(0, 0)
+      expect(box.textFromLeft).toBeCloseTo(20, 0)
+      expect(box.textFromRight).toBeCloseTo(20, 0)
+    })
+  }
 
   test('a reading page on a wide screen keeps one thin rule and no corners', async ({ page }) => {
     await page.setViewportSize({ width: 768, height: 1024 })
