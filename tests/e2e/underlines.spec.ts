@@ -21,7 +21,7 @@ const DRAWN: { page: string; name: string; in: (page: Page) => Locator; width?: 
     page: '/',
     name: 'Concepts',
     in: (page: Page) => page.getByRole('navigation', { name: 'Main' }),
-    // The header shows its sections from 72rem; narrower screens find them in the Menu.
+    // The header shows its sections from 64rem; narrower screens find them in the Menu.
     width: 1440,
   },
   // The hero's "Start here": the closing button at the foot of the page repeats its label.

@@ -17,9 +17,9 @@
   scroll-margin-top: 1.5rem;
 }
 
-/* Below 640px the folio has no side padding for the wash to reach into; the margin rule
+/* Below 768px the folio has no side padding for the wash to reach into; the margin rule
    still stands clear of the text. */
-@media (width < 40rem) {
+@media (width < 48rem) {
   .passage {
     --bleed: 0rem;
     padding-inline-start: 1rem;

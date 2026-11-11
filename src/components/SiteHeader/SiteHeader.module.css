@@ -4,6 +4,8 @@
  * top edge (--layer-thread is above --layer-header).
  */
 .header {
+  /* The narrowest phones' tweaks below ask the header's own width, which is the screen's. */
+  container: site-header / inline-size;
   position: sticky;
   top: 0;
   z-index: var(--layer-header);
@@ -134,7 +136,7 @@
  * its gap, the wordmark, then the strip's padding. Without the padding, the wordmark's stand-in
  * face leaves half a pixel, less than Linux's whole-pixel glyph hinting can take.
  */
-@media (width < 22.5rem) {
+@container site-header (width < 22.5rem) {
   .strip {
     padding-inline: 0.5rem;
   }
@@ -149,14 +151,14 @@
   }
 }
 
-/* Below 72rem the sections are in the Drawer, so only Search and Log in stand here, side by side. */
+/* Below 64rem the sections are in the Drawer, so only Search and Log in stand here, side by side. */
 .nav {
   display: flex;
   align-items: center;
   gap: 0;
 }
 
-/* Search: a reading glass on narrow screens, a labelled field from 72rem. */
+/* Search: a reading glass on narrow screens, a labelled field from 64rem. */
 .search {
   position: relative;
   display: inline-flex;
@@ -214,14 +216,14 @@
   color: var(--color-ink);
 }
 
-@media (width < 24rem) {
+@container site-header (width < 24rem) {
   .login {
     font-size: var(--text-small);
     padding: 0;
   }
 }
 
-@media (width >= 72rem) {
+@media (width >= 64rem) {
   .nav {
     gap: 1.25rem;
   }

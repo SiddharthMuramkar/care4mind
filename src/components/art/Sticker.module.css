@@ -24,7 +24,7 @@
   margin-block-end: 1rem;
 }
 
-@media (width < 40rem) {
+@media (width < 48rem) {
   .head {
     width: 5.5rem;
   }

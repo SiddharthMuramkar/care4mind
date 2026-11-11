@@ -16,13 +16,13 @@
 }
 
 /* A Medallion with a phone size has a ring for each width, and shows the one that suits. */
-@media (width >= 40rem) {
+@media (width >= 48rem) {
   .medallion .phoneRing {
     display: none;
   }
 }
 
-@media (width < 40rem) {
+@media (width < 48rem) {
   .medallion .wideRing {
     display: none;
   }

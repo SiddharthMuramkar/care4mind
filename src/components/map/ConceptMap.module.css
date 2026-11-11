@@ -13,14 +13,14 @@
   --dim: 1;
 }
 
-/* Below about 600 px the list leads; the plate shows once its link is followed (#plate). */
+/* Below 768 px the list leads; the plate shows once its link is followed (#plate). */
 .toPlate,
 .toList {
   display: none;
   margin: 0;
 }
 
-@media (width < 37.5rem) {
+@media (width < 48rem) {
   .toPlate,
   .toList {
     display: block;

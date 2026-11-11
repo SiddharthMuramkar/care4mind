@@ -30,7 +30,7 @@
   font-size: 50px;
 }
 
-@media (width >= 34rem) {
+@media (width >= 48rem) {
   .drawing {
     font-size: 32px;
   }
@@ -67,7 +67,7 @@
   stroke-linejoin: round;
 }
 
-@media (width >= 34rem) {
+@media (width >= 48rem) {
   .arrow {
     stroke-width: 3.5;
   }

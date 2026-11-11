@@ -77,7 +77,7 @@
 }
 
 /* Wide: the labels in a margin of their own, as a printed form's. */
-@media (width >= 40rem) {
+@media (width >= 48rem) {
   .facts {
     grid-template-columns: 10rem minmax(0, 1fr);
   }

@@ -9,8 +9,8 @@ import { ROUTES } from './routes'
 // The navigation shell: the header's sections and Search, the panels
 // a computer opens from two of them, the Drawer a phone opens from Menu, and the footer.
 
-/** From 72rem (1152 px) the sections and Search fit on one line; below it the Menu takes over. */
-const WIDE = 1152
+/** From 64rem (1024 px) the sections and Search fit on one line; below it the Menu takes over. */
+const WIDE = 1024
 
 /** A take page is a route only while its Questionnaire can be taken in this build. */
 const TAKEABLE = ROUTES.some(({ kind }) => kind === 'questionnaire-flow')
@@ -650,7 +650,7 @@ test.describe('every panel stays inside the screen', { tag: '@self-width' }, () 
       await page.setViewportSize({ width, height: 800 })
       await gotoReady(page, '/')
       if (width < WIDE) {
-        // Below 72rem the sections open in the Drawer, the only panel there is.
+        // Below 64rem the sections open in the Drawer, the only panel there is.
         await banner(page).getByRole('button', { name: 'Menu' }).click()
         const drawer = page.getByRole('dialog', { name: 'Menu' })
         await expect(drawer).toBeVisible()
@@ -876,7 +876,7 @@ test.describe('the Drawer, on a phone', { tag: '@below-1440' }, () => {
 test('with reduced motion, a section link changes the page at once', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' })
   await gotoReady(page, '/concepts/vikshepa/')
-  // In the header from 72rem; on narrower screens, in the Drawer.
+  // In the header from 64rem; on narrower screens, in the Drawer.
   if (!isWide(page)) await banner(page).getByRole('button', { name: 'Menu' }).click()
   await page
     .getByRole('navigation', { name: 'Main' })

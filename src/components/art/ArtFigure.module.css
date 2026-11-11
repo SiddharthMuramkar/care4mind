@@ -19,7 +19,7 @@
 }
 
 /* Drawn a little smaller on a phone. The width attribute stays 160, so the same two files serve. */
-@media (width < 40rem) {
+@media (width < 48rem) {
   .picture {
     width: 150px;
   }

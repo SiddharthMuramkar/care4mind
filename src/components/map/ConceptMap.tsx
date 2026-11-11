@@ -33,8 +33,8 @@ function ConceptLink({ point }: { point: MapPoint | undefined }) {
  * Everything is laid out while the site builds. The plate is three layers of hairline curves (SVG,
  * hidden from assistive technology), one per kind of connection, under the Concepts themselves:
  * ordinary links, in the topics' order. Pointing at or focusing a Concept lights its neighbours
- * through `:has()` rules made here; the filters are the page's one client island. Below about
- * 600 px the list leads and the plate waits one tap away, at #plate.
+ * through `:has()` rules made here; the filters are the page's one client island. Below 768 px
+ * the list leads and the plate waits one tap away, at #plate.
  */
 export function ConceptMap({ layout }: { layout: MapLayout }) {
   const { top, height } = layout.view

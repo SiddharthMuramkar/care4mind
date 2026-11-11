@@ -197,7 +197,7 @@
 
 /* A comparison table on a phone: no frame to scroll; each row a card, each cell under its
    column's name, which the hidden head row still names for a screen reader. */
-@media screen and (width < 40rem) {
+@media screen and (width < 48rem) {
   .frameStacked {
     overflow: visible;
     border: 0;
@@ -252,7 +252,7 @@
 }
 
 /* A stacked table's head row carries sr-only on a phone; above one, and on paper, it is itself again. */
-@media print, (width >= 40rem) {
+@media print, (width >= 48rem) {
   .stackedHead {
     position: static;
     width: auto;

@@ -12,7 +12,7 @@
   margin-inline: auto;
 }
 
-@media (width >= 40rem) {
+@media (width >= 48rem) {
   .viewport {
     inset-inline: auto 2rem;
     bottom: 2rem;

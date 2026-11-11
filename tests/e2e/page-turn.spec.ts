@@ -108,8 +108,8 @@ async function headerBesideTheLotus(page: Page) {
 test('links in the header change page at once, without turning it', async ({ page }) => {
   await recordPageTurns(page)
   await gotoReady(page, '/concepts/vikshepa/')
-  // The sections are in the header from 72rem; on narrower screens, in the Menu's Drawer.
-  if ((page.viewportSize()?.width ?? 0) < 1152) {
+  // The sections are in the header from 64rem; on narrower screens, in the Menu's Drawer.
+  if ((page.viewportSize()?.width ?? 0) < 1024) {
     await page.getByRole('banner').getByRole('button', { name: 'Menu' }).click()
   }
   const link = page

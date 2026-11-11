@@ -71,7 +71,7 @@
 }
 
 /* A finger needs more than a pointer does. */
-@media (width < 40rem) {
+@media (width < 48rem) {
   .chip,
   .clear {
     min-height: 2.75rem;

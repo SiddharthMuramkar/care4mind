@@ -1,4 +1,8 @@
 /* Fixed columns, so a picture stands at the same place in every family's row. */
+.galleryFrame {
+  container: credits-gallery / inline-size;
+}
+
 .gallery {
   display: grid;
   grid-template-columns: repeat(auto-fill, 160px);
@@ -30,7 +34,7 @@
 }
 
 /* At 360px the text is 328px wide: ArtFigure draws at 150px here, so two columns keep their room. */
-@media (width < 40rem) {
+@media (width < 48rem) {
   .gallery {
     grid-template-columns: repeat(auto-fill, 150px);
     column-gap: 1.75rem;
@@ -42,7 +46,8 @@
 }
 
 /* Too narrow for two columns: the one column stands in the middle. */
-@media (width < 22.5rem) {
+/* The gallery's own width: 20.5rem is its width on a 360 px phone. */
+@container credits-gallery (width < 20.5rem) {
   .gallery {
     justify-content: center;
   }

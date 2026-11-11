@@ -263,7 +263,7 @@
   gap: 0.75rem;
 }
 
-@media (width >= 40rem) {
+@media (width >= 48rem) {
   .topics {
     grid-template-columns: repeat(auto-fill, minmax(11.25rem, 1fr));
     gap: 1rem;
@@ -359,7 +359,7 @@
 }
 
 /* Five to a row before the sections reach full width, the longest title needs a phone's size to stay whole. */
-@media (width >= 64rem) and (width < 72rem) {
+@media (width >= 64rem) and (width < 80rem) {
   .topics h3 {
     font-size: 1.3125rem;
   }

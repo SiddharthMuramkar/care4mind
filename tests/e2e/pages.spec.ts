@@ -190,11 +190,11 @@ test.describe('the 404 page picture', { tag: '@self-width' }, () => {
 })
 
 // The double frame marks only the hero, verse cards and featured cards; a reading page is a
-// paper panel with one thin rule, and below 640 px no frame and 16 px side margins (@self-width).
+// paper panel with one thin rule, and below 768 px no frame and 16 px side margins (@self-width).
 test.describe('the double frame', { tag: '@self-width' }, () => {
   const folio = (page: import('@playwright/test').Page) => page.locator('main [data-paper]').first()
 
-  test('a reading page below 640 px has no frame and its text runs to 16 px', async ({ page }) => {
+  test('a reading page below 768 px has no frame and its text runs to 16 px', async ({ page }) => {
     await page.setViewportSize({ width: 360, height: 800 })
     await gotoReady(page, '/concepts/')
     const panel = folio(page)
@@ -225,7 +225,7 @@ test.describe('the double frame', { tag: '@self-width' }, () => {
     expect(shadow.match(/inset/g)).toHaveLength(1)
   })
 
-  test('the 404 page below 640 px has no frame either', async ({ page }) => {
+  test('the 404 page below 768 px has no frame either', async ({ page }) => {
     await page.setViewportSize({ width: 360, height: 800 })
     await gotoReady(page, MISSING)
     const panel = folio(page)

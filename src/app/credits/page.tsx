@@ -40,10 +40,12 @@ export default function CreditsPage() {
             <h2 id={`${family}-title`} className={reading.sectionTitle}>
               {title}
             </h2>
-            <div className={styles.gallery}>
-              {members.map((picture) => (
-                <ArtFigure key={picture.id} art={picture} shape={shape} />
-              ))}
+            <div className={styles.galleryFrame}>
+              <div className={styles.gallery}>
+                {members.map((picture) => (
+                  <ArtFigure key={picture.id} art={picture} shape={shape} />
+                ))}
+              </div>
             </div>
           </section>
         )
