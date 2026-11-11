@@ -104,7 +104,7 @@ test.describe('The Karma Yoga cycle', () => {
     'sets every label at 15 px or more on a 360 px phone and where the type steps down',
     { tag: '@self-width' },
     async ({ page }) => {
-      for (const width of [360, 544]) {
+      for (const width of [360, 768]) {
         await page.setViewportSize({ width, height: 800 })
         await gotoReady(page, PATH)
         const sizes = await drawing(page).evaluate((svg) => {
@@ -123,7 +123,7 @@ test.describe('The Karma Yoga cycle', () => {
     'keeps labels apart and any arrow off them, from a phone up',
     { tag: '@self-width' },
     async ({ page }) => {
-      for (const width of [360, 640, 1024]) {
+      for (const width of [360, 768, 1024]) {
         await page.setViewportSize({ width, height: 800 })
         await gotoReady(page, PATH)
         await page.evaluate(() => document.fonts.ready)

@@ -484,7 +484,7 @@ test.describe('The Library home', () => {
       .getByRole('navigation', { name: 'The Library’s sections' })
       .getByRole('link', { name: `${volume.title} ${volume.holds}` })
     await prefetched(link)
-    if ((page.viewportSize()?.width ?? 0) >= 640)
+    if ((page.viewportSize()?.width ?? 0) >= 768)
       await expect
         .poll(() => link.evaluate((element) => getComputedStyle(element).transform))
         .not.toBe('none')
