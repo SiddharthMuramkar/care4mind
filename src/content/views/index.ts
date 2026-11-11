@@ -170,8 +170,8 @@ export function createContent(source: ContentSource, flags: Features) {
       },
       /**
        * Whether any Questionnaire can be taken in this build: a live one with a form, or a
-       * preview one with a form while `questionnairePreview` is on. The header lists
-       * Questionnaires only then, so the link returns by itself when one goes live.
+       * preview one with a form while `questionnairePreview` is on. The footer names its
+       * Questionnaires link plainly only then, and by its drafted label otherwise.
        */
       async anyTakeable(): Promise<boolean> {
         const read = await graph()
