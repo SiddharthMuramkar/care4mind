@@ -22,9 +22,11 @@
   min-width: 0;
 }
 
+/* Running text keeps to the reading measure, however wide its column. */
 .section :where(p),
 .term :where(p) {
   margin: 0;
+  max-width: var(--measure-text);
 }
 
 .sectionTitle {
@@ -101,6 +103,7 @@
 
 .list {
   margin: 0;
+  max-width: var(--measure-text);
   padding-inline-start: 1.25rem;
   display: grid;
   gap: 0.6rem;

@@ -3,6 +3,8 @@
   padding: clamp(2rem, 6vw, 4.5rem) clamp(1.25rem, 6vw, 4.5rem);
   background: var(--color-surface);
   color: var(--color-surface-ink);
+  /* A word longer than its line, as at a large text size, breaks rather than run off the paper. */
+  overflow-wrap: break-word;
   --rule-colour: var(--color-highlight);
 }
 
@@ -23,10 +25,13 @@
     0 30px 60px -20px rgb(0 0 0 / 0.55);
 }
 
-/* Below 768px a reading page has no frame: its text runs to the page's own 16px margins. */
+/*
+ * Below 768px a reading page's paper runs edge to edge, with no frame, and its text keeps the
+ * phone's inset off both sides. Everything set on it keeps inside that padding.
+ */
 @media (width < 48rem) {
   .page {
-    padding-inline: 0;
+    padding-inline: var(--inset-phone);
     box-shadow: none;
   }
 }

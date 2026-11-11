@@ -37,16 +37,19 @@ const card = (page: Page, name: string) =>
   page.getByRole('link', { name: `Read about ${name}`, exact: true })
 
 /**
- * How a row looks: its name's colour, and how much of its dotted leader is inked, from 0 to 1
- * (the ink is uncovered from the centre, so `inset(0px 50%)` is none of it and `inset(0px)` all).
+ * How a row looks: its name's colour, whether its dotted leader is drawn (from 768 px), and how
+ * much of the leader is inked, from 0 to 1 (the ink is uncovered from the centre, so
+ * `inset(0px 50%)` is none of it and `inset(0px)` all).
  */
 const looks = (row: Locator) =>
   row.evaluate((item) => {
     const name = item.querySelector('a > :not([aria-hidden])')
-    const ink = item.querySelector('[data-leader] > *')
+    const leader = item.querySelector('[data-leader]')
+    const ink = leader?.firstElementChild
     const sides = /^inset\(\S+(?: ([\d.]+)%)?/.exec(ink ? getComputedStyle(ink).clipPath : '')
     return {
       color: name ? getComputedStyle(name).color : '',
+      leader: leader?.checkVisibility() ?? false,
       ink: sides ? 1 - Number(sides[1] ?? 0) / 50 : NaN,
     }
   })
@@ -115,36 +118,111 @@ test('opens a verse after its speaker’s line, even one joined by sandhi', asyn
   await expect(link).not.toContainText('उवाच')
 })
 
-test('focusing a card lights its row and inks in the row’s leader', async ({ page }) => {
-  await gotoReady(page, hrefFor({ kind: 'topic', id: 'mind' }))
-  const [first, second] = conceptsOf(mind)
-  if (!first || !second) throw new Error('The mind topic has two Concepts.')
-  const before = await looks(row(page, plateName(first)))
-  expect(before.ink, 'a leader is plain dots until its row lights').toBe(UNINKED)
+test(
+  'focusing a card lights its row and inks in the row’s leader',
+  { tag: '@from-768' },
+  async ({ page }) => {
+    await gotoReady(page, hrefFor({ kind: 'topic', id: 'mind' }))
+    const [first, second] = conceptsOf(mind)
+    if (!first || !second) throw new Error('The mind topic has two Concepts.')
+    const before = await looks(row(page, plateName(first)))
+    expect(before.ink, 'a leader is plain dots until its row lights').toBe(UNINKED)
 
-  await card(page, first.name).focus()
-  await expect.poll(async () => (await looks(row(page, plateName(first)))).ink).toBe(INKED)
-  expect((await looks(row(page, plateName(first)))).color, 'the lit row changes colour').not.toBe(
-    before.color,
-  )
-  expect((await looks(row(page, plateName(second)))).ink, 'only its own row lights').toBe(UNINKED)
+    await card(page, first.name).focus()
+    await expect.poll(async () => (await looks(row(page, plateName(first)))).ink).toBe(INKED)
+    expect((await looks(row(page, plateName(first)))).color, 'the lit row changes colour').not.toBe(
+      before.color,
+    )
+    expect((await looks(row(page, plateName(second)))).ink, 'only its own row lights').toBe(UNINKED)
 
-  // Pointing at another card moves the light to its row.
-  await page.locator(':focus').blur()
-  await card(page, second.name).hover()
-  await expect.poll(async () => (await looks(row(page, plateName(second)))).ink).toBe(INKED)
-  await expect.poll(async () => (await looks(row(page, plateName(first)))).ink).toBe(UNINKED)
-})
+    // Pointing at another card moves the light to its row.
+    await page.locator(':focus').blur()
+    await card(page, second.name).hover()
+    await expect.poll(async () => (await looks(row(page, plateName(second)))).ink).toBe(INKED)
+    await expect.poll(async () => (await looks(row(page, plateName(first)))).ink).toBe(UNINKED)
+  },
+)
 
-test('focusing a row lights it too', async ({ page }) => {
+test('focusing a row lights it too, inking in its leader where one is drawn', async ({ page }) => {
   await gotoReady(page, hrefFor({ kind: 'topic', id: 'mind' }))
   const [first] = conceptsOf(mind)
   if (!first) throw new Error('The mind topic has a Concept.')
+  const before = await looks(row(page, plateName(first)))
   await plate(page)
     .getByRole('link', { name: plateName(first), exact: true })
     .focus()
-  await expect.poll(async () => (await looks(row(page, plateName(first)))).ink).toBe(INKED)
+  await expect
+    .poll(
+      async () => (await looks(row(page, plateName(first)))).color,
+      'the lit row changes colour',
+    )
+    .not.toBe(before.color)
+  if (before.leader)
+    await expect.poll(async () => (await looks(row(page, plateName(first)))).ink).toBe(INKED)
 })
+
+test(
+  'on a phone every part of a contents row sits inside the paper’s padding, the Devanagari under its name and no leader drawn',
+  { tag: '@self-width' },
+  async ({ page }) => {
+    await page.setViewportSize({ width: 360, height: 800 })
+    await gotoReady(page, hrefFor({ kind: 'topic', id: 'mind' }))
+    const rows = await plate(page)
+      .getByRole('listitem')
+      .evaluateAll((items) =>
+        items.map((item) => {
+          const paper = item.closest('[data-paper]')
+          if (!paper) throw new Error('The plate is set on the paper.')
+          const style = getComputedStyle(paper)
+          const box = paper.getBoundingClientRect()
+          const inside = {
+            left: box.left + parseFloat(style.paddingLeft),
+            right: box.right - parseFloat(style.paddingRight),
+          }
+          /** Where a part's text runs, or null when the row has no such part. */
+          const extent = (part: Element | null) => {
+            if (!part) return null
+            const range = document.createRange()
+            range.selectNodeContents(part)
+            const { left, right, top, bottom } = range.getBoundingClientRect()
+            return { left, right, top, bottom }
+          }
+          const parts = {
+            numeral: extent(item.querySelector(':scope > span:first-child')),
+            name: extent(item.querySelector(':scope > a')),
+            devanagari: extent(item.querySelector(':scope > [lang="sa-Deva"]')),
+          }
+          return {
+            name: item.querySelector(':scope > a')?.textContent ?? '',
+            outside: Object.entries(parts).flatMap(([part, at]) =>
+              at && (at.left < inside.left - 0.5 || at.right > inside.right + 0.5)
+                ? [`${part} ${at.left.toFixed(1)}–${at.right.toFixed(1)} px`]
+                : [],
+            ),
+            leader: item.querySelector('[data-leader]')?.checkVisibility() ?? false,
+            devanagariUnderName:
+              !parts.devanagari || !parts.name || parts.devanagari.top >= parts.name.bottom - 1,
+          }
+        }),
+      )
+    expect(rows.length).toBe(conceptsOf(mind).length)
+    expect(rows.some(({ name }) => name.length > 0)).toBe(true)
+    for (const { name, outside, leader, devanagariUnderName } of rows) {
+      expect.soft(outside, `${name}: inside the paper’s padding`).toEqual([])
+      expect.soft(leader, `${name}: no leader`).toBe(false)
+      expect.soft(devanagariUnderName, `${name}: its Devanagari on a line under it`).toBe(true)
+    }
+
+    // A row still lights when its card is focused, by colour alone.
+    const [first] = conceptsOf(mind)
+    if (!first) throw new Error('The mind topic has a Concept.')
+    const before = await looks(row(page, plateName(first)))
+    await card(page, first.name).focus()
+    await expect
+      .poll(async () => (await looks(row(page, plateName(first)))).color)
+      .not.toBe(before.color)
+  },
+)
 
 test('under reduced motion a row lights at once, with nothing inking in', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' })

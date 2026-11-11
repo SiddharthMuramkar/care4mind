@@ -1,3 +1,10 @@
+/* Above the paper, which runs edge to edge on a phone: the trail keeps the paper's inset. */
+@media (width < 48rem) {
+  .breadcrumbs {
+    padding-inline: var(--inset-phone);
+  }
+}
+
 .breadcrumbs ol {
   list-style: none;
   display: flex;

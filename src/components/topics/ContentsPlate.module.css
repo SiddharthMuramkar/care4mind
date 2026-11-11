@@ -136,6 +136,29 @@
   font-size: var(--text-large);
 }
 
+/*
+ * Below 768px a row is two columns, its numerals and its name, with the Devanagari on a line of
+ * its own under the name and no leader: every part of it inside the paper's padding.
+ */
+@media (width < 48rem) {
+  .row {
+    grid-template-columns: 2.5rem minmax(0, 1fr);
+    grid-template-areas:
+      'numeral name'
+      '. trailing';
+    align-items: baseline;
+  }
+
+  .leader {
+    display: none;
+  }
+
+  .trailing {
+    max-width: none;
+    text-align: start;
+  }
+}
+
 @media (prefers-reduced-motion: no-preference) {
   .ink {
     transition: clip-path var(--duration-slow) var(--ease-out);

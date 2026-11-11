@@ -4,6 +4,7 @@ import { localSource } from '@/content/testing'
 import {
   isNormalisedSanskrit,
   isSpeakerLine,
+  keepDandasWithWords,
   normaliseSanskrit,
   openingLine,
   stripDiacritics,
@@ -135,5 +136,43 @@ describe('openingLine', () => {
   it('gives the first line of a verse with no speaker, and nothing for no lines', () => {
     expect(openingLine(['yogaś citta-vṛtti-nirodhaḥ'])).toBe('yogaś citta-vṛtti-nirodhaḥ')
     expect(openingLine([])).toBeUndefined()
+  })
+})
+
+describe('keepDandasWithWords', () => {
+  const NBSP = '\u00A0'
+
+  it('holds a Devanagari danda or double danda to the word it closes', () => {
+    expect(keepDandasWithWords('यः सर्वत्रानभिस्नेहस्तत्तत्प्राप्य शुभाशुभम् ।')).toBe(
+      `यः सर्वत्रानभिस्नेहस्तत्तत्प्राप्य शुभाशुभम्${NBSP}।`,
+    )
+    expect(keepDandasWithWords('हेतुरुच्यते ॥')).toBe(`हेतुरुच्यते${NBSP}॥`)
+  })
+
+  it('holds a transliteration’s | and ‖ the same way, however many spaces came before', () => {
+    expect(keepDandasWithWords('tasya prajñā pratiṣṭhitā |')).toBe(
+      `tasya prajñā pratiṣṭhitā${NBSP}|`,
+    )
+    expect(keepDandasWithWords('yogaś citta-vṛtti-nirodhaḥ  ‖')).toBe(
+      `yogaś citta-vṛtti-nirodhaḥ${NBSP}‖`,
+    )
+  })
+
+  it('leaves every other space breakable, and a danda already joined to its word as it is', () => {
+    expect(keepDandasWithWords('कर्मणि भारत।')).toBe('कर्मणि भारत।')
+    expect(keepDandasWithWords('नाभिनन्दति न द्वेष्टि')).toBe('नाभिनन्दति न द्वेष्टि')
+  })
+
+  it('leaves no verse line in the content a breakable space before a danda', async () => {
+    const passages = await localSource.records('passage')
+    const lines = passages.flatMap((passage) => [
+      ...passage.devanagari,
+      ...(passage.transliteration?.lines ?? []),
+    ])
+    expect(
+      lines.some((line) => / [।॥|‖]/u.test(line)),
+      'the content has such lines',
+    ).toBe(true)
+    expect(lines.map(keepDandasWithWords).filter((line) => / [।॥|‖]/u.test(line))).toEqual([])
   })
 })

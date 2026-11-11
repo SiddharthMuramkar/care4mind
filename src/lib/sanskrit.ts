@@ -39,3 +39,14 @@ export function isSpeakerLine(line: string): boolean {
 export function openingLine(lines: readonly string[]): string | undefined {
   return lines.find((line) => !isSpeakerLine(line)) ?? lines[0]
 }
+
+/** The spaces before a danda: । and ॥ in Devanagari, | and ‖ in a transliteration. */
+const BEFORE_DANDA = /\s+(?=[।॥|‖])/gu
+
+/**
+ * A verse line as the screen sets it: each danda held to the word it closes by a non-breaking
+ * space, so a narrow line never leaves it alone. The stored text keeps its plain space.
+ */
+export function keepDandasWithWords(line: string): string {
+  return line.replace(BEFORE_DANDA, '\u00A0')
+}

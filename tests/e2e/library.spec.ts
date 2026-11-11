@@ -12,6 +12,7 @@ import {
 } from '@/content'
 
 import { expectNoAxeViolations } from './axe'
+import { contentsPastThePadding } from './edges'
 import { expect, gotoReady, scrollsSideways, test } from './fixtures'
 import { expectPageTurned, pageTurns, prefetched, recordPageTurns } from './page-turns'
 
@@ -791,6 +792,19 @@ for (const textPage of textPages)
         await expect.poll(() => frame.evaluate((element) => element.scrollLeft)).toBeGreaterThan(0)
       }
       expect(await scrollsSideways(page)).toEqual([])
+    },
+  )
+
+for (const textPage of textPages)
+  test(
+    `${textPage.title}: on a phone every part of its contents, the marker too, sits inside the paper’s padding`,
+    { tag: '@self-width' },
+    async ({ page }) => {
+      await page.setViewportSize({ width: 360, height: 800 })
+      await gotoReady(page, textPage.href)
+      const contents = page.getByRole('navigation', { name: 'Contents' })
+      await expect(contents.getByRole('link')).toHaveCount(textPage.toc.length)
+      expect(await contentsPastThePadding(contents)).toEqual([])
     },
   )
 

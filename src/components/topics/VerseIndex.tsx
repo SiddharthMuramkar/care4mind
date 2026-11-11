@@ -2,7 +2,7 @@ import Link from 'next/link'
 
 import { turnForward } from '@/components/PageTurn'
 import { hrefFor, type PassageView, type QuotedWork } from '@/content'
-import { openingLine } from '@/lib/sanskrit'
+import { keepDandasWithWords, openingLine } from '@/lib/sanskrit'
 
 import styles from './VerseIndex.module.css'
 import { inWords, langOf } from './names'
@@ -10,9 +10,20 @@ import { inWords, langOf } from './names'
 /** A verse's opening line, in Devanagari where there is some, else in transliteration. */
 function Opening({ verse }: { verse: PassageView }) {
   const deva = openingLine(verse.devanagari)
-  if (deva) return <span lang="sa-Deva">{deva}</span>
+  if (deva)
+    return (
+      <span lang="sa-Deva" data-verse-line>
+        {keepDandasWithWords(deva)}
+      </span>
+    )
   const line = openingLine(verse.transliteration?.lines ?? [])
-  return line ? <span lang={verse.work.lang}>{line}</span> : <>{verse.label}</>
+  return line ? (
+    <span lang={verse.work.lang} data-verse-line>
+      {keepDandasWithWords(line)}
+    </span>
+  ) : (
+    <>{verse.label}</>
+  )
 }
 
 /**

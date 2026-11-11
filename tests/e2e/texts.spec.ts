@@ -4,6 +4,7 @@ import { ownArt } from '@/art'
 import { hrefFor, works, type PassageView, type WorkView } from '@/content'
 
 import { expectNoAxeViolations } from './axe'
+import { settle, verseTrouble } from './edges'
 import { expect, gotoReady, inScope, scrollsSideways, test } from './fixtures'
 import { expectPageTurned, pageTurns, prefetched, recordPageTurns } from './page-turns'
 import { ROUTES } from './routes'
@@ -469,6 +470,34 @@ test.describe('with JavaScript off', () => {
     ).toHaveCount(4)
   })
 })
+
+// Every page that sets verses, at phone widths from 320 to 412 px: each verse wraps inside its
+// card, no word of it within 12 px of the card's side, and no line of the screen holds a danda
+// alone (@self-width). A verse card's folded original is opened to be measured.
+const VERSE_KINDS = ['texts', 'work', 'topic', 'concept']
+for (const route of inScope(ROUTES.filter(({ kind }) => VERSE_KINDS.includes(kind))))
+  test(
+    `${route.path} keeps its verses 12 px inside their cards at 320 to 412 px, and no danda alone on a line`,
+    { tag: '@self-width' },
+    async ({ page }) => {
+      await page.setViewportSize({ width: 320, height: 720 })
+      await gotoReady(page, route.path)
+      await page.waitForLoadState('networkidle')
+      await page.evaluate(() => document.fonts.ready)
+      await page.evaluate(() => {
+        for (const disclosure of document.querySelectorAll<HTMLDetailsElement>('main details'))
+          disclosure.open = true
+      })
+      const lines = main(page).locator('[data-verse-line]')
+      if (route.kind === 'texts' || route.kind === 'work')
+        expect(await lines.count(), `${route.path}: sets verses`).toBeGreaterThan(0)
+      for (const width of [320, 360, 375, 390, 412]) {
+        await page.setViewportSize({ width, height: 720 })
+        await settle(page)
+        expect.soft(await verseTrouble(page, 12), `${route.path} at ${width} px`).toEqual([])
+      }
+    },
+  )
 
 test('prints a work without its picture', async ({ page }) => {
   await gotoReady(page, yogaSutra.href)

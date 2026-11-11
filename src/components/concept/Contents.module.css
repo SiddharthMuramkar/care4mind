@@ -93,8 +93,16 @@
   opacity: 0;
 }
 
-/* A finger needs a taller line. The marker comes down with the words, by the padding added. */
+/*
+ * Below 768px the paper's padding is only the phone's inset, so the lines move in to make the
+ * marker room inside it. A finger needs a taller line: the marker comes down with the words, by
+ * the padding added.
+ */
 @media (width < 48rem) {
+  .list {
+    padding-inline-start: 1rem;
+  }
+
   .tallLines .entry {
     min-height: 2.75rem;
     padding-block: 0.5rem;

@@ -1,7 +1,10 @@
 import { siteConfig } from '@/config/site'
 
+import { concepts, library } from '@/content'
+
 import { expectNoAxeViolations } from './axe'
 import { unfinishedDrawings } from './drawings'
+import { measureLayout, nearTheEdge, settle, showDeferred } from './edges'
 import { expect, gotoReady, scrollsSideways, test } from './fixtures'
 import { breathes, lotuses } from './lotuses'
 import { at, MISSING, ROUTES_IN_SCOPE } from './routes'
@@ -190,29 +193,39 @@ test.describe('the 404 page picture', { tag: '@self-width' }, () => {
 })
 
 // The double frame marks only the hero, verse cards and featured cards; a reading page is a
-// paper panel with one thin rule, and below 768 px no frame and 16 px side margins (@self-width).
+// paper panel with one thin rule, and below 768 px paper with no frame that runs edge to edge,
+// its text 20 px in from both sides (@self-width).
 test.describe('the double frame', { tag: '@self-width' }, () => {
   const folio = (page: import('@playwright/test').Page) => page.locator('main [data-paper]').first()
 
-  test('a reading page below 768 px has no frame and its text runs to 16 px', async ({ page }) => {
+  /** Where the paper stands across the screen, and where the text on it starts and ends. */
+  const across = (panel: import('@playwright/test').Locator) =>
+    panel.evaluate((element) => {
+      const style = getComputedStyle(element)
+      const rect = element.getBoundingClientRect()
+      const screen = document.documentElement.clientWidth
+      return {
+        shadow: style.boxShadow,
+        fromLeft: rect.left,
+        fromRight: screen - rect.right,
+        textFromLeft: rect.left + parseFloat(style.paddingLeft),
+        textFromRight: screen - (rect.right - parseFloat(style.paddingRight)),
+      }
+    })
+
+  test('a reading page below 768 px runs its paper edge to edge, unframed, its text 20 px in', async ({
+    page,
+  }) => {
     await page.setViewportSize({ width: 360, height: 800 })
     await gotoReady(page, '/concepts/')
     const panel = folio(page)
     await expect(panel.locator('[data-corner]')).toHaveCount(0)
-    const box = await panel.evaluate((element) => {
-      const style = getComputedStyle(element)
-      const rect = element.getBoundingClientRect()
-      return {
-        shadow: style.boxShadow,
-        textLeft: rect.left + parseFloat(style.paddingLeft),
-        textRight: rect.right - parseFloat(style.paddingRight),
-      }
-    })
+    const box = await across(panel)
     expect(box.shadow).toBe('none')
-    expect(box.textLeft).toBeGreaterThanOrEqual(16)
-    expect(box.textLeft).toBeLessThanOrEqual(17)
-    expect(360 - box.textRight).toBeGreaterThanOrEqual(16)
-    expect(360 - box.textRight).toBeLessThanOrEqual(17)
+    expect(box.fromLeft).toBeCloseTo(0, 0)
+    expect(box.fromRight).toBeCloseTo(0, 0)
+    expect(box.textFromLeft).toBeCloseTo(20, 0)
+    expect(box.textFromRight).toBeCloseTo(20, 0)
   })
 
   test('a reading page on a wide screen keeps one thin rule and no corners', async ({ page }) => {
@@ -225,12 +238,17 @@ test.describe('the double frame', { tag: '@self-width' }, () => {
     expect(shadow.match(/inset/g)).toHaveLength(1)
   })
 
-  test('the 404 page below 768 px has no frame either', async ({ page }) => {
+  test('the 404 page below 768 px runs its paper edge to edge too, unframed', async ({ page }) => {
     await page.setViewportSize({ width: 360, height: 800 })
     await gotoReady(page, MISSING)
     const panel = folio(page)
     await expect(panel.locator('[data-corner]')).toHaveCount(0)
-    expect(await panel.evaluate((element) => getComputedStyle(element).boxShadow)).toBe('none')
+    const box = await across(panel)
+    expect(box.shadow).toBe('none')
+    expect(box.fromLeft).toBeCloseTo(0, 0)
+    expect(box.fromRight).toBeCloseTo(0, 0)
+    expect(box.textFromLeft).toBeCloseTo(20, 0)
+    expect(box.textFromRight).toBeCloseTo(20, 0)
   })
 
   test('the hero and the featured cards keep the frame', async ({ page }) => {
@@ -271,6 +289,30 @@ test.describe('the double frame', { tag: '@self-width' }, () => {
     await expect(page.locator('main [data-corner]')).toHaveCount(0)
   })
 })
+
+// On a phone no word or control comes closer than 16 px to a side of the surface it is set on:
+// the paper, edge to edge, or the screen around it, at three phone widths (@self-width). The
+// header's strip is the site navigation's, which sets its own inset, so the page's content and
+// its footer are measured.
+for (const route of ROUTES_IN_SCOPE) {
+  test(
+    `${route.path} keeps every word and control 16 px or more off its surface’s sides at 360, 390 and 412 px`,
+    { tag: '@self-width' },
+    async ({ page }) => {
+      await gotoReady(page, route.path)
+      await page.waitForLoadState('networkidle')
+      await page.evaluate(() => document.fonts.ready)
+      await showDeferred(page)
+      for (const width of [360, 390, 412]) {
+        await page.setViewportSize({ width, height: 800 })
+        await settle(page)
+        expect
+          .soft(nearTheEdge(await measureLayout(page), 16), `${route.path} at ${width} px`)
+          .toEqual([])
+      }
+    },
+  )
+}
 
 test('the skip link is the first thing keyboard focus reaches, and it works', async ({ page }) => {
   await gotoReady(page, '/concepts/vikshepa/')
@@ -338,6 +380,37 @@ test.describe('running text', { tag: '@from-1440' }, () => {
     await expect(shared).toHaveCount(1)
     await expect(page.locator('#yama')).toBeVisible()
     await expect(page.getByRole('link', { name: 'Values: yama and niyama' }).first()).toBeVisible()
+  })
+
+  test('keeps its paragraphs and lists to the reading measure on a wide screen', async ({
+    page,
+  }) => {
+    const vikshepa = await concepts.get('vikshepa')
+    const methods = await library.get('methods')
+    if (!vikshepa || methods?.kind !== 'page')
+      throw new Error('Vikṣepa and the Therapy approaches page are in the content.')
+    for (const { href, sections } of [vikshepa, methods]) {
+      await gotoReady(page, href)
+      const blocks = page.locator(
+        sections.map(({ id }) => `section[id="${id}"] :is(p, ul, ol)`).join(', '),
+      )
+      expect(await blocks.count(), `${href}: running text`).toBeGreaterThan(0)
+      const wider = await blocks.evaluateAll((elements) =>
+        elements.flatMap((block) => {
+          // The measure in the block's own type, read off a probe set inside it.
+          const probe = document.createElement('span')
+          probe.style.cssText = 'display: block; width: var(--measure-text); height: 0'
+          block.append(probe)
+          const measure = probe.getBoundingClientRect().width
+          probe.remove()
+          const { width } = block.getBoundingClientRect()
+          return width > measure + 0.5
+            ? [`“${(block.textContent ?? '').slice(0, 40)}”: ${width} px, past ${measure} px`]
+            : []
+        }),
+      )
+      expect.soft(wider, `${href}: no block wider than the measure`).toEqual([])
+    }
   })
 })
 
