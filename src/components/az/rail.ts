@@ -89,8 +89,25 @@ export function useRail(list: RefObject<HTMLElement | null>, rail: unknown) {
       pause = window.setTimeout(rest, 150)
     }
     const resized = new ResizeObserver(onRow)
+    // The arrow keys move between linked letters only: at the first link or the last the row
+    // goes the whole way, so a blank letter beyond it comes into view as a swipe would show it.
+    let reach = 0
+    const onFocus = (event: FocusEvent) => {
+      const links = row.querySelectorAll('a[href]')
+      const end =
+        event.target === links[0]
+          ? 0
+          : event.target === links[links.length - 1]
+            ? row.scrollWidth
+            : -1
+      if (end < 0) return
+      cancelAnimationFrame(reach)
+      // After the browser has brought the letter itself into view.
+      reach = requestAnimationFrame(() => row.scrollTo({ left: end, behavior: 'instant' }))
+    }
 
     nav.addEventListener('scroll', onRow, { capture: true, passive: true })
+    nav.addEventListener('focusin', onFocus)
     resized.observe(row)
     window.addEventListener('scrollend', rest)
     window.addEventListener('scroll', onPage, { passive: true })
@@ -103,6 +120,8 @@ export function useRail(list: RefObject<HTMLElement | null>, rail: unknown) {
 
     return () => {
       nav.removeEventListener('scroll', onRow, { capture: true })
+      nav.removeEventListener('focusin', onFocus)
+      cancelAnimationFrame(reach)
       resized.disconnect()
       window.removeEventListener('scrollend', rest)
       window.removeEventListener('scroll', onPage)

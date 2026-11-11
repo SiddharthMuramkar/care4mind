@@ -198,7 +198,8 @@ a.letter:focus-visible {
 /*
  * A phone: one row of 44 px letters that scrolls sideways and settles on a letter, so the band
  * stays one short row. A fade at each end that has letters past it, as the map's chip rows have:
- * the island marks those ends (data-more), and until it does the row's far end alone fades.
+ * the island marks those ends (data-more), and until it does the row's far end alone fades
+ * (without a script, neither does).
  */
 @media (width < 48rem) {
   .railBand {
@@ -232,6 +233,13 @@ a.letter:focus-visible {
 
   .railBand[data-more~='end'] .rail {
     --fade-end: 12%;
+  }
+
+  /* With no script to mark the ends, no fade: it would lie over the last letter once reached. */
+  @media (scripting: none) {
+    .rail {
+      --fade-end: 0%;
+    }
   }
 
   .letter {

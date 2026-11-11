@@ -248,9 +248,7 @@ test.describe('the letter rail on a phone', { tag: '@self-width' }, () => {
     await expect.poll(() => fades(row), 'at the end').toMatchObject({ start: true, end: false })
   })
 
-  test('brings every letter to hand by swipe, and every linked letter by keyboard', async ({
-    page,
-  }) => {
+  test('brings every letter to hand by swipe and by keyboard', async ({ page }) => {
     await gotoReady(page, EVERYTHING)
     await expect(toolbar(page)).toBeVisible()
     const row = toolbar(page)
@@ -264,6 +262,12 @@ test.describe('the letter rail on a phone', { tag: '@self-width' }, () => {
     expect(reached, 'each letter in view as it takes focus').toEqual(
       names.map((letter) => ({ letter, inView: true })),
     )
+    // At the last link the row goes the whole way, so the blank letters past it show too.
+    await expect
+      .poll(() =>
+        row.evaluate((rail) => rail.scrollLeft + rail.clientWidth >= rail.scrollWidth - 1),
+      )
+      .toBe(true)
   })
 
   test('brings the current letter into view as the list is read', async ({ page }) => {
