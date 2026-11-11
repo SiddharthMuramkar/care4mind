@@ -757,7 +757,7 @@ test.describe('every panel stays inside the screen', { tag: '@self-width' }, () 
     }).toPass()
   }
 
-  for (const width of [320, 390, 1024, WIDE]) {
+  for (const width of [320, 390, WIDE, 1280]) {
     test(`at ${width} px no open panel overflows either edge, and a panel's pointer sits under its toggle`, async ({
       page,
     }) => {
