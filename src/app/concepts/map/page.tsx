@@ -40,7 +40,6 @@ export default async function ConceptMapPage() {
         </>
       }
       title="Concept map"
-      longTitle
       afterTitle={
         <>
           <p className={reading.summary}>

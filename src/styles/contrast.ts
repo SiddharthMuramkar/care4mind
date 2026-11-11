@@ -165,6 +165,16 @@ export const CONTRAST_PAIRS = [
         { foreground: 'surface-focus', background: surface, minimum: 3 },
       ] as const,
   ),
+  // A card: a deeper paper laid on the folio. Its text, links, focus ring and marks, as on the paper.
+  { foreground: 'surface-ink', background: 'card', minimum: 4.5 },
+  { foreground: 'surface-muted', background: 'card', minimum: 4.5 },
+  { foreground: 'surface-link', background: 'card', minimum: 4.5 },
+  { foreground: 'surface-focus', background: 'card', minimum: 3 },
+  { foreground: 'highlight', background: 'card', minimum: 3 },
+  // The edge that shows a control is there (a chip, a round button, an option), on every paper it sits on.
+  ...(['surface', 'card', 'surface-pale-45', 'drawer'] as const).map(
+    (paper) => ({ foreground: 'control-edge', background: paper, minimum: 3 }) as const,
+  ),
   // The toast: its text and focus ring on its dark slip, and its turmeric edge on the indigo page.
   { foreground: 'toast-ink', background: 'toast', minimum: 4.5 },
   { foreground: 'toast-muted', background: 'toast', minimum: 4.5 },

@@ -6,6 +6,8 @@
   margin: 0;
   font-size: var(--text-base);
   color: var(--color-surface-muted);
+  font-family: var(--font-ui);
+  --font-iast: var(--font-text);
 }
 
 /* A result's gloss, set after its name as a Concept is named everywhere. */
@@ -92,6 +94,6 @@
   margin: 0;
   font-family: var(--font-display);
   font-weight: 500;
-  font-size: var(--text-heading);
+  font-size: var(--text-subsection);
   line-height: 1.25;
 }

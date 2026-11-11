@@ -68,7 +68,6 @@ export default async function TakeQuestionnairePage({
       headerClassName={styles.head}
       kicker="Take the Questionnaire"
       title={title}
-      longTitle
       afterTitle={
         <>
           <StatusBadge status={shownStatus} />

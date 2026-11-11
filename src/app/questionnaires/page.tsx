@@ -73,7 +73,6 @@ export default async function QuestionnairesPage() {
       titleId="questionnaires-title"
       beforeTitle={<SectionSticker section="questionnaires" />}
       title="Questionnaires"
-      titleClassName={styles.title}
       afterTitle={
         <>
           <p className={reading.summary}>

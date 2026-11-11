@@ -25,6 +25,8 @@
   line-height: 1.3;
   color: var(--color-surface-muted);
   white-space: nowrap;
+  font-family: var(--font-ui);
+  --font-iast: var(--font-text);
 }
 
 /* The tally: 45 short rules in groups by part, a box that never changes size. */

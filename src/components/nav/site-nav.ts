@@ -78,20 +78,16 @@ async function build(): Promise<SiteNav> {
         ...link('Traditional texts', hrefFor({ page: 'texts' })),
         within: [hrefFor({ page: 'texts' })],
       },
-      // Listed only while one can be taken in this build; the footer keeps its link either way.
-      ...(anyTakeable
-        ? [
-            {
-              id: 'questionnaires' as const,
-              ...link('Questionnaires', hrefFor({ page: 'questionnaires' })),
-              within: [hrefFor({ page: 'questionnaires' })],
-            },
-          ]
-        : []),
       {
         id: 'library',
         ...link('Library', hrefFor({ page: 'library' })),
         within: [hrefFor({ page: 'library' })],
+      },
+      // Always listed, last, beside Search; its page says "In preparation" until one goes live.
+      {
+        id: 'questionnaires',
+        ...link('Questionnaires', hrefFor({ page: 'questionnaires' })),
+        within: [hrefFor({ page: 'questionnaires' })],
       },
     ],
     concepts: {

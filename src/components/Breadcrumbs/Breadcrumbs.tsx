@@ -1,14 +1,23 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 
+import { Transliterated } from '@/components/script'
 import { site, type Crumb } from '@/content'
 
 import styles from './Breadcrumbs.module.css'
 import { turnBack } from '../PageTurn'
 
-/** A crumb's words: its label in its own language where it has one, its gloss plain after it. */
+/**
+ * A crumb's words: its label in its own language where it has one, its gloss plain after it. A
+ * label with no language of its own, such as a topic's, tags any transliterated word in it.
+ */
 function Words({ crumb }: { crumb: Crumb }) {
-  if (!crumb.gloss) return crumb.lang ? <span lang={crumb.lang}>{crumb.label}</span> : crumb.label
+  if (!crumb.gloss)
+    return crumb.lang ? (
+      <span lang={crumb.lang}>{crumb.label}</span>
+    ) : (
+      <Transliterated text={crumb.label} />
+    )
   return (
     <>
       <span {...(crumb.lang ? { lang: crumb.lang } : {})}>{crumb.label}</span>

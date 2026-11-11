@@ -290,6 +290,8 @@
 .count {
   color: var(--color-drawer-muted);
   font-variant-numeric: oldstyle-nums proportional-nums;
+  font-family: var(--font-ui);
+  --font-iast: var(--font-text);
 }
 
 .proposal {

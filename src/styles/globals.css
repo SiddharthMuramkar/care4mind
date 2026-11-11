@@ -54,6 +54,10 @@
   --color-surface-muted: var(--press-umber);
   --color-surface-link: var(--press-vermilion-dark);
   --color-surface-focus: var(--press-indigo);
+  /* A card: the deeper paper, laid on the folio. It takes the paper's text, link and focus colours. */
+  --color-card: var(--press-paper);
+  /* The edge that shows a control is there on paper (a chip, a round button, an option): 3:1 on each paper. */
+  --color-control-edge: var(--press-umber);
   --color-accent: var(--press-turmeric);
   --color-accent-ink: var(--press-indigo);
   --color-highlight: var(--press-vermilion);
@@ -97,14 +101,30 @@
   --font-display: var(--font-playfair-display), var(--font-playfair-text), var(--font-tiro), serif;
   --font-deva:
     var(--font-tiro), 'Noto Serif Devanagari', 'Kohinoor Devanagari', 'Nirmala UI', serif;
+  /*
+   * Interface text (chips, badges, breadcrumbs, labels, counts) in the system's own sans, which
+   * costs no download. Text set in it also sets --font-iast, so any transliteration inside keeps
+   * the serif that has its diacritics: Roboto, Android's system face, lacks some of them.
+   */
+  --font-ui: system-ui, -apple-system, 'Segoe UI', Roboto, 'Noto Sans', sans-serif;
 
-  /* The type scale: the sizes already set most often, so adopting one changes nothing. */
+  /* The type scale: the sizes already set most often, so adopting one changes nothing. Nothing is set below the small size. */
   --text-small: 0.9375rem;
   --text-base: 1rem;
   --text-body: 1.0625rem;
   --text-large: 1.125rem;
   --text-title: 1.375rem;
   --text-heading: 1.5rem;
+  /*
+   * The headings' scale, fluid from a phone to a wide screen, so each level stays a clear step
+   * below the one above it at every width: the homepage's title 36 to 60 px, a page's title 32 to
+   * 52, a section 24 to 34 and a sub-section 20 to 24. Long-form reading text runs 18 to 20 px.
+   */
+  --text-display: clamp(2.25rem, 1.6rem + 3vw, 3.75rem);
+  --text-page-title: clamp(2rem, 1.5rem + 2.5vw, 3.25rem);
+  --text-section: clamp(1.5rem, 1.3rem + 1vw, 2.125rem);
+  --text-subsection: clamp(1.25rem, 1.15rem + 0.5vw, 1.5rem);
+  --text-reading: clamp(1.125rem, 1.05rem + 0.35vw, 1.25rem);
 
   /* Structural measures that recur: a short lede, a line of reading text, a page's column. */
   --measure-lede: 44ch;
@@ -114,7 +134,8 @@
   /* How far text keeps off the paper's edges on a phone, where a folio has no frame. */
   --inset-phone: 1.5rem;
 
-  --duration-instant: 100ms;
+  /* A press: quick enough to feel direct, long enough to be seen. */
+  --duration-instant: 140ms;
   --duration-quick: 160ms;
   --duration-move: 320ms;
   --duration-slow: 400ms;
@@ -215,6 +236,8 @@
 
 @layer base {
   html {
+    /* The browser draws its canvas, scrollbars and native controls dark, to suit the indigo page. */
+    color-scheme: dark;
     -webkit-text-size-adjust: 100%;
     text-rendering: optimizeLegibility;
     /* In-page links and focus land clear of the sticky header. */
@@ -246,6 +269,20 @@
     font-weight: 400;
     line-height: 1.75;
     font-synthesis: none;
+  }
+
+  /*
+   * Transliteration in interface text takes the serif the interface sets in --font-iast. Elsewhere
+   * that is unset, and the declaration falls back to inheriting: the text keeps its surroundings' face.
+   */
+  :lang(sa-Latn),
+  :lang(pi-Latn) {
+    font-family: var(--font-iast);
+  }
+
+  /* Headings break into lines of even length. */
+  :is(h1, h2, h3) {
+    text-wrap: balance;
   }
 
   a {
@@ -284,8 +321,12 @@
     border-radius: 2px;
   }
 
-  /* A paper surface, marked data-paper: the page's turmeric ring and links all but vanish on it. */
+  /*
+   * A paper surface, marked data-paper: the page's turmeric ring and links all but vanish on it,
+   * and its scrollbars and native controls are drawn light, to match the paper.
+   */
   [data-paper] {
+    color-scheme: light;
     --color-focus: var(--color-surface-focus);
     --color-link: var(--color-surface-link);
   }
@@ -481,11 +522,11 @@
 
   @media (prefers-reduced-motion: no-preference) {
     [data-ink-press='a']::before {
-      animation: ink-a var(--duration-slow) var(--ease-out);
+      animation: ink-a var(--duration-quick) var(--ease-out);
     }
 
     [data-ink-press='b']::before {
-      animation: ink-b var(--duration-slow) var(--ease-out);
+      animation: ink-b var(--duration-quick) var(--ease-out);
     }
   }
 }

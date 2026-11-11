@@ -16,12 +16,7 @@ export function generateMetadata(): Promise<Metadata> {
 /** Every picture's name, origin and licence, from the registry: the one place these are written. */
 export default function CreditsSourcesPage() {
   return (
-    <ReadingPage
-      path={PATH}
-      titleId="credits-sources-title"
-      title="Where these pictures come from"
-      longTitle
-    >
+    <ReadingPage path={PATH} titleId="credits-sources-title" title="Where these pictures come from">
       <ul className={styles.entries}>
         {shipped().map((picture) => (
           <li key={picture.id} className={styles.entry}>

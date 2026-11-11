@@ -466,6 +466,8 @@ export async function expectNoAxeViolations(page: Page, where?: string) {
                   if (
                     pseudoStyle.content === 'none' ||
                     Number(pseudoStyle.opacity) === 0 ||
+                    // Scaled to nothing, as a rail letter's resting lozenge is, it paints nothing.
+                    pseudoStyle.transform.startsWith('matrix(0, 0, 0, 0,') ||
                     (pseudoStyle.position !== 'absolute' && pseudoStyle.position !== 'fixed') ||
                     (pseudoStyle.backgroundColor === 'rgba(0, 0, 0, 0)' &&
                       pseudoStyle.backgroundImage === 'none')

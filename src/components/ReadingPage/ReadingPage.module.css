@@ -62,8 +62,8 @@
 .article {
   display: grid;
   gap: 2.5rem;
-  font-size: var(--text-large);
-  line-height: 1.7;
+  font-size: var(--text-reading);
+  line-height: 1.65;
 }
 
 /* Grid children may shrink below their content, so a wide table scrolls inside its own frame. */
@@ -71,8 +71,11 @@
   min-width: 0;
 }
 
+/* A paragraph avoids ending on a lone word, and an opening quotation mark hangs in the margin where the browser can. */
 .article :where(p) {
   margin: 0;
+  text-wrap: pretty;
+  hanging-punctuation: first;
 }
 
 .titlePage {
@@ -94,21 +97,7 @@
   margin: 0;
   font-family: var(--font-display);
   font-weight: 500;
-  font-size: clamp(3rem, 12vw, 5.75rem);
-  line-height: 1;
+  font-size: var(--text-page-title);
+  line-height: 1.15;
   overflow-wrap: anywhere;
-}
-
-/* At 320 px (400% zoom, WCAG 1.4.10) the longest one-word titles still fit their line. */
-@media (width < 21rem) {
-  .title {
-    font-size: 2.375rem;
-  }
-}
-
-/* A long name (a topic, an English-titled page) is set a size down. */
-.titleLong {
-  font-size: clamp(2.25rem, 8vw, 4rem);
-  line-height: 1.1;
-  text-wrap: balance;
 }

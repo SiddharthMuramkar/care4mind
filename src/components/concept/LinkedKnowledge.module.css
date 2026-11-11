@@ -22,7 +22,7 @@
   margin: 0;
   font-family: var(--font-display);
   font-weight: 500;
-  font-size: clamp(1.75rem, 4.5vw, 2.25rem);
+  font-size: var(--text-section);
   line-height: 1.15;
 }
 
@@ -45,6 +45,8 @@
 .count {
   font-weight: 400;
   font-variant-numeric: oldstyle-nums;
+  font-family: var(--font-ui);
+  --font-iast: var(--font-text);
 }
 
 .rows {
@@ -85,6 +87,8 @@
   color: var(--color-surface-muted);
   font-size: var(--text-base);
   line-height: 1.45;
+  font-family: var(--font-ui);
+  --font-iast: var(--font-text);
 }
 
 .note {
