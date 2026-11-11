@@ -248,6 +248,23 @@ test.describe('interface text', { tag: '@self-width' }, () => {
     await expect.poll(() => face(main.getByText('Quoted in', { exact: true }).first())).toBe(UI)
   })
 
+  test('sets a topic’s name in the sans, the transliterated word in it in the serif', async ({
+    page,
+  }) => {
+    await gotoReady(page, '/concepts/triguna/')
+    const serif = await face(page.locator('body'))
+    const chip = page.getByRole('main').locator('[data-topic="temperament"]').first()
+    await expect(chip).toHaveText('Temperament (guṇa)')
+    await expect.poll(() => face(chip)).toBe(UI)
+    await expect.poll(() => face(chip.locator('[lang="sa-Latn"]'))).toBe(serif)
+
+    await gotoReady(page, '/concepts/')
+    const filter = page.getByRole('main').getByRole('button', { name: 'Temperament (guṇa)' })
+    await expect(filter).toBeVisible()
+    await expect.poll(() => face(filter)).toBe(UI)
+    await expect.poll(() => face(filter.locator('[lang="sa-Latn"]'))).toBe(serif)
+  })
+
   test('sets a status badge, a topic chip and a form’s label in the sans', async ({ page }) => {
     await gotoReady(page, '/questionnaires/')
     const badge = page

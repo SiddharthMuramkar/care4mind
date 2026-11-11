@@ -5,6 +5,7 @@ import { ToggleGroup } from '@base-ui/react/toggle-group'
 import { Toolbar } from '@base-ui/react/toolbar'
 
 import { filterStyles } from '@/components/filters'
+import { Transliterated } from '@/components/script'
 import { cx } from '@/lib/cx'
 
 import styles from './AzIndex.module.css'
@@ -61,7 +62,9 @@ function Chips({ groups, pressed, onPress }: ChipsProps) {
                 data-chip={chip}
                 data-ink
               >
-                <span {...(lang ? { lang } : {})}>{name}</span>
+                <span {...(lang ? { lang } : {})}>
+                  {lang ? name : <Transliterated text={name} />}
+                </span>
               </Toggle>
             )
           })}

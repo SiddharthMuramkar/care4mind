@@ -1,3 +1,4 @@
+import { Transliterated } from '@/components/script'
 import type { TopicRef } from '@/content'
 import { cx } from '@/lib/cx'
 
@@ -11,7 +12,7 @@ import styles from './TopicChip.module.css'
 export function TopicChip({ topic, className }: { topic: TopicRef; className?: string }) {
   return (
     <span className={cx(styles.chip, className)} data-topic={topic.slug}>
-      {topic.name}
+      <Transliterated text={topic.name} />
     </span>
   )
 }
