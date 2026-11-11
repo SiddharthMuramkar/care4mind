@@ -74,8 +74,8 @@ const chrome = devices['Desktop Chrome']
 
 // A tagged test runs only where its tag belongs, instead of opening a page at every width just
 // to skip: @one-width (its assertions read no layout) and @self-width (it sets its own viewport
-// first) run at 360 alone, @only-360 below 600 px, @below-1440 under 64rem, @from-768 from
-// 600 px and @from-1440 from 64rem (or checked once, at 1440 px). Untagged tests run at all three.
+// first) run at 360 alone, @only-360 below 48rem, @below-1440 under 64rem, @from-768 from
+// 48rem and @from-1440 from 64rem (or checked once, at 1440 px). Untagged tests run at all three.
 const notAt: Record<number, RegExp> = {
   360: /@from-768|@from-1440/,
   768: /@one-width|@self-width|@only-360|@from-1440/,
