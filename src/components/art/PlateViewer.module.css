@@ -2,6 +2,11 @@
   display: grid;
   justify-items: center;
   gap: 0.5rem;
+}
+
+/* The figure's own margin goes, at no weight, so a page's class can always set it: this file
+   may load after the page's. */
+:where(.viewer) {
   margin: 0;
 }
 

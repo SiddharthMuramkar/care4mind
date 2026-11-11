@@ -27,6 +27,8 @@
   display: grid;
   justify-items: center;
   gap: 0.5rem;
+  /* As wide as the picture asks: centred from the middle, it would otherwise shrink to half the screen. */
+  width: max-content;
   max-width: calc(100vw - 2rem);
   max-height: calc(100dvh - 2rem);
   overflow-y: auto;
@@ -73,10 +75,12 @@
   height: 18px;
 }
 
+/* The picture's width, so the caption wraps under it rather than widening the leaf. */
 .figure {
   display: grid;
   justify-items: center;
   gap: 0.5rem;
+  width: min-content;
   margin: 0;
 }
 
@@ -87,6 +91,8 @@
 .picture {
   display: block;
   width: min(var(--whole), calc(100vw - 4.5rem), calc(100dvh - 10rem));
+  /* Its width is capped above, so the leaf can take its measure from it. */
+  max-width: none;
   height: auto;
 }
 
