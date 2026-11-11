@@ -307,10 +307,12 @@
   gap: 0.5em;
   min-height: 2rem;
   padding: 0.1rem 0.85rem;
-  border: 1px solid var(--color-surface-rule);
+  border: 1px solid var(--color-control-edge);
   border-radius: 1rem;
   color: var(--color-surface-ink);
   text-decoration: none;
+  font-family: var(--font-ui);
+  --font-iast: var(--font-text);
 }
 
 .verse figcaption a::before {
