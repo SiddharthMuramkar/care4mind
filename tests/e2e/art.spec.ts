@@ -2146,7 +2146,11 @@ test.describe('the hero Plate on a 2× screen', { tag: '@self-width' }, () => {
         .toBeGreaterThan(0)
       const medallion = await plate.locator('xpath=..').boundingBox()
       if (!medallion) throw new Error('the Medallion is laid out')
-      const file = await plate.evaluate((image: HTMLImageElement) => image.naturalWidth)
+      // The width the browser asked the image service for: naturalWidth is scaled back by the
+      // srcset's density, so it says how wide the picture stands, not how wide its file is.
+      const file = await plate.evaluate((image: HTMLImageElement) =>
+        Number(new URL(image.currentSrc).searchParams.get('w')),
+      )
       expect(file).toBeGreaterThanOrEqual(
         Math.min(2 * medallion.width, art('plate-jeweller').width),
       )

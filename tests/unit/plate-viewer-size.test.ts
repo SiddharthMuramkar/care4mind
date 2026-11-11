@@ -11,7 +11,7 @@ const ROOT = process.cwd()
  * `next/image` are left out, because every picture on the site shares them. The real bundler
  * splits its chunks across unrelated modules, so can't say this.
  */
-async function viewerChunk() {
+async function viewerChunk(file = 'src/components/art/PlateViewer.tsx') {
   const result = await build({
     configFile: false,
     root: ROOT,
@@ -22,7 +22,7 @@ async function viewerChunk() {
       write: false,
       minify: true,
       lib: {
-        entry: join(ROOT, 'src/components/art/PlateViewer.tsx'),
+        entry: join(ROOT, file),
         formats: ['es'],
       },
       rolldownOptions: {
@@ -33,7 +33,7 @@ async function viewerChunk() {
   const outputs = (Array.isArray(result) ? result : [result]).flatMap((bundle) =>
     'output' in bundle ? bundle.output : [],
   )
-  const chunk = outputs.find((output) => output.type === 'chunk')
+  const chunk = outputs.find((output) => output.type === 'chunk' && output.isEntry)
   if (chunk?.type !== 'chunk') throw new Error('the build wrote no script')
   return chunk
 }
@@ -52,5 +52,18 @@ describe('the Plate viewer script', () => {
       'react',
       'react/jsx-runtime',
     ])
+  })
+})
+
+describe('the homepage hero script', () => {
+  // The viewer with the lightbox's opener: the lightbox itself is a chunk of its own, fetched
+  // only when a reader comes to open it.
+  const HERO = 'src/components/art/HeroPlates.tsx'
+
+  it('is at most 3 KB gzipped, the lightbox left out', { timeout: 60_000 }, async () => {
+    const { code, dynamicImports } = await viewerChunk(HERO)
+    expect(code).toContain('Next painting')
+    expect(dynamicImports.length).toBeGreaterThan(0)
+    expect(gzipSync(code, { level: 9 }).length).toBeLessThanOrEqual(3 * 1024)
   })
 })

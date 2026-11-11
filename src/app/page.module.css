@@ -367,6 +367,13 @@
   text-wrap: balance;
 }
 
+/* Beside the Plate the hero's title is 3.5vw at its least: the closing line stays under it. */
+@media (width >= 64rem) {
+  .closing {
+    font-size: min(2.75rem, max(2.25rem, 3.5vw) - 1px);
+  }
+}
+
 .closingCta {
   margin: 0;
 }

@@ -22,7 +22,8 @@
   .gallery {
     --thumbnail: 180px;
 
-    grid-template-columns: repeat(3, var(--thumbnail));
+    /* Columns that give way a little, should a classic scrollbar narrow the page at 768px. */
+    grid-template-columns: repeat(3, minmax(0, var(--thumbnail)));
   }
 }
 
