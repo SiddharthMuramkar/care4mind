@@ -46,7 +46,9 @@ export function MenuDrawer({
 }: MenuDrawerProps) {
   const pathname = usePathname()
   const closeOnLink = (event: MouseEvent) => {
-    if (event.target instanceof Element && event.target.closest('a[href]')) onOpenChange(false)
+    // A link that leads on; the help line's numbers start a call and leave the Menu open.
+    if (event.target instanceof Element && event.target.closest('a[href]:not([href^="tel:"])'))
+      onOpenChange(false)
   }
   // The Menu link is display:none from 48rem, where the sections stand in the header, and a
   // hidden link can't take focus.

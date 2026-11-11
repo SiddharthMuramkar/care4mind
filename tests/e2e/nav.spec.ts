@@ -927,6 +927,21 @@ test.describe('the Drawer, on a phone', { tag: '@only-360' }, () => {
   })
 
   test(
+    'a page opened wide, then narrowed, has the Drawer ready for its first press',
+    { tag: '@self-width' },
+    async ({ page }) => {
+      // A phone loaded in landscape and turned upright: the Menu arrives with no pointer near it.
+      await page.setViewportSize({ width: 900, height: 800 })
+      await gotoReady(page, '/')
+      await page.setViewportSize({ width: 360, height: 800 })
+      await expect(menu(page)).toHaveAttribute('role', 'button')
+      await menu(page).click()
+      await expect(drawer(page)).toBeVisible()
+      expect(new URL(page.url()).hash).toBe('')
+    },
+  )
+
+  test(
     'widening the header closes it, leaves the page scrollable, and puts focus on a visible element',
     { tag: '@self-width' },
     async ({ page }) => {
@@ -934,7 +949,8 @@ test.describe('the Drawer, on a phone', { tag: '@only-360' }, () => {
       await gotoReady(page, '/')
       await menu(page).click()
       await expect(drawer(page)).toBeVisible()
-      await page.setViewportSize({ width: 1280, height: 900 })
+      // Just to the width where the sections join the header.
+      await page.setViewportSize({ width: TABLET, height: 900 })
       await expect(drawer(page)).toBeHidden()
       await expect
         .poll(() =>

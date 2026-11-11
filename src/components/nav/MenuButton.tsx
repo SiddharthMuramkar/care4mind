@@ -64,9 +64,20 @@ export function MenuButton({ nav, search, login, mapNote, help }: Props) {
     [],
   )
 
+  // Whenever the Menu can show: at load, or once a turned phone or a narrowed window brings it.
   useEffect(() => {
-    if (matchMedia(TABLET).matches) return
-    return whenIdle(() => void load())
+    const tablet = matchMedia(TABLET)
+    let cancel: (() => void) | undefined
+    const preload = () => {
+      if (tablet.matches || cancel) return
+      cancel = whenIdle(() => void load())
+    }
+    preload()
+    tablet.addEventListener('change', preload)
+    return () => {
+      tablet.removeEventListener('change', preload)
+      cancel?.()
+    }
   }, [load])
 
   const press = (event: MouseEvent | KeyboardEvent) => {
