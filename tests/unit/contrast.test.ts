@@ -253,3 +253,29 @@ describe('the TopicChip', () => {
     }
   })
 })
+
+describe('controls on paper', () => {
+  // A chip or a round button is seen by its edge alone, so the edge needs 3:1 (WCAG 1.4.11):
+  // a translucent mix of the ink fades below that on the paper.
+  it.each([
+    ['src/components/filters/filters.module.css', '.chip'],
+    ['src/components/library/library.module.css', '.kind'],
+    ['src/components/search/StartingPoints.module.css', '.chip'],
+    ['src/components/art/PlateViewer.module.css', '.button'],
+    ['src/components/questionnaire/Statement.module.css', '.option'],
+    ['src/components/library/references.module.css', '.chip'],
+    ['src/components/texts/Passage.module.css', '.chip'],
+    ['src/components/prose/Prose.module.css', '.verse figcaption a'],
+  ])('%s %s draws its edge in the control edge colour', (file, selector) => {
+    expect(declared(rule(file, selector), 'border')).toBe('1px solid var(--color-control-edge)')
+  })
+
+  it('no module edges a control in a translucent mix of the paper’s ink', () => {
+    const hits = globSync('src/**/*.module.css').filter((file) =>
+      /border:[^;]*color-mix\(in srgb, var\(--color-surface-ink\) 45%, transparent\)/.test(
+        readFileSync(file, 'utf8'),
+      ),
+    )
+    expect(hits).toEqual([])
+  })
+})

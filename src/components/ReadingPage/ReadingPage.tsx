@@ -28,8 +28,6 @@ interface ReadingPageProps {
   /** Pairs the folio's `aria-labelledby` with the title's id. Omit it only where the folio is no article. */
   titleId?: string
   title: ReactNode
-  /** A long name is set a size down. */
-  longTitle?: boolean
   titleClassName?: string
   /** The title flies in from its card: the kind of thing it names, and its slug. */
   titleMorph?: { kind: TitleMorphKind; slug: string }
@@ -58,7 +56,6 @@ export function ReadingPage({
   path,
   titleId,
   title,
-  longTitle = false,
   titleClassName,
   titleMorph,
   beforeTitle,
@@ -72,10 +69,7 @@ export function ReadingPage({
   children,
 }: ReadingPageProps) {
   const heading = (
-    <h1
-      {...(titleId ? { id: titleId } : {})}
-      className={cx(styles.title, longTitle && styles.titleLong, titleClassName)}
-    >
+    <h1 {...(titleId ? { id: titleId } : {})} className={cx(styles.title, titleClassName)}>
       {title}
     </h1>
   )

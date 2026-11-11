@@ -7,7 +7,7 @@
   margin: 0 0 0.75rem;
   font-family: var(--font-display);
   font-weight: 500;
-  font-size: var(--text-heading);
+  font-size: var(--text-subsection);
 }
 
 .workTitle a {
@@ -75,7 +75,7 @@
 
 .quotedIn {
   margin: 0;
-  font-size: 0.875rem;
+  font-size: var(--text-small);
   font-style: italic;
   color: var(--color-surface-muted);
 }

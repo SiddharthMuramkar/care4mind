@@ -12,7 +12,7 @@
   list-style: none;
   font-family: var(--font-display);
   font-weight: 500;
-  font-size: clamp(1.5rem, 3.5vw, 2rem);
+  font-size: var(--text-section);
   cursor: pointer;
 }
 
@@ -26,9 +26,10 @@
 }
 
 .count {
-  font-family: var(--font-text);
   font-size: var(--text-large);
   color: var(--color-surface-muted);
+  font-family: var(--font-ui);
+  --font-iast: var(--font-text);
 }
 
 /*

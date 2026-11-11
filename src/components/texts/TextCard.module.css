@@ -120,6 +120,8 @@
   font-size: var(--text-body);
   line-height: 1.2;
   color: var(--color-surface-muted);
+  font-family: var(--font-ui);
+  --font-iast: var(--font-text);
 }
 
 /* Pointed at or focused, the card's tally inks in. */

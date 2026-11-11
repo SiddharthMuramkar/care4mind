@@ -4,6 +4,7 @@ import { type ComponentType, useLayoutEffect, useMemo, useRef, useState } from '
 
 import { filterStyles, Tally } from '@/components/filters'
 import { pushAddress, useAddressQuery, useKeyboardParts } from '@/components/island'
+import { Transliterated } from '@/components/script'
 import { cx } from '@/lib/cx'
 
 import {
@@ -149,7 +150,7 @@ function PlainButtons({ topics, selection, onChange }: ButtonsProps) {
                 })
               }
             >
-              {name}
+              <Transliterated text={name} />
             </button>
           )
         })}

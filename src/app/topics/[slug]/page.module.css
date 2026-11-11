@@ -40,6 +40,8 @@
   text-wrap: balance;
   font-size: var(--text-large);
   color: var(--color-surface-muted);
+  font-family: var(--font-ui);
+  --font-iast: var(--font-text);
 }
 
 /* A work's title stays whole on its line. */

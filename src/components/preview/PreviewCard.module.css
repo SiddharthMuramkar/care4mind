@@ -61,6 +61,8 @@
   gap: 0.5rem 0.75rem;
   color: var(--color-preview-muted);
   font-size: var(--text-base);
+  font-family: var(--font-ui);
+  --font-iast: var(--font-text);
 }
 
 /* A line or four of the content: the link's page has the rest. */

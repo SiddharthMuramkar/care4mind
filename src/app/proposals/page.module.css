@@ -3,6 +3,8 @@
   margin: 0;
   font-size: var(--text-body);
   color: var(--color-surface-muted);
+  font-family: var(--font-ui);
+  --font-iast: var(--font-text);
 }
 
 /* The proposals page: each proposal set as a proof sheet, numbered, with its stamp. */
@@ -38,7 +40,7 @@
   margin: 0;
   font-family: var(--font-display);
   font-weight: 500;
-  font-size: clamp(1.75rem, 4.5vw, 2.25rem);
+  font-size: var(--text-section);
   line-height: 1.15;
 }
 
@@ -93,7 +95,7 @@
   padding: 0 0.25em;
   background: var(--color-surface-pale-30);
   font-family: ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
-  font-size: 0.85em;
+  font-size: max(var(--text-small), 0.85em);
   overflow-wrap: anywhere;
 }
 

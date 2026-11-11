@@ -38,6 +38,16 @@ test("a Concept card's title flies into the Concept page's heading as the page t
   await gotoReady(page, '/')
   const card = page.getByRole('link', { name: 'Read about Vikṣepa' })
   await prefetched(card)
+  // The card lifts under the pointer: the title's place is read once the lift has settled, as the
+  // click waits for it, or the click scrolls the page to try again.
+  await card.evaluate(() =>
+    Promise.all(
+      document
+        .getAnimations()
+        .filter((animation) => animation instanceof CSSTransition)
+        .map((animation) => animation.finished),
+    ),
+  )
   const from = await page.getByRole('heading', { name: 'Vikṣepa', level: 3 }).boundingBox()
   await card.click()
   const heading = page.getByRole('heading', { level: 1 })

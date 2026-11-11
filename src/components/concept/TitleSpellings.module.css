@@ -1,4 +1,4 @@
-/* The heading's two spellings beside each other; the second is set at half the size. */
+/* The heading's two spellings beside each other; the second is set at half the size, never under the small size. */
 .pair {
   display: inline-flex;
   flex-wrap: wrap;
@@ -12,5 +12,5 @@
 }
 
 .pair > :last-child {
-  font-size: 0.5em;
+  font-size: max(var(--text-small), 0.5em);
 }

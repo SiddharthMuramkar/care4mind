@@ -34,6 +34,8 @@
 .groupLabel {
   flex-basis: 100%;
   color: var(--color-surface-muted);
+  font-family: var(--font-ui);
+  --font-iast: var(--font-text);
 }
 
 /* Wide: each group's label in a margin of its own, its buttons wrapping beside it. */

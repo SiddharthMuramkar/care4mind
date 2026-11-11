@@ -19,15 +19,16 @@
   margin-top: 1.75rem;
 }
 
+/* A sub-section's heading, a step below the section's: at that size the capital takes the paper's text red. */
 .letterTitle {
   margin: 0;
   padding-bottom: 0.25rem;
   border-bottom: 1px solid var(--color-surface-rule);
   font-family: var(--font-display);
   font-weight: 500;
-  font-size: 2.75rem;
-  line-height: 1;
-  color: var(--color-highlight);
+  font-size: var(--text-subsection);
+  line-height: 1.3;
+  color: var(--color-surface-link);
 }
 
 /* Wide: the capital stands in the margin and stays beside its entries as they pass. */
@@ -43,7 +44,6 @@
     align-self: start;
     padding: 0.6rem 0 0;
     border: 0;
-    font-size: 3.25rem;
     text-align: center;
   }
 
@@ -116,6 +116,8 @@
   font-style: italic;
   font-size: var(--text-small);
   color: var(--color-surface-muted);
+  font-family: var(--font-ui);
+  --font-iast: var(--font-text);
 }
 
 .chips {
@@ -134,13 +136,15 @@
   gap: 0.45rem;
   min-height: 2rem;
   padding: 0.05rem 0.65rem;
-  border: 1px solid color-mix(in srgb, var(--color-surface-ink) 35%, transparent);
+  border: 1px solid var(--color-control-edge);
   border-radius: 2px;
   color: var(--color-surface-ink);
   font-size: var(--text-small);
   line-height: 1.3;
   text-decoration: none;
   overflow-wrap: normal;
+  font-family: var(--font-ui);
+  --font-iast: var(--font-text);
 }
 
 .chip::before {

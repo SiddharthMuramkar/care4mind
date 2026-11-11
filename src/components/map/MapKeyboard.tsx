@@ -4,6 +4,7 @@ import { Toggle } from '@base-ui/react/toggle'
 import { ToggleGroup } from '@base-ui/react/toggle-group'
 
 import { filterStyles } from '@/components/filters'
+import { Transliterated } from '@/components/script'
 import { cx } from '@/lib/cx'
 
 import { mapAttribute } from './attributes'
@@ -71,7 +72,7 @@ function Buttons({ topics, selection, onChange }: ButtonsProps) {
             data-topic={slug}
             data-ink
           >
-            {name}
+            <Transliterated text={name} />
           </Toggle>
         ))}
       </ToggleGroup>

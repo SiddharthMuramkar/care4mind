@@ -20,11 +20,12 @@
   border: 2px solid var(--color-highlight);
 }
 
+/* The end screen's Source heading, a step below the result's; the notice without JavaScript takes it too. */
 .title {
   margin: 0;
   font-family: var(--font-display);
   font-weight: 500;
-  font-size: clamp(1.5rem, 4vw, 1.875rem);
+  font-size: var(--text-subsection);
   line-height: 1.15;
 }
 

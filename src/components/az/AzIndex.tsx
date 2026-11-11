@@ -13,6 +13,7 @@ import { flushSync } from 'react-dom'
 
 import { filterStyles, Tally } from '@/components/filters'
 import { pushAddress, replaceAddress, useAddressQuery, useKeyboardParts } from '@/components/island'
+import { Transliterated } from '@/components/script'
 import { cx } from '@/lib/cx'
 import { count } from '@/lib/text'
 
@@ -281,7 +282,9 @@ function PlainChips({ groups, pressed, onPress }: ChipsProps) {
                   onPress(on ? pressed.filter((other) => other !== chip) : [...pressed, chip])
                 }
               >
-                <span {...(lang ? { lang } : {})}>{name}</span>
+                <span {...(lang ? { lang } : {})}>
+                  {lang ? name : <Transliterated text={name} />}
+                </span>
               </button>
             )
           })}

@@ -101,7 +101,6 @@ export default async function ConceptPage({ params }: PageProps<'/concepts/[slug
           className={reading.headPicture}
         />
       }
-      longTitle={!concept.term}
       title={
         // A Concept card's title flies into the heading's IAST spelling, or its English title.
         concept.term?.devanagari ? (
