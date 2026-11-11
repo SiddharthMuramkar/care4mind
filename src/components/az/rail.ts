@@ -80,9 +80,14 @@ export function useRail(list: RefObject<HTMLElement | null>, rail: unknown) {
     }
     // The page at rest: at its scrollend, or after a pause in its scrolling where none fires.
     let pause = 0
+    let settle = 0
+    // The browser marks the current letter as it draws a frame: read the mark once it has.
     const rest = () => {
       clearTimeout(pause)
-      follow(true)
+      cancelAnimationFrame(settle)
+      settle = requestAnimationFrame(() => {
+        settle = requestAnimationFrame(() => follow(true))
+      })
     }
     const onPage = () => {
       clearTimeout(pause)
@@ -127,6 +132,7 @@ export function useRail(list: RefObject<HTMLElement | null>, rail: unknown) {
       window.removeEventListener('scroll', onPage)
       cancelAnimationFrame(frame)
       cancelAnimationFrame(opening)
+      cancelAnimationFrame(settle)
       clearTimeout(pause)
     }
   }, [list, rail])
