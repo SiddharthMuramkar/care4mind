@@ -5,11 +5,15 @@
   margin: 0;
 }
 
-/* Isolated so that the Plates and the ring stack among themselves. */
+/*
+ * Isolated so that the Plates and the ring stack among themselves. On a phone 72vw, never more than
+ * 300 px; from 48rem 360 px and from 64rem 480 px (at the end of this file). A 1024 px Plate stays
+ * sharp at 2× at each, and `SIZES` in the script says the same widths.
+ */
 .medallion {
   position: relative;
   isolation: isolate;
-  width: 168px;
+  width: min(72vw, 300px);
   aspect-ratio: 1;
 }
 
@@ -28,6 +32,21 @@
   z-index: 2;
 }
 
+/*
+ * The button that opens the Plate whole lies over its circle, above the ring, and shows only its
+ * focus ring and a magnifier pointer: the Plate itself is what a visitor presses.
+ */
+.open {
+  position: absolute;
+  inset: 5%;
+  z-index: 3;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  cursor: zoom-in;
+}
+
 .caption {
   order: 1;
   color: var(--color-surface-muted);
@@ -36,8 +55,8 @@
 }
 
 /*
- * Held at a fixed height the buttons fit in, from first paint, so that nothing below it moves. A
- * figcaption has to come last in its figure, so `order` is what stands this row under the caption.
+ * Held at the buttons' own height from first paint, so that nothing below it moves. A figcaption
+ * has to come last in its figure, so `order` is what stands this row under the caption.
  */
 .controls {
   order: 2;
@@ -45,7 +64,7 @@
   justify-content: center;
   align-items: center;
   gap: 0.75rem;
-  height: 3rem;
+  height: 2.75rem;
   visibility: hidden;
 }
 
@@ -55,7 +74,8 @@
 
 /* Paper can't press a button. The Plate and its caption print. */
 @media print {
-  .controls {
+  .controls,
+  .open {
     display: none;
   }
 }
@@ -140,8 +160,14 @@
   }
 }
 
-@media (width >= 64rem) {
+@media (width >= 48rem) {
   .medallion {
     width: 360px;
+  }
+}
+
+@media (width >= 64rem) {
+  .medallion {
+    width: 480px;
   }
 }

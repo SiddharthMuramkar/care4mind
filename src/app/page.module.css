@@ -25,9 +25,18 @@
   text-align: center;
 }
 
-/* The first Plate above the motto, with a clear gap before the words start. */
+/*
+ * The first Plate above the motto, with a clear gap before the words start: a little less on a
+ * phone, where the larger Plate leaves the heading just room on the first screen at 360 × 740.
+ */
 .heroPlate {
-  margin-bottom: 1rem;
+  margin-bottom: 0.75rem;
+}
+
+@media (width >= 48rem) {
+  .heroPlate {
+    margin-bottom: 1rem;
+  }
 }
 
 /* The motto: a small label above the promise, its words carried over unchanged. */
@@ -116,25 +125,31 @@
  */
 @media (width >= 64rem) {
   .heroFolio {
-    /* The Plate's figure here: its 360 px ring, caption line and controls, with the gaps between. */
-    --hero-plate-height: calc(360px + 0.5rem + 1.5 * var(--text-small) + 0.5rem + 3rem);
+    /* The Plate's figure here: its 480 px ring, caption line and controls, with the gaps between. */
+    --hero-plate-height: calc(480px + 0.5rem + 1.5 * var(--text-small) + 0.5rem + 2.75rem);
     /* The Fleuron, 12rem wide at its drawing's 4:1. */
     --hero-fleuron-height: 3rem;
     --hero-pair-gap: 1.5rem;
 
     display: grid;
-    grid-template-columns: 360px minmax(0, 1fr);
+    grid-template-columns: 480px minmax(0, 1fr);
+    /*
+     * The five rows of words between two empty ones. Where the Plate and the Fleuron stand taller
+     * than the words, the empty rows share the difference, so the words stay together, centred
+     * beside the pair; where the words are taller, the empty rows take nothing.
+     */
+    grid-template-rows: 1fr repeat(5, auto) 1fr;
     column-gap: clamp(2rem, 4vw, 4rem);
     max-width: 72rem;
   }
 
   /*
-   * The Plate and the Fleuron share one area beside all five rows of words, centred there as one
-   * group: each keeps the other's room as a margin, so neither can overlap the other.
+   * The Plate and the Fleuron share one area beside the words, centred there as one group: each
+   * keeps the other's room as a margin, so neither can overlap the other.
    */
   .heroPlate {
     grid-column: 1;
-    grid-row: 1 / span 5;
+    grid-row: 1 / -1;
     align-self: center;
     margin-block: 0 calc(var(--hero-fleuron-height) + var(--hero-pair-gap));
   }
@@ -147,20 +162,37 @@
     grid-column: 2;
   }
 
-  /* Narrower here, so that the two-line heading fits its column and the button stays on screen. */
+  .motto {
+    grid-row: 2;
+  }
+
+  /*
+   * Narrower here, so that the two-line heading fits its column beside the 480 px Plate and the
+   * button stays on screen: the column is under 300 px wide at 64rem and stops growing near 80rem.
+   */
   .heroTitle {
-    font-size: min(var(--text-display), 4.6vw);
+    grid-row: 3;
+    font-size: clamp(2.25rem, 3.5vw, 3.5rem);
+  }
+
+  .subhead {
+    grid-row: 4;
+  }
+
+  .ctas {
+    grid-row: 5;
   }
 
   .heroFleuron {
     grid-column: 1;
-    grid-row: 1 / span 5;
+    grid-row: 1 / -1;
     align-self: center;
     margin-block: calc(var(--hero-plate-height) + var(--hero-pair-gap)) 0;
   }
 
   /* The Fleuron no longer stands between the buttons and the introduction, so this keeps them apart. */
   .intro {
+    grid-row: 6;
     margin-top: 1.5rem;
   }
 }
