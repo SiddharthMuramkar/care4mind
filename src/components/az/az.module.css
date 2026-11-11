@@ -1,6 +1,9 @@
 /* The Concepts A–Z's entries, set like a dictionary's on the folio's paper: two columns where there is room. */
 
-/* A letter's section: its capital over a rule, then its entries. */
+/*
+ * A letter's section: its capital over a rule, then its entries. A letter or entry a link leads
+ * to lands clear of the header and the rail's one row under it, at every width.
+ */
 .section {
   display: grid;
   gap: 1rem;
@@ -58,9 +61,48 @@
   break-inside: avoid;
   scroll-margin-top: calc(var(--sticky-top) + 3.5rem);
   overflow-wrap: anywhere;
-  /* A long list: the browser skips drawing entries far off screen, keeping their space. */
+  /*
+   * A long list: the browser skips drawing entries far off screen, keeping the space their
+   * kind's lines take at this width. A term: its name, a line or two on what it is, and most
+   * have other spellings. A glossary entry: its name with the site it leads to, often over two
+   * lines here, then what it is and a description of a line or two.
+   */
   content-visibility: auto;
-  contain-intrinsic-block-size: auto 7rem;
+  contain-intrinsic-block-size: auto 8rem;
+}
+
+.entry[data-kind='glossary'] {
+  contain-intrinsic-block-size: auto 10.25rem;
+}
+
+/*
+ * A Concept's entry is drawn in full. A plain address shows these alone, a short list, and
+ * they vary most (both scripts, a topic chip, other spellings, at times a description), so a
+ * guessed height would make the page's length jump as it is read.
+ */
+.entry[data-kind='concept'] {
+  content-visibility: visible;
+}
+
+@media (width >= 48rem) {
+  .entry {
+    contain-intrinsic-block-size: auto 6.75rem;
+  }
+
+  .entry[data-kind='glossary'] {
+    contain-intrinsic-block-size: auto 7.75rem;
+  }
+}
+
+/* Two columns: each narrower than one column above, so more lines wrap. */
+@media (width >= 64rem) {
+  .entry {
+    contain-intrinsic-block-size: auto 7.5rem;
+  }
+
+  .entry[data-kind='glossary'] {
+    contain-intrinsic-block-size: auto 9rem;
+  }
 }
 
 .entry > * {
@@ -142,21 +184,4 @@
 .spellings {
   font-size: var(--text-small);
   color: var(--color-surface-muted);
-}
-
-/* The wrapped rail is taller, so a letter or entry it leads to lands further down. */
-@media (width < 48rem) {
-  .section,
-  .entry,
-  .anchor {
-    scroll-margin-top: calc(var(--sticky-top) + 8rem);
-  }
-}
-
-@media (width < 30rem) {
-  .section,
-  .entry,
-  .anchor {
-    scroll-margin-top: calc(var(--sticky-top) + 12rem);
-  }
 }

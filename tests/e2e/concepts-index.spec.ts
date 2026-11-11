@@ -5,6 +5,7 @@ import { concepts as conceptList, hrefFor, site, topics } from '@/content'
 import { expectNoAxeViolations } from './axe'
 import { expect, gotoReady, scrollsSideways, test } from './fixtures'
 import { inPageTransitions, recordPageTurns } from './page-turns'
+import { arrowAcross, fades, letterBoxes, lettersInView, swipeAcross } from './rail'
 
 // The Concepts A–Z: one list of every Concept, term and glossary
 // entry, a rail of letters, and filter chips whose state lives in the address.
@@ -180,6 +181,201 @@ test.describe('the letter rail', () => {
     await expect.poll(() => colour(first), 'the mark follows the reader back').toBe(marked)
     expect(await colour(middle)).toBe(plain)
   })
+
+  test('sticks while 15 entries or more show, and stays where it stands for fewer', async ({
+    page,
+  }) => {
+    const mindConcepts = concepts.filter(({ topics }) => topics.includes('mind'))
+    expect(concepts.length, 'a plain address shows 15 or more').toBeGreaterThanOrEqual(15)
+    expect(mindConcepts.length, 'the mind topic shows fewer').toBeLessThan(15)
+    // A short screen, so even the short list leaves room to read past the rail.
+    await page.setViewportSize({ width: page.viewportSize()?.width ?? 360, height: 480 })
+    // Read 200 px past where the rail stands: stuck, it is still under the header; else gone above.
+    const pastIt = () =>
+      rail(page).evaluate((band) => {
+        window.scrollTo({ top: 0, behavior: 'instant' })
+        const stands = band.getBoundingClientRect().top + window.scrollY
+        window.scrollTo({ top: stands + 200, behavior: 'instant' })
+        const { top } = band.getBoundingClientRect()
+        if (Math.abs(top - parseFloat(getComputedStyle(band).top)) <= 1) return 'stuck'
+        return top < 0 ? 'passed' : `at ${top} px`
+      })
+    await gotoReady(page, PATH)
+    await expect(count(page)).toHaveText(entries(concepts.length))
+    expect(await pastIt()).toBe('stuck')
+    await page.evaluate(() => window.scrollTo({ top: 0, behavior: 'instant' }))
+    await chip(page, mind.name).click()
+    await expect(count(page)).toHaveText(entries(mindConcepts.length))
+    expect(await pastIt()).toBe('passed')
+    await page.evaluate(() => window.scrollTo({ top: 0, behavior: 'instant' }))
+    await page.getByRole('button', { name: 'Clear filters' }).click()
+    await expect(count(page)).toHaveText(entries(concepts.length))
+    expect(await pastIt(), 'and sticks again when the list is long').toBe('stuck')
+  })
+})
+
+test.describe('the letter rail on a phone', { tag: '@self-width' }, () => {
+  test.use({ viewport: { width: 360, height: 800 } })
+
+  test('is one row at most 56 px tall, of 44 px letters, fading at each end with letters past it', async ({
+    page,
+  }) => {
+    await gotoReady(page, EVERYTHING)
+    await expect(toolbar(page)).toBeVisible()
+    const band = await rail(page).boundingBox()
+    expect(band?.height ?? Infinity, 'the band, rule to rule').toBeLessThanOrEqual(56)
+    const row = toolbar(page)
+    const boxes = await letterBoxes(row)
+    expect(boxes).toHaveLength(letters.length)
+    expect(new Set(boxes.map(({ top }) => top)).size, 'one row').toBe(1)
+    for (const { width, height } of boxes) {
+      expect(width).toBeGreaterThanOrEqual(44)
+      expect(height).toBeGreaterThanOrEqual(44)
+    }
+    expect(await row.evaluate((element) => element.scrollWidth > element.clientWidth)).toBe(true)
+    expect((await fades(row)).mask).toContain('gradient')
+    await expect.poll(() => fades(row), 'at the start').toMatchObject({ start: false, end: true })
+    await row.evaluate((element) =>
+      element.scrollTo({
+        left: (element.scrollWidth - element.clientWidth) / 2,
+        behavior: 'instant',
+      }),
+    )
+    await expect.poll(() => fades(row), 'midway').toMatchObject({ start: true, end: true })
+    await row.evaluate((element) =>
+      element.scrollTo({ left: element.scrollWidth, behavior: 'instant' }),
+    )
+    await expect.poll(() => fades(row), 'at the end').toMatchObject({ start: true, end: false })
+  })
+
+  test('brings every letter to hand by swipe and by keyboard', async ({ page }) => {
+    await gotoReady(page, EVERYTHING)
+    await expect(toolbar(page)).toBeVisible()
+    const row = toolbar(page)
+    const every = letters.map(({ letter }) => letter)
+    expect((await swipeAcross(page, row)).toSorted(), 'every letter seen whole').toEqual(
+      every.toSorted(),
+    )
+    await row.evaluate((element) => element.scrollTo({ left: 0, behavior: 'instant' }))
+    const { names, reached } = await arrowAcross(page, row)
+    expect(names).toEqual(filled)
+    expect(reached, 'each letter in view as it takes focus').toEqual(
+      names.map((letter) => ({ letter, inView: true })),
+    )
+    // At the last link the row goes the whole way, so the blank letters past it show too.
+    await expect
+      .poll(() =>
+        row.evaluate((rail) => rail.scrollLeft + rail.clientWidth >= rail.scrollWidth - 1),
+      )
+      .toBe(true)
+  })
+
+  test('brings the current letter into view as the list is read', async ({ page }) => {
+    await gotoReady(page, EVERYTHING)
+    await expect(toolbar(page)).toBeVisible()
+    const row = toolbar(page)
+    const first = filled[0] ?? 'A'
+    const fullest =
+      letters
+        .filter(({ letter }) => letter !== first)
+        .toSorted((a, b) => b.entries.length - a.entries.length)[0]?.letter ?? 'S'
+    const readTo = (letter: string) =>
+      page.locator(`#letter-${letter.toLowerCase()}`).evaluate((section) => {
+        section.scrollIntoView({ block: 'start', behavior: 'instant' })
+      })
+    // The letter :target-current marks, and whether the row shows it whole.
+    const marked = () =>
+      row.evaluate((element) => {
+        const current = element.querySelector(':target-current')
+        if (!current) return 'none'
+        const [box, letter] = [element.getBoundingClientRect(), current.getBoundingClientRect()]
+        const whole = letter.left >= box.left - 0.5 && letter.right <= box.right + 0.5
+        return `${current.textContent ?? ''}${whole ? '' : ' out of view'}`
+      })
+    expect(await lettersInView(row), 'the row opens at its start').not.toContain(fullest)
+    await readTo(fullest)
+    await expect.poll(marked).toBe(fullest)
+    await readTo(first)
+    await expect.poll(marked, 'and follows the reader back').toBe(first)
+  })
+
+  test('keyboard focus never rests under the header or the rail', async ({ page }) => {
+    // Reduced motion makes each scroll that focus calls for a jump, so where it rests reads at once.
+    await page.emulateMedia({ reducedMotion: 'reduce' })
+    await gotoReady(page, PATH)
+    await expect(toolbar(page)).toBeVisible()
+    /** The focused element and the sticky bars lying over it; null once focus leaves the page. */
+    const focus = () =>
+      page.evaluate(() => {
+        const focused = document.activeElement
+        if (!(focused instanceof HTMLElement) || focused === document.body) return null
+        const name = `<${focused.localName}> “${(focused.textContent ?? '').trim().slice(0, 30)}”`
+        const bars = [...document.querySelectorAll('header, nav[aria-label="Letters"]')].filter(
+          (bar) => getComputedStyle(bar).position === 'sticky',
+        )
+        const box = focused.getBoundingClientRect()
+        const over = bars
+          .filter((bar) => !bar.contains(focused))
+          .filter((bar) => {
+            const { top, bottom } = bar.getBoundingClientRect()
+            return bottom > box.top + 0.5 && top < box.bottom - 0.5
+          })
+          .map((bar) => (bar.localName === 'nav' ? 'rail' : 'header'))
+        return { name, over, first: focused.matches('.skip-link') }
+      })
+    const hidden: string[] = []
+    const through = async (key: string) => {
+      for (let press = 0; press < 200; press += 1) {
+        await page.keyboard.press(key)
+        const at = await focus()
+        if (at === null) return
+        // The skip link, which stands over the header on purpose, opens the page and ends it.
+        if (at.first) {
+          if (key === 'Tab' && press === 0) continue
+          return
+        }
+        if (at.over.length > 0) hidden.push(`${key} to ${at.name}: under the ${at.over.join(', ')}`)
+      }
+      throw new Error(`${key} never left the page`)
+    }
+    await through('Tab')
+    // And back from the page's last link, where the list passes under the rail from above.
+    await page.locator('body > footer a[href]').last().focus()
+    await through('Shift+Tab')
+    expect(hidden).toEqual([])
+  })
+
+  test('keeps its length as it is read from top to bottom', async ({ page }) => {
+    await gotoReady(page, PATH)
+    await expect(toolbar(page)).toBeVisible()
+    await page.evaluate(async () => {
+      await document.fonts.ready
+    })
+    const lengths = await page.evaluate(async () => {
+      const root = document.documentElement
+      const drawn = () =>
+        new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(done)))
+      const seen = [root.scrollHeight]
+      for (
+        let top = 0;
+        top + window.innerHeight < root.scrollHeight;
+        top += window.innerHeight / 2
+      ) {
+        window.scrollTo({ top, behavior: 'instant' })
+        await drawn()
+        seen.push(root.scrollHeight)
+      }
+      window.scrollTo({ top: root.scrollHeight, behavior: 'instant' })
+      await drawn()
+      seen.push(root.scrollHeight)
+      return seen
+    })
+    const [shortest, longest] = [Math.min(...lengths), Math.max(...lengths)]
+    expect(
+      (longest - shortest) / shortest,
+      `the page's length at each half screen: ${lengths.join(', ')}`,
+    ).toBeLessThan(0.05)
+  })
 })
 
 test.describe('the filter chips', () => {
@@ -215,7 +411,7 @@ test.describe('the filter chips', () => {
     await expect(kindChip(page, 'Terms', 'term')).toHaveAttribute('aria-pressed', 'true')
   })
 
-  test('on a phone the chip rows wrap, and the A–Z bar wraps with every letter on screen', async ({
+  test('on a phone the chip rows wrap, and the A–Z bar is one row that scrolls sideways under a fade', async ({
     page,
   }) => {
     await page.setViewportSize({ width: 375, height: 800 })
@@ -229,10 +425,11 @@ test.describe('the filter chips', () => {
       ).toBe(true)
     const bar = rail(page).locator(':scope > div').first()
     expect(
-      await bar.evaluate((row) => row.scrollWidth <= row.clientWidth + 1),
-      'the bar wraps instead of scrolling',
+      await bar.evaluate((row) => row.scrollWidth > row.clientWidth + 1),
+      'the bar scrolls instead of wrapping',
     ).toBe(true)
-    expect(await bar.evaluate((row) => getComputedStyle(row).maskImage)).not.toContain('gradient')
+    expect(new Set((await letterBoxes(bar)).map(({ top }) => top)).size, 'one row').toBe(1)
+    expect(await bar.evaluate((row) => getComputedStyle(row).maskImage)).toContain('gradient')
   })
 
   test('filter by mouse, announce the count, keep it in the address, and Back undoes it', async ({

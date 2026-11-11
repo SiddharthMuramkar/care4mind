@@ -124,6 +124,20 @@
   border-block: 3px double var(--color-surface-rule);
 }
 
+/* A short list is soon passed, and the band would only cover it: it stays where it stands. */
+.railBand[data-short] {
+  position: static;
+}
+
+/*
+ * While the band sticks, the list passes under it: focus inside the list lands below the band
+ * as well as the header (WCAG 2.4.11). On the list's links and buttons rather than in the
+ * page's scroll padding, which the stuck band's own letters sit inside.
+ */
+.railBand:not([data-short]) ~ .list :is(a[href], button) {
+  scroll-margin-top: 4rem;
+}
+
 .rail {
   display: flex;
   justify-content: space-between;
@@ -181,17 +195,57 @@ a.letter:focus-visible {
   }
 }
 
+/*
+ * A phone: one row of 44 px letters that scrolls sideways and settles on a letter, so the band
+ * stays one short row. A fade at each end that has letters past it, as the map's chip rows have:
+ * the island marks those ends (data-more), and until it does the row's far end alone fades
+ * (without a script, neither does).
+ */
 @media (width < 48rem) {
-  /* Every letter to hand at once: the rail wraps, so no letter waits behind a swipe. */
+  .railBand {
+    padding-block: 0.125rem;
+  }
+
   .rail {
-    flex-wrap: wrap;
+    --fade-start: 0%;
+    --fade-end: 12%;
     justify-content: flex-start;
-    gap: 0.25rem;
-    overflow-x: visible;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x proximity;
+    /* A letter settled on, or given focus, stands clear of the fades. */
+    scroll-padding-inline: 12%;
+    mask-image: linear-gradient(
+      to right,
+      transparent,
+      #000 var(--fade-start),
+      #000 calc(100% - var(--fade-end)),
+      transparent
+    );
+  }
+
+  .railBand[data-more] .rail {
+    --fade-end: 0%;
+  }
+
+  .railBand[data-more~='start'] .rail {
+    --fade-start: 12%;
+  }
+
+  .railBand[data-more~='end'] .rail {
+    --fade-end: 12%;
+  }
+
+  /* With no script to mark the ends, no fade: it would lie over the last letter once reached. */
+  @media (scripting: none) {
+    .rail {
+      --fade-end: 0%;
+    }
   }
 
   .letter {
-    min-width: 2.25rem;
+    min-width: 2.75rem;
+    min-height: 2.75rem;
+    scroll-snap-align: start;
   }
 }
 
