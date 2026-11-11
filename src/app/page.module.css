@@ -227,7 +227,7 @@
   font-family: var(--font-display);
   font-weight: 500;
   font-size: var(--text-section);
-  line-height: 1.15;
+  line-height: 1.3;
 }
 
 /* A heading with its Sticker after it, so every heading keeps the same left edge. */

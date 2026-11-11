@@ -43,7 +43,7 @@
   font-family: var(--font-display);
   font-weight: 500;
   font-size: var(--text-section);
-  line-height: 1.1;
+  line-height: 1.3;
   text-wrap: balance;
   /* Clear of the header and the progress strip, with the kicker above it in view. */
   scroll-margin-top: calc(var(--sticky-top) + 8rem);
