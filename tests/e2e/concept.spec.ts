@@ -935,6 +935,8 @@ test.describe('Concept page v2: previous and next', () => {
   test('the first Concept of a topic has no "previous", and the last leads on to the next topic instead of a "next"', async ({
     page,
   }) => {
+    // Recorded from the page's first load: a page turn happens in the page, with no new load.
+    await recordPageTurns(page)
     await gotoReady(page, '/concepts/chittabhumi/')
     const pager = page.getByRole('navigation', { name: /^Concepts in / })
     await expect(pager.getByRole('link', { name: /^Previous/ })).toHaveCount(0)
@@ -949,7 +951,6 @@ test.describe('Concept page v2: previous and next', () => {
     await expect(onward).toHaveAccessibleName(/^Next topic/)
     await expect(onward).toContainText('Practice and progress')
     await expect(onward).toHaveAttribute('href', '/topics/practice/')
-    await recordPageTurns(page)
     await prefetched(onward)
     await onward.click()
     await expect(page.getByRole('heading', { level: 1 })).toHaveText('Practice and progress')
@@ -991,7 +992,9 @@ test.describe('Concept page v2: previous and next', () => {
     await prefetched(all)
     await all.click()
     await expect(page).toHaveURL('/topics/mind/#its-concepts')
-    await expect(page.getByRole('heading', { level: 2, name: 'Its Concepts' })).toBeInViewport()
+    await expect(
+      page.getByRole('heading', { level: 2, name: 'Its Concepts', exact: true }),
+    ).toBeInViewport()
   })
 })
 
