@@ -602,7 +602,9 @@ test.describe('Concept page v2: linked knowledge', () => {
     await gotoReady(page, '/concepts/atman/')
     const panel = linked(page)
     await expect(panel.getByRole('heading', { level: 3 })).toHaveText([/^Related Concepts/])
-    await expect(page.locator('details', { hasText: 'References' })).toHaveCount(0)
+    // The page's own list: the footer's folded Library list names the References page too.
+    const main = page.getByRole('main')
+    await expect(main.locator('details', { hasText: 'References' })).toHaveCount(0)
   })
 
   test('its cross-reference rules ink in from the centre as they scroll into view', async ({

@@ -58,14 +58,25 @@
   list-style: none;
   margin: 0;
   padding: 0;
-  /* A column holds 'Questionnaires' whole, so phones under about 26rem get one column. */
-  columns: 2 11rem;
-  column-gap: 2rem;
+}
+
+/*
+ * On a phone the columns stand in a grid's rows, so opening a folded list moves only what is
+ * under it. A column holds 'Questionnaires' whole, so phones under about 26rem get one column.
+ */
+@media (width < 48rem) {
+  .groups {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr));
+    column-gap: 2rem;
+    align-items: start;
+  }
 }
 
 @media (width >= 48rem) {
   .groups {
     columns: 3 11rem;
+    column-gap: 2rem;
   }
 
   /* Concepts, the longest, fills the first column; the other sections share the rest. */
@@ -75,11 +86,22 @@
 }
 
 .group {
+  position: relative;
   break-inside: avoid;
   margin-bottom: 1.25rem;
 }
 
-/* A section's name heads its pages. */
+/* A column's heading: its section's name, a link where the section has a page of its own. */
+.heading {
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+  margin: 0;
+  color: var(--color-ink);
+  font-size: 1.1875rem;
+}
+
+/* A section's name heads its pages; on hover and focus a line draws in under it. */
 .head {
   position: relative;
   display: inline-flex;
@@ -125,6 +147,66 @@
     display: inline-flex;
     align-items: center;
     min-height: 44px;
+  }
+}
+
+/* A list of pages reads as links without a line under each; one shows on hover and focus. */
+.link {
+  text-decoration-line: none;
+}
+
+.link:is(:hover, :focus-visible) {
+  text-decoration-line: underline;
+}
+
+/*
+ * On a phone the two long lists fold shut under their headings. Each opens from a chevron at the
+ * end of its heading's line, a 44 px target, turned up while the list is open.
+ */
+.toggle {
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-end: 0;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  color: var(--color-ink-muted);
+  cursor: pointer;
+}
+
+.toggle::-webkit-details-marker {
+  display: none;
+}
+
+.toggle:hover,
+.fold[open] > .toggle {
+  color: var(--color-ink);
+}
+
+.chevron {
+  width: 12px;
+  height: 12px;
+}
+
+.fold[open] .chevron {
+  transform: rotate(180deg);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .chevron {
+    transition: transform var(--duration-panel) var(--ease-out);
+  }
+}
+
+/* From 48rem every list stands open, and its chevron is left off. */
+@media (width >= 48rem) {
+  .fold::details-content {
+    content-visibility: visible;
+  }
+
+  .toggle {
+    display: none;
   }
 }
 
