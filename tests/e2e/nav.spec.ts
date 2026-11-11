@@ -9,8 +9,8 @@ import { ROUTES } from './routes'
 // The navigation shell: the header's sections and Search, the panels
 // a computer opens from two of them, the Drawer a phone opens from Menu, and the footer.
 
-/** From 64rem (1024 px) the sections and Search fit on one line; below it the Menu takes over. */
-const WIDE = 1024
+/** From 80rem (1280 px) the sections and Search fit on one line; below it the Menu takes over. */
+const WIDE = 1280
 
 /** A take page is a route only while its Questionnaire can be taken in this build. */
 const TAKEABLE = ROUTES.some(({ kind }) => kind === 'questionnaire-flow')
@@ -540,7 +540,7 @@ test.describe('panels, on a computer', { tag: '@from-1440' }, () => {
     await expect(concepts).toBeHidden()
   })
 
-  for (const width of [WIDE, 1280, 1440]) {
+  for (const width of [WIDE, 1360, 1440]) {
     test(`at ${width} px one click switches panels, by click or by hover then click, and the pointer sits under its toggle`, async ({
       page,
     }) => {
@@ -724,14 +724,14 @@ test.describe('every panel stays inside the screen', { tag: '@self-width' }, () 
     }).toPass()
   }
 
-  for (const width of [320, 390, WIDE, 1280]) {
+  for (const width of [320, 390, 1024, WIDE]) {
     test(`at ${width} px no open panel overflows either edge, and a panel's pointer sits under its toggle`, async ({
       page,
     }) => {
       await page.setViewportSize({ width, height: 800 })
       await gotoReady(page, '/')
       if (width < WIDE) {
-        // Below 64rem the sections open in the Drawer, the only panel there is.
+        // Below 80rem the sections open in the Drawer, the only panel there is.
         await banner(page).getByRole('button', { name: 'Menu' }).click()
         const drawer = page.getByRole('dialog', { name: 'Menu' })
         await expect(drawer).toBeVisible()
@@ -957,7 +957,7 @@ test.describe('the Drawer, on a phone', { tag: '@below-1440' }, () => {
 test('with reduced motion, a section link changes the page at once', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' })
   await gotoReady(page, '/concepts/vikshepa/')
-  // In the header from 64rem; on narrower screens, in the Drawer.
+  // In the header from 80rem; on narrower screens, in the Drawer.
   if (!isWide(page)) await banner(page).getByRole('button', { name: 'Menu' }).click()
   await page
     .getByRole('navigation', { name: 'Main' })

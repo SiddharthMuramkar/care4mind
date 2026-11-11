@@ -217,7 +217,7 @@ test('the Frontispiece stands centred above the heading, smaller on a phone', as
   if (!box || !kicker || !heading) throw new Error('The title page has its parts.')
   expect(box.y + box.height).toBeLessThanOrEqual(kicker.y)
   expect(Math.abs(box.x + box.width / 2 - (heading.x + heading.width / 2))).toBeLessThanOrEqual(1)
-  const expected = (page.viewportSize()?.width ?? 1440) < 640 ? 200 : 240
+  const expected = (page.viewportSize()?.width ?? 1440) < 768 ? 200 : 240
   expect(box.width).toBe(expected)
   expect(box.height).toBe(expected)
 })
