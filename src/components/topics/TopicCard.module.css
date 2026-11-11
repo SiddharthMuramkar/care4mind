@@ -98,7 +98,7 @@
 }
 
 /* On a phone the card is tighter, and its count loses the rule above it. */
-@media (width < 40rem) {
+@media (width < 48rem) {
   .card {
     column-gap: 0.75rem;
     row-gap: 0.25rem;

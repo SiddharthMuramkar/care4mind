@@ -1,4 +1,4 @@
-/* The narrow screen's Menu, gone from 72rem (WIDE in current.ts), where the sections fit. */
+/* The narrow screen's Menu, gone from 80rem (WIDE in current.ts), where the sections fit. */
 .menu {
   display: inline-flex;
   align-items: center;
@@ -25,7 +25,7 @@
   flex: none;
 }
 
-@media (width < 24rem) {
+@container site-header (width < 24rem) {
   .menu {
     gap: 0.3rem;
     padding: 0 0.55rem 0 0.45rem;
@@ -34,13 +34,13 @@
 }
 
 /* The narrowest screens keep the word and lose the drawing, so Log in fits the strip beside it. */
-@media (width < 22.5rem) {
+@container site-header (width < 22.5rem) {
   .glyphBesideLogIn {
     display: none;
   }
 }
 
-@media (width >= 72rem) {
+@media (width >= 80rem) {
   .menu {
     display: none;
   }

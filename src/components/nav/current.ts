@@ -1,7 +1,7 @@
 import type { PanelId } from './types'
 
 /** The width from which the header shows its sections and Search on one line (SiteHeader.module.css). */
-export const WIDE = '(min-width: 72rem)'
+export const WIDE = '(min-width: 80rem)'
 
 const PANELS: readonly string[] = ['concepts', 'library'] satisfies PanelId[]
 

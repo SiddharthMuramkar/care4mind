@@ -121,7 +121,7 @@
 
 /* On a phone the trail is one line back to its topic: "← Mind: states and obstacles".
    The lead also stands closer together, so the first section is a short scroll away. */
-@media (width < 40rem) {
+@media (width < 48rem) {
   .scope,
   .body {
     gap: 1.5rem;

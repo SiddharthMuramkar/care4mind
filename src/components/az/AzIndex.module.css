@@ -52,7 +52,7 @@
 }
 
 /* Wide: each group's label in a margin of its own, its chips wrapping beside it. */
-@media (width >= 40rem) {
+@media (width >= 48rem) {
   .chipGroup {
     position: relative;
     padding-inline-start: 5rem;
@@ -181,7 +181,7 @@ a.letter:focus-visible {
   }
 }
 
-@media (width < 40rem) {
+@media (width < 48rem) {
   /* Every letter to hand at once: the rail wraps, so no letter waits behind a swipe. */
   .rail {
     flex-wrap: wrap;

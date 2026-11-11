@@ -77,7 +77,7 @@
   }
 }
 
-@media (width < 34rem) {
+@media (width < 48rem) {
   .progress {
     grid-template-columns: minmax(0, 1fr);
   }

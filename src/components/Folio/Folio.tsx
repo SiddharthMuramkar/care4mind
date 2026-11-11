@@ -12,7 +12,7 @@ interface Props {
   /**
    * `frame` is the printer's double rule with diamond corners, which marks the hero alone
    * among folios; `page` is a reading page's paper panel — one thin rule on wide screens,
-   * and no frame below 40rem, where its text runs to the page's own 16px margins.
+   * and no frame below 48rem, where its text runs to the page's own 16px margins.
    */
   variant?: 'frame' | 'page'
 }

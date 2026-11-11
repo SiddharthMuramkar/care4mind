@@ -827,7 +827,7 @@ test.describe('Concept page v2: tables', () => {
   test('on a phone a comparison table stacks as cards, each cell under its column’s name', async ({
     page,
   }) => {
-    test.skip(page.viewportSize()?.width !== 360, 'comparison tables stack below 40rem')
+    test.skip(page.viewportSize()?.width !== 360, 'comparison tables stack below 48rem')
     await gotoReady(page, '/concepts/vikshepa/')
     const frame = page.getByRole('region', { name: /Comparison between Indian and Western/ })
     await frame.scrollIntoViewIfNeeded()

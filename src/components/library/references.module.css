@@ -263,7 +263,7 @@
 }
 
 /* The wrapped rail is taller, so a letter or entry it leads to lands further down. */
-@media (width < 40rem) {
+@media (width < 48rem) {
   .letter,
   .entry {
     scroll-margin-top: calc(var(--sticky-top) + 8rem);
@@ -271,13 +271,6 @@
 }
 
 @media (width < 30rem) {
-  .letter,
-  .entry {
-    scroll-margin-top: calc(var(--sticky-top) + 10rem);
-  }
-}
-
-@media (width < 24rem) {
   .letter,
   .entry {
     scroll-margin-top: calc(var(--sticky-top) + 12rem);

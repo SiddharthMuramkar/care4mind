@@ -222,7 +222,7 @@ test.describe('section pages', () => {
       .poll(() => sticker.evaluate((image: HTMLImageElement) => image.naturalWidth))
       .toBeGreaterThan(0)
     const box = await sticker.boundingBox()
-    const expected = (page.viewportSize()?.width ?? 0) < 640 ? 88 : 112
+    const expected = (page.viewportSize()?.width ?? 0) < 768 ? 88 : 112
     expect(box?.width).toBe(expected)
     expect(box?.height).toBe(expected)
   })
@@ -410,7 +410,7 @@ test.describe('topic cards', () => {
       page,
     }) => {
       await gotoReady(page, path)
-      const textGap = (page.viewportSize()?.width ?? 0) < 640 ? 4 : 8
+      const textGap = (page.viewportSize()?.width ?? 0) < 768 ? 4 : 8
       for (const slug of TOPIC_SLUGS) {
         const card = topicCard(page, slug)
         // The count is the last line, and a term, on the cards that have one, the line above it.
@@ -624,7 +624,7 @@ test.describe('Concept pages', () => {
       .poll(() => picture.evaluate((image: HTMLImageElement) => image.naturalWidth))
       .toBeGreaterThan(0)
     const box = await (VIKSHEPA_RINGED ? ringOf(picture) : picture).boundingBox()
-    const expected = (page.viewportSize()?.width ?? 0) < 640 ? 88 : 120
+    const expected = (page.viewportSize()?.width ?? 0) < 768 ? 88 : 120
     expect(box?.width).toBe(expected)
     expect(box?.height).toBe(expected)
   })
@@ -674,7 +674,7 @@ test.describe('Questionnaire pages and cards', () => {
       .poll(() => picture.evaluate((image: HTMLImageElement) => image.naturalWidth))
       .toBeGreaterThan(0)
     // The ring's band is 5% each side of the Medallion: the picture fills the 90% inside it.
-    const wide = (page.viewportSize()?.width ?? 0) >= 640
+    const wide = (page.viewportSize()?.width ?? 0) >= 768
     const box = await picture.locator('xpath=..').boundingBox()
     expect(box?.width).toBe(wide ? 120 : 88)
   })
@@ -2039,7 +2039,7 @@ test.describe('the homepage, section and topic pages as a set', () => {
       box: (page) => ringOf(headImage(page)),
       wide: 240,
       narrow: 200,
-      narrowBelow: 640,
+      narrowBelow: 768,
     },
     {
       name: 'section Sticker',
@@ -2047,7 +2047,7 @@ test.describe('the homepage, section and topic pages as a set', () => {
       box: headImage,
       wide: 112,
       narrow: 88,
-      narrowBelow: 640,
+      narrowBelow: 768,
     },
     {
       name: 'Sticker on a topic card',
@@ -2055,7 +2055,7 @@ test.describe('the homepage, section and topic pages as a set', () => {
       box: (page) => cardSticker(page, 'self'),
       wide: 64,
       narrow: 64,
-      narrowBelow: 640,
+      narrowBelow: 768,
     },
     {
       name: 'Sticker beside What’s on your mind?',
@@ -2063,7 +2063,7 @@ test.describe('the homepage, section and topic pages as a set', () => {
       box: (page) => homeSection(page, MIND).locator('img'),
       wide: 56,
       narrow: 56,
-      narrowBelow: 640,
+      narrowBelow: 768,
     },
     {
       name: 'Emblem in Who’s behind this',
@@ -2071,7 +2071,7 @@ test.describe('the homepage, section and topic pages as a set', () => {
       box: (page) => main(page).locator(emblem),
       wide: 120,
       narrow: 120,
-      narrowBelow: 640,
+      narrowBelow: 768,
     },
     {
       name: 'footer Emblem',
@@ -2079,7 +2079,7 @@ test.describe('the homepage, section and topic pages as a set', () => {
       box: (page) => page.getByRole('contentinfo').locator(emblem),
       wide: 72,
       narrow: 72,
-      narrowBelow: 640,
+      narrowBelow: 768,
     },
   ]
 
@@ -2235,7 +2235,7 @@ test.describe('the Concept, Questionnaire, text and error pages as a set', () =>
         if (!next) throw new Error('The words follow the picture.')
         return next.getBoundingClientRect().top - element.getBoundingClientRect().bottom
       })
-      const wide = (page.viewportSize()?.width ?? 0) >= 640
+      const wide = (page.viewportSize()?.width ?? 0) >= 768
       expect(gap).toBeCloseTo(wide ? 28 : 12, 0)
     })
   }

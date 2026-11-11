@@ -3,7 +3,7 @@
   margin-block-end: 1rem;
 }
 
-@media (width < 40rem) {
+@media (width < 48rem) {
   .frontispiece {
     max-width: 12.5rem;
   }

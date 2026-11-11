@@ -4,7 +4,7 @@ import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
 
 /** The widths a layout may change at, in rem. Custom properties can't be read in a media query, so the set lives here. */
-const breakpoints = [21, 22.5, 24, 30, 34, 37.5, 40, 46, 48, 52, 60, 64, 72]
+const breakpoints = [30, 48, 64, 80]
 
 const cssFiles = readdirSync('src', { withFileTypes: true, recursive: true })
   .filter((entry) => entry.isFile() && entry.name.endsWith('.css'))

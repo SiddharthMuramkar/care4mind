@@ -23,8 +23,8 @@
     0 30px 60px -20px rgb(0 0 0 / 0.55);
 }
 
-/* Below 640px a reading page has no frame: its text runs to the page's own 16px margins. */
-@media (width < 40rem) {
+/* Below 768px a reading page has no frame: its text runs to the page's own 16px margins. */
+@media (width < 48rem) {
   .page {
     padding-inline: 0;
     box-shadow: none;

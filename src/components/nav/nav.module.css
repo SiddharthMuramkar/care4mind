@@ -1,6 +1,6 @@
 /*
  * The header's sections, shared by the server-rendered list and the NavigationMenu that
- * replaces it, so the swap changes nothing you can see. They show from 72rem (WIDE in
+ * replaces it, so the swap changes nothing you can see. They show from 80rem (WIDE in
  * current.ts); narrower screens reach them through the Menu.
  */
 .sections {
@@ -10,7 +10,7 @@
   padding: 0;
 }
 
-@media (width >= 72rem) {
+@media (width >= 80rem) {
   .sections {
     display: flex;
     align-items: center;

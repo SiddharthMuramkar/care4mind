@@ -94,7 +94,7 @@
 }
 
 /* A finger needs a taller line. The marker comes down with the words, by the padding added. */
-@media (width < 40rem) {
+@media (width < 48rem) {
   .tallLines .entry {
     min-height: 2.75rem;
     padding-block: 0.5rem;

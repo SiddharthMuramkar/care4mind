@@ -1,5 +1,5 @@
 /* Its picture, above the name, with the room a Concept's or a Questionnaire's head leaves. */
-@media (width >= 40rem) {
+@media (width >= 48rem) {
   .picture {
     margin-block-end: 1rem;
   }
