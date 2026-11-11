@@ -3,9 +3,15 @@
   container: credits-gallery / inline-size;
 }
 
+/*
+ * Each column as wide as ArtFigure draws its picture: 150 px on a phone, 180 from 48rem and 240
+ * from 64rem, where three columns and their two gaps fill the text's 784 px at most.
+ */
 .gallery {
+  --thumbnail: 150px;
+
   display: grid;
-  grid-template-columns: repeat(auto-fill, 160px);
+  grid-template-columns: repeat(auto-fill, var(--thumbnail));
   justify-content: space-between;
   gap: 2rem;
 }
@@ -14,7 +20,16 @@
    eleven Plates 3 + 3 + 3 + 2, so no family ends on a lone picture. */
 @media (width >= 48rem) {
   .gallery {
-    grid-template-columns: repeat(3, 160px);
+    --thumbnail: 180px;
+
+    /* Columns that give way a little, should a classic scrollbar narrow the page at 768px. */
+    grid-template-columns: repeat(3, minmax(0, var(--thumbnail)));
+  }
+}
+
+@media (width >= 64rem) {
+  .gallery {
+    --thumbnail: 240px;
   }
 }
 
@@ -22,26 +37,21 @@
 .gallery:not(:has(> :nth-child(3))) {
   grid-template-columns: none;
   grid-auto-flow: column;
-  grid-auto-columns: 160px;
+  grid-auto-columns: var(--thumbnail);
   justify-content: center;
 }
 
 /* Its pictures stand as far apart as the three columns' do, so the page keeps one spacing. */
 @media (width >= 48rem) {
   .gallery:not(:has(> :nth-child(3))) {
-    column-gap: calc((100% - 3 * 160px) / 2);
+    column-gap: calc((100% - 3 * var(--thumbnail)) / 2);
   }
 }
 
-/* At 360px the text is 320px wide: ArtFigure draws at 150px here, so two columns keep their room. */
+/* At 360px the text is 320px wide, so two 150px columns keep their room. */
 @media (width < 48rem) {
   .gallery {
-    grid-template-columns: repeat(auto-fill, 150px);
     column-gap: 1.25rem;
-  }
-
-  .gallery:not(:has(> :nth-child(3))) {
-    grid-auto-columns: 150px;
   }
 }
 

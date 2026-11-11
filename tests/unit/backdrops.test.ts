@@ -7,6 +7,7 @@ import { describe, expect, it } from 'vitest'
 // such toolbars, so the stylesheets are read instead.
 
 const BACKDROPS = [
+  'src/components/art/Lightbox.module.css',
   'src/components/nav/MenuDrawer.module.css',
   'src/components/questionnaire/RetakeDialog.module.css',
 ] as const

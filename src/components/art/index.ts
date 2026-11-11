@@ -1,6 +1,7 @@
 export { ArtFigure } from './ArtFigure'
 export { FolkBorder } from './FolkBorder'
 export { HeadPicture } from './HeadPicture'
+export { HeroPlates } from './HeroPlates'
 export { KarmaCycle } from './KarmaCycle'
 export { Medallion } from './Medallion'
 export { MedallionRing } from './MedallionRing'

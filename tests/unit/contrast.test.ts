@@ -262,6 +262,7 @@ describe('controls on paper', () => {
     ['src/components/library/library.module.css', '.kind'],
     ['src/components/search/StartingPoints.module.css', '.chip'],
     ['src/components/art/PlateViewer.module.css', '.button'],
+    ['src/components/art/Lightbox.module.css', '.close'],
     ['src/components/questionnaire/Statement.module.css', '.option'],
     ['src/components/library/references.module.css', '.chip'],
     ['src/components/texts/Passage.module.css', '.chip'],
