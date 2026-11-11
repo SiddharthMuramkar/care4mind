@@ -272,6 +272,47 @@ test('the values topic shows its yama–niyama introduction; no other topic has 
   await expect(page.getByRole('main').locator('#yama')).toHaveCount(0)
 })
 
+test(
+  'ends with the topics before and after it, in the topics’ order',
+  { tag: '@one-width' },
+  async ({ page }) => {
+    const all = await topics.list()
+    for (const [index, topic] of all.entries()) {
+      await page.goto(topic.href)
+      const pager = page.getByRole('main').getByRole('navigation', { name: 'Topics', exact: true })
+      for (const [link, other] of [
+        [pager.getByRole('link', { name: /^Previous topic/ }), all[index - 1]],
+        [pager.getByRole('link', { name: /^Next topic/ }), all[index + 1]],
+      ] as const) {
+        if (other) {
+          await expect(link, topic.slug).toHaveAttribute('href', other.href)
+          await expect(link, topic.slug).toContainText(other.name)
+        } else await expect(link, topic.slug).toHaveCount(0)
+      }
+    }
+  },
+)
+
+test('"next topic" turns the page forward and "previous topic" turns it back', async ({ page }) => {
+  const [first, second] = await topics.list()
+  if (!first || !second) throw new Error('The content has two topics or more.')
+  await recordPageTurns(page)
+  await gotoReady(page, first.href)
+  const pager = page.getByRole('navigation', { name: 'Topics', exact: true })
+  const next = pager.getByRole('link', { name: /^Next topic/ })
+  await prefetched(next)
+  await next.click()
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText(second.name)
+  const [forward] = await pageTurns(page)
+  expectPageTurned(forward, 'forward')
+  const previous = pager.getByRole('link', { name: /^Previous topic/ })
+  await prefetched(previous)
+  await previous.click()
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText(first.name)
+  const [, back] = await pageTurns(page)
+  expectPageTurned(back, 'back')
+})
+
 test('a topic card on the A–Z turns the page forward, its title flying into the heading', async ({
   page,
 }) => {

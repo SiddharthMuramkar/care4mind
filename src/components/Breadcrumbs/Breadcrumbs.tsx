@@ -30,8 +30,9 @@ function Words({ crumb }: { crumb: Crumb }) {
 /**
  * FR-01: every page below the homepage shows where it sits. The
  * trail is the route registry's, so it follows the site map; the last crumb is the page itself.
- * Going back up turns the page back. A path the registry doesn't list, such as a switched-off
- * feature's, has no trail, so its page answers 404.
+ * On a phone the stylesheet shows one link of it, back to the page above. Going back up turns
+ * the page back. A path the registry doesn't list, such as a switched-off feature's, has no
+ * trail, so its page answers 404.
  */
 export async function Breadcrumbs({ path }: { path: string }) {
   const trail = await site.trail(path)

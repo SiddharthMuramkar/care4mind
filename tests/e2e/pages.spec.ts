@@ -1,4 +1,5 @@
 import { siteConfig } from '@/config/site'
+import { site } from '@/content'
 
 import { expectNoAxeViolations } from './axe'
 import { unfinishedDrawings } from './drawings'
@@ -56,20 +57,25 @@ for (const route of ROUTES_IN_SCOPE) {
       .soft(canonical.first(), `${where}: canonical address ends in /`)
       .toHaveAttribute('href', /\/$/)
 
-    // FR-01: every page below the homepage shows its trail, ending at itself. A Concept on a
-    // phone shows one line of it instead: the link back to its topic.
+    // FR-01: every page below the homepage shows its trail, ending at itself. On a phone every
+    // page shows one line of it instead: the link back to the page above.
     if (route.kind !== 'home') {
       const trail = page.getByRole('navigation', { name: 'Breadcrumb', exact: true })
       await expect.soft(trail, `${where}: one Breadcrumb landmark`).toHaveCount(1)
-      if (route.kind === 'concept' && (page.viewportSize()?.width ?? 0) < 768) {
-        const topic = trail.getByRole('link')
+      if ((page.viewportSize()?.width ?? 0) < 768) {
+        // A crumb's href is a typed route; read as a plain string, it compares with any other.
+        const crumbs: readonly { href: string }[] = await site.trail(route.path)
+        const above = crumbs.at(-2)?.href ?? 'the page above'
+        const link = trail.getByRole('link')
         await expect
-          .soft(topic, `${where}: Breadcrumb’s one phone link, to its topic`)
+          .soft(link, `${where}: Breadcrumb’s one phone link, to the page above`)
           .toHaveCount(1)
-        await expect.soft(topic, `${where}: Breadcrumb links to its topic`).toBeVisible()
+        await expect.soft(link, `${where}: Breadcrumb links to the page above`).toBeVisible()
         await expect
-          .soft(topic, `${where}: Breadcrumb’s topic link`)
-          .toHaveAttribute('href', /^\/topics\/[^/]+\/$/)
+          .soft(link, `${where}: Breadcrumb’s link to the page above`)
+          .toHaveAttribute('href', above)
+        const box = await trail.boundingBox()
+        expect.soft(box?.height ?? 0, `${where}: Breadcrumb on one line`).toBeLessThanOrEqual(50)
       } else {
         const home = trail.getByRole('link', { name: 'Go to home', exact: true })
         await expect.soft(home, `${where}: Breadcrumb links to Home`).toBeVisible()

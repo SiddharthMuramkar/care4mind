@@ -56,6 +56,11 @@ const header = (page: Page) => banner(page).getByRole('navigation', { name: 'Mai
 const footerNav = (page: Page) =>
   page.getByRole('contentinfo').getByRole('navigation', { name: 'All sections' })
 
+/** On a phone the footer folds its long lists: open each, as a reader would, script or none. */
+async function unfoldFooter(page: Page) {
+  for (const toggle of await footerNav(page).locator('summary:visible').all()) await toggle.click()
+}
+
 /** A link's address, as a path: every address ends with a slash. */
 const pathOf = async (link: Locator) =>
   new URL((await link.getAttribute('href')) ?? '', 'http://site').pathname
@@ -149,6 +154,7 @@ test.describe('without JavaScript', () => {
   test('each navigation label is the heading of the page it opens', async ({ page }) => {
     await page.goto('/')
     // The footer holds every page the header, its panels and the phone menu open.
+    await unfoldFooter(page)
     const links = await footerNav(page).getByRole('link').all()
     const targets: { label: string; path: string }[] = []
     for (const link of links) {
@@ -189,6 +195,7 @@ test.describe('without JavaScript', () => {
 
   test('the footer carries the full navigation, the wordmark and the notices', async ({ page }) => {
     await page.goto('/')
+    await unfoldFooter(page)
     const nav = footerNav(page)
     // Questionnaires keeps the footer's own label while none can be taken, so it is checked below.
     for (const { name, path } of SECTIONS.filter(({ name }) => name !== 'Questionnaires')) {
@@ -230,12 +237,86 @@ test.describe('without JavaScript', () => {
     async ({ page }) => {
       await page.setViewportSize({ width: 360, height: 800 })
       await page.goto('/concepts/vikshepa/')
+      await unfoldFooter(page)
       const links = await footerNav(page).locator('ul ul > li > a').all()
       expect(links.length).toBeGreaterThan(0)
       for (const link of links) {
         const box = await link.boundingBox()
         expect(box?.height ?? 0, await link.innerText()).toBeGreaterThanOrEqual(44)
       }
+    },
+  )
+
+  test('the footer heads its three columns Concepts, Library and More', async ({ page }) => {
+    await page.goto('/')
+    const headings = footerNav(page).getByRole('heading', { level: 2 })
+    await expect(headings).toHaveText(['Concepts', 'Library', 'More'])
+    // A section with a page of its own is a link to it; More has none.
+    for (const name of ['Concepts', 'Library']) {
+      await expect(headings.filter({ hasText: name }).getByRole('link')).toHaveCount(1)
+    }
+    await expect(headings.filter({ hasText: 'More' }).getByRole('link')).toHaveCount(0)
+  })
+
+  test(
+    'on a phone the footer folds its two long lists, each opening without JavaScript, and keeps the help line open',
+    { tag: '@self-width' },
+    async ({ page }) => {
+      await page.setViewportSize({ width: 360, height: 800 })
+      await page.goto('/concepts/vikshepa/')
+      const nav = footerNav(page)
+      for (const { name } of [...TOPICS, ...LIBRARY]) {
+        await expect(nav.getByRole('link', { name })).toBeHidden()
+      }
+      // The short list, More, stands open, and so does the help line under the columns.
+      await expect(nav.getByRole('link', { name: 'Picture credits', exact: true })).toBeVisible()
+      await expect(page.locator('footer [data-help-line]')).toBeVisible()
+      const toggles = nav.locator('summary')
+      await expect(toggles).toHaveText(['More in Concepts', 'More in Library'])
+      await expect(toggles.first()).toHaveAccessibleName('More in Concepts')
+      for (const toggle of await toggles.all()) {
+        const box = await toggle.boundingBox()
+        expect(box?.width ?? 0).toBeGreaterThanOrEqual(44)
+        expect(box?.height ?? 0).toBeGreaterThanOrEqual(44)
+      }
+      await toggles.first().click()
+      for (const { name } of TOPICS) await expect(nav.getByRole('link', { name })).toBeVisible()
+      await expect(nav.getByRole('link', { name: LIBRARY[0].name })).toBeHidden()
+      await toggles.last().click()
+      for (const { name } of LIBRARY) await expect(nav.getByRole('link', { name })).toBeVisible()
+    },
+  )
+
+  test(
+    'from 48rem the footer’s lists stand open, with nothing to open them',
+    { tag: '@from-768' },
+    async ({ page }) => {
+      await page.goto('/concepts/vikshepa/')
+      const nav = footerNav(page)
+      for (const { name } of [...TOPICS, ...LIBRARY]) {
+        await expect(nav.getByRole('link', { name })).toBeVisible()
+      }
+      await expect(nav.locator('summary')).toHaveCount(2)
+      await expect(nav.locator('summary:visible')).toHaveCount(0)
+    },
+  )
+
+  test(
+    'a link in the footer’s lists shows a line under it only on hover and focus',
+    { tag: '@one-width' },
+    async ({ page }) => {
+      await page.goto('/')
+      const link = footerNav(page).getByRole('link', { name: 'Picture credits', exact: true })
+      await expect(link).toHaveCSS('text-decoration-line', 'none')
+      await link.hover()
+      await expect(link).toHaveCSS('text-decoration-line', 'underline')
+      await page.mouse.move(0, 0)
+      await expect(link).toHaveCSS('text-decoration-line', 'none')
+      // Focused from the keyboard, as its focus ring shows.
+      await page.keyboard.press('Tab')
+      await link.focus()
+      expect(await link.evaluate((element) => element.matches(':focus-visible'))).toBe(true)
+      await expect(link).toHaveCSS('text-decoration-line', 'underline')
     },
   )
 
