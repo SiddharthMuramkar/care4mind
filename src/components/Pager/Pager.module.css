@@ -1,4 +1,9 @@
-/* The ways on at the foot of a folio, set like a book's catchwords. */
+/* The ways on at the foot of a folio, set like a book's catchwords, and any line under them. */
+.landmark {
+  display: grid;
+  gap: 1rem;
+}
+
 .pager {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr));
@@ -17,6 +22,11 @@
   text-decoration: none;
 }
 
+/* A turn with a link preview is placed by its wrapper, which the preview anchors to. */
+.pager > :has(> .next) {
+  grid-column: -2;
+}
+
 .next {
   grid-column: -2;
   justify-items: end;
@@ -26,11 +36,6 @@
 .previous:hover,
 .next:hover {
   border-color: var(--color-surface-ink);
-}
-
-.previous:active,
-.next:active {
-  transform: translateY(1px);
 }
 
 .direction {
@@ -71,6 +76,11 @@
   .previous,
   .next {
     transition: transform var(--duration-instant) var(--ease-press);
+  }
+
+  .previous:active,
+  .next:active {
+    transform: translateY(1px);
   }
 }
 

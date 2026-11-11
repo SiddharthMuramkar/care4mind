@@ -40,7 +40,19 @@ export function TopicPager({
   nextTopic?: TopicRef
 }) {
   return (
-    <Pager label={`Concepts in ${topic.name}`}>
+    <Pager
+      label={`Concepts in ${topic.name}`}
+      after={
+        <p className={styles.all}>
+          <Link
+            href={hrefFor({ kind: 'topic', id: topic.slug, anchor: 'its-concepts' })}
+            transitionTypes={turnBack}
+          >
+            All concepts in this topic
+          </Link>
+        </p>
+      }
+    >
       {previous ? <ConceptTurn concept={previous} rel="prev" /> : null}
       {next ? (
         <ConceptTurn concept={next} rel="next" />
@@ -52,14 +64,6 @@ export function TopicPager({
           name={<Transliterated text={nextTopic.name} />}
         />
       ) : null}
-      <p className={styles.all}>
-        <Link
-          href={hrefFor({ kind: 'topic', id: topic.slug, anchor: 'its-concepts' })}
-          transitionTypes={turnBack}
-        >
-          All concepts in this topic
-        </Link>
-      </p>
     </Pager>
   )
 }

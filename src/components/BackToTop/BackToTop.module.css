@@ -22,7 +22,9 @@
   opacity: 0;
 }
 
-.button[data-shown] {
+/* Shown far down the page, and kept while it has focus, so focus never rests on nothing. */
+.button[data-shown],
+.button:focus-visible {
   visibility: visible;
   opacity: 1;
 }

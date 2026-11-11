@@ -1,7 +1,7 @@
 /* Under the ways through the topic, a line of its own back up to the whole of it. */
 .all {
-  grid-column: 1 / -1;
   display: flex;
+  margin: 0;
   justify-content: center;
   font-size: var(--text-body);
 }

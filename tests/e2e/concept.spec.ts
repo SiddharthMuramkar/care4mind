@@ -905,6 +905,33 @@ test.describe('Concept page v2: previous and next', () => {
     expectPageTurned(back, 'back')
   })
 
+  test(
+    'on a wide screen "previous" takes the left half and "next" the right, over the line back to the topic',
+    { tag: '@from-1440' },
+    async ({ page }) => {
+      await gotoReady(page, '/concepts/upa-vikshepa/')
+      const pager = page.getByRole('navigation', { name: /^Concepts in / })
+      const box = async (name: RegExp) => {
+        const found = await pager.getByRole('link', { name }).boundingBox()
+        if (!found) throw new Error(`${name} is on the page`)
+        return found
+      }
+      const nav = await pager.boundingBox()
+      if (!nav) throw new Error('the pager is on the page')
+      const previous = await box(/^Previous/)
+      const next = await box(/^Next/)
+      const all = await box(/^All concepts in this topic$/)
+      expect(Math.abs(previous.x - nav.x), 'previous at the left edge').toBeLessThanOrEqual(1)
+      expect(
+        Math.abs(next.x + next.width - (nav.x + nav.width)),
+        'next at the right edge',
+      ).toBeLessThanOrEqual(1)
+      expect(Math.abs(previous.width - next.width), 'the two share the row').toBeLessThanOrEqual(1)
+      expect(previous.width + next.width, 'half each').toBeGreaterThan(nav.width - 40)
+      expect(all.y, 'the line back stands under them').toBeGreaterThan(next.y + next.height)
+    },
+  )
+
   test('the first Concept of a topic has no "previous", and the last leads on to the next topic instead of a "next"', async ({
     page,
   }) => {

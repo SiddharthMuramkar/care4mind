@@ -199,14 +199,19 @@
   }
 }
 
-/* From 48rem every list stands open, and its chevron is left off. */
-@media (width >= 48rem) {
-  .fold::details-content {
-    content-visibility: visible;
-  }
+/*
+ * From 48rem every list stands open, and its chevron is left off; only where the browser can
+ * open a fold from its stylesheet, so an older one keeps the chevron that opens it.
+ */
+@supports selector(::details-content) {
+  @media (width >= 48rem) {
+    .fold::details-content {
+      content-visibility: visible;
+    }
 
-  .toggle {
-    display: none;
+    .toggle {
+      display: none;
+    }
   }
 }
 

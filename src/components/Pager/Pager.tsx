@@ -46,15 +46,19 @@ export function Pager({
   label,
   className,
   children,
+  after,
 }: {
   /** The landmark's name, which says what the pager steps through. */
   label: string
   className?: string
   children: ReactNode
+  /** A line under the boxes, outside their grid, so a lone box still takes the whole row. */
+  after?: ReactNode
 }) {
   return (
-    <nav className={cx(styles.pager, className)} aria-label={label}>
-      {children}
+    <nav className={cx(styles.landmark, className)} aria-label={label}>
+      <div className={styles.pager}>{children}</div>
+      {after}
     </nav>
   )
 }
