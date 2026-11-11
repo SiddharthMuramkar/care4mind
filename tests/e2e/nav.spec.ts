@@ -9,8 +9,11 @@ import { ROUTES } from './routes'
 // The navigation shell: the header's sections and Search, the panels
 // a computer opens from two of them, the Drawer a phone opens from Menu, and the footer.
 
-/** From 80rem (1280 px) the sections and Search fit on one line; below it the Menu takes over. */
-const WIDE = 1280
+/** From 48rem (768 px) the header lists the sections beside Search; below it the Menu takes over. */
+const TABLET = 768
+
+/** From 64rem (1024 px) Concepts and Library open panels, and Search is a labelled field. */
+const WIDE = 1024
 
 /** A take page is a route only while its Questionnaire can be taken in this build. */
 const TAKEABLE = ROUTES.some(({ kind }) => kind === 'questionnaire-flow')
@@ -40,10 +43,14 @@ const LIBRARY = [
   { name: /^Therapy approaches/, path: '/library/methods/', holds: '5 sections' },
 ] as const
 
-/** Start here follows the wordmark from 30rem (480 px), while its proposal's route exists. */
+/**
+ * Start here follows the wordmark, while its proposal's route exists, where the strip has room:
+ * from 30rem (480 px) until the sections join at 48rem, and again from 80rem (1280 px).
+ */
 const START_LINK = ROUTES.some(({ path }) => path === hrefFor({ page: 'start' }))
   ? ['Start here']
   : []
+const startShows = (width: number) => (width >= 480 && width < TABLET) || width >= 1280
 
 /** Log in sits beside Search, at every width, while the login switch is on. */
 const LOG_IN_LINK = ROUTES.some(({ path }) => path === hrefFor({ page: 'log-in' }))
@@ -51,6 +58,7 @@ const LOG_IN_LINK = ROUTES.some(({ path }) => path === hrefFor({ page: 'log-in' 
   : []
 
 const isWide = (page: Page) => (page.viewportSize()?.width ?? 0) >= WIDE
+const fromTablet = (page: Page) => (page.viewportSize()?.width ?? 0) >= TABLET
 const banner = (page: Page) => page.getByRole('banner')
 const header = (page: Page) => banner(page).getByRole('navigation', { name: 'Main' })
 const footerNav = (page: Page) =>
@@ -109,10 +117,11 @@ test.describe('without JavaScript', () => {
   }) => {
     await page.goto('/concepts/vikshepa/')
     const links = banner(page).getByRole('link')
-    if (isWide(page)) {
+    const start = startShows(page.viewportSize()?.width ?? 0) ? START_LINK : []
+    if (fromTablet(page)) {
       await expect(links).toHaveText([
         'Care4Mind',
-        ...START_LINK,
+        ...start,
         ...SECTIONS.map(({ name }) => new RegExp(`^\\s*${name}\\s*$`)),
         ...LOG_IN_LINK,
       ])
@@ -121,7 +130,6 @@ test.describe('without JavaScript', () => {
       }
     } else {
       // On a phone the sections wait behind Menu, which is a link to the footer's navigation.
-      const start = (page.viewportSize()?.width ?? 0) >= 480 ? START_LINK : []
       await expect(links).toHaveText(['Care4Mind', ...start, /Search/, ...LOG_IN_LINK, /Menu/])
       const menu = banner(page).getByRole('link', { name: 'Menu' })
       await expect(menu).toHaveAttribute('href', '#site-nav')
@@ -143,7 +151,7 @@ test.describe('without JavaScript', () => {
   })
 
   test('every header link opens its page', async ({ page }) => {
-    const names = isWide(page) ? SECTIONS : SECTIONS.filter(({ name }) => name === 'Search')
+    const names = fromTablet(page) ? SECTIONS : SECTIONS.filter(({ name }) => name === 'Search')
     for (const { name, path } of names) {
       await page.goto('/concepts/vikshepa/')
       await banner(page).getByRole('link', { name, exact: true }).click()
@@ -178,7 +186,7 @@ test.describe('without JavaScript', () => {
 
   test(
     'Menu leads to the full navigation in the footer',
-    { tag: '@below-1440' },
+    { tag: '@only-360' },
     async ({ page }) => {
       await page.goto('/concepts/vikshepa/')
       await banner(page).getByRole('link', { name: 'Menu' }).click()
@@ -398,7 +406,7 @@ test.describe('the section you are in', () => {
 
   test(
     'is marked in the header, by aria-current and a lozenge under its name',
-    { tag: '@from-1440' },
+    { tag: '@from-768' },
     async ({ page }) => {
       for (const { path, current } of CASES) {
         await gotoReady(page, path)
@@ -427,7 +435,7 @@ test.describe('the section you are in', () => {
     },
   )
 
-  test('is marked in the Drawer', { tag: '@below-1440' }, async ({ page }) => {
+  test('is marked in the Drawer', { tag: '@only-360' }, async ({ page }) => {
     await gotoReady(page, '/concepts/vikshepa/')
     await banner(page).getByRole('button', { name: 'Menu' }).click()
     const drawer = page.getByRole('dialog', { name: 'Menu' })
@@ -643,6 +651,31 @@ test.describe('panels, on a computer', { tag: '@from-1440' }, () => {
   })
 
   for (const section of ['Concepts', 'Library']) {
+    test(`a click outside the open ${section} panel closes it, and the page stays where it is`, async ({
+      page,
+    }) => {
+      await gotoReady(page, '/concepts/vikshepa/')
+      await expect(toggle(page, section)).toHaveAttribute('data-ready')
+      await toggle(page, section).click()
+      const open = panel(page, section)
+      await expect(open).toBeVisible()
+      await settled(page)
+      // The page's lower left corner: the margin beside the text, clear of the panel and of any link.
+      const box = await open.boundingBox()
+      const height = page.viewportSize()?.height ?? 0
+      if (!box) throw new Error(`the ${section} panel is on the page`)
+      const spot = { x: 8, y: height - 8 }
+      expect(spot.x < box.x || spot.y > box.y + box.height, 'the spot is outside the panel').toBe(
+        true,
+      )
+      await page.mouse.click(spot.x, spot.y)
+      await expect(open).toBeHidden()
+      await expect(toggle(page, section)).toHaveAttribute('aria-expanded', 'false')
+      await expect(page).toHaveURL(atPath('/concepts/vikshepa/'))
+    })
+  }
+
+  for (const section of ['Concepts', 'Library']) {
     test(`passes axe with the ${section} panel open`, async ({ page }) => {
       await gotoReady(page, '/concepts/vikshepa/')
       await toggle(page, section).focus()
@@ -724,14 +757,14 @@ test.describe('every panel stays inside the screen', { tag: '@self-width' }, () 
     }).toPass()
   }
 
-  for (const width of [320, 390, 1024, WIDE]) {
+  for (const width of [320, 390, WIDE, 1280]) {
     test(`at ${width} px no open panel overflows either edge, and a panel's pointer sits under its toggle`, async ({
       page,
     }) => {
       await page.setViewportSize({ width, height: 800 })
       await gotoReady(page, '/')
-      if (width < WIDE) {
-        // Below 80rem the sections open in the Drawer, the only panel there is.
+      if (width < TABLET) {
+        // On a phone the sections open in the Drawer, the only panel there is.
         await banner(page).getByRole('button', { name: 'Menu' }).click()
         const drawer = page.getByRole('dialog', { name: 'Menu' })
         await expect(drawer).toBeVisible()
@@ -770,7 +803,7 @@ test.describe('every panel stays inside the screen', { tag: '@self-width' }, () 
   })
 })
 
-test.describe('the Drawer, on a phone', { tag: '@below-1440' }, () => {
+test.describe('the Drawer, on a phone', { tag: '@only-360' }, () => {
   const menu = (page: Page) => banner(page).getByRole('button', { name: 'Menu' })
   // While the Drawer is open the page behind it, Menu included, is hidden from assistive
   // technology, so Menu's state is read from the element itself.
@@ -799,8 +832,11 @@ test.describe('the Drawer, on a phone', { tag: '@below-1440' }, () => {
       await expect(nav.getByRole('link', { name })).toHaveAccessibleName(new RegExp(`${holds}$`))
     }
     expect(await pathOf(drawer(page).getByRole('link', { name: 'Search' }))).toBe('/search/')
-    // The menu opens with Search, before the sections.
-    expect(await pathOf(drawer(page).getByRole('link').first())).toBe('/search/')
+    // The menu opens with Home, then Search, before the sections.
+    const links = drawer(page).getByRole('link')
+    await expect(links.first()).toHaveText('Home')
+    expect(await pathOf(links.first())).toBe('/')
+    expect(await pathOf(links.nth(1))).toBe('/search/')
     // The phone menu always lists Questionnaires, like the header.
     await expect(drawer(page).locator('a[href$="/questionnaires/"]')).toHaveCount(1)
     // Under Concepts the five topics come first, then "All concepts A–Z" and the map.
@@ -827,6 +863,110 @@ test.describe('the Drawer, on a phone', { tag: '@below-1440' }, () => {
     await expect(drawer(page)).toBeHidden()
     await expect(menu(page)).toBeFocused()
     await expect(menu(page)).toHaveAttribute('aria-expanded', 'false')
+  })
+
+  test('lists every page the footer does, Home first and the help line last, so any page is two presses away', async ({
+    page,
+  }) => {
+    await gotoReady(page, '/')
+    const paths = (links: Locator) =>
+      links.evaluateAll((all) =>
+        all.map((link) => new URL(link.getAttribute('href') ?? '', 'http://site').pathname),
+      )
+    const footer = await paths(footerNav(page).locator('a[href]'))
+    expect(footer.length).toBeGreaterThan(0)
+    await menu(page).click()
+    await expect(drawer(page)).toBeVisible()
+    const listed = await paths(drawer(page).locator('a[href]'))
+    for (const path of footer) expect(listed, `the Drawer lists ${path}`).toContain(path)
+
+    const home = drawer(page).getByRole('link').first()
+    await expect(home).toHaveText('Home')
+    expect(await pathOf(home)).toBe('/')
+    await expect(home).toHaveAttribute('aria-current', 'page')
+    const nav = drawer(page).getByRole('navigation', { name: 'Main' })
+    // Questionnaires keeps its place in the contents, the fourth section, whether or not one can be taken.
+    await expect(nav.locator('ol > li').nth(3)).toContainText('Questionnaires')
+    expect(await pathOf(nav.getByRole('link', { name: 'Questionnaires', exact: true }))).toBe(
+      '/questionnaires/',
+    )
+    expect(await pathOf(nav.getByRole('link', { name: 'Picture credits', exact: true }))).toBe(
+      '/credits/',
+    )
+    // The help line is the sheet's last line, each number ready to dial.
+    const help = drawer(page).locator('[data-help-line]')
+    await expect(help).toHaveCount(1)
+    for (const tel of ['tel:14416', 'tel:18008914416', 'tel:112']) {
+      await expect(help.locator(`a[href="${tel}"]`)).toHaveCount(1)
+    }
+    expect(
+      await drawer(page).evaluate((sheet) => {
+        const walker = document.createTreeWalker(sheet, NodeFilter.SHOW_TEXT)
+        let last: Node | null = null
+        for (let node = walker.nextNode(); node; node = walker.nextNode()) {
+          if (node.textContent?.trim()) last = node
+        }
+        return last?.parentElement?.closest('[data-help-line]') != null
+      }),
+    ).toBe(true)
+  })
+
+  test('closes when the page changes, by Back too', async ({ page }) => {
+    await gotoReady(page, '/')
+    await banner(page).getByRole('link', { name: 'Search' }).click()
+    await expect(page).toHaveURL(atPath('/search/'))
+    await menu(page).click()
+    await expect(drawer(page)).toBeVisible()
+    await page.goBack()
+    await expect.poll(() => new URL(page.url()).pathname).toBe('/')
+    await expect(drawer(page)).toBeHidden()
+    await expect(menuElement(page)).toHaveAttribute('aria-expanded', 'false')
+  })
+
+  test('hides the page behind it from assistive technology while open, and gives it back as it closes', async ({
+    page,
+  }) => {
+    await gotoReady(page, '/concepts/vikshepa/')
+    const behind = ['banner', 'main', 'contentinfo'] as const
+    for (const role of behind) await expect(page.getByRole(role)).toHaveCount(1)
+    await menu(page).click()
+    await expect(drawer(page)).toBeVisible()
+    await expect(drawer(page)).toHaveAttribute('aria-modal', 'true')
+    for (const role of behind) {
+      await expect(page.getByRole(role), `the ${role} is hidden behind the Drawer`).toHaveCount(0)
+    }
+    await page.keyboard.press('Escape')
+    await expect(drawer(page)).toBeHidden()
+    for (const role of behind) await expect(page.getByRole(role)).toHaveCount(1)
+  })
+
+  test('a press on Menu as soon as the page arrives, on a slowed CPU, opens the Drawer or reaches the footer’s navigation', async ({
+    page,
+    browserName,
+  }) => {
+    test.skip(browserName !== 'chromium', 'slowing the CPU needs the Chrome DevTools Protocol')
+    // Once at full speed, so each visit after comes from the cache, as a reload does.
+    await gotoReady(page, '/')
+    const devtools = await page.context().newCDPSession(page)
+    await devtools.send('Emulation.setCPUThrottlingRate', { rate: 4 })
+    // By its id: an open Drawer hides the footer from the accessibility tree.
+    const footerInView = () =>
+      page.locator('#site-nav').evaluate((nav) => {
+        const box = nav.getBoundingClientRect()
+        return box.top < window.innerHeight && box.bottom > 0
+      })
+    for (let visit = 1; visit <= 3; visit += 1) {
+      await page.goto('/', { waitUntil: 'domcontentloaded' })
+      await menuElement(page).click()
+      await expect(async () => {
+        if (await drawer(page).isVisible()) return
+        expect(
+          new URL(page.url()).hash,
+          `visit ${visit}: no Drawer, so the link's own target`,
+        ).toBe('#site-nav')
+        expect(await footerInView(), `visit ${visit}: the footer's navigation in view`).toBe(true)
+      }).toPass({ timeout: 15_000 })
+    }
   })
 
   test('Close puts it away and focus returns to Menu', async ({ page }) => {
@@ -868,6 +1008,21 @@ test.describe('the Drawer, on a phone', { tag: '@below-1440' }, () => {
   })
 
   test(
+    'a page opened wide, then narrowed, has the Drawer ready for its first press',
+    { tag: '@self-width' },
+    async ({ page }) => {
+      // A phone loaded in landscape and turned upright: the Menu arrives with no pointer near it.
+      await page.setViewportSize({ width: 900, height: 800 })
+      await gotoReady(page, '/')
+      await page.setViewportSize({ width: 360, height: 800 })
+      await expect(menu(page)).toHaveAttribute('role', 'button')
+      await menu(page).click()
+      await expect(drawer(page)).toBeVisible()
+      expect(new URL(page.url()).hash).toBe('')
+    },
+  )
+
+  test(
     'widening the header closes it, leaves the page scrollable, and puts focus on a visible element',
     { tag: '@self-width' },
     async ({ page }) => {
@@ -875,7 +1030,8 @@ test.describe('the Drawer, on a phone', { tag: '@below-1440' }, () => {
       await gotoReady(page, '/')
       await menu(page).click()
       await expect(drawer(page)).toBeVisible()
-      await page.setViewportSize({ width: 1280, height: 900 })
+      // Just to the width where the sections join the header.
+      await page.setViewportSize({ width: TABLET, height: 900 })
       await expect(drawer(page)).toBeHidden()
       await expect
         .poll(() =>
@@ -957,8 +1113,8 @@ test.describe('the Drawer, on a phone', { tag: '@below-1440' }, () => {
 test('with reduced motion, a section link changes the page at once', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' })
   await gotoReady(page, '/concepts/vikshepa/')
-  // In the header from 80rem; on narrower screens, in the Drawer.
-  if (!isWide(page)) await banner(page).getByRole('button', { name: 'Menu' }).click()
+  // In the header from 48rem; on a phone, in the Drawer.
+  if (!fromTablet(page)) await banner(page).getByRole('button', { name: 'Menu' }).click()
   await page
     .getByRole('navigation', { name: 'Main' })
     .getByRole('link', { name: 'Traditional texts', exact: true })
@@ -988,11 +1144,15 @@ test('the Drawer, the panels and the toasts are not in any page’s first load',
       }
     }
   }
-  // The page still works: the Drawer or the panels arrive on intent.
+  // The page still works: the Drawer or the panels arrive on intent, and between the two the
+  // sections are links that need neither.
   await gotoReady(page, '/')
   if (isWide(page)) {
     await header(page).getByRole('button', { name: 'More in Library' }).hover()
     await expect(page.getByRole('navigation', { name: 'Library', exact: true })).toBeVisible()
+  } else if (fromTablet(page)) {
+    await header(page).getByRole('link', { name: 'Library', exact: true }).click()
+    await expect(page).toHaveURL(atPath('/library/'))
   } else {
     await banner(page).getByRole('button', { name: 'Menu' }).click()
     await expect(page.getByRole('dialog', { name: 'Menu' })).toBeVisible()
@@ -1000,10 +1160,10 @@ test('the Drawer, the panels and the toasts are not in any page’s first load',
 })
 
 test(
-  'the header fits on one line at 320, 360, 768 and 1440 px, every control a full target',
+  'the header fits on one line at 320, 360, 768, 1024, 1118 and 1440 px, every control a full target',
   { tag: '@self-width' },
   async ({ page }) => {
-    for (const width of [320, 360, 768, 1440]) {
+    for (const width of [320, 360, 768, 1024, 1118, 1440]) {
       await page.setViewportSize({ width, height: 800 })
       await gotoReady(page, '/concepts/vikshepa/')
       const overflow = await page.evaluate(
@@ -1014,6 +1174,12 @@ test(
       expect(strip?.height, `one line at ${width} px`).toBeLessThanOrEqual(72)
       const logo = banner(page).getByRole('link', { name: 'Care4Mind home', exact: true })
       expect((await logo.boundingBox())?.height ?? 0).toBeGreaterThanOrEqual(48)
+      // From 48rem the sections stand in the header, nothing to open first.
+      if (width >= TABLET) {
+        for (const { name } of SECTIONS) {
+          await expect(header(page).getByRole('link', { name, exact: true })).toBeVisible()
+        }
+      }
       const controls = banner(page).locator('a:visible, button:visible')
       for (const control of await controls.all()) {
         const box = await control.boundingBox()
@@ -1024,7 +1190,45 @@ test(
         expect(box?.height ?? 0, `${name} is tall enough at ${width} px`).toBeGreaterThanOrEqual(44)
         expect(box?.x ?? -1, `${name} is on screen at ${width} px`).toBeGreaterThanOrEqual(0)
         expect((box?.x ?? 0) + (box?.width ?? 0)).toBeLessThanOrEqual(width)
+        // In the one row: nothing wraps under the strip.
+        expect(box?.y ?? -1, `${name} is in the strip at ${width} px`).toBeGreaterThanOrEqual(
+          strip?.y ?? 0,
+        )
+        expect((box?.y ?? 0) + (box?.height ?? 0)).toBeLessThanOrEqual(
+          (strip?.y ?? 0) + (strip?.height ?? 0),
+        )
       }
     }
+  },
+)
+
+test(
+  'the sections stand evenly spaced, a panel’s chevron counted with its label',
+  { tag: '@from-768' },
+  async ({ page }) => {
+    await gotoReady(page, '/')
+    if (isWide(page)) {
+      await expect(header(page).getByRole('button', { name: 'More in Library' })).toHaveAttribute(
+        'data-ready',
+      )
+    }
+    const gaps = await header(page)
+      .locator('ul')
+      .first()
+      .evaluate((list) => {
+        const spans = [...list.children].map((item) => {
+          const label = item.querySelector('a')?.getBoundingClientRect()
+          if (!label) throw new Error('each section is a link')
+          // A chevron that shows ends its section; a hidden one takes no room.
+          const chevron = item.querySelector('button svg')
+          const end = chevron?.getClientRects().length
+            ? chevron.getBoundingClientRect().right
+            : label.right
+          return { start: label.left, end }
+        })
+        return spans.slice(1).map((span, index) => span.start - (spans[index]?.end ?? 0))
+      })
+    expect(gaps).toHaveLength(3)
+    expect(Math.max(...gaps) - Math.min(...gaps), `gaps ${gaps.join(', ')}`).toBeLessThanOrEqual(1)
   },
 )

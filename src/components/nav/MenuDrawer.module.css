@@ -139,6 +139,15 @@
   height: 18px;
 }
 
+/*
+ * Home, the tools, Start here, the numbered sections and the last pages, one under another at
+ * the sections' own spacing. A page without a number in the contents stands at the left edge.
+ */
+.nav {
+  display: grid;
+  gap: 1.1rem;
+}
+
 .tools {
   display: grid;
   gap: 0.75rem;
@@ -292,6 +301,13 @@
   font-variant-numeric: oldstyle-nums proportional-nums;
   font-family: var(--font-ui);
   --font-iast: var(--font-text);
+}
+
+/* After the sections, the pages every footer lists: set as the pages within a section are. */
+.more {
+  list-style: none;
+  margin: 0;
+  padding: 0;
 }
 
 .proposal {

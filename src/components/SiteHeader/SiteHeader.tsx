@@ -11,16 +11,19 @@ import { SearchTrigger } from '@/components/search'
 import { cx } from '@/lib/cx'
 
 import { LotusMark } from '../Fleuron'
+import { HelpLine } from '../HelpLine'
 import { Logo } from '../Logo'
 import styles from './SiteHeader.module.css'
 
 /**
  * The header every page shares, stuck to the top of the screen: the lotus and the wordmark,
  * leading home, then the section links and Search, each a server-rendered link that works
- * without JavaScript. On a computer Concepts and Library open panels; on a narrow screen the
- * sections move into the Menu's Drawer, and Search stays. While its proposal is on, Start here
- * follows the wordmark from 30rem up, and below that it heads the Drawer's list. While the
- * login switch is on, Log in sits beside Search, and Log out in its place for a user who is in.
+ * without JavaScript. From 48rem the sections stand in the header as links; from 64rem Concepts
+ * and Library also open panels. On a phone the sections move into the Menu's Drawer, which ends
+ * with the help line, and Search stays. While its proposal is on, Start here follows the
+ * wordmark wherever the strip has room for it (30 to 48rem, and from 80rem), and the Drawer
+ * lists it. While the login switch is on, Log in sits beside Search, and Log out in its place for
+ * a user who is in.
  */
 export async function SiteHeader() {
   const nav = await siteNav()
@@ -29,7 +32,7 @@ export async function SiteHeader() {
     // Its own transition name keeps it still while the page turns (globals.css).
     <header className={styles.header} style={{ viewTransitionName: 'site-header' }}>
       <div className={styles.strip}>
-        <Link href={nav.home} className={styles.home} aria-label="Care4Mind home">
+        <Link href={nav.home.href} className={styles.home} aria-label="Care4Mind home">
           <LotusMark className={styles.mark} />
           <Logo />
         </Link>
@@ -58,6 +61,7 @@ export async function SiteHeader() {
             nav.login ? <LoginSlot href={nav.login.href} className={styles.drawerLogin} /> : null
           }
           mapNote={mapNote}
+          help={<HelpLine className={styles.drawerHelp} />}
         />
       </div>
     </header>
