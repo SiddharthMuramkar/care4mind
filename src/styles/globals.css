@@ -522,11 +522,11 @@
 
   @media (prefers-reduced-motion: no-preference) {
     [data-ink-press='a']::before {
-      animation: ink-a var(--duration-slow) var(--ease-out);
+      animation: ink-a var(--duration-quick) var(--ease-out);
     }
 
     [data-ink-press='b']::before {
-      animation: ink-b var(--duration-slow) var(--ease-out);
+      animation: ink-b var(--duration-quick) var(--ease-out);
     }
   }
 }
