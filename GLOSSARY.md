@@ -81,3 +81,13 @@ _Avoid_: divider image
 **Interim picture**:
 A stand-in shown at the head of a page until that page's own picture exists.
 _Avoid_: placeholder, fallback
+
+## Layout
+
+**Folio**:
+A page of paper on the indigo ground. `frame` is the printer's double rule, and marks the hero. `page` is a reading page's panel: one thin rule on a wide screen, and below 48rem no frame, the paper edge to edge.
+_Avoid_: card, container, panel
+
+**Drawer**:
+The phone's menu, below 48rem: a sheet of paper that slides in from the right and lists the whole navigation. Until its script has loaded, Menu is a link to the same list in the footer.
+_Avoid_: hamburger, sidebar, mobile nav

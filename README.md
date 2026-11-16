@@ -3,6 +3,7 @@
 The new care4mind.org: a portal for Indian psychology that links Concepts, traditional texts, References and Questionnaires. It replaces the current WordPress site.
 
 - Why and what: [docs/project-brief.md](docs/project-brief.md). Decisions: [docs/adr/](docs/adr/).
+- How pages change with width: [docs/layout.md](docs/layout.md).
 - Work in progress lives in [GitHub Issues](https://github.com/SiddharthMuramkar/care4mind/issues). Coding agents follow [CLAUDE.md](CLAUDE.md).
 
 ## Run it

@@ -3,6 +3,7 @@
 The new care4mind.org, a portal for Indian psychology. Requirements: `docs/project-brief.md`.
 
 - `pnpm check` says a change is done.
+- Page widths, the phone shell and tables: `docs/layout.md`.
 - Changes reach `main` through pull requests, and production builds from it. Nothing enforces this, so never push to it.
 - CI runs only `pnpm check`. If a change touches pages, run `pnpm check:e2e` after `pnpm check`, which builds the site it tests.
 - Text in `src/content/data/` came from the old site. Change it only to fix a listed error, and run `pnpm content:verify --changed origin/main` before opening the PR, and put its result in the PR description. CI can't run this. The saved copy it reads never goes in this repo.
