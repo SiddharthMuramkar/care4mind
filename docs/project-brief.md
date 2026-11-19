@@ -114,6 +114,7 @@ This brief decides none of these. "(Client)" means the Project owner answers it.
 9. **Domain and DNS. (Client)** Who controls care4mind.org and questionnaire.care4mind.org, and how the switch to the new site happens at launch.
    - The domain stays registered at Namecheap for launch. The switch is [#341](https://github.com/SiddharthMuramkar/care4mind/issues/341), and `questionnaire.care4mind.org` is retired ([#334](https://github.com/SiddharthMuramkar/care4mind/issues/334)).
 10. **Content model details:** what a topic is, traditional texts and their passages, models and techniques, how authors and journals are recorded, and how a Concept links to a modern construct.
+   - Links between content and to modern constructs: decided in [Links between content, and links to modern constructs](https://github.com/SiddharthMuramkar/care4mind/issues/10). Sanskrit names: decided in [Sanskrit terms: storage and display](https://github.com/SiddharthMuramkar/care4mind/issues/11).
 11. **Client sign-off on the defaults marked †.**
 12. **Who fills the roles marked TBD?** The client names the Project owner, Psychology expert and Research editor (see Roles). The questions marked (Client) go to the Project owner, so they wait on this one.
 

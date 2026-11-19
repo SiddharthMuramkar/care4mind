@@ -48,6 +48,28 @@ _Avoid_: lecture, session
 The private page where a client-reviewer finds users by name and opens their results.
 _Avoid_: admin panel, dashboard (on its own)
 
+## Content
+
+**Sanskrit name**:
+A Sanskrit word as the site stores it: its IAST form, its Devanagari form where known, and its ASCII spellings.
+_Avoid_: term (on its own), headword
+
+**ASCII spelling**:
+A plain-keyboard spelling of a Sanskrit name, such as vikshepa or viksepa.
+_Avoid_: romanisation, transliteration
+
+**Gloss**:
+The English translation set beside a Sanskrit name. It translates the word and never names a Modern construct.
+_Avoid_: English name, meaning, definition
+
+**Modern construct**:
+An idea from modern psychology, such as anxiety or self-efficacy, that a Concept may be compared with.
+_Avoid_: Western concept, equivalent
+
+**Construct link**:
+An explained claim, backed by References, that a Concept partly overlaps, contrasts with, or was studied alongside a Modern construct. It never claims the two are the same.
+_Avoid_: mapping, equivalence, tag
+
 ## Pictures
 
 **Emblem**:
