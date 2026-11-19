@@ -13,6 +13,7 @@ import { flushSync } from 'react-dom'
 
 import { filterStyles, Tally } from '@/components/filters'
 import { pushAddress, replaceAddress, useAddressQuery, useKeyboardParts } from '@/components/island'
+import { SearchGlyph } from '@/components/glyphs'
 import { Transliterated } from '@/components/script'
 import { cx } from '@/lib/cx'
 import { count } from '@/lib/text'
@@ -460,14 +461,30 @@ export function AzIndex({
         {searchLabel ? (
           <label className={styles.search}>
             <span className={styles.groupLabel}>{searchLabel}</span>
-            <input
-              type="search"
-              className={styles.searchBox}
-              value={typed}
-              onChange={(event) => setTyped(event.currentTarget.value)}
-              autoComplete="off"
-              spellCheck={false}
-            />
+            <span className={styles.field}>
+              <SearchGlyph className={styles.fieldGlyph} />
+              <input
+                type="search"
+                className={styles.searchBox}
+                value={typed}
+                onChange={(event) => setTyped(event.currentTarget.value)}
+                autoComplete="off"
+                spellCheck={false}
+              />
+              {typed ? (
+                <button
+                  type="button"
+                  className={styles.fieldClear}
+                  aria-label="Clear"
+                  onClick={(event) => {
+                    setTyped('')
+                    event.currentTarget.parentElement?.querySelector('input')?.focus()
+                  }}
+                >
+                  <span aria-hidden>×</span>
+                </button>
+              ) : null}
+            </span>
           </label>
         ) : null}
         <Chips groups={groups} pressed={pressed} onPress={press} />

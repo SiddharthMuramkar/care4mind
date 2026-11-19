@@ -287,15 +287,22 @@ for (const [slug, file] of FRONTISPIECES) {
   })
 }
 
-test('the Frontispiece stands centred above the heading, smaller on a phone', async ({ page }) => {
+test('the Frontispiece stands beside the heading from 48rem, and small and centred above it on a phone', async ({
+  page,
+}) => {
   await gotoReady(page, hrefFor({ kind: 'topic', id: 'mind' }))
   const box = await medallion(page).boundingBox()
   const kicker = await titlePage(page).locator('p').first().boundingBox()
   const heading = await page.getByRole('heading', { level: 1 }).boundingBox()
   if (!box || !kicker || !heading) throw new Error('The title page has its parts.')
-  expect(box.y + box.height).toBeLessThanOrEqual(kicker.y)
-  expect(Math.abs(box.x + box.width / 2 - (heading.x + heading.width / 2))).toBeLessThanOrEqual(1)
-  const expected = (page.viewportSize()?.width ?? 1440) < 768 ? 200 : 240
+  const phone = (page.viewportSize()?.width ?? 1440) < 768
+  if (phone) {
+    expect(box.y + box.height).toBeLessThanOrEqual(kicker.y)
+    expect(Math.abs(box.x + box.width / 2 - (heading.x + heading.width / 2))).toBeLessThanOrEqual(1)
+  } else {
+    expect(box.x + box.width).toBeLessThanOrEqual(heading.x)
+  }
+  const expected = phone ? 96 : 240
   expect(box.width).toBe(expected)
   expect(box.height).toBe(expected)
 })
@@ -324,7 +331,7 @@ test(
   { tag: '@one-width' },
   async ({ page }) => {
     // On so short a screen the Frontispiece is still coming into view at the top of the page.
-    await page.setViewportSize({ width: 640, height: 360 })
+    await page.setViewportSize({ width: 640, height: 200 })
     await gotoReady(page, hrefFor({ kind: 'topic', id: 'mind' }))
     const hairline = ring(page).locator('path[pathLength]').first()
     const scrollTo = (top: number) =>

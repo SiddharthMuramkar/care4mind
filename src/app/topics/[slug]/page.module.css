@@ -1,11 +1,8 @@
 /* The topic's Plate, centred above the heading, with the room a section's Sticker has below it. */
-.frontispiece {
-  margin-block-end: 1rem;
-}
-
+/* Small on a phone, so the title page keeps to half the screen. */
 @media (width < 48rem) {
   .frontispiece {
-    max-width: 12.5rem;
+    max-width: 6rem;
   }
 }
 

@@ -19,13 +19,7 @@
   }
 }
 
-/* The picture above the name. A phone shows it smaller, and with no extra room below. */
-@media (width >= 48rem) {
-  .headPicture {
-    margin-block-end: 1rem;
-  }
-}
-
+/* The picture beside the name, above it on a phone, where it shows smaller. */
 @media (width < 48rem) {
   .headPicture {
     max-width: 5.5rem;

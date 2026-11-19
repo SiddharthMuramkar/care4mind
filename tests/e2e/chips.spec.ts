@@ -29,7 +29,10 @@ for (const path of ['/concepts/', '/library/references/']) {
     const heights = await chips.evaluateAll((buttons) =>
       buttons
         .filter((button) => button.checkVisibility())
-        .map((button) => ({ name: button.textContent, height: button.offsetHeight })),
+        .map((button) => ({
+          name: button.textContent,
+          height: button.getBoundingClientRect().height,
+        })),
     )
     expect(heights.length).toBeGreaterThan(0)
     for (const { name, height } of heights) expect(height, name ?? '').toBeGreaterThanOrEqual(44)

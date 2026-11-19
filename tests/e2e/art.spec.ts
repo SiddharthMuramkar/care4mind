@@ -585,13 +585,31 @@ const CONCEPT_HEADS = [
   { slug: 'triguna', file: 'gear' },
 ] as const
 
+type Box = { x: number; y: number; width: number; height: number }
+
+/**
+ * A page head's picture: beside its title from 48rem, so the title page keeps to 40% of the
+ * screen; on a phone centred above it.
+ */
+function expectBesideOrAbove(page: Page, picture: Box, heading: Box) {
+  if ((page.viewportSize()?.width ?? 0) >= 768) {
+    expect(picture.x + picture.width, 'beside the title').toBeLessThanOrEqual(heading.x)
+    return
+  }
+  expect(picture.y + picture.height, 'above the title').toBeLessThanOrEqual(heading.y)
+  expect(
+    Math.abs(picture.x + picture.width / 2 - (heading.x + heading.width / 2)),
+    'centred on the title',
+  ).toBeLessThan(1.5)
+}
+
 /** Vikṣepa's head is a Medallion once its Plate can show, and a bare Sticker until then. */
 const VIKSHEPA_RINGED = ownArt({ kind: 'concept', slug: 'vikshepa' })?.family === 'plate'
 
 test.describe('Concept pages', () => {
   for (const { slug, file } of CONCEPT_HEADS) {
     const path = `/concepts/${slug}/`
-    test(`${path} shows its Plate or the ${file} picture, decorative, centred above its title`, async ({
+    test(`${path} shows its Plate or the ${file} picture, decorative, beside its title from 48rem`, async ({
       page,
     }) => {
       await gotoReady(page, path)
@@ -606,8 +624,7 @@ test.describe('Concept pages', () => {
         page.getByRole('heading', { level: 1 }).boundingBox(),
       ])
       if (!box || !heading) throw new Error('The title page has its parts.')
-      expect(box.y + box.height).toBeLessThanOrEqual(heading.y)
-      expect(Math.abs(box.x + box.width / 2 - (heading.x + heading.width / 2))).toBeLessThan(1.5)
+      expectBesideOrAbove(page, box, heading)
     })
   }
 
@@ -897,7 +914,7 @@ test.describe('Traditional text pages', () => {
     )
   }
 
-  test('the picture stands centred above the title, 120 px wide on every screen', async ({
+  test('the picture stands beside the title from 48rem, above it on a phone, 120 px wide on every screen', async ({
     page,
   }) => {
     await gotoReady(page, '/texts/yoga-sutra/')
@@ -907,11 +924,7 @@ test.describe('Traditional text pages', () => {
     ])
     if (!picture || !heading) throw new Error('The page head is laid out.')
     expect(picture.width).toBe(120)
-    expect(picture.y + picture.height, 'above the title').toBeLessThanOrEqual(heading.y)
-    expect(
-      Math.abs(picture.x + picture.width / 2 - (heading.x + heading.width / 2)),
-      'centred on the title',
-    ).toBeLessThanOrEqual(1)
+    expectBesideOrAbove(page, picture, heading)
   })
 
   test(
@@ -2365,17 +2378,26 @@ test.describe('the homepage, section and topic pages as a set', () => {
     { path: '/topics/mind/', ringed: true },
     { path: '/topics/self/', ringed: true },
   ]) {
-    test(`${path}: the head picture stands as far above the words as on every other head`, async ({
+    test(`${path}: the head picture stands as far from the words as on every other head`, async ({
       page,
     }) => {
       await gotoReady(page, path)
       const picture = ringed ? ringOf(headImage(page)) : headImage(page)
+      if ((page.viewportSize()?.width ?? 0) >= 768) {
+        const [box, heading] = [
+          await picture.boundingBox(),
+          await page.getByRole('heading', { level: 1 }).boundingBox(),
+        ]
+        if (!box || !heading) throw new Error('The title page has its parts.')
+        expectBesideOrAbove(page, box, heading)
+        return
+      }
       const gap = await picture.evaluate((element) => {
-        const next = element.nextElementSibling
+        const next = element.closest('header > *')?.nextElementSibling
         if (!next) throw new Error('The words follow the picture.')
         return next.getBoundingClientRect().top - element.getBoundingClientRect().bottom
       })
-      expect(gap).toBeCloseTo(28, 0)
+      expect(gap).toBeCloseTo(8, 0)
     })
   }
 
@@ -2494,13 +2516,21 @@ test.describe('the Concept, Questionnaire, text and error pages as a set', () =>
     }) => {
       await gotoReady(page, path)
       const picture = ringed ? ringOf(headImage(page)) : headImage(page)
+      if ((page.viewportSize()?.width ?? 0) >= 768) {
+        const [box, heading] = [
+          await picture.boundingBox(),
+          await page.getByRole('heading', { level: 1 }).boundingBox(),
+        ]
+        if (!box || !heading) throw new Error('The title page has its parts.')
+        expectBesideOrAbove(page, box, heading)
+        return
+      }
       const gap = await picture.evaluate((element) => {
-        const next = element.nextElementSibling
+        const next = element.closest('header > *')?.nextElementSibling
         if (!next) throw new Error('The words follow the picture.')
         return next.getBoundingClientRect().top - element.getBoundingClientRect().bottom
       })
-      const wide = (page.viewportSize()?.width ?? 0) >= 768
-      expect(gap).toBeCloseTo(wide ? 28 : 12, 0)
+      expect(gap).toBeCloseTo(8, 0)
     })
   }
 

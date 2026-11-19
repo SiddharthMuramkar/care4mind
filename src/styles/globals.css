@@ -163,8 +163,9 @@
   --color-status-preview-ink: var(--press-indigo);
   --color-status-soon: var(--press-lilac);
   --color-status-soon-ink: var(--press-indigo);
-  --color-status-later: var(--press-indigo-rule);
-  --color-status-later-ink: var(--press-cream);
+  /* In preparation, whether soon or later: one badge, as it is one status in words. */
+  --color-status-later: var(--press-lilac);
+  --color-status-later-ink: var(--press-indigo);
 
   /* The Proposal label: an editor's blue pencil, on any ground. */
   --color-proposal: var(--press-sky);

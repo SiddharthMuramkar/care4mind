@@ -182,6 +182,14 @@
   text-underline-offset: 0.18em;
 }
 
+/* A small arrow after the action's words shows it leads on, without hover on a touch screen. */
+.action :is(a, button)::before {
+  content: '→' / '';
+  order: 1;
+  margin-inline-start: 0.4em;
+  text-decoration: none;
+}
+
 /* The action covers the whole card, so the card is one large target (WCAG 2.5.8). */
 .action :is(a, button)::after {
   content: '';

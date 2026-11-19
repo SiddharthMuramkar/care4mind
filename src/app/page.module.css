@@ -298,7 +298,6 @@
 
 @media (width >= 48rem) {
   .topics {
-    grid-template-columns: repeat(auto-fill, minmax(11.25rem, 1fr));
     gap: 1rem;
   }
 }
@@ -379,6 +378,35 @@
 }
 
 /*
+ * Five topics never leave one card alone on a row: a centred three and two on six half-columns,
+ * then five across from 64rem, where five fit.
+ */
+@media (width >= 48rem) {
+  .topics {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
+
+  .topics > li {
+    grid-column: span 2;
+  }
+
+  .topics > li:nth-child(4):nth-last-child(2) {
+    grid-column: 2 / span 2;
+  }
+}
+
+@media (width >= 64rem) {
+  .topics {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+
+  .topics > li,
+  .topics > li:nth-child(4):nth-last-child(2) {
+    grid-column: auto;
+  }
+}
+
+/*
  * From 64rem the sections widen with the hero's Folio, and the cards take explicit columns: at
  * these widths `auto-fill` leaves the five topics at four and one, and the three featured at two.
  * Last, so it overrides the rules above at equal specificity.
@@ -387,10 +415,6 @@
   .section,
   .closingSection {
     max-width: 72rem;
-  }
-
-  .topics {
-    grid-template-columns: repeat(5, minmax(0, 1fr));
   }
 
   .cards {

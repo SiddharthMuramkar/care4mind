@@ -175,7 +175,7 @@ Every file, whatever its verdict, gets downloaded once (ticket 2). WordPress is 
 
 Sizes are CSS pixels. An **Interim picture** is a stand-in, used until the new picture is made in ticket 12. Interim pictures appear only at the head of a page (and on that page's share card) and on the five topic cards. They never appear on Concept, Questionnaire or Traditional text cards, which stay bare until they have their own picture. A page can ship with Interim pictures.
 
-Every page head carries one picture, centred above its title, with these exceptions. The homepage hero's Plate sits beside the motto and heading. `/search/` shows its Sticker in the empty and no-results states only. `/proposals/`, `/questionnaires/[slug]/take/`, `/credits/` and `/credits/sources/` have no head picture.
+Every page head carries one picture, centred above its title on a phone and beside it from 48rem, with these exceptions. The homepage hero's Plate sits beside the motto and heading. `/search/` shows its Sticker in the empty and no-results states only. `/proposals/`, `/questionnaires/[slug]/take/`, `/credits/` and `/credits/sources/` have no head picture.
 
 ### 5.1 Site-wide
 
@@ -208,7 +208,7 @@ From 64rem the homepage's Folio and its sections widen to 72rem, on the homepage
 
 ### 5.3 Section pages
 
-A Sticker sits centred above the page's heading, at 112 px (88 px below 48rem). It is decorative, since the heading names the section.
+A Sticker sits beside the page's heading from 48rem, at 112 px, and centred above it below 48rem, at 88 px. It is decorative, since the heading names the section.
 
 | Page | Sticker | Interim picture |
 |---|---|---|
@@ -236,11 +236,11 @@ A Sticker sits centred above the page's heading, at 112 px (88 px below 48rem). 
 | Values: yama and niyama | `sticker-values` (new). Interim picture: `sticker-book-ornate` | `plate-tree-of-mind` |
 | Temperament (guṇa) | `sticker-gunas` (new). Interim picture: `sticker-gear`, so Cosmos does not appear twice in the topic row | `plate-farmers` |
 
-A topic page shows its Frontispiece only, centred above the heading (200 px below 48rem). Its ring takes the topic's colour. The Sticker stays on the topic's card, wherever that card appears, including on `/concepts/`. The Frontispiece is decorative. A–Z entries carry no picture.
+A topic page shows its Frontispiece only, beside the heading from 48rem and centred above it, 96 px, below. Its ring takes the topic's colour. The Sticker stays on the topic's card, wherever that card appears, including on `/concepts/`. The Frontispiece is decorative. A–Z entries carry no picture.
 
 ### 5.5 Concept pages and cards
 
-- **Concept page:** the Concept's Medallion at 120 px (88 px below 48rem), centred above the title at every width. Decorative. The 88 px is set by `tests/e2e/concept.spec.ts`: at 390 px the first section sits at 1597 of its 1700 px limit, and a picture adds its height plus the title block's 12 px gap.
+- **Concept page:** the Concept's Medallion at 120 px (88 px below 48rem), beside the title from 48rem and centred above it below. Decorative. The 88 px is set by `tests/e2e/concept.spec.ts`: at 390 px the first section sits at 1597 of its 1700 px limit, and a picture adds its height plus the title block's 12 px gap.
 - **Concept card** (homepage, topic pages, Start here): its Medallion at 64 px (72 on the homepage's featured cards), in its own row above the title. Decorative.
 - **A–Z index, the concept map, the "related Concepts" links on a Questionnaire page:** no picture on any entry or link. They stay clean indexes and plain links. The index and map pages keep their head Sticker (5.3).
 - **Which:** each Concept gets its own Plate (`plate-<slug>`, section 7.8). Interim picture: its topic's Sticker, or that topic's Interim picture from 5.4 until the Sticker exists, at the same sizes (120 / 88), at the head of the Concept page only, never on the card.
@@ -289,7 +289,7 @@ Only the homepage hero Plate sets `sizes`, because its displayed width changes a
 | Use | CSS px (wide / narrow) | Served widths (1× and 2×) | Shape |
 |---|---|---|---|
 | Hero Plate | 480 / 360 / 72vw up to 300 | from `sizes`, whichever the screen needs, up to the whole 1024 px master at 480 on a 2× screen | circle |
-| Topic Frontispiece | 240 / 200 | 240, 480 | circle |
+| Topic Frontispiece | 240 / 96 | 240, 480 | circle |
 | 404 picture | 200 / 160 | 200, 400 | circle |
 | Concept or Questionnaire Medallion on its page | 120 / 88 | 120, 240 | circle |
 | Pothi on its page | 120 | 120, 240 | Sticker |

@@ -1,4 +1,5 @@
 import { hrefFor } from '@/content'
+import { SearchGlyph } from '@/components/glyphs'
 import { cx } from '@/lib/cx'
 
 import cta from '@/components/Cta'
@@ -25,14 +26,18 @@ export function SearchForm({
       <label htmlFor={id} className={styles.label}>
         A Concept, a term, a verse, a text or an author
       </label>
-      <input
-        id={id}
-        name="q"
-        type="search"
-        defaultValue={query}
-        placeholder="Try: focus, anger, Gītā…"
-        className={styles.input}
-      />
+      <span className={styles.field}>
+        <SearchGlyph className={styles.glyph} />
+        {/* type="search": the browser draws its own clear mark once there is text. */}
+        <input
+          id={id}
+          name="q"
+          type="search"
+          defaultValue={query}
+          placeholder="Try: focus, anger, Gītā…"
+          className={styles.input}
+        />
+      </span>
       <button type="submit" className={cx(cta[variant], styles.button)}>
         Search
       </button>

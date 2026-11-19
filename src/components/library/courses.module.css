@@ -137,3 +137,12 @@
     transition-duration: var(--duration-instant);
   }
 }
+
+/* Under a finger the link out stands in a 44 px row. */
+@media (pointer: coarse) {
+  .visit a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+  }
+}

@@ -272,3 +272,12 @@
     display: none;
   }
 }
+
+/* Under a finger a link stands in a 44 px row, not a 25 px line box. */
+@media (pointer: coarse) {
+  .link {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+  }
+}

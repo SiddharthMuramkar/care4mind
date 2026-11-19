@@ -85,6 +85,42 @@
   text-align: center;
 }
 
+/*
+ * From 48rem the title page's picture (a Sticker, a Plate) stands beside the title rather than
+ * above it, so the title page keeps to under 40% of a screen's height and the text starts sooner.
+ */
+@media (width >= 48rem) {
+  .withArt {
+    grid-template-columns: auto minmax(0, 1fr);
+    column-gap: 2rem;
+    align-items: center;
+    justify-items: start;
+    text-align: start;
+  }
+
+  .withArt > * {
+    grid-column: 2;
+  }
+
+  .withArt > .titleArt {
+    grid-column: 1;
+    grid-row: 1 / span 8;
+    align-self: start;
+  }
+}
+
+/* Closer set on a phone, where the title page keeps to half the screen. */
+@media (width < 48rem) {
+  .titlePage {
+    gap: 0.5rem;
+  }
+}
+
+.titleArt {
+  display: grid;
+  justify-items: center;
+}
+
 .kicker {
   margin: 0;
   font-variant-caps: all-small-caps;

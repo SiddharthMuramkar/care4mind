@@ -90,8 +90,14 @@ export function ReadingPage({
           {...(titleId ? { as: 'article' as const, 'aria-labelledby': titleId } : {})}
           className={cx(styles.article, articleClassName)}
         >
-          <header className={cx(styles.titlePage, headerClassName)}>
-            {beforeTitle}
+          <header
+            className={cx(
+              styles.titlePage,
+              beforeTitle ? styles.withArt : undefined,
+              headerClassName,
+            )}
+          >
+            {beforeTitle ? <div className={styles.titleArt}>{beforeTitle}</div> : null}
             {kicker ? <p className={styles.kicker}>{kicker}</p> : null}
             {titleMorph ? (
               <TitleMorph kind={titleMorph.kind} slug={titleMorph.slug}>
