@@ -65,7 +65,7 @@
 }
 
 .role {
-  color: var(--color-surface-link);
+  color: var(--color-surface-muted);
 }
 
 /* Terms show beside the text on a wide screen; above it on a phone the sections are enough. */

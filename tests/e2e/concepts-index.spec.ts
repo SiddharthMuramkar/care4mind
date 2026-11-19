@@ -642,3 +642,68 @@ test('fits 320 px', { tag: '@self-width' }, async ({ page }) => {
   await page.setViewportSize({ width: 320, height: 720 })
   expect(await scrollsSideways(page)).toEqual([])
 })
+
+/** A colour token as the browser sets text in it, read off a probe so it compares with a computed colour. */
+const inked = (page: Page, token: string) =>
+  page.evaluate((token) => {
+    const probe = document.createElement('i')
+    probe.style.color = `var(${token})`
+    document.body.append(probe)
+    const colour = getComputedStyle(probe).color
+    probe.remove()
+    return colour
+  }, token)
+
+// Red means a link to follow or "you are here", never a title: a list of red names reads as a
+// wall of red, and red also reads as an error. A row's names are ink, and its Devanagari keeps
+// the accent; a letter's heading is ink too.
+test(
+  'sets entry names and letter headings in ink, the Devanagari a row’s only red',
+  {
+    tag: '@one-width',
+  },
+  async ({ page }) => {
+    await gotoReady(page, EVERYTHING)
+    const [ink, red] = [
+      await inked(page, '--color-surface-ink'),
+      await inked(page, '--color-surface-link'),
+    ]
+    await expect(list(page).getByRole('heading', { level: 3 }).first()).toHaveCSS('color', ink)
+    for (const kind of ['concept', 'term', 'glossary']) {
+      const row = list(page).locator(`[data-entry][data-kind="${kind}"]:not([hidden])`).first()
+      await expect(row.getByRole('link').first()).toHaveCSS('color', ink)
+      const redText = await row.evaluate(
+        (row, red) =>
+          [row, ...row.querySelectorAll('*')]
+            .filter((part) =>
+              [...part.childNodes].some(
+                (node) => node.nodeType === Node.TEXT_NODE && node.textContent?.trim(),
+              ),
+            )
+            .filter((part) => getComputedStyle(part).color === red)
+            .map((part) => part.closest('[lang]')?.getAttribute('lang') ?? part.tagName),
+        red,
+      )
+      expect(
+        redText.every((lang) => lang === 'sa-Deva'),
+        `${kind}: ${redText.join(', ')}`,
+      ).toBe(true)
+    }
+  },
+)
+
+test(
+  'underlines an entry’s name on hover and on focus',
+  { tag: '@from-1440' },
+  async ({ page }) => {
+    await gotoReady(page, PATH)
+    const name = list(page).locator('[data-entry]:not([hidden])').first().getByRole('link').first()
+    await expect(name).toHaveCSS('text-decoration-line', 'none')
+    await name.hover()
+    await expect(name).toHaveCSS('text-decoration-line', 'underline')
+    await page.mouse.move(0, 0)
+    await page.keyboard.press('Shift')
+    await name.focus()
+    await expect(name).toHaveCSS('text-decoration-line', 'underline')
+  },
+)

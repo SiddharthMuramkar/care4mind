@@ -18,7 +18,7 @@
   margin-top: 1.5rem;
 }
 
-/* A sub-section's heading, a step below the section's: at that size the capital takes the paper's text red. */
+/* A sub-section's heading, a step below the section's, in ink: red is kept for links and "you are here". */
 .letterTitle {
   margin: 0;
   padding-bottom: 0.25rem;
@@ -27,7 +27,7 @@
   font-weight: 500;
   font-size: var(--text-subsection);
   line-height: 1.3;
-  color: var(--color-surface-link);
+  color: var(--color-surface-ink);
 }
 
 .entries {
@@ -132,15 +132,25 @@
   font-style: italic;
 }
 
+/* The Devanagari keeps the accent, the one red in a row. */
 .deva {
   margin-inline-start: 0.4em;
   font-family: var(--font-deva);
   font-size: 0.9em;
   font-style: normal;
+  color: var(--color-surface-link);
 }
 
+/* A name is ink, as in a dictionary, and shows it is a link by its underline on hover and focus. */
 .link {
-  color: var(--color-link);
+  color: var(--color-surface-ink);
+  text-decoration-line: none;
+  text-underline-offset: 0.18em;
+  text-decoration-thickness: 0.06em;
+}
+
+.link:is(:hover, :focus-visible) {
+  text-decoration-line: underline;
 }
 
 .away {

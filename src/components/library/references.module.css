@@ -28,7 +28,7 @@
   font-weight: 500;
   font-size: var(--text-subsection);
   line-height: 1.3;
-  color: var(--color-surface-link);
+  color: var(--color-surface-ink);
 }
 
 /* Wide: the capital stands in the margin and stays beside its entries as they pass. */

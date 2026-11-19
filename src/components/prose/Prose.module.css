@@ -45,7 +45,7 @@
   font-variant-caps: all-small-caps;
   letter-spacing: 0.16em;
   font-size: var(--text-body);
-  color: var(--color-surface-link);
+  color: var(--color-surface-muted);
 }
 
 /* Heard as "Comparison: …", seen as a label above the heading. */
