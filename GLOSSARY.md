@@ -48,6 +48,32 @@ _Avoid_: lecture, session
 The private page where a client-reviewer finds users by name and opens their results.
 _Avoid_: admin panel, dashboard (on its own)
 
+## Traditional texts
+
+**Traditional text**:
+A classical Indian work, such as the Yoga Sūtra or the Bhagavad Gītā, whose passages the site quotes.
+_Avoid_: work, classic text, scripture, source
+
+**Passage**:
+One numbered unit of a traditional text, such as Yoga Sūtra 1.30, held once with its original text, its transliteration and every translation the site quotes.
+_Avoid_: shloka, sutra (for the record)
+
+**Passage number**:
+The number that picks out one passage within its traditional text, such as the "1.30" in Yoga Sūtra 1.30, with the section's name where the text has named sections.
+_Avoid_: locator, verse number
+
+**Verse**:
+A passage as one Concept quotes it: the translation that page shows and, where the page gives one, its Meaning.
+_Avoid_: shloka, quote
+
+**Translation**:
+An English rendering of a passage, as a page gives it under that label.
+_Avoid_: meaning, gloss
+
+**Meaning**:
+A page's own reading of a verse, kept apart from the translation.
+_Avoid_: translation, commentary, interpretation
+
 ## Pictures
 
 **Emblem**:
