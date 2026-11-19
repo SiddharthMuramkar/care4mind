@@ -159,7 +159,7 @@
      a click, as on the line that leads to the table, leaves the table on top. */
   .contents:has(:focus-visible) {
     z-index: var(--layer-sticky);
-    background: var(--color-surface);
+    background: var(--paper);
   }
 
   .terms {

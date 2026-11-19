@@ -120,7 +120,7 @@
   z-index: 1;
   margin-inline: -0.5rem;
   padding: 0.35rem 0.5rem;
-  background: var(--color-surface);
+  background: var(--paper);
   border-block: 3px double var(--color-surface-rule);
 }
 

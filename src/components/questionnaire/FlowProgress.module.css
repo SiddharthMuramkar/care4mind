@@ -13,10 +13,10 @@
   align-items: center;
   gap: 0.35rem 1.5rem;
   padding: 0.85rem 0 0.75rem;
-  background: var(--color-surface);
+  background: var(--paper);
   border-bottom: 1px solid var(--color-surface-rule);
   /* Paper above it too, so text scrolling under the header's margin is hidden. */
-  box-shadow: 0 -1rem 0 var(--color-surface);
+  box-shadow: 0 -1rem 0 var(--paper);
 }
 
 .progressText {

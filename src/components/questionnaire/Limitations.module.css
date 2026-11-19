@@ -44,7 +44,7 @@
 }
 
 .pageDraft {
-  background: var(--color-surface);
+  background: var(--paper);
   color: var(--color-surface-ink);
 }
 

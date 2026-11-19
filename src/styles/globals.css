@@ -54,7 +54,9 @@
   --color-surface-muted: var(--press-umber);
   --color-surface-link: var(--press-vermilion-dark);
   --color-surface-focus: var(--press-indigo);
-  /* A card: the deeper paper, laid on the folio. It takes the paper's text, link and focus colours. */
+  /* The reading paper: lighter, for the long read of every page below the homepage. It takes the paper's text, link and focus colours. */
+  --color-reading: var(--press-paper-fresh);
+  /* A card: the deeper paper, laid on the reading paper. It takes the paper's text, link and focus colours. */
   --color-card: var(--press-paper);
   /* The edge that shows a control is there on paper (a chip, a round button, an option): 3:1 on each paper. */
   --color-control-edge: var(--press-umber);

@@ -1,4 +1,4 @@
-import type { Locator } from '@playwright/test'
+import type { Locator, Page } from '@playwright/test'
 
 import { expect, gotoReady, test } from './fixtures'
 import { expectPaperFocusRing } from './paper'
@@ -86,5 +86,51 @@ test.describe('a focused link on paper rings in paper’s focus colour', () => {
       await expect(drawer).toBeVisible()
       await expectPaperFocusRing(drawer.getByRole('link').first())
     })
+  })
+})
+
+/** A colour token as the browser paints it, read off a probe so it compares with a computed background. */
+const painted = (page: Page, token: string) =>
+  page.evaluate((token) => {
+    const probe = document.createElement('i')
+    probe.style.backgroundColor = `var(${token})`
+    document.body.append(probe)
+    const colour = getComputedStyle(probe).backgroundColor
+    probe.remove()
+    return colour
+  }, token)
+
+const background = (element: Locator) =>
+  element.evaluate((node) => getComputedStyle(node).backgroundColor)
+
+// Long reading happens on the lighter paper, and the cards laid on it keep the deeper one, so the
+// two tones give the page depth. The homepage's hero keeps the deeper paper too.
+test.describe('the reading paper', { tag: '@one-width' }, () => {
+  for (const path of [
+    '/concepts/vikshepa/',
+    '/topics/mind/',
+    '/texts/yoga-sutra/',
+    '/library/',
+    '/library/courses/',
+    '/questionnaires/karmayoga-scale/',
+  ]) {
+    test(`is the body of ${path}`, async ({ page }) => {
+      await gotoReady(page, path)
+      const folio = page.getByRole('main').getByRole('article').first()
+      expect(await background(folio)).toBe(await painted(page, '--color-reading'))
+    })
+  }
+
+  test('lies under cards that keep the deeper paper', async ({ page }) => {
+    await gotoReady(page, '/topics/mind/')
+    const card = page.getByRole('main').getByRole('article').nth(1)
+    await expect(card.getByRole('link', { name: /^Read about/ })).toBeVisible()
+    expect(await background(card)).toBe(await painted(page, '--color-card'))
+  })
+
+  test('is not the homepage hero’s', async ({ page }) => {
+    await gotoReady(page, '/')
+    const hero = page.getByRole('main').locator('[data-paper]').first()
+    expect(await background(hero)).toBe(await painted(page, '--color-surface'))
   })
 })

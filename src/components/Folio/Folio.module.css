@@ -1,7 +1,12 @@
+/*
+ * --paper names the paper a part is laid on, so a band or chip that covers what passes under it
+ * paints the same paper: the deeper one here and on a card, the reading paper on a reading page.
+ */
 .folio {
+  --paper: var(--color-surface);
   position: relative;
   padding: clamp(2rem, 6vw, 4.5rem) clamp(1.25rem, 6vw, 4.5rem);
-  background: var(--color-surface);
+  background: var(--paper);
   color: var(--color-surface-ink);
   /* A word longer than its line, as at a large text size, breaks rather than run off the paper. */
   overflow-wrap: break-word;
@@ -18,8 +23,9 @@
     0 30px 60px -20px rgb(0 0 0 / 0.55);
 }
 
-/* A reading page's panel: the paper, lifted, with a single thin rule. */
+/* A reading page's panel: the lighter reading paper, lifted, with a single thin rule. */
 .page {
+  --paper: var(--color-reading);
   box-shadow:
     inset 0 0 0 1px var(--color-surface-rule),
     0 30px 60px -20px rgb(0 0 0 / 0.55);

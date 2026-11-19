@@ -262,7 +262,7 @@
 }
 
 .point[data-faint] .mark {
-  background: var(--color-surface);
+  background: var(--paper);
 }
 
 /*

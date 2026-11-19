@@ -236,20 +236,29 @@ describe('numerals and the paragraph anchor', () => {
 describe('the TopicChip', () => {
   const palette = palettes().find((item) => item.name.includes('globals.css'))
   if (!palette) throw new Error('the site palette is missing')
-  const paper = hex(palette, 'surface')
 
-  it('sets its name in ink on the paper, at 4.5:1 or better', () => {
+  // The chip takes the paper it stands on: a card's, the reading paper, or a preview slip's.
+  const papers = ['surface', 'reading', 'card', 'preview'].map((name) => hex(palette, name))
+
+  it('sets its name in ink on the paper under it, at 4.5:1 or better', () => {
     const body = rule('src/components/TopicChip/TopicChip.module.css', '.chip')
     expect(declared(body, 'color')).toBe('var(--color-surface-ink)')
-    expect(declared(body, 'background')).toBe('var(--color-surface)')
-    expect(contrastRatio(hex(palette, 'surface-ink'), paper)).toBeGreaterThanOrEqual(4.5)
+    expect(declared(body, 'background')).toBe('var(--paper, var(--color-surface))')
+    for (const paper of papers) {
+      expect(contrastRatio(hex(palette, 'surface-ink'), paper), paper).toBeGreaterThanOrEqual(4.5)
+    }
   })
 
-  it('draws only its mark in the topic hue, at 3:1 or better on the paper', () => {
+  it('draws only its mark in the topic hue, at 3:1 or better on the paper under it', () => {
     const mark = rule('src/components/TopicChip/TopicChip.module.css', '.chip::before')
     expect(declared(mark, 'background')).toContain('var(--topic')
     for (const topic of ['self', 'mind', 'practice', 'values', 'temperament'] as const) {
-      expect(contrastRatio(hex(palette, `topic-${topic}`), paper), topic).toBeGreaterThanOrEqual(3)
+      for (const paper of papers) {
+        expect(
+          contrastRatio(hex(palette, `topic-${topic}`), paper),
+          `${topic} on ${paper}`,
+        ).toBeGreaterThanOrEqual(3)
+      }
     }
   })
 })

@@ -127,9 +127,11 @@ export const CONTRAST_PAIRS = [
   { foreground: 'accent', background: 'ground', minimum: 3 },
   // Vermilion marks on the paper: the Folio's rule and the lotus Fleuron.
   { foreground: 'highlight', background: 'surface', minimum: 3 },
-  // A pressed control's label over its ink at the ink's strongest; the ink is translucent, so it is laid over the control.
+  // A pressed control's label over its ink at the ink's strongest; the ink is translucent, so it is laid over the control,
+  // on the indigo page and on each paper.
   { foreground: 'ink', background: 'ink-spread', over: 'ground', minimum: 4.5 },
   { foreground: 'surface-ink', background: 'ink-spread', over: 'surface', minimum: 4.5 },
+  { foreground: 'surface-ink', background: 'ink-spread', over: 'reading', minimum: 4.5 },
 
   // Topic hues are drawings, never text, on the page and on paper alike. The TopicChip's
   // mark is one: its text is the surface-ink on surface pair above, its dot these on surface.
@@ -171,8 +173,19 @@ export const CONTRAST_PAIRS = [
   { foreground: 'surface-link', background: 'card', minimum: 4.5 },
   { foreground: 'surface-focus', background: 'card', minimum: 3 },
   { foreground: 'highlight', background: 'card', minimum: 3 },
+  // The reading paper, lighter than the cards laid on it: its text, links, focus ring, vermilion
+  // marks and topic hues, and the A–Z's blank letter.
+  { foreground: 'surface-ink', background: 'reading', minimum: 4.5 },
+  { foreground: 'surface-muted', background: 'reading', minimum: 4.5 },
+  { foreground: 'surface-link', background: 'reading', minimum: 4.5 },
+  { foreground: 'surface-blank', background: 'reading', minimum: 4.5 },
+  { foreground: 'surface-focus', background: 'reading', minimum: 3 },
+  { foreground: 'highlight', background: 'reading', minimum: 3 },
+  ...(['self', 'mind', 'practice', 'values', 'temperament'] as const).map(
+    (topic) => ({ foreground: `topic-${topic}`, background: 'reading', minimum: 3 }) as const,
+  ),
   // The edge that shows a control is there (a chip, a round button, an option), on every paper it sits on.
-  ...(['surface', 'card', 'surface-pale-45', 'drawer'] as const).map(
+  ...(['surface', 'reading', 'card', 'surface-pale-45', 'drawer'] as const).map(
     (paper) => ({ foreground: 'control-edge', background: paper, minimum: 3 }) as const,
   ),
   // The toast: its text and focus ring on its dark slip, and its turmeric edge on the indigo page.
@@ -191,27 +204,29 @@ export const CONTRAST_PAIRS = [
         { foreground: 'surface-focus', background: `surface-pale-${share}`, minimum: 3 },
       ] as const,
   ),
-  ...(['8', '9', '10'] as const).flatMap(
-    (share) =>
-      [
-        {
-          foreground: 'surface-ink',
-          background: `highlight-wash-${share}`,
-          over: 'surface',
-          minimum: 4.5,
-        },
-        {
-          foreground: 'surface-muted',
-          background: `highlight-wash-${share}`,
-          over: 'surface',
-          minimum: 4.5,
-        },
-        {
-          foreground: 'surface-link',
-          background: `highlight-wash-${share}`,
-          over: 'surface',
-          minimum: 4.5,
-        },
-      ] as const,
+  ...(['8', '9', '10'] as const).flatMap((share) =>
+    (['surface', 'reading'] as const).flatMap(
+      (paper) =>
+        [
+          {
+            foreground: 'surface-ink',
+            background: `highlight-wash-${share}`,
+            over: paper,
+            minimum: 4.5,
+          },
+          {
+            foreground: 'surface-muted',
+            background: `highlight-wash-${share}`,
+            over: paper,
+            minimum: 4.5,
+          },
+          {
+            foreground: 'surface-link',
+            background: `highlight-wash-${share}`,
+            over: paper,
+            minimum: 4.5,
+          },
+        ] as const,
+    ),
   ),
 ] as const

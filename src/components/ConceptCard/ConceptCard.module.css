@@ -11,7 +11,8 @@
   align-items: baseline;
   gap: 0.5rem 1rem;
   padding: 2rem;
-  background: var(--color-card);
+  --paper: var(--color-card);
+  background: var(--paper);
   color: var(--color-surface-ink);
   border-radius: 2px;
   box-shadow: 0 0 0 1px color-mix(in srgb, var(--color-surface-ink) 35%, transparent);
