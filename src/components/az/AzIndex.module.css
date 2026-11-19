@@ -76,23 +76,6 @@
   box-shadow: inset 0 -3px 0 var(--topic, transparent);
 }
 
-/* The pressed chip's vermilion mark, a lozenge before its name (::before is the ink's). */
-.chip[aria-pressed='true']::after {
-  content: '';
-  order: -1;
-  flex: none;
-  width: 0.4em;
-  height: 0.4em;
-  margin-inline-end: 0.5em;
-  background: var(--color-highlight);
-  transform: rotate(45deg);
-}
-
-@media (forced-colors: active) {
-  .chip[aria-pressed='true']::after {
-    background: HighlightText;
-  }
-}
 
 .tally {
   display: flex;
