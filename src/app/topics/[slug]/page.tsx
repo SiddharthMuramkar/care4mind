@@ -62,6 +62,7 @@ export default async function TopicPage({ params }: PageProps<'/topics/[slug]'>)
       }
       title={topic.name}
       titleMorph={{ kind: 'topic', slug: topic.slug }}
+      topic={topic.slug}
       afterTitle={
         <>
           {topic.term ? (

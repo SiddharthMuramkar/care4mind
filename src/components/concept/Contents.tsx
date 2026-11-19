@@ -31,8 +31,11 @@ const CURRENT = `[data-contents] a:target-current { color: var(--color-surface-i
 export function Contents({
   entries,
   tallLines = false,
+  topic,
 }: {
   entries: readonly ContentsEntry[]
+  /** The page's topic, whose colour marks the section being read. Inline, never a `data-topic`. */
+  topic?: string
   /** Lines a finger can take on a phone. A Concept page goes without, to reach its text sooner. */
   tallLines?: boolean
 }) {
@@ -41,6 +44,7 @@ export function Contents({
       className={cx(styles.contents, tallLines && styles.tallLines)}
       aria-labelledby="contents-title"
       data-contents
+      {...(topic ? { style: { '--topic': `var(--color-topic-${topic})` } as CSSProperties } : {})}
     >
       <style href="concept-contents" precedence="default">
         {CURRENT}

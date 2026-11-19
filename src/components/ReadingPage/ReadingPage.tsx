@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react'
+import type { CSSProperties, ReactNode } from 'react'
 
 import { cx } from '@/lib/cx'
 
@@ -36,6 +36,12 @@ interface ReadingPageProps {
   kicker?: ReactNode
   /** The rest of the title page: a gloss, a summary, what the page holds. */
   afterTitle?: ReactNode
+  /**
+   * The topic the page belongs to, whose colour draws a rule under the title. Set as an inline
+   * `--topic`, never a second `data-topic` (a Concept card's chip must stay the only one). The
+   * page names the topic in words as well: the colour never stands alone.
+   */
+  topic?: string
   headerClassName?: string
   /** Set inside the page's main, above the trail. */
   beforeTrail?: ReactNode
@@ -61,6 +67,7 @@ export function ReadingPage({
   beforeTitle,
   kicker,
   afterTitle,
+  topic,
   headerClassName,
   beforeTrail,
   width = 'reading',
@@ -93,6 +100,13 @@ export function ReadingPage({
             ) : (
               heading
             )}
+            {topic ? (
+              <span
+                className={styles.topicRule}
+                style={{ '--topic': `var(--color-topic-${topic})` } as CSSProperties}
+                aria-hidden
+              />
+            ) : null}
             {afterTitle}
           </header>
           {children}

@@ -9,6 +9,7 @@ import { Transliterated } from '@/components/script'
 import { cx } from '@/lib/cx'
 
 import styles from './AzIndex.module.css'
+import { topicHue } from './hue'
 import type { ChipsProps, KeyboardParts, RailProps } from './types'
 
 /** The rail as a Base UI Toolbar: one Tab stop, the arrow keys moving between its letters. */
@@ -61,6 +62,7 @@ function Chips({ groups, pressed, onPress }: ChipsProps) {
                 className={cx(filterStyles.chip, styles.chip)}
                 data-chip={chip}
                 data-ink
+                {...topicHue(group, value)}
               >
                 <span {...(lang ? { lang } : {})}>
                   {lang ? name : <Transliterated text={name} />}

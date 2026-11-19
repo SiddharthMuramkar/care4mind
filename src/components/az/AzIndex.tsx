@@ -18,6 +18,7 @@ import { cx } from '@/lib/cx'
 import { count } from '@/lib/text'
 
 import styles from './AzIndex.module.css'
+import { topicHue } from './hue'
 import {
   DEFAULT_KINDS,
   fromChips,
@@ -282,6 +283,7 @@ function PlainChips({ groups, pressed, onPress }: ChipsProps) {
                 aria-pressed={on}
                 data-chip={chip}
                 data-ink
+                {...topicHue(group, value)}
                 onClick={() =>
                   onPress(on ? pressed.filter((other) => other !== chip) : [...pressed, chip])
                 }

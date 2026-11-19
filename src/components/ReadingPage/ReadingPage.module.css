@@ -101,3 +101,18 @@
   line-height: 1.15;
   overflow-wrap: anywhere;
 }
+
+/* A rule in the page's topic colour under the title: a drawing, beside the topic named in words. */
+.topicRule {
+  width: 4rem;
+  height: 4px;
+  background: var(--topic);
+}
+
+/* Windows' contrast themes paint no backgrounds: the rule becomes a border they draw. */
+@media (forced-colors: active) {
+  .topicRule {
+    height: 0;
+    border-top: 4px solid CanvasText;
+  }
+}

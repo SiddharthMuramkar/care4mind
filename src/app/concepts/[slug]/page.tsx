@@ -93,6 +93,7 @@ export default async function ConceptPage({ params }: PageProps<'/concepts/[slug
       pageClassName={styles.page}
       articleClassName={styles.article}
       beforeTrail={<ReadingThread />}
+      topic={concept.topic.slug}
       beforeTitle={
         <HeadPicture
           art={artFor({ kind: 'concept', slug: concept.slug, topic: concept.topic.slug })}
@@ -166,7 +167,7 @@ export default async function ConceptPage({ params }: PageProps<'/concepts/[slug
         <AtAGlance terms={concept.glance} />
 
         <div className={styles.body}>
-          <Contents entries={contents} />
+          <Contents entries={contents} topic={concept.topic.slug} />
 
           <div className={styles.text}>
             <Sections sections={concept.sections} citations={citations} />

@@ -79,7 +79,7 @@
   font-style: italic;
 }
 
-/* The marker: a vermilion lozenge in the margin, shown beside the section being read. */
+/* The marker: a lozenge in the margin, in the page's topic colour, shown beside the section being read. */
 .entry::before,
 .term::before {
   content: '';
@@ -88,7 +88,7 @@
   top: 0.95em;
   width: 0.4rem;
   height: 0.4rem;
-  background: var(--color-highlight);
+  background: var(--topic, var(--color-highlight));
   transform: rotate(45deg) scale(0);
   opacity: 0;
 }
