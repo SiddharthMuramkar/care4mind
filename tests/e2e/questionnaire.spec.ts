@@ -1,5 +1,7 @@
 import type { Page } from '@playwright/test'
 
+import { questionnaires } from '@/content'
+
 import { expectTrail } from './breadcrumbs'
 import { undrawn } from './drawings'
 import { expect, gotoReady, test } from './fixtures'
@@ -51,6 +53,40 @@ test.describe('Questionnaire page (FR-05)', () => {
       '/questionnaires/karmayoga-scale/take/',
     )
     await expect(page.locator('main').locator('input, select, textarea, form')).toHaveCount(0)
+  })
+})
+
+// Where the preview flag is off, as in production, the KarmaYoga Scale can't be taken yet. Its
+// start control looks disabled and says why beside it; aria-disabled keeps it in the Tab order,
+// so a keyboard or screen-reader user meets it and hears its reason. These run only on a build
+// made with FEATURE_QUESTIONNAIRE_PREVIEW=0, as the content reads the same flag.
+const karmayoga = await questionnaires.get('karmayoga-scale')
+
+test.describe('a Questionnaire that can’t be taken yet', () => {
+  test.skip(karmayoga?.takeHref !== undefined, 'the preview flag is on in this build')
+  const PATH = '/questionnaires/karmayoga-scale/'
+
+  test('shows its start control disabled, with its reason beside it and linked to it', async ({
+    page,
+  }) => {
+    await gotoReady(page, PATH)
+    const start = page.getByRole('button', { name: 'Start the Questionnaire' })
+    await expect(start).toHaveAttribute('aria-disabled', 'true')
+    await expect(start).not.toHaveAttribute('disabled')
+    await expect(start).toHaveAccessibleDescription(/^In preparation\./)
+    const reason = page.getByText(/^In preparation\. The questions open here/)
+    await expect(reason).toBeVisible()
+    const [button, words] = [await start.boundingBox(), await reason.boundingBox()]
+    if (!button || !words) throw new Error('the start control and its reason are on the page')
+    expect(words.y - (button.y + button.height), 'the reason sits right under it').toBeLessThan(24)
+    const opacity = await start.evaluate((node) => Number(getComputedStyle(node).opacity))
+    expect(opacity, 'it looks disabled').toBeLessThan(1)
+    await start.focus()
+    await expect(start).toBeFocused()
+    await start.press('Enter')
+    // Playwright waits for a control marked disabled to be enabled before clicking: force it.
+    await start.click({ force: true })
+    await expect(page).toHaveURL(PATH)
   })
 })
 

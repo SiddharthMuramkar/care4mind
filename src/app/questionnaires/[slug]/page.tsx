@@ -13,6 +13,7 @@ import { Limitations, RelatedConcepts } from '@/components/questionnaire'
 import { ReadingThread } from '@/components/ReadingThread'
 import { StatusBadge } from '@/components/StatusBadge'
 import { hrefFor, questionnaires, site } from '@/content'
+import { cx } from '@/lib/cx'
 import { metadataFor } from '@/lib/metadata'
 
 import cta from '@/components/Cta'
@@ -147,10 +148,11 @@ export default async function QuestionnairePage({ params }: PageProps<'/question
           </>
         ) : (
           <>
+            {/* aria-disabled, not disabled: it keeps its Tab stop, so its reason is heard too. */}
             <button
               type="button"
-              className={styles.startButton}
-              disabled
+              className={cx(cta.primary, styles.startButton)}
+              aria-disabled="true"
               aria-describedby="start-note"
             >
               Start the Questionnaire

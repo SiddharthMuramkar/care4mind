@@ -18,17 +18,33 @@
   text-align: center;
 }
 
+/*
+ * Not open yet: the primary button, faded, which does nothing when pressed. Its reason stands
+ * right under it, and is its description.
+ */
 .startButton {
-  appearance: none;
-  min-height: 52px;
-  padding: 0 2rem;
-  border: 2px dashed var(--color-surface-muted);
-  border-radius: 2px;
-  background: transparent;
-  color: var(--color-surface-muted);
-  font: inherit;
-  font-size: 1.25rem;
+  border: 0;
+  font-family: inherit;
+  opacity: 0.5;
   cursor: not-allowed;
+}
+
+.startButton[aria-disabled='true']:is(:hover, :focus-visible)::after {
+  transform: scaleX(0);
+}
+
+.startButton[aria-disabled='true']:active {
+  transform: none;
+  box-shadow: 0 3px 0 var(--color-ground-shadow);
+}
+
+/* Windows' contrast themes keep no opacity: they draw it in their disabled text colour. */
+@media (forced-colors: active) {
+  .startButton {
+    opacity: 1;
+    color: GrayText;
+    border: 1px solid GrayText;
+  }
 }
 
 .startNote {
